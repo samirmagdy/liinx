@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PRICING_PLANS } from '../data/mockData';
 import { Check, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface PricingSectionProps {
   onSelectPlan: (planId: string) => void;
@@ -8,6 +9,7 @@ interface PricingSectionProps {
 
 export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) => {
   const [isAnnual, setIsAnnual] = useState(true);
+  const { t, isRtl } = useLanguage();
 
   return (
     <section id="pricing" className="py-20 md:py-28 border-b border-neutral-200">
@@ -16,15 +18,13 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
-            <span>TRANSPARENT PRICING</span>
-            <span>•</span>
-            <span className="text-emerald-700 tracking-wider">14-DAY FREE TRIAL</span>
+            <span>{t.pricingSection.badge}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
-            Simple, honest pricing for serious creators
+            {t.pricingSection.title}
           </h2>
           <p className="text-base text-neutral-600 text-pretty">
-            Build your entire page for free. Upgrade when you’re ready to connect your custom domain and remove all badges.
+            {t.pricingSection.subtitle}
           </p>
 
           {/* Monthly / Annual Billing Toggle */}
@@ -37,7 +37,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                   : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
-              Monthly Billing
+              {t.pricingSection.monthly}
             </button>
             <button
               onClick={() => setIsAnnual(true)}
@@ -47,9 +47,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                   : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
-              <span>Annual Billing</span>
+              <span>{t.pricingSection.yearly}</span>
               <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-extrabold tracking-wider">
-                2 MONTHS FREE
+                {t.pricingSection.yearlySave}
               </span>
             </button>
           </div>
@@ -71,7 +71,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-xs">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
-                    <span>Most Popular</span>
+                    <span>{t.pricingSection.popular}</span>
                   </div>
                 )}
 
@@ -91,7 +91,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                       ${price}
                     </span>
                     <span className="text-xs font-semibold text-neutral-500">
-                      / month {isAnnual && <span className="block text-[11px] text-neutral-400 tabular-nums">billed ${plan.yearlyPrice}/yr</span>}
+                      {t.pricingSection.perMonth} {isAnnual && <span className="block text-[11px] text-neutral-400 tabular-nums">billed ${plan.yearlyPrice}/yr</span>}
                     </span>
                   </div>
 
@@ -115,7 +115,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                   }`}
                 >
                   <span>{plan.ctaText}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
               </div>
             );

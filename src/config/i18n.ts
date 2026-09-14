@@ -38,6 +38,7 @@ export interface Translations {
     feature2Desc: string;
     feature3Title: string;
     feature3Desc: string;
+    cta: string;
   };
   templatesSection: {
     badge: string;
@@ -46,6 +47,7 @@ export interface Translations {
     allCategory: string;
     useTemplate: string;
     previewMobile: string;
+    categories: string[];
   };
   pricingSection: {
     badge: string;
@@ -55,11 +57,14 @@ export interface Translations {
     yearly: string;
     yearlySave: string;
     startTrial: string;
+    perMonth: string;
+    popular: string;
   };
   faqSection: {
     badge: string;
     title: string;
     subtitle: string;
+    openAnswer: string;
   };
   footer: {
     tagline: string;
@@ -111,7 +116,8 @@ export const translations: Record<Language, Translations> = {
       feature2Title: 'Rich Functional Blocks',
       feature2Desc: 'Embed Spotify previews, YouTube trailers, newsletter forms, and expandable folders.',
       feature3Title: 'Custom Domains & Zero Branding',
-      feature3Desc: 'Route links.yourdomain.com with automated SSL certificates and 100% white-label badges.'
+      feature3Desc: 'Route links.yourdomain.com with automated SSL certificates and 100% white-label badges.',
+      cta: 'Open the Studio Builder'
     },
     templatesSection: {
       badge: 'Bespoke Gallery',
@@ -119,7 +125,8 @@ export const translations: Record<Language, Translations> = {
       subtitle: 'Explore meticulously crafted design systems for photographers, producers, indie studios, writers, and digital brands.',
       allCategory: 'All Templates',
       useTemplate: 'Use this template',
-      previewMobile: 'Preview'
+      previewMobile: 'Preview',
+      categories: ['All Templates', 'Design & Art', 'Musicians', 'Brands', 'Creators', 'Podcasts', 'Gaming', 'Wellness', 'Lifestyle']
     },
     pricingSection: {
       badge: 'Transparent Pricing',
@@ -128,12 +135,15 @@ export const translations: Record<Language, Translations> = {
       monthly: 'Monthly billing',
       yearly: 'Annual billing',
       yearlySave: 'Save 20%',
-      startTrial: 'Start 14-day free trial'
+      startTrial: 'Start 14-day free trial',
+      perMonth: '/ month',
+      popular: 'Most Popular'
     },
     faqSection: {
       badge: 'Questions & Answers',
       title: 'Everything you need to know.',
-      subtitle: 'Clear answers to help you choose the right foundation for your audience.'
+      subtitle: 'Clear answers to help you choose the right foundation for your audience.',
+      openAnswer: 'Open answer'
     },
     footer: {
       tagline: 'A design-first micro-website builder for everything you make, sell, and share.',
@@ -183,7 +193,8 @@ export const translations: Record<Language, Translations> = {
       feature2Title: 'عناصر وظيفية متقدمة',
       feature2Desc: 'تضمين سبوتيفاي، يوتيوب، رسائل إخبارية، وأدلة مجمعة في مجلدات أنيقة.',
       feature3Title: 'دومين مخصص وإزالة الشعار',
-      feature3Desc: 'اربط نطاقك الخاص مثل links.brand.com مع شهادة SSL تلقائية وعلامة بيضاء بالكامل.'
+      feature3Desc: 'اربط نطاقك الخاص مثل links.brand.com مع شهادة SSL تلقائية وعلامة بيضاء بالكامل.',
+      cta: 'افتح استوديو التصميم'
     },
     templatesSection: {
       badge: 'معرض القوالب',
@@ -191,7 +202,8 @@ export const translations: Record<Language, Translations> = {
       subtitle: 'استكشف قوالب مختارة بعناية للمصورين، الموسيقيين، المطورين، المدربين، واستوديوهات الألعاب المستقلة.',
       allCategory: 'جميع القوالب',
       useTemplate: 'استخدم هذا القالب',
-      previewMobile: 'معاينة'
+      previewMobile: 'معاينة',
+      categories: ['جميع القوالب', 'التصميم والفن', 'الموسيقيون', 'العلامات التجارية', 'صناع المحتوى', 'البودكاست', 'الألعاب', 'العافية', 'أسلوب الحياة']
     },
     pricingSection: {
       badge: 'أسعار واضحة',
@@ -200,12 +212,15 @@ export const translations: Record<Language, Translations> = {
       monthly: 'اشتراك شهري',
       yearly: 'اشتراك سنوي',
       yearlySave: 'وفّر ٢٠٪',
-      startTrial: 'ابدأ التجربة المجانية لـ ١٤ يوماً'
+      startTrial: 'ابدأ التجربة المجانية لـ ١٤ يوماً',
+      perMonth: '/ شهرياً',
+      popular: 'الأكثر شعبية'
     },
     faqSection: {
       badge: 'الأسئلة الشائعة',
       title: 'كل ما تحتاج لمعرفته.',
-      subtitle: 'إجابات مباشرة وواضحة لمساعدتك في اتخاذ القرار الأمثل لحضورك الرقمي.'
+      subtitle: 'إجابات مباشرة وواضحة لمساعدتك في اتخاذ القرار الأمثل لحضورك الرقمي.',
+      openAnswer: 'افتح الإجابة'
     },
     footer: {
       tagline: 'منصة تصميم المواقع المصغرة الأولى لكل ما تصنعه وتبيعه وتشاركه.',

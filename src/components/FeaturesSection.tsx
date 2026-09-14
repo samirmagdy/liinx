@@ -9,12 +9,14 @@ import {
   Smartphone,
   Instagram
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface FeaturesSectionProps {
   onOpenStudio: () => void;
 }
 
 export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }) => {
+  const { t } = useLanguage();
   return (
     <section id="features" className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,16 +24,13 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
         {/* Section Header */}
         <div className="max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-mono font-bold mb-4 tracking-wider">
-            <span>SUPERPOWERS</span>
-            <span>•</span>
-            <span className="text-amber-800">ENGINEERED FOR DESIGNERS</span>
+            <span>{t.builderSection.badge}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
-            Everything you need in a bio link. Nothing you don't.
+            {t.builderSection.title}
           </h2>
           <p className="text-lg text-neutral-600 max-w-2xl text-pretty">
-            Most link tools look like 1999 directory lists filled with ads and generic buttons. 
-            LIINX gives you complete aesthetic freedom to present your body of work.
+            {t.builderSection.subtitle}
           </p>
         </div>
 
@@ -169,7 +168,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
             onClick={onOpenStudio}
             className="px-6 py-3.5 rounded-full bg-white text-neutral-900 text-sm font-bold hover:bg-neutral-100 transition-colors active:scale-95 shrink-0 flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
-            <span>Launch Interactive Studio</span>
+              <span>{t.builderSection.cta}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

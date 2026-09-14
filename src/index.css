@@ -225,3 +225,16 @@ html, body, #root { max-width: 100%; overflow-x: hidden; }
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] .font-brand {
   font-family: 'Cairo', 'Tajawal', var(--font-display);
 }
+
+[dir="rtl"] .text-left { text-align: right; }
+[dir="rtl"] .text-right { text-align: left; }
+[dir="rtl"] input, [dir="rtl"] textarea { text-align: right; }
+[dir="rtl"] code, [dir="rtl"] .font-mono { direction: ltr; unicode-bidi: plaintext; }
+[dir="rtl"] .public-header-actions { flex-direction: row-reverse; }
+[dir="rtl"] .studio-toolbar, [dir="rtl"] .studio-tabs { direction: rtl; }
+[dir="rtl"] .hero-section .hero-proof svg { order: 2; }
+
+@media (max-width: 767px) {
+  [dir="rtl"] .hero-section .hero-proof svg { order: 0; }
+  [dir="rtl"] .public-header-actions { flex-direction: row-reverse; }
+}

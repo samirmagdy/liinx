@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TEMPLATES, THEMES } from '../data/mockData';
 import { CreatorProfile } from '../types';
 import { ArrowRight } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TemplatesSectionProps {
   onSelectTemplate: (profile: CreatorProfile) => void;
@@ -9,6 +10,7 @@ interface TemplatesSectionProps {
 
 export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemplate }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const { t, isRtl } = useLanguage();
 
   const categories = ['All', 'Design & Art', 'Musicians', 'Brands', 'Creators', 'Podcasts', 'Gaming', 'Wellness', 'Lifestyle'];
 
@@ -26,13 +28,13 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
-              <span>CURATED ARCHETYPES</span>
+            <span>{t.templatesSection.badge}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 text-balance">
-              Designed for your creative discipline
+              {t.templatesSection.title}
             </h2>
             <p className="text-base text-neutral-600 mt-2 max-w-xl text-pretty">
-              Start with a beautifully balanced preset crafted for your industry, then personalize every pixel in seconds.
+              {t.templatesSection.subtitle}
             </p>
           </div>
 
@@ -48,7 +50,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                     : 'text-neutral-500 hover:text-neutral-900'
                 }`}
               >
-                {cat}
+                {t.templatesSection.categories[categories.indexOf(cat)] || cat}
               </button>
             ))}
           </div>
@@ -112,8 +114,8 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                   onClick={() => onSelectTemplate(template.profile)}
                   className="w-full py-2.5 px-4 rounded-full bg-white border border-neutral-300 hover:border-neutral-900 text-xs font-bold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
-                  <span>Use This Template</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>{t.templatesSection.useTemplate}</span>
+                  <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
               </div>
             </div>
