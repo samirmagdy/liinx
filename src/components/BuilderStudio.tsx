@@ -41,7 +41,9 @@ import {
   Youtube,
   Github,
   Linkedin,
-  Disc
+  Disc,
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -84,6 +86,20 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   // Subscribers state
   const [subscribers, setSubscribers] = useState<{ id: string; email: string; subscribedAt: string }[]>([]);
 
+  // Instagram Auto-Sync state
+  const [instagramStatus, setInstagramStatus] = useState<{
+    connected: boolean;
+    configured: boolean;
+    username?: string;
+    autoSyncEnabled?: boolean;
+    lastSyncedAt?: number;
+    syncedLinksCount?: number;
+  } | null>(null);
+  const [isSyncingInstagram, setIsSyncingInstagram] = useState(false);
+  const [instagramCaptionInput, setInstagramCaptionInput] = useState('');
+  const [isTestingCaption, setIsTestingCaption] = useState(false);
+  const [instagramFeedback, setInstagramFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   // Load live profile on initial mount
   useEffect(() => {
     api.studio.getProfile()
@@ -97,7 +113,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       });
   }, []);
 
-  // Fetch real analytics when Analytics tab is opened
+  // Fetch real analytics or subscribers/instagram when tabs change
   useEffect(() => {
     if (activeTab === 'analytics') {
       api.studio.getAnalytics()
@@ -107,8 +123,118 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       api.studio.getSubscribers()
         .then(res => setSubscribers(res.subscribers))
         .catch(err => console.error('Failed to load subscribers:', err));
+
+      api.instagram.getStatus()
+        .then(status => setInstagramStatus(status))
+        .catch(err => console.error('Failed to load Instagram status:', err));
     }
   }, [activeTab]);
+
+  const handleConnectInstagram = async () => {
+    try {
+      setInstagramFeedback(null);
+      const res = await api.instagram.getAuthUrl();
+      if (res.authUrl) {
+        window.location.href = res.authUrl;
+      }
+    } catch (err: any) {
+      setInstagramFeedback({
+        type: 'error',
+        message: err.message || 'Meta Instagram App credentials not configured in server environment.'
+      });
+    }
+  };
+
+  const handleSyncInstagramNow = async () => {
+    try {
+      setIsSyncingInstagram(true);
+      setInstagramFeedback(null);
+      const res = await api.instagram.syncNow();
+      setInstagramFeedback({
+        type: 'success',
+        message: res.message || `Sync complete. Created ${res.linksCreated.length} links.`
+      });
+      const refreshed = await api.studio.getProfile();
+      setProfile(refreshed);
+      const status = await api.instagram.getStatus();
+      setInstagramStatus(status);
+    } catch (err: any) {
+      setInstagramFeedback({
+        type: 'error',
+        message: err.message || 'Instagram sync failed.'
+      });
+    } finally {
+      setIsSyncingInstagram(false);
+    }
+  };
+
+  const handleToggleInstagramAutoSync = async () => {
+    if (!instagramStatus) return;
+    const nextVal = !instagramStatus.autoSyncEnabled;
+    try {
+      await api.instagram.toggleAutoSync(nextVal);
+      setInstagramStatus(prev => prev ? { ...prev, autoSyncEnabled: nextVal } : null);
+    } catch (err: any) {
+      setInstagramFeedback({
+        type: 'error',
+        message: err.message || 'Failed to toggle auto-sync.'
+      });
+    }
+  };
+
+  const handleDisconnectInstagram = async () => {
+    try {
+      await api.instagram.disconnect();
+      setInstagramStatus({
+        connected: false,
+        configured: Boolean(instagramStatus?.configured)
+      });
+      setInstagramFeedback({
+        type: 'success',
+        message: 'Instagram account disconnected successfully.'
+      });
+    } catch (err: any) {
+      setInstagramFeedback({
+        type: 'error',
+        message: err.message || 'Failed to disconnect.'
+      });
+    }
+  };
+
+  const handleTestCaptionExtract = async (saveToProfile: boolean) => {
+    if (!instagramCaptionInput.trim()) return;
+    try {
+      setIsTestingCaption(true);
+      setInstagramFeedback(null);
+      const res = await api.instagram.testCaption(instagramCaptionInput, saveToProfile);
+      if (res.extracted.length === 0) {
+        setInstagramFeedback({
+          type: 'error',
+          message: 'No valid web URLs detected in this caption.'
+        });
+      } else if (saveToProfile) {
+        setInstagramFeedback({
+          type: 'success',
+          message: `Extracted & added ${res.savedCount} new link(s) to your bio!`
+        });
+        const refreshed = await api.studio.getProfile();
+        setProfile(refreshed);
+        setInstagramCaptionInput('');
+      } else {
+        setInstagramFeedback({
+          type: 'success',
+          message: `Detected ${res.extracted.length} link(s): "${res.extracted.map(l => l.title).join('", "')}"`
+        });
+      }
+    } catch (err: any) {
+      setInstagramFeedback({
+        type: 'error',
+        message: err.message || 'Caption extraction failed.'
+      });
+    } finally {
+      setIsTestingCaption(false);
+    }
+  };
 
   // Debounced auto-save to database
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1294,6 +1420,155 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     </button>
                   </div>
                 </div>
+              </div>
+
+              {/* Instagram Caption Auto-Sync Card */}
+              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center shadow-xs">
+                      <Instagram className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
+                        <span>Instagram Caption Auto-Sync</span>
+                      </h3>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Automatically pull and create link buttons whenever you mention links in post captions.
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border ${
+                    instagramStatus?.connected
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                  }`}>
+                    {instagramStatus?.connected ? 'CONNECTED' : 'DISCONNECTED'}
+                  </span>
+                </div>
+
+                {/* Feedback Notification */}
+                {instagramFeedback && (
+                  <div className={`p-3 rounded-xl text-xs flex items-center justify-between animate-fade-in ${
+                    instagramFeedback.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}>
+                    <span>{instagramFeedback.message}</span>
+                    <button 
+                      onClick={() => setInstagramFeedback(null)}
+                      className="font-bold text-xs opacity-70 hover:opacity-100 cursor-pointer ml-2"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Connection Details or Connect Button */}
+                {instagramStatus?.connected ? (
+                  <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-neutral-900">@{instagramStatus.username}</span>
+                        <span className="text-neutral-400">•</span>
+                        <span className="font-mono text-neutral-500">
+                          {instagramStatus.syncedLinksCount ?? 0} synced links active
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleSyncInstagramNow}
+                          disabled={isSyncingInstagram}
+                          className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white font-semibold flex items-center gap-1.5 text-xs hover:bg-black transition-colors cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isSyncingInstagram ? 'animate-spin' : ''}`} />
+                          <span>{isSyncingInstagram ? 'Syncing...' : 'Sync Now'}</span>
+                        </button>
+                        <button
+                          onClick={handleDisconnectInstagram}
+                          className="px-3 py-1.5 rounded-lg border border-neutral-300 text-neutral-700 font-semibold text-xs hover:bg-neutral-100 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                        >
+                          Disconnect
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs">
+                      <span className="text-neutral-600">Auto-sync on incoming Webhooks:</span>
+                      <button
+                        onClick={handleToggleInstagramAutoSync}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold transition-colors cursor-pointer ${
+                          instagramStatus.autoSyncEnabled
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-neutral-200 text-neutral-600'
+                        }`}
+                      >
+                        {instagramStatus.autoSyncEnabled ? 'ENABLED' : 'PAUSED'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-neutral-900">Connect your Instagram account</p>
+                        <p className="text-[11px] text-neutral-500 mt-0.5">
+                          Authorize via official Meta Graph API to enable automatic post polling & real-time webhook updates.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleConnectInstagram}
+                        className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      >
+                        <Instagram className="w-3.5 h-3.5" />
+                        <span>Connect Account</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Instant Caption Ingest & Parser Tester */}
+                <div className="pt-2 border-t border-neutral-100 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-neutral-800 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Live Caption Parser & Post Ingest</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setInstagramCaptionInput('Tickets for Berlin studio show live now: https://eventbrite.com/e/berlin-live-2025! Also grab the vinyl bundle at https://shop.artist.studio/vinyl.')}
+                      className="text-[10px] font-mono text-amber-700 hover:underline cursor-pointer"
+                    >
+                      Fill sample caption
+                    </button>
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={instagramCaptionInput}
+                    onChange={(e) => setInstagramCaptionInput(e.target.value)}
+                    placeholder="Paste any Instagram caption containing links to extract & add to your bio (e.g. 'Presave the single on Spotify: https://...')"
+                    className="w-full text-xs p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors"
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleTestCaptionExtract(false)}
+                      disabled={isTestingCaption || !instagramCaptionInput.trim()}
+                      className="px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                    >
+                      Test Parser
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTestCaptionExtract(true)}
+                      disabled={isTestingCaption || !instagramCaptionInput.trim()}
+                      className="px-3.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-black text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                    >
+                      <span>Extract & Add Link to Bio</span>
+                    </button>
+                  </div>
+                </div>
+
               </div>
 
               {/* Newsletter Subscribers Card with CSV Export */}

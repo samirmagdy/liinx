@@ -160,5 +160,53 @@ export const api = {
         body: JSON.stringify({ profileId, blockId, email })
       });
     }
+  },
+
+  instagram: {
+    getStatus: async () => {
+      return request<{
+        connected: boolean;
+        configured: boolean;
+        username?: string;
+        autoSyncEnabled?: boolean;
+        lastSyncedAt?: number;
+        syncedLinksCount?: number;
+      }>('/api/integrations/instagram/status');
+    },
+    getAuthUrl: async () => {
+      return request<{ authUrl: string }>('/api/integrations/instagram/auth-url');
+    },
+    syncNow: async () => {
+      return request<{
+        success: boolean;
+        message: string;
+        mediaProcessed: number;
+        linksCreated: { id: string; title: string; url: string }[];
+      }>('/api/integrations/instagram/sync', {
+        method: 'POST'
+      });
+    },
+    testCaption: async (caption: string, saveToProfile = false) => {
+      return request<{
+        success: boolean;
+        extracted: { url: string; title: string; snippet?: string }[];
+        savedCount: number;
+        blocks?: { id: string; title: string; url: string }[];
+      }>('/api/integrations/instagram/test-caption', {
+        method: 'POST',
+        body: JSON.stringify({ caption, saveToProfile })
+      });
+    },
+    toggleAutoSync: async (enabled: boolean) => {
+      return request<{ success: boolean; autoSyncEnabled: boolean }>('/api/integrations/instagram/toggle-auto', {
+        method: 'POST',
+        body: JSON.stringify({ enabled })
+      });
+    },
+    disconnect: async () => {
+      return request<{ success: boolean; message: string }>('/api/integrations/instagram/disconnect', {
+        method: 'POST'
+      });
+    }
   }
 };

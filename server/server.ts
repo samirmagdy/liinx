@@ -10,6 +10,7 @@ import { blocksRouter } from './routes/blocks.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { newsletterRouter } from './routes/newsletter.js';
 import { uploadRouter } from './routes/upload.js';
+import { instagramRouter } from './routes/instagram.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,6 +61,7 @@ app.use('/api', profilesRouter);
 app.use('/api', blocksRouter);
 app.use(newsletterRouter);
 app.use(uploadRouter);
+app.use('/api', instagramRouter);
 
 // Comprehensive Health & Diagnostics Endpoint
 app.get('/api/health', (_req, res) => {

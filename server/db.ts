@@ -109,6 +109,24 @@ export function initDatabase() {
     );
 
     CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_unique ON newsletter_subscribers(profile_id, email);
+
+    CREATE TABLE IF NOT EXISTS instagram_sync (
+      id TEXT PRIMARY KEY,
+      profile_id TEXT UNIQUE NOT NULL,
+      instagram_user_id TEXT,
+      instagram_username TEXT,
+      access_token TEXT NOT NULL,
+      token_type TEXT DEFAULT 'bearer',
+      token_expires_at INTEGER,
+      auto_sync_enabled INTEGER DEFAULT 1,
+      last_synced_at INTEGER,
+      last_media_id TEXT,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_insta_profile ON instagram_sync(profile_id);
   `);
 
   try {
