@@ -300,7 +300,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         <style dangerouslySetInnerHTML={{ __html: profile.customCss }} />
       )}
       {/* Top Floating Control Bar */}
-      <header className="sticky top-0 z-40 w-full px-4 py-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex items-center justify-between text-xs">
+      <header className="public-header sticky top-0 z-40 w-full px-4 py-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex items-center justify-between text-xs">
         {onBackToStudio ? (
           <button
             onClick={onBackToStudio}
@@ -319,7 +319,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           </button>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="public-header-actions flex items-center gap-2">
           <button
             onClick={onOpenQr ? onOpenQr : () => setQrModalOpen(true)}
             className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium transition-colors cursor-pointer flex items-center gap-1.5"

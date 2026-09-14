@@ -134,6 +134,46 @@
   50% { transform: translateY(-8px) rotate(0deg); }
 }
 
+/* Responsive safeguards for narrow phones and small tablets. These rules complement
+   the component breakpoints and protect long editor controls from creating overflow. */
+html, body, #root { max-width: 100%; overflow-x: hidden; }
+
+@media (max-width: 767px) {
+  .hero-accent { white-space: normal; }
+  .hero-section { padding-top: 3rem; padding-bottom: 3.5rem; }
+  .hero-section .phone-shell { border-radius: 32px; padding: 0.6rem; }
+  .hero-proof { line-height: 1.5; }
+
+  .studio-toolbar { top: 0; padding: 0.7rem 0.75rem; }
+  .studio-toolbar > div { min-width: 0; }
+  .studio-toolbar .save-status { max-width: 8.5rem; }
+  .studio-toolbar .save-status span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .studio-shell > .flex-1 { padding: 0.75rem; gap: 1.25rem; }
+  .studio-controls, .studio-preview { width: 100%; min-width: 0; }
+  .studio-preview { position: static; }
+  .studio-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 1rem; }
+  .studio-tabs button { min-width: 0; padding-inline: 0.35rem; }
+  .studio-tabs button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .studio-preview .preview-label { display: none; }
+  .studio-preview > .flex { margin-inline: auto; }
+  .studio-preview .phone-shell { max-width: 100%; border-radius: 34px; }
+  .studio-preview .phone-shell > div { height: min(660px, calc(100svh - 155px)); }
+
+  .public-header { align-items: flex-start; gap: 0.5rem; }
+  .public-header-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .public-header-actions button { padding-inline: 0.6rem; }
+  .resource-modal-dialog { max-height: 96svh; border-radius: 1.25rem; }
+  .resource-modal-dialog > div:first-child { padding-inline: 1rem; }
+  .resource-modal-dialog > div:last-child { padding-inline: 1rem; }
+}
+
+@media (max-width: 380px) {
+  .studio-toolbar .save-status { display: none; }
+  .hero-section form { border-radius: 1rem; }
+  .hero-section form button { width: 100%; }
+  .hero-section .hero-proof { display: grid; grid-template-columns: 1fr; }
+}
+
 /* === Typography utilities === */
 
 .text-balance { text-wrap: balance; }
@@ -185,4 +225,3 @@
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] .font-brand {
   font-family: 'Cairo', 'Tajawal', var(--font-display);
 }
-

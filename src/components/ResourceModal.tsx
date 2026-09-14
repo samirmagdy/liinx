@@ -82,7 +82,7 @@ export const ResourceModal: React.FC<ResourceModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl border border-neutral-100 flex flex-col max-h-[90vh] overflow-hidden"
+        className="resource-modal-dialog bg-white rounded-3xl w-full max-w-4xl shadow-2xl border border-neutral-100 flex flex-col max-h-[90vh] overflow-hidden"
         role="dialog"
         aria-modal="true"
       >

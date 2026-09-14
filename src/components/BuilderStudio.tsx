@@ -762,7 +762,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   return (
-    <div className="min-h-[calc(100vh-72px)] bg-neutral-50 border-t border-neutral-200 flex flex-col">
+    <div className="studio-shell min-h-[calc(100vh-72px)] bg-neutral-50 border-t border-neutral-200 flex flex-col">
       
       {/* Hidden File Input for Avatar Upload */}
       <input
@@ -774,7 +774,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       />
 
       {/* Studio Top Control Bar */}
-      <div className="bg-white border-b border-neutral-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-18 z-30 shadow-2xs">
+      <div className="studio-toolbar bg-white border-b border-neutral-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-18 z-30 shadow-2xs">
         
         {/* Left: Username & Save Status */}
         <div className="flex items-center gap-4">
@@ -831,7 +831,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+          <div className="save-status flex items-center gap-1.5 text-xs text-neutral-500">
             <span className={`w-2 h-2 rounded-full ${
               saveStatus === 'saving' ? 'bg-amber-500 animate-ping' : 
               saveStatus === 'error' ? 'bg-rose-500' : 'bg-emerald-500'
@@ -885,10 +885,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       <div className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left Control Canvas (7 cols) */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="studio-controls lg:col-span-7 space-y-6">
           
           {/* Navigation Sub-Tabs */}
-          <div className="flex items-center p-1 bg-white border border-neutral-200 rounded-2xl shadow-xs gap-1">
+          <div className="studio-tabs flex items-center p-1 bg-white border border-neutral-200 rounded-2xl shadow-xs gap-1">
             <button
               onClick={() => setActiveTab('content')}
               className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
@@ -2374,7 +2374,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         </div>
 
         {/* Right Phone Live Preview Simulator (5 cols) */}
-        <div className="lg:col-span-5 sticky top-28 flex flex-col items-center">
+        <div className="studio-preview lg:col-span-5 sticky top-28 flex flex-col items-center">
           {/* Responsive Viewport Switcher */}
           <div className="flex items-center gap-1 mb-3 p-1 bg-neutral-100 rounded-full border border-neutral-200 text-xs shadow-xs">
             <button
@@ -2384,7 +2384,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span>Mobile</span>
+                <span className="preview-label">Mobile</span>
             </button>
             <button
               onClick={() => setPreviewDevice('tablet')}
@@ -2393,7 +2393,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Tablet className="w-3.5 h-3.5" />
-              <span>Tablet</span>
+                <span className="preview-label">Tablet</span>
             </button>
             <button
               onClick={() => setPreviewDevice('desktop')}
@@ -2402,7 +2402,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Monitor className="w-3.5 h-3.5" />
-              <span>Desktop</span>
+                <span className="preview-label">Desktop</span>
             </button>
           </div>
 
