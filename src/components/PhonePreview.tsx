@@ -82,12 +82,12 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
     setTimeout(() => setCopiedNotification(false), 2000);
   };
 
-  const getRadiusClass = (radius: ThemeConfig['cardRadius']) => {
+  const getRadiusClass = (radius: ThemeConfig['cardRadius'], isComplex: boolean = false) => {
     switch (radius) {
       case 'none': return 'rounded-none';
-      case 'md': return 'rounded-lg';
+      case 'md': return 'rounded-xl';
       case 'xl': return 'rounded-2xl';
-      case 'full': return 'rounded-full';
+      case 'full': return isComplex ? 'rounded-2xl' : 'rounded-full';
       default: return 'rounded-2xl';
     }
   };
@@ -106,6 +106,9 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
     }
   };
 
+  const isArabicText = (text?: string) => /[\u0600-\u06FF]/.test(text || '');
+  const isProfileRtl = isArabicText(profile.displayName) || isArabicText(profile.bio);
+
   const scaleClass =
     deviceMode === 'desktop' ? 'max-w-[620px]' :
     deviceMode === 'tablet' ? 'max-w-[500px]' :
@@ -114,9 +117,10 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
     'max-w-[380px]';
 
   return (
-    <div className={`relative mx-auto w-full select-none ${scaleClass}`}>
+    <div className={`relative mx-auto w-full select-none ${scaleClass}`} dir={isProfileRtl ? 'rtl' : 'ltr'}>
       {compact ? (
         <div
+          dir={isProfileRtl ? 'rtl' : 'ltr'}
           className="rounded-[28px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300 shadow-lg"
           style={{
             background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
@@ -131,7 +135,9 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
         <div className="phone-shell relative rounded-[44px] p-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] ring-1 ring-black/10 bg-neutral-900 border-[4px] border-neutral-800">
           <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
-          <div className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
+          <div 
+            dir={isProfileRtl ? 'rtl' : 'ltr'}
+            className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
             style={{
               background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
               color: theme.textColor,
@@ -239,25 +245,27 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           {profile.blocks.map((block) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
+              const isComplexLink = Boolean(block.subtitle);
+              const isPill = theme.cardRadius === 'full' && !isComplexLink;
               return (
                 <div
                   key={block.id}
                   onClick={() => onLinkClick?.(block)}
-                  className={`group relative p-3.5 transition-shadow duration-200 cursor-pointer flex items-center justify-between gap-3 shadow-xs hover:shadow-md hover:-translate-y-0.5 ${getRadiusClass(theme.cardRadius)}`}
+                  className={`group relative ${isPill ? 'px-5 py-3.5' : 'p-3.5'} transition-shadow duration-200 cursor-pointer flex items-center justify-between gap-3 shadow-xs hover:shadow-md hover:-translate-y-0.5 ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
                   style={{
                     backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
                     border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
                     color: theme.cardText
                   }}
                 >
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0" dir="auto">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-semibold text-xs tracking-tight truncate">
+                      <span className="font-semibold text-xs tracking-tight truncate" dir="auto">
                         {block.title}
                       </span>
                       {block.badge && (
                         <span 
-                          className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase"
+                          className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase shrink-0"
                           style={{ 
                             backgroundColor: theme.accentColor, 
                             color: '#FFFFFF' 
@@ -268,12 +276,12 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       )}
                     </div>
                     {block.subtitle && (
-                      <p className="text-[11px] truncate opacity-70">
+                      <p className="text-[11px] truncate opacity-70" dir="auto">
                         {block.subtitle}
                       </p>
                     )}
                   </div>
-                  <div className="p-1 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform">
+                  <div className="p-1 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform shrink-0">
                     <ExternalLink className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -282,8 +290,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
             if (block.type === 'header') {
               return (
-                <div key={block.id} className="pt-3 pb-1 text-center">
-                  <h3 className="text-xs font-bold uppercase tracking-widest opacity-60">
+                <div key={block.id} className="pt-3 pb-1 text-center" dir="auto">
+                  <h3 className="text-xs font-bold uppercase tracking-widest opacity-60" dir="auto">
                     {block.title}
                   </h3>
                 </div>
@@ -300,7 +308,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                 return (
                   <div
                     key={block.id}
-                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
                     style={{
                       backgroundColor: theme.cardBg,
                       border: theme.cardBorder,
@@ -325,7 +333,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                 return (
                   <div
                     key={block.id}
-                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
                     style={{
                       backgroundColor: theme.cardBg,
                       border: theme.cardBorder,
@@ -350,7 +358,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                 return (
                   <div
                     key={block.id}
-                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
                     style={{
                       backgroundColor: theme.cardBg,
                       border: theme.cardBorder,
@@ -373,7 +381,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`p-3.5 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                  className={`p-3.5 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
@@ -424,17 +432,17 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0" dir="auto">
                       <div className="flex items-center gap-1.5 text-[10px] opacity-70 mb-0.5">
-                        <Music2 className="w-3 h-3 text-emerald-500" />
+                        <Music2 className="w-3 h-3 text-emerald-500 shrink-0" />
                         <span className="uppercase font-mono tracking-wider font-semibold">Audio Track</span>
                       </div>
-                      <p className="text-xs font-bold truncate">{block.title}</p>
-                      <p className="text-[11px] truncate opacity-70">{block.artist}</p>
+                      <p className="text-xs font-bold truncate" dir="auto">{block.title}</p>
+                      <p className="text-[11px] truncate opacity-70" dir="auto">{block.artist}</p>
                     </div>
 
                     {isPlayingAudio && (
-                      <div className="flex items-end gap-0.5 h-5 px-1">
+                      <div className="flex items-end gap-0.5 h-5 px-1 shrink-0">
                         <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_100ms] h-4" />
                         <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_300ms] h-5" />
                         <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_200ms] h-3" />
@@ -462,7 +470,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`overflow-hidden transition-shadow duration-200 border shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                  className={`overflow-hidden transition-shadow duration-200 border shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
@@ -471,20 +479,20 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                 >
                   <button
                     onClick={() => toggleFolder(block.id)}
-                    className="w-full p-3.5 flex items-center justify-between text-left transition-opacity hover:opacity-90 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                    className="w-full p-3.5 flex items-center justify-between text-left transition-opacity hover:opacity-90 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 gap-2"
                   >
-                    <div className="min-w-0 pr-2">
+                    <div className="min-w-0 flex-1" dir="auto">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-xs truncate">{block.title}</span>
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-white/10 font-mono">
+                        <span className="font-semibold text-xs truncate" dir="auto">{block.title}</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-white/10 font-mono shrink-0">
                           {block.items.length} items
                         </span>
                       </div>
                       {block.subtitle && (
-                        <p className="text-[10px] truncate opacity-65 mt-0.5 text-pretty">{block.subtitle}</p>
+                        <p className="text-[10px] truncate opacity-65 mt-0.5 text-pretty" dir="auto">{block.subtitle}</p>
                       )}
                     </div>
-                    <div className="p-1 rounded-full opacity-60">
+                    <div className="p-1 rounded-full opacity-60 shrink-0">
                       {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
                   </button>
@@ -499,12 +507,12 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                           rel="noreferrer"
                           className="p-2.5 rounded-xl block transition-colors hover:bg-neutral-100 dark:hover:bg-white/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-medium group-hover:underline truncate">{item.title}</span>
-                            <ExternalLink className="w-3 h-3 opacity-40 group-hover:opacity-100" />
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-medium group-hover:underline truncate" dir="auto">{item.title}</span>
+                            <ExternalLink className="w-3 h-3 opacity-40 group-hover:opacity-100 shrink-0" />
                           </div>
                           {item.subtitle && (
-                            <p className="text-[10px] opacity-60 truncate mt-0.5">{item.subtitle}</p>
+                            <p className="text-[10px] opacity-60 truncate mt-0.5" dir="auto">{item.subtitle}</p>
                           )}
                         </a>
                       ))}
@@ -523,7 +531,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`overflow-hidden transition-shadow shadow-xs group ${getRadiusClass(theme.cardRadius)}`}
+                  className={`overflow-hidden transition-shadow shadow-xs group ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
@@ -581,8 +589,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       </button>
                     )}
                   </div>
-                  <div className="p-3">
-                    <p className="text-xs font-semibold line-clamp-1">{block.title}</p>
+                  <div className="p-3" dir="auto">
+                    <p className="text-xs font-semibold line-clamp-1" dir="auto">{block.title}</p>
                   </div>
                 </div>
               );
@@ -592,16 +600,16 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`p-3 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                  className={`p-3 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
                     color: theme.cardText
                   }}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold">{block.title}</span>
-                    <span className="text-[10px] font-mono opacity-60">{block.handle}</span>
+                  <div className="flex items-center justify-between mb-2" dir="auto">
+                    <span className="text-xs font-semibold" dir="auto">{block.title}</span>
+                    <span className="text-[10px] font-mono opacity-60 shrink-0">{block.handle}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-1.5">
                     {block.posts.map(post => (
@@ -626,24 +634,24 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`p-4 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                  className={`p-4 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
                     color: theme.cardText
                   }}
                 >
-                  <h3 className="text-xs font-bold mb-1 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5" style={{ color: theme.accentColor }} />
-                    <span>{block.title}</span>
+                  <h3 className="text-xs font-bold mb-1 flex items-center gap-1.5" dir="auto">
+                    <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: theme.accentColor }} />
+                    <span dir="auto">{block.title}</span>
                   </h3>
-                  <p className="text-[11px] opacity-70 mb-3 leading-relaxed text-pretty">
+                  <p className="text-[11px] opacity-70 mb-3 leading-relaxed text-pretty" dir="auto">
                     {block.description}
                   </p>
 
                   {newsletterSuccess ? (
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-medium flex items-center gap-1.5 justify-center">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-medium flex items-center gap-1.5 justify-center" dir="auto">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                       <span>You're on the list! Welcome.</span>
                     </div>
                   ) : (
@@ -657,14 +665,15 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                         style={{ color: theme.textColor }}
                         required
                         spellCheck={false}
+                        dir="auto"
                       />
                       <button
                         type="submit"
                         className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                         style={{ backgroundColor: theme.accentColor }}
                       >
-                        <span>{block.buttonText}</span>
-                        <Send className="w-3 h-3" />
+                        <span dir="auto">{block.buttonText}</span>
+                        <Send className="w-3 h-3 shrink-0" />
                       </button>
                     </form>
                   )}

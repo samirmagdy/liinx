@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QrCodeModal } from './QrCodeModal';
+import { BookingCard } from './BookingCard';
 import { 
   getSpotifyEmbedUrl, 
   getYouTubeEmbedUrl, 
@@ -263,15 +264,18 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     }
   };
 
-  const getRadiusClass = (radius: ThemeConfig['cardRadius']) => {
+  const getRadiusClass = (radius: ThemeConfig['cardRadius'], isComplex: boolean = false) => {
     switch (radius) {
       case 'none': return 'rounded-none';
       case 'md': return 'rounded-xl';
       case 'xl': return 'rounded-2xl';
-      case 'full': return 'rounded-full';
+      case 'full': return isComplex ? 'rounded-2xl' : 'rounded-full';
       default: return 'rounded-2xl';
     }
   };
+
+  const isArabicText = (text?: string) => /[\u0600-\u06FF]/.test(text || '');
+  const isProfileRtl = isArabicText(profile?.displayName) || isArabicText(profile?.bio);
 
   const renderSocialIcon = (platform: string) => {
     switch (platform) {
@@ -347,7 +351,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       </header>
 
       {/* Main Centered Bio Column */}
-      <main className="max-w-xl mx-auto px-4 py-12 sm:py-16">
+      <main dir={isProfileRtl ? 'rtl' : 'ltr'} className="max-w-xl mx-auto px-4 py-12 sm:py-16">
         
         {/* Profile Card Header */}
         <div className="flex flex-col items-center text-center mb-8">
@@ -415,27 +419,29 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!
               const redirectUrl = `/r/${block.id}`;
+              const isComplexLink = Boolean(block.subtitle);
+              const isPill = theme.cardRadius === 'full' && !isComplexLink;
               return (
                 <a
                   key={block.id}
                   href={redirectUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className={`group relative p-4 transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-current ${getRadiusClass(theme.cardRadius)}`}
+                  className={`group relative ${isPill ? 'px-6 py-4' : 'p-4'} transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-current ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
                   style={{
                     backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
                     border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
                     color: theme.cardText
                   }}
                 >
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0" dir="auto">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-bold text-sm sm:text-base tracking-tight truncate">
+                      <span className="font-bold text-sm sm:text-base tracking-tight truncate" dir="auto">
                         {block.title}
                       </span>
                       {block.badge && (
                         <span 
-                          className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase shadow-xs"
+                          className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase shadow-xs shrink-0"
                           style={{ 
                             backgroundColor: theme.accentColor, 
                             color: '#FFFFFF' 
@@ -446,12 +452,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       )}
                     </div>
                     {block.subtitle && (
-                      <p className="text-xs truncate opacity-70">
+                      <p className="text-xs truncate opacity-70" dir="auto">
                         {block.subtitle}
                       </p>
                     )}
                   </div>
-                  <div className="p-2 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-transform">
+                  <div className="p-2 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-transform shrink-0">
                     <ExternalLink className="w-4 h-4" />
                   </div>
                 </a>
@@ -460,8 +466,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
             if (block.type === 'header') {
               return (
-                <div key={block.id} className="pt-6 pb-2 text-center">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-widest opacity-60">
+                <div key={block.id} className="pt-6 pb-2 text-center" dir="auto">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-widest opacity-60" dir="auto">
                     {block.title}
                   </h3>
                 </div>
@@ -478,7 +484,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                 return (
                   <div
                     key={block.id}
-                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius, true)}`}
                     style={{
                       backgroundColor: theme.cardBg,
                       border: theme.cardBorder,
@@ -503,7 +509,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                 return (
                   <div
                     key={block.id}
-                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius, true)}`}
                     style={{
                       backgroundColor: theme.cardBg,
                       border: theme.cardBorder,
@@ -528,7 +534,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                 return (
                   <div
                     key={block.id}
-                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius, true)}`}
                     style={{
                       backgroundColor: theme.cardBg,
                       border: theme.cardBorder,
@@ -551,7 +557,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`p-4 transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                  className={`p-4 transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
@@ -602,17 +608,17 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0" dir="auto">
                       <div className="flex items-center gap-1.5 text-[11px] opacity-70 mb-0.5">
-                        <Music2 className="w-3.5 h-3.5 text-emerald-500" />
+                        <Music2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                         <span className="uppercase font-mono tracking-wider font-semibold">Audio Track</span>
                       </div>
-                      <p className="text-sm font-bold truncate">{block.title}</p>
-                      <p className="text-xs truncate opacity-70">{block.artist}</p>
+                      <p className="text-sm font-bold truncate" dir="auto">{block.title}</p>
+                      <p className="text-xs truncate opacity-70" dir="auto">{block.artist}</p>
                     </div>
 
                     {isPlayingAudio && (
-                      <div className="flex items-end gap-1 h-6 px-2">
+                      <div className="flex items-end gap-1 h-6 px-2 shrink-0">
                         <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_100ms] h-5" />
                         <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_300ms] h-6" />
                         <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_200ms] h-4" />
@@ -640,7 +646,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`overflow-hidden transition-shadow duration-200 border shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                  className={`overflow-hidden transition-shadow duration-200 border shadow-sm ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
@@ -649,20 +655,20 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                 >
                   <button
                     onClick={() => toggleFolder(block.id)}
-                    className="w-full p-4 flex items-center justify-between text-left hover:opacity-95 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+                    className="w-full p-4 flex items-center justify-between text-left hover:opacity-95 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current gap-2"
                   >
-                    <div className="min-w-0 pr-2">
+                    <div className="min-w-0 flex-1" dir="auto">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm sm:text-base truncate">{block.title}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 font-mono">
+                        <span className="font-bold text-sm sm:text-base truncate" dir="auto">{block.title}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 font-mono shrink-0">
                           {block.items?.length || 0} links
                         </span>
                       </div>
                       {block.subtitle && (
-                        <p className="text-xs truncate opacity-65 mt-0.5 text-pretty">{block.subtitle}</p>
+                        <p className="text-xs truncate opacity-65 mt-0.5 text-pretty" dir="auto">{block.subtitle}</p>
                       )}
                     </div>
-                    <div className="p-1.5 rounded-full opacity-60">
+                    <div className="p-1.5 rounded-full opacity-60 shrink-0">
                       {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </div>
                   </button>
@@ -677,12 +683,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           rel="noreferrer"
                           className="p-3 rounded-xl block transition-colors hover:bg-black/5 dark:hover:bg-white/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs sm:text-sm font-semibold group-hover:underline truncate">{item.title}</span>
-                            <ExternalLink className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100" />
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs sm:text-sm font-semibold group-hover:underline truncate" dir="auto">{item.title}</span>
+                            <ExternalLink className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 shrink-0" />
                           </div>
                           {item.subtitle && (
-                            <p className="text-xs opacity-60 truncate mt-0.5 text-pretty">{item.subtitle}</p>
+                            <p className="text-xs opacity-60 truncate mt-0.5 text-pretty" dir="auto">{item.subtitle}</p>
                           )}
                         </a>
                       ))}
@@ -701,7 +707,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`overflow-hidden transition-shadow duration-200 shadow-sm group ${getRadiusClass(theme.cardRadius)}`}
+                  className={`overflow-hidden transition-shadow duration-200 shadow-sm group ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
@@ -759,8 +765,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       </button>
                     )}
                   </div>
-                  <div className="p-4">
-                    <p className="text-sm font-bold line-clamp-1">{block.title}</p>
+                  <div className="p-4" dir="auto">
+                    <p className="text-sm font-bold line-clamp-1" dir="auto">{block.title}</p>
                   </div>
                 </div>
               );
@@ -770,23 +776,23 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`p-5 transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                  className={`p-5 transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius, true)}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
                     color: theme.cardText
                   }}
                 >
-                  <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
-                    <Mail className="w-4 h-4" style={{ color: theme.accentColor }} />
-                    <span>{block.title}</span>
+                  <h3 className="text-sm font-bold mb-1 flex items-center gap-2" dir="auto">
+                    <Mail className="w-4 h-4 shrink-0" style={{ color: theme.accentColor }} />
+                    <span dir="auto">{block.title}</span>
                   </h3>
-                  <p className="text-xs opacity-75 mb-4 leading-relaxed text-pretty">
+                  <p className="text-xs opacity-75 mb-4 leading-relaxed text-pretty" dir="auto">
                     {block.description}
                   </p>
 
                   {newsletterSuccess ? (
-                    <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2 justify-center">
+                    <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2 justify-center" dir="auto">
                       <CheckCircle2 className="w-4 h-4 shrink-0" />
                       <span>{newsletterSuccess}</span>
                     </div>
@@ -801,6 +807,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         style={{ color: theme.textColor }}
                         required
                         spellCheck={false}
+                        dir="auto"
                       />
                       <button
                         type="submit"
@@ -810,13 +817,13 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       >
                         {newsletterLoading ? (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
                             <span>Subscribing...</span>
                           </>
                         ) : (
                           <>
-                            <span>{block.buttonText || 'Subscribe'}</span>
-                            <Send className="w-3.5 h-3.5" />
+                            <span dir="auto">{block.buttonText || 'Subscribe'}</span>
+                            <Send className="w-3.5 h-3.5 shrink-0" />
                           </>
                         )}
                       </button>
@@ -855,4 +862,3 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     </div>
   );
 };
-import { BookingCard } from './BookingCard';
