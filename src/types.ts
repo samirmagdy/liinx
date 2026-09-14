@@ -144,7 +144,7 @@ export interface CreatorProfile {
 export interface TemplateItem {
   id: string;
   name: string;
-  category: 'Creators' | 'Musicians' | 'Design & Art' | 'Brands' | 'Podcasts';
+  category: 'Creators' | 'Musicians' | 'Design & Art' | 'Brands' | 'Podcasts' | 'Gaming' | 'Wellness' | 'Lifestyle';
   description: string;
   profile: CreatorProfile;
   previewColor: string;

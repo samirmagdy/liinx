@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TEMPLATES } from '../data/mockData';
+import { TEMPLATES, THEMES } from '../data/mockData';
 import { CreatorProfile } from '../types';
 import { ArrowRight } from 'lucide-react';
 
@@ -10,11 +10,13 @@ interface TemplatesSectionProps {
 export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemplate }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-  const categories = ['All', 'Design & Art', 'Musicians', 'Brands', 'Creators'];
+  const categories = ['All', 'Design & Art', 'Musicians', 'Brands', 'Creators', 'Podcasts', 'Gaming', 'Wellness', 'Lifestyle'];
 
   const filteredTemplates = selectedCategory === 'All' 
     ? TEMPLATES 
     : TEMPLATES.filter(t => t.category === selectedCategory);
+
+  const isDarkTheme = (themeId: string) => THEMES.find(t => t.id === themeId)?.isDark ?? false;
 
   return (
     <section id="templates" className="py-20 md:py-28 border-b border-neutral-200">
@@ -71,14 +73,14 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                   loading="lazy"
                 />
                 <h3 className={`text-base font-bold tracking-tight text-center ${
-                  template.profile.themeId.includes('noir') || template.profile.themeId.includes('cyber') 
+                  isDarkTheme(template.profile.themeId) 
                     ? 'text-white' 
                     : 'text-neutral-900'
                 }`}>
                   {template.profile.displayName}
                 </h3>
                 <p className={`text-xs font-mono opacity-65 ${
-                  template.profile.themeId.includes('noir') || template.profile.themeId.includes('cyber') 
+                  isDarkTheme(template.profile.themeId) 
                     ? 'text-neutral-300' 
                     : 'text-neutral-600'
                 }`}>
@@ -86,7 +88,11 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 </p>
 
                 {/* Badge */}
-                <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider bg-neutral-900/10 text-neutral-700 border border-neutral-900/5">
+                <span className={`absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider border ${
+                  isDarkTheme(template.profile.themeId)
+                    ? 'bg-white/10 text-neutral-300 border-white/10'
+                    : 'bg-neutral-900/10 text-neutral-700 border-neutral-900/5'
+                }`}>
                   {template.category}
                 </span>
               </div>

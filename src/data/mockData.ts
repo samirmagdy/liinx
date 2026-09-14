@@ -114,6 +114,73 @@ export const THEMES: ThemeConfig[] = [
     accentColor: '#000000',
     fontFamily: 'mono',
     isDark: false,
+  },
+  {
+    id: 'forest-canopy',
+    name: 'Forest Canopy',
+    bgType: 'gradient',
+    bgColor: '#0B1A14',
+    bgGradient: 'linear-gradient(180deg, #0B1A14 0%, #132A1E 50%, #0F2318 100%)',
+    textColor: '#E8F5E9',
+    subtextColor: '#81C784',
+    cardBg: 'rgba(255, 255, 255, 0.06)',
+    cardText: '#E8F5E9',
+    cardBorder: '1px solid rgba(76, 175, 80, 0.3)',
+    cardHover: 'rgba(76, 175, 80, 0.12)',
+    cardRadius: 'xl',
+    accentColor: '#4CAF50',
+    fontFamily: 'sans',
+    isDark: true,
+  },
+  {
+    id: 'coral-reef',
+    name: 'Coral Reef',
+    bgType: 'gradient',
+    bgColor: '#FFF5F5',
+    bgGradient: 'linear-gradient(180deg, #FFF1F2 0%, #FFE4E6 50%, #FECDD3 100%)',
+    textColor: '#881337',
+    subtextColor: '#BE185D',
+    cardBg: '#FFFFFF',
+    cardText: '#881337',
+    cardBorder: '1px solid rgba(244, 63, 94, 0.2)',
+    cardHover: '#FFF1F2',
+    cardRadius: 'full',
+    accentColor: '#F43F5E',
+    fontFamily: 'display',
+    isDark: false,
+  },
+  {
+    id: 'midnight-ink',
+    name: 'Midnight Ink',
+    bgType: 'solid',
+    bgColor: '#0F172A',
+    textColor: '#E2E8F0',
+    subtextColor: '#64748B',
+    cardBg: '#1E293B',
+    cardText: '#E2E8F0',
+    cardBorder: '1px solid #334155',
+    cardHover: '#273548',
+    cardRadius: 'md',
+    accentColor: '#38BDF8',
+    fontFamily: 'mono',
+    isDark: true,
+  },
+  {
+    id: 'sahara-dune',
+    name: 'Sahara Dune',
+    bgType: 'gradient',
+    bgColor: '#FDFAF5',
+    bgGradient: 'linear-gradient(180deg, #FDFAF5 0%, #F5EDE0 50%, #EADBC8 100%)',
+    textColor: '#3E2C1C',
+    subtextColor: '#8B6914',
+    cardBg: '#FFFFFF',
+    cardText: '#3E2C1C',
+    cardBorder: '1px solid rgba(194, 139, 56, 0.25)',
+    cardHover: '#FAF3E6',
+    cardRadius: 'xl',
+    accentColor: '#C28B38',
+    fontFamily: 'display',
+    isDark: false,
   }
 ];
 
@@ -371,6 +438,305 @@ export const DEMO_PROFILES: CreatorProfile[] = [
         buttonText: 'Read Free'
       }
     ]
+  },
+  // ─── New Profile: Wellness & Fitness Coach ─────────────────────────────
+  {
+    id: 'kaia-monroe',
+    username: 'kaiamonroe',
+    displayName: 'Kaia Monroe',
+    bio: 'Certified Wellness Coach & NASM-CPT. Evidence-based movement, breathwork, and mindful nutrition for high-performers.',
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop',
+    category: 'Wellness',
+    verified: true,
+    themeId: 'forest-canopy',
+    stats: {
+      viewsThisMonth: '73.8K',
+      ctr: '21.2%',
+      totalClicks: '15.6K'
+    },
+    socials: [
+      { platform: 'instagram', url: 'https://instagram.com' },
+      { platform: 'youtube', url: 'https://youtube.com' },
+      { platform: 'tiktok', url: 'https://tiktok.com' },
+      { platform: 'email', url: 'mailto:hello@kaiamonroe.com' }
+    ],
+    blocks: [
+      {
+        id: 'km1',
+        type: 'link',
+        title: '8-Week Body Recomposition Program',
+        subtitle: 'Home & gym variations included — 12,000+ members enrolled',
+        url: 'https://example.com/program',
+        badge: 'BESTSELLER',
+        highlighted: true,
+        clicks: 7820
+      },
+      {
+        id: 'km2',
+        type: 'video',
+        title: '15-Min Morning Mobility Flow (No Equipment)',
+        videoUrl: 'https://www.youtube.com',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=400&auto=format&fit=crop',
+        platform: 'youtube'
+      },
+      {
+        id: 'km3',
+        type: 'folder',
+        title: 'Free Guides & Downloads',
+        subtitle: 'Meal plans, workout templates, and habit trackers',
+        items: [
+          { id: 'km-f1', title: 'High-Protein Meal Prep Guide (PDF)', url: 'https://example.com/mealprep', subtitle: '7-day macro-balanced meal plan' },
+          { id: 'km-f2', title: 'Progressive Overload Tracker Spreadsheet', url: 'https://example.com/tracker', subtitle: 'Google Sheets auto-calculating template' },
+          { id: 'km-f3', title: 'Breathwork Basics: 4-7-8 Technique Guide', url: 'https://example.com/breathwork', subtitle: 'Illustrated step-by-step PDF' }
+        ]
+      },
+      {
+        id: 'km4',
+        type: 'header',
+        title: 'Coaching & Community'
+      },
+      {
+        id: 'km5',
+        type: 'link',
+        title: 'Book 1:1 Coaching (Limited Availability)',
+        subtitle: 'Personalized programming, nutrition, and weekly check-ins',
+        url: 'https://example.com/coaching',
+        badge: '3 SPOTS LEFT',
+        clicks: 2140
+      },
+      {
+        id: 'km6',
+        type: 'newsletter',
+        title: 'The Grounded Newsletter',
+        description: 'Weekly evidence-based wellness tips, workout ideas, and mindset strategies. Join 22,000+ readers.',
+        buttonText: 'Subscribe Free'
+      }
+    ]
+  },
+  // ─── New Profile: Podcast Host ─────────────────────────────────────────
+  {
+    id: 'milo-abate',
+    username: 'miloabate',
+    displayName: 'Milo Abate',
+    bio: 'Host of "The Long View" — a weekly deep-dive podcast on culture, technology, and the human condition. 2M+ downloads.',
+    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
+    category: 'Podcasts',
+    verified: true,
+    themeId: 'midnight-ink',
+    stats: {
+      viewsThisMonth: '156.3K',
+      ctr: '26.7%',
+      totalClicks: '41.7K'
+    },
+    socials: [
+      { platform: 'spotify', url: 'https://spotify.com' },
+      { platform: 'twitter', url: 'https://x.com' },
+      { platform: 'youtube', url: 'https://youtube.com' },
+      { platform: 'instagram', url: 'https://instagram.com' }
+    ],
+    blocks: [
+      {
+        id: 'ma1',
+        type: 'audio',
+        title: 'Ep. 247: "Why We Forgot How to Be Bored"',
+        artist: 'The Long View with Milo Abate',
+        coverUrl: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?q=80&w=300&auto=format&fit=crop',
+        platform: 'spotify'
+      },
+      {
+        id: 'ma2',
+        type: 'link',
+        title: 'Listen on Apple Podcasts',
+        subtitle: '#4 in Technology • 2.1M+ total downloads',
+        url: 'https://example.com/apple-podcasts',
+        badge: 'TOP 5',
+        highlighted: true,
+        clicks: 18400
+      },
+      {
+        id: 'ma3',
+        type: 'link',
+        title: 'Listen on Spotify',
+        subtitle: 'New episodes every Tuesday morning',
+        url: 'https://example.com/spotify',
+        clicks: 12700
+      },
+      {
+        id: 'ma4',
+        type: 'video',
+        title: 'Full Video Episode: Naval Ravikant on Wealth & Leverage',
+        videoUrl: 'https://www.youtube.com',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1519337265831-281ec6cc8514?q=80&w=400&auto=format&fit=crop',
+        platform: 'youtube'
+      },
+      {
+        id: 'ma5',
+        type: 'folder',
+        title: 'Recommended Reading List',
+        subtitle: 'Books referenced on the show (affiliate-free)',
+        items: [
+          { id: 'ma-f1', title: 'Antifragile — Nassim Nicholas Taleb', url: 'https://example.com/book1', subtitle: 'Discussed in Ep. 12, 89, 201' },
+          { id: 'ma-f2', title: 'The Master and His Emissary — Iain McGilchrist', url: 'https://example.com/book2', subtitle: 'Discussed in Ep. 134' },
+          { id: 'ma-f3', title: 'Finite and Infinite Games — James Carse', url: 'https://example.com/book3', subtitle: 'Discussed in Ep. 56, 178' }
+        ]
+      },
+      {
+        id: 'ma6',
+        type: 'newsletter',
+        title: 'The Long View Letters',
+        description: 'Curated show notes, guest recommendations, and original essays every Friday. Read by 65,000+ subscribers.',
+        buttonText: 'Read the Archive'
+      }
+    ]
+  },
+  // ─── New Profile: Indie Game Developer / Studio ────────────────────────
+  {
+    id: 'pixel-forge',
+    username: 'pixelforge',
+    displayName: 'Pixel Forge Studios',
+    bio: 'Award-winning indie game studio crafting narrative-driven pixel art RPGs. Creators of "Hollow Circuit" and "Ashborne".',
+    avatarUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop',
+    category: 'Gaming',
+    verified: true,
+    themeId: 'midnight-ink',
+    stats: {
+      viewsThisMonth: '201.4K',
+      ctr: '28.3%',
+      totalClicks: '57.0K'
+    },
+    socials: [
+      { platform: 'twitter', url: 'https://x.com' },
+      { platform: 'youtube', url: 'https://youtube.com' },
+      { platform: 'tiktok', url: 'https://tiktok.com' },
+      { platform: 'github', url: 'https://github.com' }
+    ],
+    blocks: [
+      {
+        id: 'pf1',
+        type: 'link',
+        title: 'Hollow Circuit — Wishlist on Steam',
+        subtitle: 'A cyberpunk pixel art RPG about AI consciousness',
+        url: 'https://example.com/steam',
+        badge: 'COMING 2026',
+        highlighted: true,
+        clicks: 34200
+      },
+      {
+        id: 'pf2',
+        type: 'video',
+        title: 'Hollow Circuit — Official Reveal Trailer',
+        videoUrl: 'https://www.youtube.com',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=400&auto=format&fit=crop',
+        platform: 'youtube'
+      },
+      {
+        id: 'pf3',
+        type: 'link',
+        title: 'Play "Ashborne" — Free on Itch.io',
+        subtitle: 'Award-winning 2024 IGF finalist (20+ hour campaign)',
+        url: 'https://example.com/ashborne',
+        badge: 'FREE',
+        clicks: 15800
+      },
+      {
+        id: 'pf4',
+        type: 'folder',
+        title: 'Press Kit & Dev Resources',
+        subtitle: 'Assets for journalists, streamers, and content creators',
+        items: [
+          { id: 'pf-f1', title: 'Press Kit (Screenshots, Logos, Fact Sheet)', url: 'https://example.com/presskit', subtitle: 'Hi-res assets ready for publication' },
+          { id: 'pf-f2', title: 'Streamer/YouTuber Early Access Keys', url: 'https://example.com/keys', subtitle: 'Request a free review key' },
+          { id: 'pf-f3', title: 'Official Soundtrack (Bandcamp)', url: 'https://example.com/ost', subtitle: '42-track chiptune + orchestral hybrid OST' }
+        ]
+      },
+      {
+        id: 'pf5',
+        type: 'newsletter',
+        title: 'Pixel Forge Devlog',
+        description: 'Behind-the-scenes development updates, pixel art breakdowns, and exclusive early previews every other week.',
+        buttonText: 'Follow the Journey'
+      }
+    ]
+  },
+  // ─── New Profile: Lifestyle & Travel Blogger ──────────────────────────
+  {
+    id: 'amara-osei',
+    username: 'amaraosei',
+    displayName: 'Amara Osei',
+    bio: 'Travel storyteller & slow-living advocate. Documenting intentional journeys through West Africa, Southern Europe, and Southeast Asia.',
+    avatarUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=400&auto=format&fit=crop',
+    category: 'Lifestyle',
+    verified: true,
+    themeId: 'sahara-dune',
+    stats: {
+      viewsThisMonth: '88.9K',
+      ctr: '20.5%',
+      totalClicks: '18.2K'
+    },
+    socials: [
+      { platform: 'instagram', url: 'https://instagram.com' },
+      { platform: 'youtube', url: 'https://youtube.com' },
+      { platform: 'tiktok', url: 'https://tiktok.com' },
+      { platform: 'twitter', url: 'https://x.com' }
+    ],
+    blocks: [
+      {
+        id: 'ao1',
+        type: 'link',
+        title: 'Read My New Book: "Slow Roads, Rich Days"',
+        subtitle: 'A visual memoir on slow travel through 14 countries',
+        url: 'https://example.com/book',
+        badge: 'NEW RELEASE',
+        highlighted: true,
+        clicks: 6420
+      },
+      {
+        id: 'ao2',
+        type: 'video',
+        title: 'A Week in Accra — Food, Markets & Hidden Courtyards',
+        videoUrl: 'https://www.youtube.com',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?q=80&w=400&auto=format&fit=crop',
+        platform: 'youtube'
+      },
+      {
+        id: 'ao3',
+        type: 'instagram_grid',
+        title: 'Latest Travels & Moments',
+        handle: '@amaraosei',
+        posts: [
+          { id: 'ao-p1', imageUrl: 'https://images.unsplash.com/photo-1504681869696-d977211a5f4c?q=80&w=300&auto=format&fit=crop', likes: '12.3k', linkUrl: 'https://instagram.com' },
+          { id: 'ao-p2', imageUrl: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=300&auto=format&fit=crop', likes: '8.1k', linkUrl: 'https://instagram.com' },
+          { id: 'ao-p3', imageUrl: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?q=80&w=300&auto=format&fit=crop', likes: '15.7k', linkUrl: 'https://instagram.com' },
+          { id: 'ao-p4', imageUrl: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=300&auto=format&fit=crop', likes: '9.4k', linkUrl: 'https://instagram.com' }
+        ]
+      },
+      {
+        id: 'ao4',
+        type: 'folder',
+        title: 'Travel Guides & Packing Lists',
+        subtitle: 'Free downloadable itineraries and checklists',
+        items: [
+          { id: 'ao-f1', title: 'West Africa 3-Week Itinerary (Ghana, Senegal, Benin)', url: 'https://example.com/westafrica', subtitle: 'Budget, routes, and cultural tips' },
+          { id: 'ao-f2', title: 'Carry-On Only Packing List (Tropical)', url: 'https://example.com/packing', subtitle: 'My minimalist packing system' },
+          { id: 'ao-f3', title: 'Portugal Slow Travel Guide — Algarve to Porto', url: 'https://example.com/portugal', subtitle: '10-day road trip with hidden gems' }
+        ]
+      },
+      {
+        id: 'ao5',
+        type: 'link',
+        title: 'Collaborate With Me — Brand Partnerships',
+        subtitle: 'Media kit and partnership inquiries',
+        url: 'https://example.com/collab',
+        clicks: 1830
+      },
+      {
+        id: 'ao6',
+        type: 'newsletter',
+        title: 'The Slow Dispatch',
+        description: 'A bi-weekly letter on intentional travel, cultural immersion, and living with less. 35,000+ readers.',
+        buttonText: 'Join the Journey'
+      }
+    ]
   }
 ];
 
@@ -406,6 +772,38 @@ export const TEMPLATES: TemplateItem[] = [
     description: 'High-impact tactile 2px borders, monospaced tech typography, and raw authenticity.',
     profile: DEMO_PROFILES[3],
     previewColor: '#F5F5F0'
+  },
+  {
+    id: 'tmpl-wellness',
+    name: 'Forest Wellness',
+    category: 'Wellness',
+    description: 'Organic green gradients and calming depth for fitness coaches, yoga instructors, and wellness brands.',
+    profile: DEMO_PROFILES[4],
+    previewColor: '#0B1A14'
+  },
+  {
+    id: 'tmpl-podcast',
+    name: 'Midnight Broadcast',
+    category: 'Podcasts',
+    description: 'Dark slate tones with monospaced typography, built for podcasters, interviewers, and audio creators.',
+    profile: DEMO_PROFILES[5],
+    previewColor: '#0F172A'
+  },
+  {
+    id: 'tmpl-gaming',
+    name: 'Indie Dev Console',
+    category: 'Gaming',
+    description: 'Terminal-inspired dark theme for game studios, streamers, and indie developers with press-kit ready layouts.',
+    profile: DEMO_PROFILES[6],
+    previewColor: '#0F172A'
+  },
+  {
+    id: 'tmpl-lifestyle',
+    name: 'Sahara Journal',
+    category: 'Lifestyle',
+    description: 'Warm desert tones, elegant serif accents, and earthy hues for travel bloggers and lifestyle creators.',
+    profile: DEMO_PROFILES[7],
+    previewColor: '#FDFAF5'
   }
 ];
 
@@ -531,5 +929,29 @@ export const TESTIMONIALS = [
     handle: "@studionoir",
     avatar: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=150&auto=format&fit=crop",
     metric: "Zero Aesthetic Compromise"
+  },
+  {
+    quote: "My clients kept asking where my link-in-bio was from. LIINX's Forest Wellness theme matches my brand identity perfectly and the folder system keeps my free guides organized beautifully.",
+    author: "Kaia Monroe",
+    role: "Certified Wellness Coach",
+    handle: "@kaiamonroe",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop",
+    metric: "+87% Guide Downloads"
+  },
+  {
+    quote: "I used to just throw an Apple Podcasts link in my bio. Now I have a full listening hub with embedded episodes, a reading list, and newsletter signup — all in one gorgeous page.",
+    author: "Milo Abate",
+    role: "Host of The Long View",
+    handle: "@miloabate",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
+    metric: "2.1M+ Downloads"
+  },
+  {
+    quote: "Our Steam wishlists jumped 40% after we set up our LIINX page with the trailer embed and press kit folder. Indie devs need this — it's like a mini-website that takes 5 minutes to build.",
+    author: "Pixel Forge Studios",
+    role: "Indie Game Studio",
+    handle: "@pixelforge",
+    avatar: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=150&auto=format&fit=crop",
+    metric: "+40% Steam Wishlists"
   }
 ];
