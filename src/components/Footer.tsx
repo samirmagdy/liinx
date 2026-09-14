@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, Sparkles, Heart } from 'lucide-react';
+import { ArrowUpRight, Heart } from 'lucide-react';
 
 interface FooterProps {
   onSelectView: (view: 'home' | 'builder' | 'templates' | 'pricing') => void;
@@ -105,7 +105,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
 
         {/* Bottom copyright row */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
-          <p>© {new Date().getFullYear()} LIINX Studio Inc. Reimagined from Liinks.co. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} LIINX Studio Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span>Crafted with zero clutter</span>
             <span>•</span>

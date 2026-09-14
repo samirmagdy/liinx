@@ -3,7 +3,7 @@ import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import confetti from 'canvas-confetti';
-import { Sparkles, ArrowRight, Lock, Mail, AtSign, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { ArrowRight, Lock, Mail, AtSign, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');

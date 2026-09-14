@@ -318,7 +318,7 @@ export const DEMO_PROFILES: CreatorProfile[] = [
     id: 'aris-thorne',
     username: 'draristhorne',
     displayName: 'Dr. Aris Thorne',
-    bio: 'AI Ethics researcher & Founder of Synthetica Labs. Writing about neural architectures and human agency.',
+    bio: 'Spatial computing researcher & Founder of Synthetica Studio. Writing on algorithmic typography and modern architecture.',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
     category: 'Creators',
     verified: true,

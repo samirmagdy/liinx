@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TEMPLATES } from '../data/mockData';
-import { TemplateItem, CreatorProfile } from '../types';
-import { Sparkles, ArrowRight, Eye, Layers } from 'lucide-react';
+import { CreatorProfile } from '../types';
+import { ArrowRight, Eye, Layers } from 'lucide-react';
 
 interface TemplatesSectionProps {
   onSelectTemplate: (profile: CreatorProfile) => void;

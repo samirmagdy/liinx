@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PRICING_PLANS } from '../data/mockData';
-import { Check, Sparkles, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 
 interface PricingSectionProps {
   onSelectPlan: (planId: string) => void;
@@ -70,7 +70,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
               >
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#18181B] text-white text-[11px] font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-sm">
-                    <Sparkles className="w-3 h-3 text-amber-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
                     <span>Most Popular</span>
                   </div>
                 )}

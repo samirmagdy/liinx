@@ -17,7 +17,6 @@ import {
   Linkedin,
   Disc,
   Share2,
-  Sparkles,
   Music2
 } from 'lucide-react';
 
@@ -445,7 +444,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     }}
                   >
                     <h3 className="text-xs font-bold mb-1 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" style={{ color: theme.accentColor }} />
+                      <Mail className="w-3.5 h-3.5" style={{ color: theme.accentColor }} />
                       <span>{block.title}</span>
                     </h3>
                     <p className="text-[11px] opacity-70 mb-3 leading-relaxed">

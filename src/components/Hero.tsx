@@ -4,7 +4,6 @@ import { DEMO_PROFILES, THEMES } from '../data/mockData';
 import { CreatorProfile, ThemeConfig } from '../types';
 import { 
   ArrowRight, 
-  Sparkles, 
   ShieldCheck, 
   Palette, 
   Sliders, 

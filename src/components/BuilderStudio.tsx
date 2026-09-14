@@ -5,7 +5,6 @@ import { PhonePreview } from './PhonePreview';
 import { QrCodeModal } from './QrCodeModal';
 import { api } from '../services/api';
 import { 
-  Sparkles, 
   Layers, 
   Palette, 
   Settings, 

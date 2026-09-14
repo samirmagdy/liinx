@@ -1,6 +1,6 @@
 import React from 'react';
 import { COMPARISON_FEATURES } from '../data/mockData';
-import { Check, X, Sparkles } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 export const ComparisonSection: React.FC = () => {
   return (
@@ -29,8 +29,8 @@ export const ComparisonSection: React.FC = () => {
                   Features & Standards
                 </th>
                 <th className="py-4 px-6 text-xs font-extrabold text-[#111315] uppercase tracking-wider bg-amber-500/10 border-x border-[#E8E6DF]">
-                  <div className="flex items-center gap-1.5 text-amber-900">
-                    <Sparkles className="w-4 h-4 text-amber-600" />
+                  <div className="flex items-center gap-1.5 text-amber-950">
+                    <span className="w-2 h-2 rounded-full bg-amber-600 inline-block" />
                     <span>LIINX</span>
                   </div>
                 </th>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, ArrowRight, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, Lock, Mail, AlertCircle, Loader2, User } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -114,15 +114,15 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Quick Demo Fill Helper */}
+          {/* Demo Account Helper */}
           <div className="mt-6 pt-6 border-t border-neutral-100 text-center">
             <button
               type="button"
               onClick={handleQuickDemo}
-              className="text-xs text-neutral-500 hover:text-black font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5 bg-neutral-100/80 px-3 py-1.5 rounded-full"
+              className="text-xs text-neutral-500 hover:text-black font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5 bg-neutral-100/80 hover:bg-neutral-200/80 px-3.5 py-1.5 rounded-full"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Fill Seeded Demo Creator Account</span>
+              <User className="w-3.5 h-3.5 text-neutral-700" />
+              <span>Sign in with demo account (Elena Rostova)</span>
             </button>
           </div>
         </div>

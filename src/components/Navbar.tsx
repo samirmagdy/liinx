@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Sparkles, 
   ArrowRight, 
   Menu, 
   X, 
@@ -187,8 +186,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 href="/register"
                 className="px-4 py-2 rounded-full bg-[#18181B] text-white text-xs font-semibold hover:bg-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 <span>Get Started</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           )}

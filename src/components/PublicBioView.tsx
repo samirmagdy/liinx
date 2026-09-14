@@ -13,7 +13,6 @@ import {
   ChevronDown, 
   ChevronUp, 
   Send, 
-  Sparkles, 
   Music2, 
   Instagram, 
   Twitter, 
@@ -519,7 +518,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   }}
                 >
                   <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" style={{ color: theme.accentColor }} />
+                    <Mail className="w-4 h-4" style={{ color: theme.accentColor }} />
                     <span>{block.title}</span>
                   </h3>
                   <p className="text-xs opacity-75 mb-4 leading-relaxed">

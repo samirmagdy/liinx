@@ -5,7 +5,6 @@ import {
   Instagram, 
   Globe2, 
   BarChart2, 
-  Sparkles, 
   Layers, 
   Check, 
   ArrowRight,
