@@ -44,7 +44,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <li>
                 <button 
                   onClick={() => onSelectView('builder')}
-                  className="hover:text-white transition-colors cursor-pointer text-left"
+                  className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
                 >
                   Interactive Studio
                 </button>
@@ -52,7 +52,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <li>
                 <button 
                   onClick={() => onSelectView('templates')}
-                  className="hover:text-white transition-colors cursor-pointer text-left"
+                  className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
                 >
                   Template Gallery
                 </button>
@@ -60,18 +60,18 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <li>
                 <button 
                   onClick={() => onSelectView('pricing')}
-                  className="hover:text-white transition-colors cursor-pointer text-left"
+                  className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
                 >
                   Plans & Pricing
                 </button>
               </li>
               <li>
-                <a href="#features" className="hover:text-white transition-colors">
+                <a href="#features" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">
                   Custom Domains
                 </a>
               </li>
               <li>
-                <a href="#features" className="hover:text-white transition-colors">
+                <a href="#features" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">
                   Instagram Auto-Sync
                 </a>
               </li>
@@ -82,11 +82,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
           <div className="space-y-3">
             <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">Resources</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white transition-colors">Creator Handbook</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Switching from Linktree</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">DNS & CNAME Setup</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Brand Assets & Logos</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Public REST API</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Creator Handbook</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Switching from Linktree</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">DNS & CNAME Setup</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Brand Assets & Logos</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Public REST API</a></li>
             </ul>
           </div>
 
@@ -94,10 +94,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
           <div className="space-y-3">
             <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">Legal</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Security & GDPR</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact Support</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Terms of Service</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Security & GDPR</a></li>
+              <li><a href="#" className="hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded">Contact Support</a></li>
             </ul>
           </div>
 

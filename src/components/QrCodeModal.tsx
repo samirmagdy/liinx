@@ -59,12 +59,12 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-      <div className="relative w-full max-w-sm rounded-3xl bg-[#FAF9F6] border border-[#E8E6DF] p-6 shadow-2xl">
+      <div className="relative w-full max-w-sm rounded-3xl bg-white border border-neutral-200 p-6 shadow-2xl">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 text-[#71717A] hover:text-[#18181B] transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
@@ -72,39 +72,39 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
 
         {/* Modal Header */}
         <div className="text-center mb-6">
-          <div className="w-10 h-10 rounded-2xl bg-[#18181B] text-white flex items-center justify-center mx-auto mb-2.5 shadow-sm">
+          <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-white flex items-center justify-center mx-auto mb-2.5 shadow-sm">
             <QrCode className="w-5 h-5 text-amber-400" />
           </div>
-          <h3 className="font-brand font-bold text-lg text-[#111315]">
+          <h3 className="font-brand font-bold text-lg text-neutral-900">
             Dynamic QR Code
           </h3>
-          <p className="text-xs text-[#71717A] mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Share {displayName}'s profile anywhere in the physical world
           </p>
         </div>
 
         {/* QR Code Graphic Frame */}
-        <div className="bg-white p-5 rounded-2xl border border-[#E5E2DA] shadow-xs flex flex-col items-center justify-center mb-5">
+        <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs flex flex-col items-center justify-center mb-5">
           <img 
             src={qrApiUrl} 
             alt={`QR code for ${username}`}
             className="w-48 h-48 object-contain rounded-lg"
           />
-          <span className="font-mono text-xs font-semibold text-[#18181B] mt-3">
+          <span className="font-mono text-xs font-semibold text-neutral-900 mt-3">
             liinx.co/@{username}
           </span>
         </div>
 
         {/* Color Palette Tint Picker */}
         <div className="flex items-center justify-between px-2 mb-6">
-          <span className="text-xs font-medium text-[#71717A]">QR Tint:</span>
+          <span className="text-xs font-medium text-neutral-500">QR Tint:</span>
           <div className="flex items-center gap-2">
             {['#111315', '#B45309', '#2563EB', '#7C3AED', '#059669'].map((c) => (
               <button
                 key={c}
                 onClick={() => setQrColor(c)}
-                className={`w-5 h-5 rounded-full border transition-transform cursor-pointer ${
-                  qrColor === c ? 'ring-2 ring-black ring-offset-1 scale-110' : 'opacity-70 hover:opacity-100'
+                className={`w-5 h-5 rounded-full border transition-transform cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+                  qrColor === c ? 'ring-2 ring-neutral-900 ring-offset-1 scale-110' : 'opacity-70 hover:opacity-100'
                 }`}
                 style={{ backgroundColor: c }}
                 title={`Tint ${c}`}
@@ -117,7 +117,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
         <div className="grid grid-cols-2 gap-2.5">
           <button
             onClick={handleCopyLink}
-            className="py-2.5 px-3 rounded-xl bg-white border border-[#D5D1C7] hover:border-black text-xs font-semibold text-[#18181B] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            className="py-2.5 px-3 rounded-xl bg-white border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
             {copied ? (
               <>
@@ -135,7 +135,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="py-2.5 px-3 rounded-xl bg-[#18181B] hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            className="py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <Download className="w-4 h-4" />
             <span>{downloading ? 'Downloading...' : 'Download PNG'}</span>

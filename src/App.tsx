@@ -37,7 +37,7 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-[#121417]">
+    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="home" onClaimClick={handleClaimUsername} />
       <main className="flex-1">
         <Hero
@@ -65,7 +65,7 @@ function StudioPage() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-[#121417]">
+    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="builder" />
       <main className="flex-1">
         <BuilderStudio
@@ -88,7 +88,7 @@ function TemplatesPage() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-[#121417]">
+    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="templates" />
       <main className="flex-1 pt-8">
         <TemplatesSection onSelectTemplate={(p) => setLocation(`/@${p.username}`)} />
@@ -119,7 +119,7 @@ function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-[#121417]">
+    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="pricing" />
       <main className="flex-1 pt-8">
         <PricingSection onSelectPlan={handleSelectPlan} />

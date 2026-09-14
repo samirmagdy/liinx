@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TEMPLATES } from '../data/mockData';
 import { CreatorProfile } from '../types';
-import { ArrowRight, Eye, Layers } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface TemplatesSectionProps {
   onSelectTemplate: (profile: CreatorProfile) => void;
@@ -17,33 +17,33 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
     : TEMPLATES.filter(t => t.category === selectedCategory);
 
   return (
-    <section id="templates" className="py-20 md:py-28 bg-white border-b border-[#E8E6DF]">
+    <section id="templates" className="py-20 md:py-28 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18181B]/5 text-xs font-mono font-bold text-[#18181B] mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
               <span>CURATED ARCHETYPES</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111315]">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 text-balance">
               Designed for your creative discipline
             </h2>
-            <p className="text-base text-[#52525B] mt-2 max-w-xl">
+            <p className="text-base text-neutral-600 mt-2 max-w-xl text-pretty">
               Start with a beautifully balanced preset crafted for your industry, then personalize every pixel in seconds.
             </p>
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 p-1 bg-[#FAF9F6] border border-[#E8E6DF] rounded-2xl overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 p-1 bg-neutral-100 border border-neutral-200 rounded-full overflow-x-auto no-scrollbar">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-[#18181B] text-white shadow-xs'
-                    : 'text-[#71717A] hover:text-[#18181B] hover:bg-black/5'
+                    ? 'bg-neutral-900 text-white'
+                    : 'text-neutral-500 hover:text-neutral-900'
                 }`}
               >
                 {cat}
@@ -57,23 +57,23 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
           {filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="rounded-3xl border border-[#E8E6DF] bg-[#FAF9F6] overflow-hidden flex flex-col justify-between hover:border-black/40 hover:shadow-md transition-all group"
+              className="rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between transition-colors hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
             >
               {/* Preview Card Header */}
               <div 
-                className="p-6 border-b border-[#E8E6DF] flex flex-col items-center justify-center relative min-h-[220px]"
+                className="p-6 border-b border-neutral-200 flex flex-col items-center justify-center relative min-h-[220px]"
                 style={{ backgroundColor: template.previewColor }}
               >
                 <img 
                   src={template.profile.avatarUrl} 
                   alt={template.profile.displayName}
-                  className="w-18 h-18 rounded-full object-cover shadow-sm ring-2 ring-white/20 mb-3 group-hover:scale-105 transition-transform"
-                  referrerPolicy="no-referrer"
+                  className="w-18 h-18 rounded-full object-cover shadow-sm ring-2 ring-white/20 mb-3"
+                  loading="lazy"
                 />
                 <h3 className={`text-base font-bold tracking-tight text-center ${
                   template.profile.themeId.includes('noir') || template.profile.themeId.includes('cyber') 
                     ? 'text-white' 
-                    : 'text-[#18181B]'
+                    : 'text-neutral-900'
                 }`}>
                   {template.profile.displayName}
                 </h3>
@@ -86,7 +86,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 </p>
 
                 {/* Badge */}
-                <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/10 backdrop-blur-xs text-[#18181B] dark:text-white border border-white/20">
+                <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider bg-neutral-900/10 text-neutral-700 border border-neutral-900/5">
                   {template.category}
                 </span>
               </div>
@@ -94,17 +94,17 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
               {/* Template Body */}
               <div className="p-6 flex flex-col flex-1 justify-between">
                 <div>
-                  <h4 className="font-brand font-bold text-base text-[#111315] mb-1">
+                  <h4 className="font-brand font-bold text-base text-neutral-900 mb-1 text-balance">
                     {template.name}
                   </h4>
-                  <p className="text-xs text-[#52525B] leading-relaxed mb-6">
+                  <p className="text-xs text-neutral-600 leading-relaxed mb-6 text-pretty">
                     {template.description}
                   </p>
                 </div>
 
                 <button
                   onClick={() => onSelectTemplate(template.profile)}
-                  className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#DCD8CF] hover:border-black text-xs font-bold text-[#18181B] flex items-center justify-center gap-1.5 transition-colors cursor-pointer group-hover:bg-[#18181B] group-hover:text-white group-hover:border-black"
+                  className="w-full py-2.5 px-4 rounded-full bg-white border border-neutral-300 hover:border-neutral-900 text-xs font-bold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
                   <span>Use This Template</span>
                   <ArrowRight className="w-3.5 h-3.5" />

@@ -79,27 +79,27 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center text-white font-bold text-lg shadow-sm">
+        <Link href="/" className="inline-flex items-center gap-2 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
+          <div className="w-9 h-9 rounded-xl bg-neutral-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
             L
           </div>
-          <span className="font-bold text-xl tracking-tight text-[#121417]">LIINX</span>
+          <span className="font-bold text-xl tracking-tight text-neutral-900">LIINX</span>
         </Link>
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#121417]">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 text-balance">
           Create your creator page
         </h2>
         <p className="mt-2 text-sm text-neutral-600">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-black hover:underline">
+          <Link href="/login" className="font-semibold text-neutral-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded">
             Sign in here
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <div className="bg-white py-8 px-6 shadow-xl shadow-black/5 rounded-3xl border border-neutral-200/80 sm:px-10">
+        <div className="bg-neutral-50/50 py-8 px-6 shadow-sm rounded-3xl border border-neutral-200 sm:px-10">
           {error && (
             <div className="mb-6 p-3.5 rounded-2xl bg-rose-50 border border-rose-200/60 flex items-start gap-2.5 text-xs text-rose-700">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
@@ -120,7 +120,7 @@ export const RegisterPage: React.FC = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                   placeholder="yourname"
-                  className="w-full pl-10 pr-10 py-2.5 bg-neutral-50 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
                 />
                 {availability.checked && (
                   <div className="absolute right-3.5 top-3">
@@ -149,7 +149,7 @@ export const RegisterPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@domain.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
                 />
               </div>
             </div>
@@ -166,7 +166,7 @@ export const RegisterPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"
-                  className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
                 />
               </div>
             </div>
@@ -174,7 +174,7 @@ export const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting || (availability.checked && !availability.available)}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-[#121417] hover:bg-black text-white text-sm font-semibold shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
             >
               {isSubmitting ? (
                 <>
