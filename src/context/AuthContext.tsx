@@ -28,8 +28,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       const data = await api.auth.me();
-      setUser(data.user);
-      setProfile(data.profile);
+      if (data?.user) {
+        setUser(data.user);
+        setProfile(data.profile || null);
+      } else {
+        authStorage.removeToken();
+        setUser(null);
+        setProfile(null);
+      }
     } catch (err) {
       console.warn('Session expired or invalid:', err);
       authStorage.removeToken();

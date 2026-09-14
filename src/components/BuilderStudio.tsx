@@ -121,7 +121,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   const loadProfilesList = () => {
     api.studio.getProfiles()
-      .then(res => setProfileList(res.profiles))
+      .then(res => {
+        if (res && Array.isArray(res.profiles)) {
+          setProfileList(res.profiles);
+        }
+      })
       .catch(() => {});
   };
 
@@ -206,7 +210,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   const loadApiKeys = () => {
     api.studio.getApiKeys()
-      .then(res => setApiKeyList(res.keys))
+      .then(res => {
+        if (res && Array.isArray(res.keys)) {
+          setApiKeyList(res.keys);
+        }
+      })
       .catch(() => {});
   };
 
@@ -230,6 +238,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   useEffect(() => {
     api.studio.getProfile()
       .then(liveProfile => {
+        if (!liveProfile || !liveProfile.id) return;
         setProfile(liveProfile);
         setGaInput(liveProfile.gaMeasurementId || '');
         setMetaPixelInput(liveProfile.metaPixelId || '');
@@ -240,7 +249,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         setCustomTheme(th);
       })
       .catch(err => {
-        console.log('Using active session profile:', err.message);
+        console.log('Using active session profile:', err?.message || err);
       });
 
     loadProfilesList();
@@ -250,15 +259,21 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   useEffect(() => {
     if (activeTab === 'analytics') {
       api.studio.getAnalytics()
-        .then(data => setAnalyticsData(data))
+        .then(data => {
+          if (data) setAnalyticsData(data);
+        })
         .catch(err => console.error('Failed to load analytics:', err));
     } else if (activeTab === 'settings') {
       api.studio.getSubscribers()
-        .then(res => setSubscribers(res.subscribers))
+        .then(res => {
+          if (res && Array.isArray(res.subscribers)) setSubscribers(res.subscribers);
+        })
         .catch(err => console.error('Failed to load subscribers:', err));
 
       api.instagram.getStatus()
-        .then(status => setInstagramStatus(status))
+        .then(status => {
+          if (status) setInstagramStatus(status);
+        })
         .catch(err => console.error('Failed to load Instagram status:', err));
 
       if (profile.plan === 'studio') {

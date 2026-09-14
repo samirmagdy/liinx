@@ -8,6 +8,8 @@ export const authStorage = {
   removeToken: () => localStorage.removeItem(TOKEN_KEY)
 };
 
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL?.replace(/\/$/, '') || '';
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = authStorage.getToken();
   const headers: Record<string, string> = {
@@ -19,15 +21,19 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(endpoint, {
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
+  const res = await fetch(url, {
     ...options,
     headers
   });
 
-  const data = await res.json().catch(() => null);
+  const contentType = res.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const data = isJson ? await res.json().catch(() => null) : null;
 
-  if (!res.ok) {
-    const errorMsg = data?.error || `HTTP error ${res.status}`;
+  if (!res.ok || data === null) {
+    const errorMsg = data?.error || (!isJson ? `Backend unreachable or returned non-JSON response (${res.status})` : `HTTP error ${res.status}`);
     throw new Error(errorMsg);
   }
 
@@ -131,7 +137,7 @@ export const api = {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await fetch('/api/upload', {
+      const res = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: formData

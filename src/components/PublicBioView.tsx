@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { CreatorProfile, ThemeConfig } from '../types';
-import { THEMES } from '../data/mockData';
+import { THEMES, DEMO_PROFILES } from '../data/mockData';
 import { api } from '../services/api';
 import { 
   ArrowLeft, 
@@ -83,14 +83,30 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
     api.profiles.getByUsername(cleanUsername)
       .then(fetchedProfile => {
+        if (!fetchedProfile || !fetchedProfile.id) {
+          const demo = DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername.toLowerCase());
+          if (demo) {
+            setProfile(demo);
+            document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
+          } else {
+            setNotFound(true);
+          }
+          return;
+        }
         setProfile(fetchedProfile);
         document.title = `${fetchedProfile.displayName} (@${fetchedProfile.username}) | LIINX`;
         // Record profile visit for real analytics with UTM parameters
         api.analytics.recordView(fetchedProfile.id).catch(() => {});
       })
       .catch(err => {
-        console.error('Failed to load public profile:', err);
-        setNotFound(true);
+        console.warn('Could not load profile from server, checking demo profiles:', err?.message || err);
+        const demo = DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername.toLowerCase());
+        if (demo) {
+          setProfile(demo);
+          document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
+        } else {
+          setNotFound(true);
+        }
       })
       .finally(() => {
         setLoading(false);
