@@ -1,0 +1,42 @@
+name: CI / Production Quality Gate
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-and-test:
+    name: Lint, Build & Comprehensive Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Static Type Check (tsc)
+        run: npm run lint
+
+      - name: Build Production Frontend Bundle
+        run: npm run build
+
+      - name: Execute Full Test Suite (Vitest)
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_jwt_secret_ci_key_32_characters_minimum
+        run: npm test
+
+      - name: Verify Bundle Integrity
+        run: |
+          test -f dist/index.html || (echo "dist/index.html is missing!" && exit 1)
+          echo "Production assets successfully compiled and validated."

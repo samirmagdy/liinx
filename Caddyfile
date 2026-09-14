@@ -1,0 +1,7 @@
+# Example Caddyfile for VPS deployment with automated HTTPS
+# Replace yourdomain.com with your actual domain name
+
+# yourdomain.com {
+#     reverse_proxy localhost:3000
+#     encode gzip zstd
+# }

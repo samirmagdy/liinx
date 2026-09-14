@@ -1,0 +1,19 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# SQLite Database & Backups
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/backups/
+
+# User Uploads
+public/uploads/*
+!public/uploads/.gitkeep
+

@@ -1,0 +1,6 @@
+{
+  "name": "LIINX | Design-First Link in Bio",
+  "description": "Production-ready clone and reimagined modern branding for Liinks.co, featuring an interactive creator studio, live responsive phone preview, customizable themes, rich media embeds, and analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,132 @@
+import React, { useState } from 'react';
+import { useLocation, Link } from 'wouter';
+import { useAuth } from '../context/AuthContext';
+import { Sparkles, ArrowRight, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
+
+export const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      await login(email, password);
+      setLocation('/studio');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please verify your credentials.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleQuickDemo = () => {
+    setEmail('demo@liinx.co');
+    setPassword('password123');
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FAF9F6] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <Link href="/" className="inline-flex items-center gap-2 mb-4">
+          <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            L
+          </div>
+          <span className="font-bold text-xl tracking-tight text-[#121417]">LIINX</span>
+        </Link>
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#121417]">
+          Welcome back to your Studio
+        </h2>
+        <p className="mt-2 text-sm text-neutral-600">
+          Or{' '}
+          <Link href="/register" className="font-semibold text-black hover:underline">
+            claim a new handle and create your page
+          </Link>
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
+        <div className="bg-white py-8 px-6 shadow-xl shadow-black/5 rounded-3xl border border-neutral-200/80 sm:px-10">
+          {error && (
+            <div className="mb-6 p-3.5 rounded-2xl bg-rose-50 border border-rose-200/60 flex items-start gap-2.5 text-xs text-rose-700">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
+                Email address
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@domain.com"
+                  className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-[#121417] hover:bg-black text-white text-sm font-semibold shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Quick Demo Fill Helper */}
+          <div className="mt-6 pt-6 border-t border-neutral-100 text-center">
+            <button
+              type="button"
+              onClick={handleQuickDemo}
+              className="text-xs text-neutral-500 hover:text-black font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5 bg-neutral-100/80 px-3 py-1.5 rounded-full"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Fill Seeded Demo Creator Account</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
