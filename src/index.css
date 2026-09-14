@@ -92,6 +92,46 @@
   --radius-xl:  1rem;
   --radius-2xl: 1.25rem;
   --radius-3xl: 1.75rem;
+  --shadow-soft: 0 12px 36px rgba(24, 24, 23, 0.08);
+  --shadow-lift: 0 24px 70px rgba(24, 24, 23, 0.14);
+}
+
+.hero-section {
+  background:
+    radial-gradient(circle at 75% 18%, rgba(217, 119, 6, 0.08), transparent 24rem),
+    linear-gradient(180deg, #fbfbf9 0%, #f7f7f5 100%);
+}
+
+.hero-accent {
+  color: #b45309;
+  position: relative;
+  white-space: nowrap;
+}
+
+.hero-accent::after {
+  content: '';
+  position: absolute;
+  left: 0.05em;
+  right: 0.05em;
+  bottom: -0.08em;
+  height: 0.08em;
+  background: #f0b35e;
+  border-radius: 999px;
+  transform: rotate(-1.5deg);
+  opacity: 0.8;
+}
+
+.hero-section .phone-shell {
+  box-shadow: var(--shadow-lift);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-section .phone-shell { animation: float-preview 7s ease-in-out infinite; }
+}
+
+@keyframes float-preview {
+  0%, 100% { transform: translateY(0) rotate(1deg); }
+  50% { transform: translateY(-8px) rotate(0deg); }
 }
 
 /* === Typography utilities === */

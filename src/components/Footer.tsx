@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ResourceModal, ResourceDocType } from './ResourceModal';
+import { brand } from '../config/brand';
 
 interface FooterProps {
   onSelectView: (view: 'home' | 'builder' | 'templates' | 'pricing') => void;
@@ -26,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   </div>
                 </div>
                 <span className="font-brand font-extrabold text-xl tracking-tight text-white">
-                  LIINX
+                  {brand.productShortName}
                 </span>
               </div>
 
@@ -191,7 +192,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
 
           {/* Bottom copyright row */}
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
-            <p>© {new Date().getFullYear()} LIINX Studio Inc. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} {brand.legalName}. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <span>Crafted with zero clutter</span>
               <span>•</span>

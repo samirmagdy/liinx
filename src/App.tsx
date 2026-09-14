@@ -47,7 +47,6 @@ function HomePage() {
         <FeaturesSection onOpenStudio={handleOpenStudio} />
         <ComparisonSection />
         <TemplatesSection onSelectTemplate={handleSelectTemplate} />
-        <TestimonialsSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
       </main>
@@ -111,8 +110,7 @@ function PricingPage() {
     try {
       const cleanPlan = planId.toLowerCase() as 'free' | 'pro' | 'studio';
       await api.studio.updatePlan(cleanPlan);
-      alert(`Upgraded to ${planId.toUpperCase()} tier!`);
-      setLocation('/studio');
+      setLocation('/studio?plan=updated');
     } catch {
       setLocation(`/register?plan=${encodeURIComponent(planId)}`);
     }

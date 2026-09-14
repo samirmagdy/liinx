@@ -7,8 +7,11 @@ import {
   ShieldCheck, 
   Palette, 
   Check, 
-  Zap 
+  Zap,
+  MousePointer2,
+  LayoutTemplate
 } from 'lucide-react';
+import { brand } from '../config/brand';
 
 interface HeroProps {
   onClaimUsername: (handle: string) => void;
@@ -47,13 +50,12 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-neutral-900 leading-[1.08] mb-6 text-balance">
-              The design-first link in bio for creators who care about pixels.
+              Your entire world. <span className="hero-accent">Designed your way.</span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg text-neutral-600 leading-relaxed max-w-xl mb-8 text-pretty">
-              No generic buttons, no corporate clutter, no cookie-cutter templates. 
-              Embed playable music, rich media, accordion folders, and connect your own custom domain.
+              Create a beautiful mini-site for everything you make, sell and share. No code, no cookie-cutter templates.
             </p>
 
             {/* Claim Handle Hero Form */}
@@ -64,7 +66,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
               >
                 <div className="flex items-center pl-4 py-2 sm:py-0 flex-1">
                   <span className="text-neutral-500 font-mono text-sm sm:text-base font-semibold select-none">
-                    liinx.co/@
+                    {brand.domain}/@
                   </span>
                   <input
                     id="hero-claim-input"
@@ -74,7 +76,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                     placeholder="yourname"
                     className="w-full pl-1 outline-none font-mono text-sm sm:text-base font-bold text-neutral-900 placeholder-neutral-400 bg-transparent"
                     spellCheck={false}
-                    aria-label="Claim your LIINX handle"
+                    aria-label={`Claim your ${brand.productShortName} handle`}
                   />
                 </div>
                 
@@ -90,7 +92,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
               <div className="flex items-center gap-4 mt-3 text-xs text-neutral-500 pl-2">
                 <span className="flex items-center gap-1">
                   <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                  <span>Always free to build</span>
+                  <span>Free to start</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
@@ -98,25 +100,15 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 </span>
                 <span className="flex items-center gap-1">
                   <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                  <span>Custom domain ready</span>
+                  <span>Publish in minutes</span>
                 </span>
               </div>
             </div>
 
             {/* Social Proof & Metrics row */}
-            <div className="pt-4 border-t border-neutral-200 w-full grid grid-cols-3 gap-4">
-              <div>
-                <p className="font-brand font-bold text-2xl text-neutral-900 tabular-nums">150K+</p>
-                <p className="text-xs text-neutral-500">Curated Profiles</p>
-              </div>
-              <div>
-                <p className="font-brand font-bold text-2xl text-neutral-900 tabular-nums">&lt; 85ms</p>
-                <p className="text-xs text-neutral-500">Edge Page Speed</p>
-              </div>
-              <div>
-                <p className="font-brand font-bold text-2xl text-neutral-900 tabular-nums">0%</p>
-                <p className="text-xs text-neutral-500">Commission Taken</p>
-              </div>
+            <div className="hero-proof pt-4 border-t border-neutral-200 w-full flex flex-wrap gap-x-5 gap-y-2 text-xs text-neutral-500">
+              <span className="inline-flex items-center gap-1.5"><MousePointer2 className="w-3.5 h-3.5 text-amber-600" />Live preview while you build</span>
+              <span className="inline-flex items-center gap-1.5"><LayoutTemplate className="w-3.5 h-3.5 text-amber-600" />Distinct templates, not skins</span>
             </div>
 
           </div>

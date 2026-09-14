@@ -149,7 +149,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
             </div>
             <div className="mt-6 flex items-center justify-between text-xs font-mono bg-white p-2.5 rounded-xl border border-neutral-200">
               <span>Avg CTR:</span>
-              <span className="font-bold text-emerald-600 tabular-nums">21.8% (3x industry avg)</span>
+                <span className="font-bold text-emerald-700">Clicks, sources & conversions</span>
             </div>
           </div>
 

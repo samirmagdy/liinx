@@ -10,6 +10,7 @@ import {
   User,
   Check
 } from 'lucide-react';
+import { brand } from '../config/brand';
 
 interface NavbarProps {
   activeView?: 'home' | 'builder' | 'templates' | 'pricing';
@@ -74,10 +75,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             
             <div className="flex flex-col">
               <span className="font-brand font-extrabold text-xl tracking-tight text-neutral-900 leading-none">
-                LIINX
+                {brand.productShortName}
               </span>
               <span className="text-[10px] text-neutral-500 font-medium tracking-wide">
-                Design-First Bio
+                Micro-site builder
               </span>
             </div>
           </Link>
