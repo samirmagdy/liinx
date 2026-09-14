@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '../db.js';
+import { bookingUrl } from '../../src/utils/booking.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const blocksRouter = Router();
 
 const createBlockSchema = z.object({
-  type: z.enum(['link', 'header', 'audio', 'video', 'folder', 'newsletter', 'instagram_grid']),
+  type: z.enum(['booking', 'link', 'header', 'audio', 'video', 'folder', 'newsletter', 'instagram_grid']),
   title: z.string().min(1, 'Title is required').max(150),
   url: z.string().optional().nullable(),
   subtitle: z.string().max(250).optional().nullable(),
@@ -39,6 +40,9 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
     }
 
     const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, extra } = parse.data;
+    if (type === 'booking' && (!bookingUrl(url) || extra != null)) {
+      return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
+    }
     const profileId = req.user!.profileId;
     const now = Date.now();
     const id = 'blk_' + Math.random().toString(36).substring(2, 10);
@@ -134,6 +138,9 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
 
     const now = Date.now();
     const data = parse.data;
+    if (existing.type === 'booking' && (!bookingUrl(data.url === undefined ? existing.url : data.url) || data.extra != null)) {
+      return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
+    }
 
     let existingExtra = {};
     if (existing.extra_json) {

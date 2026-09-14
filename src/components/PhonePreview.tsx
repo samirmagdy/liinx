@@ -237,6 +237,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
         {/* Profile Blocks */}
         <div className="space-y-3 mb-8">
           {profile.blocks.map((block) => {
+            if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
               return (
                 <div
@@ -692,3 +693,4 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
     );
   }
 };
+import { BookingCard } from './BookingCard';

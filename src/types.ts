@@ -1,4 +1,5 @@
 export type BlockType = 
+  | 'booking'
   | 'link' 
   | 'header' 
   | 'audio' 
@@ -84,6 +85,7 @@ export interface InstagramGridBlock {
 }
 
 export type ProfileBlock = 
+  | BookingBlock
   | LinkBlock 
   | HeaderBlock 
   | AudioBlock 
@@ -91,6 +93,13 @@ export type ProfileBlock =
   | FolderBlock 
   | NewsletterBlock 
   | InstagramGridBlock;
+
+export interface BookingBlock {
+  id: string;
+  type: 'booking';
+  title: string;
+  url: string;
+}
 
 export interface SocialLink {
   platform: 'instagram' | 'tiktok' | 'youtube' | 'spotify' | 'twitter' | 'github' | 'email' | 'linkedin';

@@ -57,6 +57,7 @@ import {
   X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { BookingEditor } from './BookingEditor';
 
 interface BuilderStudioProps {
   initialProfile?: CreatorProfile;
@@ -1085,6 +1086,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Action Bar: Add Block & Import Links */}
+              <BookingEditor onSave={async (title, url) => {
+                const block = await api.studio.createBlock({ type: 'booking', title, url });
+                setProfile(prev => ({ ...prev, blocks: [...prev.blocks, block] }));
+              }} />
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1 relative">
                   <button
@@ -1227,7 +1232,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         />
                       </div>
 
-                      {block.type === 'link' && (
+                      {(block.type === 'link' || block.type === 'booking') && (
                         <div>
                           <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Destination URL</label>
                           <input

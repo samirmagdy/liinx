@@ -411,6 +411,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         {/* Content Blocks */}
         <div className="space-y-4 mb-14">
           {profile.blocks.map((block) => {
+            if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!
               const redirectUrl = `/r/${block.id}`;
@@ -854,3 +855,4 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     </div>
   );
 };
+import { BookingCard } from './BookingCard';
