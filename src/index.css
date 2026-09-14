@@ -176,3 +176,13 @@
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+/* RTL and Arabic Typography Support */
+[dir="rtl"] body {
+  font-family: 'Cairo', 'Tajawal', var(--font-sans);
+}
+
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] .font-brand {
+  font-family: 'Cairo', 'Tajawal', var(--font-display);
+}
+

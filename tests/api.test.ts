@@ -248,5 +248,53 @@ describe('LIINX Production Backend API', () => {
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/select an image file/i);
   });
+
+  it('GET /api/auth/check-username for reserved name should return available: false', async () => {
+    const res = await request(app).get('/api/auth/check-username/pricing');
+    expect(res.body.available).toBe(false);
+    expect(res.body.reason).toMatch(/reserved/i);
+  });
+
+  it('POST /api/auth/register with reserved username should fail with 400', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: `reserved_${Date.now()}@liinx.test`,
+        password: 'Password123!',
+        username: 'admin'
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/reserved/i);
+  });
+
+  it('GET /robots.txt and /sitemap.xml should return valid SEO endpoints', async () => {
+    const robotsRes = await request(app).get('/robots.txt');
+    expect(robotsRes.status).toBe(200);
+    expect(robotsRes.text).toContain('Sitemap:');
+    expect(robotsRes.text).toContain('Disallow: /studio');
+
+    const sitemapRes = await request(app).get('/sitemap.xml');
+    expect(sitemapRes.status).toBe(200);
+    expect(sitemapRes.header['content-type']).toContain('xml');
+    expect(sitemapRes.text).toContain('<urlset');
+    expect(sitemapRes.text).toContain('/@elenarostova');
+  });
+
+  it('DELETE /api/auth/account should permanently delete user and associated profile', async () => {
+    const res = await request(app)
+      .delete('/api/auth/account')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+
+    // Verify user and profile are deleted from SQLite
+    const userCheck = db.prepare('SELECT * FROM users WHERE email = ?').get(testEmail);
+    expect(userCheck).toBeUndefined();
+
+    const profileCheck = db.prepare('SELECT * FROM profiles WHERE username = ?').get(testUsername);
+    expect(profileCheck).toBeUndefined();
+  });
 });
 

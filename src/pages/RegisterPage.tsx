@@ -2,13 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { brand } from '../config/brand';
+import { THEMES } from '../data/mockData';
 import confetti from 'canvas-confetti';
-import { ArrowRight, Lock, Mail, AtSign, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { 
+  ArrowRight, 
+  ArrowLeft,
+  Lock, 
+  Mail, 
+  AtSign, 
+  AlertCircle, 
+  CheckCircle2, 
+  Loader2, 
+  Sparkles,
+  Camera,
+  Music,
+  Code,
+  Heart,
+  Briefcase,
+  User,
+  Palette,
+  Check
+} from 'lucide-react';
+
+const INTENT_OPTIONS = [
+  { id: 'creator', label: 'Creator / Influencer', icon: Sparkles, defaultCategory: 'Creator' },
+  { id: 'photographer', label: 'Photographer / Visual Artist', icon: Camera, defaultCategory: 'Design & Art' },
+  { id: 'musician', label: 'Musician / Producer / DJ', icon: Music, defaultCategory: 'Musicians' },
+  { id: 'developer', label: 'Developer / Designer / Studio', icon: Code, defaultCategory: 'Tech & Design' },
+  { id: 'coach', label: 'Coach / Consultant / Wellness', icon: Heart, defaultCategory: 'Wellness' },
+  { id: 'business', label: 'Small Business / Brand', icon: Briefcase, defaultCategory: 'Business' }
+];
 
 export const RegisterPage: React.FC = () => {
+  const [step, setStep] = useState<1 | 2>(1);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedIntent, setSelectedIntent] = useState('creator');
+  const [selectedThemeId, setSelectedThemeId] = useState('editorial-stone');
   const [availability, setAvailability] = useState<{ checked: boolean; available: boolean; message?: string }>({
     checked: false,
     available: false
@@ -18,7 +50,7 @@ export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Read initial username from query parameter if available
+  // Read initial handle from query parameter
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const initialHandle = params.get('username');
@@ -28,7 +60,7 @@ export const RegisterPage: React.FC = () => {
     }
   }, []);
 
-  // Debounce username availability check
+  // Debounced username check
   useEffect(() => {
     if (!username || username.length < 3) {
       setAvailability({ checked: false, available: false });
@@ -39,15 +71,15 @@ export const RegisterPage: React.FC = () => {
       try {
         const res = await api.auth.checkUsername(username);
         setAvailability({ checked: true, available: res.available, message: res.reason });
-      } catch (e) {
+      } catch {
         setAvailability({ checked: false, available: false });
       }
-    }, 300);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [username]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -61,134 +93,240 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    if (availability.checked && !availability.available) {
+      setError(availability.message || 'This username is not available.');
+      return;
+    }
+
+    setStep(2);
+  };
+
+  const handleFinalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
     setIsSubmitting(true);
 
     try {
       await register(email, password, username);
+      
+      // Update profile with selected theme and intent
+      const category = INTENT_OPTIONS.find(i => i.id === selectedIntent)?.defaultCategory || 'Creator';
+      try {
+        await api.studio.updateProfile({
+          themeId: selectedThemeId,
+          category
+        });
+      } catch {}
+
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 100,
+        spread: 80,
         origin: { y: 0.6 }
       });
       setLocation('/studio');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
+      setStep(1);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
           <div className="w-9 h-9 rounded-xl bg-neutral-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-            L
+            {brand.logoMark}
           </div>
-          <span className="font-bold text-xl tracking-tight text-neutral-900">LIINX</span>
+          <span className="font-bold text-xl tracking-tight text-neutral-900">{brand.productShortName}</span>
         </Link>
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 text-balance">
-          Create your creator page
-        </h2>
-        <p className="mt-2 text-sm text-neutral-600">
-          Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-neutral-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded">
-            Sign in here
-          </Link>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">
+          {step === 1 ? 'Build your micro-site' : 'Choose your aesthetic'}
+        </h1>
+        <p className="mt-2 text-xs sm:text-sm text-neutral-600">
+          {step === 1 ? (
+            <>
+              Already have an account?{' '}
+              <Link href="/login" className="font-semibold text-neutral-900 hover:underline">
+                Sign in here
+              </Link>
+            </>
+          ) : (
+            'Step 2 of 2: Select your focus discipline and initial theme.'
+          )}
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <div className="bg-neutral-50/50 py-8 px-6 shadow-sm rounded-3xl border border-neutral-200 sm:px-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-neutral-50/70 py-8 px-6 shadow-sm rounded-3xl border border-neutral-200 sm:px-10">
           {error && (
-            <div className="mb-6 p-3.5 rounded-2xl bg-rose-50 border border-rose-200/60 flex items-start gap-2.5 text-xs text-rose-700">
+            <div className="mb-6 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-xs text-rose-700">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-                Claim your handle
-              </label>
-              <div className="relative">
-                <AtSign className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                  placeholder="yourname"
-                  className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
-                />
-                {availability.checked && (
-                  <div className="absolute right-3.5 top-3">
-                    {availability.available ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4 text-rose-500" />
-                    )}
-                  </div>
-                )}
+          {step === 1 ? (
+            <form className="space-y-4" onSubmit={handleNextStep}>
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1.5">
+                  Choose your handle
+                </label>
+                <div className="relative">
+                  <AtSign className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                  <input
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="yourname"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
+                  />
+                  {availability.checked && (
+                    <div className="absolute right-3.5 top-3">
+                      {availability.available ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-rose-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Your live link will be <span className="font-mono text-neutral-700 font-semibold">{brand.domain}/@{username || 'yourname'}</span>
+                </p>
               </div>
-              <p className="mt-1 text-[11px] text-neutral-500">
-                Your page will be hosted at <span className="font-mono text-neutral-700">liinx.co/@{username || 'yourname'}</span>
-              </p>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@domain.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
-                />
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1.5">
+                  Email address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@domain.com"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-                Choose a password
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
-                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
-                />
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1.5">
+                  Choose password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting || (availability.checked && !availability.available)}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Creating your Studio...</span>
-                </>
-              ) : (
-                <>
-                  <span>Create Account & Page</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={availability.checked && !availability.available}
+                className="w-full mt-3 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
+              >
+                <span>Continue to Step 2</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          ) : (
+            <form className="space-y-5" onSubmit={handleFinalSubmit}>
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-2">
+                  What are you building?
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {INTENT_OPTIONS.map((item) => {
+                    const Icon = item.icon;
+                    const isSelected = selectedIntent === item.id;
+                    return (
+                      <button
+                        type="button"
+                        key={item.id}
+                        onClick={() => setSelectedIntent(item.id)}
+                        className={`p-2.5 rounded-xl border text-left flex items-start gap-2 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-white border-neutral-900 ring-1 ring-neutral-900 text-neutral-950'
+                            : 'bg-white/60 border-neutral-200 text-neutral-600 hover:border-neutral-300'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-amber-600' : 'text-neutral-400'}`} />
+                        <span className="text-[11px] font-semibold leading-tight">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-2">
+                  Choose starting design theme
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {THEMES.slice(0, 6).map((theme) => {
+                    const isSelected = selectedThemeId === theme.id;
+                    return (
+                      <button
+                        type="button"
+                        key={theme.id}
+                        onClick={() => setSelectedThemeId(theme.id)}
+                        className={`p-2 rounded-xl border flex flex-col items-center gap-1.5 transition-all cursor-pointer text-center ${
+                          isSelected
+                            ? 'bg-white border-neutral-900 ring-2 ring-neutral-900 text-neutral-900 shadow-xs'
+                            : 'bg-white border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                        }`}
+                      >
+                        <span
+                          className="w-5 h-5 rounded-full border shadow-xs"
+                          style={{ backgroundColor: theme.bgColor, borderColor: theme.isDark ? '#444' : '#ccc' }}
+                        />
+                        <span className="text-[10px] font-semibold truncate w-full">{theme.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="px-3.5 py-3 rounded-xl border border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Creating your Studio...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Launch My Micro-Site</span>
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

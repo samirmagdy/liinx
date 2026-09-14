@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '../db.js';
 import { hashPassword, comparePassword, signJwt } from '../auth.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { RESERVED_USERNAMES } from '../../src/config/brand.js';
 
 export const authRouter = Router();
 
@@ -36,6 +37,10 @@ authRouter.get('/check-username/:username', (req, res) => {
     return res.json({ available: false, reason: 'Invalid format (3-30 lowercase characters)' });
   }
 
+  if (RESERVED_USERNAMES.includes(cleanUsername as any)) {
+    return res.json({ available: false, reason: 'This username is reserved by the system' });
+  }
+
   const existing = db.prepare('SELECT id FROM profiles WHERE username = ?').get(cleanUsername);
   res.json({ available: !existing, username: cleanUsername });
 });
@@ -51,6 +56,11 @@ authRouter.post('/register', (req, res) => {
     const { email, password, username } = parse.data;
     const cleanEmail = email.toLowerCase().trim();
     const cleanUsername = username.toLowerCase().trim();
+
+    // Check reserved usernames
+    if (RESERVED_USERNAMES.includes(cleanUsername as any)) {
+      return res.status(400).json({ error: 'This username is reserved and cannot be claimed.' });
+    }
 
     // Check existing email
     const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(cleanEmail);
@@ -214,5 +224,40 @@ authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res) => {
   } catch (err: any) {
     console.error('Auth /me error:', err);
     res.status(500).json({ error: 'Failed to retrieve authenticated session.' });
+  }
+});
+
+// Delete account & all associated data permanently (GDPR / Privacy compliance)
+authRouter.delete('/account', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const userId = req.user!.userId;
+
+    const deleteAccountTx = db.transaction(() => {
+      // Find all profiles for this user
+      const userProfiles = db.prepare('SELECT id FROM profiles WHERE user_id = ?').all(userId) as { id: string }[];
+      const profileIds = userProfiles.map(p => p.id);
+
+      if (profileIds.length > 0) {
+        for (const pId of profileIds) {
+          db.prepare('DELETE FROM link_clicks WHERE profile_id = ?').run(pId);
+          db.prepare('DELETE FROM profile_views WHERE profile_id = ?').run(pId);
+          db.prepare('DELETE FROM newsletter_subscribers WHERE profile_id = ?').run(pId);
+          db.prepare('DELETE FROM instagram_sync WHERE profile_id = ?').run(pId);
+          db.prepare('DELETE FROM api_keys WHERE profile_id = ?').run(pId);
+          db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(pId);
+        }
+        db.prepare('DELETE FROM profiles WHERE user_id = ?').run(userId);
+      }
+
+      // Delete user
+      db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    });
+
+    deleteAccountTx();
+
+    res.json({ success: true, message: 'Your account and all associated profile data have been permanently deleted.' });
+  } catch (err: any) {
+    console.error('Account deletion error:', err);
+    res.status(500).json({ error: 'Failed to delete account.' });
   }
 });

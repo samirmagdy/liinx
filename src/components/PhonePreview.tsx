@@ -17,7 +17,8 @@ import {
   Linkedin,
   Disc,
   Share2,
-  Music2
+  Music2,
+  MessageCircle
 } from 'lucide-react';
 import { 
   getSpotifyEmbedUrl, 
@@ -36,6 +37,7 @@ interface PhonePreviewProps {
   onLinkClick?: (block: ProfileBlock) => void;
   scale?: 'normal' | 'compact' | 'responsive' | 'editor';
   compact?: boolean;
+  deviceMode?: 'mobile' | 'tablet' | 'desktop';
 }
 
 export const PhonePreview: React.FC<PhonePreviewProps> = ({
@@ -45,6 +47,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   onLinkClick,
   scale = 'normal',
   compact = false,
+  deviceMode = 'mobile',
 }) => {
   const theme = customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0];
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
@@ -98,11 +101,14 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
       case 'github': return <Github className="w-4 h-4" />;
       case 'linkedin': return <Linkedin className="w-4 h-4" />;
       case 'email': return <Mail className="w-4 h-4" />;
+      case 'whatsapp': return <MessageCircle className="w-4 h-4 text-emerald-500" />;
       default: return <ExternalLink className="w-4 h-4" />;
     }
   };
 
   const scaleClass =
+    deviceMode === 'desktop' ? 'max-w-[620px]' :
+    deviceMode === 'tablet' ? 'max-w-[500px]' :
     scale === 'compact' ? 'max-w-[340px]' :
     scale === 'editor' ? 'max-w-[320px]' :
     'max-w-[380px]';

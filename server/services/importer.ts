@@ -20,7 +20,9 @@ export interface ImportedProfileData {
   }[];
 }
 
-// Anti-SSRF check: block internal IPs and reserved metadata ranges
+import dns from 'dns';
+
+// Anti-SSRF check: block internal IPs, local hostnames, and reserved metadata ranges
 export function isSafePublicUrl(inputUrl: string): boolean {
   try {
     const parsed = new URL(inputUrl);
@@ -50,6 +52,39 @@ export function isSafePublicUrl(inputUrl: string): boolean {
     }
     return true;
   } catch {
+    return false;
+  }
+}
+
+export async function isSafePublicUrlAsync(inputUrl: string): Promise<boolean> {
+  if (!isSafePublicUrl(inputUrl)) return false;
+  try {
+    const parsed = new URL(inputUrl);
+    // DNS resolution re-validation to block DNS rebinding attacks
+    const addresses = await dns.promises.lookup(parsed.hostname, { all: true });
+    for (const addr of addresses) {
+      const ip = addr.address;
+      if (
+        ip === '127.0.0.1' ||
+        ip === '0.0.0.0' ||
+        ip === '::1' ||
+        ip.startsWith('10.') ||
+        ip.startsWith('192.168.') ||
+        ip.startsWith('172.16.') ||
+        ip.startsWith('172.17.') ||
+        ip.startsWith('172.18.') ||
+        ip.startsWith('172.19.') ||
+        ip.startsWith('172.2') ||
+        ip.startsWith('172.30.') ||
+        ip.startsWith('172.31.') ||
+        ip.startsWith('169.254.')
+      ) {
+        return false;
+      }
+    }
+    return true;
+  } catch {
+    // If hostname does not resolve, it cannot be safely fetched
     return false;
   }
 }
@@ -172,7 +207,7 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
     }
   }
 
-  if (!isSafePublicUrl(cleanUrl)) {
+  if (!isSafePublicUrl(cleanUrl) || !(await isSafePublicUrlAsync(cleanUrl))) {
     throw new Error('Invalid or non-public profile URL provided.');
   }
 

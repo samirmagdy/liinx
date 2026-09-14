@@ -30,6 +30,8 @@ import {
   Sliders, 
   RotateCcw,
   Smartphone,
+  Tablet,
+  Monitor,
   Maximize2,
   Upload,
   Users,
@@ -73,6 +75,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -2371,10 +2374,42 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         </div>
 
         {/* Right Phone Live Preview Simulator (5 cols) */}
-        <div className="lg:col-span-5 sticky top-28 flex justify-center">
+        <div className="lg:col-span-5 sticky top-28 flex flex-col items-center">
+          {/* Responsive Viewport Switcher */}
+          <div className="flex items-center gap-1 mb-3 p-1 bg-neutral-100 rounded-full border border-neutral-200 text-xs shadow-xs">
+            <button
+              onClick={() => setPreviewDevice('mobile')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
+                previewDevice === 'mobile' ? 'bg-white shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Mobile</span>
+            </button>
+            <button
+              onClick={() => setPreviewDevice('tablet')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
+                previewDevice === 'tablet' ? 'bg-white shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+              }`}
+            >
+              <Tablet className="w-3.5 h-3.5" />
+              <span>Tablet</span>
+            </button>
+            <button
+              onClick={() => setPreviewDevice('desktop')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
+                previewDevice === 'desktop' ? 'bg-white shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+              }`}
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              <span>Desktop</span>
+            </button>
+          </div>
+
           <PhonePreview
             profile={profile}
             customTheme={customTheme}
+            deviceMode={previewDevice}
           />
         </div>
 

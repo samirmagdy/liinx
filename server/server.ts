@@ -44,8 +44,83 @@ app.use((req, res, next) => {
   next();
 });
 
+// Security Headers Middleware (OWASP / Production Hardening)
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  }
+  next();
+});
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Search Engine robots.txt
+app.get('/robots.txt', (_req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(`User-agent: *
+Allow: /
+Allow: /features
+Allow: /templates
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /@*
+Disallow: /studio
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /uploads/
+
+Sitemap: https://liinx.app/sitemap.xml
+`);
+});
+
+// Search Engine dynamic sitemap.xml
+app.get('/sitemap.xml', (_req, res) => {
+  try {
+    const profiles = db.prepare('SELECT username, updated_at FROM profiles ORDER BY updated_at DESC LIMIT 500').all() as { username: string; updated_at: number }[];
+    const baseUrl = 'https://liinx.app';
+    const nowIso = new Date().toISOString().split('T')[0];
+
+    const staticRoutes = [
+      { path: '', changefreq: 'daily', priority: '1.0' },
+      { path: '/features', changefreq: 'weekly', priority: '0.9' },
+      { path: '/templates', changefreq: 'weekly', priority: '0.9' },
+      { path: '/pricing', changefreq: 'weekly', priority: '0.8' },
+      { path: '/about', changefreq: 'monthly', priority: '0.7' },
+      { path: '/contact', changefreq: 'monthly', priority: '0.6' },
+      { path: '/privacy', changefreq: 'monthly', priority: '0.3' },
+      { path: '/terms', changefreq: 'monthly', priority: '0.3' },
+    ];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    for (const route of staticRoutes) {
+      xml += `  <url>\n    <loc>${baseUrl}${route.path}</loc>\n    <lastmod>${nowIso}</lastmod>\n    <changefreq>${route.changefreq}</changefreq>\n    <priority>${route.priority}</priority>\n  </url>\n`;
+    }
+
+    for (const p of profiles) {
+      const pDate = p.updated_at ? new Date(p.updated_at).toISOString().split('T')[0] : nowIso;
+      xml += `  <url>\n    <loc>${baseUrl}/@${encodeURIComponent(p.username)}</loc>\n    <lastmod>${pDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+    }
+
+    xml += `</urlset>`;
+
+    res.setHeader('Content-Type', 'application/xml');
+    res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    res.send(xml);
+  } catch (err: any) {
+    console.error('Sitemap error:', err);
+    res.status(500).send('Failed to generate sitemap.');
+  }
+});
 
 // Custom Domain Host-Header Routing Engine (Milestone 6)
 app.use((req, res, next) => {

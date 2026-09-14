@@ -1,21 +1,24 @@
-import React, { Component, ReactNode, ErrorInfo } from 'react';
+import React, { Component } from 'react';
 import { Switch, Route, useLocation } from 'wouter';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { FeaturesSection } from './components/FeaturesSection';
 import { ComparisonSection } from './components/ComparisonSection';
 import { TemplatesSection } from './components/TemplatesSection';
 import { PricingSection } from './components/PricingSection';
-import { TestimonialsSection } from './components/TestimonialsSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 import { BuilderStudio } from './components/BuilderStudio';
 import { PublicBioView } from './components/PublicBioView';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { FeaturesPage } from './pages/FeaturesPage';
+import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
 import { CreatorProfile } from './types';
 import { api } from './services/api';
+import { RESERVED_USERNAMES } from './config/brand';
 
 function HomePage() {
   const [, setLocation] = useLocation();
@@ -204,43 +207,50 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 export default function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <Switch>
-          {/* Core application routes */}
-          <Route path="/" component={HomePage} />
-          <Route path="/login" component={LoginPage} />
-          <Route path="/register" component={RegisterPage} />
-          <Route path="/studio" component={StudioPage} />
-          <Route path="/templates" component={TemplatesPage} />
-          <Route path="/pricing" component={PricingPage} />
+      <LanguageProvider>
+        <AuthProvider>
+          <Switch>
+            {/* Core application routes */}
+            <Route path="/" component={HomePage} />
+            <Route path="/features" component={FeaturesPage} />
+            <Route path="/templates" component={TemplatesPage} />
+            <Route path="/pricing" component={PricingPage} />
+            <Route path="/about" component={AboutPage} />
+            <Route path="/contact" component={ContactPage} />
+            <Route path="/privacy" component={PrivacyPage} />
+            <Route path="/terms" component={TermsPage} />
+            <Route path="/login" component={LoginPage} />
+            <Route path="/register" component={RegisterPage} />
+            <Route path="/studio" component={StudioPage} />
 
-          {/* Dynamic Public Bio Pages */}
-          <Route path="/@:username">
-            {(params) => (
-              <PublicBioView
-                username={params.username}
-                onBackToStudio={() => window.location.href = '/studio'}
-              />
-            )}
-          </Route>
-
-          <Route path="/:username">
-            {(params) => {
-              // Guard against system routes
-              const reserved = ['login', 'register', 'studio', 'templates', 'pricing', 'api', 'uploads'];
-              if (reserved.includes(params.username)) {
-                return <HomePage />;
-              }
-              return (
+            {/* Dynamic Public Bio Pages */}
+            <Route path="/@:username">
+              {(params) => (
                 <PublicBioView
                   username={params.username}
                   onBackToStudio={() => window.location.href = '/studio'}
                 />
-              );
-            }}
-          </Route>
-        </Switch>
-      </AuthProvider>
+              )}
+            </Route>
+
+            <Route path="/:username">
+              {(params) => {
+                // Guard against system routes and reserved words
+                const clean = params.username.toLowerCase();
+                if (RESERVED_USERNAMES.includes(clean as any)) {
+                  return <HomePage />;
+                }
+                return (
+                  <PublicBioView
+                    username={params.username}
+                    onBackToStudio={() => window.location.href = '/studio'}
+                  />
+                );
+              }}
+            </Route>
+          </Switch>
+        </AuthProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   );
 }

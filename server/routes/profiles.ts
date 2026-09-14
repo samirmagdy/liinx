@@ -4,6 +4,7 @@ import dns from 'dns';
 import { db } from '../db.js';
 import { signJwt } from '../auth.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { RESERVED_USERNAMES } from '../../src/config/brand.js';
 
 export const profilesRouter = Router();
 
@@ -434,6 +435,10 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       return res.status(403).json({
         error: `Your current ${userPlan.toUpperCase()} plan allows up to ${maxProfiles} bio profile(s). Please upgrade to create more.`
       });
+    }
+
+    if (RESERVED_USERNAMES.includes(cleanUsername as any)) {
+      return res.status(400).json({ error: 'This username is reserved and cannot be claimed.' });
     }
 
     // Check username availability

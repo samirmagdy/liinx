@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
+import { Link } from 'wouter';
 import { ResourceModal, ResourceDocType } from './ResourceModal';
 import { brand } from '../config/brand';
+import { useLanguage } from '../context/LanguageContext';
+import { Globe } from 'lucide-react';
 
 interface FooterProps {
-  onSelectView: (view: 'home' | 'builder' | 'templates' | 'pricing') => void;
+  onSelectView?: (view: 'home' | 'builder' | 'templates' | 'pricing' | 'features' | 'about' | 'contact') => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
   const [activeModalDoc, setActiveModalDoc] = useState<ResourceDocType | null>(null);
+  const { lang, setLanguage, t } = useLanguage();
+
+  const toggleLanguage = () => {
+    setLanguage(lang === 'en' ? 'ar' : 'en');
+  };
 
   return (
     <>
@@ -19,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
             {/* Brand Column (2 cols) */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-white text-[#111315] flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-xl bg-white text-[#111315] flex items-center justify-center font-bold shadow-sm">
                   <div className="flex items-center gap-0.5">
                     <span className="w-1.5 h-4 bg-[#111315] rounded-full" />
                     <span className="w-1.5 h-2.5 bg-amber-500 rounded-full" />
@@ -32,76 +40,80 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               </div>
 
               <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">
-                The design-first link in bio platform engineered for creators, independent studios, and modern brands who refuse to compromise on visual identity.
+                {t.footer.tagline}
               </p>
 
-              <div className="flex items-center gap-2 pt-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[11px] font-mono text-neutral-400">All systems operational • 99.99% uptime</span>
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[11px] font-mono text-neutral-400">99.99% Uptime SLA</span>
+                </div>
+
+                <button
+                  onClick={toggleLanguage}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-[11px] text-neutral-300 transition-colors cursor-pointer"
+                >
+                  <Globe className="w-3 h-3 text-amber-500" />
+                  <span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span>
+                </button>
               </div>
             </div>
 
             {/* Nav Column 1: Product */}
             <div className="space-y-3">
-              <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">Product</h4>
+              <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.product}</h4>
               <ul className="space-y-2">
                 <li>
-                  <button 
-                    type="button"
-                    onClick={() => onSelectView('builder')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Interactive Studio
-                  </button>
+                  <Link href="/features" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.nav.features}
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    type="button"
-                    onClick={() => onSelectView('templates')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Template Gallery
-                  </button>
+                  <Link href="/studio" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.nav.studio}
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    type="button"
-                    onClick={() => onSelectView('pricing')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Plans & Pricing
-                  </button>
+                  <Link href="/templates" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.nav.templates}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.nav.pricing}
+                  </Link>
                 </li>
                 <li>
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('dns-guide')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
                     Custom Domains
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    type="button"
-                    onClick={() => onSelectView('builder')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Instagram Auto-Sync
                   </button>
                 </li>
               </ul>
             </div>
 
-            {/* Nav Column 2: Resources */}
+            {/* Nav Column 2: Company & Resources */}
             <div className="space-y-3">
-              <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">Resources</h4>
+              <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.company}</h4>
               <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    About {brand.productShortName}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.nav.contact}
+                  </Link>
+                </li>
                 <li>
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('creator-handbook')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
                     Creator Handbook
                   </button>
@@ -110,34 +122,16 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('switch-linktree')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    Switching from Linktree
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('dns-guide')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    DNS & CNAME Setup
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('brand-assets')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Brand Assets & Logos
+                    Switch from Linktree
                   </button>
                 </li>
                 <li>
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('api-docs')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
                     Public REST API
                   </button>
@@ -147,43 +141,31 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
 
             {/* Nav Column 3: Legal & Trust */}
             <div className="space-y-3">
-              <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">Legal</h4>
+              <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.legal}</h4>
               <ul className="space-y-2">
                 <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('privacy')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Privacy Policy
-                  </button>
+                  <Link href="/privacy" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.footer.privacy}
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('terms')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Terms of Service
-                  </button>
+                  <Link href="/terms" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.footer.terms}
+                  </Link>
                 </li>
                 <li>
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('security')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
                     Security & GDPR
                   </button>
                 </li>
                 <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('support')}
-                    className="hover:text-white transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                  >
-                    Contact Support
-                  </button>
+                  <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-left block">
+                    {t.footer.contact}
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -192,11 +174,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
 
           {/* Bottom copyright row */}
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
-            <p>© {new Date().getFullYear()} {brand.legalName}. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} {brand.legalName}. {t.footer.rightsReserved}</p>
             <div className="flex items-center gap-4">
-              <span>Crafted with zero clutter</span>
+              <span>Zero-Tracker Architecture</span>
               <span>•</span>
-              <span>Sub-100ms Global CDN</span>
+              <span>Encrypted SQLite Storage</span>
             </div>
           </div>
 
