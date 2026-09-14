@@ -4,27 +4,67 @@ import { brand } from '../config/brand';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ComparisonSection } from '../components/ComparisonSection';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Sparkles, 
   Layers, 
-  Music, 
-  Video, 
   Globe2, 
   BarChart3, 
-  ShieldCheck, 
-  Smartphone, 
-  FolderPlus, 
-  Mail, 
   ArrowRight,
-  Sliders,
   Palette,
   CheckCircle2
 } from 'lucide-react';
 
 export function FeaturesPage() {
   const [, setLocation] = useLocation();
+  const { isRtl } = useLanguage();
 
-  const featurePillars = [
+  const featurePillars = isRtl ? [
+    {
+      icon: <Layers className="w-6 h-6 text-amber-600" />,
+      title: "بنية عناصر قابلة للتوسّع",
+      description: "لا تكتفِ بمجرد مشاركة روابط. ابنِ حضوراً تفاعلياً غنياً بمشغلات وسائط أصلية، مجلدات قابلة للطي، ونماذج اشتراك مباشر.",
+      bullets: [
+        "مشغلات صوتية مع معاينة سبوتيفاي",
+        "تشغيل كامل لفيديوهات يوتيوب وفيميو",
+        "مجلدات مجمعة وقابلة للطي",
+        "نماذج اشتراك مباشر في النشرة البريدية"
+      ]
+    },
+    {
+      icon: <Palette className="w-6 h-6 text-amber-600" />,
+      title: "نظام تصميم تحريري فاخر",
+      description: "صُمم خصيصاً للمبدعين والمصورين والاستوديوهات التي ترفض القوالب المكررة. خطوط متناسقة وألوان معاصرة.",
+      bullets: [
+        "خطوط راقية تدعم العربية والإنجليزية ببراعة",
+        "سمات حجرية وداكنة مصممة بأناقة",
+        "دعم كامل لأكواد CSS المخصصة",
+        "إمكانية ربط ورفع خطوط ويب خارجية"
+      ]
+    },
+    {
+      icon: <Globe2 className="w-6 h-6 text-amber-600" />,
+      title: "دومين مخصص بدون تعقيدات",
+      description: "وجّه links.yourbrand.com أو bio.yourname.studio مباشرة مع شهادات SSL مجانية وتلقائية بالكامل.",
+      bullets: [
+        "تحقق تلقائي من سجلات CNAME",
+        "إزالة شعار المنصة بالكامل (علامة بيضاء 100%)",
+        "دعم ملفات متعددة تحت حساب واحد",
+        "ربط النطاقات الرئيسية والفرعية"
+      ]
+    },
+    {
+      icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
+      title: "تحليلات لدعم اتخاذ القرار",
+      description: "استبدل الأرقام التقديرية ببيانات حقيقية: اعرف الروابط الأكثر تحويلاً، مصادر الزيارات، وحملات UTM بدقة.",
+      bullets: [
+        "صفر بيانات وهمية أو أرقام مضخمة",
+        "تجميع آمن ومشفر يحفظ خصوصية الزوار",
+        "تتبع مصادر وحملات UTM بدقة",
+        "مخططات تفاعل يومية للمشاهدات والنقرات لـ ٧ أيام"
+      ]
+    }
+  ] : [
     {
       icon: <Layers className="w-6 h-6 text-amber-600" />,
       title: "Extensible Block Architecture",
@@ -59,28 +99,39 @@ export function FeaturesPage() {
         <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-800">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Framer × Linktree × Carrd</span>
+            <span>{isRtl ? 'مواقع مصغرة رفيعة المستوى' : 'Framer × Linktree × Carrd'}</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-neutral-900 max-w-3xl mx-auto leading-tight">
-            Everything your work deserves. <br className="hidden sm:inline" />
-            <span className="text-neutral-500">Built into one platform.</span>
+            {isRtl ? (
+              <>
+                كل ما يستحقه عملك وإبداعك. <br className="hidden sm:inline" />
+                <span className="text-neutral-500">مدمج في منصة واحدة.</span>
+              </>
+            ) : (
+              <>
+                Everything your work deserves. <br className="hidden sm:inline" />
+                <span className="text-neutral-500">Built into one platform.</span>
+              </>
+            )}
           </h1>
           <p className="text-base sm:text-lg text-neutral-600 max-w-xl mx-auto leading-relaxed">
-            {brand.description}
+            {isRtl 
+              ? 'أنشئ موقعاً مصغراً فائق الجمال لكل ما تصنعه وتبيعه وتشاركه بدومين مخصص وتصميم فريد بدون كود.' 
+              : brand.description}
           </p>
           <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
             <button
               onClick={() => setLocation('/register')}
               className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-neutral-900 text-white font-bold text-sm hover:bg-black transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Build your micro-site</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>{isRtl ? 'أنشئ موقعك المصغر' : 'Build your micro-site'}</span>
+              <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
             </button>
             <button
               onClick={() => setLocation('/templates')}
               className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-neutral-300 text-neutral-800 font-semibold text-sm hover:bg-neutral-50 transition-colors cursor-pointer"
             >
-              Explore Templates
+              {isRtl ? 'استكشف القوالب' : 'Explore Templates'}
             </button>
           </div>
         </section>
@@ -91,7 +142,7 @@ export function FeaturesPage() {
             {featurePillars.map((feature, idx) => (
               <div
                 key={idx}
-                className="p-8 rounded-3xl bg-neutral-50/80 border border-neutral-200 hover:border-neutral-300 transition-all space-y-4"
+                className="p-8 rounded-3xl bg-neutral-50/80 border border-neutral-200 hover:border-neutral-300 transition-all space-y-4 text-start"
               >
                 <div className="w-12 h-12 rounded-2xl bg-white border border-neutral-200 flex items-center justify-center shadow-xs">
                   {feature.icon}

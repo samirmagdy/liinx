@@ -59,10 +59,18 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
           {PRICING_PLANS.map((plan) => {
             const price = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
+            const loc = t.pricingSection.plans[plan.id] || {
+              name: plan.name,
+              tagline: plan.tagline,
+              features: plan.features,
+              ctaText: plan.ctaText,
+              billedAnnuallyText: (p: number) => `billed $${p}/yr`
+            };
+
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-3xl p-8 flex flex-col justify-between transition-colors duration-200 ${
+                className={`relative rounded-3xl p-8 flex flex-col justify-between transition-colors duration-200 text-start ${
                   plan.popular
                     ? 'bg-neutral-50/50 border-2 border-neutral-900 shadow-md'
                     : 'bg-white border border-neutral-200 hover:border-neutral-300'
@@ -78,10 +86,10 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                 <div>
                   <div className="mb-6">
                     <h3 className="font-brand font-bold text-xl text-neutral-900">
-                      {plan.name}
+                      {loc.name}
                     </h3>
                     <p className="text-xs text-neutral-500 mt-1 h-8 text-pretty">
-                      {plan.tagline}
+                      {loc.tagline}
                     </p>
                   </div>
 
@@ -91,13 +99,13 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                       ${price}
                     </span>
                     <span className="text-xs font-semibold text-neutral-500">
-                      {t.pricingSection.perMonth} {isAnnual && <span className="block text-[11px] text-neutral-400 tabular-nums">billed ${plan.yearlyPrice}/yr</span>}
+                      {t.pricingSection.perMonth} {isAnnual && <span className="block text-[11px] text-neutral-400 tabular-nums">{loc.billedAnnuallyText(plan.yearlyPrice)}</span>}
                     </span>
                   </div>
 
                   {/* Feature list */}
                   <ul className="space-y-3 mb-8 text-xs text-neutral-600">
-                    {plan.features.map((feat, fIdx) => (
+                    {loc.features.map((feat, fIdx) => (
                       <li key={fIdx} className="flex items-start gap-2.5">
                         <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5] mt-0.5" />
                         <span className="leading-relaxed">{feat}</span>
@@ -114,7 +122,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
                       : 'bg-neutral-100 border border-neutral-200 hover:bg-neutral-200 text-neutral-900'
                   }`}
                 >
-                  <span>{plan.ctaText}</span>
+                  <span>{loc.ctaText}</span>
                   <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
               </div>
@@ -125,7 +133,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) 
         {/* Guarantee Banner */}
         <div className="mt-12 text-center text-xs text-neutral-500">
           <p>
-            All plans include a 14-day free trial. Cancel anytime with a single click. Zero lock-in.
+            {isRtl 
+              ? 'جميع الخطط تشمل تجربة مجانية كاملة لمدة ١٤ يوماً. يمكنك الإلغاء في أي وقت بنقرة واحدة.' 
+              : 'All plans include a 14-day free trial. Cancel anytime with a single click. Zero lock-in.'}
           </p>
         </div>
 

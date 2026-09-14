@@ -4,9 +4,7 @@ import {
   Music, 
   Globe2, 
   BarChart2, 
-  Check, 
   ArrowRight,
-  Smartphone,
   Instagram
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -16,21 +14,23 @@ interface FeaturesSectionProps {
 }
 
 export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }) => {
-  const { t } = useLanguage();
+  const { t, isRtl } = useLanguage();
+  const b = t.builderSection;
+
   return (
     <section id="features" className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="max-w-3xl mb-16">
+        <div className="max-w-3xl mb-16 text-start">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-mono font-bold mb-4 tracking-wider">
-            <span>{t.builderSection.badge}</span>
+            <span>{b.badge}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
-            {t.builderSection.title}
+            {b.title}
           </h2>
           <p className="text-lg text-neutral-600 max-w-2xl text-pretty">
-            {t.builderSection.subtitle}
+            {b.subtitle}
           </p>
         </div>
 
@@ -38,138 +38,155 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">          
 
           {/* Feature 1: Accordion Folders */}
-          <div className="md:col-span-2 p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors">
+          <div className="md:col-span-2 p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
             <div className="mb-6">
               <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mb-4">
                 <FolderPlus className="w-6 h-6 text-amber-800" />
               </div>
               <h3 className="font-brand font-bold text-xl sm:text-2xl text-neutral-900 mb-2 text-balance">
-                Accordion Folders & Multi-Level Lists
+                {b.feature1Title}
               </h3>
               <p className="text-base text-neutral-600 max-w-xl text-pretty">
-                Keep your page clean and uncluttered. Collapse presets, press kits, tour dates, and archived projects into sleek expandable drawers.
+                {b.feature1Desc}
               </p>
             </div>
 
             {/* Visual simulation of folder */}
-            <div className="bg-white p-4 rounded-2xl border border-neutral-200 space-y-2">
+            <div className="bg-white p-4 rounded-2xl border border-neutral-200 space-y-2 text-start">
               <div className="p-3 bg-neutral-50 rounded-xl flex items-center justify-between font-medium text-xs text-neutral-900">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <span className="font-bold">2025 Tour Dates & VIP Access</span>
+                  <span className="font-bold">
+                    {isRtl ? 'جولة الحفلات الفنية ومقاعد VIP' : '2025 Tour Dates & VIP Access'}
+                  </span>
                 </div>
-                <span className="font-mono text-[10px] text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200">4 Cities</span>
+                <span className="font-mono text-[10px] text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200">
+                  {isRtl ? '٤ مدن' : '4 Cities'}
+                </span>
               </div>
-              <div className="pl-4 pr-2 py-1 space-y-1 text-xs text-neutral-600">
+              <div className="px-3 py-1 space-y-1 text-xs text-neutral-600">
                 <div className="flex justify-between py-1 border-b border-neutral-200">
-                  <span>Berlin • Kraftwerk Studio</span>
-                  <span className="font-mono font-bold text-emerald-600">SOLD OUT</span>
+                  <span>{isRtl ? 'برلين • مسرح كرافتفيرك' : 'Berlin • Kraftwerk Studio'}</span>
+                  <span className="font-mono font-bold text-emerald-600">
+                    {isRtl ? 'مكتمل العدد' : 'SOLD OUT'}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span>Tokyo • Sound Museum Vision</span>
-                  <span className="font-mono font-bold text-amber-600">FEW TICKETS</span>
+                  <span>{isRtl ? 'طوكيو • ميوزيم فيجن' : 'Tokyo • Sound Museum Vision'}</span>
+                  <span className="font-mono font-bold text-amber-600">
+                    {isRtl ? 'تذاكر محدودة' : 'FEW TICKETS'}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Feature 2: Custom Domains */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors">
+          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-900 flex items-center justify-center mb-4">
                 <Globe2 className="w-6 h-6 text-blue-800" />
               </div>
               <h3 className="font-brand font-bold text-xl text-neutral-900 mb-2">
-                True Custom Domain
+                {b.feature2Title}
               </h3>
               <p className="text-base text-neutral-600">
-                Map <code>links.yourname.studio</code> or <code>bio.brand.studio</code> directly. Free automatic SSL included with every plan.
+                {b.feature2Desc}
               </p>
             </div>
-            <div className="mt-6 p-3 bg-neutral-50 border border-neutral-200 rounded-xl font-mono text-xs text-center text-neutral-900 font-bold">
+            <div className="mt-6 p-3 bg-neutral-50 border border-neutral-200 rounded-xl font-mono text-xs text-center text-neutral-900 font-bold" dir="ltr">
               links.elenarostova.design
             </div>
           </div>
 
           {/* Feature 3: Playable Media Embeds */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors">
+          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-900 flex items-center justify-center mb-4">
                 <Music className="w-6 h-6 text-emerald-800" />
               </div>
               <h3 className="font-brand font-bold text-xl text-neutral-900 mb-2">
-                Playable Audio & Video
+                {b.feature3Title}
               </h3>
               <p className="text-base text-neutral-600">
-                Embed playable Spotify audio tracks, Soundcloud snippets, YouTube streams, and TikTok clips directly on your page.
+                {b.feature3Desc}
               </p>
             </div>
             <div className="mt-6 p-3 bg-neutral-50 border border-neutral-200 rounded-xl flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-800 text-white flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-lg bg-emerald-800 text-white flex items-center justify-center font-bold shrink-0">
                 ▶
               </div>
               <div className="text-xs">
-                <p className="font-bold text-neutral-900">Midnight Transmission</p>
-                <p className="text-[11px] text-neutral-500">Spotify Audio Player</p>
+                <p className="font-bold text-neutral-900">
+                  {isRtl ? 'إصدار منتصف الليل' : 'Midnight Transmission'}
+                </p>
+                <p className="text-[11px] text-neutral-500">
+                  {isRtl ? 'مشغل مقطع صوتي سبوتيفاي' : 'Spotify Audio Player'}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Feature 4: Instagram Caption Sync */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors">
+          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-900 flex items-center justify-center mb-4">
                 <Instagram className="w-6 h-6 text-rose-800" />
               </div>
               <h3 className="font-brand font-bold text-xl text-neutral-900 mb-2 text-balance">
-                Instagram Caption Sync
+                {b.feature4Title}
               </h3>
               <p className="text-base text-neutral-600 text-pretty">
-                Post on Instagram and let LIINX automatically pull links from your captions into your bio page without manual updates.
+                {b.feature4Desc}
               </p>
             </div>
             <div className="mt-6 text-xs font-mono text-neutral-500 bg-white p-2.5 rounded-xl border border-neutral-200">
-              Auto-sync: <span className="text-emerald-600 font-bold">ACTIVE (0 delay)</span>
+              {isRtl ? 'المزامنة التلقائية: ' : 'Auto-sync: '}
+              <span className="text-emerald-600 font-bold">
+                {isRtl ? 'مفعلة (بدون تأخير)' : 'ACTIVE (0 delay)'}
+              </span>
             </div>
           </div>
 
           {/* Feature 5: Privacy-Friendly Analytics */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors">
+          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-900 flex items-center justify-center mb-4">
                 <BarChart2 className="w-6 h-6 text-purple-800" />
               </div>
               <h3 className="font-brand font-bold text-xl text-neutral-900 mb-2">
-                Actionable Analytics
+                {b.feature5Title}
               </h3>
               <p className="text-base text-neutral-600">
-                Know which links convert. Track click-through rates, geographical breakdown, referral apps, and UTM campaign tags.
+                {b.feature5Desc}
               </p>
             </div>
             <div className="mt-6 flex items-center justify-between text-xs font-mono bg-white p-2.5 rounded-xl border border-neutral-200">
-              <span>Avg CTR:</span>
-                <span className="font-bold text-emerald-700">Clicks, sources & conversions</span>
+              <span>{isRtl ? 'النتائج والمصادر:' : 'Avg CTR:'}</span>
+              <span className="font-bold text-emerald-700">
+                {isRtl ? 'نقرات وتحويلات دقيقة' : 'Clicks, sources & conversions'}
+              </span>
             </div>
           </div>
 
         </div>
 
         {/* Bottom CTA bar */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-neutral-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="p-8 sm:p-12 rounded-3xl bg-neutral-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 text-start">
           <div>
             <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-balance">
-              Ready to elevate your creative presence?
+              {b.ctaBarTitle}
             </h3>
             <p className="text-sm text-neutral-400">
-              Set up your profile in under 2 minutes. Free 14-day trial on all pro plans.
+              {b.ctaBarDesc}
             </p>
           </div>
           <button
             onClick={onOpenStudio}
             className="px-6 py-3.5 rounded-full bg-white text-neutral-900 text-sm font-bold hover:bg-neutral-100 transition-colors active:scale-95 shrink-0 flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
-              <span>{t.builderSection.cta}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{b.cta}</span>
+            <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
           </button>
         </div>
 

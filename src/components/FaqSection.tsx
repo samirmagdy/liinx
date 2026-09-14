@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 export const FaqSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const { t } = useLanguage();
+  const faqList = t.faqSection.faqs || FAQS;
 
   const toggleFaq = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -30,7 +31,7 @@ export const FaqSection: React.FC = () => {
 
         {/* FAQ Accordion */}
         <div className="space-y-3">
-          {FAQS.map((faq, idx) => {
+          {faqList.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div
@@ -39,9 +40,9 @@ export const FaqSection: React.FC = () => {
               >
                 <button
                   onClick={() => toggleFaq(idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 hover:bg-neutral-50 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                  className="w-full p-5 text-start flex items-center justify-between gap-4 hover:bg-neutral-50 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
-                  <span className="font-bold text-sm sm:text-base text-neutral-900">
+                  <span className="font-bold text-sm sm:text-base text-neutral-900 text-start">
                     {faq.question}
                   </span>
                   <div className="p-1 rounded-full bg-neutral-100 shrink-0 text-neutral-600">
@@ -50,7 +51,7 @@ export const FaqSection: React.FC = () => {
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-neutral-600 leading-relaxed border-t border-neutral-100 animate-fade-in text-pretty">
+                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-neutral-600 leading-relaxed border-t border-neutral-100 animate-fade-in text-pretty text-start">
                     {faq.answer}
                   </div>
                 )}
