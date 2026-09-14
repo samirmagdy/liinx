@@ -13,6 +13,8 @@ const createBlockSchema = z.object({
   badge: z.string().max(30).optional().nullable(),
   icon: z.string().max(50).optional().nullable(),
   highlighted: z.boolean().optional(),
+  startAt: z.number().nullable().optional(),
+  endAt: z.number().nullable().optional(),
   extra: z.any().optional()
 });
 
@@ -23,6 +25,8 @@ const updateBlockSchema = z.object({
   badge: z.string().max(30).optional().nullable(),
   icon: z.string().max(50).optional().nullable(),
   highlighted: z.boolean().optional(),
+  startAt: z.number().nullable().optional(),
+  endAt: z.number().nullable().optional(),
   extra: z.any().optional()
 });
 
@@ -34,7 +38,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
-    const { type, title, url, subtitle, badge, icon, highlighted, extra } = parse.data;
+    const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, extra } = parse.data;
     const profileId = req.user!.profileId;
     const now = Date.now();
     const id = 'blk_' + Math.random().toString(36).substring(2, 10);
@@ -45,8 +49,8 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
 
     db.prepare(`
       INSERT INTO blocks (
-        id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, extra_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, extra_json, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       profileId,
@@ -58,6 +62,8 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       badge || null,
       highlighted ? 1 : 0,
       nextPos,
+      startAt || null,
+      endAt || null,
       extra ? JSON.stringify(extra) : null,
       now,
       now
@@ -72,6 +78,8 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       icon: icon || null,
       badge: badge || null,
       highlighted: Boolean(highlighted),
+      startAt: startAt || null,
+      endAt: endAt || null,
       position: nextPos,
       clicks: 0,
       ...(extra || {})
@@ -142,6 +150,8 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
           badge = ?,
           icon = ?,
           highlighted = ?,
+          start_at = ?,
+          end_at = ?,
           extra_json = ?,
           updated_at = ?
       WHERE id = ? AND profile_id = ?
@@ -152,6 +162,8 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
       data.badge !== undefined ? data.badge : existing.badge,
       data.icon !== undefined ? data.icon : existing.icon,
       data.highlighted !== undefined ? (data.highlighted ? 1 : 0) : existing.highlighted,
+      data.startAt !== undefined ? data.startAt : existing.start_at,
+      data.endAt !== undefined ? data.endAt : existing.end_at,
       JSON.stringify(mergedExtra),
       now,
       blockId,

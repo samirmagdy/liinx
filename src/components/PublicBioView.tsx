@@ -28,6 +28,15 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QrCodeModal } from './QrCodeModal';
+import { 
+  getSpotifyEmbedUrl, 
+  getYouTubeEmbedUrl, 
+  getVimeoEmbedUrl, 
+  getSoundCloudEmbedUrl, 
+  getAppleMusicEmbedUrl, 
+  isDirectAudioFile, 
+  isDirectVideoFile 
+} from '../utils/mediaEmbeds';
 
 interface PublicBioViewProps {
   profile?: CreatorProfile;
@@ -50,6 +59,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [notFound, setNotFound] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({ 'b3': true });
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -75,7 +85,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       .then(fetchedProfile => {
         setProfile(fetchedProfile);
         document.title = `${fetchedProfile.displayName} (@${fetchedProfile.username}) | LIINX`;
-        // Record profile visit for real analytics
+        // Record profile visit for real analytics with UTM parameters
         api.analytics.recordView(fetchedProfile.id).catch(() => {});
       })
       .catch(err => {
@@ -86,6 +96,78 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         setLoading(false);
       });
   }, [initialProfile, routeUsername]);
+
+  // Google Analytics 4 (gtag.js) Injection
+  useEffect(() => {
+    if (!profile?.gaMeasurementId) return;
+    const gaId = profile.gaMeasurementId.trim();
+    if (!gaId || !/^G-[A-Z0-9]+$/i.test(gaId)) return;
+
+    const script = document.createElement('script');
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
+    script.async = true;
+    script.id = 'liinx-ga4-script';
+    document.head.appendChild(script);
+
+    const inlineScript = document.createElement('script');
+    inlineScript.id = 'liinx-ga4-inline';
+    inlineScript.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${gaId}');
+    `;
+    document.head.appendChild(inlineScript);
+
+    return () => {
+      document.getElementById('liinx-ga4-script')?.remove();
+      document.getElementById('liinx-ga4-inline')?.remove();
+    };
+  }, [profile?.gaMeasurementId]);
+
+  // Meta Pixel (fbq) Injection
+  useEffect(() => {
+    if (!profile?.metaPixelId) return;
+    const pixelId = profile.metaPixelId.trim();
+    if (!pixelId || !/^[0-9]+$/.test(pixelId)) return;
+
+    const script = document.createElement('script');
+    script.id = 'liinx-meta-pixel';
+    script.innerHTML = `
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '${pixelId}');
+      fbq('track', 'PageView');
+    `;
+    document.head.appendChild(script);
+
+    return () => {
+      document.getElementById('liinx-meta-pixel')?.remove();
+    };
+  }, [profile?.metaPixelId]);
+
+  // Custom Font Link Injection
+  useEffect(() => {
+    if (!profile?.customFontUrl) return;
+    const fontUrl = profile.customFontUrl.trim();
+    if (!fontUrl || !/^https?:\/\//i.test(fontUrl)) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = fontUrl;
+    link.id = 'liinx-custom-font';
+    document.head.appendChild(link);
+
+    return () => {
+      document.getElementById('liinx-custom-font')?.remove();
+    };
+  }, [profile?.customFontUrl]);
 
   if (loading) {
     return (
@@ -190,6 +272,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   return (
     <div 
+      id="public-bio-view"
       className="min-h-screen w-full transition-colors duration-300 relative selection:bg-black selection:text-white"
       style={{
         background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
@@ -197,6 +280,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
       }}
     >
+      {profile?.customCss && (
+        <style dangerouslySetInnerHTML={{ __html: profile.customCss }} />
+      )}
       {/* Top Floating Control Bar */}
       <header className="sticky top-0 z-40 w-full px-4 py-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex items-center justify-between text-xs">
         {onBackToStudio ? (
@@ -366,6 +452,85 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             }
 
             if (block.type === 'audio') {
+              const spotifyEmbed = getSpotifyEmbedUrl(block.audioUrl);
+              const soundCloudEmbed = getSoundCloudEmbedUrl(block.audioUrl);
+              const appleMusicEmbed = getAppleMusicEmbedUrl(block.audioUrl);
+              const directAudio = isDirectAudioFile(block.audioUrl);
+
+              if (spotifyEmbed) {
+                return (
+                  <div
+                    key={block.id}
+                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                    style={{
+                      backgroundColor: theme.cardBg,
+                      border: theme.cardBorder,
+                      color: theme.cardText
+                    }}
+                  >
+                    <iframe
+                      src={spotifyEmbed}
+                      width="100%"
+                      height="152"
+                      frameBorder="0"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                      className="w-full border-0 block"
+                      title={block.title}
+                    />
+                  </div>
+                );
+              }
+
+              if (soundCloudEmbed) {
+                return (
+                  <div
+                    key={block.id}
+                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                    style={{
+                      backgroundColor: theme.cardBg,
+                      border: theme.cardBorder,
+                      color: theme.cardText
+                    }}
+                  >
+                    <iframe
+                      width="100%"
+                      height="140"
+                      scrolling="no"
+                      frameBorder="no"
+                      allow="autoplay"
+                      src={soundCloudEmbed}
+                      className="w-full border-0 block"
+                      title={block.title}
+                    />
+                  </div>
+                );
+              }
+
+              if (appleMusicEmbed) {
+                return (
+                  <div
+                    key={block.id}
+                    className={`overflow-hidden transition-shadow duration-200 shadow-sm ${getRadiusClass(theme.cardRadius)}`}
+                    style={{
+                      backgroundColor: theme.cardBg,
+                      border: theme.cardBorder,
+                      color: theme.cardText
+                    }}
+                  >
+                    <iframe
+                      allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                      frameBorder="0"
+                      height="175"
+                      className="w-full border-0 block"
+                      sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                      src={appleMusicEmbed}
+                      title={block.title}
+                    />
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={block.id}
@@ -384,17 +549,40 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                       />
-                      <button
-                        onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-                        className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                        aria-label="Play track"
-                      >
-                        {isPlayingAudio ? (
-                          <Pause className="w-5 h-5 fill-white text-white" />
-                        ) : (
+                      {directAudio ? (
+                        <button
+                          onClick={() => {
+                            const audioEl = document.getElementById(`audio-player-${block.id}`) as HTMLAudioElement;
+                            if (audioEl) {
+                              if (audioEl.paused) {
+                                audioEl.play();
+                                setIsPlayingAudio(true);
+                              } else {
+                                audioEl.pause();
+                                setIsPlayingAudio(false);
+                              }
+                            }
+                          }}
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                          aria-label="Play track"
+                        >
+                          {isPlayingAudio ? (
+                            <Pause className="w-5 h-5 fill-white text-white" />
+                          ) : (
+                            <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                          )}
+                        </button>
+                      ) : (
+                        <a
+                          href={block.audioUrl || `/r/${block.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                          aria-label="Listen track"
+                        >
                           <Play className="w-5 h-5 fill-white text-white ml-0.5" />
-                        )}
-                      </button>
+                        </a>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -414,6 +602,18 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       </div>
                     )}
                   </div>
+
+                  {directAudio && (
+                    <audio
+                      id={`audio-player-${block.id}`}
+                      src={block.audioUrl}
+                      controls
+                      className="w-full mt-3 h-8"
+                      onPlay={() => setIsPlayingAudio(true)}
+                      onPause={() => setIsPlayingAudio(false)}
+                      onEnded={() => setIsPlayingAudio(false)}
+                    />
+                  )}
                 </div>
               );
             }
@@ -476,6 +676,11 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             }
 
             if (block.type === 'video') {
+              const ytEmbed = getYouTubeEmbedUrl(block.videoUrl);
+              const vimeoEmbed = getVimeoEmbedUrl(block.videoUrl);
+              const directVideo = isDirectVideoFile(block.videoUrl);
+              const isPlaying = activeVideoId === block.id;
+
               return (
                 <div
                   key={block.id}
@@ -486,19 +691,57 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                     color: theme.cardText
                   }}
                 >
-                  <a href={`/r/${block.id}`} target="_blank" rel="noreferrer" className="block relative aspect-video w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-current">
-                    <img 
-                      src={block.thumbnailUrl} 
-                      alt={block.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                        <Play className="w-5 h-5 fill-white ml-0.5" />
-                      </div>
-                    </div>
-                  </a>
+                  <div className="relative aspect-video w-full overflow-hidden bg-black">
+                    {isPlaying && ytEmbed ? (
+                      <iframe
+                        src={ytEmbed}
+                        title={block.title}
+                        className="w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    ) : isPlaying && vimeoEmbed ? (
+                      <iframe
+                        src={vimeoEmbed}
+                        title={block.title}
+                        className="w-full h-full border-0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : isPlaying && directVideo ? (
+                      <video
+                        src={block.videoUrl}
+                        controls
+                        autoPlay
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (ytEmbed || vimeoEmbed || directVideo) {
+                            setActiveVideoId(block.id);
+                          } else {
+                            window.open(block.videoUrl || `/r/${block.id}`, '_blank', 'noreferrer');
+                          }
+                        }}
+                        className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
+                        aria-label={`Play ${block.title}`}
+                      >
+                        <img 
+                          src={block.thumbnailUrl} 
+                          alt={block.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <Play className="w-5 h-5 fill-white ml-0.5" />
+                          </div>
+                        </div>
+                      </button>
+                    )}
+                  </div>
                   <div className="p-4">
                     <p className="text-sm font-bold line-clamp-1">{block.title}</p>
                   </div>
@@ -570,17 +813,19 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           })}
         </div>
 
-        {/* Footer Brand Credit */}
-        <div className="text-center pt-4 pb-12">
-          <button 
-            onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 opacity-70 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
-            style={{ color: theme.textColor }}
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Made with <strong>LIINX</strong></span>
-          </button>
-        </div>
+        {/* Footer Brand Credit - omitted when white-labeled on Pro/Studio plans */}
+        {!(profile.plan && profile.plan !== 'free' && profile.hideBranding) && (
+          <div className="text-center pt-4 pb-12">
+            <button 
+              onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 opacity-70 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              style={{ color: theme.textColor }}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Made with <strong>LIINX</strong></span>
+            </button>
+          </div>
+        )}
 
       </main>
 

@@ -17,6 +17,8 @@ export interface LinkBlock {
   badge?: string;
   highlighted?: boolean;
   clicks?: number;
+  startAt?: number;
+  endAt?: number;
 }
 
 export interface HeaderBlock {
@@ -124,6 +126,12 @@ export interface CreatorProfile {
   socials: SocialLink[];
   themeId: string;
   plan?: 'free' | 'pro' | 'studio';
+  hideBranding?: boolean;
+  gaMeasurementId?: string | null;
+  metaPixelId?: string | null;
+  customDomain?: string | null;
+  customCss?: string | null;
+  customFontUrl?: string | null;
   customTheme?: ThemeConfig;
   blocks: ProfileBlock[];
   stats?: {

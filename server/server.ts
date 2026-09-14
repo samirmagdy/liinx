@@ -11,6 +11,8 @@ import { analyticsRouter } from './routes/analytics.js';
 import { newsletterRouter } from './routes/newsletter.js';
 import { uploadRouter } from './routes/upload.js';
 import { instagramRouter } from './routes/instagram.js';
+import { importerRouter } from './routes/importer.js';
+import { apiV1Router } from './routes/apiV1.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,6 +47,22 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Custom Domain Host-Header Routing Engine (Milestone 6)
+app.use((req, res, next) => {
+  const host = (req.headers.host || '').split(':')[0].toLowerCase().trim();
+  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
+
+  if (host && !defaultHosts.includes(host) && !host.endsWith('.liinx.app')) {
+    const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ?').get(host) as { username: string } | undefined;
+    if (profile) {
+      if (req.path === '/' || req.path === '') {
+        req.url = `/api/profiles/${encodeURIComponent(profile.username)}`;
+      }
+    }
+  }
+  next();
+});
+
 // Serve uploaded media with caching
 const uploadsDir = path.resolve(__dirname, '../public/uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -62,6 +80,8 @@ app.use('/api', blocksRouter);
 app.use(newsletterRouter);
 app.use(uploadRouter);
 app.use('/api', instagramRouter);
+app.use('/api', importerRouter);
+app.use('/api', apiV1Router);
 
 // Comprehensive Health & Diagnostics Endpoint
 app.get('/api/health', (_req, res) => {

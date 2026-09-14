@@ -31,6 +31,9 @@ interface ClickRecord {
   ip_hash: string;
   referrer: string;
   user_agent: string;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
   created_at: number;
 }
 
@@ -40,6 +43,9 @@ interface ViewRecord {
   ip_hash: string;
   referrer: string;
   user_agent: string;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
   created_at: number;
 }
 
@@ -48,21 +54,21 @@ let viewBuffer: ViewRecord[] = [];
 
 const insertClicksBatch = db.transaction((clicks: ClickRecord[]) => {
   const stmt = db.prepare(`
-    INSERT INTO link_clicks (id, block_id, profile_id, target_url, ip_hash, referrer, user_agent, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO link_clicks (id, block_id, profile_id, target_url, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   for (const c of clicks) {
-    stmt.run(c.id, c.block_id, c.profile_id, c.target_url, c.ip_hash, c.referrer, c.user_agent, c.created_at);
+    stmt.run(c.id, c.block_id, c.profile_id, c.target_url, c.ip_hash, c.referrer, c.user_agent, c.utm_source || null, c.utm_medium || null, c.utm_campaign || null, c.created_at);
   }
 });
 
 const insertViewsBatch = db.transaction((views: ViewRecord[]) => {
   const stmt = db.prepare(`
-    INSERT INTO profile_views (id, profile_id, ip_hash, referrer, user_agent, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO profile_views (id, profile_id, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   for (const v of views) {
-    stmt.run(v.id, v.profile_id, v.ip_hash, v.referrer, v.user_agent, v.created_at);
+    stmt.run(v.id, v.profile_id, v.ip_hash, v.referrer, v.user_agent, v.utm_source || null, v.utm_medium || null, v.utm_campaign || null, v.created_at);
   }
 });
 
@@ -112,6 +118,9 @@ analyticsRouter.get('/r/:blockId', (req, res) => {
     const ipHash = hashIp(ip);
     const referrer = (req.headers['referer'] as string) || 'direct';
     const userAgent = (req.headers['user-agent'] as string) || '';
+    const utmSource = (req.query.utm_source as string) || null;
+    const utmMedium = (req.query.utm_medium as string) || null;
+    const utmCampaign = (req.query.utm_campaign as string) || null;
     const now = Date.now();
     const clickId = 'clk_' + Math.random().toString(36).substring(2, 10);
 
@@ -123,6 +132,9 @@ analyticsRouter.get('/r/:blockId', (req, res) => {
       ip_hash: ipHash,
       referrer,
       user_agent: userAgent,
+      utm_source: utmSource,
+      utm_medium: utmMedium,
+      utm_campaign: utmCampaign,
       created_at: now
     });
 
@@ -141,7 +153,7 @@ analyticsRouter.get('/r/:blockId', (req, res) => {
 // Public Record Profile View
 analyticsRouter.post('/api/analytics/view', (req, res) => {
   try {
-    const { profileId, referrer } = req.body;
+    const { profileId, referrer, utmSource, utmMedium, utmCampaign } = req.body;
     if (!profileId) {
       return res.status(400).json({ error: 'profileId is required' });
     }
@@ -163,6 +175,9 @@ analyticsRouter.post('/api/analytics/view', (req, res) => {
       ip_hash: ipHash,
       referrer: referrer || 'direct',
       user_agent: userAgent,
+      utm_source: utmSource || null,
+      utm_medium: utmMedium || null,
+      utm_campaign: utmCampaign || null,
       created_at: now
     });
 
@@ -258,6 +273,20 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
       LIMIT 5
     `).all(profileId, thirtyDaysAgo) as { referrer: string; count: number }[];
 
+    // Top UTM Campaigns (Source / Medium / Campaign)
+    const topUtmCampaigns = db.prepare(`
+      SELECT 
+        COALESCE(utm_source, '(direct)') as source,
+        COALESCE(utm_medium, '(none)') as medium,
+        COALESCE(utm_campaign, '(unnamed)') as campaign,
+        COUNT(*) as count
+      FROM profile_views
+      WHERE profile_id = ? AND created_at >= ? AND (utm_campaign IS NOT NULL OR utm_source IS NOT NULL)
+      GROUP BY utm_source, utm_medium, utm_campaign
+      ORDER BY count DESC
+      LIMIT 5
+    `).all(profileId, thirtyDaysAgo) as { source: string; medium: string; campaign: string; count: number }[];
+
     res.json({
       totalViews,
       uniqueVisitors,
@@ -268,7 +297,8 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
         percentage: totalClicks > 0 ? Math.round((l.clicks / totalClicks) * 100) : 0
       })),
       dailyTimeline,
-      topReferrers
+      topReferrers,
+      topUtmCampaigns
     });
   } catch (err: any) {
     console.error('Analytics stats error:', err);

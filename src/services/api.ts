@@ -117,6 +117,7 @@ export const api = {
         topLinks: { id: string; title: string; url: string; clicks: number; percentage: number }[];
         dailyTimeline: { date: string; views: number; clicks: number }[];
         topReferrers: { referrer: string; count: number }[];
+        topUtmCampaigns: { source: string; medium: string; campaign: string; count: number }[];
       }>('/api/analytics/stats');
     },
     getSubscribers: async () => {
@@ -141,14 +142,89 @@ export const api = {
         throw new Error(data.error || 'Failed to upload image');
       }
       return data;
+    },
+    getProfiles: async () => {
+      return request<{
+        profiles: { id: string; username: string; displayName: string; avatarUrl: string; plan: string; category: string }[];
+        activeProfileId: string;
+      }>('/api/studio/profiles');
+    },
+    createProfile: async (data: { username: string; displayName: string }) => {
+      return request<{
+        success: boolean;
+        profile: { id: string; username: string; displayName: string; plan: string };
+        token: string;
+      }>('/api/studio/profiles', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
+    selectProfile: async (profileId: string) => {
+      return request<{
+        success: boolean;
+        token: string;
+        profile: { id: string; username: string; displayName: string; plan: string };
+      }>(`/api/studio/profiles/${profileId}/select`, {
+        method: 'POST'
+      });
+    },
+    verifyCustomDomain: async (domain: string) => {
+      return request<{
+        domain: string;
+        verified: boolean;
+        expectedTarget: string;
+        cnameRecords: string[];
+        message: string;
+      }>('/api/studio/custom-domain/verify', {
+        method: 'POST',
+        body: JSON.stringify({ domain })
+      });
+    },
+    getApiKeys: async () => {
+      return request<{
+        keys: { id: string; prefix: string; name: string; createdAt: number }[];
+      }>('/api/studio/api-keys');
+    },
+    createApiKey: async (name: string) => {
+      return request<{
+        success: boolean;
+        key: { id: string; name: string; prefix: string; createdAt: number };
+        apiKey: string;
+        warning: string;
+      }>('/api/studio/api-keys', {
+        method: 'POST',
+        body: JSON.stringify({ name })
+      });
+    },
+    revokeApiKey: async (keyId: string) => {
+      return request<{ success: boolean; message: string }>(`/api/studio/api-keys/${keyId}`, {
+        method: 'DELETE'
+      });
     }
   },
 
   analytics: {
     recordView: async (profileId: string, referrer?: string) => {
+      let utmSource: string | undefined;
+      let utmMedium: string | undefined;
+      let utmCampaign: string | undefined;
+
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        utmSource = searchParams.get('utm_source') || undefined;
+        utmMedium = searchParams.get('utm_medium') || undefined;
+        utmCampaign = searchParams.get('utm_campaign') || undefined;
+      }
+
       return request<{ success: boolean }>('/api/analytics/view', {
         method: 'POST',
-        body: JSON.stringify({ profileId, referrer: referrer || document.referrer || 'direct' })
+        body: JSON.stringify({ 
+          profileId, 
+          referrer: referrer || (typeof document !== 'undefined' ? document.referrer : '') || 'direct',
+          utmSource,
+          utmMedium,
+          utmCampaign
+        })
       });
     }
   },
@@ -206,6 +282,38 @@ export const api = {
     disconnect: async () => {
       return request<{ success: boolean; message: string }>('/api/integrations/instagram/disconnect', {
         method: 'POST'
+      });
+    }
+  },
+
+  importer: {
+    preview: async (url: string) => {
+      return request<{
+        success: boolean;
+        data: {
+          sourceUrl: string;
+          provider: 'linktree' | 'beacons' | 'biofm' | 'generic';
+          displayName?: string;
+          bio?: string;
+          avatarUrl?: string;
+          links: { title: string; url: string; subtitle?: string }[];
+          socials: { platform: string; url: string }[];
+        };
+      }>('/api/studio/import/preview', {
+        method: 'POST',
+        body: JSON.stringify({ url })
+      });
+    },
+    commit: async (payload: {
+      links: { title: string; url: string; subtitle?: string }[];
+      updateProfileInfo?: boolean;
+      displayName?: string;
+      bio?: string;
+      avatarUrl?: string;
+    }) => {
+      return request<{ success: boolean; count: number; message: string }>('/api/studio/import/commit', {
+        method: 'POST',
+        body: JSON.stringify(payload)
       });
     }
   }

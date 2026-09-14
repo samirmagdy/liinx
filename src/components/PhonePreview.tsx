@@ -19,6 +19,15 @@ import {
   Share2,
   Music2
 } from 'lucide-react';
+import { 
+  getSpotifyEmbedUrl, 
+  getYouTubeEmbedUrl, 
+  getVimeoEmbedUrl, 
+  getSoundCloudEmbedUrl, 
+  getAppleMusicEmbedUrl, 
+  isDirectAudioFile, 
+  isDirectVideoFile 
+} from '../utils/mediaEmbeds';
 
 interface PhonePreviewProps {
   profile: CreatorProfile;
@@ -38,6 +47,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   compact = false,
 }) => {
   const theme = customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0];
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
     'b3': true
@@ -274,6 +284,85 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             }
 
             if (block.type === 'audio') {
+              const spotifyEmbed = getSpotifyEmbedUrl(block.audioUrl);
+              const soundCloudEmbed = getSoundCloudEmbedUrl(block.audioUrl);
+              const appleMusicEmbed = getAppleMusicEmbedUrl(block.audioUrl);
+              const directAudio = isDirectAudioFile(block.audioUrl);
+
+              if (spotifyEmbed) {
+                return (
+                  <div
+                    key={block.id}
+                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                    style={{
+                      backgroundColor: theme.cardBg,
+                      border: theme.cardBorder,
+                      color: theme.cardText
+                    }}
+                  >
+                    <iframe
+                      src={spotifyEmbed}
+                      width="100%"
+                      height="152"
+                      frameBorder="0"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                      className="w-full border-0 block"
+                      title={block.title}
+                    />
+                  </div>
+                );
+              }
+
+              if (soundCloudEmbed) {
+                return (
+                  <div
+                    key={block.id}
+                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                    style={{
+                      backgroundColor: theme.cardBg,
+                      border: theme.cardBorder,
+                      color: theme.cardText
+                    }}
+                  >
+                    <iframe
+                      width="100%"
+                      height="120"
+                      scrolling="no"
+                      frameBorder="no"
+                      allow="autoplay"
+                      src={soundCloudEmbed}
+                      className="w-full border-0 block"
+                      title={block.title}
+                    />
+                  </div>
+                );
+              }
+
+              if (appleMusicEmbed) {
+                return (
+                  <div
+                    key={block.id}
+                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius)}`}
+                    style={{
+                      backgroundColor: theme.cardBg,
+                      border: theme.cardBorder,
+                      color: theme.cardText
+                    }}
+                  >
+                    <iframe
+                      allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                      frameBorder="0"
+                      height="150"
+                      className="w-full border-0 block"
+                      sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                      src={appleMusicEmbed}
+                      title={block.title}
+                    />
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={block.id}
@@ -292,23 +381,46 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                       />
-                      <button
-                        onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-                        className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                        aria-label={isPlayingAudio ? 'Pause track' : 'Play track'}
-                      >
-                        {isPlayingAudio ? (
-                          <Pause className="w-4 h-4 fill-white text-white" />
-                        ) : (
+                      {directAudio ? (
+                        <button
+                          onClick={() => {
+                            const audioEl = document.getElementById(`phone-audio-${block.id}`) as HTMLAudioElement;
+                            if (audioEl) {
+                              if (audioEl.paused) {
+                                audioEl.play();
+                                setIsPlayingAudio(true);
+                              } else {
+                                audioEl.pause();
+                                setIsPlayingAudio(false);
+                              }
+                            }
+                          }}
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                          aria-label={isPlayingAudio ? 'Pause track' : 'Play track'}
+                        >
+                          {isPlayingAudio ? (
+                            <Pause className="w-4 h-4 fill-white text-white" />
+                          ) : (
+                            <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                          )}
+                        </button>
+                      ) : (
+                        <a
+                          href={block.audioUrl || `/r/${block.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                          aria-label="Listen track"
+                        >
                           <Play className="w-4 h-4 fill-white text-white ml-0.5" />
-                        )}
-                      </button>
+                        </a>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 text-[10px] opacity-70 mb-0.5">
                         <Music2 className="w-3 h-3 text-emerald-500" />
-                        <span className="uppercase font-mono tracking-wider font-semibold">Spotify Preview</span>
+                        <span className="uppercase font-mono tracking-wider font-semibold">Audio Track</span>
                       </div>
                       <p className="text-xs font-bold truncate">{block.title}</p>
                       <p className="text-[11px] truncate opacity-70">{block.artist}</p>
@@ -322,6 +434,18 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       </div>
                     )}
                   </div>
+
+                  {directAudio && (
+                    <audio
+                      id={`phone-audio-${block.id}`}
+                      src={block.audioUrl}
+                      controls
+                      className="w-full mt-2.5 h-7"
+                      onPlay={() => setIsPlayingAudio(true)}
+                      onPause={() => setIsPlayingAudio(false)}
+                      onEnded={() => setIsPlayingAudio(false)}
+                    />
+                  )}
                 </div>
               );
             }
@@ -384,6 +508,11 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             }
 
             if (block.type === 'video') {
+              const ytEmbed = getYouTubeEmbedUrl(block.videoUrl);
+              const vimeoEmbed = getVimeoEmbedUrl(block.videoUrl);
+              const directVideo = isDirectVideoFile(block.videoUrl);
+              const isPlaying = activeVideoId === block.id;
+
               return (
                 <div
                   key={block.id}
@@ -394,18 +523,56 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     color: theme.cardText
                   }}
                 >
-                  <div className="relative aspect-video w-full overflow-hidden">
-                    <img 
-                      src={block.thumbnailUrl} 
-                      alt={block.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                        <Play className="w-4 h-4 fill-white ml-0.5" />
-                      </div>
-                    </div>
+                  <div className="relative aspect-video w-full overflow-hidden bg-black">
+                    {isPlaying && ytEmbed ? (
+                      <iframe
+                        src={ytEmbed}
+                        title={block.title}
+                        className="w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    ) : isPlaying && vimeoEmbed ? (
+                      <iframe
+                        src={vimeoEmbed}
+                        title={block.title}
+                        className="w-full h-full border-0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : isPlaying && directVideo ? (
+                      <video
+                        src={block.videoUrl}
+                        controls
+                        autoPlay
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (ytEmbed || vimeoEmbed || directVideo) {
+                            setActiveVideoId(block.id);
+                          } else {
+                            window.open(block.videoUrl || `/r/${block.id}`, '_blank', 'noreferrer');
+                          }
+                        }}
+                        className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
+                        aria-label={`Play ${block.title}`}
+                      >
+                        <img 
+                          src={block.thumbnailUrl} 
+                          alt={block.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <Play className="w-4 h-4 fill-white ml-0.5" />
+                          </div>
+                        </div>
+                      </button>
+                    )}
                   </div>
                   <div className="p-3">
                     <p className="text-xs font-semibold line-clamp-1">{block.title}</p>
@@ -502,17 +669,19 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           })}
         </div>
 
-        {/* LIINX Branding Footer Badge */}
-        <div className="pt-2 pb-6 text-center">
-          <a 
-            href="#builder" 
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider opacity-60 hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            style={{ color: theme.textColor }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>Made with <strong>LIINX</strong></span>
-          </a>
-        </div>
+        {/* LIINX Branding Footer Badge - omitted when white-labeled on Pro/Studio plans */}
+        {!(profile.plan && profile.plan !== 'free' && profile.hideBranding) && (
+          <div className="pt-2 pb-6 text-center">
+            <a 
+              href="#builder" 
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider opacity-60 hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              style={{ color: theme.textColor }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>Made with <strong>LIINX</strong></span>
+            </a>
+          </div>
+        )}
       </>
     );
   }

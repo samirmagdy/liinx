@@ -47,6 +47,9 @@ export function initDatabase() {
       verified INTEGER DEFAULT 0,
       theme_id TEXT DEFAULT 'editorial-stone',
       plan TEXT DEFAULT 'free',
+      hide_branding INTEGER DEFAULT 0,
+      ga_measurement_id TEXT,
+      meta_pixel_id TEXT,
       custom_theme_json TEXT,
       socials_json TEXT,
       created_at INTEGER NOT NULL,
@@ -65,6 +68,8 @@ export function initDatabase() {
       badge TEXT,
       highlighted INTEGER DEFAULT 0,
       position INTEGER NOT NULL,
+      start_at INTEGER,
+      end_at INTEGER,
       extra_json TEXT,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
@@ -82,6 +87,9 @@ export function initDatabase() {
       ip_hash TEXT,
       referrer TEXT,
       user_agent TEXT,
+      utm_source TEXT,
+      utm_medium TEXT,
+      utm_campaign TEXT,
       created_at INTEGER NOT NULL
     );
 
@@ -94,6 +102,9 @@ export function initDatabase() {
       ip_hash TEXT,
       referrer TEXT,
       user_agent TEXT,
+      utm_source TEXT,
+      utm_medium TEXT,
+      utm_campaign TEXT,
       created_at INTEGER NOT NULL
     );
 
@@ -134,6 +145,87 @@ export function initDatabase() {
   } catch (e) {
     // Column already exists
   }
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN hide_branding INTEGER DEFAULT 0");
+  } catch (e) {
+    // Column already exists
+  }
+
+  try {
+    db.exec("ALTER TABLE blocks ADD COLUMN start_at INTEGER");
+  } catch (e) {
+    // Column already exists
+  }
+
+  try {
+    db.exec("ALTER TABLE blocks ADD COLUMN end_at INTEGER");
+  } catch (e) {
+    // Column already exists
+  }
+
+  try {
+    db.exec("ALTER TABLE link_clicks ADD COLUMN utm_source TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE link_clicks ADD COLUMN utm_medium TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE link_clicks ADD COLUMN utm_campaign TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profile_views ADD COLUMN utm_source TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profile_views ADD COLUMN utm_medium TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profile_views ADD COLUMN utm_campaign TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN ga_measurement_id TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN meta_pixel_id TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN custom_domain TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN custom_css TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN custom_font_url TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_custom_domain ON profiles(custom_domain)");
+  } catch (e) {}
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id TEXT PRIMARY KEY,
+      profile_id TEXT NOT NULL,
+      key_hash TEXT NOT NULL,
+      prefix TEXT NOT NULL,
+      name TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
+    CREATE INDEX IF NOT EXISTS idx_api_keys_profile ON api_keys(profile_id);
+  `);
 
   seedDefaultData();
 }

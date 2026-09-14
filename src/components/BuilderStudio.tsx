@@ -3,7 +3,8 @@ import { CreatorProfile, ThemeConfig, ProfileBlock, LinkBlock, FolderBlock, Audi
 import { DEMO_PROFILES, THEMES } from '../data/mockData';
 import { PhonePreview } from './PhonePreview';
 import { QrCodeModal } from './QrCodeModal';
-import { api } from '../services/api';
+import { LinktreeImporterModal } from './LinktreeImporterModal';
+import { api, authStorage } from '../services/api';
 import { 
   Layers, 
   Palette, 
@@ -24,6 +25,7 @@ import {
   Video, 
   FolderPlus, 
   Mail, 
+  Clock, 
   Link as LinkIcon, 
   Sliders, 
   RotateCcw,
@@ -43,7 +45,14 @@ import {
   Linkedin,
   Disc,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  ChevronDown,
+  Code,
+  Key,
+  Terminal,
+  Copy,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -99,21 +108,145 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [instagramCaptionInput, setInstagramCaptionInput] = useState('');
   const [isTestingCaption, setIsTestingCaption] = useState(false);
   const [instagramFeedback, setInstagramFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [showImporterModal, setShowImporterModal] = useState(false);
+
+  // Multi-Profile Management
+  const [profileList, setProfileList] = useState<{ id: string; username: string; displayName: string; avatarUrl: string; plan: string }[]>([]);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [showNewProfileModal, setShowNewProfileModal] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [newDisplayName, setNewDisplayName] = useState('');
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [createProfileError, setCreateProfileError] = useState<string | null>(null);
+
+  const loadProfilesList = () => {
+    api.studio.getProfiles()
+      .then(res => setProfileList(res.profiles))
+      .catch(() => {});
+  };
+
+  const handleSelectProfile = async (targetId: string) => {
+    if (targetId === profile.id) {
+      setProfileDropdownOpen(false);
+      return;
+    }
+    try {
+      const res = await api.studio.selectProfile(targetId);
+      if (res.token) {
+        authStorage.setToken(res.token);
+        const newLiveProfile = await api.studio.getProfile();
+        setProfile(newLiveProfile);
+        const th = newLiveProfile.customTheme || THEMES.find(t => t.id === newLiveProfile.themeId) || THEMES[0];
+        setCustomTheme(th);
+        setGaInput(newLiveProfile.gaMeasurementId || '');
+        setMetaPixelInput(newLiveProfile.metaPixelId || '');
+        setProfileDropdownOpen(false);
+        loadProfilesList();
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to switch profile');
+    }
+  };
+
+  const handleCreateProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername.trim() || !newDisplayName.trim() || isCreatingProfile) return;
+    setIsCreatingProfile(true);
+    setCreateProfileError(null);
+
+    try {
+      const res = await api.studio.createProfile({
+        username: newUsername.trim(),
+        displayName: newDisplayName.trim()
+      });
+      if (res.token) {
+        authStorage.setToken(res.token);
+        const newLiveProfile = await api.studio.getProfile();
+        setProfile(newLiveProfile);
+        const th = newLiveProfile.customTheme || THEMES.find(t => t.id === newLiveProfile.themeId) || THEMES[0];
+        setCustomTheme(th);
+        setShowNewProfileModal(false);
+        setNewUsername('');
+        setNewDisplayName('');
+        loadProfilesList();
+      }
+    } catch (err: any) {
+      setCreateProfileError(err.message || 'Failed to create new bio profile.');
+    } finally {
+      setIsCreatingProfile(false);
+    }
+  };
+
+  // Tracking Pixels (GA4 & Meta Pixel)
+  const [gaInput, setGaInput] = useState(profile.gaMeasurementId || '');
+  const [metaPixelInput, setMetaPixelInput] = useState(profile.metaPixelId || '');
+  const [isSavingPixels, setIsSavingPixels] = useState(false);
+  const [pixelsSavedFeedback, setPixelsSavedFeedback] = useState(false);
+
+  // Custom Domain State (Milestone 6)
+  const [customDomainInput, setCustomDomainInput] = useState(profile.customDomain || '');
+  const [isVerifyingDns, setIsVerifyingDns] = useState(false);
+  const [dnsVerificationResult, setDnsVerificationResult] = useState<{ verified: boolean; message: string } | null>(null);
+  const [isSavingDomain, setIsSavingDomain] = useState(false);
+
+  // Custom CSS & Font Engine State (Milestone 7)
+  const [customCssInput, setCustomCssInput] = useState(profile.customCss || '');
+  const [customFontUrlInput, setCustomFontUrlInput] = useState(profile.customFontUrl || '');
+  const [isSavingStyling, setIsSavingStyling] = useState(false);
+  const [stylingSavedFeedback, setStylingSavedFeedback] = useState(false);
+
+  // REST API Keys State (Milestone 8)
+  const [apiKeyList, setApiKeyList] = useState<{ id: string; prefix: string; name: string; createdAt: number }[]>([]);
+  const [showNewKeyModal, setShowNewKeyModal] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [createdApiKey, setCreatedApiKey] = useState<string | null>(null);
+  const [isGeneratingKey, setIsGeneratingKey] = useState(false);
+  const [generateKeyError, setGenerateKeyError] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
+
+  const loadApiKeys = () => {
+    api.studio.getApiKeys()
+      .then(res => setApiKeyList(res.keys))
+      .catch(() => {});
+  };
+
+  const handleGenerateApiKeySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newKeyName.trim() || isGeneratingKey) return;
+    setIsGeneratingKey(true);
+    setGenerateKeyError(null);
+    try {
+      const res = await api.studio.createApiKey(newKeyName.trim());
+      setCreatedApiKey(res.apiKey);
+      loadApiKeys();
+    } catch (err: any) {
+      setGenerateKeyError(err.message || 'Failed to generate API key');
+    } finally {
+      setIsGeneratingKey(false);
+    }
+  };
 
   // Load live profile on initial mount
   useEffect(() => {
     api.studio.getProfile()
       .then(liveProfile => {
         setProfile(liveProfile);
+        setGaInput(liveProfile.gaMeasurementId || '');
+        setMetaPixelInput(liveProfile.metaPixelId || '');
+        setCustomDomainInput(liveProfile.customDomain || '');
+        setCustomCssInput(liveProfile.customCss || '');
+        setCustomFontUrlInput(liveProfile.customFontUrl || '');
         const th = liveProfile.customTheme || THEMES.find(t => t.id === liveProfile.themeId) || THEMES[0];
         setCustomTheme(th);
       })
       .catch(err => {
         console.log('Using active session profile:', err.message);
       });
+
+    loadProfilesList();
   }, []);
 
-  // Fetch real analytics or subscribers/instagram when tabs change
+  // Fetch real analytics or subscribers/instagram/api-keys when tabs change
   useEffect(() => {
     if (activeTab === 'analytics') {
       api.studio.getAnalytics()
@@ -127,8 +260,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       api.instagram.getStatus()
         .then(status => setInstagramStatus(status))
         .catch(err => console.error('Failed to load Instagram status:', err));
+
+      if (profile.plan === 'studio') {
+        loadApiKeys();
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, profile.plan]);
 
   const handleConnectInstagram = async () => {
     try {
@@ -551,6 +688,35 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const toDateTimeLocal = (ts?: number | null) => {
+    if (!ts) return '';
+    try {
+      const d = new Date(ts);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+      return '';
+    }
+  };
+
+  const fromDateTimeLocal = (val: string): number | null => {
+    if (!val) return null;
+    const parsed = new Date(val).getTime();
+    return isNaN(parsed) ? null : parsed;
+  };
+
+  const getScheduleStatus = (startAt?: number | null, endAt?: number | null) => {
+    if (!startAt && !endAt) return null;
+    const now = Date.now();
+    if (startAt && now < startAt) {
+      return { label: `SCHEDULED (${new Date(startAt).toLocaleDateString()})`, color: 'bg-amber-100 text-amber-800' };
+    }
+    if (endAt && now > endAt) {
+      return { label: 'EXPIRED', color: 'bg-neutral-100 text-neutral-600' };
+    }
+    return { label: 'LIVE SCHEDULED', color: 'bg-emerald-100 text-emerald-800' };
+  };
+
   const handleThemeSelect = (theme: ThemeConfig) => {
     setCustomTheme(theme);
     const updated = { ...profile, themeId: theme.id, customTheme: theme };
@@ -594,14 +760,57 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         
         {/* Left: Username & Save Status */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-neutral-500">Handle:</span>
-            <span className="font-mono text-xs font-bold text-neutral-900 bg-neutral-100 px-2.5 py-1 rounded-lg">
-              @{profile.username}
-            </span>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
-              {profile.plan || 'free'} TIER
-            </span>
+          {/* Multi-Profile Switcher Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              className="flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer text-xs font-bold text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            >
+              <span className="font-mono">@{profile.username}</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                {profile.plan || 'free'}
+              </span>
+              <ChevronDown className={`w-3.5 h-3.5 text-neutral-500 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {profileDropdownOpen && (
+              <div className="absolute left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
+                <div className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400">
+                  Switch Profile ({profileList.length})
+                </div>
+                <div className="max-h-56 overflow-y-auto divide-y divide-neutral-50">
+                  {profileList.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => handleSelectProfile(p.id)}
+                      className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs hover:bg-neutral-50 transition-colors cursor-pointer ${
+                        p.id === profile.id ? 'bg-neutral-50 font-bold text-neutral-900' : 'text-neutral-700'
+                      }`}
+                    >
+                      <div className="flex flex-col truncate">
+                        <span className="truncate">{p.displayName || p.username}</span>
+                        <span className="text-[10px] font-mono text-neutral-400">@{p.username}</span>
+                      </div>
+                      {p.id === profile.id && (
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="pt-2 mt-1 border-t border-neutral-100 px-2">
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      setShowNewProfileModal(true);
+                    }}
+                    className="w-full py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>New Bio Profile</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-neutral-500">
@@ -857,67 +1066,78 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
               </div>
 
-              {/* Add New Block Bar */}
-              <div className="relative">
+              {/* Action Bar: Add Block & Import Links */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => setShowAddMenu(!showAddMenu)}
+                    className="w-full py-3.5 px-4 rounded-2xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add New Link or Block to Profile</span>
+                  </button>
+
+                  {showAddMenu && (
+                    <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-white rounded-2xl border border-neutral-200 shadow-2xl z-20 grid grid-cols-2 sm:grid-cols-3 gap-2 animate-fade-in">
+                      <button
+                        onClick={handleAddLink}
+                        className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      >
+                        <LinkIcon className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-bold text-neutral-900">Custom Link</span>
+                      </button>
+
+                      <button
+                        onClick={handleAddHeader}
+                        className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      >
+                        <Sliders className="w-4 h-4 text-neutral-700" />
+                        <span className="text-xs font-bold text-neutral-900">Section Title</span>
+                      </button>
+
+                      <button
+                        onClick={handleAddAudio}
+                        className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      >
+                        <Music className="w-4 h-4 text-emerald-600" />
+                        <span className="text-xs font-bold text-neutral-900">Audio Track</span>
+                      </button>
+
+                      <button
+                        onClick={handleAddVideo}
+                        className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      >
+                        <Video className="w-4 h-4 text-red-600" />
+                        <span className="text-xs font-bold text-neutral-900">Video Embed</span>
+                      </button>
+
+                      <button
+                        onClick={handleAddFolder}
+                        className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      >
+                        <FolderPlus className="w-4 h-4 text-amber-600" />
+                        <span className="text-xs font-bold text-neutral-900">Link Folder</span>
+                      </button>
+
+                      <button
+                        onClick={handleAddNewsletter}
+                        className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      >
+                        <Mail className="w-4 h-4 text-purple-600" />
+                        <span className="text-xs font-bold text-neutral-900">Newsletter</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <button
-                  onClick={() => setShowAddMenu(!showAddMenu)}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
+                  type="button"
+                  onClick={() => setShowImporterModal(true)}
+                  className="py-3.5 px-4 rounded-2xl bg-white border border-neutral-200 hover:border-emerald-600 text-neutral-900 hover:text-emerald-700 text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Link or Block to Profile</span>
+                  <Download className="w-4 h-4 text-emerald-600" />
+                  <span>Import Linktree</span>
                 </button>
-
-                {showAddMenu && (
-                  <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-white rounded-2xl border border-neutral-200 shadow-2xl z-20 grid grid-cols-2 sm:grid-cols-3 gap-2 animate-fade-in">
-                    <button
-                      onClick={handleAddLink}
-                      className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                    >
-                      <LinkIcon className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-bold text-neutral-900">Custom Link</span>
-                    </button>
-
-                    <button
-                      onClick={handleAddHeader}
-                      className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                    >
-                      <Sliders className="w-4 h-4 text-neutral-700" />
-                      <span className="text-xs font-bold text-neutral-900">Section Title</span>
-                    </button>
-
-                    <button
-                      onClick={handleAddAudio}
-                      className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                    >
-                      <Music className="w-4 h-4 text-emerald-600" />
-                      <span className="text-xs font-bold text-neutral-900">Audio Track</span>
-                    </button>
-
-                    <button
-                      onClick={handleAddVideo}
-                      className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                    >
-                      <Video className="w-4 h-4 text-red-600" />
-                      <span className="text-xs font-bold text-neutral-900">Video Embed</span>
-                    </button>
-
-                    <button
-                      onClick={handleAddFolder}
-                      className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                    >
-                      <FolderPlus className="w-4 h-4 text-amber-600" />
-                      <span className="text-xs font-bold text-neutral-900">Link Folder</span>
-                    </button>
-
-                    <button
-                      onClick={handleAddNewsletter}
-                      className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                    >
-                      <Mail className="w-4 h-4 text-purple-600" />
-                      <span className="text-xs font-bold text-neutral-900">Newsletter</span>
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* Block List Draggable/Reorderable */}
@@ -939,6 +1159,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           <span className="text-[10px] font-mono text-emerald-600 font-semibold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
                             <MousePointerClick className="w-3 h-3" />
                             <span>{(block as LinkBlock).clicks} clicks</span>
+                          </span>
+                        )}
+                        {getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt) && (
+                          <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                            getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt)?.color
+                          }`}>
+                            {getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt)?.label}
                           </span>
                         )}
                       </div>
@@ -1036,28 +1263,80 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                     {/* Secondary Fields per Block Type */}
                     {block.type === 'link' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                        <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Subtitle Note</label>
-                          <input
-                            type="text"
-                            value={(block as LinkBlock).subtitle || ''}
-                            onChange={(e) => handleUpdateBlockField(block.id, 'subtitle', e.target.value)}
-                            placeholder="Supporting text..."
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
-                          />
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                          <div>
+                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Subtitle Note</label>
+                            <input
+                              type="text"
+                              value={(block as LinkBlock).subtitle || ''}
+                              onChange={(e) => handleUpdateBlockField(block.id, 'subtitle', e.target.value)}
+                              placeholder="Supporting text..."
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Badge Tag</label>
+                            <input
+                              type="text"
+                              value={(block as LinkBlock).badge || ''}
+                              onChange={(e) => handleUpdateBlockField(block.id, 'badge', e.target.value)}
+                              placeholder="e.g. NEW, SALE, LISTEN"
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Badge Tag</label>
-                          <input
-                            type="text"
-                            value={(block as LinkBlock).badge || ''}
-                            onChange={(e) => handleUpdateBlockField(block.id, 'badge', e.target.value)}
-                            placeholder="e.g. NEW, SALE, LISTEN"
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
-                          />
+
+                        {/* Link Scheduling (Time-Release) */}
+                        <div className="pt-2 border-t border-neutral-100 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-semibold text-neutral-600 flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 text-neutral-500" />
+                              <span>Link Scheduling & Time-Release</span>
+                            </label>
+                            {profile.plan === 'free' ? (
+                              <span className="text-[9px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
+                                PRO FEATURE
+                              </span>
+                            ) : (
+                              getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt) && (
+                                <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                                  getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt)?.color
+                                }`}>
+                                  {getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt)?.label}
+                                </span>
+                              )
+                            )}
+                          </div>
+
+                          {profile.plan !== 'free' ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                              <div>
+                                <span className="text-neutral-400 block mb-1">Publish (Start Date/Time):</span>
+                                <input
+                                  type="datetime-local"
+                                  value={toDateTimeLocal((block as LinkBlock).startAt)}
+                                  onChange={(e) => handleUpdateBlockField(block.id, 'startAt', fromDateTimeLocal(e.target.value))}
+                                  className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-800 focus:outline-none focus:border-neutral-900 font-mono text-[11px]"
+                                />
+                              </div>
+                              <div>
+                                <span className="text-neutral-400 block mb-1">Unpublish (End Date/Time):</span>
+                                <input
+                                  type="datetime-local"
+                                  value={toDateTimeLocal((block as LinkBlock).endAt)}
+                                  onChange={(e) => handleUpdateBlockField(block.id, 'endAt', fromDateTimeLocal(e.target.value))}
+                                  className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-800 focus:outline-none focus:border-neutral-900 font-mono text-[11px]"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-neutral-400">
+                              Upgrade to Pro to automatically schedule links to go live and expire at specific dates and times.
+                            </p>
+                          )}
                         </div>
-                      </div>
+                      </>
                     )}
 
                     {block.type === 'audio' && (
@@ -1344,6 +1623,33 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   )}
                 </div>
               )}
+
+              {/* UTM Campaign & Traffic Attribution */}
+              {analyticsData && (
+                <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-neutral-900">UTM Campaign & Traffic Attribution</h4>
+                    <span className="text-[10px] font-mono text-neutral-500">Source / Medium / Campaign</span>
+                  </div>
+                  {!analyticsData.topUtmCampaigns || analyticsData.topUtmCampaigns.length === 0 ? (
+                    <p className="text-xs text-neutral-400 py-2">
+                      No UTM parameters recorded yet. Append <code className="bg-neutral-100 px-1 py-0.5 rounded text-neutral-700 font-mono text-[10px]">?utm_source=instagram&amp;utm_campaign=spring</code> to your bio URL to start tracking!
+                    </p>
+                  ) : (
+                    <div className="divide-y divide-neutral-100 text-xs">
+                      {analyticsData.topUtmCampaigns.map((utm, idx) => (
+                        <div key={idx} className="py-2.5 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-neutral-900">{utm.campaign}</span>
+                            <span className="text-[11px] font-mono text-neutral-500">{utm.source} / {utm.medium}</span>
+                          </div>
+                          <span className="font-mono font-bold text-neutral-800 tabular-nums">{utm.count} views</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -1420,6 +1726,438 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     </button>
                   </div>
                 </div>
+              </div>
+
+              {/* White-Label Branding Card */}
+              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-sm text-neutral-900">White-Label Branding</h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      Remove the "Made with LIINX" badge from your bio page and footer.
+                    </p>
+                  </div>
+                  {profile.plan === 'free' ? (
+                    <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+                      PRO FEATURE
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const newHide = !profile.hideBranding;
+                        setProfile(prev => ({ ...prev, hideBranding: newHide }));
+                        try {
+                          await api.studio.updateProfile({ hideBranding: newHide });
+                        } catch (err) {
+                          console.error('Failed to update white label setting', err);
+                        }
+                      }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+                        profile.hideBranding ? 'bg-emerald-600' : 'bg-neutral-200'
+                      }`}
+                      role="switch"
+                      aria-checked={Boolean(profile.hideBranding)}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                          profile.hideBranding ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
+                {profile.plan === 'free' && (
+                  <p className="text-[11px] text-neutral-400">
+                    Upgrade to Pro or Studio to completely remove all LIINX branding badges.
+                  </p>
+                )}
+              </div>
+
+              {/* Google Analytics 4 & Meta Pixel Tracking Card */}
+              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-sm text-neutral-900">Analytics &amp; Retargeting Pixels</h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      Connect your Google Analytics 4 Measurement ID and Meta Pixel to track visitors and run retargeting ads.
+                    </p>
+                  </div>
+                  {profile.plan === 'free' ? (
+                    <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+                      PRO FEATURE
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-neutral-800">Google Analytics 4 Measurement ID</label>
+                    <input
+                      type="text"
+                      disabled={profile.plan === 'free'}
+                      value={gaInput}
+                      onChange={e => setGaInput(e.target.value)}
+                      placeholder="G-XXXXXXXXXX"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                    />
+                    <p className="text-[10px] text-neutral-400">Found in GA4 Admin &gt; Data Streams &gt; Measurement ID</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-neutral-800">Meta (Facebook) Pixel ID</label>
+                    <input
+                      type="text"
+                      disabled={profile.plan === 'free'}
+                      value={metaPixelInput}
+                      onChange={e => setMetaPixelInput(e.target.value)}
+                      placeholder="e.g. 123456789012345"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                    />
+                    <p className="text-[10px] text-neutral-400">Found in Meta Events Manager &gt; Data Sources</p>
+                  </div>
+                </div>
+
+                {profile.plan !== 'free' && (
+                  <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+                    <span className="text-xs text-emerald-600 font-medium">
+                      {pixelsSavedFeedback ? '✓ Pixel settings saved!' : ''}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={isSavingPixels}
+                      onClick={async () => {
+                        setIsSavingPixels(true);
+                        try {
+                          await api.studio.updateProfile({
+                            gaMeasurementId: gaInput.trim() || null,
+                            metaPixelId: metaPixelInput.trim() || null
+                          });
+                          setProfile(prev => ({
+                            ...prev,
+                            gaMeasurementId: gaInput.trim() || null,
+                            metaPixelId: metaPixelInput.trim() || null
+                          }));
+                          setPixelsSavedFeedback(true);
+                          setTimeout(() => setPixelsSavedFeedback(false), 3000);
+                        } catch (err: any) {
+                          alert(err.message || 'Failed to save pixel settings');
+                        } finally {
+                          setIsSavingPixels(false);
+                        }
+                      }}
+                      className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                    >
+                      {isSavingPixels ? 'Saving...' : 'Save Tracking IDs'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Custom Domain Setup Card (Milestone 6) */}
+              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-800">
+                      <Globe2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-neutral-900">Custom Domain</h3>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Link your own domain or subdomain (e.g. <span className="font-mono">links.yourbrand.com</span>) directly to your bio page.
+                      </p>
+                    </div>
+                  </div>
+                  {profile.plan === 'free' ? (
+                    <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+                      PRO / STUDIO
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+                      AVAILABLE
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-3 pt-1">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-neutral-800">Domain / Subdomain Name</label>
+                    <input
+                      type="text"
+                      disabled={profile.plan === 'free'}
+                      value={customDomainInput}
+                      onChange={e => setCustomDomainInput(e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))}
+                      placeholder="e.g. links.sarahcreator.com"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl space-y-1 text-xs">
+                    <span className="font-semibold text-neutral-800 block">DNS Configuration Instructions:</span>
+                    <p className="text-neutral-500 text-[11px]">
+                      Add a <span className="font-mono font-bold text-neutral-900">CNAME</span> record at your DNS provider pointing to:
+                    </p>
+                    <div className="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-neutral-200 font-mono text-xs">
+                      <span>cname.liinx.app</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText('cname.liinx.app');
+                          alert('Copied cname.liinx.app to clipboard!');
+                        }}
+                        className="text-[10px] text-neutral-500 hover:text-black font-sans font-semibold cursor-pointer"
+                      >
+                        Copy Target
+                      </button>
+                    </div>
+                  </div>
+
+                  {dnsVerificationResult && (
+                    <div className={`p-3 rounded-xl text-xs border ${
+                      dnsVerificationResult.verified
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}>
+                      {dnsVerificationResult.message}
+                    </div>
+                  )}
+
+                  {profile.plan !== 'free' && (
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        disabled={isVerifyingDns || !customDomainInput.trim()}
+                        onClick={async () => {
+                          setIsVerifyingDns(true);
+                          setDnsVerificationResult(null);
+                          try {
+                            const res = await api.studio.verifyCustomDomain(customDomainInput.trim());
+                            setDnsVerificationResult({
+                              verified: res.verified,
+                              message: res.message
+                            });
+                          } catch (err: any) {
+                            setDnsVerificationResult({
+                              verified: false,
+                              message: err.message || 'DNS verification request failed'
+                            });
+                          } finally {
+                            setIsVerifyingDns(false);
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-xs font-semibold text-neutral-800 cursor-pointer disabled:opacity-50"
+                      >
+                        {isVerifyingDns ? 'Checking DNS...' : 'Verify DNS'}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={isSavingDomain}
+                        onClick={async () => {
+                          setIsSavingDomain(true);
+                          try {
+                            const val = customDomainInput.trim() || null;
+                            await api.studio.updateProfile({ customDomain: val });
+                            setProfile(prev => ({ ...prev, customDomain: val }));
+                            alert('Custom domain saved successfully!');
+                          } catch (err: any) {
+                            alert(err.message || 'Failed to save custom domain');
+                          } finally {
+                            setIsSavingDomain(false);
+                          }
+                        }}
+                        className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {isSavingDomain ? 'Saving...' : 'Save Domain'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Custom CSS & Custom Font Card (Milestone 7) */}
+              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-800">
+                      <Code className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-neutral-900">Custom CSS &amp; Custom Webfonts</h3>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Inject custom stylesheet overrides and Google Fonts to match your brand guide.
+                      </p>
+                    </div>
+                  </div>
+                  {profile.plan === 'free' ? (
+                    <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+                      PRO / STUDIO
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-3 pt-1">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-neutral-800">Google Fonts / Webfont Stylesheet URL</label>
+                    <input
+                      type="url"
+                      disabled={profile.plan === 'free'}
+                      value={customFontUrlInput}
+                      onChange={e => setCustomFontUrlInput(e.target.value)}
+                      placeholder="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-neutral-800">Custom CSS Overrides</label>
+                      <span className="text-[10px] font-mono text-neutral-400">Scoped to #public-bio-view</span>
+                    </div>
+                    <textarea
+                      rows={4}
+                      disabled={profile.plan === 'free'}
+                      value={customCssInput}
+                      onChange={e => setCustomCssInput(e.target.value)}
+                      placeholder="/* Custom CSS overrides */&#10;#public-bio-view .custom-card { border-width: 2px; }"
+                      className="w-full text-xs font-mono p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                    />
+                  </div>
+
+                  {profile.plan !== 'free' && (
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs text-emerald-600 font-medium">
+                        {stylingSavedFeedback ? '✓ Custom styling saved!' : ''}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={isSavingStyling}
+                        onClick={async () => {
+                          setIsSavingStyling(true);
+                          try {
+                            await api.studio.updateProfile({
+                              customCss: customCssInput.trim() || null,
+                              customFontUrl: customFontUrlInput.trim() || null
+                            });
+                            setProfile(prev => ({
+                              ...prev,
+                              customCss: customCssInput.trim() || null,
+                              customFontUrl: customFontUrlInput.trim() || null
+                            }));
+                            setStylingSavedFeedback(true);
+                            setTimeout(() => setStylingSavedFeedback(false), 3000);
+                          } catch (err: any) {
+                            alert(err.message || 'Failed to save styling');
+                          } finally {
+                            setIsSavingStyling(false);
+                          }
+                        }}
+                        className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {isSavingStyling ? 'Saving...' : 'Save Custom CSS & Fonts'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Developer REST API Card (Milestone 8) */}
+              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-800">
+                      <Terminal className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-neutral-900">Developer &amp; REST API Access</h3>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Manage your LIINX link bio programmatically via our public REST API v1.
+                      </p>
+                    </div>
+                  </div>
+                  {profile.plan !== 'studio' ? (
+                    <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+                      STUDIO TIER ONLY
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+                      API ENABLED
+                    </span>
+                  )}
+                </div>
+
+                {profile.plan !== 'studio' ? (
+                  <p className="text-xs text-neutral-500">
+                    REST API keys and programmatic block automation require a Studio subscription. Upgrade to unlock direct API access.
+                  </p>
+                ) : (
+                  <div className="space-y-4 pt-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-neutral-800">Active API Keys</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCreatedApiKey(null);
+                          setNewKeyName('');
+                          setShowNewKeyModal(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Generate Key</span>
+                      </button>
+                    </div>
+
+                    {apiKeyList.length === 0 ? (
+                      <div className="py-6 text-center text-xs text-neutral-400 border border-dashed rounded-xl">
+                        No API keys generated yet. Click "Generate Key" to create your first API credential.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-neutral-100 border rounded-xl overflow-hidden text-xs">
+                        {apiKeyList.map(k => (
+                          <div key={k.id} className="p-3 flex items-center justify-between">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-neutral-900">{k.name}</span>
+                              <span className="font-mono text-[11px] text-neutral-400">{k.prefix}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (confirm(`Revoke key "${k.name}"? Applications using this key will immediately lose access.`)) {
+                                  try {
+                                    await api.studio.revokeApiKey(k.id);
+                                    loadApiKeys();
+                                  } catch (err: any) {
+                                    alert(err.message || 'Failed to revoke key');
+                                  }
+                                }
+                              }}
+                              className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
+                            >
+                              Revoke
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="p-3 bg-neutral-900 text-neutral-200 rounded-xl space-y-1 text-xs font-mono">
+                      <span className="text-neutral-400 text-[10px] uppercase font-bold tracking-wider block">Sample API Request</span>
+                      <p className="text-[11px] select-all overflow-x-auto whitespace-nowrap">
+                        curl https://liinx.app/api/v1/profile \<br />
+                        &nbsp;&nbsp;-H "Authorization: Bearer liinx_live_your_key_here"
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Instagram Caption Auto-Sync Card */}
@@ -1633,6 +2371,215 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         username={profile.username}
         displayName={profile.displayName}
       />
+
+      <LinktreeImporterModal
+        isOpen={showImporterModal}
+        onClose={() => setShowImporterModal(false)}
+        onImportComplete={async () => {
+          try {
+            const liveProfile = await api.studio.getProfile();
+            setProfile(liveProfile);
+            const th = liveProfile.customTheme || THEMES.find(t => t.id === liveProfile.themeId) || THEMES[0];
+            setCustomTheme(th);
+          } catch (err) {
+            console.error('Failed to reload profile after import', err);
+          }
+        }}
+      />
+
+      {/* New Profile Creation Modal */}
+      {showNewProfileModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-scale-in border border-neutral-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-base text-neutral-900">Create New Bio Profile</h3>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Add another project, brand, or persona under your account.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowNewProfileModal(false)}
+                className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {createProfileError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700">
+                {createProfileError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateProfileSubmit} className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-neutral-800">Handle (Username)</label>
+                <div className="flex items-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 focus-within:bg-white focus-within:border-neutral-900">
+                  <span className="text-xs font-mono text-neutral-400">@</span>
+                  <input
+                    type="text"
+                    required
+                    value={newUsername}
+                    onChange={e => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="myotherbrand"
+                    className="w-full text-xs font-mono p-2 bg-transparent outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-neutral-800">Display Name</label>
+                <input
+                  type="text"
+                  required
+                  value={newDisplayName}
+                  onChange={e => setNewDisplayName(e.target.value)}
+                  placeholder="My Other Brand"
+                  className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewProfileModal(false)}
+                  className="px-4 py-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingProfile || !newUsername.trim() || !newDisplayName.trim()}
+                  className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isCreatingProfile ? 'Creating...' : 'Create Profile'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Generate API Key Modal (Milestone 8) */}
+      {showNewKeyModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-neutral-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-neutral-900 text-white flex items-center justify-center">
+                  <Key className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-base text-neutral-900">
+                  {createdApiKey ? 'API Key Generated' : 'Generate Studio API Key'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewKeyModal(false);
+                  setCreatedApiKey(null);
+                  setNewKeyName('');
+                  setCopiedKey(false);
+                }}
+                className="text-neutral-400 hover:text-neutral-600 p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {createdApiKey ? (
+              <div className="space-y-4">
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+                  <span>
+                    <strong>Make sure to copy your API key now.</strong> You won't be able to see it again! Store it in an environment variable or secrets manager.
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-800">Your Live Secret Key</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={createdApiKey}
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 select-all outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(createdApiKey);
+                        setCopiedKey(true);
+                        setTimeout(() => setCopiedKey(false), 2000);
+                      }}
+                      className="px-3.5 py-2.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    >
+                      {copiedKey ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedKey ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewKeyModal(false);
+                      setCreatedApiKey(null);
+                      setNewKeyName('');
+                      setCopiedKey(false);
+                    }}
+                    className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleGenerateApiKeySubmit} className="space-y-4">
+                {generateKeyError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700">
+                    {generateKeyError}
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-800">Key Name / Description</label>
+                  <input
+                    type="text"
+                    required
+                    value={newKeyName}
+                    onChange={e => setNewKeyName(e.target.value)}
+                    placeholder="e.g., Zapier Sync, Mobile App Integration"
+                    className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none"
+                  />
+                  <p className="text-[11px] text-neutral-400">
+                    Give your API key a recognizable name so you can track where it is being used.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowNewKeyModal(false)}
+                    className="px-4 py-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isGeneratingKey || !newKeyName.trim()}
+                    className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {isGeneratingKey ? 'Generating...' : 'Generate Key'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

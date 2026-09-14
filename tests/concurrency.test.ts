@@ -98,6 +98,9 @@ describe('Concurrency & Race Condition Testing', () => {
 
     const reorderResponses = await Promise.all(reorderPromises);
     for (const r of reorderResponses) {
+      if (r.status !== 200) {
+        console.error('CONCURRENCY REORDER FAILED:', r.status, r.body, r.text);
+      }
       expect(r.status).toBe(200);
       expect(r.body.success).toBe(true);
     }
