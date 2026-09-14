@@ -156,10 +156,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   static getDerivedStateFromError(error: Error) {
+    if (error?.message && error.message.includes('removeChild')) {
+      console.warn('Suppressed third-party DOM mutation error:', error.message);
+      return { hasError: false, error: null };
+    }
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    if (error?.message && error.message.includes('removeChild')) {
+      return;
+    }
     console.error('Unhandled Application Error:', error, errorInfo);
   }
 

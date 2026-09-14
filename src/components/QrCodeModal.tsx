@@ -48,7 +48,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
       link.download = `liinx-${username}-qr.png`;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.remove();
       URL.revokeObjectURL(url);
     } catch (e) {
       window.open(qrApiUrl, '_blank');

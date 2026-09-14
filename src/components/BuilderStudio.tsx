@@ -757,7 +757,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     link.download = `liinx-${profile.username}-subscribers.csv`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
     URL.revokeObjectURL(url);
   };
 

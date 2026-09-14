@@ -1,8 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="notranslate" translate="no">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
+    
+    <!-- Shield against third-party extension crashes (e.g. frame_start.js, IDM, adblockers) -->
+    <script>
+      window.addEventListener('error', function(e) {
+        if (e.filename && (e.filename.includes('frame_start.js') || e.filename.includes('extension://'))) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+        }
+      }, true);
+    </script>
     <title>Liinx Studio — Your entire world, designed your way</title>
     <meta name="description" content="Create a beautiful mini-site for everything you make, sell and share. Editorial typography, rich media embeds, and custom domains without touching code." />
     <meta name="keywords" content="micro-site builder, creator website, link in bio, portfolio builder, custom domain, linktree alternative" />
