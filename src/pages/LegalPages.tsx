@@ -20,7 +20,7 @@ function InformationPage({ title, icon, badge, sections }: InformationPageProps)
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar />
       <main className="flex-1 w-full max-w-3xl mx-auto px-5 py-16 sm:py-20">
 

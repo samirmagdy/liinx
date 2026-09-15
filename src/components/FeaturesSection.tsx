@@ -25,7 +25,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
   };
 
   return (
-    <section id="features" className="py-20 md:py-28">
+    <section id="features" className="marketing-section py-24 md:py-36">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -33,7 +33,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-4 tracking-wider">
             <span>{b.badge}</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.04em] text-neutral-900 mb-4 text-balance">
             {b.title}
           </h2>
           <p className="text-lg text-neutral-600 max-w-2xl text-pretty">

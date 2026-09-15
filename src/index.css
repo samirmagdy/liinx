@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: 'Syne', 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -141,6 +141,44 @@
 
 .hero-section .phone-shell {
   box-shadow: var(--shadow-lift);
+}
+
+/* Marketing surfaces use Apple's quieter editorial rhythm: one visual voice,
+   fewer ornamental borders, and motion that never makes content feel busy. */
+.marketing-shell .marketing-section > div,
+.marketing-shell .marketing-hero > div {
+  max-width: 74rem;
+}
+.marketing-shell h1,
+.marketing-shell h2,
+.marketing-shell h3,
+.marketing-shell h4 {
+  font-family: var(--font-sans);
+}
+.marketing-shell .font-brand {
+  font-family: var(--font-sans);
+}
+.marketing-shell #features [class*="hover:scale"],
+.marketing-shell #templates [class*="hover:scale"] {
+  transition-property: border-color, background-color, box-shadow, color;
+}
+.marketing-shell #features [class*="hover:scale"]:hover,
+.marketing-shell #templates [class*="hover:scale"]:hover {
+  transform: none;
+}
+.marketing-shell footer {
+  font-size: 0.8125rem;
+}
+.marketing-shell .font-mono {
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 767px) {
+  .marketing-shell .marketing-section,
+  .marketing-shell .marketing-hero {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
 }
 
 /* Decorative motion background: never create a stacking or layout dependency. */

@@ -90,7 +90,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
 }
 
 return (
-    <section className="py-16 md:py-24 lg:py-28 border-b border-neutral-200">
+    <section className="hero-section marketing-hero py-16 md:py-24 lg:py-32 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
@@ -104,15 +104,15 @@ return (
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-neutral-900 leading-[1.08] mb-6 text-balance">
+            <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-6 text-balance">
               {t.hero.headline} <span className="text-neutral-500 font-medium">{t.hero.headlineHighlight}</span>
             </h1>
 
             {/* Subtitle */}
-              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl mb-8 text-pretty">
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl mb-5 text-pretty">
                 {t.hero.subheadline}
               </p>
-              <p className="text-sm text-neutral-500 max-w-xl -mt-4 mb-8 text-pretty">
+              <p className="text-sm text-neutral-500 max-w-xl mb-8 text-pretty">
                 {tr('One designed page for links, supported media, newsletter capture, and Calendly bookings — with your own domain on paid plans.')}
               </p>
 
@@ -201,7 +201,7 @@ return (
             
             {/* Interactive Selector Bar */}
             <div className="w-full max-w-[380px] mb-6 space-y-3">
-              <p className="text-xs font-semibold text-neutral-600 text-center">{t.hero.previewSubtitle} · {tr('Switch the profile or theme to explore')}</p>
+              <p className="text-xs font-semibold text-neutral-600 text-center">{t.hero.previewSubtitle}</p>
               {/* Profile switcher tabs */}
               <div className="flex items-center justify-between gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
                 {DEMO_PROFILES.slice(0, 4).map((prof, idx) => (

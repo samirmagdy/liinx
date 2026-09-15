@@ -49,7 +49,7 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-home min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="home" onClaimClick={handleClaimUsername} />
       <main className="flex-1">
         <Hero
@@ -136,7 +136,7 @@ function StudioPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="builder" />
       <main className="flex-1">
         <Suspense fallback={
@@ -161,7 +161,7 @@ function TemplatesPage() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="templates" />
       <main className="flex-1 pt-8">
         <TemplatesSection headingLevel={1} onSelectTemplate={(p) => chooseTemplate(p, setLocation)} />

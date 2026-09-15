@@ -157,8 +157,8 @@ export const translations: Record<Language, Translations> = {
     },
     builderSection: {
       badge: 'Intuitive Studio',
-      title: 'Build visually. No code required.',
-      subtitle: 'Edit your content, reorder blocks with the move controls, and preview your page.',
+      title: 'A page that looks like you.',
+      subtitle: 'Shape your content, preview every change, and publish when it feels right.',
       feature1Title: 'Accordion Folders & Multi-Level Lists',
       feature1Desc: 'Keep your page clean and uncluttered. Collapse presets, press kits, tour dates, and archived projects into sleek expandable drawers.',
       feature2Title: 'True Custom Domain',
@@ -167,16 +167,16 @@ export const translations: Record<Language, Translations> = {
       feature3Desc: 'Embed playable Spotify audio tracks, Soundcloud snippets, YouTube streams, and TikTok clips directly on your page.',
       feature4Title: 'Instagram link extraction',
       feature4Desc: 'When the integration is configured and authorized, extract eligible links from supported captions.',
-      feature5Title: 'Actionable Analytics',
-      feature5Desc: 'Track visits, link clicks, referring sources, and UTM campaign tags.',
-      ctaBarTitle: 'Ready to elevate your creative presence?',
+      feature5Title: 'Know what your audience opens.',
+      feature5Desc: 'See visits, link clicks, referring sources, and campaign tags in one calm view.',
+      ctaBarTitle: 'Make your next click feel intentional.',
       ctaBarDesc: 'Start with a free account. Paid plans are available through Stripe Checkout.',
       cta: 'Open the Studio Builder'
     },
     templatesSection: {
       badge: 'Template gallery',
-      title: 'Built for every creative discipline.',
-      subtitle: 'Choose a starting layout for your work, links, media, and audience.',
+      title: 'Start with a page shaped around your work.',
+      subtitle: 'Choose a considered starting point for your links, media, and audience.',
       allCategory: 'All Templates',
       useTemplate: 'Use this template',
       previewMobile: 'Preview',
@@ -240,7 +240,7 @@ export const translations: Record<Language, Translations> = {
         { feature: 'Accordion Folders for Clean Profiles', liinx: true, linktree: false, beacons: false },
         { feature: 'Instagram Caption Auto-Sync', liinx: true, linktree: false, beacons: false },
         { feature: 'Zero Commission on Sales/Donations', liinx: true, linktree: 'Takes 0.5-9%', beacons: 'Takes 9%' },
-        { feature: 'Sub-100ms Ultra-Fast Page Load', liinx: true, linktree: false, beacons: false },
+        { feature: 'Fast, focused public pages', liinx: true, linktree: false, beacons: false },
         { feature: 'Curated design themes', liinx: true, linktree: 'Generic templates', beacons: 'Limited' },
         { feature: 'Multi-Profile Management (One Login)', liinx: true, linktree: 'Enterprise only', beacons: false }
       ]

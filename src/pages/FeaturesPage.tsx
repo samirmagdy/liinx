@@ -94,7 +94,7 @@ export function FeaturesPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="features" />
       <main className="flex-1">
         {/* Hero Header */}

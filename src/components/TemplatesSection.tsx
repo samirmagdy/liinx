@@ -29,7 +29,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
   const isDarkTheme = (themeId: string) => THEMES.find(t => t.id === themeId)?.isDark ?? false;
 
   return (
-    <section id="templates" className="py-20 md:py-28 border-b border-neutral-200">
+    <section id="templates" className="marketing-section py-24 md:py-36 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}

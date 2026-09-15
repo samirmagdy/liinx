@@ -49,7 +49,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
   ];
 
   return (
-    <section id="pricing" className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
+    <section id="pricing" className="marketing-section py-24 md:py-36 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">

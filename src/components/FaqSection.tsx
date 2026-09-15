@@ -28,7 +28,7 @@ export const FaqSection: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="py-20 md:py-28 border-b border-neutral-200">
+    <section id="faq" className="marketing-section py-24 md:py-36 border-b border-neutral-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
