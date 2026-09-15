@@ -67,7 +67,7 @@ billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: 
 
     const host = req.get('host') || 'localhost:3000';
     const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-    const origin = process.env.APP_ORIGIN!;
+    const origin = process.env.APP_ORIGIN || `${protocol}://${host}`;
 
     const planConfig = paidPlans[plan as keyof typeof paidPlans];
     if (profile.stripe_subscription_id) return res.status(409).json({ error: 'Manage your existing subscription in the billing portal.' });
@@ -136,8 +136,8 @@ billingRouter.post('/billing/create-portal-session', requireAuth, async (req: Au
 
     const host = req.get('host') || 'localhost:3000';
     const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-    if (!process.env.APP_ORIGIN) return res.status(503).json({ error: 'Billing return address is not configured.' });
-    const returnUrl = `${process.env.APP_ORIGIN}/studio`;
+    const origin = process.env.APP_ORIGIN || `${protocol}://${host}`;
+    const returnUrl = `${origin}/studio`;
 
     const portalSession = await stripeClient.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,

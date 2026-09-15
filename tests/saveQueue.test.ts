@@ -45,4 +45,33 @@ describe('editor save queue', () => {
     await queue.flush();
     expect(write).toHaveBeenLastCalledWith('b', { title: 'new', extra: { artist: 'A', coverUrl: 'cover' } });
   });
+  it('waits for in-flight flush and returns true when concurrent flush() is called', async () => {
+    vi.useFakeTimers();
+    let finish!: () => void;
+    const write = vi.fn().mockImplementation(() => new Promise<void>(resolve => { finish = resolve; }));
+    const queue = new SaveQueue(write, vi.fn());
+    queue.enqueue('profile', { bio: 'hello' });
+    const f1 = queue.flush();
+    const f2 = queue.flush();
+    finish();
+    const [r1, r2] = await Promise.all([f1, f2]);
+    expect(r1).toBe(true);
+    expect(r2).toBe(true);
+    expect(queue.dirty).toBe(false);
+  });
+  it('resumes debounce timer on new enqueues after a failed flush', async () => {
+    vi.useFakeTimers();
+    const write = vi.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValue(undefined);
+    const queue = new SaveQueue(write, vi.fn());
+    queue.enqueue('profile', { bio: 'fail-first' });
+    await vi.runAllTimersAsync();
+    expect(queue.dirty).toBe(true);
+    expect(write).toHaveBeenCalledTimes(1);
+
+    // New edit arrives: should re-arm timer and attempt save
+    queue.enqueue('profile', { bio: 'retry-success' });
+    await vi.runAllTimersAsync();
+    expect(write).toHaveBeenCalledTimes(2);
+    expect(queue.dirty).toBe(false);
+  });
 });

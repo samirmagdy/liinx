@@ -11,23 +11,35 @@ export function mergePatch(a: Patch, b: Patch): Patch {
 /** One ordered writer. Failed payloads remain pending until explicitly retried. */
 export class SaveQueue {
   private pending = new Map<string, Patch>();
-  private running = false;
+  private activeFlush: Promise<boolean> | null = null;
   private failed = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
   constructor(private write: (key: string, patch: Patch) => Promise<unknown>,
     private report: (state: SaveState) => void, private delay = 500) {}
-  get dirty() { return this.running || this.pending.size > 0; }
+  get dirty() { return this.activeFlush !== null || this.pending.size > 0; }
   enqueue(key: string, patch: Patch) {
     this.pending.set(key, mergePatch(this.pending.get(key) || {}, patch));
     this.report(this.failed ? 'error' : 'saving');
     clearTimeout(this.timer);
-    if (!this.failed) this.timer = setTimeout(() => void this.flush(), this.delay);
+    this.timer = setTimeout(() => void this.flush(), this.delay);
   }
   async flush(): Promise<boolean> {
     clearTimeout(this.timer);
-    if (this.running) return false;
+    if (this.activeFlush) {
+      const ok = await this.activeFlush;
+      if (!ok) return false;
+      if (this.pending.size > 0) return this.flush();
+      return true;
+    }
+    this.activeFlush = this._flush();
+    try {
+      return await this.activeFlush;
+    } finally {
+      this.activeFlush = null;
+    }
+  }
+  private async _flush(): Promise<boolean> {
     this.failed = false;
-    this.running = true;
     this.report('saving');
     try {
       while (this.pending.size) {
@@ -43,7 +55,11 @@ export class SaveQueue {
       }
       this.report('saved');
       return true;
-    } finally { this.running = false; }
+    } catch {
+      this.failed = true;
+      this.report('error');
+      return false;
+    }
   }
   dispose() { clearTimeout(this.timer); }
 }

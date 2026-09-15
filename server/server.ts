@@ -141,7 +141,9 @@ app.use((req, res, next) => {
       res.setHeader('X-Custom-Domain-User', profile.username);
       if (req.path === '/' || req.path === '') {
         const acceptsHtml = req.headers.accept && req.headers.accept.includes('text/html');
-        const distIndex = path.resolve(__dirname, '../dist/shell.html');
+        const shellFile = path.resolve(__dirname, '../dist/shell.html');
+        const indexFile = path.resolve(__dirname, '../dist/index.html');
+        const distIndex = fs.existsSync(shellFile) ? shellFile : indexFile;
         if (acceptsHtml && fs.existsSync(distIndex)) {
           return res.sendFile(distIndex);
         }
@@ -246,7 +248,10 @@ export async function startServer() {
       res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
       const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
       if (['/studio', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-      res.sendFile(routeFile && fs.existsSync(routeFile) ? routeFile : path.join(distDir, 'shell.html'));
+      const fallbackFile = fs.existsSync(path.join(distDir, 'shell.html'))
+        ? path.join(distDir, 'shell.html')
+        : path.join(distDir, 'index.html');
+      res.sendFile(routeFile && fs.existsSync(routeFile) ? routeFile : fallbackFile);
     });
   }
 

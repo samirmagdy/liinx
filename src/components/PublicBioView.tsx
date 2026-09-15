@@ -871,7 +871,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               style={{ color: theme.textColor }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>{ui("Made with")}<strong>{ui("LIINX")}</strong></span>
+              <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>
             </button>
           </div>
         )}

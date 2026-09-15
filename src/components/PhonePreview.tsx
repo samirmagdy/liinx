@@ -693,7 +693,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               style={{ color: theme.textColor }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>{ui("Made with")}<strong>{ui("LIINX")}</strong></span>
+              <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>
             </a>
           </div>
         )}

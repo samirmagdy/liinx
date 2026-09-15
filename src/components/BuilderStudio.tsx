@@ -74,7 +74,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 }) => {
   const { tr: ui } = useUiLanguage();
   const { tr } = useLanguage();
-  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(initialProfile ? 'ready' : 'loading');
   const [profile, setProfile] = useState<CreatorProfile>(initialProfile || DEMO_PROFILES[0]);
   const [activeTab, setActiveTab] = useState<'content' | 'appearance' | 'settings' | 'analytics'>('content');
   const [customTheme, setCustomTheme] = useState<ThemeConfig>(
@@ -434,10 +434,17 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     return () => { window.removeEventListener('beforeunload', warn); document.removeEventListener('click', navigate, true); queueRef.current?.dispose(); };
   }, []);
   const triggerAutoSave = (updated: Partial<CreatorProfile>) => {
-    const { displayName, bio, avatarUrl, category, themeId, customTheme, socials } = updated;
-    queueRef.current!.enqueue('profile', Object.fromEntries(
-      Object.entries({ displayName, bio, avatarUrl, category, themeId, customTheme, socials }).filter(([,v]) => v !== undefined)
-    ));
+    const allowedKeys = new Set([
+      'displayName', 'bio', 'avatarUrl', 'category', 'themeId',
+      'hideBranding', 'gaMeasurementId', 'metaPixelId', 'customDomain',
+      'customCss', 'customFontUrl', 'customTheme', 'socials'
+    ]);
+    const patch = Object.fromEntries(
+      Object.entries(updated).filter(([k, v]) => allowedKeys.has(k) && v !== undefined)
+    );
+    if (Object.keys(patch).length > 0) {
+      queueRef.current!.enqueue('profile', patch);
+    }
   };
   const handleRetryFailedSaves = () => queueRef.current!.flush();
 
