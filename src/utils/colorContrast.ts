@@ -37,21 +37,40 @@ export function getAccessibleTextColor(background: string, fallback: string = DA
 }
 
 /** Normalizes creator-provided colors at render time so public pages stay readable. */
-export function ensureThemeContrast(theme: ThemeConfig): ThemeConfig {
-  const background = theme.bgColor;
-  const cardBackground = theme.cardBg.startsWith('#') ? theme.cardBg : (theme.isDark ? '#1E293B' : '#FFFFFF');
-  const readableText = contrastRatio(theme.textColor, background) !== null && contrastRatio(theme.textColor, background)! >= 4.5
-    ? theme.textColor
-    : (theme.isDark ? '#F8FAFC' : DARK_TEXT);
-  const readableSubtext = contrastRatio(theme.subtextColor, background) !== null && contrastRatio(theme.subtextColor, background)! >= 4.5
-    ? theme.subtextColor
-    : (theme.isDark ? '#CBD5E1' : '#525252');
-  const readableCardText = contrastRatio(theme.cardText, cardBackground) !== null && contrastRatio(theme.cardText, cardBackground)! >= 4.5
-    ? theme.cardText
-    : readableText;
-  const readableAccent = contrastRatio(theme.accentColor, background) !== null && contrastRatio(theme.accentColor, background)! >= 3
-    ? theme.accentColor
-    : (theme.isDark ? '#38BDF8' : '#92400E');
+export function ensureThemeContrast(theme: Partial<ThemeConfig> | null | undefined): ThemeConfig {
+  const isDark = theme?.isDark ?? false;
+  const safeTheme: ThemeConfig = {
+    id: theme?.id ?? 'safe-default',
+    name: theme?.name ?? 'Safe Default',
+    bgType: theme?.bgType ?? 'solid',
+    bgColor: theme?.bgColor ?? '#FAF9F6',
+    bgGradient: theme?.bgGradient,
+    textColor: theme?.textColor ?? DARK_TEXT,
+    subtextColor: theme?.subtextColor ?? '#525252',
+    cardBg: theme?.cardBg ?? (isDark ? '#1E293B' : '#FFFFFF'),
+    cardText: theme?.cardText ?? (isDark ? '#E2E8F0' : DARK_TEXT),
+    cardBorder: theme?.cardBorder ?? (isDark ? '1px solid #334155' : '1px solid #E5E5E0'),
+    cardHover: theme?.cardHover ?? (isDark ? '#273548' : '#F9FAFA'),
+    cardRadius: theme?.cardRadius ?? 'xl',
+    accentColor: theme?.accentColor ?? (isDark ? '#38BDF8' : '#92400E'),
+    fontFamily: theme?.fontFamily ?? 'sans',
+    isDark
+  };
 
-  return { ...theme, textColor: readableText, subtextColor: readableSubtext, cardText: readableCardText, accentColor: readableAccent };
+  const background = safeTheme.bgColor;
+  const cardBackground = safeTheme.cardBg.startsWith('#') ? safeTheme.cardBg : (safeTheme.isDark ? '#1E293B' : '#FFFFFF');
+  const readableText = contrastRatio(safeTheme.textColor, background) !== null && contrastRatio(safeTheme.textColor, background)! >= 4.5
+    ? safeTheme.textColor
+    : (safeTheme.isDark ? '#F8FAFC' : DARK_TEXT);
+  const readableSubtext = contrastRatio(safeTheme.subtextColor, background) !== null && contrastRatio(safeTheme.subtextColor, background)! >= 4.5
+    ? safeTheme.subtextColor
+    : (safeTheme.isDark ? '#CBD5E1' : '#525252');
+  const readableCardText = contrastRatio(safeTheme.cardText, cardBackground) !== null && contrastRatio(safeTheme.cardText, cardBackground)! >= 4.5
+    ? safeTheme.cardText
+    : readableText;
+  const readableAccent = contrastRatio(safeTheme.accentColor, background) !== null && contrastRatio(safeTheme.accentColor, background)! >= 3
+    ? safeTheme.accentColor
+    : (safeTheme.isDark ? '#38BDF8' : '#92400E');
+
+  return { ...safeTheme, textColor: readableText, subtextColor: readableSubtext, cardText: readableCardText, accentColor: readableAccent };
 }
