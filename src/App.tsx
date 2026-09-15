@@ -21,7 +21,7 @@ import { CreatorProfile } from './types';
 import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
-import { Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Lock, ArrowRight, Loader2, AlertTriangle, RotateCw } from 'lucide-react';
 
 function chooseTemplate(profile: CreatorProfile, navigate: (path: string) => void) {
   const theme = encodeURIComponent(profile.themeId);
@@ -213,12 +213,35 @@ interface ErrorBoundaryState {
 
 function CrashFallback() {
   const { tr } = useLanguage();
-  return <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-5">
-    <h1 className="text-2xl font-bold">{tr('Something went wrong')}</h1>
-    <p>{tr('Reload this page to try again.')}</p>
-    <a className="underline p-3" href="/">{tr('Back to Home')}</a>
-    <button className="rounded-full bg-neutral-900 text-white px-6 py-3" onClick={() => window.location.reload()}>{tr('Reload Page')}</button>
-  </main>;
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-white text-neutral-900">
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="w-16 h-16 rounded-3xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto">
+          <AlertTriangle className="w-7 h-7 text-red-600" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">{tr('Something went wrong')}</h1>
+          <p className="text-sm text-neutral-500">{tr('Reload this page to try again.')}</p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
+            onClick={() => window.location.reload()}
+          >
+            <RotateCw className="w-4 h-4" />
+            <span>{tr('Reload Page')}</span>
+          </button>
+          <a
+            className="px-5 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold text-neutral-800 hover:bg-neutral-100 transition-colors flex items-center gap-2"
+            href="/"
+          >
+            <span>{tr('Back to Home')}</span>
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+    </main>
+  );
 }
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   declare props: ErrorBoundaryProps;
