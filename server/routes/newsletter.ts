@@ -84,3 +84,38 @@ newsletterRouter.get('/api/studio/subscribers', requireAuth, (req: Authenticated
     res.status(500).json({ error: 'Failed to retrieve subscribers.' });
   }
 });
+
+// Authenticated: Export subscribers as CSV
+newsletterRouter.get('/api/studio/subscribers/export', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const profileId = req.user!.profileId;
+    const subscribers = db.prepare(`
+      SELECT email, created_at 
+      FROM newsletter_subscribers 
+      WHERE profile_id = ? 
+      ORDER BY created_at DESC
+    `).all(profileId) as any[];
+
+    const headers = ['Email', 'Subscribed At'];
+    const rows = subscribers.map(s => [
+      s.email,
+      new Date(s.created_at).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="subscribers.csv"');
+    res.send(csvContent);
+  } catch (err: any) {
+    console.error('Export subscribers error:', err);
+    res.status(500).json({ error: 'Failed to export subscribers.' });
+  }
+});

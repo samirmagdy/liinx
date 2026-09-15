@@ -11,7 +11,7 @@ A modern, high-performance, design-first link-in-bio platform built with **0% fa
 - **Database Engine**: `better-sqlite3` configured with **Write-Ahead Logging (WAL)**, foreign key constraints, synchronous normal writes, and a 64MB memory page cache.
 - **Security & Auth**: `bcryptjs` password hashing with salts, stateless JSON Web Tokens (JWT), BOLA/IDOR protection, and URL scheme sanitization.
 - **Concurrency & Performance**: High socket backlog (4096), non-blocking asynchronous click/view batch queue with bulk transaction commits, and multi-core Node.js cluster mode.
-- **Testing**: Comprehensive Vitest suite with 60 real tests across OWASP Top 10 Security, Concurrency race conditions, E2E Creator journeys, and SQLite disk integrity.
+- **Testing**: Comprehensive Vitest suite with **143 real tests across 16 suites** covering OWASP Top 10 Security, Concurrency race conditions, E2E Creator journeys, SQLite disk integrity, and full acceptance tests for every advertised feature.
 
 ---
 
@@ -122,7 +122,8 @@ npm run db:backup
 | `POST`| `/api/analytics/view` | None | Log a page view for a profile |
 | `GET` | `/api/analytics/stats` | Bearer | Fetch calculated 30-day metrics, CTR, and timeline |
 | `POST`| `/api/newsletter/subscribe`| None | Subscribe email to creator's newsletter |
-| `GET` | `/api/newsletter/subscribers/export`| Bearer | Export subscriber list as CSV |
+| `GET` | `/api/studio/subscribers` | Bearer | Get subscriber list for Studio dashboard |
+| `GET` | `/api/studio/subscribers/export` | Bearer | Export subscriber list as RFC-compliant CSV |
 | `POST`| `/api/upload` | Bearer | Upload avatar or block cover image (multipart) |
 
 ---
@@ -135,12 +136,23 @@ Run the full automated test suite with:
 npm test
 ```
 
-### Test Coverage (60 Tests Across 5 Suites):
+### Test Coverage (143 Tests Across 16 Suites):
 1. **OWASP Top 10 Security (`tests/security.test.ts`)**: BOLA/IDOR protection, multi-tenant isolation, SQL injection vectors, dangerous URI schemes (`javascript:`, `data:`), JWT signature tampering, payload bombing.
 2. **Concurrency & Race Conditions (`tests/concurrency.test.ts`)**: Simultaneous duplicate registration races, concurrent newsletter subscriptions, rapid block reordering stability.
 3. **End-to-End Creator Journey (`tests/e2e-workflow.test.ts`)**: Full organic lifecycle from landing page, registration, block creation, public view, 302 redirect click, newsletter capture, to analytics inspection.
 4. **Resilience & Data Integrity (`tests/resilience.test.ts`)**: Corrupted JSON recovery, invalid block type rejection, missing target handling, disk `PRAGMA integrity_check`, and zero-downtime backup snapshots.
 5. **Core API Integration (`tests/api.test.ts`)**: Full route validation for authentication, blocks, uploads, and analytics.
+6. **Acceptance Tests (`tests/acceptance.test.ts`)**: Every advertised feature end-to-end — CSV export, video/folder block lifecycle, OWASP security headers, X-Request-Id / X-Response-Time observability, duplicate subscription idempotency, plan tier validation, and health diagnostics schema.
+7. **Booking / Calendly (`tests/booking.test.ts`)**: URL validation, block persistence, IDOR rejection.
+8. **Media Embeds (`tests/embeds_and_branding.test.ts`)**: Spotify, YouTube, Vimeo, SoundCloud, Apple Music embed generation.
+9. **Instagram Caption Sync (`tests/instagram-sync.test.ts`)**: Link extraction, DB deduplication, Meta webhook signature verification.
+10. **Custom Domains (`tests/custom_domain.test.ts`)**: Plan-gated attachment, DNS CNAME verification, host-header routing.
+11. **UTM & Tracking Pixels (`tests/utm_and_pixels.test.ts`)**: GA4 / Meta Pixel ID persistence, UTM campaign stats.
+12. **Multi-Profile (`tests/multiprofile.test.ts`)**: Per-plan limits, profile switching, IDOR prevention.
+13. **Custom CSS & Font (`tests/custom_css_font.test.ts`)**: Studio/public endpoint propagation.
+14. **Link Scheduling (`tests/scheduling.test.ts`)**: Future and expired link filtering from public API.
+15. **Linktree Importer (`tests/importer.test.ts`)**: SSRF blocking, Next.js JSON extraction, OpenGraph fallback.
+16. **Public REST API v1 (`tests/api_v1.test.ts`)**: API key lifecycle, Studio-tier gating.
 
 ---
 
