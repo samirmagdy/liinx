@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { db } from '../db.js';
 import { hashPassword, comparePassword, signJwt } from '../auth.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
-import { RESERVED_USERNAMES } from '../../src/config/brand.js';
+import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 import fs from 'fs';
 import path from 'path';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
@@ -184,7 +184,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
         profileId,
         'link',
         'My Website',
-        'https://liinx.co',
+        `https://${brand.domain}`,
         'Check out my official website',
         'NEW',
         1,

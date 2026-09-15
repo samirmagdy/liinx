@@ -9,6 +9,11 @@ export const billingRouter = Router();
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+function configuredPriceId(plan: 'pro' | 'studio', interval: 'month' | 'year') {
+  return process.env[`STRIPE_${plan.toUpperCase()}_${interval.toUpperCase()}_PRICE_ID`]
+    || (interval === 'month' ? process.env[`STRIPE_${plan.toUpperCase()}_PRICE_ID`] : undefined);
+}
+
 export const stripeClient = stripeKey ? new Stripe(stripeKey) : null;
 
 // 1. Check Billing Configuration & Active Subscription
@@ -64,10 +69,8 @@ billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: 
       client_reference_id: profile.id,
       customer_email: req.user!.email,
       line_items: [{
-        ...(plan === 'pro' && process.env.STRIPE_PRO_PRICE_ID
-          ? { price: process.env.STRIPE_PRO_PRICE_ID }
-          : plan === 'studio' && process.env.STRIPE_STUDIO_PRICE_ID
-            ? { price: process.env.STRIPE_STUDIO_PRICE_ID }
+        ...(configuredPriceId(plan, interval)
+          ? { price: configuredPriceId(plan, interval) }
             : { price_data: {
                 currency: 'usd',
                 product_data: {
@@ -153,7 +156,8 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Missing stripe-signature header' });
       }
       const rawBody = (req as any).rawBody || req.body;
-      const stripe = stripeClient || new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', { apiVersion: '2025-02-24.acacia' as any });
+      if (!stripeClient) return res.status(503).json({ error: 'Stripe billing is not configured.' });
+      const stripe = stripeClient;
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } else if (process.env.NODE_ENV === 'test' && req.body && req.body.type) {
       // In automated unit testing where webhooks are simulated
@@ -242,7 +246,7 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
         const object = event.data.object as any;
         const customerId = object.customer ? String(object.customer) : null;
         if (customerId) {
-          db.prepare("UPDATE profiles SET plan = 'free', updated_at = ? WHERE stripe_customer_id = ?").run(now, customerId);
+          db.prepare("UPDATE profiles SET plan = 'free', stripe_subscription_id = null, updated_at = ? WHERE stripe_customer_id = ?").run(now, customerId);
         }
         break;
       }

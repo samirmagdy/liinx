@@ -130,6 +130,7 @@ npm run db:backup
 | `POST`| `/api/analytics/view` | None | Log a page view for a profile |
 | `GET` | `/api/analytics/stats` | Bearer | Fetch calculated 30-day metrics, CTR, and timeline |
 | `POST`| `/api/newsletter/subscribe`| None | Subscribe email to creator's newsletter |
+| `GET` | `/api/newsletter/unsubscribe?token=...` | Token | Remove a subscriber using their private unsubscribe link |
 | `GET` | `/api/studio/subscribers` | Bearer | Get subscriber list for Studio dashboard |
 | `GET` | `/api/studio/subscribers/export` | Bearer | Export subscriber list as RFC-compliant CSV |
 | `POST`| `/api/upload` | Bearer | Upload avatar or block cover image (multipart) |

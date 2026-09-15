@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
+import { encryptSecret } from './secretStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,6 +123,7 @@ export function initDatabase() {
 
     CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_unique ON newsletter_subscribers(profile_id, email);
 
+
     CREATE TABLE IF NOT EXISTS instagram_sync (
       id TEXT PRIMARY KEY,
       profile_id TEXT UNIQUE NOT NULL,
@@ -224,6 +226,25 @@ export function initDatabase() {
   try {
     db.exec("ALTER TABLE users ADD COLUMN session_version INTEGER NOT NULL DEFAULT 1");
   } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE newsletter_subscribers ADD COLUMN unsubscribe_token_hash TEXT");
+  } catch (e) {}
+
+  // Encrypt legacy Instagram tokens once the integration key is available.
+  // Existing v1 ciphertext is left untouched; plaintext remains readable only
+  // long enough for this migration to protect it at rest.
+  try {
+    const legacyTokens = db.prepare("SELECT id, access_token FROM instagram_sync WHERE access_token NOT LIKE 'v1:%'").all() as Array<{ id: string; access_token: string }>;
+    const updateToken = db.prepare('UPDATE instagram_sync SET access_token = ?, updated_at = ? WHERE id = ?');
+    const now = Date.now();
+    const migrateTokens = db.transaction(() => {
+      for (const row of legacyTokens) updateToken.run(encryptSecret(row.access_token), now, row.id);
+    });
+    migrateTokens();
+  } catch (e) {
+    if (process.env.NODE_ENV === 'production') console.error('Instagram token migration skipped:', e);
+  }
 
   try {
     db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_custom_domain ON profiles(custom_domain)");

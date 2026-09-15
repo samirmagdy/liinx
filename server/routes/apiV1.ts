@@ -158,7 +158,7 @@ apiV1Router.get('/v1/profile', requireApiKey, (req: ApiKeyRequest, res: Response
 
 const v1CreateBlockSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100),
-  url: z.string().url('A valid URL is required'),
+  url: z.string().url('A valid URL is required').refine(value => /^https?:$/i.test(new URL(value).protocol), 'Only HTTP(S) links are allowed.'),
   subtitle: z.string().max(100).optional(),
   badge: z.string().max(30).optional(),
   highlighted: z.boolean().optional()

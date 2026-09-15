@@ -2,6 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { sharedRateLimit } from '../middleware/rateLimit.js';
 
 export const analyticsRouter = Router();
 
@@ -152,12 +153,16 @@ export function resetAnalyticsRateLimits() {
   clickRateLimits.clear();
 }
 
+function isLikelyBot(userAgent: string): boolean {
+  return /bot|crawler|spider|slurp|bingpreview|facebookexternalhit|linkedinbot|embedly|quora link preview|pinterest/i.test(userAgent);
+}
+
 // Background flusher every 100ms
 setInterval(flushAnalyticsBuffers, 100).unref();
 process.on('exit', flushAnalyticsBuffers);
 
 // Public Link Redirector & Click Logger
-analyticsRouter.get('/r/:blockId', (req, res) => {
+analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip', limit: 180, windowMs: 60000 }), (req, res) => {
   try {
     const blockId = req.params.blockId;
     const block = db.prepare('SELECT * FROM blocks WHERE id = ?').get(blockId) as any;
@@ -171,7 +176,7 @@ analyticsRouter.get('/r/:blockId', (req, res) => {
       return res.status(400).send('Invalid destination URL.');
     }
 
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
+    const ip = req.ip || req.socket.remoteAddress || '';
     const ipHash = hashIp(ip);
 
     // Abuse protection: Only record metric if not flooded with repeated clicks from same IP
@@ -181,6 +186,7 @@ analyticsRouter.get('/r/:blockId', (req, res) => {
       const utmSource = (req.query.utm_source as string) || null;
       const utmMedium = (req.query.utm_medium as string) || null;
       const utmCampaign = (req.query.utm_campaign as string) || null;
+      if (isLikelyBot(userAgent)) return res.redirect(302, targetUrl);
       const now = Date.now();
       const clickId = 'clk_' + Math.random().toString(36).substring(2, 10);
 
@@ -212,7 +218,7 @@ analyticsRouter.get('/r/:blockId', (req, res) => {
 });
 
 // Public Record Profile View
-analyticsRouter.post('/api/analytics/view', (req, res) => {
+analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-view-ip', limit: 120, windowMs: 60000 }), (req, res) => {
   try {
     const { profileId, referrer, utmSource, utmMedium, utmCampaign } = req.body;
     if (!profileId) {
@@ -224,7 +230,7 @@ analyticsRouter.post('/api/analytics/view', (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
+    const ip = req.ip || req.socket.remoteAddress || '';
     const ipHash = hashIp(ip);
 
     // Abuse rate limiting: prevent view spam / bots inflating counts
@@ -233,6 +239,7 @@ analyticsRouter.post('/api/analytics/view', (req, res) => {
     }
 
     const userAgent = (req.headers['user-agent'] as string) || '';
+    if (isLikelyBot(userAgent)) return res.json({ success: true, recorded: false, reason: 'bot' });
     const now = Date.now();
     const viewId = 'vw_' + Math.random().toString(36).substring(2, 10);
 

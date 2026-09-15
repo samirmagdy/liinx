@@ -4,7 +4,7 @@ import dns from 'dns';
 import { db } from '../db.js';
 import { signJwt } from '../auth.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
-import { RESERVED_USERNAMES } from '../../src/config/brand.js';
+import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 
 export const profilesRouter = Router();
 
@@ -352,17 +352,13 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
       return res.status(400).json({ error: 'Invalid domain format. Example: links.yourdomain.com' });
     }
 
-    const expectedTarget = 'cname.liinx.app';
+    const expectedTarget = brand.cnameTarget;
     let isVerified = false;
     let cnameRecords: string[] = [];
 
     try {
       cnameRecords = await dns.promises.resolveCname(cleanDomain);
-      isVerified = cnameRecords.some(r => 
-        r.toLowerCase().includes('liinx') || 
-        r.toLowerCase().includes('vercel') || 
-        r.toLowerCase().includes('localhost')
-      );
+      isVerified = cnameRecords.some(r => r.replace(/\.$/, '').toLowerCase() === expectedTarget);
     } catch (dnsErr) {
       // DNS record may not yet be configured or propagating
     }

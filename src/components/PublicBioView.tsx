@@ -76,7 +76,20 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [newsletterError, setNewsletterError] = useState<string | null>(null);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterConsent, setNewsletterConsent] = useState(false);
+  const [newsletterUnsubscribeUrl, setNewsletterUnsubscribeUrl] = useState<string | null>(null);
+  const [analyticsConsent, setAnalyticsConsent] = useState<'granted' | 'denied' | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  useEffect(() => {
+    if (previewOnly) return;
+    const saved = window.localStorage.getItem('liinx_analytics_consent');
+    if (saved === 'granted' || saved === 'denied') setAnalyticsConsent(saved);
+  }, [previewOnly]);
+
+  const updateAnalyticsConsent = (value: 'granted' | 'denied') => {
+    window.localStorage.setItem('liinx_analytics_consent', value);
+    setAnalyticsConsent(value);
+  };
 
   // Dynamic fetch when accessed via route or custom domain (0% fake demo fallback)
   useEffect(() => {
@@ -135,7 +148,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   // Google Analytics 4 (gtag.js) Injection
   useEffect(() => {
-    if (previewOnly || !profile?.gaMeasurementId) return;
+    if (previewOnly || analyticsConsent !== 'granted' || !profile?.gaMeasurementId) return;
     const gaId = profile.gaMeasurementId.trim();
     if (!gaId || !/^G-[A-Z0-9]+$/i.test(gaId)) return;
 
@@ -159,11 +172,11 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       document.getElementById('liinx-ga4-script')?.remove();
       document.getElementById('liinx-ga4-inline')?.remove();
     };
-  }, [profile?.gaMeasurementId]);
+  }, [profile?.gaMeasurementId, analyticsConsent, previewOnly]);
 
   // Meta Pixel (fbq) Injection
   useEffect(() => {
-    if (previewOnly || !profile?.metaPixelId) return;
+    if (previewOnly || analyticsConsent !== 'granted' || !profile?.metaPixelId) return;
     const pixelId = profile.metaPixelId.trim();
     if (!pixelId || !/^[0-9]+$/.test(pixelId)) return;
 
@@ -186,7 +199,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     return () => {
       document.getElementById('liinx-meta-pixel')?.remove();
     };
-  }, [profile?.metaPixelId]);
+  }, [profile?.metaPixelId, analyticsConsent, previewOnly]);
 
   // Custom Font Link Injection
   useEffect(() => {
@@ -301,6 +314,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       }
       const res = await api.newsletter.subscribe(profile.id, blockId, newsletterEmail.trim(), newsletterConsent);
       setNewsletterSuccess(res.message || ui('Subscribed successfully!'));
+      setNewsletterUnsubscribeUrl(res.unsubscribeUrl || null);
       setNewsletterError(null);
       setTimeout(() => {
         setNewsletterSuccess(null);
@@ -843,10 +857,11 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                     <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2 justify-center" dir="auto">
                       <CheckCircle2 className="w-4 h-4 shrink-0" />
                       <span>{newsletterSuccess}</span>
+                      {newsletterUnsubscribeUrl && <a href={newsletterUnsubscribeUrl} className="underline underline-offset-2" dir="auto">{ui("Unsubscribe")}</a>}
                     </div>
                   ) : (
                     <form onSubmit={(e) => handleNewsletter(e, block.id)} className="space-y-2.5">
-                      <input aria-label={ui("Enter your email address")} 
+                        <input id={`newsletter-email-${block.id}`} name="email" autoComplete="email" aria-label={ui("Enter your email address")}
                         type="email"
                         value={newsletterEmail}
                         onChange={(e) => {
@@ -866,7 +881,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         </p>
                       )}
                       <label className="flex items-start gap-2 text-[11px] leading-relaxed opacity-80" dir="auto">
-                        <input type="checkbox" checked={newsletterConsent} onChange={e => setNewsletterConsent(e.target.checked)} className="mt-0.5 min-h-0" />
+                        <input id={`newsletter-consent-${block.id}`} name="consent" autoComplete="off" type="checkbox" checked={newsletterConsent} onChange={e => setNewsletterConsent(e.target.checked)} className="mt-0.5 min-h-0" />
                         <span>{ui("I agree to receive updates from this creator and can unsubscribe later.")}</span>
                       </label>
                       <button
@@ -919,6 +934,22 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         username={profile.username}
         displayName={profile.displayName}
       />
+
+      {!previewOnly && analyticsConsent === null && (profile.gaMeasurementId || profile.metaPixelId) && (
+        <aside className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-lg rounded-2xl border border-neutral-200 bg-white p-4 text-neutral-900 shadow-2xl" role="dialog" aria-label={ui('Privacy controls')}>
+          <p className="text-xs leading-relaxed text-neutral-600" dir="auto">
+            {ui('This page uses optional analytics and advertising pixels configured by the creator. Choose whether to allow them.')}
+          </p>
+          <div className="mt-3 flex flex-wrap justify-end gap-2">
+            <button type="button" onClick={() => updateAnalyticsConsent('denied')} className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-semibold hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30">
+              {ui('Reject optional analytics')}
+            </button>
+            <button type="button" onClick={() => updateAnalyticsConsent('granted')} className="rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30">
+              {ui('Allow optional analytics')}
+            </button>
+          </div>
+        </aside>
+      )}
     </div>
   );
 };

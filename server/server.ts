@@ -156,6 +156,27 @@ app.get('/sitemap.xml', (_req, res) => {
   }
 });
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>'\"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character] || character));
+}
+
+function sendProfileShell(res: express.Response, filePath: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null }, canonical: string) {
+  let html = fs.readFileSync(filePath, 'utf8');
+  const title = `${profile.display_name} (@${profile.username}) | LIINX`;
+  const description = profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`)
+    .replace(/<meta name="description" content="[^"]*"\s*\/>/i, `<meta name="description" content="${safeDescription}" />`)
+    .replace(/<meta name="robots" content="[^"]*"\s*\/>/i, '<meta name="robots" content="index, follow" />')
+    .replace(/<link rel="canonical" href="[^"]*"\s*\/>/i, `<link rel="canonical" href="${escapeHtml(canonical)}" />`)
+    .replace(/<meta property="og:url" content="[^"]*"\s*\/>/i, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
+    .replace(/<meta property="og:title" content="[^"]*"\s*\/>/i, `<meta property="og:title" content="${safeTitle}" />`)
+    .replace(/<meta property="og:description" content="[^"]*"\s*\/>/i, `<meta property="og:description" content="${safeDescription}" />`)
+    .replace('</head>', `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, image: profile.avatar_url || undefined } })}</script></head>`);
+  res.type('html').send(html);
+}
+
 // Custom Domain Host-Header Routing Engine (Milestone 6)
 app.use((req, res, next) => {
   const host = (req.headers.host || '').split(':')[0].toLowerCase().trim();
@@ -171,7 +192,8 @@ app.use((req, res, next) => {
         const indexFile = path.resolve(__dirname, '../dist/index.html');
         const distIndex = fs.existsSync(shellFile) ? shellFile : indexFile;
         if (acceptsHtml && fs.existsSync(distIndex)) {
-          return res.sendFile(distIndex);
+          const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url FROM profiles WHERE username = ?').get(profile.username) as any;
+          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}/`) : res.sendFile(distIndex);
         }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}`;
       }
@@ -272,6 +294,12 @@ export async function startServer() {
     }));
     app.get('*', (req, res) => {
       res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
+      const profileMatch = req.path.match(/^\/@([a-z0-9_]+)$/i);
+      if (profileMatch) {
+        const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
+        const profileShell = path.join(distDir, 'shell.html');
+        if (publicProfile && fs.existsSync(profileShell)) return sendProfileShell(res, profileShell, publicProfile, `https://${process.env.PUBLIC_DOMAIN || 'liinx.app'}/@${encodeURIComponent(publicProfile.username)}`);
+      }
       const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
       if (['/studio', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
       const fallbackFile = fs.existsSync(path.join(distDir, 'shell.html'))

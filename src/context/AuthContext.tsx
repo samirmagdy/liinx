@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(null);
       }
     } catch (err: any) {
-      console.warn('Session expired or invalid:', err);
+      if (err?.status !== 401) console.warn('Session refresh failed:', err);
       if (err?.status === 401) authStorage.removeToken();
       setUser(null);
       setProfile(null);

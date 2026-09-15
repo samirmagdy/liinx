@@ -252,7 +252,7 @@ export const api = {
 
   newsletter: {
     subscribe: async (profileId: string, blockId: string | undefined, email: string, consent = true) => {
-      return request<{ success: boolean; message: string }>('/api/newsletter/subscribe', {
+      return request<{ success: boolean; message: string; unsubscribeUrl?: string }>('/api/newsletter/subscribe', {
         method: 'POST',
         body: JSON.stringify({ profileId, blockId, email, consent })
       });
