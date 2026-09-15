@@ -151,7 +151,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
       {/* Device Home Indicator Bar (editor mode only) */}
       {!compact && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-24 h-1 bg-white/30 rounded-full pointer-events-none" />
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-24 h-1 bg-neutral-900/30 rounded-full pointer-events-none" />
       )}
     </div>
   );
@@ -166,7 +166,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             <button 
               onClick={handleShare}
               aria-label={ui("Share bio link")}
-              className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              className="p-1.5 rounded-full hover:bg-neutral-900/10 dark:hover:bg-neutral-100/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
               title={ui("Copy bio link")}
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -492,7 +492,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     <div className="min-w-0 flex-1" dir="auto">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs truncate" dir="auto">{block.title}</span>
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-white/10 font-mono shrink-0">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900/10 font-mono shrink-0">
                           {block.items.length} {ui("items")}</span>
                       </div>
                       {block.subtitle && (
@@ -512,7 +512,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                           href={item.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-2.5 rounded-xl block transition-colors hover:bg-neutral-100 dark:hover:bg-white/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                          className="p-2.5 rounded-xl block transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-[11px] font-medium group-hover:underline truncate" dir="auto">{item.title}</span>
@@ -668,7 +668,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
                         placeholder="your@email.com…"
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-neutral-100/50 dark:bg-white/5 border border-neutral-200 dark:border-white/15 outline-none transition-colors focus:ring-1 focus:ring-neutral-900/10"
+                        className="w-full px-3 py-2 text-xs rounded-xl bg-neutral-100/50 dark:bg-neutral-900/10 border border-neutral-200 dark:border-neutral-800 outline-none transition-colors focus:ring-1 focus:ring-neutral-900/10"
                         style={{ color: theme.textColor }}
                         required
                         spellCheck={false}
@@ -676,7 +676,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       />
                       <button
                         type="submit"
-                        className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                        className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                         style={{ backgroundColor: theme.accentColor }}
                       >
                         <span dir="auto">{block.buttonText}</span>
@@ -697,7 +697,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           <div className="pt-2 pb-6 text-center">
             <a 
               href="#builder" 
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider opacity-60 hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider opacity-60 hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-neutral-50/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
               style={{ color: theme.textColor }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

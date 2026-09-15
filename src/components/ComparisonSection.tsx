@@ -38,7 +38,7 @@ export function ComparisonSection() {
         </div>
 
         {/* Feature List */}
-        <dl className="divide-y divide-neutral-200 border border-neutral-200 rounded-2xl bg-white overflow-hidden shadow-xs">
+        <dl className="divide-y divide-neutral-200 border border-neutral-200 rounded-2xl bg-neutral-50 overflow-hidden shadow-xs">
           {rows.map((row) => (
             <div className="py-5 px-5 sm:px-6 grid sm:grid-cols-[1fr_2fr] gap-3 items-start" key={row.name}>
               <dt className="flex items-center gap-2.5 font-bold text-sm text-neutral-900">

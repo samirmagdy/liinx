@@ -107,7 +107,7 @@ plan.highlight
 
               {/* Plan Header */}
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${plan.highlight ? 'bg-white/10' : 'bg-neutral-100 border border-neutral-200'}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${plan.highlight ? 'bg-neutral-100/5' : 'bg-neutral-100 border border-neutral-200'}`}>
                   {plan.icon}
                 </div>
                 <h2 className={`text-xl font-bold ${plan.highlight ? 'text-white' : 'text-neutral-900'}`}>

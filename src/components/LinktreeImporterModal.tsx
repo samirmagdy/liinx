@@ -102,7 +102,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
 
   return (
     <Modal open={isOpen} onClose={onClose} label={ui('One-Click Linktree Importer')} wide>
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-neutral-100 dark:border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -119,7 +119,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
           <button 
             onClick={onClose}
             aria-label={ui('Close modal')}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -138,7 +138,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="https://linktr.ee/yourname or yourname"
-                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-neutral-50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 focus:border-neutral-900 dark:focus:border-white focus:outline-none"
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-neutral-100 dark:bg-neutral-900/10 border border-neutral-200 dark:border-neutral-800 focus:border-neutral-900 dark:focus:border-neutral-900 outline-none"
                     autoFocus
                     required
                   />
@@ -157,7 +157,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
               <button
                 type="submit"
                 disabled={loading || !url.trim()}
-                className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-bold hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 dark:bg-neutral-50 text-white dark:text-neutral-900 text-xs font-bold hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -175,7 +175,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
           ) : (
             <div className="space-y-4">
               {/* Profile Preview Card */}
-              <div className="p-3.5 bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/10 flex items-center gap-3">
+              <div className="p-3.5 bg-neutral-100 dark:bg-neutral-900/10 rounded-2xl border border-neutral-200 dark:border-neutral-800 flex items-center gap-3">
                 {previewData.avatarUrl && (
                   <img
                     src={previewData.avatarUrl}
@@ -235,7 +235,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                       className={`p-2.5 rounded-xl border text-xs flex items-center justify-between transition-colors cursor-pointer ${
                         selectedIndices.has(idx)
                           ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800'
-                          : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-white/10 opacity-60'
+                          : 'bg-neutral-100/50 dark:bg-neutral-900/20 border-neutral-300 dark:border-neutral-600 opacity-60'
                       }`}
                     >
                       <div className="min-w-0 pr-2">
@@ -266,7 +266,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setPreviewData(null)}
-                  className="py-2 px-3 rounded-xl border border-neutral-200 dark:border-white/10 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer"
+                  className="py-2 px-3 rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-900/10 cursor-pointer"
                 >
                   {ui("Back")}</button>
                 <button

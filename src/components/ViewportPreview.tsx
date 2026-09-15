@@ -29,7 +29,7 @@ export function ViewportPreview({ profile, customTheme, deviceMode }: { profile:
   }, [root, profile.customFontUrl]);
   return <div ref={host} className="w-full min-w-0">
     <p className="text-xs text-neutral-600 text-center mb-3">{lang === 'ar' ? 'معاينة التخطيط فقط. افتح الصفحة المنشورة للتفاعل.' : 'Layout preview only. Open the live page to interact.'} <bdi>{width} × {height}</bdi></p>
-    <div className="relative mx-auto overflow-hidden border rounded-2xl bg-white" style={{ width: width * scale, height: height * scale }}>
+    <div className="relative mx-auto overflow-hidden border rounded-2xl bg-neutral-50" style={{ width: width * scale, height: height * scale }}>
       <iframe title={lang === 'ar' ? 'معاينة تخطيط الصفحة' : 'Page layout preview'} tabIndex={-1} className="absolute top-0 left-0 border-0 origin-top-left pointer-events-none" style={{ width, height, transform: `scale(${scale})` }} srcDoc="<!doctype html><html><head></head><body style='margin:0'><div id='preview-root' inert></div></body></html>" onLoad={event => {
         const doc = event.currentTarget.contentDocument;
         if (!doc) return;

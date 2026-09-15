@@ -52,7 +52,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
             </div>
 
             {/* Visual simulation of folder */}
-            <div className="bg-white p-4 rounded-2xl border border-neutral-200 space-y-2 text-start">
+            <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 space-y-2 text-start">
               <div className="p-3 bg-neutral-50 rounded-xl flex items-center justify-between font-medium text-xs text-neutral-900">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
@@ -60,7 +60,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                     {isRtl ? 'جولة الحفلات الفنية ومقاعد VIP' : '2025 Tour Dates & VIP Access'}
                   </span>
                 </div>
-                <span className="font-mono text-[10px] text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200">
+                <span className="font-mono text-[10px] text-neutral-500 bg-neutral-100 dark:bg-neutral-900/10 px-2 py-0.5 rounded-full border border-neutral-200">
                   {isRtl ? '٤ مدن' : '4 Cities'}
                 </span>
               </div>
@@ -140,7 +140,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                 {b.feature4Desc}
               </p>
             </div>
-            <div className="mt-6 text-xs font-mono text-neutral-500 bg-white p-2.5 rounded-xl border border-neutral-200">
+            <div className="mt-6 text-xs font-mono text-neutral-500 bg-neutral-100 dark:bg-neutral-900/10 p-2.5 rounded-xl border border-neutral-200">
               {isRtl ? 'المزامنة التلقائية: ' : 'Auto-sync: '}
               <span className="text-emerald-600 font-bold">
                 {isRtl ? 'مفعلة (بدون تأخير)' : 'ACTIVE (0 delay)'}
@@ -161,7 +161,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                 {b.feature5Desc}
               </p>
             </div>
-            <div className="mt-6 flex items-center justify-between text-xs font-mono bg-white p-2.5 rounded-xl border border-neutral-200">
+            <div className="mt-6 flex items-center justify-between text-xs font-mono bg-neutral-100 dark:bg-neutral-900/10 p-2.5 rounded-xl border border-neutral-200">
               <span>{isRtl ? 'النتائج والمصادر:' : 'Avg CTR:'}</span>
               <span className="font-bold text-emerald-700">
                 {isRtl ? 'نقرات وتحويلات دقيقة' : 'Clicks, sources & conversions'}
@@ -183,7 +183,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
           <button
             onClick={onOpenStudio}
-            className="px-6 py-3.5 rounded-full bg-white text-neutral-900 text-sm font-bold hover:bg-neutral-100 transition-colors active:scale-95 shrink-0 flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+            className="px-6 py-3.5 rounded-full bg-neutral-100 text-neutral-900 text-sm font-bold hover:bg-neutral-200 transition-colors active:scale-95 shrink-0 flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
           >
             <span>{b.cta}</span>
             <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />

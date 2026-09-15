@@ -29,7 +29,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
             {/* Brand Column (2 cols) */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-white text-[#111315] flex items-center justify-center font-bold shadow-sm">
+                <div className="w-8 h-8 rounded-xl bg-neutral-50 text-neutral-900 flex items-center justify-center font-bold shadow-sm">
                   <div className="flex items-center gap-0.5">
                     <span className="w-1.5 h-4 bg-[#111315] rounded-full" />
                     <span className="w-1.5 h-2.5 bg-amber-500 rounded-full" />

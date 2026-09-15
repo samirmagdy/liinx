@@ -71,7 +71,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             <div className="w-full max-w-xl mb-8 space-y-4">
               <form 
                 onSubmit={handleClaim}
-                className="p-1.5 bg-white rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(0,0,0,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
+                className="p-1.5 bg-neutral-50 rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(24,24,23,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
               >
                 <div className="flex items-center px-4 py-2 sm:py-0 flex-1" dir="ltr">
                   <span className="text-neutral-500 font-mono text-sm sm:text-base font-semibold select-none">

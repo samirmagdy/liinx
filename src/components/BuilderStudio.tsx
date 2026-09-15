@@ -796,7 +796,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <p className="text-sm font-mono text-neutral-500">{tr('Loading your profile…')}</p>
           </>
         ) : (
-          <div className="max-w-md bg-white p-8 rounded-3xl border border-neutral-200 shadow-sm flex flex-col items-center animate-fade-in">
+          <div className="max-w-md bg-neutral-50 p-8 rounded-3xl border border-neutral-200 shadow-sm flex flex-col items-center animate-fade-in">
             <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mb-4 text-rose-600">
               <AlertCircle className="w-7 h-7" />
             </div>
@@ -830,7 +830,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       />
 
       {/* Studio Top Control Bar */}
-      <div className="studio-toolbar bg-white border-b border-neutral-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-18 z-30 shadow-2xs">
+      <div className="studio-toolbar bg-neutral-100 border-b border-neutral-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-18 z-30 shadow-2xs">
         
         {/* Left: Username & Save Status */}
         <div className="flex items-center gap-4">
@@ -851,7 +851,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             </button>
 
             {profileDropdownOpen && (
-              <div className="absolute left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
+              <div className="absolute left-0 mt-2 w-64 bg-neutral-100 rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
                 {profileSwitchError && (
                   <div role="alert" className="mx-2 mb-2 p-2 rounded-lg bg-rose-50 border border-rose-200 text-[11px] text-rose-700 font-medium">
                     {profileSwitchError}
@@ -919,7 +919,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           <button
             onClick={() => setQrModalOpen(true)}
             aria-label={ui('QR Code')}
-            className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-white text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
             <QrCode className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{ui("QR Code")}</span>
@@ -928,7 +928,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           <button
             onClick={handleCopyPublicLink}
             aria-label={ui('Copy Link')}
-            className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-white text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
             {copiedLink ? (
               <>
@@ -963,7 +963,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         <div className="studio-controls lg:col-span-7 space-y-6">
           
           {/* Navigation Sub-Tabs */}
-          <div className="studio-tabs flex items-center p-1 bg-white border border-neutral-200 rounded-2xl shadow-xs gap-1">
+          <div className="studio-tabs flex items-center p-1 bg-neutral-50 border border-neutral-200 rounded-2xl shadow-xs gap-1">
             <button
               onClick={() => setActiveTab('content')}
               className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
@@ -1018,7 +1018,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <div className="space-y-6 animate-fade-in">
               
               {/* Profile Bio & Avatar Card */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-sm text-[#18181B]">{ui("Creator Identity")}</h3>
                   <span className="text-[10px] font-mono uppercase bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-md">
@@ -1177,7 +1177,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   </button>
 
                   {showAddMenu && (
-                    <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-white rounded-2xl border border-neutral-200 shadow-2xl z-20 grid grid-cols-2 sm:grid-cols-3 gap-2 animate-fade-in">
+                    <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-neutral-50 rounded-2xl border border-neutral-200 shadow-2xl z-20 grid grid-cols-2 sm:grid-cols-3 gap-2 animate-fade-in">
                       <button
                         onClick={handleAddLink}
                         className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
@@ -1232,7 +1232,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowImporterModal(true)}
-                  className="py-3.5 px-4 rounded-2xl bg-white border border-neutral-200 hover:border-emerald-600 text-neutral-900 hover:text-emerald-700 text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 shrink-0"
+                  className="py-3.5 px-4 rounded-2xl bg-neutral-50 border border-neutral-200 hover:border-emerald-600 text-neutral-900 hover:text-emerald-700 text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 shrink-0"
                 >
                   <Download className="w-4 h-4 text-emerald-600" />
                   <span>{ui("Import Linktree")}</span>
@@ -1244,7 +1244,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 {profile.blocks.map((block, index) => (
                   <div 
                     key={block.id}
-                    className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs space-y-3 hover:border-neutral-400 transition-colors"
+                    className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs space-y-3 hover:border-neutral-400 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
@@ -1556,7 +1556,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           {/* TAB 2: THEMES & APPEARANCE */}
           {activeTab === 'appearance' && (
             <div className="space-y-6 animate-fade-in">
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <h3 className="font-bold text-sm text-neutral-900">{ui("Curated Visual Presets")}</h3>
                 <p className="text-xs text-neutral-500">
                   {ui("Choose from carefully crafted aesthetic profiles. Every palette is built with strong contrast and responsive tokens.")}</p>
@@ -1591,7 +1591,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Geometry & Radius Control */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <h3 className="font-bold text-sm text-neutral-900">{ui("Card Geometry & Accent Tint")}</h3>
                 
                 <div className="grid grid-cols-4 gap-2">
@@ -1641,7 +1641,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           {activeTab === 'analytics' && (
             <div className="space-y-6 animate-fade-in">
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
+                <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
                   <span className="text-xs text-neutral-500">{ui("30-Day Views")}</span>
                   <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
                     {analyticsData ? analyticsData.totalViews.toLocaleString() : '...'}
@@ -1651,7 +1651,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   </span>
                 </div>
 
-                <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
+                <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
                   <span className="text-xs text-neutral-500">{ui("Click-Through")}</span>
                   <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">
                     {analyticsData ? analyticsData.ctr : '...'}
@@ -1659,7 +1659,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <span className="text-[10px] text-emerald-700 font-semibold font-mono">{ui("Clicks per view")}</span>
                 </div>
 
-                <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
+                <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
                   <span className="text-xs text-neutral-500">{ui("Total Clicks")}</span>
                   <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
                     {analyticsData ? analyticsData.totalClicks.toLocaleString() : '...'}
@@ -1670,7 +1670,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
               {/* 7-Day Daily Bar Chart */}
               {analyticsData && analyticsData.dailyTimeline && (
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
                       <TrendingUp className="w-4 h-4 text-emerald-500" />
@@ -1714,7 +1714,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
               {/* Top Performing Links */}
               {analyticsData && analyticsData.topLinks && (
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                   <h4 className="text-xs font-bold text-neutral-900">{ui("Top Performing Links")}</h4>
                   {analyticsData.topLinks.length === 0 ? (
                     <p className="text-xs text-neutral-400 py-2">{ui("No clicks recorded yet. Share your link to start tracking!")}</p>
@@ -1741,7 +1741,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
               {/* UTM Campaign & Traffic Attribution */}
               {analyticsData && (
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-neutral-900">{ui("UTM Campaign & Traffic Attribution")}</h4>
                     <span className="text-[10px] font-mono text-neutral-500">{ui("Source / Medium / Campaign")}</span>
@@ -1772,7 +1772,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <div className="space-y-6 animate-fade-in">
               
               {/* Subscription Plan Card */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
@@ -1848,7 +1848,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* White-Label Branding Card */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-sm text-neutral-900">{ui("White-Label Branding")}</h3>
@@ -1877,7 +1877,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       aria-checked={Boolean(profile.hideBranding)}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-neutral-50 shadow-lg ring-0 transition duration-200 ease-in-out ${
                           profile.hideBranding ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
@@ -1891,7 +1891,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Google Analytics 4 & Meta Pixel Tracking Card */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-sm text-neutral-900">{ui("Analytics & Retargeting Pixels")}</h3>
@@ -1916,7 +1916,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       value={gaInput}
                       onChange={e => setGaInput(e.target.value)}
                       placeholder={ui("G-XXXXXXXXXX")}
-                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                     <p className="text-[10px] text-neutral-400">{ui("Found in GA4 Admin > Data Streams > Measurement ID")}</p>
                   </div>
@@ -1929,7 +1929,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       value={metaPixelInput}
                       onChange={e => setMetaPixelInput(e.target.value)}
                       placeholder={ui("e.g. 123456789012345")}
-                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                     <p className="text-[10px] text-neutral-400">{ui("Found in Meta Events Manager > Data Sources")}</p>
                   </div>
@@ -1976,7 +1976,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Custom Domain Setup Card (Milestone 6) */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-800">
@@ -2006,7 +2006,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       value={customDomainInput}
                       onChange={e => setCustomDomainInput(e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))}
                       placeholder={ui("e.g. links.sarahcreator.com")}
-                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                   </div>
 
@@ -2014,7 +2014,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <span className="font-semibold text-neutral-800 block">{ui("DNS Configuration Instructions:")}</span>
                     <p className="text-neutral-500 text-[11px]">
                       {ui("Add a")}<span className="font-mono font-bold text-neutral-900">{ui("CNAME")}</span> {ui("record at your DNS provider pointing to:")}</p>
-                    <div className="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-neutral-200 font-mono text-xs">
+                    <div className="flex items-center justify-between bg-neutral-50 px-3 py-1.5 rounded-lg border border-neutral-200 font-mono text-xs">
                       <span>{ui("cname.liinx.app")}</span>
                       <button
                         type="button"
@@ -2114,7 +2114,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Custom CSS & Custom Font Card (Milestone 7) */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-800">
@@ -2144,7 +2144,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       value={customFontUrlInput}
                       onChange={e => setCustomFontUrlInput(e.target.value)}
                       placeholder="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
-                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                      className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                   </div>
 
@@ -2159,7 +2159,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       value={customCssInput}
                       onChange={e => setCustomCssInput(e.target.value)}
                       placeholder={ui("/* Custom CSS overrides */\n#public-bio-view .custom-card { border-width: 2px; }")}
-                      className="w-full text-xs font-mono p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
+                      className="w-full text-xs font-mono p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                   </div>
 
@@ -2205,7 +2205,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Developer REST API Card (Milestone 8) */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-800">
@@ -2318,7 +2318,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Instagram Caption Auto-Sync Card */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center shadow-xs">
@@ -2449,7 +2449,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     value={instagramCaptionInput}
                     onChange={(e) => setInstagramCaptionInput(e.target.value)}
                     placeholder={ui("Paste any Instagram caption containing links to extract & add to your bio (e.g. 'Presave the single on Spotify: https://...')")}
-                    className="w-full text-xs p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors"
+                    className="w-full text-xs p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors"
                   />
                   <div className="flex items-center justify-end gap-2">
                     <button
@@ -2473,7 +2473,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Newsletter Subscribers Card with CSV Export */}
-              <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-sm text-neutral-900">{ui("Newsletter Email Subscribers")}</h3>
@@ -2522,7 +2522,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <button
               onClick={() => setPreviewDevice('mobile')}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
-                previewDevice === 'mobile' ? 'bg-white shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+                previewDevice === 'mobile' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
@@ -2531,7 +2531,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <button
               onClick={() => setPreviewDevice('tablet')}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
-                previewDevice === 'tablet' ? 'bg-white shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+                previewDevice === 'tablet' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               <Tablet className="w-3.5 h-3.5" />
@@ -2540,7 +2540,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <button
               onClick={() => setPreviewDevice('desktop')}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
-                previewDevice === 'desktop' ? 'bg-white shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+                previewDevice === 'desktop' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               <Monitor className="w-3.5 h-3.5" />
@@ -2582,7 +2582,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       {/* New Profile Creation Modal */}
       {showNewProfileModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-scale-in border border-neutral-200">
+          <div className="bg-neutral-50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-scale-in border border-neutral-200">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-base text-neutral-900">{ui("Create New Bio Profile")}</h3>
@@ -2606,7 +2606,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <form onSubmit={handleCreateProfileSubmit} className="space-y-3">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-neutral-800">{ui("Handle (Username)")}</label>
-                <div className="flex items-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 focus-within:bg-white focus-within:border-neutral-900">
+                <div className="flex items-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 focus-within:bg-neutral-50 focus-within:border-neutral-900">
                   <span className="text-xs font-mono text-neutral-400">@</span>
                   <input aria-label={ui("Handle (Username)")}
                     type="text"
@@ -2627,7 +2627,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   value={newDisplayName}
                   onChange={e => setNewDisplayName(e.target.value)}
                   placeholder={ui("My Other Brand")}
-                  className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none"
+                  className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none"
                 />
               </div>
 
@@ -2654,7 +2654,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       {/* Generate API Key Modal (Milestone 8) */}
       {showNewKeyModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-neutral-100 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-neutral-50 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-neutral-100 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-neutral-900 text-white flex items-center justify-center">
@@ -2740,7 +2740,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     value={newKeyName}
                     onChange={e => setNewKeyName(e.target.value)}
                     placeholder={ui("e.g., Zapier Sync, Mobile App Integration")}
-                    className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none"
+                    className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none"
                   />
                   <p className="text-[11px] text-neutral-400">
                     {ui("Give your API key a recognizable name so you can track where it is being used.")}</p>

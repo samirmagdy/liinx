@@ -48,7 +48,7 @@ export const FaqSection: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="rounded-2xl border border-neutral-200 bg-white overflow-hidden shadow-xs"
+                className="rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden shadow-xs"
               >
                 <button
                   aria-expanded={isOpen} aria-controls={`faq-answer-${idx}`}

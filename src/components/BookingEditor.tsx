@@ -9,7 +9,7 @@ export function BookingEditor({ onSave }: { onSave: (title: string, url: string)
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  return <form className="bg-white border rounded-2xl p-4 space-y-3" onSubmit={async e => {
+  return <form className="bg-neutral-50 border rounded-2xl p-4 space-y-3" onSubmit={async e => {
     e.preventDefault();
     const valid = bookingUrl(url);
     if (!valid || !title.trim()) { setError(true); return; }
