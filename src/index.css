@@ -172,6 +172,14 @@
 .marketing-shell .font-mono {
   letter-spacing: 0.02em;
 }
+.marketing-shell > main .text-neutral-400 {
+  color: var(--color-neutral-600) !important;
+}
+
+/* Studio surfaces are light, so subdued helper text must remain readable. */
+.studio-shell .text-neutral-400 {
+  color: var(--color-neutral-600) !important;
+}
 
 @media (max-width: 767px) {
   .marketing-shell .marketing-section,

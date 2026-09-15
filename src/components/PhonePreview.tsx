@@ -31,6 +31,7 @@ import {
   isDirectAudioFile, 
   isDirectVideoFile 
 } from '../utils/mediaEmbeds';
+import { ensureThemeContrast, getAccessibleTextColor } from '../utils/colorContrast';
 
 interface PhonePreviewProps {
   profile: CreatorProfile;
@@ -52,7 +53,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   deviceMode = 'mobile',
 }) => {
   const { tr: ui } = useUiLanguage();
-  const theme = customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0];
+  const theme = ensureThemeContrast(customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0]);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
@@ -202,10 +203,10 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             {profile.verified && (
               <div 
                 className="absolute bottom-0 right-0 p-1 rounded-full text-white shadow-sm"
-                style={{ backgroundColor: theme.accentColor }}
+                style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
                 title={ui("Verified Creator")}
               >
-                <CheckCircle2 className="w-3.5 h-3.5 fill-current text-white" />
+                <CheckCircle2 className="w-3.5 h-3.5 fill-current" style={{ color: getAccessibleTextColor(theme.accentColor) }} />
               </div>
             )}
           </div>
@@ -214,7 +215,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             <span>{profile.displayName}</span>
           </h2>
           
-          <p className="text-[11px] font-mono opacity-60 mb-2.5">
+          <p className="text-[11px] font-mono mb-2.5" style={{ color: theme.subtextColor }}>
             {brand.domain}/@{profile.username}
           </p>
 
@@ -277,7 +278,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                           className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase shrink-0"
                           style={{ 
                             backgroundColor: theme.accentColor, 
-                            color: '#FFFFFF' 
+                            color: getAccessibleTextColor(theme.accentColor)
                           }}
                         >
                           {block.badge}
@@ -285,7 +286,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       )}
                     </div>
                     {block.subtitle && (
-                      <p className="text-[11px] truncate opacity-70" dir="auto">
+                      <p className="text-[11px] truncate" style={{ color: theme.subtextColor }} dir="auto">
                         {block.subtitle}
                       </p>
                     )}
@@ -300,7 +301,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             if (block.type === 'header') {
               return (
                 <div key={block.id} className="pt-3 pb-1 text-center" dir="auto">
-                  <h3 className="text-xs font-bold uppercase tracking-widest opacity-60" dir="auto">
+                  <h3 className="text-xs font-bold uppercase tracking-widest" dir="auto">
                     {block.title}
                   </h3>
                 </div>
@@ -442,12 +443,12 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     </div>
 
                     <div className="flex-1 min-w-0" dir="auto">
-                      <div className="flex items-center gap-1.5 text-[10px] opacity-70 mb-0.5">
+                      <div className="flex items-center gap-1.5 text-[10px] mb-0.5" style={{ color: theme.subtextColor }}>
                         <Music2 className="w-3 h-3 text-emerald-500 shrink-0" />
                         <span className="uppercase font-mono tracking-wider font-semibold">{ui("Audio Track")}</span>
                       </div>
                       <p className="text-xs font-bold truncate" dir="auto">{block.title}</p>
-                      <p className="text-[11px] truncate opacity-70" dir="auto">{block.artist}</p>
+                      <p className="text-[11px] truncate" style={{ color: theme.subtextColor }} dir="auto">{block.artist}</p>
                     </div>
 
                     {isPlayingAudio && (
@@ -497,7 +498,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                           {block.items.length} {ui("items")}</span>
                       </div>
                       {block.subtitle && (
-                        <p className="text-[10px] truncate opacity-65 mt-0.5 text-pretty" dir="auto">{block.subtitle}</p>
+                        <p className="text-[10px] truncate mt-0.5 text-pretty" style={{ color: theme.subtextColor }} dir="auto">{block.subtitle}</p>
                       )}
                     </div>
                     <div className="p-1 rounded-full opacity-60 shrink-0">
@@ -520,7 +521,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                             <ExternalLink className="w-3 h-3 opacity-40 group-hover:opacity-100 shrink-0" />
                           </div>
                           {item.subtitle && (
-                            <p className="text-[10px] opacity-60 truncate mt-0.5" dir="auto">{item.subtitle}</p>
+                            <p className="text-[10px] truncate mt-0.5" style={{ color: theme.subtextColor }} dir="auto">{item.subtitle}</p>
                           )}
                         </a>
                       ))}
@@ -653,7 +654,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: theme.accentColor }} />
                     <span dir="auto">{block.title}</span>
                   </h3>
-                  <p className="text-[11px] opacity-70 mb-3 leading-relaxed text-pretty" dir="auto">
+                  <p className="text-[11px] mb-3 leading-relaxed text-pretty" style={{ color: theme.subtextColor }} dir="auto">
                     {block.description}
                   </p>
 
@@ -678,7 +679,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       <button
                         type="submit"
                         className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                        style={{ backgroundColor: theme.accentColor }}
+                        style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
                       >
                         <span dir="auto">{block.buttonText}</span>
                         <Send className="w-3 h-3 shrink-0" />
@@ -698,7 +699,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           <div className="pt-2 pb-6 text-center">
             <a 
               href="#builder" 
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider opacity-60 hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-neutral-50/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-neutral-50/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
               style={{ color: theme.textColor }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

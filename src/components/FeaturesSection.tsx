@@ -84,13 +84,13 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
               <div className="px-3 py-1 space-y-1 text-xs text-neutral-600">
                 <div className="flex justify-between py-1 border-b border-neutral-200">
                   <span>{isRtl ? 'برلين • مسرح كرافتفيرك' : 'Berlin • Kraftwerk Studio'}</span>
-                  <span className="font-mono font-bold text-emerald-600">
+                  <span className="font-mono font-bold text-emerald-800">
                     {isRtl ? 'عنصر داخل المجلد' : 'Folder item'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span>{isRtl ? 'طوكيو • ميوزيم فيجن' : 'Tokyo • Sound Museum Vision'}</span>
-                  <span className="font-mono font-bold text-amber-600">
+                  <span className="font-mono font-bold text-amber-800">
                     {isRtl ? 'عنصر داخل المجلد' : 'Folder item'}
                   </span>
                 </div>

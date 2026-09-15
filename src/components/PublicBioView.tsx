@@ -5,6 +5,7 @@ import { CreatorProfile, ThemeConfig } from '../types';
 import { THEMES } from '../data/mockData';
 import { brand } from '../config/brand';
 import { api } from '../services/api';
+import { ensureThemeContrast, getAccessibleTextColor } from '../utils/colorContrast';
 import { 
   ArrowLeft, 
   Share2, 
@@ -280,7 +281,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     );
   }
 
-  const theme = customTheme || profile.customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0];
+  const theme = ensureThemeContrast(customTheme || profile.customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0]);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => ({
@@ -428,10 +429,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             {profile.verified && (
               <div 
                 className="absolute bottom-1 right-1 p-1.5 rounded-full text-white shadow-md"
-                style={{ backgroundColor: theme.accentColor }}
+                style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
                 title={ui("Verified Profile")}
               >
-                <CheckCircle2 className="w-4 h-4 fill-current text-white" />
+                <CheckCircle2 className="w-4 h-4 fill-current" style={{ color: getAccessibleTextColor(theme.accentColor) }} />
               </div>
             )}
           </div>
@@ -440,7 +441,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             <span>{profile.displayName}</span>
           </h1>
 
-          <p className="text-xs sm:text-sm font-mono opacity-65 mb-3">
+          <p className="text-xs sm:text-sm font-mono mb-3" style={{ color: theme.subtextColor }}>
             {brand.domain}/@{profile.username}
           </p>
 
@@ -507,7 +508,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase shadow-xs shrink-0"
                           style={{ 
                             backgroundColor: theme.accentColor, 
-                            color: '#FFFFFF' 
+                            color: getAccessibleTextColor(theme.accentColor)
                           }}
                         >
                           {block.badge}
@@ -515,7 +516,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       )}
                     </div>
                     {block.subtitle && (
-                      <p className="text-xs truncate opacity-70" dir="auto">
+                      <p className="text-xs truncate" style={{ color: theme.subtextColor }} dir="auto">
                         {block.subtitle}
                       </p>
                     )}
@@ -530,7 +531,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             if (block.type === 'header') {
               return (
                 <div key={block.id} className="pt-6 pb-2 text-center" dir="auto">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-widest opacity-60" dir="auto">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-widest" dir="auto">
                     {block.title}
                   </h3>
                 </div>
@@ -672,12 +673,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                     </div>
 
                     <div className="flex-1 min-w-0" dir="auto">
-                      <div className="flex items-center gap-1.5 text-[11px] opacity-70 mb-0.5">
+                      <div className="flex items-center gap-1.5 text-[11px] mb-0.5" style={{ color: theme.subtextColor }}>
                         <Music2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                         <span className="uppercase font-mono tracking-wider font-semibold">{ui("Audio Track")}</span>
                       </div>
                       <p className="text-sm font-bold truncate" dir="auto">{block.title}</p>
-                      <p className="text-xs truncate opacity-70" dir="auto">{block.artist}</p>
+                      <p className="text-xs truncate" style={{ color: theme.subtextColor }} dir="auto">{block.artist}</p>
                     </div>
 
                     {isPlayingAudio && (
@@ -727,7 +728,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           {block.items?.length || 0} {ui("links")}</span>
                       </div>
                       {block.subtitle && (
-                        <p className="text-xs truncate opacity-65 mt-0.5 text-pretty" dir="auto">{block.subtitle}</p>
+                        <p className="text-xs truncate mt-0.5 text-pretty" style={{ color: theme.subtextColor }} dir="auto">{block.subtitle}</p>
                       )}
                     </div>
                     <div className="p-1.5 rounded-full opacity-60 shrink-0">
@@ -750,7 +751,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                             <ExternalLink className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 shrink-0" />
                           </div>
                           {item.subtitle && (
-                            <p className="text-xs opacity-60 truncate mt-0.5 text-pretty" dir="auto">{item.subtitle}</p>
+                            <p className="text-xs truncate mt-0.5 text-pretty" style={{ color: theme.subtextColor }} dir="auto">{item.subtitle}</p>
                           )}
                         </a>
                       ))}
@@ -849,7 +850,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                     <Mail className="w-4 h-4 shrink-0" style={{ color: theme.accentColor }} />
                     <span dir="auto">{block.title}</span>
                   </h3>
-                  <p className="text-xs opacity-75 mb-4 leading-relaxed text-pretty" dir="auto">
+                  <p className="text-xs mb-4 leading-relaxed text-pretty" style={{ color: theme.subtextColor }} dir="auto">
                     {block.description}
                   </p>
 
@@ -870,7 +871,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         }}
                         placeholder={ui("Enter your email address")}
                         className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 outline-none focus:ring-2 focus:ring-neutral-900/20"
-                        style={{ color: theme.textColor }}
+                        style={{ color: theme.subtextColor }}
                         required
                         spellCheck={false}
                         dir="auto"
@@ -880,7 +881,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           {newsletterError}
                         </p>
                       )}
-                      <label className="flex items-start gap-2 text-[11px] leading-relaxed opacity-80" dir="auto">
+                      <label className="flex items-start gap-2 text-[11px] leading-relaxed" style={{ color: theme.subtextColor }} dir="auto">
                         <input id={`newsletter-consent-${block.id}`} name="consent" autoComplete="off" type="checkbox" checked={newsletterConsent} onChange={e => setNewsletterConsent(e.target.checked)} className="mt-0.5 min-h-0" />
                         <span>{ui("I agree to receive updates from this creator and can unsubscribe later.")}</span>
                       </label>
@@ -888,7 +889,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         type="submit"
                         disabled={newsletterLoading}
                         className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                        style={{ backgroundColor: theme.accentColor }}
+                        style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
                       >
                         {newsletterLoading ? (
                           <>
@@ -917,7 +918,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           <div className="text-center pt-4 pb-12">
             <button 
               onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 opacity-70 bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
               style={{ color: theme.textColor }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
