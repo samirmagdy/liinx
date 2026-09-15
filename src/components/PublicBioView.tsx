@@ -222,7 +222,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
+        <Loader2 className="w-8 h-8 animate-spin text-neutral-600 mb-4" />
         <p className="text-sm font-mono text-neutral-500">{ui("Loading creator page...")}</p>
       </div>
     );
@@ -368,11 +368,18 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         <style dangerouslySetInnerHTML={{ __html: profile.customCss }} />
       )}
       {/* Top Floating Control Bar */}
-      <header className="public-header sticky top-0 z-40 w-full px-4 py-3 bg-black/20 backdrop-blur-md border-b border-white/10 flex items-center justify-between text-xs">
+      <header
+        className="public-header sticky top-0 z-40 w-full px-4 py-3 backdrop-blur-md border-b flex items-center justify-between text-xs"
+        style={{
+          backgroundColor: theme.isDark ? 'rgba(15, 23, 42, 0.86)' : 'rgba(255, 255, 255, 0.9)',
+          borderColor: theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(24, 24, 23, 0.12)'
+        }}
+      >
         {onBackToStudio ? (
           <button
             onClick={onBackToStudio}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100/10 hover:bg-neutral-100/20 text-white font-medium transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border font-medium transition-opacity hover:opacity-80 cursor-pointer"
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{ui("Back to Studio")}</span>
@@ -380,7 +387,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         ) : (
           <button
             onClick={() => setLocation('/')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100/10 hover:bg-neutral-100/20 text-white font-medium transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border font-medium transition-opacity hover:opacity-80 cursor-pointer"
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{ui("LIINX")}</span>
@@ -390,14 +398,16 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         <div className="public-header-actions flex items-center gap-2">
           <button
             onClick={onOpenQr ? onOpenQr : () => setQrModalOpen(true)}
-            className="px-3 py-1.5 rounded-full bg-neutral-100/10 hover:bg-neutral-100/20 text-white font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-full border font-medium transition-opacity hover:opacity-80 cursor-pointer flex items-center gap-1.5"
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>{ui("QR Code")}</span>
           </button>
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-50 text-neutral-900 font-semibold hover:bg-neutral-100 transition-colors shadow-xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-semibold transition-opacity hover:opacity-80 shadow-xs cursor-pointer"
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
           >
             {copiedLink ? (
               <>
@@ -465,7 +475,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   style={{
                     backgroundColor: theme.cardBg,
                     borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.1)',
-                    color: theme.textColor
+                    color: theme.cardText
                   }}
                   title={social.platform}
                 >
@@ -724,7 +734,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                     <div className="min-w-0 flex-1" dir="auto">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm sm:text-base truncate" dir="auto">{block.title}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900/10 font-mono shrink-0">
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full font-mono shrink-0"
+                          style={{ backgroundColor: theme.isDark ? 'rgba(255,255,255,0.12)' : '#F5F5F5', color: theme.cardText }}
+                        >
                           {block.items?.length || 0} {ui("links")}</span>
                       </div>
                       {block.subtitle && (
@@ -820,8 +833,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           referrerPolicy="no-referrer"
                         />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-red-700 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                             <Play className="w-5 h-5 fill-white ml-0.5" />
                           </div>
                         </div>
@@ -855,7 +868,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   </p>
 
                   {newsletterSuccess ? (
-                    <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2 justify-center" dir="auto">
+                    <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 justify-center" dir="auto">
                       <CheckCircle2 className="w-4 h-4 shrink-0" />
                       <span>{newsletterSuccess}</span>
                       {newsletterUnsubscribeUrl && <a href={newsletterUnsubscribeUrl} className="underline underline-offset-2" dir="auto">{ui("Unsubscribe")}</a>}
@@ -870,8 +883,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           if (newsletterError) setNewsletterError(null);
                         }}
                         placeholder={ui("Enter your email address")}
-                        className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 outline-none focus:ring-2 focus:ring-neutral-900/20"
-                        style={{ color: theme.subtextColor }}
+                        className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl border outline-none focus:ring-2 focus:ring-neutral-900/20"
+                        style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)', color: theme.cardText }}
                         required
                         spellCheck={false}
                         dir="auto"

@@ -143,7 +143,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     required
                   />
                 </div>
-                <p className="text-[11px] text-neutral-400 mt-1.5">
+                <p className="text-[11px] text-neutral-600 mt-1.5">
                   {ui("Supports Linktree, Beacons, and public bio profiles.")}</p>
               </div>
 
@@ -240,11 +240,11 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     >
                       <div className="min-w-0 pr-2">
                         <p className="font-semibold text-neutral-900 dark:text-white truncate">{link.title}</p>
-                        <p className="text-[10px] text-neutral-400 truncate">{link.url}</p>
+                        <p className="text-[10px] text-neutral-600 truncate">{link.url}</p>
                       </div>
                       <div className={`w-4 h-4 rounded flex items-center justify-center border ${
                         selectedIndices.has(idx)
-                          ? 'bg-emerald-600 border-emerald-600 text-white'
+                          ? 'bg-emerald-700 border-emerald-700 text-white'
                           : 'border-neutral-300 dark:border-neutral-600'
                       }`}>
                         {selectedIndices.has(idx) && <Check className="w-3 h-3" />}
@@ -273,7 +273,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   type="button"
                   onClick={handleCommit}
                   disabled={importing || selectedIndices.size === 0}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 >
                   {importing ? (
                     <>

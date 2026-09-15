@@ -239,7 +239,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                   style={{
                     backgroundColor: theme.cardBg,
                     borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.06)',
-                    color: theme.textColor
+                    color: theme.cardText
                   }}
                   title={social.platform}
                 >
@@ -494,7 +494,10 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     <div className="min-w-0 flex-1" dir="auto">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs truncate" dir="auto">{block.title}</span>
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900/10 font-mono shrink-0">
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 rounded-full font-mono shrink-0"
+                          style={{ backgroundColor: theme.isDark ? 'rgba(255,255,255,0.12)' : '#F5F5F5', color: theme.cardText }}
+                        >
                           {block.items.length} {ui("items")}</span>
                       </div>
                       {block.subtitle && (
@@ -591,7 +594,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                           loading="lazy"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                          <div className="w-10 h-10 rounded-full bg-red-700 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                             <Play className="w-4 h-4 fill-white ml-0.5" />
                           </div>
                         </div>
@@ -659,7 +662,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                   </p>
 
                   {newsletterSuccess ? (
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-medium flex items-center gap-1.5 justify-center" dir="auto">
+                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[11px] font-medium flex items-center gap-1.5 justify-center" dir="auto">
                       <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                       <span>{ui("You're on the list! Welcome.")}</span>
                     </div>
@@ -670,8 +673,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
                         placeholder="your@email.com…"
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-neutral-100/50 dark:bg-neutral-900/10 border border-neutral-200 dark:border-neutral-800 outline-none transition-colors focus:ring-1 focus:ring-neutral-900/10"
-                        style={{ color: theme.textColor }}
+                        className="w-full px-3 py-2 text-xs rounded-xl border outline-none transition-colors focus:ring-1 focus:ring-neutral-900/10"
+                        style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)', color: theme.cardText }}
                         required
                         spellCheck={false}
                         dir="auto"

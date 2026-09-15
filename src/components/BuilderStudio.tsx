@@ -1309,7 +1309,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                                 handleDeleteBlock(block.id);
                                 setConfirmDeleteBlockId(null);
                               }}
-                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white hover:bg-rose-700 transition-colors cursor-pointer"
+                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-700 text-white hover:bg-rose-800 transition-colors cursor-pointer"
                             >
                               {ui("Confirm")}
                             </button>
@@ -2294,7 +2294,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                                       setApiKeyError(err.message || ui('Failed to revoke key'));
                                     }
                                   }}
-                                  className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold transition-colors cursor-pointer"
+                                  className="px-2.5 py-1 rounded-lg bg-rose-700 hover:bg-rose-800 text-white text-[11px] font-bold transition-colors cursor-pointer"
                                 >
                                   {ui("Confirm Revoke")}
                                 </button>
