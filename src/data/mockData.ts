@@ -901,57 +901,6 @@ export const FAQS = [
   },
   {
     question: 'Is there a free trial?',
-    answer: 'Yes, both Starter and Pro plans come with a full 14-day free trial. You can build and customize your profile completely for free before deciding.'
-  }
-];
-
-export const TESTIMONIALS = [
-  {
-    quote: "Switching from Linktree to LIINX immediately doubled our release click-through rate. The clean editorial design looks like a bespoke mini-website rather than a generic link list.",
-    author: "Elena Rostova",
-    role: "Architectural Photographer",
-    handle: "@elenarostova",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop",
-    metric: "+124% Link Clicks"
-  },
-  {
-    quote: "Being able to embed full Spotify preview tracks and YouTube releases inside an accordion folder changed everything. Fans actually stay on our page.",
-    author: "Mateo Chen",
-    role: "Electronic Producer & DJ",
-    handle: "@mateochen",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
-    metric: "450k+ Monthly Plays"
-  },
-  {
-    quote: "As a fashion atelier, brand perception is everything. LIINX is the only platform whose aesthetics match our brand guidelines. Having our custom domain connected took 2 minutes.",
-    author: "Studio Noir Team",
-    role: "Paris & Tokyo Atelier",
-    handle: "@studionoir",
-    avatar: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=150&auto=format&fit=crop",
-    metric: "Zero Aesthetic Compromise"
-  },
-  {
-    quote: "My clients kept asking where my link-in-bio was from. LIINX's Forest Wellness theme matches my brand identity perfectly and the folder system keeps my free guides organized beautifully.",
-    author: "Kaia Monroe",
-    role: "Certified Wellness Coach",
-    handle: "@kaiamonroe",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop",
-    metric: "+87% Guide Downloads"
-  },
-  {
-    quote: "I used to just throw an Apple Podcasts link in my bio. Now I have a full listening hub with embedded episodes, a reading list, and newsletter signup — all in one gorgeous page.",
-    author: "Milo Abate",
-    role: "Host of The Long View",
-    handle: "@miloabate",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop",
-    metric: "2.1M+ Downloads"
-  },
-  {
-    quote: "Our Steam wishlists jumped 40% after we set up our LIINX page with the trailer embed and press kit folder. Indie devs need this — it's like a mini-website that takes 5 minutes to build.",
-    author: "Pixel Forge Studios",
-    role: "Indie Game Studio",
-    handle: "@pixelforge",
-    avatar: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=150&auto=format&fit=crop",
-    metric: "+40% Steam Wishlists"
+    answer: 'There is a free plan you can use forever. Paid subscriptions on Pro and Studio are managed directly through Stripe.'
   }
 ];

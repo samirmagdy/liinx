@@ -72,6 +72,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({ 'b3': true });
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState<string | null>(null);
+  const [newsletterError, setNewsletterError] = useState<string | null>(null);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -276,15 +277,17 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     if (!newsletterEmail.trim() || newsletterLoading) return;
 
     setNewsletterLoading(true);
+    setNewsletterError(null);
     try {
       const res = await api.newsletter.subscribe(profile.id, blockId, newsletterEmail.trim());
-      setNewsletterSuccess(res.message || 'Subscribed successfully!');
+      setNewsletterSuccess(res.message || ui('Subscribed successfully!'));
+      setNewsletterError(null);
       setTimeout(() => {
         setNewsletterSuccess(null);
         setNewsletterEmail('');
       }, 5000);
     } catch (err: any) {
-      alert(err.message || 'Subscription failed. Please check your email.');
+      setNewsletterError(err.message || ui('Subscription failed. Please check your email.'));
     } finally {
       setNewsletterLoading(false);
     }
@@ -826,7 +829,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       <input aria-label={ui("Enter your email address")} 
                         type="email"
                         value={newsletterEmail}
-                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        onChange={(e) => {
+                          setNewsletterEmail(e.target.value);
+                          if (newsletterError) setNewsletterError(null);
+                        }}
                         placeholder={ui("Enter your email address")}
                         className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 outline-none focus:ring-2 focus:ring-black/20"
                         style={{ color: theme.textColor }}
@@ -834,6 +840,11 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         spellCheck={false}
                         dir="auto"
                       />
+                      {newsletterError && (
+                        <p role="alert" className="text-xs text-rose-500 font-medium px-1" dir="auto">
+                          {newsletterError}
+                        </p>
+                      )}
                       <button
                         type="submit"
                         disabled={newsletterLoading}

@@ -102,7 +102,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <ul className="space-y-2">
                 <li>
                   <Link href="/about" className="hover:text-white transition-colors cursor-pointer text-left block">
-                    {ui("About")}{brand.productShortName}
+                    {ui("About")}{' '}{brand.productShortName}
                   </Link>
                 </li>
                 <li>

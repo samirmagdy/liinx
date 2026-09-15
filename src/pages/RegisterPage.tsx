@@ -162,7 +162,7 @@ export const RegisterPage: React.FC = () => {
                 {ui("Sign in here")}</Link>
             </>
           ) : (
-            'Step 2 of 2: Select your focus discipline and initial theme.'
+            ui('Step 2 of 2: Select your focus discipline and initial theme.')
           )}
         </p>
       </div>

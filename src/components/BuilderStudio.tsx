@@ -125,6 +125,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   // Multi-Profile Management
   const [profileList, setProfileList] = useState<{ id: string; username: string; displayName: string; avatarUrl: string; plan: string }[]>([]);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [profileSwitchError, setProfileSwitchError] = useState<string | null>(null);
   const [showNewProfileModal, setShowNewProfileModal] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [newDisplayName, setNewDisplayName] = useState('');
@@ -147,6 +148,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       setProfileDropdownOpen(false);
       return;
     }
+    setProfileSwitchError(null);
     try {
       const res = await api.studio.selectProfile(targetId);
       if (res.token) {
@@ -161,7 +163,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         loadProfilesList();
       }
     } catch (err: any) {
-      alert(err.message || 'Failed to switch profile');
+      setProfileSwitchError(err.message || ui('Failed to switch profile'));
     }
   };
 
@@ -200,18 +202,22 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [metaPixelInput, setMetaPixelInput] = useState(profile.metaPixelId || '');
   const [isSavingPixels, setIsSavingPixels] = useState(false);
   const [pixelsSavedFeedback, setPixelsSavedFeedback] = useState(false);
+  const [pixelsError, setPixelsError] = useState<string | null>(null);
 
   // Custom Domain State (Milestone 6)
   const [customDomainInput, setCustomDomainInput] = useState(profile.customDomain || '');
   const [isVerifyingDns, setIsVerifyingDns] = useState(false);
   const [dnsVerificationResult, setDnsVerificationResult] = useState<{ verified: boolean; message: string } | null>(null);
   const [isSavingDomain, setIsSavingDomain] = useState(false);
+  const [copiedCname, setCopiedCname] = useState(false);
+  const [domainFeedback, setDomainFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Custom CSS & Font Engine State (Milestone 7)
   const [customCssInput, setCustomCssInput] = useState(profile.customCss || '');
   const [customFontUrlInput, setCustomFontUrlInput] = useState(profile.customFontUrl || '');
   const [isSavingStyling, setIsSavingStyling] = useState(false);
   const [stylingSavedFeedback, setStylingSavedFeedback] = useState(false);
+  const [stylingError, setStylingError] = useState<string | null>(null);
 
   // REST API Keys State (Milestone 8)
   const [apiKeyList, setApiKeyList] = useState<{ id: string; prefix: string; name: string; createdAt: number }[]>([]);
@@ -221,6 +227,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [generateKeyError, setGenerateKeyError] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [confirmRevokeKeyId, setConfirmRevokeKeyId] = useState<string | null>(null);
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+
+  // Non-blocking UI Inline Feedback States
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [billingError, setBillingError] = useState<string | null>(null);
+  const [confirmDeleteBlockId, setConfirmDeleteBlockId] = useState<string | null>(null);
 
   const loadApiKeys = () => {
     api.studio.getApiKeys()
@@ -460,13 +473,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     if (!file) return;
 
     setUploadingImage(true);
+    setAvatarError(null);
     try {
       const res = await api.studio.uploadImage(file);
       const updated = { ...profile, avatarUrl: res.url };
       setProfile(updated);
       triggerAutoSave({ avatarUrl: res.url });
     } catch (err: any) {
-      alert(err.message || 'Image upload failed');
+      setAvatarError(err.message || ui('Image upload failed'));
     } finally {
       setUploadingImage(false);
     }
@@ -497,6 +511,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   // Plan Upgrade Operation
   const handleUpgradePlan = async (targetPlan: 'free' | 'pro' | 'studio') => {
+    setBillingError(null);
     try {
       setSaveStatus('saving');
       if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
@@ -505,7 +520,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         : await api.billing.createCheckoutSession(targetPlan);
       window.location.assign(res.url);
     } catch (err: any) {
-      alert(err.message || 'Failed to update plan');
+      setBillingError(err.message || ui('Failed to update plan'));
       setSaveStatus('error');
     }
   };
@@ -655,7 +670,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   const handleDeleteBlock = async (id: string) => {
     if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
-    if (!window.confirm('Delete this block?')) return;
     try {
       setSaveStatus('saving');
       await api.studio.deleteBlock(id);
@@ -759,10 +773,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   // Export CSV
   const handleExportCsv = () => {
-    if (subscribers.length === 0) {
-      alert('No subscribers to export.');
-      return;
-    }
+    if (subscribers.length === 0) return;
     const headers = 'Email,Subscribed At\n';
     const rows = subscribers.map(s => `"${s.email}","${s.subscribedAt}"`).join('\n');
     const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
@@ -800,7 +811,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           {/* Multi-Profile Switcher Dropdown */}
           <div className="relative">
             <button
-              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              onClick={() => {
+                setProfileSwitchError(null);
+                setProfileDropdownOpen(!profileDropdownOpen);
+              }}
               className="flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer text-xs font-bold text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
             >
               <span className="font-mono">@{profile.username}</span>
@@ -812,6 +826,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
             {profileDropdownOpen && (
               <div className="absolute left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
+                {profileSwitchError && (
+                  <div role="alert" className="mx-2 mb-2 p-2 rounded-lg bg-rose-50 border border-rose-200 text-[11px] text-rose-700 font-medium">
+                    {profileSwitchError}
+                  </div>
+                )}
                 <div className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400">
                   {ui("Switch Profile (")}{profileList.length})
                 </div>
@@ -1009,6 +1028,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         <span>{uploadingImage ? ui("Uploading...") : ui("Upload Avatar Image")}</span>
                       </button>
                     </div>
+                    {avatarError && (
+                      <p role="alert" className="text-xs text-rose-600 font-medium">
+                        {avatarError}
+                      </p>
+                    )}
                     <p className="text-[11px] text-neutral-500">
                       {ui("Supports JPG, PNG, WEBP up to 5MB. Stored directly on server.")}</p>
                   </div>
@@ -1236,13 +1260,33 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
-                        <button
-                          onClick={() => handleDeleteBlock(block.id)}
-                          className="p-1 rounded-lg text-rose-400 hover:text-rose-600 cursor-pointer"
-                          title={ui("Delete block")}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {confirmDeleteBlockId === block.id ? (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => {
+                                handleDeleteBlock(block.id);
+                                setConfirmDeleteBlockId(null);
+                              }}
+                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white hover:bg-rose-700 transition-colors cursor-pointer"
+                            >
+                              {ui("Confirm")}
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteBlockId(null)}
+                              className="px-2 py-0.5 rounded text-[10px] font-semibold text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer"
+                            >
+                              {ui("Cancel")}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDeleteBlockId(block.id)}
+                            className="p-1 rounded-lg text-rose-400 hover:text-rose-600 cursor-pointer"
+                            title={ui("Delete block")}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -1717,6 +1761,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     {ui("ACTIVE")}</span>
                 </div>
 
+                {billingError && (
+                  <div role="alert" className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
+                    {billingError}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                   <div className={`p-4 rounded-xl border text-xs flex flex-col justify-between transition-colors ${
                     (profile.plan || 'free') === 'free' ? 'border-neutral-900 ring-2 ring-neutral-900/10 bg-neutral-50' : 'border-neutral-200'
@@ -1861,14 +1911,16 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                 {profile.plan !== 'free' && (
                   <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
-                    <span className="text-xs text-emerald-600 font-medium">
-                      {pixelsSavedFeedback ? ui("✓ Pixel settings saved!") : ''}
+                    <span className="text-xs font-medium">
+                      {pixelsSavedFeedback && <span className="text-emerald-600">{ui("✓ Pixel settings saved!")}</span>}
+                      {pixelsError && <span role="alert" className="text-rose-600">{pixelsError}</span>}
                     </span>
                     <button
                       type="button"
                       disabled={isSavingPixels}
                       onClick={async () => {
                         setIsSavingPixels(true);
+                        setPixelsError(null);
                         try {
                           await api.studio.updateProfile({
                             gaMeasurementId: gaInput.trim() || null,
@@ -1880,9 +1932,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             metaPixelId: metaPixelInput.trim() || null
                           }));
                           setPixelsSavedFeedback(true);
+                          setPixelsError(null);
                           setTimeout(() => setPixelsSavedFeedback(false), 3000);
                         } catch (err: any) {
-                          alert(err.message || 'Failed to save pixel settings');
+                          setPixelsError(err.message || ui('Failed to save pixel settings'));
+                          setPixelsSavedFeedback(false);
                         } finally {
                           setIsSavingPixels(false);
                         }
@@ -1940,11 +1994,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         type="button"
                         onClick={() => {
                           navigator.clipboard?.writeText('cname.liinx.app');
-                          alert('Copied cname.liinx.app to clipboard!');
+                          setCopiedCname(true);
+                          setTimeout(() => setCopiedCname(false), 2000);
                         }}
                         className="text-[10px] text-neutral-500 hover:text-black font-sans font-semibold cursor-pointer"
                       >
-                        {ui("Copy Target")}</button>
+                        {copiedCname ? ui("Copied!") : ui("Copy Target")}</button>
                     </div>
                   </div>
 
@@ -1955,6 +2010,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         : 'bg-amber-50 text-amber-800 border-amber-200'
                     }`}>
                       {dnsVerificationResult.message}
+                    </div>
+                  )}
+
+                  {domainFeedback && (
+                    <div
+                      role={domainFeedback.type === 'error' ? 'alert' : 'status'}
+                      className={`p-3 rounded-xl text-xs border font-medium ${
+                        domainFeedback.type === 'success'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-rose-50 text-rose-800 border-rose-200'
+                      }`}
+                    >
+                      {domainFeedback.message}
                     </div>
                   )}
 
@@ -1991,13 +2059,21 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         disabled={isSavingDomain}
                         onClick={async () => {
                           setIsSavingDomain(true);
+                          setDomainFeedback(null);
                           try {
                             const val = customDomainInput.trim() || null;
                             await api.studio.updateProfile({ customDomain: val });
                             setProfile(prev => ({ ...prev, customDomain: val }));
-                            alert('Custom domain saved successfully!');
+                            setDomainFeedback({
+                              type: 'success',
+                              message: ui('Custom domain saved successfully!')
+                            });
+                            setTimeout(() => setDomainFeedback(null), 4000);
                           } catch (err: any) {
-                            alert(err.message || 'Failed to save custom domain');
+                            setDomainFeedback({
+                              type: 'error',
+                              message: err.message || ui('Failed to save custom domain')
+                            });
                           } finally {
                             setIsSavingDomain(false);
                           }
@@ -2051,26 +2127,28 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <label className="text-xs font-semibold text-neutral-800">{ui("Custom CSS Overrides")}</label>
                       <span className="text-[10px] font-mono text-neutral-400">{ui("Scoped to #public-bio-view")}</span>
                     </div>
-                    <textarea aria-label={ui("/* Custom CSS overrides */&#10;#public-bio-view .custom-card { border-width: 2px; }")}
+                    <textarea aria-label={ui("/* Custom CSS overrides */\n#public-bio-view .custom-card { border-width: 2px; }")}
                       rows={4}
                       disabled={profile.plan === 'free'}
                       value={customCssInput}
                       onChange={e => setCustomCssInput(e.target.value)}
-                      placeholder={ui("/* Custom CSS overrides */&#10;#public-bio-view .custom-card { border-width: 2px; }")}
+                      placeholder={ui("/* Custom CSS overrides */\n#public-bio-view .custom-card { border-width: 2px; }")}
                       className="w-full text-xs font-mono p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                   </div>
 
                   {profile.plan !== 'free' && (
                     <div className="flex items-center justify-between pt-1">
-                      <span className="text-xs text-emerald-600 font-medium">
-                        {stylingSavedFeedback ? ui("✓ Custom styling saved!") : ''}
+                      <span className="text-xs font-medium">
+                        {stylingSavedFeedback && <span className="text-emerald-600">{ui("✓ Custom styling saved!")}</span>}
+                        {stylingError && <span role="alert" className="text-rose-600">{stylingError}</span>}
                       </span>
                       <button
                         type="button"
                         disabled={isSavingStyling}
                         onClick={async () => {
                           setIsSavingStyling(true);
+                          setStylingError(null);
                           try {
                             await api.studio.updateProfile({
                               customCss: customCssInput.trim() || null,
@@ -2082,9 +2160,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                               customFontUrl: customFontUrlInput.trim() || null
                             }));
                             setStylingSavedFeedback(true);
+                            setStylingError(null);
                             setTimeout(() => setStylingSavedFeedback(false), 3000);
                           } catch (err: any) {
-                            alert(err.message || 'Failed to save styling');
+                            setStylingError(err.message || ui('Failed to save styling'));
+                            setStylingSavedFeedback(false);
                           } finally {
                             setIsSavingStyling(false);
                           }
@@ -2141,32 +2221,60 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       </button>
                     </div>
 
+                    {apiKeyError && (
+                      <div role="alert" className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
+                        {apiKeyError}
+                      </div>
+                    )}
+
                     {apiKeyList.length === 0 ? (
                       <div className="py-6 text-center text-xs text-neutral-400 border border-dashed rounded-xl">
                         {ui("No API keys generated yet. Click \"Generate Key\" to create your first API credential.")}</div>
                     ) : (
                       <div className="divide-y divide-neutral-100 border rounded-xl overflow-hidden text-xs">
                         {apiKeyList.map(k => (
-                          <div key={k.id} className="p-3 flex items-center justify-between">
+                          <div key={k.id} className="p-3 flex items-center justify-between gap-3">
                             <div className="flex flex-col">
                               <span className="font-bold text-neutral-900">{k.name}</span>
                               <span className="font-mono text-[11px] text-neutral-400">{k.prefix}</span>
                             </div>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                if (confirm(`Revoke key "${k.name}"? Applications using this key will immediately lose access.`)) {
-                                  try {
-                                    await api.studio.revokeApiKey(k.id);
-                                    loadApiKeys();
-                                  } catch (err: any) {
-                                    alert(err.message || 'Failed to revoke key');
-                                  }
-                                }
-                              }}
-                              className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
-                            >
-                              {ui("Revoke")}</button>
+                            {confirmRevokeKeyId === k.id ? (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    setApiKeyError(null);
+                                    try {
+                                      await api.studio.revokeApiKey(k.id);
+                                      setConfirmRevokeKeyId(null);
+                                      loadApiKeys();
+                                    } catch (err: any) {
+                                      setApiKeyError(err.message || ui('Failed to revoke key'));
+                                    }
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold transition-colors cursor-pointer"
+                                >
+                                  {ui("Confirm Revoke")}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmRevokeKeyId(null)}
+                                  className="px-2 py-1 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 text-[11px] font-semibold transition-colors cursor-pointer"
+                                >
+                                  {ui("Cancel")}
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setApiKeyError(null);
+                                  setConfirmRevokeKeyId(k.id);
+                                }}
+                                className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
+                              >
+                                {ui("Revoke")}</button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -2176,7 +2284,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <span className="text-neutral-400 text-[10px] uppercase font-bold tracking-wider block">{ui("Sample API Request")}</span>
                       <p className="text-[11px] select-all overflow-x-auto whitespace-nowrap">
                         curl https://liinx.app/api/v1/profile \<br />
-                        {ui("  -H \"Authorization: Bearer liinx_live_your_key_here\"")}</p>
+                        {'  -H "Authorization: Bearer liinx_live_your_key_here"'}
+                      </p>
                     </div>
                   </div>
                 )}

@@ -60,6 +60,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
+  const [previewNotice, setPreviewNotice] = useState<string | null>(null);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => ({
@@ -71,8 +72,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsletterEmail.trim()) return;
-    // Preview actions never create subscribers or claim a successful subscription.
-    alert('Preview only. Open the live page to subscribe.');
+    setPreviewNotice(ui('Interactive preview only. Open the live page to subscribe.'));
+    setTimeout(() => setPreviewNotice(null), 2500);
   };
 
   const handleShare = async () => {
@@ -175,9 +176,16 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
         {/* Copy Toast inside screen */}
         {copiedNotification && (
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-neutral-900 text-white text-[11px] px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-fade-in">
+          <div role="status" aria-live="polite" className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-neutral-900 text-white text-[11px] px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-fade-in">
             <CheckCircle2 className="w-3 h-3 text-emerald-400" />
             <span>{ui("Link copied to clipboard")}</span>
+          </div>
+        )}
+
+        {/* Preview Notice Toast */}
+        {previewNotice && (
+          <div role="status" aria-live="polite" className="absolute top-16 left-1/2 -translate-x-1/2 z-40 max-w-[90%] bg-neutral-900 text-white text-[11px] px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-fade-in text-center">
+            <span>{previewNotice}</span>
           </div>
         )}
 

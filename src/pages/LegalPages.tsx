@@ -16,7 +16,7 @@ function InformationPage({ title, sections }: { title: string; sections: [string
       {sections.map(([heading, body]) => <section key={heading} className="mb-8">
         <h2 className="text-xl font-bold mb-3">{heading}</h2><p className="leading-8">{body}</p>
       </section>)}
-      <a className="underline" href="/contact">{title === 'Privacy' || title === 'Terms of use' ? ui("Contact us") : 'تواصل معنا'}</a>
+      <a className="underline font-medium text-neutral-800 hover:text-neutral-950 transition-colors" href="/contact">{ui("Contact us")}</a>
     </main><Footer /></div>;
 }
 export function PrivacyPage() {
@@ -160,7 +160,7 @@ export function ContactPage() {
 
 export function AboutPage() {
   const { lang } = useLanguage();
-  return <InformationPage title={lang === 'ar' ? 'عن Liinx' : 'About Liinx'} sections={lang === 'ar' ? [
+  return <InformationPage title={lang === 'ar' ? `عن ${brand.productShortName}` : `About ${brand.productShortName}`} sections={lang === 'ar' ? [
     ['صفحة واحدة لأعمالك', 'اجمع روابطك ووسائطك ونموذج الاشتراك والحجوزات في صفحة شخصية.'],
     ['صمّمها لتناسبك', 'اختر مظهراً جاهزاً ثم خصّص الألوان والخطوط وترتيب المحتوى. اختبر الصفحة المنشورة قبل مشاركتها.']
   ] : [

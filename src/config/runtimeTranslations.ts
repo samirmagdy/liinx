@@ -77,6 +77,19 @@ export const runtimeTranslations: Record<string, string> = {
   'Theme:': 'السمة:',
   'Live canvas preview while you build': 'معاينة حية أثناء البناء',
   '8+ distinct creative disciplines': 'أكثر من ٨ مجالات إبداعية مختلفة',
+  'Confirm': 'تأكيد',
+  'Cancel': 'إلغاء',
+  'Confirm Revoke': 'تأكيد الإلغاء',
+  'Custom domain saved successfully!': 'تم حفظ النطاق المخصص بنجاح!',
+  'Failed to save custom domain': 'فشل حفظ النطاق المخصص',
+  'Failed to switch profile': 'فشل تبديل الملف الشخصي',
+  'Failed to update plan': 'فشل تحديث الخطة',
+  'Image upload failed': 'فشل رفع الصورة',
+  'Failed to save pixel settings': 'فشل حفظ إعدادات التتبع',
+  'Failed to save styling': 'فشل حفظ المظهر المخصص',
+  'Failed to revoke key': 'فشل إلغاء المفتاح',
+  'Subscription failed. Please check your email.': 'فشل الاشتراك. يرجى التحقق من البريد الإلكتروني.',
+  'Subscribed successfully!': 'تم الاشتراك بنجاح!',
 };
 
 export function translateRuntime(value: string, lang: Language): string {
