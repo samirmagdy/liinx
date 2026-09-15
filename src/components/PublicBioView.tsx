@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { CreatorProfile, ThemeConfig } from '../types';
-import { THEMES, DEMO_PROFILES } from '../data/mockData';
+import { THEMES } from '../data/mockData';
 import { api } from '../services/api';
 import { 
   ArrowLeft, 
@@ -42,6 +42,7 @@ import {
 interface PublicBioViewProps {
   profile?: CreatorProfile;
   username?: string;
+  customDomain?: string;
   customTheme?: ThemeConfig;
   onBackToStudio?: () => void;
   onOpenQr?: () => void;
@@ -50,6 +51,7 @@ interface PublicBioViewProps {
 export const PublicBioView: React.FC<PublicBioViewProps> = ({
   profile: initialProfile,
   username: routeUsername,
+  customDomain,
   customTheme,
   onBackToStudio,
   onOpenQr
@@ -58,6 +60,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [profile, setProfile] = useState<CreatorProfile | null>(initialProfile || null);
   const [loading, setLoading] = useState(!initialProfile);
   const [notFound, setNotFound] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
@@ -68,7 +71,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Dynamic fetch when accessed via route
+  // Dynamic fetch when accessed via route or custom domain (0% fake demo fallback)
   useEffect(() => {
     if (initialProfile) {
       setProfile(initialProfile);
@@ -76,22 +79,20 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       return;
     }
 
-    if (!routeUsername) return;
+    if (!routeUsername && !customDomain) return;
 
-    const cleanUsername = routeUsername.replace(/^@/, '');
     setLoading(true);
     setNotFound(false);
+    setServerError(null);
 
-    api.profiles.getByUsername(cleanUsername)
+    const fetchPromise = customDomain
+      ? api.profiles.getByCustomDomain(customDomain)
+      : api.profiles.getByUsername(routeUsername!.replace(/^@/, ''));
+
+    fetchPromise
       .then(fetchedProfile => {
         if (!fetchedProfile || !fetchedProfile.id) {
-          const demo = DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername.toLowerCase());
-          if (demo) {
-            setProfile(demo);
-            document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
-          } else {
-            setNotFound(true);
-          }
+          setNotFound(true);
           return;
         }
         setProfile(fetchedProfile);
@@ -99,20 +100,18 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         // Record profile visit for real analytics with UTM parameters
         api.analytics.recordView(fetchedProfile.id).catch(() => {});
       })
-      .catch(err => {
-        console.warn('Could not load profile from server, checking demo profiles:', err?.message || err);
-        const demo = DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername.toLowerCase());
-        if (demo) {
-          setProfile(demo);
-          document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
-        } else {
+      .catch((err: any) => {
+        const is404 = err?.status === 404 || err?.statusCode === 404 || err?.message?.toLowerCase().includes('not found');
+        if (is404) {
           setNotFound(true);
+        } else {
+          setServerError(err?.message || 'Failed to load creator profile from server.');
         }
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [initialProfile, routeUsername]);
+  }, [initialProfile, routeUsername, customDomain]);
 
   // Google Analytics 4 (gtag.js) Injection
   useEffect(() => {
@@ -191,6 +190,36 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
         <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
         <p className="text-sm font-mono text-neutral-500">Loading creator page...</p>
+      </div>
+    );
+  }
+
+  if (serverError) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 flex items-center justify-center mb-6 text-rose-600">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mb-2">
+          Unable to load creator page
+        </h1>
+        <p className="text-sm text-neutral-500 max-w-sm mb-6">
+          {serverError}
+        </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
+          <button
+            onClick={() => setLocation('/')}
+            className="px-5 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer"
+          >
+            Go to Homepage
+          </button>
+        </div>
       </div>
     );
   }

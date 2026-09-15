@@ -29,6 +29,8 @@
     "multer": "^2.4.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "stripe": "^22.6.2",
+    "tsx": "^4.21.0",
     "wouter": "^3.11.0",
     "zod": "^4.6.5"
   },
@@ -48,7 +50,6 @@
     "playwright": "^1.63.0",
     "supertest": "^7.2.2",
     "tailwindcss": "^4.1.14",
-    "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3",
     "vitest": "^5.0.0"

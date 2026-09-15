@@ -392,29 +392,84 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
-  // Debounced auto-save to database
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Robust Per-Block and Profile Pending Save Queues (prevents race condition & lost edits)
+  const pendingBlockUpdatesRef = useRef<Map<string, { timer: NodeJS.Timeout; updates: Record<string, any> }>>(new Map());
+  const pendingProfileSaveRef = useRef<{ timer: NodeJS.Timeout | null; updates: Partial<CreatorProfile> }>({
+    timer: null,
+    updates: {}
+  });
+  const [saveErrorBanner, setSaveErrorBanner] = useState<string | null>(null);
+
+  // Warn if user attempts to navigate away with unsaved changes in flight
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (pendingBlockUpdatesRef.current.size > 0 || pendingProfileSaveRef.current.timer) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes in the studio editor.';
+        return 'You have unsaved changes in the studio editor.';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
   const triggerAutoSave = (updatedProfile: Partial<CreatorProfile>) => {
     setSaveStatus('saving');
-    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    setSaveErrorBanner(null);
 
-    saveTimeoutRef.current = setTimeout(async () => {
+    pendingProfileSaveRef.current.updates = {
+      ...pendingProfileSaveRef.current.updates,
+      ...updatedProfile
+    };
+
+    if (pendingProfileSaveRef.current.timer) {
+      clearTimeout(pendingProfileSaveRef.current.timer);
+    }
+
+    pendingProfileSaveRef.current.timer = setTimeout(async () => {
+      const payload = { ...pendingProfileSaveRef.current.updates };
+      pendingProfileSaveRef.current.updates = {};
+      pendingProfileSaveRef.current.timer = null;
+
       try {
         await api.studio.updateProfile({
-          displayName: updatedProfile.displayName ?? profile.displayName,
-          bio: updatedProfile.bio ?? profile.bio,
-          avatarUrl: updatedProfile.avatarUrl ?? profile.avatarUrl,
-          category: updatedProfile.category ?? profile.category,
-          themeId: updatedProfile.themeId ?? profile.themeId,
-          customTheme: updatedProfile.customTheme ?? customTheme,
-          socials: updatedProfile.socials ?? profile.socials
+          displayName: payload.displayName ?? profile.displayName,
+          bio: payload.bio ?? profile.bio,
+          avatarUrl: payload.avatarUrl ?? profile.avatarUrl,
+          category: payload.category ?? profile.category,
+          themeId: payload.themeId ?? profile.themeId,
+          customTheme: payload.customTheme ?? customTheme,
+          socials: payload.socials ?? profile.socials
         });
-        setSaveStatus('saved');
-      } catch (err) {
-        console.error('Auto-save error:', err);
+        if (pendingBlockUpdatesRef.current.size === 0) {
+          setSaveStatus('saved');
+        }
+      } catch (err: any) {
+        console.error('Auto-save profile error:', err);
         setSaveStatus('error');
+        setSaveErrorBanner(err?.message || 'Failed to save profile changes. Edits may not be persisted.');
       }
     }, 600);
+  };
+
+  const handleRetryFailedSaves = async () => {
+    setSaveStatus('saving');
+    setSaveErrorBanner(null);
+    try {
+      await api.studio.updateProfile({
+        displayName: profile.displayName,
+        bio: profile.bio,
+        avatarUrl: profile.avatarUrl,
+        category: profile.category,
+        themeId: profile.themeId,
+        customTheme: customTheme,
+        socials: profile.socials
+      });
+      setSaveStatus('saved');
+    } catch (err: any) {
+      setSaveStatus('error');
+      setSaveErrorBanner(err?.message || 'Retry failed. Please check your network connection.');
+    }
   };
 
   const handleProfileChange = (field: keyof CreatorProfile, value: any) => {
@@ -637,22 +692,45 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
+  const queueBlockUpdate = (id: string, newFields: Record<string, any>) => {
+    setSaveStatus('saving');
+    setSaveErrorBanner(null);
+
+    const existing = pendingBlockUpdatesRef.current.get(id);
+    if (existing) {
+      clearTimeout(existing.timer);
+      existing.updates = { ...existing.updates, ...newFields };
+    } else {
+      pendingBlockUpdatesRef.current.set(id, {
+        timer: null as any,
+        updates: { ...newFields }
+      });
+    }
+
+    const currentEntry = pendingBlockUpdatesRef.current.get(id)!;
+    currentEntry.timer = setTimeout(async () => {
+      const updatesToSend = { ...currentEntry.updates };
+      pendingBlockUpdatesRef.current.delete(id);
+
+      try {
+        await api.studio.updateBlock(id, updatesToSend);
+        if (pendingBlockUpdatesRef.current.size === 0 && !pendingProfileSaveRef.current.timer) {
+          setSaveStatus('saved');
+        }
+      } catch (err: any) {
+        console.error('Auto-save block error:', err);
+        setSaveStatus('error');
+        setSaveErrorBanner(err?.message || 'Failed to save block edits. Please check your network or retry.');
+      }
+    }, 500);
+  };
+
   const handleUpdateBlockField = (id: string, field: string, value: any) => {
     setProfile(prev => ({
       ...prev,
       blocks: prev.blocks.map(b => b.id === id ? { ...b, [field]: value } : b)
     }));
-
-    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    setSaveStatus('saving');
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        await api.studio.updateBlock(id, { [field]: value });
-        setSaveStatus('saved');
-      } catch (err) {
-        setSaveStatus('error');
-      }
-    }, 500);
+    queueBlockUpdate(id, { [field]: value });
   };
 
   const handleUpdateBlockExtra = (id: string, extraUpdates: Record<string, any>) => {
@@ -660,17 +738,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       ...prev,
       blocks: prev.blocks.map(b => b.id === id ? { ...b, ...extraUpdates } : b)
     }));
-
-    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    setSaveStatus('saving');
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        await api.studio.updateBlock(id, { extra: extraUpdates });
-        setSaveStatus('saved');
-      } catch (err) {
-        setSaveStatus('error');
-      }
-    }, 500);
+    queueBlockUpdate(id, { extra: extraUpdates });
   };
 
   // Folder Block item helpers
@@ -841,6 +909,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               {saveStatus === 'saving' ? 'Saving to database...' : 
                saveStatus === 'error' ? 'Save failed' : 'Saved to database'}
             </span>
+            {saveStatus === 'error' && (
+              <button
+                type="button"
+                onClick={handleRetryFailedSaves}
+                className="ml-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-[10px] font-bold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
+              >
+                Retry
+              </button>
+            )}
           </div>
         </div>
 
@@ -2266,6 +2343,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       >
                         {instagramStatus.autoSyncEnabled ? 'ENABLED' : 'PAUSED'}
                       </button>
+                    </div>
+                  </div>
+                ) : !instagramStatus?.configured ? (
+                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-2">
+                    <div className="flex items-center gap-2 text-amber-900 font-semibold">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Meta Instagram OAuth Setup Required</span>
+                    </div>
+                    <p className="text-amber-800 text-[11px] leading-relaxed">
+                      To connect your live Instagram account, server administrators must configure <code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">INSTAGRAM_CLIENT_ID</code> and <code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">INSTAGRAM_CLIENT_SECRET</code> in the server environment.
+                    </p>
+                    <div className="pt-1 flex items-center justify-between text-[11px] text-amber-900 font-medium">
+                      <span>Live Caption Parser & Link Ingest is available below without OAuth.</span>
                     </div>
                   </div>
                 ) : (

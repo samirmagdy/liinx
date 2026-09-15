@@ -72,6 +72,9 @@ export const api = {
   profiles: {
     getByUsername: async (username: string): Promise<CreatorProfile> => {
       return request<CreatorProfile>(`/api/profiles/${encodeURIComponent(username)}`);
+    },
+    getByCustomDomain: async (domain: string): Promise<CreatorProfile> => {
+      return request<CreatorProfile>(`/api/profiles/by-domain/${encodeURIComponent(domain)}`);
     }
   },
 
@@ -320,6 +323,28 @@ export const api = {
       return request<{ success: boolean; count: number; message: string }>('/api/studio/import/commit', {
         method: 'POST',
         body: JSON.stringify(payload)
+      });
+    }
+  },
+
+  billing: {
+    getStatus: async () => {
+      return request<{
+        configured: boolean;
+        plan: string;
+        hasStripeCustomer: boolean;
+        hasActiveSubscription: boolean;
+      }>('/api/billing/status');
+    },
+    createCheckoutSession: async (plan: 'pro' | 'studio') => {
+      return request<{ url: string; sessionId: string }>('/api/billing/create-checkout-session', {
+        method: 'POST',
+        body: JSON.stringify({ plan })
+      });
+    },
+    createPortalSession: async () => {
+      return request<{ url: string }>('/api/billing/create-portal-session', {
+        method: 'POST'
       });
     }
   }

@@ -112,10 +112,20 @@ function PricingPage() {
   const handleSelectPlan = async (planId: string) => {
     try {
       const cleanPlan = planId.toLowerCase() as 'free' | 'pro' | 'studio';
-      await api.studio.updatePlan(cleanPlan);
-      setLocation('/studio?plan=updated');
-    } catch {
-      setLocation(`/register?plan=${encodeURIComponent(planId)}`);
+      if (cleanPlan === 'pro' || cleanPlan === 'studio') {
+        const res = await api.billing.createCheckoutSession(cleanPlan);
+        if (res.url) {
+          window.location.href = res.url;
+          return;
+        }
+      }
+      setLocation('/studio');
+    } catch (err: any) {
+      if (err?.message?.includes('authenticated') || err?.status === 401) {
+        setLocation(`/register?plan=${encodeURIComponent(planId)}`);
+      } else {
+        alert(err?.message || 'Unable to initiate Stripe checkout. Please try again or log in.');
+      }
     }
   };
 
@@ -212,6 +222,25 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 export default function App() {
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
+  const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.liinx.app');
+
+  if (isCustomDomain) {
+    return (
+      <ErrorBoundary>
+        <LanguageProvider>
+          <AuthProvider>
+            <PublicBioView
+              customDomain={currentHost}
+              onBackToStudio={() => window.location.href = 'https://liinx.app/studio'}
+            />
+          </AuthProvider>
+        </LanguageProvider>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <LanguageProvider>

@@ -94,6 +94,64 @@ export function flushAnalyticsBuffers() {
   }
 }
 
+// In-memory sliding-window abuse rate limiter for view & click events
+interface RateLimitEntry {
+  timestamps: number[];
+}
+const viewRateLimits = new Map<string, RateLimitEntry>();
+const clickRateLimits = new Map<string, RateLimitEntry>();
+
+// Purge stale rate limiter entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  const windowMs = 60000;
+  for (const [key, entry] of viewRateLimits.entries()) {
+    entry.timestamps = entry.timestamps.filter(t => now - t < windowMs);
+    if (entry.timestamps.length === 0) viewRateLimits.delete(key);
+  }
+  for (const [key, entry] of clickRateLimits.entries()) {
+    entry.timestamps = entry.timestamps.filter(t => now - t < windowMs);
+    if (entry.timestamps.length === 0) clickRateLimits.delete(key);
+  }
+}, 300000).unref();
+
+export function isViewRateLimited(ipHash: string, profileId: string, limit = 10, windowMs = 60000): boolean {
+  const key = `${ipHash}:${profileId}`;
+  const now = Date.now();
+  let entry = viewRateLimits.get(key);
+  if (!entry) {
+    entry = { timestamps: [] };
+    viewRateLimits.set(key, entry);
+  }
+  entry.timestamps = entry.timestamps.filter(t => now - t < windowMs);
+  if (entry.timestamps.length >= limit) {
+    return true;
+  }
+  entry.timestamps.push(now);
+  return false;
+}
+
+export function isClickRateLimited(ipHash: string, blockId: string, limit = 15, windowMs = 60000): boolean {
+  const key = `${ipHash}:${blockId}`;
+  const now = Date.now();
+  let entry = clickRateLimits.get(key);
+  if (!entry) {
+    entry = { timestamps: [] };
+    clickRateLimits.set(key, entry);
+  }
+  entry.timestamps = entry.timestamps.filter(t => now - t < windowMs);
+  if (entry.timestamps.length >= limit) {
+    return true;
+  }
+  entry.timestamps.push(now);
+  return false;
+}
+
+export function resetAnalyticsRateLimits() {
+  viewRateLimits.clear();
+  clickRateLimits.clear();
+}
+
 // Background flusher every 100ms
 setInterval(flushAnalyticsBuffers, 100).unref();
 process.on('exit', flushAnalyticsBuffers);
@@ -113,33 +171,36 @@ analyticsRouter.get('/r/:blockId', (req, res) => {
       return res.status(400).send('Invalid destination URL.');
     }
 
-    // Record click into buffer (non-blocking for sub-10ms redirect latency)
     const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
     const ipHash = hashIp(ip);
-    const referrer = (req.headers['referer'] as string) || 'direct';
-    const userAgent = (req.headers['user-agent'] as string) || '';
-    const utmSource = (req.query.utm_source as string) || null;
-    const utmMedium = (req.query.utm_medium as string) || null;
-    const utmCampaign = (req.query.utm_campaign as string) || null;
-    const now = Date.now();
-    const clickId = 'clk_' + Math.random().toString(36).substring(2, 10);
 
-    clickBuffer.push({
-      id: clickId,
-      block_id: block.id,
-      profile_id: block.profile_id,
-      target_url: targetUrl,
-      ip_hash: ipHash,
-      referrer,
-      user_agent: userAgent,
-      utm_source: utmSource,
-      utm_medium: utmMedium,
-      utm_campaign: utmCampaign,
-      created_at: now
-    });
+    // Abuse protection: Only record metric if not flooded with repeated clicks from same IP
+    if (!isClickRateLimited(ipHash, block.id)) {
+      const referrer = (req.headers['referer'] as string) || 'direct';
+      const userAgent = (req.headers['user-agent'] as string) || '';
+      const utmSource = (req.query.utm_source as string) || null;
+      const utmMedium = (req.query.utm_medium as string) || null;
+      const utmCampaign = (req.query.utm_campaign as string) || null;
+      const now = Date.now();
+      const clickId = 'clk_' + Math.random().toString(36).substring(2, 10);
 
-    if (clickBuffer.length >= 100 || process.env.NODE_ENV === 'test') {
-      flushAnalyticsBuffers();
+      clickBuffer.push({
+        id: clickId,
+        block_id: block.id,
+        profile_id: block.profile_id,
+        target_url: targetUrl,
+        ip_hash: ipHash,
+        referrer,
+        user_agent: userAgent,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        created_at: now
+      });
+
+      if (clickBuffer.length >= 100 || process.env.NODE_ENV === 'test') {
+        flushAnalyticsBuffers();
+      }
     }
 
     // Fast 302 Found redirect
@@ -165,6 +226,12 @@ analyticsRouter.post('/api/analytics/view', (req, res) => {
 
     const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
     const ipHash = hashIp(ip);
+
+    // Abuse rate limiting: prevent view spam / bots inflating counts
+    if (isViewRateLimited(ipHash, profileId)) {
+      return res.status(429).json({ error: 'Too many view requests. Please slow down.', recorded: false });
+    }
+
     const userAgent = (req.headers['user-agent'] as string) || '';
     const now = Date.now();
     const viewId = 'vw_' + Math.random().toString(36).substring(2, 10);

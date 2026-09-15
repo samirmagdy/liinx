@@ -13,6 +13,7 @@ import { uploadRouter } from './routes/upload.js';
 import { instagramRouter } from './routes/instagram.js';
 import { importerRouter } from './routes/importer.js';
 import { apiV1Router } from './routes/apiV1.js';
+import { billingRouter } from './routes/billing.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -56,7 +57,12 @@ app.use((_req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({
+  limit: '2mb',
+  verify: (req: any, _res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Search Engine robots.txt
@@ -130,7 +136,13 @@ app.use((req, res, next) => {
   if (host && !defaultHosts.includes(host) && !host.endsWith('.liinx.app')) {
     const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ?').get(host) as { username: string } | undefined;
     if (profile) {
+      res.setHeader('X-Custom-Domain-User', profile.username);
       if (req.path === '/' || req.path === '') {
+        const acceptsHtml = req.headers.accept && req.headers.accept.includes('text/html');
+        const distIndex = path.resolve(__dirname, '../dist/index.html');
+        if (acceptsHtml && fs.existsSync(distIndex)) {
+          return res.sendFile(distIndex);
+        }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}`;
       }
     }
@@ -157,6 +169,7 @@ app.use(uploadRouter);
 app.use('/api', instagramRouter);
 app.use('/api', importerRouter);
 app.use('/api', apiV1Router);
+app.use('/api', billingRouter);
 
 // Comprehensive Health & Diagnostics Endpoint
 app.get('/api/health', (_req, res) => {

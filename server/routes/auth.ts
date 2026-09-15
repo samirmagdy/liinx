@@ -7,6 +7,51 @@ import { RESERVED_USERNAMES } from '../../src/config/brand.js';
 
 export const authRouter = Router();
 
+// In-memory sliding-window rate limiters for auth
+const loginAttempts = new Map<string, number[]>();
+const registerAttempts = new Map<string, number[]>();
+
+// Static dummy hash computed once to prevent user enumeration via timing attack
+const DUMMY_BCRYPT_HASH = hashPassword('dummy_timing_salt_liinx_2026');
+
+// Purge stale rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamps] of loginAttempts.entries()) {
+    const valid = timestamps.filter(t => now - t < 15 * 60 * 1000);
+    if (valid.length === 0) loginAttempts.delete(key);
+    else loginAttempts.set(key, valid);
+  }
+  for (const [key, timestamps] of registerAttempts.entries()) {
+    const valid = timestamps.filter(t => now - t < 60 * 60 * 1000);
+    if (valid.length === 0) registerAttempts.delete(key);
+    else registerAttempts.set(key, valid);
+  }
+}, 300000).unref();
+
+export function isLoginRateLimited(ip: string, limit = process.env.NODE_ENV === 'test' ? 100 : 10, windowMs = 15 * 60 * 1000): boolean {
+  const now = Date.now();
+  const timestamps = (loginAttempts.get(ip) || []).filter(t => now - t < windowMs);
+  if (timestamps.length >= limit) return true;
+  timestamps.push(now);
+  loginAttempts.set(ip, timestamps);
+  return false;
+}
+
+export function isRegisterRateLimited(ip: string, limit = process.env.NODE_ENV === 'test' ? 100 : 15, windowMs = 60 * 60 * 1000): boolean {
+  const now = Date.now();
+  const timestamps = (registerAttempts.get(ip) || []).filter(t => now - t < windowMs);
+  if (timestamps.length >= limit) return true;
+  timestamps.push(now);
+  registerAttempts.set(ip, timestamps);
+  return false;
+}
+
+export function resetAuthRateLimits() {
+  loginAttempts.clear();
+  registerAttempts.clear();
+}
+
 function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   if (!val) return fallback;
   try {
@@ -17,8 +62,11 @@ function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
 }
 
 const registerSchema = z.object({
-  email: z.string().email('Please provide a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
+  email: z.string().email('Please provide a valid email address').max(255, 'Email cannot exceed 255 characters'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(128, 'Password cannot exceed 128 characters')
+    .refine(s => s.trim().length >= 8, 'Password cannot consist only of whitespace'),
   username: z.string()
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username cannot exceed 30 characters')
@@ -26,8 +74,8 @@ const registerSchema = z.object({
 });
 
 const loginSchema = z.object({
-  email: z.string().email('Please provide a valid email address'),
-  password: z.string().min(1, 'Password is required')
+  email: z.string().email('Please provide a valid email address').max(255, 'Email cannot exceed 255 characters'),
+  password: z.string().min(1, 'Password is required').max(128, 'Password cannot exceed 128 characters')
 });
 
 // Check username availability
@@ -48,6 +96,11 @@ authRouter.get('/check-username/:username', (req, res) => {
 // Register new user & creator profile
 authRouter.post('/register', (req, res) => {
   try {
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    if (isRegisterRateLimited(ip)) {
+      return res.status(429).json({ error: 'Too many account registrations from this network. Please try again later.' });
+    }
+
     const parse = registerSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.issues[0].message });
@@ -157,6 +210,11 @@ authRouter.post('/register', (req, res) => {
 // Login
 authRouter.post('/login', (req, res) => {
   try {
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    if (isLoginRateLimited(ip)) {
+      return res.status(429).json({ error: 'Too many login attempts. Please try again in 15 minutes.' });
+    }
+
     const parse = loginSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.issues[0].message });
@@ -166,7 +224,12 @@ authRouter.post('/login', (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
 
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(cleanEmail) as any;
-    if (!user || !comparePassword(password, user.password_hash)) {
+    
+    // Constant-time check: if user not found, compare with dummy hash to prevent user enumeration via timing
+    const targetHash = user ? user.password_hash : DUMMY_BCRYPT_HASH;
+    const isMatch = comparePassword(password, targetHash);
+
+    if (!user || !isMatch) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 

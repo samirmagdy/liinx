@@ -209,6 +209,18 @@ export function initDatabase() {
   } catch (e) {}
 
   try {
+    db.exec("ALTER TABLE profiles ADD COLUMN custom_domain_verified INTEGER DEFAULT 0");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN stripe_customer_id TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN stripe_subscription_id TEXT");
+  } catch (e) {}
+
+  try {
     db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_custom_domain ON profiles(custom_domain)");
   } catch (e) {}
 

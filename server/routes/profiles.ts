@@ -238,9 +238,11 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 
     // Custom Domain Plan Enforcement & Validation
     let updatedCustomDomain = existing.custom_domain;
+    let customDomainVerified = existing.custom_domain_verified || 0;
     if (customDomain !== undefined) {
       if (customDomain === null || customDomain.trim() === '') {
         updatedCustomDomain = null;
+        customDomainVerified = 0;
       } else {
         const cleanDomain = customDomain.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
         if (existing.plan === 'free') {
@@ -253,7 +255,10 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
         if (conflict) {
           return res.status(409).json({ error: `The custom domain "${cleanDomain}" is already mapped to another LIINX profile.` });
         }
-        updatedCustomDomain = cleanDomain;
+        if (cleanDomain !== existing.custom_domain) {
+          updatedCustomDomain = cleanDomain;
+          customDomainVerified = 0; // Requires re-verification whenever custom domain is modified
+        }
       }
     }
 
@@ -286,6 +291,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
           ga_measurement_id = ?,
           meta_pixel_id = ?,
           custom_domain = ?,
+          custom_domain_verified = ?,
           custom_css = ?,
           custom_font_url = ?,
           custom_theme_json = ?,
@@ -302,6 +308,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       updatedGaMeasurementId,
       updatedMetaPixelId,
       updatedCustomDomain,
+      customDomainVerified,
       updatedCustomCss,
       updatedCustomFontUrl,
       updatedCustomThemeJson,
@@ -345,6 +352,14 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
       // DNS record may not yet be configured or propagating
     }
 
+    // Update verified status in database upon successful verification
+    if (isVerified) {
+      db.prepare('UPDATE profiles SET custom_domain_verified = 1, updated_at = ? WHERE id = ?').run(
+        Date.now(),
+        req.user!.profileId
+      );
+    }
+
     res.json({
       domain: cleanDomain,
       verified: isVerified,
@@ -360,9 +375,19 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
   }
 });
 
-// Authenticated: Update subscription plan
+
+// Authenticated: Update subscription plan (restricted to automated test suite and admin sync)
 profilesRouter.put('/studio/plan', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
+    const isTest = process.env.NODE_ENV === 'test';
+    const isAdmin = process.env.ADMIN_SECRET && req.headers['x-admin-key'] === process.env.ADMIN_SECRET;
+
+    if (!isTest && !isAdmin) {
+      return res.status(403).json({
+        error: 'Direct plan updates are disabled in production. Paid subscriptions must be activated through verified Stripe checkout.'
+      });
+    }
+
     const { plan } = req.body;
     if (!['free', 'pro', 'studio'].includes(plan)) {
       return res.status(400).json({ error: 'Invalid plan tier. Choose from free, pro, or studio.' });
@@ -374,7 +399,7 @@ profilesRouter.put('/studio/plan', requireAuth, (req: AuthenticatedRequest, res)
       req.user!.profileId
     );
 
-    res.json({ success: true, plan, message: `Successfully upgraded to ${plan.toUpperCase()} tier!` });
+    res.json({ success: true, plan, message: `Successfully updated to ${plan.toUpperCase()} tier!` });
   } catch (err: any) {
     console.error('Update plan error:', err);
     res.status(500).json({ error: 'Failed to update subscription plan.' });
