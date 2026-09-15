@@ -57,7 +57,7 @@ function HomePage() {
           onOpenStudio={handleOpenStudio}
         />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
-        <TemplatesSection onSelectTemplate={handleSelectTemplate} />
+        <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
       </main>

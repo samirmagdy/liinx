@@ -34,6 +34,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Liinx Studio — Design-First Micro-Website Builder" />
     <meta property="og:locale" content="en_US" />
+    <meta property="article:modified_time" content="2026-09-15" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -75,12 +76,68 @@
         },
         {
           "@type": "Organization",
+          "@id": "https://liinx.app/#organization",
           "name": "Liinx Studio",
           "url": "https://liinx.app",
           "logo": "https://liinx.app/favicon.svg",
+          "email": "mailto:support@liinx.app",
           "sameAs": [
             "https://x.com/liinxapp",
-            "https://instagram.com/liinxapp"
+            "https://instagram.com/liinxapp",
+            "https://github.com/liinxapp",
+            "https://linkedin.com/company/liinx"
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://liinx.app/#webpage",
+          "url": "https://liinx.app/",
+          "name": "Liinx Studio — Design-first micro-site builder",
+          "isPartOf": { "@id": "https://liinx.app/#website" },
+          "about": { "@id": "https://liinx.app/#organization" },
+          "dateModified": "2026-09-15",
+          "inLanguage": "en"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://liinx.app/#website",
+          "url": "https://liinx.app/",
+          "name": "Liinx Studio",
+          "publisher": { "@id": "https://liinx.app/#organization" }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How is Liinx different from a basic link page?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Liinx combines links, supported media, newsletter capture, and a Calendly embed in a customizable designed page instead of only a list of buttons." }
+            },
+            {
+              "@type": "Question",
+              "name": "How does booking work?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Add a valid Calendly event link. Visitors choose a time in the embedded scheduler and Calendly confirms the appointment." }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I use a custom domain?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Paid plans support custom domains after DNS verification and hosting/TLS setup." }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I import my links?",
+              "acceptedAnswer": { "@type": "Answer", "text": "You can preview links from supported public profiles, select the links you want, and import the selection. Some sites may block extraction." }
+            }
+          ]
+        },
+        {
+          "@type": "HowTo",
+          "name": "How to create a Liinx page",
+          "description": "Create and publish a Liinx micro-site in three steps.",
+          "step": [
+            { "@type": "HowToStep", "position": 1, "name": "Claim your handle", "text": "Create a free account and choose a liinx.app username." },
+            { "@type": "HowToStep", "position": 2, "name": "Add your content", "text": "Add links, supported media, a newsletter form, or a Calendly link." },
+            { "@type": "HowToStep", "position": 3, "name": "Publish and preview", "text": "Preview the page in Studio and share it. Paid plans can connect a custom domain." }
           ]
         }
       ]

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /studio
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+Disallow: /uploads/
+
+Sitemap: https://liinx.app/sitemap.xml

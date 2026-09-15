@@ -15,6 +15,7 @@ export function PageMetadata() {
     document.querySelector('link[rel="canonical"]')?.setAttribute('href', `${window.location.origin}${path}`);
     document.querySelector('meta[property="og:url"]')?.setAttribute('content', `${window.location.origin}${path}`);
     if (title) document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
+    document.querySelector('meta[property="article:modified_time"]')?.setAttribute('content', '2026-09-15');
   }, [location, lang]);
   return null;
 }

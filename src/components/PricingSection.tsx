@@ -113,9 +113,9 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${plan.highlight ? 'bg-neutral-100/5' : 'bg-neutral-100 border border-neutral-200'}`}>
                   {plan.icon}
                 </div>
-                <h2 className={`text-xl font-bold ${plan.highlight ? 'text-white' : 'text-neutral-900'}`}>
+                <h3 className={`text-xl font-bold ${plan.highlight ? 'text-white' : 'text-neutral-900'}`}>
                   {plan.name}
-                </h2>
+                </h3>
               </div>
               <p className={`text-sm leading-relaxed -mt-3 ${plan.highlight ? 'text-neutral-300' : 'text-neutral-600'}`}>{plan.tagline}</p>
 

@@ -1678,10 +1678,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               {analyticsData && analyticsData.dailyTimeline && (
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                    <h3 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
                       <TrendingUp className="w-4 h-4 text-emerald-500" />
                       <span>{ui("7-Day Engagement Timeline")}</span>
-                    </h4>
+                    </h3>
                     <div className="flex items-center gap-3 text-[10px] font-mono">
                       <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-neutral-200 rounded" /> {ui("Views")}</span>
                       <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded" /> {ui("Clicks")}</span>
@@ -1721,7 +1721,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               {/* Top Performing Links */}
               {analyticsData && analyticsData.topLinks && (
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
-                  <h4 className="text-xs font-bold text-neutral-900">{ui("Top Performing Links")}</h4>
+                  <h3 className="text-xs font-bold text-neutral-900">{ui("Top Performing Links")}</h3>
                   {analyticsData.topLinks.length === 0 ? (
                     <p className="text-xs text-neutral-400 py-2">{ui("No clicks recorded yet. Share your link to start tracking!")}</p>
                   ) : (
@@ -1749,7 +1749,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               {analyticsData && (
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-neutral-900">{ui("UTM Campaign & Traffic Attribution")}</h4>
+                    <h3 className="text-xs font-bold text-neutral-900">{ui("UTM Campaign & Traffic Attribution")}</h3>
                     <span className="text-[10px] font-mono text-neutral-500">{ui("Source / Medium / Campaign")}</span>
                   </div>
                   {!analyticsData.topUtmCampaigns || analyticsData.topUtmCampaigns.length === 0 ? (
