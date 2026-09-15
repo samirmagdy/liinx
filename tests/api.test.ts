@@ -231,6 +231,17 @@ describe('LIINX Production Backend API', () => {
     expect(updated.category).toBe('Creator'); // Preserved
   });
 
+  it('PUT /api/studio/profile should accept same-origin uploaded avatar paths', async () => {
+    const res = await request(app)
+      .put('/api/studio/profile')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ avatarUrl: '/uploads/upload_test-avatar.png' });
+
+    expect(res.status).toBe(200);
+    const updated = db.prepare('SELECT avatar_url FROM profiles WHERE username = ?').get(testUsername) as any;
+    expect(updated.avatar_url).toBe('/uploads/upload_test-avatar.png');
+  });
+
   it('POST /api/analytics/view with non-existent profile should return 404', async () => {
     const res = await request(app)
       .post('/api/analytics/view')
@@ -297,4 +308,3 @@ describe('LIINX Production Backend API', () => {
     expect(profileCheck).toBeUndefined();
   });
 });
-

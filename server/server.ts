@@ -73,7 +73,11 @@ if (process.env.NODE_ENV === 'production' && configuredOrigins.includes('*')) {
 app.set('trust proxy', 1);
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || configuredOrigins.includes('*') || configuredOrigins.includes(origin)) return callback(null, true);
+    const isLocalDevelopmentOrigin = process.env.NODE_ENV !== 'production'
+      && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(origin || '');
+    if (!origin || configuredOrigins.includes('*') || configuredOrigins.includes(origin) || isLocalDevelopmentOrigin) {
+      return callback(null, true);
+    }
     return callback(new Error('Origin is not allowed by CORS'));
   },
   credentials: true,
@@ -310,7 +314,9 @@ export async function startServer() {
     // Development mode: Vite middleware mode
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      // Keep the embedded Vite HMR socket away from other local projects that
+      // commonly claim Vite's default port.
+      server: { middlewareMode: true, hmr: { port: Number(process.env.VITE_HMR_PORT) || 24679 } },
       appType: 'spa'
     });
     app.use(vite.middlewares);

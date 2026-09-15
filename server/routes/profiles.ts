@@ -42,6 +42,16 @@ function isSafeCustomCss(value: string | null | undefined): boolean {
   return !/(?:@import|expression\s*\(|behavior\s*:|javascript\s*:|url\s*\()/i.test(value);
 }
 
+const avatarUrlSchema = z.string().refine(value => {
+  // Uploaded avatars are intentionally stored as same-origin relative paths.
+  if (/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)) return true;
+  try {
+    return ['http:', 'https:'].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}, 'Avatar must use HTTP(S) or a valid same-origin upload path.');
+
 // Public: Get profile by username
 profilesRouter.get('/profiles/:username', (req, res) => {
   try {
@@ -238,7 +248,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 const updateProfileSchema = z.object({
   displayName: z.string().min(1, 'Display name cannot be empty').max(100).optional(),
   bio: z.string().max(500).optional(),
-  avatarUrl: z.string().url().refine(value => /^https?:$|^mailto:$/i.test(new URL(value).protocol), 'Avatar must use HTTP(S).').optional(),
+  avatarUrl: avatarUrlSchema.optional(),
   category: z.string().max(50).optional(),
   themeId: z.string().optional(),
   hideBranding: z.boolean().optional(),
