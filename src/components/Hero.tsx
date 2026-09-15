@@ -8,7 +8,6 @@ import {
   ArrowRight, 
   Palette, 
   Check, 
-  CheckCircle2,
   Sparkles,
   MousePointer2,
   LayoutTemplate
@@ -50,44 +49,6 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
       setLocation('/register');
     }
   };
-
-  function renderProfileContent() {
-  return (
-    <div className="flex flex-col items-center text-center mb-6">
-      <div className="relative mb-3">
-        <img 
-          src={activeProfile.avatarUrl} 
-          alt={activeProfile.displayName}
-          className="w-20 h-20 rounded-full object-cover shadow-sm ring-2 ring-white/20"
-          referrerPolicy="no-referrer"
-        />
-        {activeProfile.verified && (
-          <div 
-            className="absolute bottom-0 right-0 p-1 rounded-full text-white shadow-sm"
-            style={{ backgroundColor: activeTheme.accentColor }}
-            title={tr("Verified Creator")}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 fill-current text-white" />
-          </div>
-        )}
-      </div>
-      <h2 className="text-xl font-bold tracking-tight mb-1 flex items-center justify-center gap-1.5 text-balance">
-        <span>{activeProfile.displayName}</span>
-      </h2>
-      
-      <p className="text-[11px] font-mono opacity-60 mb-2.5">
-        {brand.domain}/@{activeProfile.username}
-      </p>
-
-      <p 
-        className="text-xs max-w-[280px] leading-relaxed mb-4 text-pretty"
-        style={{ color: activeTheme.subtextColor }}
-      >
-        {activeProfile.bio}
-      </p>
-    </div>
-  );
-}
 
 return (
     <section className="hero-section marketing-hero py-16 md:py-24 lg:py-32 border-b border-neutral-200">
@@ -265,7 +226,12 @@ return (
                   color: theme.textColor,
                   fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
                 }}>
-                {renderProfileContent()}
+                <PhonePreview
+                  profile={activeProfile}
+                  customTheme={activeTheme}
+                  compact
+                  interactive={false}
+                />
               </div>
             </motion.div>
 
