@@ -700,7 +700,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             <a 
               href="#builder" 
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-neutral-50/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-              style={{ color: theme.textColor }}
+              style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>

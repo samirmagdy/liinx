@@ -919,7 +919,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             <button 
               onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
-              style={{ color: theme.textColor }}
+              style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>
