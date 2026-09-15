@@ -90,6 +90,9 @@ export const runtimeTranslations: Record<string, string> = {
   'Failed to revoke key': 'فشل إلغاء المفتاح',
   'Subscription failed. Please check your email.': 'فشل الاشتراك. يرجى التحقق من البريد الإلكتروني.',
   'Subscribed successfully!': 'تم الاشتراك بنجاح!',
+  'Create an account': 'إنشاء حساب',
+  'Access your bio builder, customize your theme, and manage your links and live analytics.': 'ادخل إلى استوديو بناء صفحتك، وخصّص مظهرك، وأدر روابطك وإحصاءاتك في الوقت الفعلي.',
+  'Could not load your profile': 'تعذّر تحميل ملفك',
 };
 
 export function translateRuntime(value: string, lang: Language): string {

@@ -21,6 +21,7 @@ import { CreatorProfile } from './types';
 import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
+import { Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 function chooseTemplate(profile: CreatorProfile, navigate: (path: string) => void) {
   const theme = encodeURIComponent(profile.themeId);
@@ -74,25 +75,80 @@ function StudioPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading } = useAuth();
   const { tr } = useLanguage();
-  if (isLoading) return <p role="status" className="p-8">{tr('Loading your profile…')}</p>;
-  if (!user) return <div className="p-8 text-center"><h1>{tr('Sign in to edit your page')}</h1><a href="/login" className="inline-block p-4 underline">{tr('Sign In')}</a></div>;
+
+  const handleFooterNavigation = (v: string) => {
+    if (v === 'home') setLocation('/');
+    else if (v === 'builder') setLocation('/studio');
+    else if (v === 'templates') setLocation('/templates');
+    else if (v === 'pricing') setLocation('/pricing');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+        <Navbar activeView="builder" />
+        <main className="flex-1 flex flex-col items-center justify-center p-6 text-center" role="status">
+          <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
+          <p className="text-sm font-mono text-neutral-500">{tr('Loading your profile…')}</p>
+        </main>
+        <Footer onSelectView={handleFooterNavigation} />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+        <Navbar activeView="builder" />
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-16 sm:py-24 text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-3xl bg-neutral-100 border border-neutral-200/80 flex items-center justify-center mb-6 shadow-xs text-neutral-900">
+            <Lock className="w-7 h-7 text-neutral-800" />
+          </div>
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-neutral-900 mb-3 text-balance">
+            {tr('Sign in to edit your page')}
+          </h1>
+          <p className="text-sm sm:text-base text-neutral-500 max-w-md mb-8 text-pretty">
+            {tr('Access your bio builder, customize your theme, and manage your links and live analytics.')}
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => setLocation('/login')}
+              className="px-6 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2 flex items-center gap-2"
+            >
+              <span>{tr('Sign In')}</span>
+              <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+            </button>
+            <button
+              onClick={() => setLocation('/register')}
+              className="px-6 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            >
+              {tr('Create an account')}
+            </button>
+          </div>
+        </main>
+        <Footer onSelectView={handleFooterNavigation} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="builder" />
       <main className="flex-1">
-        <Suspense fallback={<p role="status" className="p-8">{tr('Loading your profile…')}</p>}><BuilderStudio
-          onViewFullscreen={(profile) => {
-            setLocation(`/@${profile.username}`);
-          }}
-        /></Suspense>
+        <Suspense fallback={
+          <div className="min-h-[calc(100vh-72px)] bg-neutral-50 flex flex-col items-center justify-center p-6 text-center" role="status">
+            <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
+            <p className="text-sm font-mono text-neutral-500">{tr('Loading your profile…')}</p>
+          </div>
+        }>
+          <BuilderStudio
+            onViewFullscreen={(profile) => {
+              setLocation(`/@${profile.username}`);
+            }}
+          />
+        </Suspense>
       </main>
-      <Footer onSelectView={(v) => {
-        if (v === 'home') setLocation('/');
-        else if (v === 'builder') setLocation('/studio');
-        else if (v === 'templates') setLocation('/templates');
-        else if (v === 'pricing') setLocation('/pricing');
-      }} />
+      <Footer onSelectView={handleFooterNavigation} />
     </div>
   );
 }
