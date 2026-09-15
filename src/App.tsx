@@ -11,6 +11,7 @@ import { TemplatesSection } from './components/TemplatesSection';
 import { PricingSection } from './components/PricingSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
+import { BackgroundAnimation } from './components/BackgroundAnimation';
 const BuilderStudio = lazy(() => import('./components/BuilderStudio').then(module => ({ default: module.BuilderStudio })));
 import { PublicBioView } from './components/PublicBioView';
 import { LoginPage } from './pages/LoginPage';
@@ -175,7 +176,6 @@ function TemplatesPage() {
 
 function PricingPage() {
   const [, setLocation] = useLocation();
-
   const { user } = useAuth();
   const handleSelectPlan = async (planId: string, interval: 'month' | 'year') => {
     if (!user) { setLocation('/register?plan=' + planId + '&interval=' + interval); return; }
@@ -243,6 +243,7 @@ function CrashFallback() {
     </main>
   );
 }
+
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   declare props: ErrorBoundaryProps;
   state: ErrorBoundaryState = { hasError: false, error: null };
@@ -257,6 +258,8 @@ export default function App() {
   const currentHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
   const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
   const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.liinx.app');
+
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (isCustomDomain) {
     return (
@@ -277,49 +280,51 @@ export default function App() {
     <ErrorBoundary>
       <LanguageProvider>
         <AuthProvider>
-          <PageMetadata />
-          <Switch>
-            {/* Core application routes */}
-            <Route path="/" component={HomePage} />
-            <Route path="/features" component={FeaturesPage} />
-            <Route path="/templates" component={TemplatesPage} />
-            <Route path="/pricing" component={PricingPage} />
-            <Route path="/about" component={AboutPage} />
-            <Route path="/contact" component={ContactPage} />
-            <Route path="/privacy" component={PrivacyPage} />
-            <Route path="/terms" component={TermsPage} />
-            <Route path="/login" component={LoginPage} />
-            <Route path="/register" component={RegisterPage} />
-            <Route path="/studio" component={StudioPage} />
+          <BackgroundAnimation reducedMotion={reducedMotion}>
+            <PageMetadata />
+            <Switch>
+              {/* Core application routes */}
+              <Route path="/" component={HomePage} />
+              <Route path="/features" component={FeaturesPage} />
+              <Route path="/templates" component={TemplatesPage} />
+              <Route path="/pricing" component={PricingPage} />
+              <Route path="/about" component={AboutPage} />
+              <Route path="/contact" component={ContactPage} />
+              <Route path="/privacy" component={PrivacyPage} />
+              <Route path="/terms" component={TermsPage} />
+              <Route path="/login" component={LoginPage} />
+              <Route path="/register" component={RegisterPage} />
+              <Route path="/studio" component={StudioPage} />
 
-            {/* Dynamic Public Bio Pages */}
-            <Route path="/@:username">
-              {(params) => (
-                <PublicBioView
-                  username={params.username}
-                  onBackToStudio={() => window.location.href = '/studio'}
-                />
-              )}
-            </Route>
-
-            <Route path="/:username">
-              {(params) => {
-                // Guard against system routes and reserved words
-                const clean = params.username.toLowerCase();
-                if (RESERVED_USERNAMES.includes(clean as any)) {
-                  return <HomePage />;
-                }
-                return (
+              {/* Dynamic Public Bio Pages */}
+              <Route path="/@:username">
+                {(params) => (
                   <PublicBioView
                     username={params.username}
                     onBackToStudio={() => window.location.href = '/studio'}
                   />
-                );
-              }}
-            </Route>
-          </Switch>
+                )}
+              </Route>
+
+              <Route path="/:username">
+                {(params) => {
+                  // Guard against system routes and reserved words
+                  const clean = params.username.toLowerCase();
+                  if (RESERVED_USERNAMES.includes(clean as any)) {
+                    return <HomePage />;
+                  }
+                  return (
+                    <PublicBioView
+                      username={params.username}
+                      onBackToStudio={() => window.location.href = '/studio'}
+                    />
+                  );
+                }}
+              </Route>
+            </Switch>
+          </BackgroundAnimation>
         </AuthProvider>
       </LanguageProvider>
     </ErrorBoundary>
   );
-}
+};

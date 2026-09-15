@@ -274,6 +274,19 @@ input, textarea, select { max-width: 100%; min-width: 0; }
   }
 }
 
+/* Background glow keyframes */
+@keyframes bg-glow {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(30px, 30px) rotate(120deg);
+  }
+  66% {
+    transform: translate(-30px, -30px) rotate(240deg);
+  }
+}
+
 /* Reduced motion overrides */
 @media (prefers-reduced-motion: reduce) {
   .motion-reduce { animation: none !important; transition: none !important; }
