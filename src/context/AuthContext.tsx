@@ -21,12 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     try {
-      if (!authStorage.getToken()) {
-        setUser(null);
-        setProfile(null);
-        setIsLoading(false);
-        return;
-      }
       const data = await api.auth.me();
       if (data?.user) {
         setUser(data.user);

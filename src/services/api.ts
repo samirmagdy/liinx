@@ -1,11 +1,11 @@
 import { CreatorProfile, ThemeConfig, ProfileBlock } from '../types';
 
-const TOKEN_KEY = 'liinx_auth_token';
+let sessionToken: string | null = null;
 
 export const authStorage = {
-  getToken: () => localStorage.getItem(TOKEN_KEY),
-  setToken: (token: string) => localStorage.setItem(TOKEN_KEY, token),
-  removeToken: () => localStorage.removeItem(TOKEN_KEY)
+  getToken: () => sessionToken,
+  setToken: (token: string) => { sessionToken = token; },
+  removeToken: () => { sessionToken = null; }
 };
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_URL?.replace(/\/$/, '') || '';
@@ -23,10 +23,17 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
-  const res = await fetch(url, {
-    ...options,
-    headers
-  });
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), 15000);
+  let res: Response;
+  try {
+    res = await fetch(url, { ...options, headers, credentials: 'include', signal: options.signal || controller.signal });
+  } catch (error: any) {
+    if (error?.name === 'AbortError') throw Object.assign(new Error('The request timed out. Please try again.'), { status: 408 });
+    throw new Error('Network error. Check your connection and try again.');
+  } finally {
+    globalThis.clearTimeout(timeout);
+  }
 
   const contentType = res.headers.get('content-type') || '';
   const isJson = contentType.includes('application/json');
@@ -66,6 +73,7 @@ export const api = {
       return request<{ user: any; profile: CreatorProfile }>('/api/auth/me');
     },
     logout: () => {
+      void request<{ success: boolean }>('/api/auth/logout', { method: 'POST' }).catch(() => {});
       authStorage.removeToken();
     }
   },
@@ -135,6 +143,9 @@ export const api = {
         count: number;
         subscribers: { id: string; email: string; subscribedAt: string }[];
       }>('/api/studio/subscribers');
+    },
+    deleteSubscriber: async (id: string) => {
+      return request<{ success: boolean }>(`/api/studio/subscribers/${encodeURIComponent(id)}`, { method: 'DELETE' });
     },
     uploadImage: async (file: File): Promise<{ success: boolean; url: string }> => {
       const token = authStorage.getToken();
@@ -240,10 +251,10 @@ export const api = {
   },
 
   newsletter: {
-    subscribe: async (profileId: string, blockId: string | undefined, email: string) => {
+    subscribe: async (profileId: string, blockId: string | undefined, email: string, consent = true) => {
       return request<{ success: boolean; message: string }>('/api/newsletter/subscribe', {
         method: 'POST',
-        body: JSON.stringify({ profileId, blockId, email })
+        body: JSON.stringify({ profileId, blockId, email, consent })
       });
     }
   },

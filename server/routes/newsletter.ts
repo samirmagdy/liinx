@@ -2,24 +2,29 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { sharedRateLimit } from '../middleware/rateLimit.js';
 
 export const newsletterRouter = Router();
 
 const subscribeSchema = z.object({
   profileId: z.string().min(1, 'Profile ID is required'),
   blockId: z.string().optional().nullable(),
-  email: z.string().email('Please enter a valid email address')
+  email: z.string().email('Please enter a valid email address'),
+  consent: z.boolean().optional()
 });
 
 // Public: Subscribe to a creator's newsletter
-newsletterRouter.post('/api/newsletter/subscribe', (req, res) => {
+newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'newsletter-subscribe', limit: 10, windowMs: 60 * 60 * 1000 }), (req, res) => {
   try {
     const parse = subscribeSchema.safeParse(req.body);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
-    const { profileId, blockId, email } = parse.data;
+    const { profileId, blockId, email, consent } = parse.data;
+    if (consent === false) {
+      return res.status(400).json({ error: 'Please confirm that you want to receive updates.' });
+    }
     const cleanEmail = email.toLowerCase().trim();
 
     // Verify creator exists
@@ -36,6 +41,9 @@ newsletterRouter.post('/api/newsletter/subscribe', (req, res) => {
         INSERT INTO newsletter_subscribers (id, profile_id, block_id, email, created_at)
         VALUES (?, ?, ?, ?, ?)
       `).run(id, profileId, blockId || null, cleanEmail, now);
+      if (consent === true) {
+        db.prepare('INSERT INTO newsletter_consents (subscriber_id, consented_at) VALUES (?, ?)').run(id, now);
+      }
 
       res.status(201).json({
         success: true,
@@ -117,5 +125,19 @@ newsletterRouter.get('/api/studio/subscribers/export', requireAuth, (req: Authen
   } catch (err: any) {
     console.error('Export subscribers error:', err);
     res.status(500).json({ error: 'Failed to export subscribers.' });
+  }
+});
+
+newsletterRouter.delete('/api/studio/subscribers/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const result = db.prepare(`
+      DELETE FROM newsletter_subscribers
+      WHERE id = ? AND profile_id = ?
+    `).run(req.params.id, req.user!.profileId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Subscriber not found.' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete subscriber error:', err);
+    res.status(500).json({ error: 'Failed to remove subscriber.' });
   }
 });

@@ -71,6 +71,10 @@ function HomePage() {
   );
 }
 
+function PublicProfilePage({ username }: { username: string }) {
+  return <PublicBioView username={username} onBackToStudio={() => window.location.href = '/studio'} />;
+}
+
 function StudioPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading } = useAuth();
@@ -303,10 +307,7 @@ export default function App() {
             {/* Dynamic Public Bio Pages */}
             <Route path="/@:username">
               {(params) => (
-                <PublicBioView
-                  username={params.username}
-                  onBackToStudio={() => window.location.href = '/studio'}
-                />
+                <PublicProfilePage username={params.username} />
               )}
             </Route>
 

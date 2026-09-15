@@ -10,7 +10,11 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - JWT_SECRET=${JWT_SECRET:-liinx_production_jwt_secret_change_me_in_env}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set to a random value of at least 32 characters}
+      - APP_ORIGIN=${APP_ORIGIN:?APP_ORIGIN must be set to the public HTTPS origin}
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN must be set to the allowed frontend origin(s)}
+      - DATA_DIR=/app/data
+      - UPLOADS_DIR=/app/public/uploads
       - CLUSTER=${CLUSTER:-false}
     volumes:
       - ./data:/app/data

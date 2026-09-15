@@ -3,13 +3,15 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import crypto from 'node:crypto';
 import { requireAuth } from '../middleware/auth.js';
+import { sharedRateLimit } from '../middleware/rateLimit.js';
 
 export const uploadRouter = Router();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const uploadsDir = path.resolve(__dirname, '../../public/uploads');
+const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../../public/uploads'));
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -51,6 +53,26 @@ export function detectImageMagicBytes(buffer: Buffer): { ext: string; mime: stri
   return null;
 }
 
+function getImageDimensions(buffer: Buffer, ext: string): { width: number; height: number } | null {
+  if (ext === '.png' && buffer.length >= 24) return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+  if (ext === '.gif' && buffer.length >= 10) return { width: buffer.readUInt16LE(6), height: buffer.readUInt16LE(8) };
+  if (ext === '.webp' && buffer.length >= 30 && buffer.toString('ascii', 12, 16) === 'VP8X') return { width: 1 + buffer.readUIntLE(24, 3), height: 1 + buffer.readUIntLE(27, 3) };
+  if (ext === '.jpg') {
+    let offset = 2;
+    while (offset + 9 < buffer.length) {
+      if (buffer[offset] !== 0xff) { offset += 1; continue; }
+      const marker = buffer[offset + 1];
+      const length = buffer.readUInt16BE(offset + 2);
+      if ((marker >= 0xc0 && marker <= 0xc3) || (marker >= 0xc5 && marker <= 0xc7) || (marker >= 0xc9 && marker <= 0xcb) || (marker >= 0xcd && marker <= 0xcf)) {
+        return { width: buffer.readUInt16BE(offset + 7), height: buffer.readUInt16BE(offset + 5) };
+      }
+      if (length < 2) break;
+      offset += 2 + length;
+    }
+  }
+  return null;
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -63,7 +85,22 @@ const uploadFields = upload.fields([
   { name: 'file', maxCount: 1 }
 ]);
 
-uploadRouter.post('/api/upload', requireAuth, (req, res) => {
+const uploadAttempts = new Map<string, { count: number; resetAt: number }>();
+function uploadRateLimited(key: string): boolean {
+  const now = Date.now();
+  const current = uploadAttempts.get(key);
+  if (!current || current.resetAt <= now) {
+    uploadAttempts.set(key, { count: 1, resetAt: now + 60 * 60 * 1000 });
+    return false;
+  }
+  current.count += 1;
+  return current.count > 30;
+}
+
+uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', limit: 30, windowMs: 60 * 60 * 1000 }), (req, res) => {
+  if (uploadRateLimited((req as any).user?.userId || req.ip)) {
+    return res.status(429).json({ error: 'Too many uploads. Please try again later.' });
+  }
   uploadFields(req, res, (err: any) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -89,8 +126,13 @@ uploadRouter.post('/api/upload', requireAuth, (req, res) => {
       });
     }
 
+    const dimensions = getImageDimensions(uploadedFile.buffer, detected.ext);
+    if (dimensions && (dimensions.width <= 0 || dimensions.height <= 0 || dimensions.width * dimensions.height > 40_000_000)) {
+      return res.status(400).json({ error: 'Image dimensions are too large. Please upload an image under 40 megapixels.' });
+    }
+
     // Securely write file with normalized extension based on detected magic bytes
-    const uniqueSuffix = Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+    const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
     const safeFilename = `upload_${uniqueSuffix}${detected.ext}`;
     const targetPath = path.join(uploadsDir, safeFilename);
 

@@ -1,6 +1,6 @@
 # LIINX — Design-First Link-in-Bio Platform
 
-A modern, high-performance, design-first link-in-bio platform built with **0% fake implementation**. Every single feature—from authentication, debounced auto-saving, rich media embeds, link redirection, and newsletter collection to real-time analytics—is backed by real persistence, real cryptography, and robust error handling.
+A production-oriented, design-first link-in-bio platform. Core creator workflows use real persistence, authentication, media blocks, redirects, newsletters, analytics, and Stripe integration. Marketing previews and seeded demo content are separate from user-owned production data.
 
 ---
 
@@ -34,7 +34,7 @@ A modern, high-performance, design-first link-in-bio platform built with **0% fa
 ## Getting Started
 
 ### Prerequisites
-- **Node.js**: v20.x or higher
+- **Node.js**: v22.x or higher
 - **npm**: v10.x or higher
 
 ### 1. Installation
@@ -50,17 +50,21 @@ Copy `.env.example` to `.env`:
 cp .env.example .env
 ```
 Key configuration parameters:
-- `PORT`: HTTP port to bind (default: `3000` or `3050`)
+- `PORT`: HTTP port to bind (Docker/Fly default: `3000`; development fallback: `3050`)
 - `NODE_ENV`: `development` or `production`
 - `JWT_SECRET`: Secret key for signing user sessions (minimum 32 characters)
 - `CLUSTER`: Set to `true` to enable multi-core cluster mode across all CPU cores
+- `APP_ORIGIN`: Canonical public HTTPS origin used by billing redirects
+- `CORS_ORIGIN`: Comma-separated allowed browser origins; do not use `*` for authenticated deployments
+- `INTEGRATION_ENCRYPTION_KEY`: Separate 32-byte key used to encrypt OAuth tokens at rest
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and configured Stripe Price IDs for billing
 
 ### 3. Running in Development
 Starts the Express server with Vite middleware hot-module reloading:
 ```bash
 npm run dev
 ```
-Open [http://localhost:3050](http://localhost:3050) in your browser.
+Open [http://localhost:3050](http://localhost:3050) in your browser when `PORT` is not set.
 
 ### 4. Running in Production
 ```bash
@@ -85,7 +89,11 @@ docker compose logs -f
 docker compose ps
 ```
 
-The database persists in `./data/liinx.db` and uploaded images persist in `./public/uploads`.
+The database persists in `./data/liinx.db` and uploaded images persist in `./public/uploads`. Fly uses separate persistent volumes for both paths; do not run more than one SQLite machine against the same logical database without a database migration.
+
+### Vercel + Fly deployment
+
+The Vercel project is the frontend shell. `vercel.json` proxies `/api/*`, `/uploads/*`, `/robots.txt`, and `/sitemap.xml` to the Fly backend at `liinx-app.fly.dev`; the Fly deployment owns Express, SQLite, and uploaded media. Set the backend `APP_ORIGIN`/`CORS_ORIGIN` to the public frontend origin and configure all required secrets before deploying. Do not deploy SQLite or local uploads as the primary data store on a serverless-only host.
 
 ---
 
@@ -156,10 +164,6 @@ npm test
 
 ---
 
-## High-Concurrency Benchmark Results (5,000 Users)
+## Performance claims
 
-- **Peak Server Throughput**: **8,139 requests/second**
-- **302 Redirect Latency**: **24 ms (P50)**, **38 ms (P90)**
-- **Profile View Latency**: **52 ms (P50)**, **85 ms (P90)**
-- **Static Assets Delivery**: **96 ms (P50)**
-- **Database Integrity**: `PRAGMA integrity_check: ok` with zero dropped writes.
+Performance depends on deployment provider, database volume, media storage, traffic mix, and proxy configuration. Run an environment-specific load test before publishing benchmark numbers. The backup command verifies SQLite integrity for the generated snapshot.

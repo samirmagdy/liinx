@@ -33,6 +33,7 @@ export function initDatabase() {
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      session_version INTEGER NOT NULL DEFAULT 1,
       created_at INTEGER NOT NULL
     );
 
@@ -221,6 +222,10 @@ export function initDatabase() {
   } catch (e) {}
 
   try {
+    db.exec("ALTER TABLE users ADD COLUMN session_version INTEGER NOT NULL DEFAULT 1");
+  } catch (e) {}
+
+  try {
     db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_custom_domain ON profiles(custom_domain)");
   } catch (e) {}
 
@@ -237,6 +242,24 @@ export function initDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
     CREATE INDEX IF NOT EXISTS idx_api_keys_profile ON api_keys(profile_id);
+
+    CREATE TABLE IF NOT EXISTS processed_webhook_events (
+      event_id TEXT PRIMARY KEY,
+      processed_at INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS newsletter_consents (
+      subscriber_id TEXT PRIMARY KEY,
+      consented_at INTEGER NOT NULL,
+      FOREIGN KEY (subscriber_id) REFERENCES newsletter_subscribers(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS rate_limit_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bucket_key TEXT NOT NULL,
+      occurred_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_rate_limit_bucket_time ON rate_limit_events(bucket_key, occurred_at);
   `);
 
   if (process.env.NODE_ENV === 'test' || process.env.SEED_DEMO === 'true') seedDefaultData();
@@ -244,7 +267,21 @@ export function initDatabase() {
 
 function seedDefaultData() {
   const userCount = (db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number }).count;
-  if (userCount > 0) return;
+  if (userCount > 0) {
+    // Keep the deterministic public fixture available for isolated test runs even
+    // when another test created users in the same persistent test database.
+    if (process.env.NODE_ENV === 'test' && !(db.prepare('SELECT id FROM profiles WHERE username = ?').get('elenarostova'))) {
+      const now = Date.now();
+      const demoUserId = 'usr_demo_01';
+      db.prepare('INSERT OR IGNORE INTO users (id, email, password_hash, session_version, created_at) VALUES (?, ?, ?, 1, ?)').run(demoUserId, 'demo@liinx.co', bcrypt.hashSync('password123', 10), now);
+      const owner = db.prepare('SELECT id FROM users WHERE id = ?').get(demoUserId);
+      if (owner) {
+        db.prepare(`INSERT OR IGNORE INTO profiles (id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          .run('prf_elena', demoUserId, 'elenarostova', 'Elena Rostova', 'Example profile for local testing.', null, 'Design & Art', 0, 'editorial-stone', '[]', now, now);
+      }
+    }
+    return;
+  }
 
   const now = Date.now();
   const passwordHash = bcrypt.hashSync('password123', 10);

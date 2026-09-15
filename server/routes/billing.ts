@@ -11,20 +11,6 @@ const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export const stripeClient = stripeKey ? new Stripe(stripeKey) : null;
 
-// Pricing tiers configuration
-const PLAN_PRICES: Record<'pro' | 'studio', { amountCents: number; name: string; envPriceId?: string }> = {
-  pro: {
-    amountCents: 900, // $9.00 / month
-    name: 'LIINX Pro Creator',
-    envPriceId: process.env.STRIPE_PRO_PRICE_ID
-  },
-  studio: {
-    amountCents: 2900, // $29.00 / month
-    name: 'LIINX Studio Agency',
-    envPriceId: process.env.STRIPE_STUDIO_PRICE_ID
-  }
-};
-
 // 1. Check Billing Configuration & Active Subscription
 billingRouter.get('/billing/status', requireAuth, (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -78,17 +64,21 @@ billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: 
       client_reference_id: profile.id,
       customer_email: req.user!.email,
       line_items: [{
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: planConfig.name,
-                description: `${interval === 'year' ? 'Annual' : 'Monthly'} subscription for LIINX ${plan.toUpperCase()} tier.`
-              },
-              unit_amount: planConfig[interval as 'month' | 'year'],
-              recurring: { interval }
-            },
-            quantity: 1
-          }],
+        ...(plan === 'pro' && process.env.STRIPE_PRO_PRICE_ID
+          ? { price: process.env.STRIPE_PRO_PRICE_ID }
+          : plan === 'studio' && process.env.STRIPE_STUDIO_PRICE_ID
+            ? { price: process.env.STRIPE_STUDIO_PRICE_ID }
+            : { price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: planConfig.name,
+                  description: `${interval === 'year' ? 'Annual' : 'Monthly'} subscription for LIINX ${plan.toUpperCase()} tier.`
+                },
+                unit_amount: planConfig[interval as 'month' | 'year'],
+                recurring: { interval }
+              } }),
+        quantity: 1
+      }],
       metadata: {
         profileId: profile.id,
         plan,
@@ -118,7 +108,7 @@ billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: 
     });
   } catch (err: any) {
     console.error('Stripe checkout error:', err);
-    res.status(500).json({ error: err.message || 'Failed to create Stripe Checkout session.' });
+    res.status(500).json({ error: 'Unable to start checkout. Please try again.' });
   }
 });
 
@@ -147,7 +137,7 @@ billingRouter.post('/billing/create-portal-session', requireAuth, async (req: Au
     res.json({ url: portalSession.url });
   } catch (err: any) {
     console.error('Stripe portal error:', err);
-    res.status(500).json({ error: err.message || 'Failed to create billing portal session.' });
+    res.status(500).json({ error: 'Unable to open billing management. Please try again.' });
   }
 });
 
@@ -178,6 +168,10 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
 
   try {
     const now = Date.now();
+
+    const duplicate = db.prepare('SELECT event_id FROM processed_webhook_events WHERE event_id = ?').get(event.id);
+    if (duplicate) return res.json({ received: true, duplicate: true });
+    db.prepare('INSERT INTO processed_webhook_events (event_id, processed_at) VALUES (?, ?)').run(event.id, now);
 
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -239,6 +233,16 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
             SET plan = 'free', stripe_subscription_id = null, updated_at = ?
             WHERE stripe_customer_id = ?
           `).run(now, customerId);
+        }
+        break;
+      }
+
+      case 'invoice.payment_failed':
+      case 'customer.subscription.paused': {
+        const object = event.data.object as any;
+        const customerId = object.customer ? String(object.customer) : null;
+        if (customerId) {
+          db.prepare("UPDATE profiles SET plan = 'free', updated_at = ? WHERE stripe_customer_id = ?").run(now, customerId);
         }
         break;
       }

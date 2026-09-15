@@ -4,8 +4,16 @@ import { db } from '../db.js';
 import { hashPassword, comparePassword, signJwt } from '../auth.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES } from '../../src/config/brand.js';
+import fs from 'fs';
+import path from 'path';
+import { sharedRateLimit } from '../middleware/rateLimit.js';
 
 export const authRouter = Router();
+
+function setSessionCookie(res: any, token: string) {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${secure}`);
+}
 
 // In-memory sliding-window rate limiters for auth
 const loginAttempts = new Map<string, number[]>();
@@ -79,7 +87,7 @@ const loginSchema = z.object({
 });
 
 // Check username availability
-authRouter.get('/check-username/:username', (req, res) => {
+authRouter.get('/check-username/:username', sharedRateLimit({ name: 'username-check', limit: 60, windowMs: 60 * 60 * 1000 }), (req, res) => {
   const cleanUsername = req.params.username.toLowerCase().trim();
   if (!/^[a-z0-9_]{3,30}$/.test(cleanUsername)) {
     return res.json({ available: false, reason: 'Invalid format (3-30 lowercase characters)' });
@@ -94,9 +102,9 @@ authRouter.get('/check-username/:username', (req, res) => {
 });
 
 // Register new user & creator profile
-authRouter.post('/register', (req, res) => {
+authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, windowMs: 60 * 60 * 1000 }), (req, res) => {
   try {
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    const ip = req.ip || req.socket.remoteAddress || '127.0.0.1';
     if (isRegisterRateLimited(ip)) {
       return res.status(429).json({ error: 'Too many account registrations from this network. Please try again later.' });
     }
@@ -193,8 +201,10 @@ authRouter.post('/register', (req, res) => {
       userId,
       email: cleanEmail,
       profileId,
-      username: cleanUsername
+      username: cleanUsername,
+      sessionVersion: 1
     });
+    setSessionCookie(res, token);
 
     res.status(201).json({
       token,
@@ -208,9 +218,9 @@ authRouter.post('/register', (req, res) => {
 });
 
 // Login
-authRouter.post('/login', (req, res) => {
+authRouter.post('/login', sharedRateLimit({ name: 'login', limit: 20, windowMs: 15 * 60 * 1000 }), (req, res) => {
   try {
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    const ip = req.ip || req.socket.remoteAddress || '127.0.0.1';
     if (isLoginRateLimited(ip)) {
       return res.status(429).json({ error: 'Too many login attempts. Please try again in 15 minutes.' });
     }
@@ -242,8 +252,10 @@ authRouter.post('/login', (req, res) => {
       userId: user.id,
       email: user.email,
       profileId: profile.id,
-      username: profile.username
+      username: profile.username,
+      sessionVersion: Number(user.session_version || 1)
     });
+    setSessionCookie(res, token);
 
     res.json({
       token,
@@ -254,6 +266,12 @@ authRouter.post('/login', (req, res) => {
     console.error('Login error:', err);
     res.status(500).json({ error: 'An unexpected error occurred during login.' });
   }
+});
+
+authRouter.post('/logout', (_req, res) => {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', `liinx_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${secure}`);
+  res.json({ success: true });
 });
 
 // Get current authenticated user and profile
@@ -294,6 +312,16 @@ authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res) => {
 authRouter.delete('/account', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user!.userId;
+    const profileMedia = db.prepare('SELECT avatar_url FROM profiles WHERE user_id = ?').all(userId) as { avatar_url?: string }[];
+    const ownedProfiles = db.prepare('SELECT id FROM profiles WHERE user_id = ?').all(userId) as { id: string }[];
+    const uploadPaths = new Set<string>(profileMedia.map(media => media.avatar_url).filter((value): value is string => Boolean(value && value.startsWith('/uploads/'))));
+    for (const profile of ownedProfiles) {
+      const blocks = db.prepare('SELECT extra_json FROM blocks WHERE profile_id = ?').all(profile.id) as { extra_json?: string | null }[];
+      for (const block of blocks) {
+        if (!block.extra_json) continue;
+        for (const match of block.extra_json.matchAll(/\/uploads\/[A-Za-z0-9._-]+/g)) uploadPaths.add(match[0]);
+      }
+    }
 
     const deleteAccountTx = db.transaction(() => {
       // Find all profiles for this user
@@ -317,6 +345,12 @@ authRouter.delete('/account', requireAuth, (req: AuthenticatedRequest, res) => {
     });
 
     deleteAccountTx();
+
+    // Remove locally stored media after the transaction succeeds. Missing files are harmless.
+    const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), 'public/uploads'));
+    for (const uploadPath of uploadPaths) {
+      try { fs.unlinkSync(path.join(uploadsDir, path.basename(uploadPath))); } catch { /* already absent */ }
+    }
 
     res.json({ success: true, message: 'Your account and all associated profile data have been permanently deleted.' });
   } catch (err: any) {

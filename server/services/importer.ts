@@ -272,13 +272,16 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
       throw new Error('Invalid or non-public profile URL provided.');
     }
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     res = await fetch(currentUrl, {
       redirect: 'manual',
+      signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
       }
-    });
+    }).finally(() => clearTimeout(timeout));
 
     if (res.status >= 300 && res.status < 400) {
       redirects++;
@@ -307,6 +310,9 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
   }
 
   const html = await res.text();
+  if (html.length > 2 * 1024 * 1024) {
+    throw new Error('The source profile is too large to import safely.');
+  }
 
   // Try Next.js embedded data first
   const parsedNext = parseLinktreeNextData(html);

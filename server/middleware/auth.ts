@@ -6,13 +6,19 @@ export interface AuthenticatedRequest extends Request {
   user?: AuthPayload;
 }
 
+function readCookie(req: Request, name: string): string | null {
+  const header = req.headers.cookie || '';
+  const item = header.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`));
+  return item ? decodeURIComponent(item.slice(name.length + 1)) : null;
+}
+
 export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const token = bearer || readCookie(req, 'liinx_session');
+  if (!token) {
     return res.status(401).json({ error: 'Authentication required. Please log in.' });
   }
-
-  const token = authHeader.split(' ')[1];
   const payload = verifyJwt(token);
 
   if (!payload) {
@@ -20,9 +26,12 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
   }
 
   // Ensure user still exists
-  const user = db.prepare('SELECT id FROM users WHERE id = ?').get(payload.userId);
+  const user = db.prepare('SELECT id, session_version FROM users WHERE id = ?').get(payload.userId) as { id: string; session_version: number } | undefined;
   if (!user) {
     return res.status(401).json({ error: 'User account not found.' });
+  }
+  if (payload.sessionVersion !== undefined && Number(payload.sessionVersion) !== Number(user.session_version || 1)) {
+    return res.status(401).json({ error: 'This session has been revoked. Please log in again.' });
   }
 
   req.user = payload;

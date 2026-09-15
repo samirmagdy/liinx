@@ -75,6 +75,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [newsletterSuccess, setNewsletterSuccess] = useState<string | null>(null);
   const [newsletterError, setNewsletterError] = useState<string | null>(null);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Dynamic fetch when accessed via route or custom domain (0% fake demo fallback)
@@ -118,6 +119,19 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         setLoading(false);
       });
   }, [initialProfile, routeUsername, customDomain]);
+
+  useEffect(() => {
+    if (!profile || previewOnly) return;
+    const title = `${profile.displayName} (@${profile.username}) | LIINX`;
+    document.title = title;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`);
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', 'index, follow');
+    const canonical = customDomain ? `https://${customDomain}` : `https://liinx.app/@${profile.username}`;
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical);
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`);
+  }, [profile, previewOnly, customDomain]);
 
   // Google Analytics 4 (gtag.js) Injection
   useEffect(() => {
@@ -280,7 +294,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     setNewsletterLoading(true);
     setNewsletterError(null);
     try {
-      const res = await api.newsletter.subscribe(profile.id, blockId, newsletterEmail.trim());
+      if (!newsletterConsent) {
+        setNewsletterError(ui('Please confirm that you want to receive updates.'));
+        setNewsletterLoading(false);
+        return;
+      }
+      const res = await api.newsletter.subscribe(profile.id, blockId, newsletterEmail.trim(), newsletterConsent);
       setNewsletterSuccess(res.message || ui('Subscribed successfully!'));
       setNewsletterError(null);
       setTimeout(() => {
@@ -846,6 +865,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           {newsletterError}
                         </p>
                       )}
+                      <label className="flex items-start gap-2 text-[11px] leading-relaxed opacity-80" dir="auto">
+                        <input type="checkbox" checked={newsletterConsent} onChange={e => setNewsletterConsent(e.target.checked)} className="mt-0.5 min-h-0" />
+                        <span>{ui("I agree to receive updates from this creator and can unsubscribe later.")}</span>
+                      </label>
                       <button
                         type="submit"
                         disabled={newsletterLoading}

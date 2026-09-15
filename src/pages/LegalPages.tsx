@@ -75,14 +75,16 @@ export function PrivacyPage() {
       title={lang === 'ar' ? 'الخصوصية' : 'Privacy'}
       sections={lang === 'ar' ? [
         ['بيانات الحساب والمحتوى', 'نخزّن البريد الإلكتروني وكلمة المرور بعد تجزئتها باستخدام bcrypt، ومحتوى الملف والروابط والمظهر الذي تختاره. تظهر المعلومات المنشورة لزوار صفحتك.'],
-        ['الزيارات والاشتراكات', 'نسجّل زيارات الصفحة ونقرات الروابط ومصادر الإحالة ووسوم الحملات. تستخدم الإحصاءات معرّفات مشتقة من عنوان IP. تُحفظ عناوين المشتركين في القائمة الخاصة بصاحب الصفحة.'],
-        ['الخدمات الخارجية', 'قد تحمّل الوسائط والحجوزات خدمات خارجية مثل YouTube وSpotify وCalendly. عند تفعيل أدوات Google Analytics أو Meta من صاحب الصفحة تسري أيضاً سياسات تلك الخدمات.'],
-        ['طلبات البيانات', 'استخدم نموذج التواصل لطلبات الوصول إلى بياناتك أو حذفها. لا يوجد ادعاء اعتماد امتثال أو مدة تنفيذ مضمونة.']
+        ['الزيارات والاشتراكات', 'نسجّل زيارات الصفحة ونقرات الروابط ومصادر الإحالة ووسوم الحملات. تستخدم الإحصاءات معرّفات مشتقة من عنوان IP وتُستخدم لأغراض مجمعة ومكافحة الإساءة. تُحفظ عناوين المشتركين في القائمة الخاصة بصاحب الصفحة مع وقت الموافقة عندما يوافق المشترك.'],
+        ['الخدمات الخارجية والوسائط', 'قد تحمّل الوسائط والحجوزات خدمات خارجية مثل YouTube وSpotify وCalendly. قد تُستخدم Stripe للفوترة، وInstagram OAuth للمزامنة، وGoogle Analytics أو Meta Pixel إذا فعّلها صاحب الصفحة. هذه الخدمات قد تعالج بيانات الزائر وفق سياساتها.'],
+        ['الاحتفاظ والحذف', 'يمكن لصاحب الحساب حذف حسابه ومحتواه من الخدمة، مع إزالة سجلات الحساب والاشتراكات والتكاملات المرتبطة. قد تبقى نسخ احتياطية آمنة حتى انتهاء فترة الاحتفاظ التشغيلية. يمكن إزالة المشترك من قائمة صاحب الصفحة عند طلبه منه.'],
+        ['طلبات البيانات', 'استخدم نموذج التواصل لطلبات الوصول إلى بياناتك أو حذفها أو الانسحاب من قائمة بريدية. لا يوجد ادعاء اعتماد امتثال أو مدة تنفيذ مضمونة.']
       ] : [
         ['Account data and content', 'We store your email, bcrypt-hashed password, profile content, links and selected appearance. Published information is visible to page visitors.'],
-        ['Visits and subscriptions', 'We record page views, link clicks, referrers and campaign tags. Analytics uses identifiers derived from IP addresses. Subscriber emails are stored in the page owner\'s private list.'],
-        ['Third-party services', 'Media and booking embeds may load external services such as YouTube, Spotify and Calendly. If a creator enables Google Analytics or Meta tools, those services\' policies also apply.'],
-        ['Data requests', 'Use the contact form to request access to or deletion of your data. No compliance certification or guaranteed processing time is claimed.']
+        ['Visits and subscriptions', 'We record page views, link clicks, referrers and campaign tags. Analytics uses identifiers derived from IP addresses for aggregate reporting and abuse prevention. Subscriber emails are stored in the page owner\'s private list, with consent time recorded when consent is provided.'],
+        ['Third-party services and media', 'Media and booking embeds may load YouTube, Spotify and Calendly. Stripe may process billing, Instagram OAuth may process synchronization, and Google Analytics or Meta Pixel may load when enabled by a creator. Those providers process data under their own policies.'],
+        ['Retention and deletion', 'Account owners can delete their account and associated content, subscriptions and integrations. Secure backups may retain deleted records for an operational retention period. Subscribers can ask the creator to remove their address from the creator\'s list.'],
+        ['Data requests', 'Use the contact form to request access, deletion, or removal from a creator\'s newsletter list. No compliance certification or guaranteed processing time is claimed.']
       ]}
     />
   );
@@ -96,12 +98,12 @@ export function TermsPage() {
       badge={lang === 'ar' ? 'الشروط والأحكام' : 'Terms & Conditions'}
       title={lang === 'ar' ? 'شروط الاستخدام' : 'Terms of use'}
       sections={lang === 'ar' ? [
-        ['مسؤولية المحتوى', 'أنت مسؤول عن المحتوى والروابط التي تنشرها وعن امتلاك حقوق استخدامها. لا تستخدم الخدمة للتصيد أو البرمجيات الضارة أو الاحتيال أو المحتوى غير القانوني.'],
+        ['مسؤولية المحتوى ومكافحة الإساءة', 'أنت مسؤول عن المحتوى والروابط التي تنشرها وعن امتلاك حقوق استخدامها. لا تستخدم الخدمة للتصيد أو البرمجيات الضارة أو الاحتيال أو انتحال الشخصية أو البريد المزعج أو المحتوى غير القانوني. يجوز إزالة الصفحات والروابط المخالفة.'],
         ['الفوترة', 'تُعرض الأسعار وفترة الفوترة قبل الانتقال إلى Stripe. تتجدد الاشتراكات المدفوعة تلقائياً؛ يمكنك إدارتها أو إلغاؤها من بوابة الفوترة.'],
         ['الحجوزات والخدمات الخارجية', 'تُدار المواعيد وتأكيدات الحجز لدى Calendly. فتح أداة الحجز لا يعني اكتمال الحجز. إعداد النطاق وHTTPS يتطلبان استضافة مهيأة.'],
         ['توفر الخدمة', 'لا توجد ضمانات منشورة لزمن الاستجابة أو نسبة التوفر. تواصل معنا بشأن مشكلات الخدمة أو الفوترة.']
       ] : [
-        ['Content responsibility', 'You are responsible for the content and destinations you publish and for having permission to use them. Do not use the service for phishing, malware, fraud or unlawful content.'],
+        ['Content responsibility and abuse', 'You are responsible for the content and destinations you publish and for having permission to use them. Do not use the service for phishing, malware, fraud, impersonation, spam or unlawful content. We may remove violating pages or destinations.'],
         ['Billing', 'Prices and billing intervals are displayed before Stripe Checkout. Paid subscriptions renew automatically; manage or cancel them through the billing portal.'],
         ['Bookings and external services', 'Calendly manages availability and booking confirmations. Opening the scheduler does not mean a booking is complete. Custom domains and HTTPS require configured hosting.'],
         ['Service availability', 'No response-time or uptime guarantee is published. Contact us about service or billing problems.']

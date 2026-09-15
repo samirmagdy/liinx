@@ -8,6 +8,7 @@ import {
   syncMediaToBlocks, 
   fetchInstagramMedia 
 } from '../services/instagramSync.js';
+import { encryptSecret, decryptSecret } from '../secretStore.js';
 
 export const instagramRouter = Router();
 
@@ -104,10 +105,13 @@ instagramRouter.get('/integrations/instagram/callback', async (req: Request, res
   if (!profileId || !timestampStr || !signature) {
     return res.redirect('/studio?instagram_error=Malformed_security_state');
   }
+  if (!/^\d+$/.test(timestampStr) || Date.now() - Number(timestampStr) > 10 * 60 * 1000) {
+    return res.redirect('/studio?instagram_error=Expired_security_state');
+  }
 
   const secret = process.env.JWT_SECRET || 'secret';
   const expectedHmac = crypto.createHmac('sha256', secret).update(`${profileId}:${timestampStr}`).digest('hex');
-  if (expectedHmac !== signature) {
+  if (expectedHmac.length !== signature.length || !crypto.timingSafeEqual(Buffer.from(expectedHmac), Buffer.from(signature))) {
     return res.redirect('/studio?instagram_error=Invalid_state_signature');
   }
 
@@ -186,7 +190,7 @@ instagramRouter.get('/integrations/instagram/callback', async (req: Request, res
         token_expires_at = excluded.token_expires_at,
         auto_sync_enabled = 1,
         updated_at = excluded.updated_at
-    `).run(syncId, profileId, String(tokenData.user_id), username, longLivedToken, tokenExpiresAt, now, now);
+    `).run(syncId, profileId, String(tokenData.user_id), username, encryptSecret(longLivedToken), tokenExpiresAt, now, now);
 
     // Initial media pull
     try {
@@ -224,7 +228,7 @@ instagramRouter.post('/integrations/instagram/sync', requireAuth, async (req: Au
     }
 
     // Fetch media from Instagram
-    const mediaItems = await fetchInstagramMedia(syncRow.access_token);
+    const mediaItems = await fetchInstagramMedia(decryptSecret(syncRow.access_token));
     const result = syncMediaToBlocks(profileId, mediaItems);
 
     return res.json({
@@ -328,7 +332,7 @@ instagramRouter.get('/webhooks/instagram', (req: Request, res: Response) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  const expectedToken = process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN || 'liinx_insta_verify';
+  const expectedToken = process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN;
 
   if (mode === 'subscribe' && token === expectedToken) {
     return res.status(200).send(challenge);
@@ -365,7 +369,7 @@ instagramRouter.post('/webhooks/instagram', async (req: Request, res: Response) 
 
       if (syncRow && syncRow.access_token) {
         try {
-          const media = await fetchInstagramMedia(syncRow.access_token);
+          const media = await fetchInstagramMedia(decryptSecret(syncRow.access_token));
           if (media.length > 0) {
             syncMediaToBlocks(syncRow.profile_id, media);
           }

@@ -12,6 +12,15 @@
     scroll-behavior: smooth;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   [id] {
     scroll-margin-top: 5rem;
   }
@@ -42,6 +51,15 @@
 
   button {
     font-family: inherit;
+  }
+
+  button, input, select, textarea {
+    min-height: 2.75rem;
+  }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+    outline-offset: 3px;
   }
 
   /* Tabular numbers for stats, prices, counters */

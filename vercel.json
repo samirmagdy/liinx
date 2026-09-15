@@ -2,6 +2,22 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://liinx-app.fly.dev/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://liinx-app.fly.dev/uploads/:path*"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "https://liinx-app.fly.dev/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://liinx-app.fly.dev/sitemap.xml"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

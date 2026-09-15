@@ -12,8 +12,9 @@ export function PageMetadata() {
     if (title) document.title = `${title[lang === 'ar' ? 1 : 0]} | ${brand.productName}`;
     const privatePage = ['/login', '/register', '/studio'].includes(path);
     document.querySelector('meta[name="robots"]')?.setAttribute('content', privatePage ? 'noindex, nofollow' : 'index, follow');
-    document.querySelector('link[rel="canonical"]')?.setAttribute('href', `${window.location.origin}${path}`);
-    document.querySelector('meta[property="og:url"]')?.setAttribute('content', `${window.location.origin}${path}`);
+    const canonicalOrigin = brand.domain === window.location.hostname ? window.location.origin : `https://${brand.domain}`;
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', `${canonicalOrigin}${path}`);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', `${canonicalOrigin}${path}`);
     if (title) document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
     document.querySelector('meta[property="article:modified_time"]')?.setAttribute('content', '2026-09-15');
   }, [location, lang]);

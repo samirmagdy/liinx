@@ -23,10 +23,30 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT) || 3050;
 
+if (process.env.NODE_ENV === 'production') {
+  for (const variable of ['APP_ORIGIN', 'CORS_ORIGIN']) {
+    if (!process.env[variable]) throw new Error(`Production requires ${variable}.`);
+  }
+}
+
 // Initialize SQLite database & seed demo data
 initDatabase();
 
-app.use(cors());
+const configuredOrigins = (process.env.CORS_ORIGIN || process.env.APP_ORIGIN || 'http://localhost:3050')
+  .split(',').map(origin => origin.trim()).filter(Boolean);
+if (process.env.NODE_ENV === 'production' && configuredOrigins.includes('*')) {
+  throw new Error('Production CORS_ORIGIN must list explicit trusted origins; wildcard CORS is not allowed.');
+}
+app.set('trust proxy', 1);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || configuredOrigins.includes('*') || configuredOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origin is not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id']
+}));
 
 // Correlation ID & Response Time Observability Middleware
 app.use((req, res, next) => {
@@ -53,6 +73,10 @@ app.use((_req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('X-DNS-Prefetch-Control', 'off');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com;");
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
@@ -93,7 +117,9 @@ Sitemap: https://liinx.app/sitemap.xml
 // Search Engine dynamic sitemap.xml
 app.get('/sitemap.xml', (_req, res) => {
   try {
-    const profiles = db.prepare('SELECT username, updated_at FROM profiles ORDER BY updated_at DESC LIMIT 500').all() as { username: string; updated_at: number }[];
+    // Sitemap protocol supports up to 50,000 URLs per file. Include all public
+    // profiles instead of silently dropping older creators at an arbitrary 500.
+    const profiles = db.prepare('SELECT username, updated_at FROM profiles WHERE username IS NOT NULL ORDER BY updated_at DESC LIMIT 50000').all() as { username: string; updated_at: number }[];
     const baseUrl = 'https://liinx.app';
     const nowIso = new Date().toISOString().split('T')[0];
 
@@ -155,7 +181,7 @@ app.use((req, res, next) => {
 });
 
 // Serve uploaded media with caching
-const uploadsDir = path.resolve(__dirname, '../public/uploads');
+const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../public/uploads'));
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -203,7 +229,7 @@ app.get('/api/health', (_req, res) => {
     res.status(503).json({
       status: 'unhealthy',
       service: 'liinx-api',
-      error: err.message
+      error: process.env.NODE_ENV === 'production' ? 'Database unavailable' : err.message
     });
   }
 });
@@ -218,7 +244,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   }
   console.error('Unhandled server error:', err);
   res.status(err.status || 500).json({
-    error: err.message || 'Internal server error'
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : (err.message || 'Internal server error')
   });
 });
 

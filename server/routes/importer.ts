@@ -3,27 +3,28 @@ import { z } from 'zod';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { importFromPublicUrl } from '../services/importer.js';
+import { sharedRateLimit } from '../middleware/rateLimit.js';
 
 export const importerRouter = Router();
 
 const previewSchema = z.object({
-  url: z.string().min(1, 'Profile URL is required')
+  url: z.string().min(1, 'Profile URL is required').max(2048)
 });
 
 const commitSchema = z.object({
   links: z.array(z.object({
-    title: z.string().min(1),
-    url: z.string().url(),
-    subtitle: z.string().optional()
-  })),
+    title: z.string().min(1).max(150),
+    url: z.string().url().refine(value => /^https?:$/i.test(new URL(value).protocol), 'Only HTTP(S) links are allowed.'),
+    subtitle: z.string().max(250).optional()
+  })).max(100),
   updateProfileInfo: z.boolean().optional(),
-  displayName: z.string().optional(),
-  bio: z.string().optional(),
-  avatarUrl: z.string().optional()
+  displayName: z.string().max(120).optional(),
+  bio: z.string().max(500).optional(),
+  avatarUrl: z.string().url().refine(value => /^https?:$/i.test(new URL(value).protocol), 'Only HTTP(S) avatar URLs are allowed.').optional()
 });
 
 // Authenticated: Preview imported links from public URL
-importerRouter.post('/studio/import/preview', requireAuth, async (req: AuthenticatedRequest, res) => {
+importerRouter.post('/studio/import/preview', requireAuth, sharedRateLimit({ name: 'import-preview', limit: 10, windowMs: 60 * 60 * 1000 }), async (req: AuthenticatedRequest, res) => {
   try {
     const parse = previewSchema.safeParse(req.body);
     if (!parse.success) {
@@ -42,7 +43,7 @@ importerRouter.post('/studio/import/preview', requireAuth, async (req: Authentic
 });
 
 // Authenticated: Commit imported links into profile
-importerRouter.post('/studio/import/commit', requireAuth, async (req: AuthenticatedRequest, res) => {
+importerRouter.post('/studio/import/commit', requireAuth, sharedRateLimit({ name: 'import-commit', limit: 20, windowMs: 60 * 60 * 1000 }), async (req: AuthenticatedRequest, res) => {
   try {
     const parse = commitSchema.safeParse(req.body);
     if (!parse.success) {

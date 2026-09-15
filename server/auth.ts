@@ -13,6 +13,7 @@ export interface AuthPayload {
   email: string;
   profileId: string;
   username: string;
+  sessionVersion?: number;
 }
 
 export function hashPassword(password: string): string {

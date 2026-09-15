@@ -22,5 +22,17 @@ export default defineConfig(() => {
     server: {
       hmr: true,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            routing: ['wouter'],
+            icons: ['lucide-react'],
+            motion: ['motion', 'canvas-confetti']
+          }
+        }
+      }
+    },
   };
 });

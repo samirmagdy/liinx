@@ -14,9 +14,9 @@ const createBlockSchema = z.object({
   badge: z.string().max(30).optional().nullable(),
   icon: z.string().max(50).optional().nullable(),
   highlighted: z.boolean().optional(),
-  startAt: z.number().nullable().optional(),
-  endAt: z.number().nullable().optional(),
-  extra: z.any().optional()
+  startAt: z.number().finite().int().min(0).nullable().optional(),
+  endAt: z.number().finite().int().min(0).nullable().optional(),
+  extra: z.record(z.string(), z.unknown()).optional()
 });
 
 const updateBlockSchema = z.object({
@@ -26,9 +26,9 @@ const updateBlockSchema = z.object({
   badge: z.string().max(30).optional().nullable(),
   icon: z.string().max(50).optional().nullable(),
   highlighted: z.boolean().optional(),
-  startAt: z.number().nullable().optional(),
-  endAt: z.number().nullable().optional(),
-  extra: z.any().optional()
+  startAt: z.number().finite().int().min(0).nullable().optional(),
+  endAt: z.number().finite().int().min(0).nullable().optional(),
+  extra: z.record(z.string(), z.unknown()).optional()
 });
 
 // Create new block
@@ -103,6 +103,11 @@ blocksRouter.put('/studio/blocks/reorder', requireAuth, (req: AuthenticatedReque
     }
 
     const profileId = req.user!.profileId;
+    const owned = db.prepare('SELECT id FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profileId) as { id: string }[];
+    const ownedIds = owned.map(block => block.id);
+    if (new Set(blockIds).size !== blockIds.length || blockIds.some((id: string) => !ownedIds.includes(id))) {
+      return res.status(400).json({ error: 'blockIds must contain only unique blocks belonging to this profile.' });
+    }
     const updatePos = db.prepare('UPDATE blocks SET position = ? WHERE id = ? AND profile_id = ?');
 
     const reorderTx = db.transaction(() => {

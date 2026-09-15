@@ -54,7 +54,7 @@ export const FaqSection: React.FC = () => {
                 className="rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden shadow-xs"
               >
                 <button
-                  aria-expanded={isOpen} aria-controls={`faq-answer-${idx}`}
+                  id={`faq-question-${idx}`} aria-expanded={isOpen} aria-controls={`faq-answer-${idx}`}
                   onClick={() => toggleFaq(idx)}
                   className="w-full p-5 text-start flex items-center justify-between gap-4 hover:bg-neutral-50 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
@@ -67,7 +67,7 @@ export const FaqSection: React.FC = () => {
                 </button>
 
                 {isOpen && (
-                  <div id={`faq-answer-${idx}`} className="px-5 pb-5 pt-1 text-xs sm:text-sm text-neutral-600 leading-relaxed border-t border-neutral-100 animate-fade-in text-pretty text-start">
+                  <div id={`faq-answer-${idx}`} role="region" aria-labelledby={`faq-question-${idx}`} className="px-5 pb-5 pt-3 text-sm sm:text-base text-neutral-700 leading-relaxed border-t border-neutral-100 animate-fade-in text-pretty text-start">
                     {faq.answer}
                   </div>
                 )}

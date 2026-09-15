@@ -17,6 +17,11 @@ function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   }
 }
 
+function isSafeCustomCss(value: string | null | undefined): boolean {
+  if (!value) return true;
+  return !/(?:@import|expression\s*\(|behavior\s*:|javascript\s*:|url\s*\()/i.test(value);
+}
+
 // Public: Get profile by username
 profilesRouter.get('/profiles/:username', (req, res) => {
   try {
@@ -191,7 +196,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 const updateProfileSchema = z.object({
   displayName: z.string().min(1, 'Display name cannot be empty').max(100).optional(),
   bio: z.string().max(500).optional(),
-  avatarUrl: z.string().optional(),
+  avatarUrl: z.string().url().refine(value => /^https?:$|^mailto:$/i.test(new URL(value).protocol), 'Avatar must use HTTP(S).').optional(),
   category: z.string().max(50).optional(),
   themeId: z.string().optional(),
   hideBranding: z.boolean().optional(),
@@ -199,12 +204,18 @@ const updateProfileSchema = z.object({
   metaPixelId: z.string().max(50).nullable().optional(),
   customDomain: z.string().max(100).nullable().optional(),
   customCss: z.string().max(10000).nullable().optional(),
-  customFontUrl: z.string().max(300).nullable().optional(),
-  customTheme: z.any().optional(),
+  customFontUrl: z.string().url().max(300).refine(value => /^https?:$/i.test(new URL(value).protocol), 'Custom fonts must use HTTP(S).').nullable().optional(),
+  customTheme: z.object({
+    background: z.string().max(30).optional(),
+    surface: z.string().max(30).optional(),
+    text: z.string().max(30).optional(),
+    accent: z.string().max(30).optional(),
+    radius: z.string().max(20).optional()
+  }).optional(),
   socials: z.array(z.object({
-    platform: z.string(),
-    url: z.string()
-  })).optional()
+    platform: z.string().min(1).max(30),
+    url: z.string().url().refine(value => /^(https?:|mailto:|tel:)$/i.test(new URL(value).protocol), 'Social links must use a safe URL scheme.').max(500)
+  })).max(20).optional()
 });
 
 // Authenticated: Update studio profile
@@ -230,6 +241,10 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       customTheme, 
       socials 
     } = parse.data;
+
+    if (!isSafeCustomCss(customCss)) {
+      return res.status(400).json({ error: 'Custom CSS may not import external content or execute scripts.' });
+    }
 
     const existing = db.prepare('SELECT * FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
     if (!existing) {
