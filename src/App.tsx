@@ -21,6 +21,7 @@ import { CreatorProfile } from './types';
 import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
+import { BackgroundAnimation } from './components/BackgroundAnimation';
 import { Lock, ArrowRight, Loader2, AlertTriangle, RotateCw } from 'lucide-react';
 
 function chooseTemplate(profile: CreatorProfile, navigate: (path: string) => void) {
@@ -263,10 +264,15 @@ export default function App() {
       <ErrorBoundary>
         <LanguageProvider>
           <AuthProvider>
-            <PublicBioView
-              customDomain={currentHost}
-              onBackToStudio={() => window.location.href = 'https://liinx.app/studio'}
-            />
+            <div className="relative min-h-screen">
+              <BackgroundAnimation />
+              <div className="relative z-10">
+                <PublicBioView
+                  customDomain={currentHost}
+                  onBackToStudio={() => window.location.href = 'https://liinx.app/studio'}
+                />
+              </div>
+            </div>
           </AuthProvider>
         </LanguageProvider>
       </ErrorBoundary>
@@ -277,8 +283,11 @@ export default function App() {
     <ErrorBoundary>
       <LanguageProvider>
         <AuthProvider>
-          <PageMetadata />
-          <Switch>
+          <div className="relative min-h-screen">
+            <BackgroundAnimation />
+            <div className="relative z-10">
+              <PageMetadata />
+              <Switch>
             {/* Core application routes */}
             <Route path="/" component={HomePage} />
             <Route path="/features" component={FeaturesPage} />
@@ -317,7 +326,9 @@ export default function App() {
                 );
               }}
             </Route>
-          </Switch>
+              </Switch>
+            </div>
+          </div>
         </AuthProvider>
       </LanguageProvider>
     </ErrorBoundary>
