@@ -13,6 +13,10 @@ services:
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set to a random value of at least 32 characters}
       - APP_ORIGIN=${APP_ORIGIN:?APP_ORIGIN must be set to the public HTTPS origin}
       - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN must be set to the allowed frontend origin(s)}
+      - INTEGRATION_ENCRYPTION_KEY=${INTEGRATION_ENCRYPTION_KEY:?INTEGRATION_ENCRYPTION_KEY must be set to a 32-byte base64 or 64-character hex key}
+      - BILLING_ENABLED=${BILLING_ENABLED:-true}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
       - DATA_DIR=/app/data
       - UPLOADS_DIR=/app/public/uploads
       - CLUSTER=${CLUSTER:-false}

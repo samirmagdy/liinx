@@ -11,7 +11,7 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 - **Database Engine**: `better-sqlite3` configured with **Write-Ahead Logging (WAL)**, foreign key constraints, synchronous normal writes, and a 64MB memory page cache.
 - **Security & Auth**: `bcryptjs` password hashing with salts, stateless JSON Web Tokens (JWT), BOLA/IDOR protection, and URL scheme sanitization.
 - **Concurrency & Performance**: High socket backlog (4096), non-blocking asynchronous click/view batch queue with bulk transaction commits, and multi-core Node.js cluster mode.
-- **Testing**: Comprehensive Vitest suite with **143 real tests across 16 suites** covering OWASP Top 10 Security, Concurrency race conditions, E2E Creator journeys, SQLite disk integrity, and full acceptance tests for every advertised feature.
+- **Testing**: Comprehensive Vitest suite with **175 real tests across 20 suites** covering OWASP Top 10 Security, concurrency race conditions, E2E creator journeys, SQLite disk integrity, and acceptance tests for every advertised feature.
 
 ---
 
@@ -45,7 +45,7 @@ npm install
 ```
 
 ### 2. Environment Configuration
-Copy `.env.example` to `.env`:
+Copy `.env.example` to `.env` and replace every `YOUR_` / `REPLACE_WITH_` placeholder:
 ```bash
 cp .env.example .env
 ```
@@ -72,6 +72,10 @@ npm run build
 npm start
 ```
 
+Production startup rejects missing or placeholder security, HTTPS origin,
+encryption, and billing configuration. To launch without paid plans, set
+`BILLING_ENABLED=false` explicitly.
+
 ---
 
 ## Docker & Container Deployment
@@ -93,7 +97,19 @@ The database persists in `./data/liinx.db` and uploaded images persist in `./pub
 
 ### Vercel + Fly deployment
 
-The Vercel project is the frontend shell. `vercel.json` proxies `/api/*`, `/uploads/*`, `/robots.txt`, and `/sitemap.xml` to the Fly backend at `liinx-app.fly.dev`; the Fly deployment owns Express, SQLite, and uploaded media. Set the backend `APP_ORIGIN`/`CORS_ORIGIN` to the public frontend origin and configure all required secrets before deploying. Do not deploy SQLite or local uploads as the primary data store on a serverless-only host.
+The Vercel project is the frontend shell. `vercel.json` proxies `/api/*`, `/uploads/*`, `/robots.txt`, and `/sitemap.xml` to the Fly backend at `liinx-app.fly.dev`; the Fly deployment owns Express, SQLite, and uploaded media. Set the backend `APP_ORIGIN`/`CORS_ORIGIN` to the public frontend origin and configure all required secrets before deploying:
+
+```bash
+fly secrets set \
+  JWT_SECRET="REPLACE_WITH_RANDOM_48_BYTE_SECRET" \
+  INTEGRATION_ENCRYPTION_KEY="REPLACE_WITH_64_HEX_CHARACTERS" \
+  APP_ORIGIN="https://YOUR_PUBLIC_DOMAIN.example" \
+  CORS_ORIGIN="https://YOUR_PUBLIC_DOMAIN.example" \
+  STRIPE_SECRET_KEY="REPLACE_WITH_STRIPE_LIVE_SECRET_KEY" \
+  STRIPE_WEBHOOK_SECRET="REPLACE_WITH_STRIPE_LIVE_WEBHOOK_SECRET"
+```
+
+Do not deploy SQLite or local uploads as the primary data store on a serverless-only host.
 
 ---
 
@@ -145,7 +161,7 @@ Run the full automated test suite with:
 npm test
 ```
 
-### Test Coverage (143 Tests Across 16 Suites):
+### Test Coverage (175 Tests Across 20 Suites):
 1. **OWASP Top 10 Security (`tests/security.test.ts`)**: BOLA/IDOR protection, multi-tenant isolation, SQL injection vectors, dangerous URI schemes (`javascript:`, `data:`), JWT signature tampering, payload bombing.
 2. **Concurrency & Race Conditions (`tests/concurrency.test.ts`)**: Simultaneous duplicate registration races, concurrent newsletter subscriptions, rapid block reordering stability.
 3. **End-to-End Creator Journey (`tests/e2e-workflow.test.ts`)**: Full organic lifecycle from landing page, registration, block creation, public view, 302 redirect click, newsletter capture, to analytics inspection.

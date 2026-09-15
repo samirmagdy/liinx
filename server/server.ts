@@ -23,11 +23,44 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT) || 3050;
 
-if (process.env.NODE_ENV === 'production') {
-  for (const variable of ['APP_ORIGIN', 'CORS_ORIGIN']) {
-    if (!process.env[variable]) throw new Error(`Production requires ${variable}.`);
+function validateProductionConfig() {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  for (const variable of ['APP_ORIGIN', 'CORS_ORIGIN', 'INTEGRATION_ENCRYPTION_KEY']) {
+    const value = process.env[variable];
+    if (!value || value.includes('replace_with_') || value.includes('your_') || value.includes('YOUR_') || value.includes('REPLACE_WITH_')) {
+      throw new Error(`Production requires a real ${variable} value.`);
+    }
+  }
+
+  let appOrigin: URL;
+  try {
+    appOrigin = new URL(process.env.APP_ORIGIN!);
+  } catch {
+    throw new Error('Production APP_ORIGIN must be a valid absolute URL.');
+  }
+  if (appOrigin.protocol !== 'https:') throw new Error('Production APP_ORIGIN must use HTTPS.');
+
+  const origins = process.env.CORS_ORIGIN!.split(',').map(origin => origin.trim()).filter(Boolean);
+  if (origins.length === 0 || origins.some(origin => origin === '*' || !origin.startsWith('https://'))) {
+    throw new Error('Production CORS_ORIGIN must contain explicit HTTPS origins only.');
+  }
+
+  const encryptionKey = process.env.INTEGRATION_ENCRYPTION_KEY!;
+  const decodedKey = Buffer.from(encryptionKey, /^[0-9a-f]{64}$/i.test(encryptionKey) ? 'hex' : 'base64');
+  if (decodedKey.length !== 32) throw new Error('Production INTEGRATION_ENCRYPTION_KEY must decode to exactly 32 bytes.');
+
+  if (process.env.BILLING_ENABLED !== 'false') {
+    for (const variable of ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']) {
+      const value = process.env[variable];
+      if (!value || value.includes('replace_me') || value.includes('REPLACE_WITH_')) {
+        throw new Error(`Production billing requires a real ${variable} value, or set BILLING_ENABLED=false.`);
+      }
+    }
   }
 }
+
+validateProductionConfig();
 
 // Initialize SQLite database & seed demo data
 initDatabase();
