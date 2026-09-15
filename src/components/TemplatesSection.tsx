@@ -13,16 +13,10 @@ interface TemplatesSectionProps {
 
 export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemplate, headingLevel = 2, maxVisible }) => {
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [isHydrated, setIsHydrated] = useState(false);
   const { t, isRtl } = useLanguage();
 
-  const categories = ['All', 'Design & Art', 'Musicians', 'Brands', 'Creators', 'Podcasts', 'Gaming', 'Wellness', 'Lifestyle'];
-
-  const filteredTemplates = selectedCategory === 'All' 
-    ? TEMPLATES 
-    : TEMPLATES.filter(t => t.category === selectedCategory);
-  const visibleTemplates = maxVisible ? filteredTemplates.slice(0, maxVisible) : filteredTemplates;
+  const visibleTemplates = maxVisible ? TEMPLATES.slice(0, maxVisible) : TEMPLATES;
 
   useEffect(() => setIsHydrated(true), []);
 
@@ -33,7 +27,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
             <span>{t.templatesSection.badge}</span>
@@ -46,23 +40,6 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
             </p>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1.5 p-2 bg-neutral-100 border border-neutral-200 rounded-2xl max-w-full">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                aria-pressed={selectedCategory === cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-neutral-900 text-white'
-                    : 'text-neutral-500 hover:text-neutral-900'
-                }`}
-              >
-                {t.templatesSection.categories[categories.indexOf(cat)] || cat}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Templates Grid */}
@@ -120,7 +97,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
         })}
         </div>
 
-        {maxVisible && filteredTemplates.length > maxVisible && (
+        {maxVisible && TEMPLATES.length > maxVisible && (
           <div className="mt-8 text-center">
             <a href="/templates" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold text-neutral-800 hover:bg-neutral-100 transition-colors">
               {isRtl ? 'عرض جميع القوالب' : 'View all templates'}
