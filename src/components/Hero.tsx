@@ -8,10 +8,13 @@ import {
   ArrowRight, 
   Palette, 
   Check, 
+  CheckCircle2,
   Sparkles,
   MousePointer2,
   LayoutTemplate
 } from 'lucide-react';
+
+import { motion } from 'framer-motion';
 import { brand } from '../config/brand';
 
 interface HeroProps {
@@ -21,13 +24,18 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => {
   const [, setLocation] = useLocation();
-  const { t, isRtl } = useLanguage();
+  const { t, isRtl, tr } = useLanguage();
   const [handle, setHandle] = useState('');
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);
 
   const activeProfile = DEMO_PROFILES[selectedProfileIndex];
   const activeTheme = THEMES.find(t => t.id === selectedThemeId) || THEMES[0];
+
+  const isArabicText = (text?: string) => /[\u0600-\u06FF]/.test(text || '');
+  const isProfileRtl = isArabicText(activeProfile.displayName) || isArabicText(activeProfile.bio);
+
+  const theme = activeTheme;
 
   const handleProfileSelect = (index: number) => {
     setSelectedProfileIndex(index);
@@ -43,7 +51,45 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
     }
   };
 
+  function renderProfileContent() {
   return (
+    <div className="flex flex-col items-center text-center mb-6">
+      <div className="relative mb-3">
+        <img 
+          src={activeProfile.avatarUrl} 
+          alt={activeProfile.displayName}
+          className="w-20 h-20 rounded-full object-cover shadow-sm ring-2 ring-white/20"
+          referrerPolicy="no-referrer"
+        />
+        {activeProfile.verified && (
+          <div 
+            className="absolute bottom-0 right-0 p-1 rounded-full text-white shadow-sm"
+            style={{ backgroundColor: activeTheme.accentColor }}
+            title={tr("Verified Creator")}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 fill-current text-white" />
+          </div>
+        )}
+      </div>
+      <h2 className="text-xl font-bold tracking-tight mb-1 flex items-center justify-center gap-1.5 text-balance">
+        <span>{activeProfile.displayName}</span>
+      </h2>
+      
+      <p className="text-[11px] font-mono opacity-60 mb-2.5">
+        liinx.co/@{activeProfile.username}
+      </p>
+
+      <p 
+        className="text-xs max-w-[280px] leading-relaxed mb-4 text-pretty"
+        style={{ color: activeTheme.subtextColor }}
+      >
+        {activeProfile.bio}
+      </p>
+    </div>
+  );
+}
+
+return (
     <section className="py-16 md:py-24 lg:py-28 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -192,13 +238,25 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
               </div>
             </div>
 
-            {/* Live Interactive Device Preview */}
-            <PhonePreview 
-              profile={activeProfile}
-              customTheme={activeTheme}
-              interactive={true}
-              compact={true}
-            />
+            {/* Live Interactive Device Preview with Apple-style motion */}
+            <motion.div
+              className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800"
+              whileHover={{ scale: 1.02, transition: { duration: 0.2, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }}}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
+
+              <div 
+                dir={isProfileRtl ? 'rtl' : 'ltr'}
+                className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
+                style={{
+                  background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
+                  color: theme.textColor,
+                  fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
+                }}>
+                {renderProfileContent()}
+              </div>
+            </motion.div>
 
             {/* Action below Phone */}
             <div className="mt-4 flex items-center gap-3">
@@ -216,5 +274,6 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
         </div>
       </div>
     </section>
-  );
+);
 };
+

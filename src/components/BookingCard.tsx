@@ -10,7 +10,7 @@ export function BookingCard({ block, theme }: { block: BookingBlock; theme: Them
   const ar = lang === 'ar';
   const url = bookingUrl(block.url);
   if (!url) return null;
-  return <section className="p-4 rounded-2xl space-y-3 min-w-0" style={{ background: theme.cardBg, color: theme.cardText, border: theme.cardBorder }}>
+  return <section className="p-4 rounded-2xl space-y-3 min-w-0 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ background: theme.cardBg, color: theme.cardText, border: theme.cardBorder }}>
     <h3 className="font-bold text-base" dir="auto">{block.title}</h3>
     <p className="text-sm">{ar ? 'اختر موعدك وأكّد الحجز عبر Calendly.' : 'Choose a time and confirm your booking with Calendly.'}</p>
     <button type="button" aria-expanded={open} onClick={() => { setOpen(!open); setLoaded(false); }} className="w-full min-h-11 rounded-xl border px-4 py-2 font-semibold">

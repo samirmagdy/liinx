@@ -88,15 +88,15 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
           </p>
         )}
 
-        {/* Plans Grid */}
+{/* Plans Grid */}
         <div className="grid md:grid-cols-3 gap-6">
           {plans.map(plan => (
             <article
               key={plan.id}
-              className={`rounded-3xl p-7 flex flex-col gap-6 transition-all ${
-plan.highlight
-                    ? 'bg-neutral-900 text-white border-2 border-neutral-800 shadow-lg relative'
-                    : 'bg-neutral-50 border border-neutral-200 hover:border-neutral-300'
+              className={`rounded-3xl p-7 flex flex-col gap-6 transition-all hover:scale-[1.02] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                plan.highlight
+                  ? 'bg-neutral-900 text-white border-2 border-neutral-800 shadow-lg relative'
+                  : 'bg-neutral-50 border border-neutral-200 hover:border-neutral-300'
               }`}
             >
               {plan.highlight && (

@@ -47,13 +47,13 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   <span className="text-[11px] text-neutral-400">{ui("Creator pages & booking")}</span>
                 </div>
 
                 <button
                   onClick={toggleLanguage}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-[11px] text-neutral-300 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-[11px] text-neutral-300 transition-colors cursor-pointer"
                 >
                   <Globe className="w-3 h-3 text-amber-500" />
                   <span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span>

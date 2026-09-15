@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { 
   FolderPlus, 
   Music, 
@@ -17,6 +18,12 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
   const { t, isRtl } = useLanguage();
   const b = t.builderSection;
 
+  // Stagger variants for Apple-style entrance
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <section id="features" className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,11 +41,21 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </p>
         </div>
 
-        {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">          
-
+        {/* Feature Cards Grid with staggered animation */}
+<motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"
+          variants={cardVariants}
+          animate="visible"
+          transition={{
+            type: "tween",
+            ease: "cubic-bezier(0.4, 0, 0.2, 1)",
+            staggerChildren: 0.1,
+            delayChildren: 0.2,
+          }}
+        >
+          
           {/* Feature 1: Accordion Folders */}
-          <div className="md:col-span-2 p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
+          <div animate="visible" className="md:col-span-2 p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
             <div className="mb-6">
               <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mb-4">
                 <FolderPlus className="w-6 h-6 text-amber-800" />
@@ -82,7 +99,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 2: Custom Domains */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
+          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-900 flex items-center justify-center mb-4">
                 <Globe2 className="w-6 h-6 text-blue-800" />
@@ -100,7 +117,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 3: Playable Media Embeds */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
+          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-900 flex items-center justify-center mb-4">
                 <Music className="w-6 h-6 text-emerald-800" />
@@ -128,7 +145,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 4: Instagram Caption Sync */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
+          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-900 flex items-center justify-center mb-4">
                 <Instagram className="w-6 h-6 text-rose-800" />
@@ -149,7 +166,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 5: Privacy-Friendly Analytics */}
-          <div className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 transition-colors text-start">
+          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-400 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-900 flex items-center justify-center mb-4">
                 <BarChart2 className="w-6 h-6 text-purple-800" />
@@ -169,7 +186,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
             </div>
           </div>
 
-        </div>
+        </motion.div>
 
         {/* Bottom CTA bar */}
         <div className="p-8 sm:p-12 rounded-3xl bg-neutral-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 text-start">
