@@ -8,6 +8,26 @@ import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 
 export const profilesRouter = Router();
 
+interface PublicProfileCacheEntry {
+  expiresAt: number;
+  payload: Record<string, unknown>;
+}
+
+// Public pages are already cacheable for a short period at the HTTP layer.
+// Keeping the assembled payload briefly in-process also avoids repeating the
+// profile, block, and click-count queries for every concurrent visitor.
+const publicProfileCache = new Map<string, PublicProfileCacheEntry>();
+const PUBLIC_PROFILE_CACHE_TTL_MS = 5_000;
+const MAX_PUBLIC_PROFILE_CACHE_ENTRIES = 10_000;
+
+const publicProfileCachePurge = setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of publicProfileCache) {
+    if (entry.expiresAt <= now) publicProfileCache.delete(key);
+  }
+}, 60_000);
+publicProfileCachePurge.unref();
+
 function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   if (!val) return fallback;
   try {
@@ -26,6 +46,15 @@ function isSafeCustomCss(value: string | null | undefined): boolean {
 profilesRouter.get('/profiles/:username', (req, res) => {
   try {
     const cleanUsername = req.params.username.toLowerCase().trim();
+    if (process.env.NODE_ENV !== 'test') {
+      const cached = publicProfileCache.get(cleanUsername);
+      if (cached && cached.expiresAt > Date.now()) {
+        res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
+        return res.json(cached.payload);
+      }
+      if (cached) publicProfileCache.delete(cleanUsername);
+    }
+
     const profile = db.prepare('SELECT * FROM profiles WHERE lower(username) = ?').get(cleanUsername) as any;
 
     if (!profile) {
@@ -78,8 +107,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       return baseBlock;
     });
 
-    res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
-    res.json({
+    const payload = {
       id: profile.id,
       username: profile.username,
       displayName: profile.display_name,
@@ -98,7 +126,21 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: safeJsonParse(profile.socials_json, []),
       blocks: formattedBlocks
-    });
+    };
+
+    if (process.env.NODE_ENV !== 'test') {
+      if (publicProfileCache.size >= MAX_PUBLIC_PROFILE_CACHE_ENTRIES) {
+        const oldestKey = publicProfileCache.keys().next().value;
+        if (oldestKey) publicProfileCache.delete(oldestKey);
+      }
+      publicProfileCache.set(cleanUsername, {
+        expiresAt: Date.now() + PUBLIC_PROFILE_CACHE_TTL_MS,
+        payload
+      });
+    }
+
+    res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
+    res.json(payload);
   } catch (err: any) {
     console.error('Fetch profile error:', err);
     res.status(500).json({ error: 'Failed to retrieve profile.' });

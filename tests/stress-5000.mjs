@@ -1,10 +1,10 @@
 import http from 'http';
 
-const CONCURRENT_USERS = 5000;
-const RAMP_UP_MS = 5000; // Ramp up 5,000 users over 5 seconds (1000 users/sec)
-const HOLD_DURATION_MS = 15000; // Hold peak for 15s
+const CONCURRENT_USERS = Number(process.env.LOAD_USERS || 5000);
+const RAMP_UP_MS = Number(process.env.LOAD_RAMP_MS || 5000);
+const HOLD_DURATION_MS = Number(process.env.LOAD_HOLD_MS || 15000);
 const TOTAL_DURATION_MS = RAMP_UP_MS + HOLD_DURATION_MS;
-const BASE_URL = 'http://127.0.0.1:3050';
+const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:3050';
 
 console.log(`\n======================================================`);
 console.log(`🚀 RAMP-UP 5,000 CONCURRENT USERS LOAD TEST`);
@@ -25,6 +25,8 @@ const stats = {
   totalRequests: 0,
   success: 0,
   failures: 0,
+  rateLimited: 0,
+  transportFailures: 0,
   statusCodes: {},
   latencies: [],
   profileReads: 0,
@@ -70,6 +72,7 @@ function sendRequest(path, method = 'GET', body = null) {
           stats.success++;
         } else {
           stats.failures++;
+          if (res.statusCode === 429) stats.rateLimited++;
         }
         resolve(true);
       });
@@ -78,6 +81,7 @@ function sendRequest(path, method = 'GET', body = null) {
     req.on('error', (err) => {
       stats.totalRequests++;
       stats.failures++;
+      stats.transportFailures++;
       stats.statusCodes['ERR_' + err.code] = (stats.statusCodes['ERR_' + err.code] || 0) + 1;
       resolve(false);
     });
@@ -166,6 +170,8 @@ console.log(`Test Duration:         ${totalElapsedSec.toFixed(2)} seconds`);
 console.log(`Total Requests Sent:   ${stats.totalRequests.toLocaleString()}`);
 console.log(`Successful Requests:   ${stats.success.toLocaleString()} (${((stats.success / stats.totalRequests) * 100).toFixed(2)}%)`);
 console.log(`Failed / Timed Out:    ${stats.failures.toLocaleString()} (${((stats.failures / stats.totalRequests) * 100).toFixed(2)}%)`);
+console.log(`Rate limited (429):     ${stats.rateLimited.toLocaleString()}`);
+console.log(`Transport failures:     ${stats.transportFailures.toLocaleString()}`);
 console.log(`Average Throughput:    ${rps} req/sec`);
 console.log(`\n--- Response Times (Latency) ---`);
 console.log(`Average Latency:       ${avg} ms`);
