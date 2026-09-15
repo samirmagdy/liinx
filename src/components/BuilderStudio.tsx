@@ -266,7 +266,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     api.studio.getProfile()
       .then(async liveProfile => {
         if (!liveProfile || !liveProfile.id) throw new Error('Invalid profile response');
-        const template = new URLSearchParams(window.location.search).get('template');
+        const params = new URLSearchParams(window.location.search);
+        const template = params.get('template');
+        const shouldOpenImporter = params.get('import') === '1';
         if (template && THEMES.some(theme => theme.id === template)) {
           await api.studio.updateProfile({ themeId: template, customTheme: THEMES.find(theme => theme.id === template)! });
           liveProfile = await api.studio.getProfile();
@@ -281,6 +283,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         setCustomFontUrlInput(liveProfile.customFontUrl || '');
         const th = liveProfile.customTheme || THEMES.find(t => t.id === liveProfile.themeId) || THEMES[0];
         setCustomTheme(th);
+        if (shouldOpenImporter) {
+          setShowImporterModal(true);
+          window.history.replaceState(null, '', '/studio');
+        }
       })
       .catch(err => {
         setLoadState('error');

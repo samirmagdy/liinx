@@ -20,7 +20,8 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      setLocation('/studio');
+      const after = new URLSearchParams(window.location.search).get('after');
+      setLocation(after === 'import' ? '/studio?import=1' : '/studio');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please verify your credentials.');
     } finally {

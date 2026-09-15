@@ -131,7 +131,9 @@ export const RegisterPage: React.FC = () => {
       });
       const params = new URLSearchParams(window.location.search);
       const plan = params.get('plan');
-      if (plan === 'pro' || plan === 'studio') {
+      if (params.get('after') === 'import') {
+        setLocation('/studio?import=1');
+      } else if (plan === 'pro' || plan === 'studio') {
         setLocation(`/pricing?plan=${plan}&interval=${params.get('interval') === 'year' ? 'year' : 'month'}`);
       } else setLocation('/studio');
     } catch (err: any) {

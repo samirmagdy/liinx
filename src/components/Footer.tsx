@@ -173,7 +173,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
             <p>© {new Date().getFullYear()} {brand.legalName}. {t.footer.rightsReserved}</p>
             <div className="flex items-center gap-4">
-              <span>{ui("Privacy controls")}</span>
+              <Link href="/privacy" className="hover:text-white underline-offset-2 hover:underline">{ui("Privacy controls")}</Link>
               <span>•</span>
               <span>{ui("Account-owned content")}</span>
             </div>

@@ -17,6 +17,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
       id: 'free' as const,
       name: ar ? 'مجاني' : 'Free',
       icon: <Zap className="w-5 h-5 text-neutral-600" />,
+      tagline: ar ? 'مكان بسيط لنشر صفحتك وروابطك.' : 'A simple place to publish your page and links.',
       price: 0,
       features: ar
         ? ['صفحة شخصية وروابط ووسائط', 'تخصيص المظهر', 'جمع اشتراكات البريد وإحصاءات الزيارات']
@@ -27,6 +28,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
       id: 'pro' as const,
       name: paidPlans.pro.name,
       icon: <Sparkles className="w-5 h-5 text-amber-600" />,
+      tagline: ar ? 'تحكم أكبر مع نمو حضورك.' : 'More control as your creator presence grows.',
       price: paidPlans.pro[interval],
       features: ar
         ? ['ميزات الخطة المجانية', 'نطاق مخصص بعد التحقق والإعداد', 'إزالة شارة المنصة وتخصيص CSS', 'جدولة الروابط وتتبع الحملات']
@@ -37,6 +39,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
       id: 'studio' as const,
       name: paidPlans.studio.name,
       icon: <Crown className="w-5 h-5 text-purple-600" />,
+      tagline: ar ? 'لإدارة عدة صفحات من حساب واحد.' : 'Manage multiple pages from one account.',
       price: paidPlans.studio[interval],
       features: ar
         ? ['ميزات Pro', 'إدارة ملفات متعددة', 'مفاتيح REST API']
@@ -114,6 +117,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                   {plan.name}
                 </h2>
               </div>
+              <p className={`text-sm leading-relaxed -mt-3 ${plan.highlight ? 'text-neutral-300' : 'text-neutral-600'}`}>{plan.tagline}</p>
 
               {/* Price */}
               <div>
@@ -168,7 +172,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         </div>
 
         {/* Disclaimer */}
-        <p className="mt-8 text-xs text-center text-neutral-500 max-w-lg mx-auto">
+        <p className="mt-8 text-xs text-center text-neutral-600 max-w-lg mx-auto">
           {ar ? 'تُحصّل الخطط السنوية دفعة واحدة. لا توجد تجربة مدفوعة مجانية. تُدار الاشتراكات والإلغاءات عبر Stripe.' : 'Annual plans are charged once. Paid plans have no free trial. Subscriptions and cancellations are handled through Stripe.'}
         </p>
       </div>

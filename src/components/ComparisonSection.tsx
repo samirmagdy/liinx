@@ -32,10 +32,10 @@ export function ComparisonSection() {
             <span>{ar ? 'نظرة شاملة' : 'Capabilities'}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 mb-3 text-balance">
-            {ar ? 'الميزات ومتطلباتها' : 'Features and requirements'}
+            {ar ? 'ما يمكنك نشره' : 'What you can publish'}
           </h2>
           <p className="text-base text-neutral-600 text-pretty max-w-xl mx-auto">
-            {ar ? 'ماذا تتضمن منصتك وما تحتاجه لكل ميزة.' : 'What your page includes and what each capability requires.'}
+            {ar ? 'محتوى حقيقي في صفحتك، مع توضيح ما يتطلب مزوّداً خارجياً أو خطة مدفوعة.' : 'Real content for your page, with clear notes about outside providers and paid-plan requirements.'}
           </p>
         </div>
 
@@ -64,8 +64,8 @@ export function ComparisonSection() {
               <p className="text-sm text-neutral-600 leading-relaxed mt-1">{ar ? 'عاين الروابط العامة المدعومة واختر ما تريد استيراده قبل الحفظ.' : 'Preview links from a supported public profile and choose what to import before saving.'}</p>
             </div>
           </div>
-          <button onClick={() => setLocation('/studio')} className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-bold hover:bg-black cursor-pointer">
-            {ar ? 'افتح أداة الاستيراد' : 'Open the importer'}
+          <button onClick={() => setLocation('/register?after=import')} className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-bold hover:bg-black cursor-pointer">
+            {ar ? 'ابدأ الاستيراد' : 'Start importing'}
             <ArrowRight className={`w-3.5 h-3.5 ${ar ? 'rotate-180' : ''}`} />
           </button>
         </div>

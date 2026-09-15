@@ -112,7 +112,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
               </p>
             </div>
             <div className="mt-6 p-3 bg-neutral-50 border border-neutral-200 rounded-xl font-mono text-xs text-center text-neutral-900 font-bold" dir="ltr">
-              links.elenarostova.design
+              links.yourdomain.com
             </div>
           </div>
 
@@ -186,6 +186,26 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
         </motion.div>
+
+        <div className="mb-16 rounded-3xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8">
+          <div className="mb-6">
+            <p className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700">{isRtl ? 'كيف تبدأ' : 'How it works'}</p>
+            <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-neutral-900">{isRtl ? 'من الحساب إلى الصفحة المنشورة في ثلاث خطوات.' : 'From account to published page in three steps.'}</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { n: '01', title: isRtl ? 'احجز اسمك' : 'Claim your handle', text: isRtl ? 'أنشئ حساباً مجانياً واحصل على رابط liinx.app/@اسمك.' : 'Create a free account and get a liinx.app/@yourname link.' },
+              { n: '02', title: isRtl ? 'أضف المحتوى' : 'Add your content', text: isRtl ? 'أضف الروابط والوسائط والنشرة أو رابط Calendly.' : 'Add links, supported media, a newsletter form, or a Calendly link.' },
+              { n: '03', title: isRtl ? 'انشر وعاين' : 'Publish and preview', text: isRtl ? 'عاين صفحتك في الاستوديو ثم شاركها، وأضف نطاقاً مخصصاً على خطة مدفوعة.' : 'Preview in Studio, share your page, and add a custom domain on a paid plan.' }
+            ].map(step => (
+              <div key={step.n} className="rounded-2xl border border-neutral-200 bg-white p-5">
+                <span className="font-mono text-xs font-bold text-amber-700">{step.n}</span>
+                <h4 className="mt-3 font-bold text-base text-neutral-900">{step.title}</h4>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-600">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Bottom CTA bar */}
         <div className="p-8 sm:p-12 rounded-3xl bg-neutral-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 text-start">

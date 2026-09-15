@@ -173,7 +173,7 @@ return (
                   <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
                 <button
-                  onClick={() => setLocation('/studio')}
+                  onClick={() => setLocation('/register?after=import')}
                   className="text-neutral-600 font-semibold hover:text-neutral-900 hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>{tr('Moving from Linktree? Import your links')}</span>
@@ -201,6 +201,7 @@ return (
             
             {/* Interactive Selector Bar */}
             <div className="w-full max-w-[380px] mb-6 space-y-3">
+              <p className="text-xs font-semibold text-neutral-600 text-center">{t.hero.previewSubtitle} · {tr('Switch the profile or theme to explore')}</p>
               {/* Profile switcher tabs */}
               <div className="flex items-center justify-between gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
                 {DEMO_PROFILES.slice(0, 4).map((prof, idx) => (

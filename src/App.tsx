@@ -57,7 +57,6 @@ function HomePage() {
           onOpenStudio={handleOpenStudio}
         />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
-        <ComparisonSection />
         <TemplatesSection onSelectTemplate={handleSelectTemplate} />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
