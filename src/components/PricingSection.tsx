@@ -94,9 +94,9 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
             <article
               key={plan.id}
               className={`rounded-3xl p-7 flex flex-col gap-6 transition-all ${
-                plan.highlight
-                  ? 'bg-neutral-900 text-white border-2 border-neutral-900 shadow-lg relative'
-                  : 'bg-white border border-neutral-200 hover:border-neutral-300'
+plan.highlight
+                    ? 'bg-neutral-900 text-white border-2 border-neutral-800 shadow-lg relative'
+                    : 'bg-neutral-50 border border-neutral-200 hover:border-neutral-300'
               }`}
             >
               {plan.highlight && (
@@ -140,7 +140,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                 disabled={pending !== null}
                 className={`w-full min-h-[44px] rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   plan.highlight
-                    ? 'bg-white text-neutral-900 hover:bg-neutral-100 focus-visible:ring-white'
+                    ? 'bg-neutral-50 text-neutral-900 hover:bg-neutral-100 focus-visible:ring-neutral-900/20'
                     : 'bg-neutral-900 text-white hover:bg-black focus-visible:ring-neutral-900/20'
                 }`}
                 onClick={async () => {

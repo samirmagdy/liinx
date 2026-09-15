@@ -75,7 +75,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 className="rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between transition-colors hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
               >
                 {/* Render the real profile component as a non-interactive theme example. */}
-                <div className="relative h-[300px] overflow-hidden border-b bg-white" aria-hidden="true" inert>
+                <div className="relative h-[300px] overflow-hidden border-b" aria-hidden="true" inert>
                   <div className="absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none">
                     <PhonePreview profile={template.profile} customTheme={THEMES.find(theme => theme.id === template.profile.themeId)} compact interactive={false} />
                   </div>
@@ -94,7 +94,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
 
                 <button
                   onClick={() => onSelectTemplate(template.profile)}
-                  className="w-full py-2.5 px-4 rounded-full bg-white border border-neutral-300 hover:border-neutral-900 text-xs font-bold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                  className="w-full py-2.5 px-4 rounded-full bg-neutral-950 border border-neutral-600 hover:border-neutral-500 text-xs font-bold text-neutral-100 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
                   <span>{t.templatesSection.useTemplate}</span>
                   <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />

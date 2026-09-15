@@ -65,7 +65,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
 
   return (
     <Modal open={isOpen} onClose={onClose} label={tr('QR Code')}>
-      <div className="relative w-full max-w-sm rounded-3xl bg-white border border-neutral-200 p-6 shadow-2xl">
+      <div className="relative w-full max-w-sm rounded-3xl bg-neutral-50 border border-neutral-200 p-6 shadow-2xl">
         
         {/* Close Button */}
         <button
@@ -119,10 +119,10 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2.5">
-          <button
-            onClick={handleCopyLink}
-            className="py-2.5 px-3 rounded-xl bg-white border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-          >
+<button
+              onClick={handleCopyLink}
+              className="py-2.5 px-3 rounded-xl bg-neutral-50 border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            >
             {copied ? (
               <>
                 <Check className="w-4 h-4 text-emerald-600" />
@@ -136,11 +136,11 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
             )}
           </button>
 
-          <button
-            onClick={handleDownload}
-            disabled={downloading}
-            className="py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
+<button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            >
             <Download className="w-4 h-4" />
             <span>{downloading ? ui("Downloading...") : ui("Download PNG")}</span>
           </button>

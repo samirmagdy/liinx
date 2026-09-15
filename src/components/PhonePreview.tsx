@@ -133,7 +133,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           {renderProfileContent()}
         </div>
       ) : (
-        <div className="phone-shell relative rounded-[44px] p-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] ring-1 ring-black/10 bg-neutral-900 border-[4px] border-neutral-800">
+        <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
           <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
           <div 

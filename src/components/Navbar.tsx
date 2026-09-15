@@ -76,7 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200/70 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-200/70 bg-neutral-100/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
         
         {/* Brand Logo & Tag */}
@@ -85,11 +85,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             href="/"
             className="flex items-center gap-2.5 text-left group focus:outline-none focus:ring-2 focus:ring-neutral-900/20 rounded-lg cursor-pointer"
           >
-            <div className="relative w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+            <div className="relative w-9 h-9 rounded-xl bg-neutral-50 text-neutral-900 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
               <div className="flex items-center gap-0.5">
-                <span className="w-1.5 h-4.5 bg-white rounded-full" />
+                <span className="w-1.5 h-4.5 bg-neutral-50 rounded-full" />
                 <span className="w-1.5 h-3 bg-amber-400 rounded-full" />
-                <span className="w-1.5 h-4.5 bg-white rounded-full" />
+                <span className="w-1.5 h-4.5 bg-neutral-50 rounded-full" />
               </div>
             </div>
             
@@ -156,7 +156,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
                 <button
                   type="submit"
-                  className="bg-neutral-900 hover:bg-black text-white px-2.5 py-1 rounded-full text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="bg-neutral-900 hover:bg-neutral-800 text-white px-2.5 py-1 rounded-full text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
                   <span>{lang === 'ar' ? 'احجز' : 'Claim'}</span>
                   <ArrowRight className={`w-2.5 h-2.5 ${isRtl ? 'rotate-180' : ''}`} />
@@ -229,7 +229,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div id="mobile-navigation" className="xl:hidden border-t border-neutral-200/60 bg-white px-4 pt-3 pb-6 space-y-3">
+        <div id="mobile-navigation" className="xl:hidden border-t border-neutral-200/60 bg-neutral-50 px-4 pt-3 pb-6 space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <Link
               href="/"

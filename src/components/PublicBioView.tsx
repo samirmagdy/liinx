@@ -202,7 +202,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   if (serverError) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 flex items-center justify-center mb-6 text-rose-600">
+        <div className="w-16 h-16 rounded-3xl bg-rose-50 border border-rose-200 flex items-center justify-center mb-6">
           <AlertCircle className="w-8 h-8" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mb-2">
