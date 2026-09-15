@@ -19,7 +19,7 @@ export const BackgroundAnimation: React.FC<BackgroundAnimationProps> = ({ reduce
   if (reducedMotion || systemReducedMotion) return null;
 
   return (
-    <div aria-hidden="true" className="liinx-motion-background fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <div aria-hidden="true" className="liinx-motion-background fixed inset-0 z-[1] overflow-hidden pointer-events-none">
       <div className="liinx-motion-glow absolute inset-0" />
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 900" preserveAspectRatio="none" focusable="false">
         <ellipse className="liinx-motion-orbit liinx-motion-orbit-a" cx="220" cy="220" rx="300" ry="200" />

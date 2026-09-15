@@ -2,6 +2,7 @@ import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { CreatorProfile, ThemeConfig, ProfileBlock } from '../types';
 import { THEMES } from '../data/mockData';
+import { brand } from '../config/brand';
 import { 
   CheckCircle2, 
   ExternalLink, 
@@ -214,7 +215,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           </h2>
           
           <p className="text-[11px] font-mono opacity-60 mb-2.5">
-            liinx.co/@{profile.username}
+            {brand.domain}/@{profile.username}
           </p>
 
           <p 

@@ -101,7 +101,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   };
 
   return (
-    <Modal open={isOpen} onClose={onClose} label={ui('One-Click Linktree Importer')} wide>
+    <Modal open={isOpen} onClose={onClose} label={ui('Import links')} wide>
       <div className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-neutral-100 dark:border-white/5 flex items-center justify-between">
@@ -111,7 +111,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-neutral-900 dark:text-white">
-                {ui("One-Click Linktree Importer")}</h2>
+                {ui("Import links")}</h2>
               <p className="text-xs text-neutral-500">
                 {ui("Preview and choose links before importing")}</p>
             </div>

@@ -142,7 +142,7 @@ export function ContactPage() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 text-balance">{ui("We'd love to hear from you.")}</h1>
           <p className="text-sm text-neutral-500 max-w-lg mx-auto text-pretty">
-            {ui("Have a question about custom domains, agency partnerships, or migration from another platform? Send our creator concierge team a message.")}</p>
+            {ui("Have a question about custom domains, partnerships, or migration from another platform? Send our support team a message.")}</p>
         </div>
 
         {submitted ? (

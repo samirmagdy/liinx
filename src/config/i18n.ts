@@ -139,19 +139,19 @@ export const translations: Record<Language, Translations> = {
       claimCta: 'Build your page'
     },
     hero: {
-      badge: 'Framer-Grade Micro-Websites',
+      badge: 'A flexible page for everything you share',
       headline: 'Your entire world.',
       headlineHighlight: 'Designed your way.',
-      subheadline: 'Create a beautiful mini-site for everything you make, sell and share. Editorial typography, rich media embeds, and custom domains without touching a line of code.',
+      subheadline: 'Create a customizable page for your links, media, bookings, and email list.',
       claimPlaceholder: 'yourname',
       claimButton: 'Build your page',
       exploreTemplates: 'Explore templates',
-      previewSubtitle: 'Live interactive preview',
-      noCreditCard: 'No credit card required',
-      customDomainIncluded: 'Custom domain ready',
+      previewSubtitle: 'Interactive page preview',
+      noCreditCard: 'Start with a free account',
+      customDomainIncluded: 'Custom domains on paid plans',
       zeroCommission: 'Booking with Calendly',
-      microProof1: 'Live canvas preview while you build',
-      microProof2: '8+ distinct creative disciplines',
+      microProof1: 'Preview your page as you build',
+      microProof2: 'Templates for creators, studios, and brands',
       themeLabel: 'Theme:',
       customizeCta: (name) => `Customize ${name}'s Page in Studio`
     },
@@ -162,11 +162,11 @@ export const translations: Record<Language, Translations> = {
       feature1Title: 'Accordion Folders & Multi-Level Lists',
       feature1Desc: 'Keep your page clean and uncluttered. Collapse presets, press kits, tour dates, and archived projects into sleek expandable drawers.',
       feature2Title: 'True Custom Domain',
-      feature2Desc: 'Map links.yourname.studio or bio.brand.studio directly. DNS verification and hosting TLS setup are required.',
+      feature2Desc: 'Connect links.yourdomain.com after DNS verification and hosting TLS setup.',
       feature3Title: 'Playable Audio & Video',
       feature3Desc: 'Embed playable Spotify audio tracks, Soundcloud snippets, YouTube streams, and TikTok clips directly on your page.',
-      feature4Title: 'Instagram Caption Sync',
-      feature4Desc: 'Post on Instagram and let LIINX automatically pull links from your captions into your bio page without manual updates.',
+      feature4Title: 'Instagram link extraction',
+      feature4Desc: 'When the integration is configured and authorized, extract eligible links from supported captions.',
       feature5Title: 'Actionable Analytics',
       feature5Desc: 'Track visits, link clicks, referring sources, and UTM campaign tags.',
       ctaBarTitle: 'Ready to elevate your creative presence?',
@@ -174,9 +174,9 @@ export const translations: Record<Language, Translations> = {
       cta: 'Open the Studio Builder'
     },
     templatesSection: {
-      badge: 'Bespoke Gallery',
+      badge: 'Template gallery',
       title: 'Built for every creative discipline.',
-      subtitle: 'Explore meticulously crafted design systems for photographers, producers, indie studios, writers, and digital brands.',
+      subtitle: 'Choose a starting layout for your work, links, media, and audience.',
       allCategory: 'All Templates',
       useTemplate: 'Use this template',
       previewMobile: 'Preview',
@@ -185,7 +185,7 @@ export const translations: Record<Language, Translations> = {
         'tmpl-editorial': {
           name: 'Minimalist Editorial',
           category: 'Design & Art',
-          description: 'Generous typography, delicate borders, and museum-grade whitespace for photographers and stylists.'
+          description: 'A quiet layout for photographers, designers, and visual portfolios.'
         },
         'tmpl-dark-sound': {
           name: 'Obsidian Studio',
@@ -195,7 +195,7 @@ export const translations: Record<Language, Translations> = {
         'tmpl-tokyo-brand': {
           name: 'Neon Atelier',
           category: 'Brands',
-          description: 'Electric accents, capsule drops, and Instagram synchronization for modern apparel and retail.'
+          description: 'A bold layout for product launches, collections, and retail links.'
         },
         'tmpl-brutalist': {
           name: 'Neo Brutalist Mono',
@@ -227,7 +227,7 @@ export const translations: Record<Language, Translations> = {
     comparisonSection: {
       badge: 'THE HONEST COMPARISON',
       title: 'Why design-conscious creators switch to LIINX',
-      subtitle: 'See how LIINX compares against traditional link aggregators that force ads and charge exorbitant fees.',
+      subtitle: 'Compare the page, media, booking, newsletter, analytics, and domain features available in Liinx.',
       featuresCol: 'Features & Standards',
       liinxCol: 'LIINX',
       linktreeCol: 'Linktree',
@@ -241,7 +241,7 @@ export const translations: Record<Language, Translations> = {
         { feature: 'Instagram Caption Auto-Sync', liinx: true, linktree: false, beacons: false },
         { feature: 'Zero Commission on Sales/Donations', liinx: true, linktree: 'Takes 0.5-9%', beacons: 'Takes 9%' },
         { feature: 'Sub-100ms Ultra-Fast Page Load', liinx: true, linktree: false, beacons: false },
-        { feature: 'Bespoke Curated Design Themes', liinx: true, linktree: 'Generic templates', beacons: 'Limited' },
+        { feature: 'Curated design themes', liinx: true, linktree: 'Generic templates', beacons: 'Limited' },
         { feature: 'Multi-Profile Management (One Login)', liinx: true, linktree: 'Enterprise only', beacons: false }
       ]
     },
@@ -252,15 +252,15 @@ export const translations: Record<Language, Translations> = {
       monthly: 'Monthly billing',
       yearly: 'Annual billing',
       yearlySave: 'Save 20%',
-      startTrial: 'Start 14-day free trial',
+      startTrial: 'Start free',
       perMonth: '/ month',
       popular: 'Most Popular',
       plans: {
         starter: {
-          name: 'Starter',
-          tagline: 'Everything creators need to look world-class.',
+          name: 'Free',
+          tagline: 'A simple place to publish your work and links.',
           features: [
-            'Personalized liinx.co/@username',
+            'Personalized liinx.app/@username',
             'Unlimited link blocks & social icons',
             'Audio & Video auto-embeds (Spotify, YouTube)',
             'Expandable accordion folders',
@@ -270,29 +270,29 @@ export const translations: Record<Language, Translations> = {
             'Basic analytics (views & click counts)',
             'Zero platform transaction fees'
           ],
-          ctaText: 'Start 14-Day Free Trial',
+          ctaText: 'Start free',
           billedAnnuallyText: (p) => `billed $${p}/yr`
         },
         pro: {
           name: 'Pro',
-          tagline: 'The gold standard for established creators & independent studios.',
+          tagline: 'More control for growing creator businesses.',
           features: [
-            'Everything in Starter, plus:',
+            'Everything in Free, plus:',
             'Connect your own custom domain (e.g. links.yourbrand.com)',
             'Multi-profile management (Up to 5 profiles included)',
-            'Instagram auto-sync from post captions',
+            'Extract eligible links from supported captions',
             'Custom CSS styling & custom font uploads',
-            'Zero LIINX branding badge (100% white-label)',
+            'Remove Liinx branding on eligible plans',
             'Deep UTM tracking & Google Analytics / Meta Pixel',
             'Scheduling & time-release links',
-            'Priority 24/7 creator concierge support'
+            'Priority support'
           ],
-          ctaText: 'Start 14-Day Free Trial',
+          ctaText: 'Start free',
           billedAnnuallyText: (p) => `billed $${p}/yr`
         },
         studio: {
           name: 'Studio / Agency',
-          tagline: 'Engineered for talent agencies, record labels, and multi-brand rosters.',
+          tagline: 'Manage multiple pages and studio projects in one account.',
           features: [
             'Everything in Pro, plus:',
             'Up to 25 managed creator profiles',
@@ -315,27 +315,27 @@ export const translations: Record<Language, Translations> = {
       faqs: [
         {
           question: 'How is LIINX different from Linktree or generic link-in-bio tools?',
-          answer: 'LIINX is engineered specifically for design-conscious creators, artists, and independent brands. Unlike older tools that clutter your page with corporate branding, ads, and generic plastic buttons, LIINX delivers an editorial-grade experience with bespoke typography, media embeds that feel native, accordion folders to reduce scrolling friction, and custom domain support at a fraction of the cost.'
+          answer: 'Liinx gives creators one customizable page for links, media, bookings, and newsletters, with layouts that give content more room than a basic list of buttons.'
         },
         {
           question: 'Can I connect my own custom domain?',
-          answer: 'Yes! On our Pro and Studio plans, you can map any custom domain or subdomain (such as links.yourdomain.com or bio.yourname.studio) with automated zero-configuration SSL certificates.'
+          answer: 'Yes. Paid plans support custom domains and subdomains. You must add the required DNS record and configure hosting and TLS.'
         },
         {
           question: 'How does the Instagram Auto-Sync feature work?',
-          answer: 'When enabled, LIINX connects to your Instagram account and automatically creates clickable links whenever you include a link or mention in your latest Instagram post caption or carousel. Your bio page always stays in sync without manual updates.'
+          answer: 'Where the Instagram integration is configured and authorized, Liinx can extract eligible links from supported captions. Availability depends on account access and permissions.'
         },
         {
           question: 'Can I easily migrate my links from my existing link-in-bio?',
-          answer: 'Absolutely. You can import your links directly from Linktree, Beacons, or Bio.fm in less than 60 seconds using our one-click importer in the Studio Builder.'
+          answer: 'You can preview publicly available links from supported profiles, select what you want to keep, and import the selection. Some sites may block extraction.'
         },
         {
           question: 'Can I play music and videos directly on my LIINX page?',
-          answer: 'Yes! LIINX supports rich interactive embeds for Spotify, Apple Music, SoundCloud, YouTube, TikTok, and Vimeo. Your fans can listen to preview tracks or watch your latest music video without leaving your profile.'
+          answer: 'You can add supported media embeds to your page. Playback and availability are controlled by the media provider, and some content may open outside your page.'
         },
         {
-          question: 'Is there a free trial?',
-          answer: 'Yes, both Starter and Pro plans come with a full 14-day free trial. You can build and customize your profile completely for free before deciding.'
+          question: 'Is there a free plan?',
+          answer: 'Yes. You can create and publish a page on the free plan. Paid plans are charged for the billing interval you select through Stripe.'
         }
       ]
     },
@@ -363,19 +363,19 @@ export const translations: Record<Language, Translations> = {
       claimCta: 'أنشئ صفحتك'
     },
     hero: {
-      badge: 'مواقع مصغرة بتصميم احترافي رفيع',
+      badge: 'صفحة مرنة لكل ما تشاركه',
       headline: 'عالمك بالكامل.',
       headlineHighlight: 'مصمم على طريقتك.',
-      subheadline: 'أنشئ موقعاً مصغراً فائق الجمال لكل ما تصنعه وتبيعه وتشاركه. خطوط عربية فاخرة، تضمين للوسائط، ونطاق مخصص بدون كتابة سطر برمجي واحد.',
+      subheadline: 'أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك وقائمتك البريدية.',
       claimPlaceholder: 'اسمك',
-      claimButton: 'احجز رابطك',
+      claimButton: 'أنشئ صفحتك مجاناً',
       exploreTemplates: 'استكشف القوالب',
-      previewSubtitle: 'معاينة تفاعلية حية',
-      noCreditCard: 'بدون بطاقة ائتمانية',
-      customDomainIncluded: 'يدعم دومينك المخصص',
+      previewSubtitle: 'معاينة تفاعلية للصفحة',
+      noCreditCard: 'ابدأ بحساب مجاني',
+      customDomainIncluded: 'النطاقات المخصصة في الخطط المدفوعة',
       zeroCommission: 'حجوزات عبر Calendly',
-      microProof1: 'معاينة حية أثناء التصميم والبناء',
-      microProof2: 'أكثر من ٨ مجالات إبداعية متخصصة',
+      microProof1: 'عاين صفحتك أثناء بنائها',
+      microProof2: 'قوالب للمبدعين والاستوديوهات والعلامات التجارية',
       themeLabel: 'السمة:',
       customizeCta: (name) => `تخصيص صفحة ${name} في الاستوديو`
     },
@@ -386,11 +386,11 @@ export const translations: Record<Language, Translations> = {
       feature1Title: 'مجلدات قابلة للطي وقوائم متعددة المستويات',
       feature1Desc: 'حافظ على صفحتك أنيقة ومنظمة. اجمع الملحقات والملفات الصحفية ومواعيد الجولات والمشاريع السابقة في مجلدات مرنة وسلسة.',
       feature2Title: 'دومين مخصص حقيقي',
-      feature2Desc: 'اربط links.yourname.studio أو bio.brand.studio مباشرة بعد التحقق من DNS وإعداد الاستضافة وشهادة TLS.',
+      feature2Desc: 'اربط links.yourdomain.com بعد التحقق من DNS وإعداد الاستضافة وTLS.',
       feature3Title: 'تشغيل الصوت والفيديو مباشرة',
       feature3Desc: 'ضمّن مقاطع سبوتيفاي، تسجيلات ساوندكلاود، وفيديوهات يوتيوب وتيك توك لتشغيلها بسلاسة من داخل صفحتك.',
-      feature4Title: 'مزامنة تلقائية مع كابشن إنستغرام',
-      feature4Desc: 'انشر على إنستغرام ودع المنصة تسحب الروابط المذكورة في كابشن منشوراتك تلقائياً دون الحاجة لتحديث يدوي.',
+      feature4Title: 'استخراج الروابط من إنستغرام',
+      feature4Desc: 'عند إعداد التكامل ومنحه الصلاحيات، استخرج الروابط المؤهلة من نصوص المنشورات المدعومة.',
       feature5Title: 'تحليلات قرارات فعلية',
       feature5Desc: 'تتبّع الزيارات ونقرات الروابط والمصادر المحيلة ووسوم الحملات.',
       ctaBarTitle: 'هل أنت مستعد للارتقاء بحضورك الرقمي؟',
@@ -400,7 +400,7 @@ export const translations: Record<Language, Translations> = {
     templatesSection: {
       badge: 'معرض القوالب',
       title: 'مصمم ليناسب كافة المجالات الإبداعية.',
-      subtitle: 'استكشف قوالب مختارة بعناية للمصورين، الموسيقيين، المطورين، المدربين، واستوديوهات الألعاب المستقلة.',
+      subtitle: 'اختر تخطيطاً أولياً لأعمالك وروابطك ووسائطك وجمهورك.',
       allCategory: 'جميع القوالب',
       useTemplate: 'استخدم هذا القالب',
       previewMobile: 'معاينة',
@@ -419,7 +419,7 @@ export const translations: Record<Language, Translations> = {
         'tmpl-tokyo-brand': {
           name: 'نيون أتيليه',
           category: 'العلامات التجارية',
-          description: 'لمسات نيون مميزة، إطلاقات حصرية، ومزامنة تلقائية مع إنستغرام لعلامات الأزياء والمتاجر الحديثة.'
+          description: 'لمسات نيون وتخطيطات لإطلاق المنتجات لعلامات الأزياء والمتاجر الحديثة.'
         },
         'tmpl-brutalist': {
           name: 'نيو بروتالست مونو',
@@ -462,7 +462,7 @@ export const translations: Record<Language, Translations> = {
         { feature: 'دومين مخصص (مثل bio.yoursite.com)', liinx: true, linktree: 'مدفوع ٢٤$+/شهرياً', beacons: 'مدفوع' },
         { feature: 'تضمين مشغلات سبوتيفاي ويوتيوب التفاعلية', liinx: true, linktree: true, beacons: true },
         { feature: 'مجلدات قابلة للطي لتقليل التمرير', liinx: true, linktree: false, beacons: false },
-        { feature: 'مزامنة تلقائية مع كابشن إنستغرام', liinx: true, linktree: false, beacons: false },
+        { feature: 'استخراج الروابط من نصوص إنستغرام', liinx: true, linktree: false, beacons: false },
         { feature: 'حجوزات عبر Calendly والتبرعات', liinx: true, linktree: 'يقتطع ٠.٥ - ٩٪', beacons: 'يقتطع ٩٪' },
         { feature: 'سرعة تحميل فائقة أقل من ١٠٠ مللي ثانية', liinx: true, linktree: false, beacons: false },
         { feature: 'سمات تصميم فاخرة ومختارة بعناية', liinx: true, linktree: 'قوالب بلاستيكية مكررة', beacons: 'محدود' },
@@ -476,15 +476,15 @@ export const translations: Record<Language, Translations> = {
       monthly: 'اشتراك شهري',
       yearly: 'اشتراك سنوي',
       yearlySave: 'وفّر ٢٠٪',
-      startTrial: 'ابدأ التجربة المجانية لـ ١٤ يوماً',
+      startTrial: 'ابدأ مجاناً',
       perMonth: '/ شهرياً',
       popular: 'الأكثر شعبية',
       plans: {
         starter: {
-          name: 'المبتدئ',
-          tagline: 'كل ما يحتاجه صانع المحتوى لظهور احترافي بمستوى عالمي.',
+          name: 'المجانية',
+          tagline: 'مساحة بسيطة لنشر أعمالك وروابطك.',
           features: [
-            'رابط مخصص liinx.co/@username',
+            'رابط صفحتك liinx.app/@username',
             'عناصر وروابط وأيقونات تواصل غير محدودة',
             'تضمين تلقائي للصوت والفيديو (سبوتيفاي، يوتيوب)',
             'مجلدات مجمعة وقابلة للطي',
@@ -494,29 +494,29 @@ export const translations: Record<Language, Translations> = {
             'تحليلات أساسية (المشاهدات والنقرات)',
             '٠٪ رسوم معاملات على المنصة'
           ],
-          ctaText: 'ابدأ التجربة المجانية لـ ١٤ يوماً',
+          ctaText: 'ابدأ مجاناً',
           billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
         },
         pro: {
           name: 'المحترف',
-          tagline: 'المعيار الذهبي لصناع المحتوى المحترفين والاستوديوهات المستقلة.',
+          tagline: 'تحكم أكبر للأنشطة الإبداعية النامية.',
           features: [
-            'كل مميزات باقة المبتدئ، بالإضافة إلى:',
+            'كل مميزات الخطة المجانية، بالإضافة إلى:',
             'ربط دومين مخصص خاص بك (مثل links.yourbrand.com)',
             'إدارة حسابات متعددة (حتى 5 ملفات شخصية)',
-            'مزامنة تلقائية مع كابشن منشورات إنستغرام',
+            'استخراج الروابط المؤهلة من نصوص المنشورات المدعومة',
             'تخصيص كامل بأكواد CSS ورفع خطوط مخصصة',
-            'إزالة شعار LIINX بالكامل (علامة بيضاء 100%)',
+            'إزالة شعار LIINX في الخطط المؤهلة',
             'تتبع UTM متقدم وربط Google Analytics / Meta Pixel',
             'جدولة الروابط وتحديد أوقات نشرها وانتهاء صلاحيتها',
-            'دعم فني مخصص ذو أولوية على مدار الساعة 24/7'
+            'دعم فني ذو أولوية'
           ],
-          ctaText: 'ابدأ التجربة المجانية لـ ١٤ يوماً',
+          ctaText: 'ابدأ مجاناً',
           billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
         },
         studio: {
           name: 'الاستوديو / الوكالات',
-          tagline: 'مصمم خصيصاً لوكالات إدارة المواهب والشركات متعددة العلامات.',
+          tagline: 'أدر صفحات ومشاريع متعددة من حساب واحد.',
           features: [
             'كل مميزات باقة المحترف، بالإضافة إلى:',
             'إدارة حتى 25 ملفاً شخصياً لصناع المحتوى',
@@ -539,27 +539,27 @@ export const translations: Record<Language, Translations> = {
       faqs: [
         {
           question: 'كيف تختلف منصة LIINX عن Linktree وأدوات الروابط التقليدية الأخرى؟',
-          answer: 'صُممت LIINX خصيصاً للمبدعين والفنانين والعلامات التجارية التي تهتم بجمالية التصميم والتفاصيل. على عكس الأدوات القديمة التي تملأ صفحتك بالإعلانات والأزرار البلاستيكية المكررة، تمنحك LIINX موقعاً مصغراً بدرجة تحريرية عالية مع خطوط راقية، وتضمين وسائط يبدو كأنه جزء أصيل من الصفحة، ومجلدات لتقليل التمرير، ودعم النطاق المخصص بتكلفة أقل بكثير.'
+          answer: 'تمنحك Liinx صفحة واحدة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك ونشرتك البريدية، مع تخطيطات تمنح المحتوى مساحة أكبر من قائمة الأزرار التقليدية.'
         },
         {
           question: 'هل يمكنني ربط دومين مخصص خاص بي؟',
-          answer: 'نعم بكل تأكيد! في خطتي Pro وStudio، يمكنك ربط أي دومين أو دومين فرعي خاص بك (مثل links.yourdomain.com أو bio.yourname.studio) مع شهادة أمان SSL مجانية وتلقائية بالكامل بدون أي إعدادات معقدة.'
+          answer: 'نعم. تدعم الخطط المدفوعة النطاقات والنطاقات الفرعية المخصصة. يجب إضافة سجل DNS المطلوب وإعداد الاستضافة وTLS.'
         },
         {
           question: 'كيف تعمل ميزة المزامنة التلقائية مع إنستغرام؟',
-          answer: 'عند تفعيلها، تتصل المنصة بحسابك على إنستغرام وتقوم تلقائياً بإنشاء روابط قابلة للنقر في صفحتك عندما تذكر رابطاً في كابشن أحدث منشور أو كاروسيل لك، لتبقى صفحتك محدثة دائماً دون أي تدخل يدوي.'
+          answer: 'عند إعداد تكامل إنستغرام ومنحه الصلاحيات اللازمة، يمكن لـ Liinx استخراج الروابط المؤهلة من نصوص المنشورات المدعومة. يعتمد ذلك على الوصول إلى الحساب والصلاحيات.'
         },
         {
           question: 'هل يمكنني استيراد روابطي الحالية بسهولة من أدوات أخرى؟',
-          answer: 'نعم بكل سهولة، يمكنك استيراد روابطك مباشرة من Linktree أو Beacons أو Bio.fm في أقل من ٦٠ ثانية باستخدام أداة الاستيراد بنقرة واحدة داخل استوديو التصميم.'
+          answer: 'يمكنك معاينة الروابط العامة من الملفات المدعومة، واختيار ما تريد الاحتفاظ به، ثم استيراده. قد تمنع بعض المواقع استخراج محتواها.'
         },
         {
           question: 'هل يمكن تشغيل الموسيقى ومقاطع الفيديو مباشرة في صفحتي؟',
-          answer: 'نعم! تدعم المنصة تضمين مشغلات تفاعلية مباشرة لـ Spotify وApple Music وSoundCloud وYouTube وTikTok وVimeo، ليستمع جمهورك لمقاطعك أو يشاهد فيديوهاتك دون مغادرة ملفك الشخصي.'
+          answer: 'يمكنك إضافة مشغلات وسائط مدعومة إلى صفحتك. يتحكم مزود الوسائط في التشغيل والتوفر، وقد يفتح بعض المحتوى خارج صفحتك.'
         },
         {
-          question: 'هل تتوفر فترة تجريبية مجانية؟',
-          answer: 'نعم، تتضمن خطتا Starter وPro تجربة مجانية كاملة لمدة ١٤ يوماً. يمكنك تصميم ملفك وتخصيصه بالكامل مجاناً قبل اتخاذ أي قرار.'
+          question: 'هل توجد خطة مجانية؟',
+          answer: 'نعم. يمكنك إنشاء صفحة ونشرها ضمن الخطة المجانية. تُحصّل الخطط المدفوعة حسب الفترة التي تختارها عبر Stripe.'
         }
       ]
     },

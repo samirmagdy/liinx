@@ -745,7 +745,7 @@ export const TEMPLATES: TemplateItem[] = [
     id: 'tmpl-editorial',
     name: 'Minimalist Editorial',
     category: 'Design & Art',
-    description: 'Generous typography, delicate borders, and museum-grade whitespace for photographers and stylists.',
+    description: 'A quiet layout for photographers, designers, and visual portfolios.',
     profile: DEMO_PROFILES[0],
     previewColor: '#FAF7F2'
   },
@@ -761,7 +761,7 @@ export const TEMPLATES: TemplateItem[] = [
     id: 'tmpl-tokyo-brand',
     name: 'Neon Atelier',
     category: 'Brands',
-    description: 'Electric accents, capsule drops, and Instagram synchronization for modern apparel and retail.',
+    description: 'A bold layout for product launches, collections, and retail links.',
     profile: DEMO_PROFILES[2],
     previewColor: '#151128'
   },
@@ -810,12 +810,12 @@ export const TEMPLATES: TemplateItem[] = [
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'starter',
-    name: 'Starter',
-    tagline: 'Everything creators need to look world-class.',
+    name: 'Free',
+    tagline: 'A simple place to publish your work and links.',
     monthlyPrice: 5,
     yearlyPrice: 48, // $4/mo billed annually
     features: [
-      'Personalized liinx.co/@username',
+      'Personalized liinx.app/@username',
       'Unlimited link blocks & social icons',
       'Audio & Video auto-embeds (Spotify, YouTube)',
       'Expandable accordion folders',
@@ -825,27 +825,27 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Basic analytics (views & click counts)',
       'Zero platform transaction fees'
     ],
-    ctaText: 'Start 14-Day Free Trial'
+    ctaText: 'Start free'
   },
   {
     id: 'pro',
     name: 'Pro',
-    tagline: 'The gold standard for established creators & independent studios.',
+    tagline: 'More control for growing creator businesses.',
     monthlyPrice: 12,
     yearlyPrice: 120, // $10/mo billed annually
     popular: true,
     features: [
-      'Everything in Starter, plus:',
+      'Everything in Free, plus:',
       'Connect your own custom domain (e.g. links.yourbrand.com)',
       'Multi-profile management (Up to 5 profiles included)',
-      'Instagram auto-sync from post captions',
+      'Extract eligible links from supported captions',
       'Custom CSS styling & custom font uploads',
-      'Zero LIINX branding badge (100% white-label)',
+      'Remove Liinx branding on eligible plans',
       'Deep UTM tracking & Google Analytics / Meta Pixel',
       'Scheduling & time-release links',
-      'Priority 24/7 creator concierge support'
+      'Priority support'
     ],
-    ctaText: 'Start 14-Day Free Trial'
+    ctaText: 'Start free'
   },
   {
     id: 'studio',
@@ -874,18 +874,18 @@ export const COMPARISON_FEATURES = [
   { feature: 'Instagram Caption Auto-Sync', liinx: true, linktree: false, beacons: false },
   { feature: 'Zero Commission on Sales/Donations', liinx: true, linktree: 'Takes 0.5-9%', beacons: 'Takes 9%' },
   { feature: 'Sub-100ms Ultra-Fast Page Load', liinx: true, linktree: false, beacons: false },
-  { feature: 'Bespoke Curated Design Themes', liinx: true, linktree: 'Generic templates', beacons: 'Limited' },
+  { feature: 'Curated design themes', liinx: true, linktree: 'Generic templates', beacons: 'Limited' },
   { feature: 'Multi-Profile Management (One Login)', liinx: true, linktree: 'Enterprise only', beacons: false }
 ];
 
 export const FAQS = [
   {
     question: 'How is LIINX different from Linktree or generic link-in-bio tools?',
-    answer: 'LIINX is engineered specifically for design-conscious creators, artists, and independent brands. Unlike older tools that clutter your page with corporate branding, ads, and generic plastic buttons, LIINX delivers an editorial-grade experience with bespoke typography, media embeds that feel native, accordion folders to reduce scrolling friction, and custom domain support at a fraction of the cost.'
+    answer: 'Liinx gives creators one customizable page for links, media, bookings, and newsletters, with layouts that give content more room than a basic list of buttons.'
   },
   {
     question: 'Can I connect my own custom domain?',
-    answer: 'Yes! On our Pro and Studio plans, you can map any custom domain or subdomain (such as links.yourdomain.com or bio.yourname.studio) with automated zero-configuration SSL certificates.'
+    answer: 'Yes. Paid plans support custom domains and subdomains. You must add the required DNS record and configure hosting and TLS.'
   },
   {
     question: 'How does the Instagram Auto-Sync feature work?',
@@ -893,14 +893,14 @@ export const FAQS = [
   },
   {
     question: 'Can I easily migrate my links from my existing link-in-bio?',
-    answer: 'Absolutely. You can import your links directly from Linktree, Beacons, or Bio.fm in less than 60 seconds using our one-click importer in the Studio Builder.'
+    answer: 'You can preview publicly available links from supported profiles, select what you want to keep, and import the selection. Some sites may block extraction.'
   },
   {
     question: 'Can I play music and videos directly on my LIINX page?',
     answer: 'Yes! LIINX supports rich interactive embeds for Spotify, Apple Music, SoundCloud, YouTube, TikTok, and Vimeo. Your fans can listen to preview tracks or watch your latest music video without leaving your profile.'
   },
   {
-    question: 'Is there a free trial?',
+    question: 'Is there a free plan?',
     answer: 'There is a free plan you can use forever. Paid subscriptions on Pro and Studio are managed directly through Stripe.'
   }
 ];

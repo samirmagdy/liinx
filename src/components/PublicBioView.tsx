@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { CreatorProfile, ThemeConfig } from '../types';
 import { THEMES } from '../data/mockData';
+import { brand } from '../config/brand';
 import { api } from '../services/api';
 import { 
   ArrowLeft, 
@@ -407,7 +408,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           </h1>
 
           <p className="text-xs sm:text-sm font-mono opacity-65 mb-3">
-            liinx.co/@{profile.username}
+            {brand.domain}/@{profile.username}
           </p>
 
           <p 

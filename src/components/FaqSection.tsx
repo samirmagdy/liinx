@@ -11,13 +11,13 @@ export const FaqSection: React.FC = () => {
     { question: 'كيف تعمل الحجوزات؟', answer: 'أضف رابط موعد صالحاً من Calendly. يختار الزائر وقتاً داخل الأداة ويؤكّد Calendly الحجز. فتح الأداة لا يُحسب حجزاً مكتملاً.' },
     { question: 'هل يوجد نطاق مخصص؟', answer: 'تدعم الخطط المدفوعة نطاقاً مخصصاً بعد التحقق من DNS. يجب إعداد النطاق وشهادة TLS لدى مزوّد الاستضافة أيضاً.' },
     { question: 'هل يمكن استيراد الروابط؟', answer: 'افتح أداة الاستيراد، أدخل رابط صفحتك العامة، ثم راجع الروابط واختر ما تريد حفظه. قد تمنع بعض المواقع الاستخراج.' },
-    { question: 'هل تتوفر تجربة مجانية؟', answer: 'توجد خطة مجانية. الخطط المدفوعة لا تتضمن فترة تجريبية مجانية وتُحصّل حسب الفترة المختارة في Stripe.' }
+    { question: 'هل توجد خطة مجانية؟', answer: 'توجد خطة مجانية. الخطط المدفوعة لا تتضمن فترة تجريبية مجانية وتُحصّل حسب الفترة المختارة في Stripe.' }
   ] : [
     { question: 'How do I start?', answer: 'Create a free account, add your links, choose a theme and open your published page to check it.' },
     { question: 'How does booking work?', answer: 'Add a valid Calendly event link. Visitors choose a time in the embedded scheduler and Calendly confirms the appointment. Opening the scheduler is not counted as a completed booking.' },
     { question: 'Can I use a custom domain?', answer: 'Paid plans support custom domains after DNS verification. Your hosting provider must also configure the domain and TLS certificate.' },
     { question: 'Can I import my links?', answer: 'Open the importer, enter your public page URL, then review and select the links to save. Some sites may block extraction.' },
-    { question: 'Is there a free trial?', answer: 'There is a free plan. Paid plans have no free trial and are charged for the selected interval through Stripe.' }
+    { question: 'Is there a free plan?', answer: 'There is a free plan. Paid plans have no free trial and are charged for the selected interval through Stripe.' }
   ];
 
   const toggleFaq = (idx: number) => {

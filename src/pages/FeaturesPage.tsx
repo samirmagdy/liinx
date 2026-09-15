@@ -46,11 +46,11 @@ export function FeaturesPage() {
     },
     {
       icon: <Globe2 className="w-6 h-6 text-amber-600" />,
-      title: "دومين مخصص بدون تعقيدات",
-      description: "وجّه links.yourbrand.com أو bio.yourname.studio مباشرة مع شهادات SSL مجانية وتلقائية بالكامل.",
+      title: "نطاقات مخصصة",
+      description: "اربط links.yourbrand.com أو نطاقاً فرعياً بعد إضافة سجل DNS وإعداد الاستضافة وTLS.",
       bullets: [
         "تحقق تلقائي من سجلات CNAME",
-        "إزالة شعار المنصة بالكامل (علامة بيضاء 100%)",
+        "إزالة شعار Liinx في الخطط المؤهلة",
         "دعم ملفات متعددة تحت حساب واحد",
         "ربط النطاقات الرئيسية والفرعية"
       ]
@@ -81,9 +81,9 @@ export function FeaturesPage() {
     },
     {
       icon: <Globe2 className="w-6 h-6 text-amber-600" />,
-      title: "Zero-Friction Custom Domains",
-      description: "Promote links.yourbrand.com or bio.yourname.studio with zero-configuration SSL certificates automatically provisioned and renewed.",
-      bullets: ["Automated DNS CNAME validation", "Zero platform branding (100% white-label)", "Multi-profile support under one account", "Apex and subdomain mapping"]
+      title: "Custom domains",
+      description: "Connect links.yourbrand.com or a subdomain after DNS verification and hosting configuration.",
+      bullets: ["DNS CNAME verification", "Remove Liinx branding on eligible plans", "Multiple profiles under one account", "Apex and subdomain mapping"]
     },
     {
       icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
@@ -101,7 +101,7 @@ export function FeaturesPage() {
         <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-800">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>{isRtl ? 'مواقع مصغرة رفيعة المستوى' : 'Framer × Linktree × Carrd'}</span>
+            <span>{isRtl ? 'صفحة واحدة لكل ما تشاركه' : 'One page for everything you share'}</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-neutral-900 max-w-3xl mx-auto leading-tight">
             {isRtl ? (
@@ -118,8 +118,8 @@ export function FeaturesPage() {
           </h1>
           <p className="text-base sm:text-lg text-neutral-600 max-w-xl mx-auto leading-relaxed">
             {isRtl 
-              ? 'أنشئ موقعاً مصغراً فائق الجمال لكل ما تصنعه وتبيعه وتشاركه بدومين مخصص وتصميم فريد بدون كود.' 
-              : brand.description}
+              ? 'أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك وقائمتك البريدية.' 
+              : 'Build a customizable page for your links, media, bookings, and newsletter.'}
           </p>
           <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
             <button

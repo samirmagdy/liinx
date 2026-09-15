@@ -617,7 +617,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           subtitle: 'Expandable collection of destinations',
           items: [
             { id: 'f_1', title: 'Main Project', url: 'https://github.com' },
-            { id: 'f_2', title: 'Documentation', url: 'https://docs.liinx.co' }
+            { id: 'f_2', title: 'Documentation', url: 'https://liinx.app/features' }
           ]
         }
       });
@@ -901,7 +901,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               saveStatus === 'error' ? 'bg-rose-500' : 'bg-emerald-500'
             }`} />
             <span className="font-mono text-[11px]">
-              {ui(saveErrorBanner ? 'Save failed' : queueRef.current?.dirty || saveStatus === 'saving' ? 'Saving to database...' : saveStatus === 'error' ? 'Save failed' : 'Saved to database')}
+              {ui(saveErrorBanner ? 'Save failed' : queueRef.current?.dirty || saveStatus === 'saving' ? 'Saving...' : saveStatus === 'error' ? 'Save failed' : 'Saved')}
             </span>
             {queueRef.current?.dirty && saveStatus === 'error' && (
               <button
@@ -997,7 +997,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
-              <span>{ui("Real Analytics")}</span>
+              <span>{ui("Analytics")}</span>
             </button>
 
             <button
@@ -1022,7 +1022,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-sm text-[#18181B]">{ui("Creator Identity")}</h3>
                   <span className="text-[10px] font-mono uppercase bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-md">
-                    {ui("Live Profile")}</span>
+                    {ui("Published page")}</span>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -1833,7 +1833,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     profile.plan === 'studio' ? 'border-neutral-900 ring-2 ring-neutral-900/10 bg-neutral-50' : 'border-neutral-200'
                   }`}>
                     <div>
-                      <div className="font-bold text-sm text-neutral-900">{ui("Studio VIP")}</div>
+                      <div className="font-bold text-sm text-neutral-900">{ui("Studio")}</div>
                       <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Custom CSS and REST API")}</div>
                     </div>
                     <button

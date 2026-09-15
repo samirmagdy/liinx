@@ -76,7 +76,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
       </h2>
       
       <p className="text-[11px] font-mono opacity-60 mb-2.5">
-        liinx.co/@{activeProfile.username}
+        {brand.domain}/@{activeProfile.username}
       </p>
 
       <p 
@@ -276,4 +276,3 @@ return (
     </section>
 );
 };
-

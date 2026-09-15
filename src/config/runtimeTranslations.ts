@@ -27,7 +27,7 @@ export const runtimeTranslations: Record<string, string> = {
   'View Live Page': 'عرض الصفحة الحية',
   'Blocks & Content': 'المحتوى والعناصر',
   'Themes & Styles': 'السمات والأنماط',
-  'Real Analytics': 'التحليلات الفعلية',
+  'Real Analytics': 'التحليلات',
   'Settings & Plan': 'الإعدادات والخطة',
   'Creator Identity': 'هوية صانع المحتوى',
   'Display Name': 'الاسم الظاهر',
