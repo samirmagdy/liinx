@@ -1,10 +1,12 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { Link2, CalendarCheck, Mail, BarChart3, Globe2, Layers } from 'lucide-react';
+import { Link2, CalendarCheck, Mail, BarChart3, Globe2, Layers, ArrowRight, Download } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export function ComparisonSection() {
   const { lang } = useLanguage();
   const ar = lang === 'ar';
+  const [, setLocation] = useLocation();
 
   const rows = ar ? [
     { icon: <Link2 className="w-4 h-4 text-amber-600" />, name: 'الروابط والوسائط', value: 'أضف روابط ووسائط من مزوّدين مدعومين.' },
@@ -51,6 +53,22 @@ export function ComparisonSection() {
             </div>
           ))}
         </dl>
+
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white border border-amber-200 flex items-center justify-center shrink-0">
+              <Download className="w-4 h-4 text-amber-700" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-neutral-900">{ar ? 'هل تنتقل من Linktree؟' : 'Coming from Linktree or Beacons?'}</h3>
+              <p className="text-sm text-neutral-600 leading-relaxed mt-1">{ar ? 'عاين الروابط العامة المدعومة واختر ما تريد استيراده قبل الحفظ.' : 'Preview links from a supported public profile and choose what to import before saving.'}</p>
+            </div>
+          </div>
+          <button onClick={() => setLocation('/studio')} className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-bold hover:bg-black cursor-pointer">
+            {ar ? 'افتح أداة الاستيراد' : 'Open the importer'}
+            <ArrowRight className={`w-3.5 h-3.5 ${ar ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
       </div>
     </section>
   );

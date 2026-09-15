@@ -68,30 +68,30 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
               </p>
             </div>
 
-            {/* Visual simulation of folder */}
+            {/* Illustrative example of folder content */}
             <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 space-y-2 text-start">
               <div className="p-3 bg-neutral-50 rounded-xl flex items-center justify-between font-medium text-xs text-neutral-900">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
                   <span className="font-bold">
-                    {isRtl ? 'جولة الحفلات الفنية ومقاعد VIP' : '2025 Tour Dates & VIP Access'}
+                    {isRtl ? 'مثال: جولة الحفلات الفنية' : 'Example: 2025 Tour Dates'}
                   </span>
                 </div>
                 <span className="font-mono text-[10px] text-neutral-500 bg-neutral-100 dark:bg-neutral-900/10 px-2 py-0.5 rounded-full border border-neutral-200">
-                  {isRtl ? '٤ مدن' : '4 Cities'}
+                  {isRtl ? 'محتوى توضيحي' : 'Example content'}
                 </span>
               </div>
               <div className="px-3 py-1 space-y-1 text-xs text-neutral-600">
                 <div className="flex justify-between py-1 border-b border-neutral-200">
                   <span>{isRtl ? 'برلين • مسرح كرافتفيرك' : 'Berlin • Kraftwerk Studio'}</span>
                   <span className="font-mono font-bold text-emerald-600">
-                    {isRtl ? 'مكتمل العدد' : 'SOLD OUT'}
+                    {isRtl ? 'عنصر داخل المجلد' : 'Folder item'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span>{isRtl ? 'طوكيو • ميوزيم فيجن' : 'Tokyo • Sound Museum Vision'}</span>
                   <span className="font-mono font-bold text-amber-600">
-                    {isRtl ? 'تذاكر محدودة' : 'FEW TICKETS'}
+                    {isRtl ? 'عنصر داخل المجلد' : 'Folder item'}
                   </span>
                 </div>
               </div>
@@ -158,9 +158,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
               </p>
             </div>
             <div className="mt-6 text-xs font-mono text-neutral-500 bg-neutral-100 dark:bg-neutral-900/10 p-2.5 rounded-xl border border-neutral-200">
-              {isRtl ? 'المزامنة التلقائية: ' : 'Auto-sync: '}
-              <span className="text-emerald-600 font-bold">
-                {isRtl ? 'مفعلة (بدون تأخير)' : 'ACTIVE (0 delay)'}
+              {isRtl ? 'المزامنة: ' : 'Sync status: '}
+              <span className="text-neutral-700 font-bold">
+                {isRtl ? 'تتطلب ربط الحساب والصلاحيات' : 'Requires account connection and permissions'}
               </span>
             </div>
           </div>
@@ -178,10 +178,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                 {b.feature5Desc}
               </p>
             </div>
-            <div className="mt-6 flex items-center justify-between text-xs font-mono bg-neutral-100 dark:bg-neutral-900/10 p-2.5 rounded-xl border border-neutral-200">
-              <span>{isRtl ? 'النتائج والمصادر:' : 'Avg CTR:'}</span>
-              <span className="font-bold text-emerald-700">
-                {isRtl ? 'نقرات وتحويلات دقيقة' : 'Clicks, sources & conversions'}
+            <div className="mt-6 text-xs font-mono bg-neutral-100 dark:bg-neutral-900/10 p-2.5 rounded-xl border border-neutral-200">
+              <span className="font-bold text-neutral-700">
+                {isRtl ? 'تظهر البيانات الحقيقية في الاستوديو بعد الزيارات والنقرات' : 'Real data appears in Studio after visits and clicks'}
               </span>
             </div>
           </div>

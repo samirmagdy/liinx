@@ -20,7 +20,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
       price: 0,
       features: ar
         ? ['صفحة شخصية وروابط ووسائط', 'تخصيص المظهر', 'جمع اشتراكات البريد وإحصاءات الزيارات']
-        : ['Personal page, links and media', 'Theme customization', 'Email capture and visit analytics'],
+        : ['Published liinx.app/@username page', 'Links, social icons and supported media blocks', 'Theme customization', 'Newsletter capture form', 'Views, clicks and referrer analytics'],
       highlight: false,
     },
     {
@@ -30,7 +30,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
       price: paidPlans.pro[interval],
       features: ar
         ? ['ميزات الخطة المجانية', 'نطاق مخصص بعد التحقق والإعداد', 'إزالة شارة المنصة وتخصيص CSS', 'جدولة الروابط وتتبع الحملات']
-        : ['Free features included', 'Custom domain after verification and setup', 'Remove platform badge and customize CSS', 'Link scheduling and campaign tracking'],
+        : ['Everything in Free', 'Custom domain after DNS verification and hosting/TLS setup', 'Custom CSS and custom font URL settings', 'Link scheduling and UTM campaign tracking', 'Google Analytics and Meta Pixel settings', 'Remove Liinx branding'],
       highlight: true,
     },
     {
@@ -40,7 +40,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
       price: paidPlans.studio[interval],
       features: ar
         ? ['ميزات Pro', 'إدارة ملفات متعددة', 'مفاتيح REST API']
-        : ['Pro features included', 'Multiple profile management', 'REST API keys'],
+        : ['Everything in Pro', 'Multiple profile management', 'REST API keys'],
       highlight: false,
     },
   ];
@@ -121,8 +121,13 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                   {currency(plan.price)}
                 </span>
                 <span className={`text-sm font-normal ${plan.highlight ? 'text-neutral-400' : 'text-neutral-500'}`}>
-                  {' '}/ {interval === 'month' ? (ar ? 'شهر' : 'month') : (ar ? 'سنة' : 'year')}
+                  {' '}/ {interval === 'month' ? (ar ? 'شهر' : 'month') : (ar ? 'سنة، تُحصّل دفعة واحدة' : 'year, billed once')}
                 </span>
+                {interval === 'year' && plan.price > 0 && (
+                  <p className={`text-xs mt-2 ${plan.highlight ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                    {ar ? `ما يعادل ${currency(plan.price / 12)} شهرياً` : `Equivalent to ${currency(plan.price / 12)}/month`}
+                  </p>
+                )}
               </div>
 
               {/* Features */}
@@ -164,7 +169,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
 
         {/* Disclaimer */}
         <p className="mt-8 text-xs text-center text-neutral-500 max-w-lg mx-auto">
-          {ar ? 'تُحصّل الخطة السنوية دفعة واحدة. لا توجد تجربة مدفوعة مجانية. إدارة الاشتراك والإلغاء من بوابة الفوترة.' : 'Annual plans are charged in one payment. No free trial on paid plans. Manage or cancel your subscription in the billing portal.'}
+          {ar ? 'تُحصّل الخطط السنوية دفعة واحدة. لا توجد تجربة مدفوعة مجانية. تُدار الاشتراكات والإلغاءات عبر Stripe.' : 'Annual plans are charged once. Paid plans have no free trial. Subscriptions and cancellations are handled through Stripe.'}
         </p>
       </div>
     </section>

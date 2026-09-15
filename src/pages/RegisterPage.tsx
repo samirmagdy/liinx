@@ -107,7 +107,7 @@ export const RegisterPage: React.FC = () => {
     setStep(2);
   };
 
-  const handleFinalSubmit = async (e: React.FormEvent) => {
+  const handleFinalSubmit = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
@@ -312,6 +312,14 @@ export const RegisterPage: React.FC = () => {
                   className="px-3.5 py-3 rounded-xl border border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFinalSubmit}
+                  disabled={isSubmitting}
+                  className="px-3.5 py-3 rounded-xl border border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {ui('Skip for now')}
                 </button>
                 <button
                   type="submit"

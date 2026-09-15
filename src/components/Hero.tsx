@@ -109,9 +109,12 @@ return (
             </h1>
 
             {/* Subtitle */}
-            <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl mb-8 text-pretty">
-              {t.hero.subheadline}
-            </p>
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl mb-8 text-pretty">
+                {t.hero.subheadline}
+              </p>
+              <p className="text-sm text-neutral-500 max-w-xl -mt-4 mb-8 text-pretty">
+                {tr('One designed page for links, supported media, newsletter capture, and Calendly bookings — with your own domain on paid plans.')}
+              </p>
 
             {/* Claim Handle Hero Form */}
             <div className="w-full max-w-xl mb-8 space-y-4">
@@ -167,6 +170,13 @@ return (
                   className="text-neutral-900 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>{t.hero.exploreTemplates}</span>
+                  <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
+                </button>
+                <button
+                  onClick={() => setLocation('/studio')}
+                  className="text-neutral-600 font-semibold hover:text-neutral-900 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{tr('Moving from Linktree? Import your links')}</span>
                   <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
               </div>
