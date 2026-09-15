@@ -18,6 +18,7 @@ COPY tsconfig.json vite.config.ts index.html ./
 COPY src/ ./src/
 COPY public/ ./public/
 COPY server/ ./server/
+COPY scripts/ ./scripts/
 
 # Build client SPA assets into dist/
 RUN npm run build

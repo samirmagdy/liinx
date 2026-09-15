@@ -1,7 +1,9 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState, useEffect, useRef } from 'react';
 import { CreatorProfile, ThemeConfig, ProfileBlock, LinkBlock, FolderBlock, AudioBlock, VideoBlock, NewsletterBlock, SocialLink } from '../types';
 import { DEMO_PROFILES, THEMES } from '../data/mockData';
 import { PhonePreview } from './PhonePreview';
+import { ViewportPreview } from './ViewportPreview';
 import { QrCodeModal } from './QrCodeModal';
 import { LinktreeImporterModal } from './LinktreeImporterModal';
 import { api, authStorage } from '../services/api';
@@ -58,6 +60,8 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { BookingEditor } from './BookingEditor';
+import { SaveQueue } from '../utils/saveQueue';
+import { useLanguage } from '../context/LanguageContext';
 
 interface BuilderStudioProps {
   initialProfile?: CreatorProfile;
@@ -68,6 +72,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   initialProfile,
   onViewFullscreen
 }) => {
+  const { tr: ui } = useUiLanguage();
+  const { tr } = useLanguage();
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [profile, setProfile] = useState<CreatorProfile>(initialProfile || DEMO_PROFILES[0]);
   const [activeTab, setActiveTab] = useState<'content' | 'appearance' | 'settings' | 'analytics'>('content');
   const [customTheme, setCustomTheme] = useState<ThemeConfig>(
@@ -75,6 +82,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   );
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [dataError, setDataError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -134,6 +142,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   const handleSelectProfile = async (targetId: string) => {
+    if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
     if (targetId === profile.id) {
       setProfileDropdownOpen(false);
       return;
@@ -158,6 +167,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   const handleCreateProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
     if (!newUsername.trim() || !newDisplayName.trim() || isCreatingProfile) return;
     setIsCreatingProfile(true);
     setCreateProfileError(null);
@@ -241,8 +251,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   // Load live profile on initial mount
   useEffect(() => {
     api.studio.getProfile()
-      .then(liveProfile => {
-        if (!liveProfile || !liveProfile.id) return;
+      .then(async liveProfile => {
+        if (!liveProfile || !liveProfile.id) throw new Error('Invalid profile response');
+        const template = new URLSearchParams(window.location.search).get('template');
+        if (template && THEMES.some(theme => theme.id === template)) {
+          await api.studio.updateProfile({ themeId: template, customTheme: THEMES.find(theme => theme.id === template)! });
+          liveProfile = await api.studio.getProfile();
+          window.history.replaceState(null, '', '/studio');
+        }
+        setLoadState('ready');
         setProfile(liveProfile);
         setGaInput(liveProfile.gaMeasurementId || '');
         setMetaPixelInput(liveProfile.metaPixelId || '');
@@ -253,7 +270,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         setCustomTheme(th);
       })
       .catch(err => {
-        console.log('Using active session profile:', err?.message || err);
+        setLoadState('error');
       });
 
     loadProfilesList();
@@ -261,24 +278,25 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   // Fetch real analytics or subscribers/instagram/api-keys when tabs change
   useEffect(() => {
+    setDataError(false);
     if (activeTab === 'analytics') {
       api.studio.getAnalytics()
         .then(data => {
           if (data) setAnalyticsData(data);
         })
-        .catch(err => console.error('Failed to load analytics:', err));
+        .catch(() => setDataError(true));
     } else if (activeTab === 'settings') {
       api.studio.getSubscribers()
         .then(res => {
           if (res && Array.isArray(res.subscribers)) setSubscribers(res.subscribers);
         })
-        .catch(err => console.error('Failed to load subscribers:', err));
+        .catch(() => setDataError(true));
 
       api.instagram.getStatus()
         .then(status => {
           if (status) setInstagramStatus(status);
         })
-        .catch(err => console.error('Failed to load Instagram status:', err));
+        .catch(() => setDataError(true));
 
       if (profile.plan === 'studio') {
         loadApiKeys();
@@ -392,90 +410,41 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
-  // Robust Per-Block and Profile Pending Save Queues (prevents race condition & lost edits)
-  const pendingBlockUpdatesRef = useRef<Map<string, { timer: NodeJS.Timeout; updates: Record<string, any> }>>(new Map());
-  const pendingProfileSaveRef = useRef<{ timer: NodeJS.Timeout | null; updates: Partial<CreatorProfile> }>({
-    timer: null,
-    updates: {}
-  });
   const [saveErrorBanner, setSaveErrorBanner] = useState<string | null>(null);
-
-  // Warn if user attempts to navigate away with unsaved changes in flight
+  const queueRef = useRef<SaveQueue | null>(null);
+  if (!queueRef.current) queueRef.current = new SaveQueue(
+    (key, patch) => key === 'profile' ? api.studio.updateProfile(patch) : api.studio.updateBlock(key, patch),
+    state => {
+      setSaveStatus(state);
+      setSaveErrorBanner(state === 'error' ? 'Changes are not saved. Check your connection and retry.' : null);
+    }
+  );
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (pendingBlockUpdatesRef.current.size > 0 || pendingProfileSaveRef.current.timer) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes in the studio editor.';
-        return 'You have unsaved changes in the studio editor.';
-      }
+    const warn = (e: BeforeUnloadEvent) => {
+      if (queueRef.current?.dirty) { e.preventDefault(); e.returnValue = ''; }
     };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('beforeunload', warn);
+    const navigate = async (event: MouseEvent) => {
+      const anchor = (event.target as Element)?.closest('a');
+      if (!anchor || anchor.target === '_blank' || !queueRef.current?.dirty) return;
+      event.preventDefault(); event.stopPropagation();
+      if (await queueRef.current.flush()) window.location.assign(anchor.href);
+    };
+    document.addEventListener('click', navigate, true);
+    return () => { window.removeEventListener('beforeunload', warn); document.removeEventListener('click', navigate, true); queueRef.current?.dispose(); };
   }, []);
-
-  const triggerAutoSave = (updatedProfile: Partial<CreatorProfile>) => {
-    setSaveStatus('saving');
-    setSaveErrorBanner(null);
-
-    pendingProfileSaveRef.current.updates = {
-      ...pendingProfileSaveRef.current.updates,
-      ...updatedProfile
-    };
-
-    if (pendingProfileSaveRef.current.timer) {
-      clearTimeout(pendingProfileSaveRef.current.timer);
-    }
-
-    pendingProfileSaveRef.current.timer = setTimeout(async () => {
-      const payload = { ...pendingProfileSaveRef.current.updates };
-      pendingProfileSaveRef.current.updates = {};
-      pendingProfileSaveRef.current.timer = null;
-
-      try {
-        await api.studio.updateProfile({
-          displayName: payload.displayName ?? profile.displayName,
-          bio: payload.bio ?? profile.bio,
-          avatarUrl: payload.avatarUrl ?? profile.avatarUrl,
-          category: payload.category ?? profile.category,
-          themeId: payload.themeId ?? profile.themeId,
-          customTheme: payload.customTheme ?? customTheme,
-          socials: payload.socials ?? profile.socials
-        });
-        if (pendingBlockUpdatesRef.current.size === 0) {
-          setSaveStatus('saved');
-        }
-      } catch (err: any) {
-        console.error('Auto-save profile error:', err);
-        setSaveStatus('error');
-        setSaveErrorBanner(err?.message || 'Failed to save profile changes. Edits may not be persisted.');
-      }
-    }, 600);
+  const triggerAutoSave = (updated: Partial<CreatorProfile>) => {
+    const { displayName, bio, avatarUrl, category, themeId, customTheme, socials } = updated;
+    queueRef.current!.enqueue('profile', Object.fromEntries(
+      Object.entries({ displayName, bio, avatarUrl, category, themeId, customTheme, socials }).filter(([,v]) => v !== undefined)
+    ));
   };
-
-  const handleRetryFailedSaves = async () => {
-    setSaveStatus('saving');
-    setSaveErrorBanner(null);
-    try {
-      await api.studio.updateProfile({
-        displayName: profile.displayName,
-        bio: profile.bio,
-        avatarUrl: profile.avatarUrl,
-        category: profile.category,
-        themeId: profile.themeId,
-        customTheme: customTheme,
-        socials: profile.socials
-      });
-      setSaveStatus('saved');
-    } catch (err: any) {
-      setSaveStatus('error');
-      setSaveErrorBanner(err?.message || 'Retry failed. Please check your network connection.');
-    }
-  };
+  const handleRetryFailedSaves = () => queueRef.current!.flush();
 
   const handleProfileChange = (field: keyof CreatorProfile, value: any) => {
     const updated = { ...profile, [field]: value };
     setProfile(updated);
-    triggerAutoSave(updated);
+    triggerAutoSave({ [field]: value });
   };
 
   // Avatar Image Upload
@@ -488,7 +457,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       const res = await api.studio.uploadImage(file);
       const updated = { ...profile, avatarUrl: res.url };
       setProfile(updated);
-      triggerAutoSave(updated);
+      triggerAutoSave({ avatarUrl: res.url });
     } catch (err: any) {
       alert(err.message || 'Image upload failed');
     } finally {
@@ -507,7 +476,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     const updatedSocials = [...currentSocials, { platform: newSocialPlatform, url: cleanUrl }];
     const updated = { ...profile, socials: updatedSocials };
     setProfile(updated);
-    triggerAutoSave(updated);
+    triggerAutoSave({ socials: updatedSocials });
     setNewSocialUrl('');
   };
 
@@ -516,22 +485,18 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     const updatedSocials = currentSocials.filter((_, i) => i !== index);
     const updated = { ...profile, socials: updatedSocials };
     setProfile(updated);
-    triggerAutoSave(updated);
+    triggerAutoSave({ socials: updatedSocials });
   };
 
   // Plan Upgrade Operation
   const handleUpgradePlan = async (targetPlan: 'free' | 'pro' | 'studio') => {
     try {
       setSaveStatus('saving');
-      const res = await api.studio.updatePlan(targetPlan);
-      setProfile(prev => ({ ...prev, plan: targetPlan }));
-      setSaveStatus('saved');
-      confetti({
-        particleCount: 70,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-      alert(res.message);
+      if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
+      const res = targetPlan === 'free' || profile.plan !== 'free'
+        ? await api.billing.createPortalSession()
+        : await api.billing.createCheckoutSession(targetPlan);
+      window.location.assign(res.url);
     } catch (err: any) {
       alert(err.message || 'Failed to update plan');
       setSaveStatus('error');
@@ -670,11 +635,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     const temp = newBlocks[index];
     newBlocks[index] = newBlocks[targetIndex];
     newBlocks[targetIndex] = temp;
-    setProfile(prev => ({ ...prev, blocks: newBlocks }));
 
     try {
       setSaveStatus('saving');
       await api.studio.reorderBlocks(newBlocks.map(b => b.id));
+      setProfile(prev => ({ ...prev, blocks: newBlocks }));
       setSaveStatus('saved');
     } catch (err) {
       setSaveStatus('error');
@@ -682,47 +647,20 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   const handleDeleteBlock = async (id: string) => {
-    setProfile(prev => ({ ...prev, blocks: prev.blocks.filter(b => b.id !== id) }));
+    if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
+    if (!window.confirm('Delete this block?')) return;
     try {
       setSaveStatus('saving');
       await api.studio.deleteBlock(id);
+      setProfile(prev => ({ ...prev, blocks: prev.blocks.filter(b => b.id !== id) }));
       setSaveStatus('saved');
     } catch (err) {
       setSaveStatus('error');
     }
   };
 
-  const queueBlockUpdate = (id: string, newFields: Record<string, any>) => {
-    setSaveStatus('saving');
-    setSaveErrorBanner(null);
-
-    const existing = pendingBlockUpdatesRef.current.get(id);
-    if (existing) {
-      clearTimeout(existing.timer);
-      existing.updates = { ...existing.updates, ...newFields };
-    } else {
-      pendingBlockUpdatesRef.current.set(id, {
-        timer: null as any,
-        updates: { ...newFields }
-      });
-    }
-
-    const currentEntry = pendingBlockUpdatesRef.current.get(id)!;
-    currentEntry.timer = setTimeout(async () => {
-      const updatesToSend = { ...currentEntry.updates };
-      pendingBlockUpdatesRef.current.delete(id);
-
-      try {
-        await api.studio.updateBlock(id, updatesToSend);
-        if (pendingBlockUpdatesRef.current.size === 0 && !pendingProfileSaveRef.current.timer) {
-          setSaveStatus('saved');
-        }
-      } catch (err: any) {
-        console.error('Auto-save block error:', err);
-        setSaveStatus('error');
-        setSaveErrorBanner(err?.message || 'Failed to save block edits. Please check your network or retry.');
-      }
-    }, 500);
+  const queueBlockUpdate = (id: string, fields: Record<string, any>) => {
+    queueRef.current!.enqueue(id, fields);
   };
 
   const handleUpdateBlockField = (id: string, field: string, value: any) => {
@@ -764,8 +702,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     handleUpdateBlockExtra(blockId, { items: newItems });
   };
 
-  const handleCopyPublicLink = () => {
-    navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`);
+  const handleCopyPublicLink = async () => {
+    try { await navigator.clipboard.writeText(`${window.location.origin}/@${profile.username}`); }
+    catch { setSaveErrorBanner(ui('Could not copy link. Copy the address from the live page.')); return; }
     setCopiedLink(true);
     confetti({
       particleCount: 50,
@@ -830,6 +769,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  if (loadState !== 'ready') return <div className="p-8 text-center" role="status">
+    <p>{tr(loadState === 'loading' ? 'Loading your profile…' : 'Could not load your profile. No demo data is being shown.')}</p>
+    {loadState === 'error' && <button onClick={() => window.location.reload()} className="mt-4 underline">{tr('Retry')}</button>}
+  </div>;
   return (
     <div className="studio-shell min-h-[calc(100vh-72px)] bg-neutral-50 border-t border-neutral-200 flex flex-col">
       
@@ -863,7 +806,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             {profileDropdownOpen && (
               <div className="absolute left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
                 <div className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400">
-                  Switch Profile ({profileList.length})
+                  {ui("Switch Profile (")}{profileList.length})
                 </div>
                 <div className="max-h-56 overflow-y-auto divide-y divide-neutral-50">
                   {profileList.map(p => (
@@ -893,7 +836,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     className="w-full py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>New Bio Profile</span>
+                    <span>{ui("New Bio Profile")}</span>
                   </button>
                 </div>
               </div>
@@ -906,17 +849,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               saveStatus === 'error' ? 'bg-rose-500' : 'bg-emerald-500'
             }`} />
             <span className="font-mono text-[11px]">
-              {saveStatus === 'saving' ? 'Saving to database...' : 
-               saveStatus === 'error' ? 'Save failed' : 'Saved to database'}
+              {ui(saveErrorBanner ? 'Save failed' : queueRef.current?.dirty || saveStatus === 'saving' ? 'Saving to database...' : saveStatus === 'error' ? 'Save failed' : 'Saved to database')}
             </span>
-            {saveStatus === 'error' && (
+            {queueRef.current?.dirty && saveStatus === 'error' && (
               <button
                 type="button"
                 onClick={handleRetryFailedSaves}
                 className="ml-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-[10px] font-bold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
               >
-                Retry
-              </button>
+                {ui("Retry")}</button>
             )}
           </div>
         </div>
@@ -925,41 +866,45 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setQrModalOpen(true)}
+            aria-label={ui('QR Code')}
             className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-white text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
             <QrCode className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">QR Code</span>
+            <span className="hidden sm:inline">{ui("QR Code")}</span>
           </button>
 
           <button
             onClick={handleCopyPublicLink}
+            aria-label={ui('Copy Link')}
             className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-white text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
             {copiedLink ? (
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Copied!</span>
+                <span>{ui("Copied!")}</span>
               </>
             ) : (
               <>
                 <Share2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Copy Link</span>
+                <span className="hidden sm:inline">{ui("Copy Link")}</span>
               </>
             )}
           </button>
 
           <button
-            onClick={() => onViewFullscreen(profile, customTheme)}
+            onClick={async () => { if (!queueRef.current?.dirty || await queueRef.current.flush()) onViewFullscreen(profile, customTheme); }}
             className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition-colors active:scale-95 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
             <Maximize2 className="w-3.5 h-3.5 text-amber-300" />
-            <span>View Live Page</span>
+            <span>{ui("View Live Page")}</span>
           </button>
         </div>
 
       </div>
 
       {/* Main Studio Workspace: Left Editor + Right Simulator */}
+      {saveErrorBanner && <p role="alert" className="p-4 text-red-700">{ui(saveErrorBanner)}</p>}
+      {dataError && <p role="alert" className="p-4 text-red-700">{ui('Could not load data. Reopen this tab to retry.')}</p>}
       <div className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left Control Canvas (7 cols) */}
@@ -976,7 +921,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Blocks & Content</span>
+              <span>{ui("Blocks & Content")}</span>
             </button>
 
             <button
@@ -988,7 +933,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Palette className="w-3.5 h-3.5" />
-              <span>Themes & Styles</span>
+              <span>{ui("Themes & Styles")}</span>
             </button>
 
             <button
@@ -1000,7 +945,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
-              <span>Real Analytics</span>
+              <span>{ui("Real Analytics")}</span>
             </button>
 
             <button
@@ -1012,7 +957,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Settings className="w-3.5 h-3.5" />
-              <span>Settings & Plan</span>
+              <span>{ui("Settings & Plan")}</span>
             </button>
           </div>
 
@@ -1023,10 +968,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               {/* Profile Bio & Avatar Card */}
               <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm text-[#18181B]">Creator Identity</h3>
+                  <h3 className="font-bold text-sm text-[#18181B]">{ui("Creator Identity")}</h3>
                   <span className="text-[10px] font-mono uppercase bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-md">
-                    Live Profile
-                  </span>
+                    {ui("Live Profile")}</span>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -1055,19 +999,18 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-black transition-colors cursor-pointer flex items-center gap-1.5"
                       >
                         <Upload className="w-3.5 h-3.5 text-neutral-500" />
-                        <span>{uploadingImage ? 'Uploading...' : 'Upload Avatar Image'}</span>
+                        <span>{uploadingImage ? ui("Uploading...") : ui("Upload Avatar Image")}</span>
                       </button>
                     </div>
                     <p className="text-[11px] text-neutral-500">
-                      Supports JPG, PNG, WEBP up to 5MB. Stored directly on server.
-                    </p>
+                      {ui("Supports JPG, PNG, WEBP up to 5MB. Stored directly on server.")}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-500 mb-1">Display Name</label>
-                    <input
+                    <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Display Name")}</label>
+                    <input aria-label={ui("Display Name")}
                       type="text"
                       value={profile.displayName}
                       onChange={(e) => handleProfileChange('displayName', e.target.value)}
@@ -1076,8 +1019,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-500 mb-1">Category / Tag</label>
-                    <input
+                    <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Category / Tag")}</label>
+                    <input aria-label={ui("Category / Tag")}
                       type="text"
                       value={profile.category}
                       onChange={(e) => handleProfileChange('category', e.target.value)}
@@ -1087,8 +1030,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 mb-1">Short Bio</label>
-                  <textarea
+                  <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Short Bio")}</label>
+                  <textarea aria-label={ui("Short Bio")}
                     rows={2}
                     value={profile.bio}
                     onChange={(e) => handleProfileChange('bio', e.target.value)}
@@ -1098,7 +1041,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                 {/* Social Links Manager */}
                 <div className="pt-3 border-t border-neutral-100">
-                  <label className="block text-xs font-bold text-neutral-900 mb-2">Connected Social Icons</label>
+                  <label className="block text-xs font-bold text-neutral-900 mb-2">{ui("Connected Social Icons")}</label>
                   
                   {/* Current socials list */}
                   <div className="space-y-2 mb-3">
@@ -1115,34 +1058,34 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             type="button"
                             onClick={() => handleRemoveSocial(sIdx)}
                             className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/30 rounded"
-                            title="Remove social link"
+                            title={ui("Remove social link")}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       ))
                     ) : (
-                      <p className="text-[11px] text-neutral-400">No social links added yet.</p>
+                      <p className="text-[11px] text-neutral-400">{ui("No social links added yet.")}</p>
                     )}
                   </div>
 
                   {/* Add social link form */}
                   <div className="flex items-center gap-2">
-                    <select
+                    <select aria-label={ui("Connected Social Icons")}
                       value={newSocialPlatform}
                       onChange={(e) => setNewSocialPlatform(e.target.value as SocialLink['platform'])}
                       className="px-2.5 py-1.5 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-semibold outline-none focus:border-neutral-900"
                     >
-                      <option value="instagram">Instagram</option>
-                      <option value="twitter">X / Twitter</option>
-                      <option value="youtube">YouTube</option>
-                      <option value="spotify">Spotify</option>
-                      <option value="github">GitHub</option>
-                      <option value="linkedin">LinkedIn</option>
-                      <option value="email">Email</option>
+                      <option value="instagram">{ui("Instagram")}</option>
+                      <option value="twitter">{ui("X / Twitter")}</option>
+                      <option value="youtube">{ui("YouTube")}</option>
+                      <option value="spotify">{ui("Spotify")}</option>
+                      <option value="github">{ui("GitHub")}</option>
+                      <option value="linkedin">{ui("LinkedIn")}</option>
+                      <option value="email">{ui("Email")}</option>
                     </select>
 
-                    <input
+                    <input aria-label={ui("Connected Social Icons")}
                       type="text"
                       value={newSocialUrl}
                       onChange={(e) => setNewSocialUrl(e.target.value)}
@@ -1155,8 +1098,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       onClick={handleAddSocial}
                       className="px-3 py-1.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                     >
-                      Add
-                    </button>
+                      {ui("Add")}</button>
                   </div>
                 </div>
 
@@ -1174,7 +1116,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     className="w-full py-3.5 px-4 rounded-2xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add New Link or Block to Profile</span>
+                    <span>{ui("Add New Link or Block to Profile")}</span>
                   </button>
 
                   {showAddMenu && (
@@ -1184,7 +1126,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                       >
                         <LinkIcon className="w-4 h-4 text-blue-600" />
-                        <span className="text-xs font-bold text-neutral-900">Custom Link</span>
+                        <span className="text-xs font-bold text-neutral-900">{ui("Custom Link")}</span>
                       </button>
 
                       <button
@@ -1192,7 +1134,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                       >
                         <Sliders className="w-4 h-4 text-neutral-700" />
-                        <span className="text-xs font-bold text-neutral-900">Section Title</span>
+                        <span className="text-xs font-bold text-neutral-900">{ui("Section Title")}</span>
                       </button>
 
                       <button
@@ -1200,7 +1142,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                       >
                         <Music className="w-4 h-4 text-emerald-600" />
-                        <span className="text-xs font-bold text-neutral-900">Audio Track</span>
+                        <span className="text-xs font-bold text-neutral-900">{ui("Audio Track")}</span>
                       </button>
 
                       <button
@@ -1208,7 +1150,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                       >
                         <Video className="w-4 h-4 text-red-600" />
-                        <span className="text-xs font-bold text-neutral-900">Video Embed</span>
+                        <span className="text-xs font-bold text-neutral-900">{ui("Video Embed")}</span>
                       </button>
 
                       <button
@@ -1216,7 +1158,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                       >
                         <FolderPlus className="w-4 h-4 text-amber-600" />
-                        <span className="text-xs font-bold text-neutral-900">Link Folder</span>
+                        <span className="text-xs font-bold text-neutral-900">{ui("Link Folder")}</span>
                       </button>
 
                       <button
@@ -1224,7 +1166,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                       >
                         <Mail className="w-4 h-4 text-purple-600" />
-                        <span className="text-xs font-bold text-neutral-900">Newsletter</span>
+                        <span className="text-xs font-bold text-neutral-900">{ui("Newsletter")}</span>
                       </button>
                     </div>
                   )}
@@ -1236,7 +1178,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   className="py-3.5 px-4 rounded-2xl bg-white border border-neutral-200 hover:border-emerald-600 text-neutral-900 hover:text-emerald-700 text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 shrink-0"
                 >
                   <Download className="w-4 h-4 text-emerald-600" />
-                  <span>Import Linktree</span>
+                  <span>{ui("Import Linktree")}</span>
                 </button>
               </div>
 
@@ -1258,7 +1200,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         {(block as LinkBlock).clicks !== undefined && (
                           <span className="text-[10px] font-mono text-emerald-600 font-semibold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
                             <MousePointerClick className="w-3 h-3" />
-                            <span>{(block as LinkBlock).clicks} clicks</span>
+                            <span>{(block as LinkBlock).clicks} {ui("clicks")}</span>
                           </span>
                         )}
                         {getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt) && (
@@ -1275,7 +1217,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           onClick={() => handleMoveBlock(index, 'up')}
                           disabled={index === 0}
                           className="p-1 rounded-lg text-neutral-400 hover:text-black disabled:opacity-20 cursor-pointer"
-                          title="Move up"
+                          title={ui("Move up")}
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
                         </button>
@@ -1283,14 +1225,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           onClick={() => handleMoveBlock(index, 'down')}
                           disabled={index === profile.blocks.length - 1}
                           className="p-1 rounded-lg text-neutral-400 hover:text-black disabled:opacity-20 cursor-pointer"
-                          title="Move down"
+                          title={ui("Move down")}
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteBlock(block.id)}
                           className="p-1 rounded-lg text-rose-400 hover:text-rose-600 cursor-pointer"
-                          title="Delete block"
+                          title={ui("Delete block")}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1300,8 +1242,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     {/* Form Fields per Block Type */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
                       <div>
-                        <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Title</label>
-                        <input
+                        <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Title")}</label>
+                        <input aria-label={ui("Title")}
                           type="text"
                           value={block.title}
                           onChange={(e) => handleUpdateBlockField(block.id, 'title', e.target.value)}
@@ -1311,8 +1253,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                       {(block.type === 'link' || block.type === 'booking') && (
                         <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Destination URL</label>
-                          <input
+                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Destination URL")}</label>
+                          <input aria-label={ui("Destination URL")}
                             type="text"
                             value={(block as LinkBlock).url || ''}
                             onChange={(e) => handleUpdateBlockField(block.id, 'url', e.target.value)}
@@ -1324,12 +1266,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                       {block.type === 'audio' && (
                         <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Artist Name</label>
-                          <input
+                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Artist Name")}</label>
+                          <input aria-label={ui("Artist Name")}
                             type="text"
                             value={(block as AudioBlock).artist || ''}
                             onChange={(e) => handleUpdateBlockExtra(block.id, { artist: e.target.value })}
-                            placeholder="Artist / Band"
+                            placeholder={ui("Artist / Band")}
                             className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
                           />
                         </div>
@@ -1337,8 +1279,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                       {block.type === 'video' && (
                         <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Video Stream URL</label>
-                          <input
+                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Video Stream URL")}</label>
+                          <input aria-label={ui("Video Stream URL")}
                             type="text"
                             value={(block as VideoBlock).videoUrl || ''}
                             onChange={(e) => handleUpdateBlockExtra(block.id, { videoUrl: e.target.value })}
@@ -1350,8 +1292,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                       {block.type === 'newsletter' && (
                         <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Button CTA Text</label>
-                          <input
+                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Button CTA Text")}</label>
+                          <input aria-label={ui("Button CTA Text")}
                             type="text"
                             value={(block as NewsletterBlock).buttonText || 'Subscribe'}
                             onChange={(e) => handleUpdateBlockExtra(block.id, { buttonText: e.target.value })}
@@ -1366,22 +1308,22 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                           <div>
-                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Subtitle Note</label>
-                            <input
+                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Subtitle Note")}</label>
+                            <input aria-label={ui("Subtitle Note")}
                               type="text"
                               value={(block as LinkBlock).subtitle || ''}
                               onChange={(e) => handleUpdateBlockField(block.id, 'subtitle', e.target.value)}
-                              placeholder="Supporting text..."
+                              placeholder={ui("Supporting text...")}
                               className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
                             />
                           </div>
                           <div>
-                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Badge Tag</label>
-                            <input
+                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Badge Tag")}</label>
+                            <input aria-label={ui("Badge Tag")}
                               type="text"
                               value={(block as LinkBlock).badge || ''}
                               onChange={(e) => handleUpdateBlockField(block.id, 'badge', e.target.value)}
-                              placeholder="e.g. NEW, SALE, LISTEN"
+                              placeholder={ui("e.g. NEW, SALE, LISTEN")}
                               className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
                             />
                           </div>
@@ -1392,12 +1334,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           <div className="flex items-center justify-between">
                             <label className="text-[11px] font-semibold text-neutral-600 flex items-center gap-1.5">
                               <Clock className="w-3.5 h-3.5 text-neutral-500" />
-                              <span>Link Scheduling & Time-Release</span>
+                              <span>{ui("Link Scheduling & Time-Release")}</span>
                             </label>
                             {profile.plan === 'free' ? (
                               <span className="text-[9px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
-                                PRO FEATURE
-                              </span>
+                                {ui("PRO FEATURE")}</span>
                             ) : (
                               getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt) && (
                                 <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
@@ -1412,7 +1353,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           {profile.plan !== 'free' ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                               <div>
-                                <span className="text-neutral-400 block mb-1">Publish (Start Date/Time):</span>
+                                <span className="text-neutral-400 block mb-1">{ui("Publish (Start Date/Time):")}</span>
                                 <input
                                   type="datetime-local"
                                   value={toDateTimeLocal((block as LinkBlock).startAt)}
@@ -1421,7 +1362,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                                 />
                               </div>
                               <div>
-                                <span className="text-neutral-400 block mb-1">Unpublish (End Date/Time):</span>
+                                <span className="text-neutral-400 block mb-1">{ui("Unpublish (End Date/Time):")}</span>
                                 <input
                                   type="datetime-local"
                                   value={toDateTimeLocal((block as LinkBlock).endAt)}
@@ -1432,8 +1373,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             </div>
                           ) : (
                             <p className="text-[11px] text-neutral-400">
-                              Upgrade to Pro to automatically schedule links to go live and expire at specific dates and times.
-                            </p>
+                              {ui("Upgrade to Pro to automatically schedule links to go live and expire at specific dates and times.")}</p>
                           )}
                         </div>
                       </>
@@ -1442,8 +1382,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     {block.type === 'audio' && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                         <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Album Cover Image URL</label>
-                          <input
+                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Album Cover Image URL")}</label>
+                          <input aria-label={ui("Album Cover Image URL")}
                             type="text"
                             value={(block as AudioBlock).coverUrl || ''}
                             onChange={(e) => handleUpdateBlockExtra(block.id, { coverUrl: e.target.value })}
@@ -1452,8 +1392,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Streaming Link</label>
-                          <input
+                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Streaming Link")}</label>
+                          <input aria-label={ui("Streaming Link")}
                             type="text"
                             value={(block as AudioBlock).audioUrl || ''}
                             onChange={(e) => handleUpdateBlockExtra(block.id, { audioUrl: e.target.value })}
@@ -1466,8 +1406,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                     {block.type === 'video' && (
                       <div>
-                        <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Thumbnail Preview Image URL</label>
-                        <input
+                        <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Thumbnail Preview Image URL")}</label>
+                        <input aria-label={ui("Thumbnail Preview Image URL")}
                           type="text"
                           value={(block as VideoBlock).thumbnailUrl || ''}
                           onChange={(e) => handleUpdateBlockExtra(block.id, { thumbnailUrl: e.target.value })}
@@ -1479,12 +1419,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                     {block.type === 'newsletter' && (
                       <div>
-                        <label className="block text-[11px] font-semibold text-neutral-500 mb-1">Newsletter Description</label>
-                        <input
+                        <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Newsletter Description")}</label>
+                        <input aria-label={ui("Newsletter Description")}
                           type="text"
                           value={(block as NewsletterBlock).description || ''}
                           onChange={(e) => handleUpdateBlockExtra(block.id, { description: e.target.value })}
-                          placeholder="What will subscribers get?"
+                          placeholder={ui("What will subscribers get?")}
                           className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
                         />
                       </div>
@@ -1493,25 +1433,24 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     {block.type === 'folder' && (
                       <div className="space-y-2 pt-2 border-t border-neutral-100">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-neutral-700">Folder Links</span>
+                          <span className="text-[11px] font-bold text-neutral-700">{ui("Folder Links")}</span>
                           <button
                             type="button"
                             onClick={() => handleAddFolderItem(block.id)}
                             className="text-[11px] text-blue-600 font-semibold hover:underline cursor-pointer flex items-center gap-1"
                           >
-                            <Plus className="w-3 h-3" /> Add Item
-                          </button>
+                            <Plus className="w-3 h-3" /> {ui("Add Item")}</button>
                         </div>
                         {((block as FolderBlock).items || []).map((item) => (
                           <div key={item.id} className="flex items-center gap-2">
-                            <input
+                            <input aria-label={ui("Title")}
                               type="text"
                               value={item.title}
                               onChange={(e) => handleUpdateFolderItem(block.id, item.id, 'title', e.target.value)}
-                              placeholder="Title"
+                              placeholder={ui("Title")}
                               className="w-1/3 px-2 py-1 rounded border border-neutral-200 text-[11px] bg-neutral-50 text-neutral-900"
                             />
-                            <input
+                            <input aria-label={ui("Destination URL")}
                               type="text"
                               value={item.url}
                               onChange={(e) => handleUpdateFolderItem(block.id, item.id, 'url', e.target.value)}
@@ -1541,10 +1480,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           {activeTab === 'appearance' && (
             <div className="space-y-6 animate-fade-in">
               <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-neutral-900">Curated Visual Presets</h3>
+                <h3 className="font-bold text-sm text-neutral-900">{ui("Curated Visual Presets")}</h3>
                 <p className="text-xs text-neutral-500">
-                  Choose from carefully crafted aesthetic profiles. Every palette is built with strong contrast and responsive tokens.
-                </p>
+                  {ui("Choose from carefully crafted aesthetic profiles. Every palette is built with strong contrast and responsive tokens.")}</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   {THEMES.map((th) => (
@@ -1564,11 +1502,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         />
                         <div>
                           <p className="font-bold text-xs text-neutral-900">{th.name}</p>
-                          <p className="text-[10px] text-neutral-500 font-mono capitalize">{th.fontFamily} font</p>
+                          <p className="text-[10px] text-neutral-500 font-mono capitalize">{th.fontFamily} {ui("font")}</p>
                         </div>
                       </div>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${th.isDark ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-900'}`}>
-                        {th.isDark ? 'Dark' : 'Light'}
+                        {th.isDark ? ui("Dark") : ui("Light")}
                       </span>
                     </button>
                   ))}
@@ -1577,7 +1515,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
               {/* Geometry & Radius Control */}
               <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-neutral-900">Card Geometry & Accent Tint</h3>
+                <h3 className="font-bold text-sm text-neutral-900">{ui("Card Geometry & Accent Tint")}</h3>
                 
                 <div className="grid grid-cols-4 gap-2">
                   {(['none', 'md', 'xl', 'full'] as const).map((rad) => (
@@ -1594,13 +1532,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           : 'border-neutral-200 bg-neutral-50 text-neutral-900 hover:bg-neutral-100'
                       }`}
                     >
-                      {rad === 'none' ? 'Square' : rad === 'full' ? 'Pill' : rad}
+                      {rad === 'none' ? ui("Square") : rad === 'full' ? ui("Pill") : rad}
                     </button>
                   ))}
                 </div>
 
                 <div className="pt-2">
-                  <label className="block text-xs font-semibold text-[#71717A] mb-2">Brand Accent Color</label>
+                  <label className="block text-xs font-semibold text-[#71717A] mb-2">{ui("Brand Accent Color")}</label>
                   <div className="flex items-center gap-2.5">
                     {['#B45309', '#3B82F6', '#EC4899', '#10B981', '#18181B', '#8B5CF6'].map((col) => (
                       <button
@@ -1627,29 +1565,29 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             <div className="space-y-6 animate-fade-in">
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
-                  <span className="text-xs text-neutral-500">30-Day Views</span>
+                  <span className="text-xs text-neutral-500">{ui("30-Day Views")}</span>
                   <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
                     {analyticsData ? analyticsData.totalViews.toLocaleString() : '...'}
                   </p>
                   <span className="text-[10px] text-neutral-500 font-mono tabular-nums">
-                    {analyticsData ? `${analyticsData.uniqueVisitors} unique` : 'loading'}
+                    {analyticsData ? `${analyticsData.uniqueVisitors} unique` : ui("loading")}
                   </span>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
-                  <span className="text-xs text-neutral-500">Click-Through</span>
+                  <span className="text-xs text-neutral-500">{ui("Click-Through")}</span>
                   <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">
                     {analyticsData ? analyticsData.ctr : '...'}
                   </p>
-                  <span className="text-[10px] text-emerald-700 font-semibold font-mono">Real conversion</span>
+                  <span className="text-[10px] text-emerald-700 font-semibold font-mono">{ui("Clicks per view")}</span>
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-xs">
-                  <span className="text-xs text-neutral-500">Total Clicks</span>
+                  <span className="text-xs text-neutral-500">{ui("Total Clicks")}</span>
                   <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
                     {analyticsData ? analyticsData.totalClicks.toLocaleString() : '...'}
                   </p>
-                  <span className="text-[10px] text-neutral-500 font-mono">Live logged</span>
+                  <span className="text-[10px] text-neutral-500 font-mono">{ui("Live logged")}</span>
                 </div>
               </div>
 
@@ -1659,11 +1597,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
                       <TrendingUp className="w-4 h-4 text-emerald-500" />
-                      <span>7-Day Engagement Timeline</span>
+                      <span>{ui("7-Day Engagement Timeline")}</span>
                     </h4>
                     <div className="flex items-center gap-3 text-[10px] font-mono">
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-neutral-200 rounded" /> Views</span>
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded" /> Clicks</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-neutral-200 rounded" /> {ui("Views")}</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded" /> {ui("Clicks")}</span>
                     </div>
                   </div>
 
@@ -1700,16 +1638,16 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               {/* Top Performing Links */}
               {analyticsData && analyticsData.topLinks && (
                 <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
-                  <h4 className="text-xs font-bold text-neutral-900">Top Performing Links</h4>
+                  <h4 className="text-xs font-bold text-neutral-900">{ui("Top Performing Links")}</h4>
                   {analyticsData.topLinks.length === 0 ? (
-                    <p className="text-xs text-neutral-400 py-2">No clicks recorded yet. Share your link to start tracking!</p>
+                    <p className="text-xs text-neutral-400 py-2">{ui("No clicks recorded yet. Share your link to start tracking!")}</p>
                   ) : (
                     <div className="space-y-2.5 text-xs">
                       {analyticsData.topLinks.map((link) => (
                         <div key={link.id} className="space-y-1">
                           <div className="flex justify-between text-[11px]">
                             <span className="font-semibold truncate max-w-xs">{link.title}</span>
-                            <span className="font-mono text-neutral-500 tabular-nums">{link.clicks} clicks ({link.percentage}%)</span>
+                            <span className="font-mono text-neutral-500 tabular-nums">{link.clicks} {ui("clicks (")}{link.percentage}%)</span>
                           </div>
                           <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
                             <div 
@@ -1728,13 +1666,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               {analyticsData && (
                 <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-neutral-900">UTM Campaign & Traffic Attribution</h4>
-                    <span className="text-[10px] font-mono text-neutral-500">Source / Medium / Campaign</span>
+                    <h4 className="text-xs font-bold text-neutral-900">{ui("UTM Campaign & Traffic Attribution")}</h4>
+                    <span className="text-[10px] font-mono text-neutral-500">{ui("Source / Medium / Campaign")}</span>
                   </div>
                   {!analyticsData.topUtmCampaigns || analyticsData.topUtmCampaigns.length === 0 ? (
                     <p className="text-xs text-neutral-400 py-2">
-                      No UTM parameters recorded yet. Append <code className="bg-neutral-100 px-1 py-0.5 rounded text-neutral-700 font-mono text-[10px]">?utm_source=instagram&amp;utm_campaign=spring</code> to your bio URL to start tracking!
-                    </p>
+                      {ui("No UTM parameters recorded yet. Append")}<code className="bg-neutral-100 px-1 py-0.5 rounded text-neutral-700 font-mono text-[10px]">{ui("?utm_source=instagram&utm_campaign=spring")}</code> {ui("to your bio URL to start tracking!")}</p>
                   ) : (
                     <div className="divide-y divide-neutral-100 text-xs">
                       {analyticsData.topUtmCampaigns.map((utm, idx) => (
@@ -1743,7 +1680,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             <span className="font-semibold text-neutral-900">{utm.campaign}</span>
                             <span className="text-[11px] font-mono text-neutral-500">{utm.source} / {utm.medium}</span>
                           </div>
-                          <span className="font-mono font-bold text-neutral-800 tabular-nums">{utm.count} views</span>
+                          <span className="font-mono font-bold text-neutral-800 tabular-nums">{utm.count} {ui("views")}</span>
                         </div>
                       ))}
                     </div>
@@ -1763,15 +1700,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <div>
                     <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                      <span>Membership & Subscription Plan</span>
+                      <span>{ui("Membership & Subscription Plan")}</span>
                     </h3>
                     <p className="text-xs text-neutral-500 mt-0.5">
-                      Current tier: <strong className="uppercase font-mono text-neutral-900">{profile.plan || 'free'}</strong>
+                      {ui("Current tier:")}<strong className="uppercase font-mono text-neutral-900">{profile.plan || 'free'}</strong>
                     </p>
                   </div>
                   <span className="px-3 py-1 bg-neutral-100 text-neutral-800 text-xs font-mono font-bold rounded-xl border border-neutral-200">
-                    ACTIVE
-                  </span>
+                    {ui("ACTIVE")}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -1779,15 +1715,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     (profile.plan || 'free') === 'free' ? 'border-neutral-900 ring-2 ring-neutral-900/10 bg-neutral-50' : 'border-neutral-200'
                   }`}>
                     <div>
-                      <div className="font-bold text-sm text-neutral-900">Free</div>
-                      <div className="text-neutral-500 text-[11px] mt-0.5">Core links, analytics & bio</div>
+                      <div className="font-bold text-sm text-neutral-900">{ui("Free")}</div>
+                      <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Core links, analytics & bio")}</div>
                     </div>
                     <button
                       onClick={() => handleUpgradePlan('free')}
                       disabled={(profile.plan || 'free') === 'free'}
                       className="mt-3 py-1.5 px-3 rounded-lg border border-neutral-300 text-center font-semibold disabled:opacity-50 cursor-pointer hover:border-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 transition-colors"
                     >
-                      {(profile.plan || 'free') === 'free' ? 'Current Plan' : 'Downgrade'}
+                      {(profile.plan || 'free') === 'free' ? ui("Current Plan") : ui("Downgrade")}
                     </button>
                   </div>
 
@@ -1796,17 +1732,17 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   }`}>
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-neutral-900">Pro</span>
-                        <span className="text-[10px] bg-amber-100 text-amber-800 font-mono font-bold px-1.5 py-0.5 rounded">POPULAR</span>
+                        <span className="font-bold text-sm text-neutral-900">{ui("Pro")}</span>
+                        <span className="text-[10px] bg-amber-100 text-amber-800 font-mono font-bold px-1.5 py-0.5 rounded">{ui("POPULAR")}</span>
                       </div>
-                      <div className="text-neutral-500 text-[11px] mt-0.5">Custom domain, 0% branding, priority routing</div>
+                      <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Custom domain and branding controls")}</div>
                     </div>
                     <button
                       onClick={() => handleUpgradePlan('pro')}
                       disabled={profile.plan === 'pro'}
                       className="mt-3 py-1.5 px-3 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-center font-semibold disabled:opacity-50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 transition-colors"
                     >
-                      {profile.plan === 'pro' ? 'Current Plan' : 'Select Pro'}
+                      {profile.plan === 'pro' ? ui("Current Plan") : ui("Select Pro")}
                     </button>
                   </div>
 
@@ -1814,15 +1750,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     profile.plan === 'studio' ? 'border-neutral-900 ring-2 ring-neutral-900/10 bg-neutral-50' : 'border-neutral-200'
                   }`}>
                     <div>
-                      <div className="font-bold text-sm text-neutral-900">Studio VIP</div>
-                      <div className="text-neutral-500 text-[11px] mt-0.5">Custom CSS, team members, full API</div>
+                      <div className="font-bold text-sm text-neutral-900">{ui("Studio VIP")}</div>
+                      <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Custom CSS and REST API")}</div>
                     </div>
                     <button
                       onClick={() => handleUpgradePlan('studio')}
                       disabled={profile.plan === 'studio'}
                       className="mt-3 py-1.5 px-3 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-center font-semibold disabled:opacity-50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 transition-colors"
                     >
-                      {profile.plan === 'studio' ? 'Current Plan' : 'Select Studio'}
+                      {profile.plan === 'studio' ? ui("Current Plan") : ui("Select Studio")}
                     </button>
                   </div>
                 </div>
@@ -1832,15 +1768,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-sm text-neutral-900">White-Label Branding</h3>
+                    <h3 className="font-bold text-sm text-neutral-900">{ui("White-Label Branding")}</h3>
                     <p className="text-xs text-neutral-500 mt-0.5">
-                      Remove the "Made with LIINX" badge from your bio page and footer.
-                    </p>
+                      {ui("Remove the \"Made with LIINX\" badge from your bio page and footer.")}</p>
                   </div>
                   {profile.plan === 'free' ? (
                     <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
-                      PRO FEATURE
-                    </span>
+                      {ui("PRO FEATURE")}</span>
                   ) : (
                     <button
                       type="button"
@@ -1869,8 +1803,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 </div>
                 {profile.plan === 'free' && (
                   <p className="text-[11px] text-neutral-400">
-                    Upgrade to Pro or Studio to completely remove all LIINX branding badges.
-                  </p>
+                    {ui("Upgrade to Pro or Studio to completely remove all LIINX branding badges.")}</p>
                 )}
               </div>
 
@@ -1878,54 +1811,51 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-sm text-neutral-900">Analytics &amp; Retargeting Pixels</h3>
+                    <h3 className="font-bold text-sm text-neutral-900">{ui("Analytics & Retargeting Pixels")}</h3>
                     <p className="text-xs text-neutral-500 mt-0.5">
-                      Connect your Google Analytics 4 Measurement ID and Meta Pixel to track visitors and run retargeting ads.
-                    </p>
+                      {ui("Connect your Google Analytics 4 Measurement ID and Meta Pixel to track visitors and run retargeting ads.")}</p>
                   </div>
                   {profile.plan === 'free' ? (
                     <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
-                      PRO FEATURE
-                    </span>
+                      {ui("PRO FEATURE")}</span>
                   ) : (
                     <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
-                      ACTIVE
-                    </span>
+                      {ui("ACTIVE")}</span>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-neutral-800">Google Analytics 4 Measurement ID</label>
-                    <input
+                    <label className="text-xs font-semibold text-neutral-800">{ui("Google Analytics 4 Measurement ID")}</label>
+                    <input aria-label={ui("Google Analytics 4 Measurement ID")}
                       type="text"
                       disabled={profile.plan === 'free'}
                       value={gaInput}
                       onChange={e => setGaInput(e.target.value)}
-                      placeholder="G-XXXXXXXXXX"
+                      placeholder={ui("G-XXXXXXXXXX")}
                       className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
-                    <p className="text-[10px] text-neutral-400">Found in GA4 Admin &gt; Data Streams &gt; Measurement ID</p>
+                    <p className="text-[10px] text-neutral-400">{ui("Found in GA4 Admin > Data Streams > Measurement ID")}</p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-neutral-800">Meta (Facebook) Pixel ID</label>
-                    <input
+                    <label className="text-xs font-semibold text-neutral-800">{ui("Meta (Facebook) Pixel ID")}</label>
+                    <input aria-label={ui("Meta (Facebook) Pixel ID")}
                       type="text"
                       disabled={profile.plan === 'free'}
                       value={metaPixelInput}
                       onChange={e => setMetaPixelInput(e.target.value)}
-                      placeholder="e.g. 123456789012345"
+                      placeholder={ui("e.g. 123456789012345")}
                       className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
-                    <p className="text-[10px] text-neutral-400">Found in Meta Events Manager &gt; Data Sources</p>
+                    <p className="text-[10px] text-neutral-400">{ui("Found in Meta Events Manager > Data Sources")}</p>
                   </div>
                 </div>
 
                 {profile.plan !== 'free' && (
                   <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
                     <span className="text-xs text-emerald-600 font-medium">
-                      {pixelsSavedFeedback ? '✓ Pixel settings saved!' : ''}
+                      {pixelsSavedFeedback ? ui("✓ Pixel settings saved!") : ''}
                     </span>
                     <button
                       type="button"
@@ -1952,7 +1882,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       }}
                       className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                     >
-                      {isSavingPixels ? 'Saving...' : 'Save Tracking IDs'}
+                      {isSavingPixels ? ui("Saving...") : ui("Save Tracking IDs")}
                     </button>
                   </div>
                 )}
@@ -1966,43 +1896,39 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <Globe2 className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-neutral-900">Custom Domain</h3>
+                      <h3 className="font-bold text-sm text-neutral-900">{ui("Custom Domain")}</h3>
                       <p className="text-xs text-neutral-500 mt-0.5">
-                        Link your own domain or subdomain (e.g. <span className="font-mono">links.yourbrand.com</span>) directly to your bio page.
-                      </p>
+                        {ui("Link your own domain or subdomain (e.g.")}<span className="font-mono">links.yourbrand.com</span>{ui(") directly to your bio page.")}</p>
                     </div>
                   </div>
                   {profile.plan === 'free' ? (
                     <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
-                      PRO / STUDIO
-                    </span>
+                      {ui("PRO / STUDIO")}</span>
                   ) : (
                     <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
-                      AVAILABLE
-                    </span>
+                      {ui("AVAILABLE")}</span>
                   )}
                 </div>
 
                 <div className="space-y-3 pt-1">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-neutral-800">Domain / Subdomain Name</label>
-                    <input
+                    <label className="text-xs font-semibold text-neutral-800">{ui("Domain / Subdomain Name")}</label>
+                    <input aria-label={ui("Domain / Subdomain Name")}
                       type="text"
                       disabled={profile.plan === 'free'}
                       value={customDomainInput}
                       onChange={e => setCustomDomainInput(e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))}
-                      placeholder="e.g. links.sarahcreator.com"
+                      placeholder={ui("e.g. links.sarahcreator.com")}
                       className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                   </div>
 
                   <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl space-y-1 text-xs">
-                    <span className="font-semibold text-neutral-800 block">DNS Configuration Instructions:</span>
+                    <span className="font-semibold text-neutral-800 block">{ui("DNS Configuration Instructions:")}</span>
                     <p className="text-neutral-500 text-[11px]">
-                      Add a <span className="font-mono font-bold text-neutral-900">CNAME</span> record at your DNS provider pointing to:
-                    </p>
+                      {ui("Add a")}<span className="font-mono font-bold text-neutral-900">{ui("CNAME")}</span> {ui("record at your DNS provider pointing to:")}</p>
                     <div className="flex items-center justify-between bg-white px-3 py-1.5 rounded-lg border border-neutral-200 font-mono text-xs">
-                      <span>cname.liinx.app</span>
+                      <span>{ui("cname.liinx.app")}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -2011,8 +1937,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         }}
                         className="text-[10px] text-neutral-500 hover:text-black font-sans font-semibold cursor-pointer"
                       >
-                        Copy Target
-                      </button>
+                        {ui("Copy Target")}</button>
                     </div>
                   </div>
 
@@ -2051,7 +1976,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         }}
                         className="px-3.5 py-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-xs font-semibold text-neutral-800 cursor-pointer disabled:opacity-50"
                       >
-                        {isVerifyingDns ? 'Checking DNS...' : 'Verify DNS'}
+                        {isVerifyingDns ? ui("Checking DNS...") : ui("Verify DNS")}
                       </button>
 
                       <button
@@ -2072,7 +1997,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         }}
                         className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                       >
-                        {isSavingDomain ? 'Saving...' : 'Save Domain'}
+                        {isSavingDomain ? ui("Saving...") : ui("Save Domain")}
                       </button>
                     </div>
                   )}
@@ -2087,27 +2012,24 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <Code className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-neutral-900">Custom CSS &amp; Custom Webfonts</h3>
+                      <h3 className="font-bold text-sm text-neutral-900">{ui("Custom CSS & Custom Webfonts")}</h3>
                       <p className="text-xs text-neutral-500 mt-0.5">
-                        Inject custom stylesheet overrides and Google Fonts to match your brand guide.
-                      </p>
+                        {ui("Inject custom stylesheet overrides and Google Fonts to match your brand guide.")}</p>
                     </div>
                   </div>
                   {profile.plan === 'free' ? (
                     <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
-                      PRO / STUDIO
-                    </span>
+                      {ui("PRO / STUDIO")}</span>
                   ) : (
                     <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
-                      ACTIVE
-                    </span>
+                      {ui("ACTIVE")}</span>
                   )}
                 </div>
 
                 <div className="space-y-3 pt-1">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-neutral-800">Google Fonts / Webfont Stylesheet URL</label>
-                    <input
+                    <label className="text-xs font-semibold text-neutral-800">{ui("Google Fonts / Webfont Stylesheet URL")}</label>
+                    <input aria-label={ui("Google Fonts / Webfont Stylesheet URL")}
                       type="url"
                       disabled={profile.plan === 'free'}
                       value={customFontUrlInput}
@@ -2119,15 +2041,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-neutral-800">Custom CSS Overrides</label>
-                      <span className="text-[10px] font-mono text-neutral-400">Scoped to #public-bio-view</span>
+                      <label className="text-xs font-semibold text-neutral-800">{ui("Custom CSS Overrides")}</label>
+                      <span className="text-[10px] font-mono text-neutral-400">{ui("Scoped to #public-bio-view")}</span>
                     </div>
-                    <textarea
+                    <textarea aria-label={ui("/* Custom CSS overrides */&#10;#public-bio-view .custom-card { border-width: 2px; }")}
                       rows={4}
                       disabled={profile.plan === 'free'}
                       value={customCssInput}
                       onChange={e => setCustomCssInput(e.target.value)}
-                      placeholder="/* Custom CSS overrides */&#10;#public-bio-view .custom-card { border-width: 2px; }"
+                      placeholder={ui("/* Custom CSS overrides */&#10;#public-bio-view .custom-card { border-width: 2px; }")}
                       className="w-full text-xs font-mono p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                   </div>
@@ -2135,7 +2057,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   {profile.plan !== 'free' && (
                     <div className="flex items-center justify-between pt-1">
                       <span className="text-xs text-emerald-600 font-medium">
-                        {stylingSavedFeedback ? '✓ Custom styling saved!' : ''}
+                        {stylingSavedFeedback ? ui("✓ Custom styling saved!") : ''}
                       </span>
                       <button
                         type="button"
@@ -2162,7 +2084,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         }}
                         className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                       >
-                        {isSavingStyling ? 'Saving...' : 'Save Custom CSS & Fonts'}
+                        {isSavingStyling ? ui("Saving...") : ui("Save Custom CSS & Fonts")}
                       </button>
                     </div>
                   )}
@@ -2177,31 +2099,27 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <Terminal className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-neutral-900">Developer &amp; REST API Access</h3>
+                      <h3 className="font-bold text-sm text-neutral-900">{ui("Developer & REST API Access")}</h3>
                       <p className="text-xs text-neutral-500 mt-0.5">
-                        Manage your LIINX link bio programmatically via our public REST API v1.
-                      </p>
+                        {ui("Manage your LIINX link bio programmatically via our public REST API v1.")}</p>
                     </div>
                   </div>
                   {profile.plan !== 'studio' ? (
                     <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
-                      STUDIO TIER ONLY
-                    </span>
+                      {ui("STUDIO TIER ONLY")}</span>
                   ) : (
                     <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
-                      API ENABLED
-                    </span>
+                      {ui("API ENABLED")}</span>
                   )}
                 </div>
 
                 {profile.plan !== 'studio' ? (
                   <p className="text-xs text-neutral-500">
-                    REST API keys and programmatic block automation require a Studio subscription. Upgrade to unlock direct API access.
-                  </p>
+                    {ui("REST API keys and programmatic block automation require a Studio subscription. Upgrade to unlock direct API access.")}</p>
                 ) : (
                   <div className="space-y-4 pt-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-neutral-800">Active API Keys</span>
+                      <span className="text-xs font-semibold text-neutral-800">{ui("Active API Keys")}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -2212,14 +2130,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Generate Key</span>
+                        <span>{ui("Generate Key")}</span>
                       </button>
                     </div>
 
                     {apiKeyList.length === 0 ? (
                       <div className="py-6 text-center text-xs text-neutral-400 border border-dashed rounded-xl">
-                        No API keys generated yet. Click "Generate Key" to create your first API credential.
-                      </div>
+                        {ui("No API keys generated yet. Click \"Generate Key\" to create your first API credential.")}</div>
                     ) : (
                       <div className="divide-y divide-neutral-100 border rounded-xl overflow-hidden text-xs">
                         {apiKeyList.map(k => (
@@ -2242,19 +2159,17 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                               }}
                               className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
                             >
-                              Revoke
-                            </button>
+                              {ui("Revoke")}</button>
                           </div>
                         ))}
                       </div>
                     )}
 
                     <div className="p-3 bg-neutral-900 text-neutral-200 rounded-xl space-y-1 text-xs font-mono">
-                      <span className="text-neutral-400 text-[10px] uppercase font-bold tracking-wider block">Sample API Request</span>
+                      <span className="text-neutral-400 text-[10px] uppercase font-bold tracking-wider block">{ui("Sample API Request")}</span>
                       <p className="text-[11px] select-all overflow-x-auto whitespace-nowrap">
                         curl https://liinx.app/api/v1/profile \<br />
-                        &nbsp;&nbsp;-H "Authorization: Bearer liinx_live_your_key_here"
-                      </p>
+                        {ui("  -H \"Authorization: Bearer liinx_live_your_key_here\"")}</p>
                     </div>
                   </div>
                 )}
@@ -2269,11 +2184,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     </div>
                     <div>
                       <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
-                        <span>Instagram Caption Auto-Sync</span>
+                        <span>{ui("Instagram Caption Auto-Sync")}</span>
                       </h3>
                       <p className="text-xs text-neutral-500 mt-0.5">
-                        Automatically pull and create link buttons whenever you mention links in post captions.
-                      </p>
+                        {ui("Automatically pull and create link buttons whenever you mention links in post captions.")}</p>
                     </div>
                   </div>
                   <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border ${
@@ -2281,7 +2195,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                       : 'bg-neutral-100 text-neutral-600 border-neutral-200'
                   }`}>
-                    {instagramStatus?.connected ? 'CONNECTED' : 'DISCONNECTED'}
+                    {instagramStatus?.connected ? ui("CONNECTED") : ui("DISCONNECTED")}
                   </span>
                 </div>
 
@@ -2310,8 +2224,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         <span className="font-bold text-neutral-900">@{instagramStatus.username}</span>
                         <span className="text-neutral-400">•</span>
                         <span className="font-mono text-neutral-500">
-                          {instagramStatus.syncedLinksCount ?? 0} synced links active
-                        </span>
+                          {instagramStatus.syncedLinksCount ?? 0} {ui("synced links active")}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -2320,19 +2233,18 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white font-semibold flex items-center gap-1.5 text-xs hover:bg-black transition-colors cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                         >
                           <RefreshCw className={`w-3.5 h-3.5 ${isSyncingInstagram ? 'animate-spin' : ''}`} />
-                          <span>{isSyncingInstagram ? 'Syncing...' : 'Sync Now'}</span>
+                          <span>{isSyncingInstagram ? ui("Syncing...") : ui("Sync Now")}</span>
                         </button>
                         <button
                           onClick={handleDisconnectInstagram}
                           className="px-3 py-1.5 rounded-lg border border-neutral-300 text-neutral-700 font-semibold text-xs hover:bg-neutral-100 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                         >
-                          Disconnect
-                        </button>
+                          {ui("Disconnect")}</button>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs">
-                      <span className="text-neutral-600">Auto-sync on incoming Webhooks:</span>
+                      <span className="text-neutral-600">{ui("Auto-sync on incoming Webhooks:")}</span>
                       <button
                         onClick={handleToggleInstagramAutoSync}
                         className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold transition-colors cursor-pointer ${
@@ -2341,7 +2253,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             : 'bg-neutral-200 text-neutral-600'
                         }`}
                       >
-                        {instagramStatus.autoSyncEnabled ? 'ENABLED' : 'PAUSED'}
+                        {instagramStatus.autoSyncEnabled ? ui("ENABLED") : ui("PAUSED")}
                       </button>
                     </div>
                   </div>
@@ -2349,30 +2261,28 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-2">
                     <div className="flex items-center gap-2 text-amber-900 font-semibold">
                       <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>Meta Instagram OAuth Setup Required</span>
+                      <span>{ui("Meta Instagram OAuth Setup Required")}</span>
                     </div>
                     <p className="text-amber-800 text-[11px] leading-relaxed">
-                      To connect your live Instagram account, server administrators must configure <code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">INSTAGRAM_CLIENT_ID</code> and <code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">INSTAGRAM_CLIENT_SECRET</code> in the server environment.
-                    </p>
+                      {ui("To connect your live Instagram account, server administrators must configure")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">{ui("INSTAGRAM_CLIENT_ID")}</code> {ui("and")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">{ui("INSTAGRAM_CLIENT_SECRET")}</code> {ui("in the server environment.")}</p>
                     <div className="pt-1 flex items-center justify-between text-[11px] text-amber-900 font-medium">
-                      <span>Live Caption Parser & Link Ingest is available below without OAuth.</span>
+                      <span>{ui("Live Caption Parser & Link Ingest is available below without OAuth.")}</span>
                     </div>
                   </div>
                 ) : (
                   <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs font-semibold text-neutral-900">Connect your Instagram account</p>
+                        <p className="text-xs font-semibold text-neutral-900">{ui("Connect your Instagram account")}</p>
                         <p className="text-[11px] text-neutral-500 mt-0.5">
-                          Authorize via official Meta Graph API to enable automatic post polling & real-time webhook updates.
-                        </p>
+                          {ui("Authorize via official Meta Graph API to enable automatic post polling & real-time webhook updates.")}</p>
                       </div>
                       <button
                         onClick={handleConnectInstagram}
                         className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                       >
                         <Instagram className="w-3.5 h-3.5" />
-                        <span>Connect Account</span>
+                        <span>{ui("Connect Account")}</span>
                       </button>
                     </div>
                   </div>
@@ -2383,21 +2293,20 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-neutral-800 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Live Caption Parser & Post Ingest</span>
+                      <span>{ui("Live Caption Parser & Post Ingest")}</span>
                     </label>
                     <button
                       type="button"
                       onClick={() => setInstagramCaptionInput('Tickets for Berlin studio show live now: https://eventbrite.com/e/berlin-live-2025! Also grab the vinyl bundle at https://shop.artist.studio/vinyl.')}
                       className="text-[10px] font-mono text-amber-700 hover:underline cursor-pointer"
                     >
-                      Fill sample caption
-                    </button>
+                      {ui("Fill sample caption")}</button>
                   </div>
-                  <textarea
+                  <textarea aria-label={ui("Destination URL")}
                     rows={2}
                     value={instagramCaptionInput}
                     onChange={(e) => setInstagramCaptionInput(e.target.value)}
-                    placeholder="Paste any Instagram caption containing links to extract & add to your bio (e.g. 'Presave the single on Spotify: https://...')"
+                    placeholder={ui("Paste any Instagram caption containing links to extract & add to your bio (e.g. 'Presave the single on Spotify: https://...')")}
                     className="w-full text-xs p-3 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none transition-colors"
                   />
                   <div className="flex items-center justify-end gap-2">
@@ -2407,15 +2316,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       disabled={isTestingCaption || !instagramCaptionInput.trim()}
                       className="px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                     >
-                      Test Parser
-                    </button>
+                      {ui("Test Parser")}</button>
                     <button
                       type="button"
                       onClick={() => handleTestCaptionExtract(true)}
                       disabled={isTestingCaption || !instagramCaptionInput.trim()}
                       className="px-3.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-black text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                     >
-                      <span>Extract & Add Link to Bio</span>
+                      <span>{ui("Extract & Add Link to Bio")}</span>
                     </button>
                   </div>
                 </div>
@@ -2426,31 +2334,28 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-sm text-neutral-900">Newsletter Email Subscribers</h3>
+                    <h3 className="font-bold text-sm text-neutral-900">{ui("Newsletter Email Subscribers")}</h3>
                     <p className="text-xs text-[#71717A] mt-0.5">
-                      Real subscribers collected directly from your page's newsletter blocks.
-                    </p>
+                      {ui("Real subscribers collected directly from your page's newsletter blocks.")}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 bg-black text-white text-xs font-mono font-bold rounded-xl">
-                      {subscribers.length} total
-                    </span>
+                      {subscribers.length} {ui("total")}</span>
                     <button
                       onClick={handleExportCsv}
                       disabled={subscribers.length === 0}
                       className="px-3 py-1 rounded-xl border border-neutral-300 hover:border-black text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                      title="Download CSV"
+                      title={ui("Download CSV")}
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Export CSV</span>
+                      <span>{ui("Export CSV")}</span>
                     </button>
                   </div>
                 </div>
 
                 {subscribers.length === 0 ? (
                   <div className="py-8 text-center text-xs text-neutral-400 border border-dashed rounded-xl">
-                    No subscribers collected yet. Add a Newsletter block to your page to start capturing leads!
-                  </div>
+                    {ui("No subscribers collected yet. Add a Newsletter block to your page to start capturing leads!")}</div>
                 ) : (
                   <div className="divide-y divide-neutral-100 border rounded-xl overflow-hidden max-h-60 overflow-y-auto">
                     {subscribers.map(sub => (
@@ -2479,7 +2384,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
-                <span className="preview-label">Mobile</span>
+                <span className="preview-label">{ui("Mobile")}</span>
             </button>
             <button
               onClick={() => setPreviewDevice('tablet')}
@@ -2488,7 +2393,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Tablet className="w-3.5 h-3.5" />
-                <span className="preview-label">Tablet</span>
+                <span className="preview-label">{ui("Tablet")}</span>
             </button>
             <button
               onClick={() => setPreviewDevice('desktop')}
@@ -2497,11 +2402,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               }`}
             >
               <Monitor className="w-3.5 h-3.5" />
-                <span className="preview-label">Desktop</span>
+                <span className="preview-label">{ui("Desktop")}</span>
             </button>
           </div>
 
-          <PhonePreview
+          <ViewportPreview
             profile={profile}
             customTheme={customTheme}
             deviceMode={previewDevice}
@@ -2538,10 +2443,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-scale-in border border-neutral-200">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-base text-neutral-900">Create New Bio Profile</h3>
+                <h3 className="font-bold text-base text-neutral-900">{ui("Create New Bio Profile")}</h3>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  Add another project, brand, or persona under your account.
-                </p>
+                  {ui("Add another project, brand, or persona under your account.")}</p>
               </div>
               <button
                 onClick={() => setShowNewProfileModal(false)}
@@ -2559,28 +2463,28 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
             <form onSubmit={handleCreateProfileSubmit} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-neutral-800">Handle (Username)</label>
+                <label className="text-xs font-semibold text-neutral-800">{ui("Handle (Username)")}</label>
                 <div className="flex items-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 focus-within:bg-white focus-within:border-neutral-900">
                   <span className="text-xs font-mono text-neutral-400">@</span>
-                  <input
+                  <input aria-label={ui("Handle (Username)")}
                     type="text"
                     required
                     value={newUsername}
                     onChange={e => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                    placeholder="myotherbrand"
+                    placeholder={ui("myotherbrand")}
                     className="w-full text-xs font-mono p-2 bg-transparent outline-none"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-neutral-800">Display Name</label>
-                <input
+                <label className="text-xs font-semibold text-neutral-800">{ui("Display Name")}</label>
+                <input aria-label={ui("Display Name")}
                   type="text"
                   required
                   value={newDisplayName}
                   onChange={e => setNewDisplayName(e.target.value)}
-                  placeholder="My Other Brand"
+                  placeholder={ui("My Other Brand")}
                   className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none"
                 />
               </div>
@@ -2591,14 +2495,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   onClick={() => setShowNewProfileModal(false)}
                   className="px-4 py-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 cursor-pointer"
                 >
-                  Cancel
-                </button>
+                  {ui("Cancel")}</button>
                 <button
                   type="submit"
                   disabled={isCreatingProfile || !newUsername.trim() || !newDisplayName.trim()}
                   className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  {isCreatingProfile ? 'Creating...' : 'Create Profile'}
+                  {isCreatingProfile ? ui("Creating...") : ui("Create Profile")}
                 </button>
               </div>
             </form>
@@ -2616,7 +2519,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <Key className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-base text-neutral-900">
-                  {createdApiKey ? 'API Key Generated' : 'Generate Studio API Key'}
+                  {createdApiKey ? ui("API Key Generated") : ui("Generate Studio API Key")}
                 </h3>
               </div>
               <button
@@ -2638,14 +2541,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
                   <span>
-                    <strong>Make sure to copy your API key now.</strong> You won't be able to see it again! Store it in an environment variable or secrets manager.
-                  </span>
+                    <strong>{ui("Make sure to copy your API key now.")}</strong> {ui("You won't be able to see it again! Store it in an environment variable or secrets manager.")}</span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-800">Your Live Secret Key</label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui("Your Live Secret Key")}</label>
                   <div className="flex items-center gap-2">
-                    <input
+                    <input aria-label={ui("Your Live Secret Key")}
                       type="text"
                       readOnly
                       value={createdApiKey}
@@ -2661,7 +2563,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       className="px-3.5 py-2.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer"
                     >
                       {copiedKey ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedKey ? 'Copied' : 'Copy'}</span>
+                      <span>{copiedKey ? ui("Copied") : ui("Copy")}</span>
                     </button>
                   </div>
                 </div>
@@ -2677,8 +2579,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     }}
                     className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold cursor-pointer"
                   >
-                    Done
-                  </button>
+                    {ui("Done")}</button>
                 </div>
               </div>
             ) : (
@@ -2690,18 +2591,17 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-800">Key Name / Description</label>
-                  <input
+                  <label className="text-xs font-semibold text-neutral-800">{ui("Key Name / Description")}</label>
+                  <input aria-label={ui("Key Name / Description")}
                     type="text"
                     required
                     value={newKeyName}
                     onChange={e => setNewKeyName(e.target.value)}
-                    placeholder="e.g., Zapier Sync, Mobile App Integration"
+                    placeholder={ui("e.g., Zapier Sync, Mobile App Integration")}
                     className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-white focus:border-neutral-900 outline-none"
                   />
                   <p className="text-[11px] text-neutral-400">
-                    Give your API key a recognizable name so you can track where it is being used.
-                  </p>
+                    {ui("Give your API key a recognizable name so you can track where it is being used.")}</p>
                 </div>
 
                 <div className="pt-2 flex items-center justify-end gap-2">
@@ -2710,14 +2610,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     onClick={() => setShowNewKeyModal(false)}
                     className="px-4 py-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 cursor-pointer"
                   >
-                    Cancel
-                  </button>
+                    {ui("Cancel")}</button>
                   <button
                     type="submit"
                     disabled={isGeneratingKey || !newKeyName.trim()}
                     className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    {isGeneratingKey ? 'Generating...' : 'Generate Key'}
+                    {isGeneratingKey ? ui("Generating...") : ui("Generate Key")}
                   </button>
                 </div>
               </form>

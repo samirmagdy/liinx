@@ -1,8 +1,10 @@
 import { Language } from './i18n';
+import { uiArabic } from './uiArabic';
 
 // UI-only copy. User content, URLs, code samples, provider names, and metrics are
 // intentionally excluded so creator-authored content is never machine-translated.
 export const runtimeTranslations: Record<string, string> = {
+  ...uiArabic,
   'Something went wrong': 'حدث خطأ ما',
   'Back to Home': 'العودة للرئيسية',
   'Reload Page': 'إعادة تحميل الصفحة',

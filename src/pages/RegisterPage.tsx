@@ -1,3 +1,4 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
@@ -35,6 +36,7 @@ const INTENT_OPTIONS = [
 ];
 
 export const RegisterPage: React.FC = () => {
+  const { tr: ui } = useUiLanguage();
   const [step, setStep] = useState<1 | 2>(1);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -54,6 +56,8 @@ export const RegisterPage: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const initialHandle = params.get('username');
+    const template = params.get('template');
+    if (template && THEMES.some(theme => theme.id === template)) setSelectedThemeId(template);
     if (initialHandle) {
       const clean = initialHandle.toLowerCase().replace(/[^a-z0-9_]/g, '');
       setUsername(clean);
@@ -62,6 +66,7 @@ export const RegisterPage: React.FC = () => {
 
   // Debounced username check
   useEffect(() => {
+    let active = true;
     if (!username || username.length < 3) {
       setAvailability({ checked: false, available: false });
       return;
@@ -70,13 +75,14 @@ export const RegisterPage: React.FC = () => {
     const timer = setTimeout(async () => {
       try {
         const res = await api.auth.checkUsername(username);
+        if (!active) return;
         setAvailability({ checked: true, available: res.available, message: res.reason });
       } catch {
         setAvailability({ checked: false, available: false });
       }
     }, 250);
 
-    return () => clearTimeout(timer);
+    return () => { active = false; clearTimeout(timer); };
   }, [username]);
 
   const handleNextStep = (e: React.FormEvent) => {
@@ -123,7 +129,11 @@ export const RegisterPage: React.FC = () => {
         spread: 80,
         origin: { y: 0.6 }
       });
-      setLocation('/studio');
+      const params = new URLSearchParams(window.location.search);
+      const plan = params.get('plan');
+      if (plan === 'pro' || plan === 'studio') {
+        setLocation(`/pricing?plan=${plan}&interval=${params.get('interval') === 'year' ? 'year' : 'month'}`);
+      } else setLocation('/studio');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
       setStep(1);
@@ -142,15 +152,14 @@ export const RegisterPage: React.FC = () => {
           <span className="font-bold text-xl tracking-tight text-neutral-900">{brand.productShortName}</span>
         </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">
-          {step === 1 ? 'Build your micro-site' : 'Choose your aesthetic'}
+          {step === 1 ? ui("Build your micro-site") : ui("Choose your aesthetic")}
         </h1>
         <p className="mt-2 text-xs sm:text-sm text-neutral-600">
           {step === 1 ? (
             <>
-              Already have an account?{' '}
+              {ui("Already have an account?")}{' '}
               <Link href="/login" className="font-semibold text-neutral-900 hover:underline">
-                Sign in here
-              </Link>
+                {ui("Sign in here")}</Link>
             </>
           ) : (
             'Step 2 of 2: Select your focus discipline and initial theme.'
@@ -171,16 +180,15 @@ export const RegisterPage: React.FC = () => {
             <form className="space-y-4" onSubmit={handleNextStep}>
               <div>
                 <label className="block text-xs font-bold text-neutral-700 mb-1.5">
-                  Choose your handle
-                </label>
+                  {ui("Choose your handle")}</label>
                 <div className="relative">
                   <AtSign className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
-                  <input
+                  <input aria-label={ui("Choose your handle")}
                     type="text"
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                    placeholder="yourname"
+                    placeholder={ui("yourname")}
                     className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
                   />
                   {availability.checked && (
@@ -194,18 +202,18 @@ export const RegisterPage: React.FC = () => {
                   )}
                 </div>
                 <p className="mt-1.5 text-[11px] text-neutral-500">
-                  Your live link will be <span className="font-mono text-neutral-700 font-semibold">{brand.domain}/@{username || 'yourname'}</span>
+                  {ui("Your live link will be")}<span className="font-mono text-neutral-700 font-semibold">{brand.domain}/@{username || 'yourname'}</span>
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-neutral-700 mb-1.5">
-                  Email address
-                </label>
+                  {ui("Email address")}</label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
                   <input
                     type="email"
+                    aria-label={ui('Email address')} name="email" autoComplete="email" dir="ltr"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -217,16 +225,16 @@ export const RegisterPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-neutral-700 mb-1.5">
-                  Choose password
-                </label>
+                  {ui("Choose password")}</label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
                   <input
                     type="password"
+                    aria-label={ui('Choose password')} name="password" autoComplete="new-password" minLength={8} maxLength={128}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 8 characters"
+                    placeholder={ui("At least 8 characters")}
                     className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
                   />
                 </div>
@@ -237,7 +245,7 @@ export const RegisterPage: React.FC = () => {
                 disabled={availability.checked && !availability.available}
                 className="w-full mt-3 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
               >
-                <span>Continue to Step 2</span>
+                <span>{ui("Continue to Step 2")}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -245,8 +253,7 @@ export const RegisterPage: React.FC = () => {
             <form className="space-y-5" onSubmit={handleFinalSubmit}>
               <div>
                 <label className="block text-xs font-bold text-neutral-700 mb-2">
-                  What are you building?
-                </label>
+                  {ui("What are you building?")}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {INTENT_OPTIONS.map((item) => {
                     const Icon = item.icon;
@@ -263,7 +270,7 @@ export const RegisterPage: React.FC = () => {
                         }`}
                       >
                         <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-amber-600' : 'text-neutral-400'}`} />
-                        <span className="text-[11px] font-semibold leading-tight">{item.label}</span>
+                        <span className="text-[11px] font-semibold leading-tight">{ui(item.label)}</span>
                       </button>
                     );
                   })}
@@ -272,8 +279,7 @@ export const RegisterPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-neutral-700 mb-2">
-                  Choose starting design theme
-                </label>
+                  {ui("Choose starting design theme")}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {THEMES.slice(0, 6).map((theme) => {
                     const isSelected = selectedThemeId === theme.id;
@@ -315,11 +321,11 @@ export const RegisterPage: React.FC = () => {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Creating your Studio...</span>
+                      <span>{ui("Creating your Studio...")}</span>
                     </>
                   ) : (
                     <>
-                      <span>Launch My Micro-Site</span>
+                      <span>{ui("Launch My Micro-Site")}</span>
                       <Sparkles className="w-4 h-4 text-amber-400" />
                     </>
                   )}

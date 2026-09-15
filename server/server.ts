@@ -14,6 +14,8 @@ import { instagramRouter } from './routes/instagram.js';
 import { importerRouter } from './routes/importer.js';
 import { apiV1Router } from './routes/apiV1.js';
 import { billingRouter } from './routes/billing.js';
+import { contactRouter } from './routes/contact.js';
+import { pageTitles } from '../src/config/pages.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -134,12 +136,12 @@ app.use((req, res, next) => {
   const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
 
   if (host && !defaultHosts.includes(host) && !host.endsWith('.liinx.app')) {
-    const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ?').get(host) as { username: string } | undefined;
+    const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { username: string } | undefined;
     if (profile) {
       res.setHeader('X-Custom-Domain-User', profile.username);
       if (req.path === '/' || req.path === '') {
         const acceptsHtml = req.headers.accept && req.headers.accept.includes('text/html');
-        const distIndex = path.resolve(__dirname, '../dist/index.html');
+        const distIndex = path.resolve(__dirname, '../dist/shell.html');
         if (acceptsHtml && fs.existsSync(distIndex)) {
           return res.sendFile(distIndex);
         }
@@ -170,6 +172,7 @@ app.use('/api', instagramRouter);
 app.use('/api', importerRouter);
 app.use('/api', apiV1Router);
 app.use('/api', billingRouter);
+app.use('/api', contactRouter);
 
 // Comprehensive Health & Diagnostics Endpoint
 app.get('/api/health', (_req, res) => {
@@ -204,6 +207,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 // Centralized error handler middleware
+app.use('/api', (_req, res) => res.status(404).json({ error: 'API endpoint not found.' }));
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err.type === 'entity.too.large' || err.status === 413) {
     return res.status(413).json({
@@ -238,9 +242,11 @@ export async function startServer() {
         }
       }
     }));
-    app.get('*', (_req, res) => {
+    app.get('*', (req, res) => {
       res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
-      res.sendFile(path.join(distDir, 'index.html'));
+      const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
+      if (['/studio', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+      res.sendFile(routeFile && fs.existsSync(routeFile) ? routeFile : path.join(distDir, 'shell.html'));
     });
   }
 

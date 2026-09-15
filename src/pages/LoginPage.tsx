@@ -1,9 +1,11 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Lock, Mail, AlertCircle, Loader2, User } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
+  const { tr: ui } = useUiLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -36,18 +38,15 @@ export const LoginPage: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
           <div className="w-9 h-9 rounded-xl bg-neutral-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-            L
-          </div>
-          <span className="font-bold text-xl tracking-tight text-neutral-900">LIINX</span>
+            {ui("L")}</div>
+          <span className="font-bold text-xl tracking-tight text-neutral-900">{ui("LIINX")}</span>
         </Link>
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 text-balance">
-          Welcome back to your Studio
-        </h2>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 text-balance">
+          {ui("Welcome back to your Studio")}</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Or{' '}
+          {ui("Or")}{' '}
           <Link href="/register" className="font-semibold text-neutral-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded">
-            claim a new handle and create your page
-          </Link>
+            {ui("claim a new handle and create your page")}</Link>
         </p>
       </div>
 
@@ -62,13 +61,12 @@ export const LoginPage: React.FC = () => {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-                Email address
-              </label>
+              <label htmlFor="login-email" className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
+                {ui("Email address")}</label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
                 <input
-                  type="email"
+                  type="email" id="login-email" name="email" autoComplete="email" dir="ltr"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -79,13 +77,12 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
-                Password
-              </label>
+              <label htmlFor="login-password" className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
+                {ui("Password")}</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
                 <input
-                  type="password"
+                  type="password" id="login-password" name="password" autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -103,28 +100,18 @@ export const LoginPage: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Signing in...</span>
+                  <span>{ui("Signing in...")}</span>
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>{ui("Sign In")}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
 
-          {/* Demo Account Helper */}
-          <div className="mt-6 pt-6 border-t border-neutral-200 text-center">
-            <button
-              type="button"
-              onClick={handleQuickDemo}
-              className="text-xs text-neutral-600 hover:text-neutral-900 font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5 bg-neutral-100 hover:bg-neutral-200/80 px-3.5 py-1.5 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            >
-              <User className="w-3.5 h-3.5 text-neutral-700" />
-              <span>Sign in with demo account (Elena Rostova)</span>
-            </button>
-          </div>
+
         </div>
       </div>
     </div>

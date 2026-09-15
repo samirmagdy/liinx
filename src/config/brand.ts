@@ -76,7 +76,7 @@ export const brand: BrandConfig = {
   domain: 'liinx.app',
   cnameTarget: 'cname.liinx.app',
   supportEmail: 'support@liinx.app',
-  legalName: 'Liinx Technologies, Inc.',
+  legalName: 'Liinx Studio',
   copyrightName: 'Liinx Studio',
   logoMark: 'LX',
   description: 'A design-first micro-website builder for creators, professionals, freelancers, businesses and brands.',

@@ -3,12 +3,15 @@ import { TEMPLATES, THEMES } from '../data/mockData';
 import { CreatorProfile } from '../types';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { PhonePreview } from './PhonePreview';
 
 interface TemplatesSectionProps {
+  headingLevel?: 1 | 2;
   onSelectTemplate: (profile: CreatorProfile) => void;
 }
 
-export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemplate }) => {
+export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemplate, headingLevel = 2 }) => {
+  const Heading = headingLevel === 1 ? 'h1' : 'h2';
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const { t, isRtl } = useLanguage();
 
@@ -30,19 +33,20 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
             <span>{t.templatesSection.badge}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 text-balance">
+            <Heading className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 text-balance">
               {t.templatesSection.title}
-            </h2>
+            </Heading>
             <p className="text-base text-neutral-600 mt-2 max-w-xl text-pretty">
               {t.templatesSection.subtitle}
             </p>
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 p-1 bg-neutral-100 border border-neutral-200 rounded-full overflow-x-auto no-scrollbar">
+          <div className="flex flex-wrap items-center gap-1.5 p-2 bg-neutral-100 border border-neutral-200 rounded-2xl max-w-full">
             {categories.map((cat) => (
               <button
                 key={cat}
+                aria-pressed={selectedCategory === cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedCategory === cat
@@ -70,40 +74,11 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 key={template.id}
                 className="rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between transition-colors hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
               >
-                {/* Preview Card Header */}
-                <div 
-                  className="p-6 border-b border-neutral-200 flex flex-col items-center justify-center relative min-h-[220px]"
-                  style={{ backgroundColor: template.previewColor }}
-                >
-                  <img 
-                    src={template.profile.avatarUrl} 
-                    alt={template.profile.displayName}
-                    className="w-18 h-18 rounded-full object-cover shadow-sm ring-2 ring-white/20 mb-3"
-                    loading="lazy"
-                  />
-                  <h3 className={`text-base font-bold tracking-tight text-center ${
-                    isDarkTheme(template.profile.themeId) 
-                      ? 'text-white' 
-                      : 'text-neutral-900'
-                  }`}>
-                    {template.profile.displayName}
-                  </h3>
-                  <p className={`text-xs font-mono opacity-65 ${
-                    isDarkTheme(template.profile.themeId) 
-                      ? 'text-neutral-300' 
-                      : 'text-neutral-600'
-                  }`}>
-                    @{template.profile.username}
-                  </p>
-
-                  {/* Badge */}
-                  <span className={`absolute top-4 end-4 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider border ${
-                    isDarkTheme(template.profile.themeId)
-                      ? 'bg-white/10 text-neutral-300 border-white/10'
-                      : 'bg-neutral-900/10 text-neutral-700 border-neutral-900/5'
-                  }`}>
-                    {loc.category}
-                  </span>
+                {/* Render the real profile component as a non-interactive theme example. */}
+                <div className="relative h-[300px] overflow-hidden border-b bg-white" aria-hidden="true" inert>
+                  <div className="absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none">
+                    <PhonePreview profile={template.profile} customTheme={THEMES.find(theme => theme.id === template.profile.themeId)} compact interactive={false} />
+                  </div>
                 </div>
 
                 {/* Template Body */}

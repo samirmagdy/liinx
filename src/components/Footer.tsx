@@ -1,3 +1,4 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { ResourceModal, ResourceDocType } from './ResourceModal';
@@ -10,6 +11,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
+  const { tr: ui } = useUiLanguage();
   const [activeModalDoc, setActiveModalDoc] = useState<ResourceDocType | null>(null);
   const { lang, setLanguage, t } = useLanguage();
 
@@ -46,7 +48,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[11px] font-mono text-neutral-400">99.99% Uptime SLA</span>
+                  <span className="text-[11px] text-neutral-400">{ui("Creator pages & booking")}</span>
                 </div>
 
                 <button
@@ -89,8 +91,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     onClick={() => setActiveModalDoc('dns-guide')}
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    Custom Domains
-                  </button>
+                    {ui("Custom Domains")}</button>
                 </li>
               </ul>
             </div>
@@ -101,7 +102,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <ul className="space-y-2">
                 <li>
                   <Link href="/about" className="hover:text-white transition-colors cursor-pointer text-left block">
-                    About {brand.productShortName}
+                    {ui("About")}{brand.productShortName}
                   </Link>
                 </li>
                 <li>
@@ -115,8 +116,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     onClick={() => setActiveModalDoc('creator-handbook')}
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    Creator Handbook
-                  </button>
+                    {ui("Creator Handbook")}</button>
                 </li>
                 <li>
                   <button 
@@ -124,8 +124,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     onClick={() => setActiveModalDoc('switch-linktree')}
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    Switch from Linktree
-                  </button>
+                    {ui("Switch from Linktree")}</button>
                 </li>
                 <li>
                   <button 
@@ -133,8 +132,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     onClick={() => setActiveModalDoc('api-docs')}
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    Public REST API
-                  </button>
+                    {ui("Public REST API")}</button>
                 </li>
               </ul>
             </div>
@@ -159,8 +157,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     onClick={() => setActiveModalDoc('security')}
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    Security & GDPR
-                  </button>
+                    {ui("Security")}</button>
                 </li>
                 <li>
                   <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-left block">
@@ -176,9 +173,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
             <p>© {new Date().getFullYear()} {brand.legalName}. {t.footer.rightsReserved}</p>
             <div className="flex items-center gap-4">
-              <span>Zero-Tracker Architecture</span>
+              <span>{ui("Privacy controls")}</span>
               <span>•</span>
-              <span>Encrypted SQLite Storage</span>
+              <span>{ui("Account-owned content")}</span>
             </div>
           </div>
 

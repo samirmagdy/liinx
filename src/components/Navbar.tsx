@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
+import React, { useState, useEffect } from 'react';
+import { api } from '../services/api';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -24,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeView = 'home',
   onClaimClick
 }) => {
+  const { tr: ui } = useUiLanguage();
   const [, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { lang, setLanguage, t, isRtl } = useLanguage();
@@ -34,8 +37,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   const handleHandleChange = (val: string) => {
     const clean = val.toLowerCase().replace(/[^a-z0-9_]/g, '');
     setQuickHandle(clean);
-    setHandleStatus(clean.length >= 2 ? 'available' : 'idle');
+    setHandleStatus('idle');
   };
+
+  useEffect(() => {
+    let active = true;
+    if (quickHandle.length < 3) return;
+    const timer = setTimeout(() => {
+      api.auth.checkUsername(quickHandle).then(result => {
+        if (active) setHandleStatus(result.available ? 'available' : 'idle');
+      }).catch(() => { if (active) setHandleStatus('idle'); });
+    }, 300);
+    return () => { active = false; clearTimeout(timer); };
+  }, [quickHandle]);
 
   const handleClaim = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,13 +98,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {brand.productShortName}
               </span>
               <span className="text-[10px] text-neutral-500 font-medium tracking-wide">
-                Micro-site builder
-              </span>
+                {ui("Micro-site builder")}</span>
             </div>
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1">
             <Link href="/" className={navLinkClass(activeView === 'home')}>
               {lang === 'ar' ? 'الرئيسية' : 'Overview'}
             </Link>
@@ -111,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Right Action Bar */}
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden xl:flex items-center gap-3">
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
@@ -128,6 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center bg-neutral-50 border border-neutral-300 rounded-full pl-3 pr-1.5 py-1 text-xs shadow-xs focus-within:ring-2 focus-within:ring-neutral-900/20 focus-within:border-neutral-900 transition-colors">
                 <span className="text-neutral-500 font-mono text-[11px] select-none pr-0.5">liinx.app/@</span>
                 <input
+                  aria-label={t.hero.claimPlaceholder} dir="ltr"
                   type="text"
                   value={quickHandle}
                   onChange={(e) => handleHandleChange(e.target.value)}
@@ -136,7 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   spellCheck={false}
                 />
                 {handleStatus === 'available' && (
-                  <span className="mr-1 text-emerald-600 flex items-center" title="Available">
+                  <span className="mr-1 text-emerald-600 flex items-center" title={ui("Available")}>
                     <Check className="w-3 h-3 stroke-[3]" />
                   </span>
                 )}
@@ -162,7 +176,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </Link>
               <button
                 onClick={logout}
-                title="Log out"
+                title={ui("Log out")}
                 className="p-2 rounded-full hover:bg-neutral-100 text-neutral-600 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
               >
                 <LogOut className="w-4 h-4" />
@@ -188,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile menu trigger */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex xl:hidden items-center gap-2">
           <button
             onClick={toggleLanguage}
             className="p-1.5 rounded-lg text-xs font-bold text-neutral-700 hover:bg-neutral-100"
@@ -204,7 +218,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            aria-label="Toggle menu"
+            aria-label={ui("Toggle menu")}
+            aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -214,7 +229,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-neutral-200/60 bg-white px-4 pt-3 pb-6 space-y-3">
+        <div id="mobile-navigation" className="xl:hidden border-t border-neutral-200/60 bg-white px-4 pt-3 pb-6 space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <Link
               href="/"
@@ -249,10 +264,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="pt-2">
             {user ? (
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl border border-neutral-200">
-                <span className="text-xs font-semibold">Logged in as @{user.username}</span>
+                <span className="text-xs font-semibold">{ui("Logged in as @")}{user.username}</span>
                 <button onClick={logout} className="text-xs text-rose-600 font-semibold cursor-pointer hover:text-rose-700">
-                  Log Out
-                </button>
+                  {ui("Log Out")}</button>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">

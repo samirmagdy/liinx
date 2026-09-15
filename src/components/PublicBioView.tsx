@@ -1,3 +1,4 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { CreatorProfile, ThemeConfig } from '../types';
@@ -40,6 +41,7 @@ import {
 } from '../utils/mediaEmbeds';
 
 interface PublicBioViewProps {
+  previewOnly?: boolean;
   profile?: CreatorProfile;
   username?: string;
   customDomain?: string;
@@ -49,6 +51,7 @@ interface PublicBioViewProps {
 }
 
 export const PublicBioView: React.FC<PublicBioViewProps> = ({
+  previewOnly = false,
   profile: initialProfile,
   username: routeUsername,
   customDomain,
@@ -56,6 +59,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   onBackToStudio,
   onOpenQr
 }) => {
+  const { tr: ui } = useUiLanguage();
   const [, setLocation] = useLocation();
   const [profile, setProfile] = useState<CreatorProfile | null>(initialProfile || null);
   const [loading, setLoading] = useState(!initialProfile);
@@ -115,7 +119,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   // Google Analytics 4 (gtag.js) Injection
   useEffect(() => {
-    if (!profile?.gaMeasurementId) return;
+    if (previewOnly || !profile?.gaMeasurementId) return;
     const gaId = profile.gaMeasurementId.trim();
     if (!gaId || !/^G-[A-Z0-9]+$/i.test(gaId)) return;
 
@@ -143,7 +147,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   // Meta Pixel (fbq) Injection
   useEffect(() => {
-    if (!profile?.metaPixelId) return;
+    if (previewOnly || !profile?.metaPixelId) return;
     const pixelId = profile.metaPixelId.trim();
     if (!pixelId || !/^[0-9]+$/.test(pixelId)) return;
 
@@ -170,7 +174,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   // Custom Font Link Injection
   useEffect(() => {
-    if (!profile?.customFontUrl) return;
+    if (previewOnly || !profile?.customFontUrl) return;
     const fontUrl = profile.customFontUrl.trim();
     if (!fontUrl || !/^https?:\/\//i.test(fontUrl)) return;
 
@@ -189,7 +193,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
         <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
-        <p className="text-sm font-mono text-neutral-500">Loading creator page...</p>
+        <p className="text-sm font-mono text-neutral-500">{ui("Loading creator page...")}</p>
       </div>
     );
   }
@@ -201,8 +205,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           <AlertCircle className="w-8 h-8" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mb-2">
-          Unable to load creator page
-        </h1>
+          {ui("Unable to load creator page")}</h1>
         <p className="text-sm text-neutral-500 max-w-sm mb-6">
           {serverError}
         </p>
@@ -211,14 +214,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             onClick={() => window.location.reload()}
             className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors cursor-pointer"
           >
-            Retry
-          </button>
+            {ui("Retry")}</button>
           <button
             onClick={() => setLocation('/')}
             className="px-5 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer"
           >
-            Go to Homepage
-          </button>
+            {ui("Go to Homepage")}</button>
         </div>
       </div>
     );
@@ -231,24 +232,20 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           <AlertCircle className="w-8 h-8 text-neutral-500" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mb-2 text-balance">
-          Creator page not found
-        </h1>
+          {ui("Creator page not found")}</h1>
         <p className="text-sm text-neutral-500 max-w-sm mb-6 text-pretty">
-          The handle <span className="font-mono font-semibold text-neutral-900">@{routeUsername || 'unknown'}</span> hasn't been claimed yet or does not exist.
-        </p>
+          {ui("The handle")}<span className="font-mono font-semibold text-neutral-900">@{routeUsername || 'unknown'}</span> {ui("hasn't been claimed yet or does not exist.")}</p>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLocation('/')}
             className="px-5 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
-            Go to Homepage
-          </button>
+            {ui("Go to Homepage")}</button>
           <button
             onClick={() => setLocation(`/register?username=${routeUsername?.replace(/^@/, '') || ''}`)}
             className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
           >
-            Claim this handle
-          </button>
+            {ui("Claim this handle")}</button>
         </div>
       </div>
     );
@@ -340,7 +337,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Studio</span>
+            <span>{ui("Back to Studio")}</span>
           </button>
         ) : (
           <button
@@ -348,7 +345,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>LIINX</span>
+            <span>{ui("LIINX")}</span>
           </button>
         )}
 
@@ -358,7 +355,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <QrCode className="w-3.5 h-3.5" />
-            <span>QR Code</span>
+            <span>{ui("QR Code")}</span>
           </button>
           <button
             onClick={handleShare}
@@ -367,12 +364,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             {copiedLink ? (
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Copied!</span>
+                <span>{ui("Copied!")}</span>
               </>
             ) : (
               <>
                 <Share2 className="w-3.5 h-3.5" />
-                <span>Share</span>
+                <span>{ui("Share")}</span>
               </>
             )}
           </button>
@@ -395,7 +392,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               <div 
                 className="absolute bottom-1 right-1 p-1.5 rounded-full text-white shadow-md"
                 style={{ backgroundColor: theme.accentColor }}
-                title="Verified Profile"
+                title={ui("Verified Profile")}
               >
                 <CheckCircle2 className="w-4 h-4 fill-current text-white" />
               </div>
@@ -616,7 +613,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                             }
                           }}
                           className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          aria-label="Play track"
+                          aria-label={ui("Play track")}
                         >
                           {isPlayingAudio ? (
                             <Pause className="w-5 h-5 fill-white text-white" />
@@ -630,7 +627,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           target="_blank"
                           rel="noreferrer"
                           className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          aria-label="Listen track"
+                          aria-label={ui("Listen track")}
                         >
                           <Play className="w-5 h-5 fill-white text-white ml-0.5" />
                         </a>
@@ -640,7 +637,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                     <div className="flex-1 min-w-0" dir="auto">
                       <div className="flex items-center gap-1.5 text-[11px] opacity-70 mb-0.5">
                         <Music2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                        <span className="uppercase font-mono tracking-wider font-semibold">Audio Track</span>
+                        <span className="uppercase font-mono tracking-wider font-semibold">{ui("Audio Track")}</span>
                       </div>
                       <p className="text-sm font-bold truncate" dir="auto">{block.title}</p>
                       <p className="text-xs truncate opacity-70" dir="auto">{block.artist}</p>
@@ -690,8 +687,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm sm:text-base truncate" dir="auto">{block.title}</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 font-mono shrink-0">
-                          {block.items?.length || 0} links
-                        </span>
+                          {block.items?.length || 0} {ui("links")}</span>
                       </div>
                       {block.subtitle && (
                         <p className="text-xs truncate opacity-65 mt-0.5 text-pretty" dir="auto">{block.subtitle}</p>
@@ -827,11 +823,11 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                     </div>
                   ) : (
                     <form onSubmit={(e) => handleNewsletter(e, block.id)} className="space-y-2.5">
-                      <input 
+                      <input aria-label={ui("Enter your email address")} 
                         type="email"
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
-                        placeholder="Enter your email address"
+                        placeholder={ui("Enter your email address")}
                         className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/15 outline-none focus:ring-2 focus:ring-black/20"
                         style={{ color: theme.textColor }}
                         required
@@ -847,7 +843,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         {newsletterLoading ? (
                           <>
                             <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
-                            <span>Subscribing...</span>
+                            <span>{ui("Subscribing...")}</span>
                           </>
                         ) : (
                           <>
@@ -875,7 +871,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               style={{ color: theme.textColor }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Made with <strong>LIINX</strong></span>
+              <span>{ui("Made with")}<strong>{ui("LIINX")}</strong></span>
             </button>
           </div>
         )}

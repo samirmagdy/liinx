@@ -5,8 +5,20 @@ import { useLanguage } from '../context/LanguageContext';
 
 export const FaqSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const { t } = useLanguage();
-  const faqList = t.faqSection.faqs || FAQS;
+  const { t, lang } = useLanguage();
+  const faqList = lang === 'ar' ? [
+    { question: 'كيف أبدأ؟', answer: 'أنشئ حساباً مجانياً، أضف روابطك واختر مظهراً ثم افتح صفحتك المنشورة للتحقق منها.' },
+    { question: 'كيف تعمل الحجوزات؟', answer: 'أضف رابط موعد صالحاً من Calendly. يختار الزائر وقتاً داخل الأداة ويؤكّد Calendly الحجز. فتح الأداة لا يُحسب حجزاً مكتملاً.' },
+    { question: 'هل يوجد نطاق مخصص؟', answer: 'تدعم الخطط المدفوعة نطاقاً مخصصاً بعد التحقق من DNS. يجب إعداد النطاق وشهادة TLS لدى مزوّد الاستضافة أيضاً.' },
+    { question: 'هل يمكن استيراد الروابط؟', answer: 'افتح أداة الاستيراد، أدخل رابط صفحتك العامة، ثم راجع الروابط واختر ما تريد حفظه. قد تمنع بعض المواقع الاستخراج.' },
+    { question: 'هل تتوفر تجربة مجانية؟', answer: 'توجد خطة مجانية. الخطط المدفوعة لا تتضمن فترة تجريبية مجانية وتُحصّل حسب الفترة المختارة في Stripe.' }
+  ] : [
+    { question: 'How do I start?', answer: 'Create a free account, add your links, choose a theme and open your published page to check it.' },
+    { question: 'How does booking work?', answer: 'Add a valid Calendly event link. Visitors choose a time in the embedded scheduler and Calendly confirms the appointment. Opening the scheduler is not counted as a completed booking.' },
+    { question: 'Can I use a custom domain?', answer: 'Paid plans support custom domains after DNS verification. Your hosting provider must also configure the domain and TLS certificate.' },
+    { question: 'Can I import my links?', answer: 'Open the importer, enter your public page URL, then review and select the links to save. Some sites may block extraction.' },
+    { question: 'Is there a free trial?', answer: 'There is a free plan. Paid plans have no free trial and are charged for the selected interval through Stripe.' }
+  ];
 
   const toggleFaq = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -39,6 +51,7 @@ export const FaqSection: React.FC = () => {
                 className="rounded-2xl border border-neutral-200 bg-white overflow-hidden shadow-xs"
               >
                 <button
+                  aria-expanded={isOpen} aria-controls={`faq-answer-${idx}`}
                   onClick={() => toggleFaq(idx)}
                   className="w-full p-5 text-start flex items-center justify-between gap-4 hover:bg-neutral-50 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
@@ -51,7 +64,7 @@ export const FaqSection: React.FC = () => {
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-neutral-600 leading-relaxed border-t border-neutral-100 animate-fade-in text-pretty text-start">
+                  <div id={`faq-answer-${idx}`} className="px-5 pb-5 pt-1 text-xs sm:text-sm text-neutral-600 leading-relaxed border-t border-neutral-100 animate-fade-in text-pretty text-start">
                     {faq.answer}
                   </div>
                 )}

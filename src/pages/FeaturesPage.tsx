@@ -1,3 +1,4 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React from 'react';
 import { useLocation } from 'wouter';
 import { brand } from '../config/brand';
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 
 export function FeaturesPage() {
+  const { tr: ui } = useUiLanguage();
   const [, setLocation] = useLocation();
   const { isRtl } = useLanguage();
 
@@ -109,8 +111,8 @@ export function FeaturesPage() {
               </>
             ) : (
               <>
-                Everything your work deserves. <br className="hidden sm:inline" />
-                <span className="text-neutral-500">Built into one platform.</span>
+                {ui("Everything your work deserves.")}<br className="hidden sm:inline" />
+                <span className="block text-neutral-500">{ui("Built into one platform.")}</span>
               </>
             )}
           </h1>

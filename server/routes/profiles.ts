@@ -104,7 +104,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
 profilesRouter.get('/profiles/by-domain/:domain', (req, res) => {
   try {
     const domain = req.params.domain.toLowerCase().trim();
-    const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ?').get(domain) as { username: string } | undefined;
+    const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(domain) as { username: string } | undefined;
     if (!profile) {
       return res.status(404).json({ error: `No profile mapped to custom domain ${domain}` });
     }

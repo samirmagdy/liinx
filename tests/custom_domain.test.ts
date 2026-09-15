@@ -138,6 +138,10 @@ describe('Milestone 6: Custom Domain Support & Host-Header Routing Engine (0% Fa
   });
 
   it('resolves profile by custom domain via /api/profiles/by-domain/:domain', async () => {
+    db.prepare('UPDATE profiles SET custom_domain_verified = 0 WHERE id = ?').run(proProfileId);
+    await request(app).get('/api/profiles/by-domain/bio.procreator.studio').expect(404);
+    // DNS verification is a prerequisite. The network-independent fixture models its result.
+    db.prepare('UPDATE profiles SET custom_domain_verified = 1 WHERE id = ?').run(proProfileId);
     const res = await request(app)
       .get('/api/profiles/by-domain/bio.procreator.studio')
       .expect(307);

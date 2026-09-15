@@ -1,3 +1,4 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { CreatorProfile, ThemeConfig, ProfileBlock } from '../types';
 import { THEMES } from '../data/mockData';
@@ -49,6 +50,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   compact = false,
   deviceMode = 'mobile',
 }) => {
+  const { tr: ui } = useUiLanguage();
   const theme = customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0];
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -69,15 +71,13 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsletterEmail.trim()) return;
-    setNewsletterSuccess(true);
-    setTimeout(() => {
-      setNewsletterSuccess(false);
-      setNewsletterEmail('');
-    }, 3500);
+    // Preview actions never create subscribers or claim a successful subscription.
+    alert('Preview only. Open the live page to subscribe.');
   };
 
-  const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.origin + '/@' + profile.username);
+  const handleShare = async () => {
+    try { await navigator.clipboard.writeText(window.location.origin + '/@' + profile.username); }
+    catch { return; }
     setCopiedNotification(true);
     setTimeout(() => setCopiedNotification(false), 2000);
   };
@@ -164,9 +164,9 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           <div className="flex items-center gap-1">
             <button 
               onClick={handleShare}
-              aria-label="Share bio link"
+              aria-label={ui("Share bio link")}
               className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
-              title="Copy bio link"
+              title={ui("Copy bio link")}
             >
               <Share2 className="w-3.5 h-3.5" />
             </button>
@@ -177,7 +177,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
         {copiedNotification && (
           <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-neutral-900 text-white text-[11px] px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-fade-in">
             <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-            <span>Link copied to clipboard</span>
+            <span>{ui("Link copied to clipboard")}</span>
           </div>
         )}
 
@@ -194,16 +194,16 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               <div 
                 className="absolute bottom-0 right-0 p-1 rounded-full text-white shadow-sm"
                 style={{ backgroundColor: theme.accentColor }}
-                title="Verified Creator"
+                title={ui("Verified Creator")}
               >
                 <CheckCircle2 className="w-3.5 h-3.5 fill-current text-white" />
               </div>
             )}
           </div>
 
-          <h1 className="text-xl font-bold tracking-tight mb-1 flex items-center justify-center gap-1.5 text-balance">
+          <h2 className="text-xl font-bold tracking-tight mb-1 flex items-center justify-center gap-1.5 text-balance">
             <span>{profile.displayName}</span>
-          </h1>
+          </h2>
           
           <p className="text-[11px] font-mono opacity-60 mb-2.5">
             liinx.co/@{profile.username}
@@ -425,7 +425,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                           target="_blank"
                           rel="noreferrer"
                           className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          aria-label="Listen track"
+                          aria-label={ui("Listen track")}
                         >
                           <Play className="w-4 h-4 fill-white text-white ml-0.5" />
                         </a>
@@ -435,7 +435,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     <div className="flex-1 min-w-0" dir="auto">
                       <div className="flex items-center gap-1.5 text-[10px] opacity-70 mb-0.5">
                         <Music2 className="w-3 h-3 text-emerald-500 shrink-0" />
-                        <span className="uppercase font-mono tracking-wider font-semibold">Audio Track</span>
+                        <span className="uppercase font-mono tracking-wider font-semibold">{ui("Audio Track")}</span>
                       </div>
                       <p className="text-xs font-bold truncate" dir="auto">{block.title}</p>
                       <p className="text-[11px] truncate opacity-70" dir="auto">{block.artist}</p>
@@ -485,8 +485,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs truncate" dir="auto">{block.title}</span>
                         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-white/10 font-mono shrink-0">
-                          {block.items.length} items
-                        </span>
+                          {block.items.length} {ui("items")}</span>
                       </div>
                       {block.subtitle && (
                         <p className="text-[10px] truncate opacity-65 mt-0.5 text-pretty" dir="auto">{block.subtitle}</p>
@@ -616,7 +615,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       <div key={post.id} className="relative aspect-square rounded-lg overflow-hidden group">
                         <img 
                           src={post.imageUrl} 
-                          alt="Post" 
+                          alt={ui("Post")} 
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           loading="lazy"
                         />
@@ -652,11 +651,11 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                   {newsletterSuccess ? (
                     <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-medium flex items-center gap-1.5 justify-center" dir="auto">
                       <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      <span>You're on the list! Welcome.</span>
+                      <span>{ui("You're on the list! Welcome.")}</span>
                     </div>
                   ) : (
                     <form onSubmit={handleSubscribe} className="space-y-2">
-                      <input 
+                      <input aria-label="your@email.com…" 
                         type="email"
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
@@ -694,7 +693,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               style={{ color: theme.textColor }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>Made with <strong>LIINX</strong></span>
+              <span>{ui("Made with")}<strong>{ui("LIINX")}</strong></span>
             </a>
           </div>
         )}

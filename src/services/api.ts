@@ -34,13 +34,14 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (!res.ok || data === null) {
     const errorMsg = data?.error || (!isJson ? `Backend unreachable or returned non-JSON response (${res.status})` : `HTTP error ${res.status}`);
-    throw new Error(errorMsg);
+    throw Object.assign(new Error(errorMsg), { status: res.status });
   }
 
   return data as T;
 }
 
 export const api = {
+  contact: (data: { name: string; email: string; message: string }) => request<{ success: boolean; id: string }>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
   auth: {
     checkUsername: async (username: string): Promise<{ available: boolean; reason?: string }> => {
       return request<{ available: boolean; reason?: string }>(`/api/auth/check-username/${encodeURIComponent(username)}`);
@@ -336,10 +337,10 @@ export const api = {
         hasActiveSubscription: boolean;
       }>('/api/billing/status');
     },
-    createCheckoutSession: async (plan: 'pro' | 'studio') => {
+    createCheckoutSession: async (plan: 'pro' | 'studio', interval: 'month' | 'year' = 'month') => {
       return request<{ url: string; sessionId: string }>('/api/billing/create-checkout-session', {
         method: 'POST',
-        body: JSON.stringify({ plan })
+        body: JSON.stringify({ plan, interval })
       });
     },
     createPortalSession: async () => {

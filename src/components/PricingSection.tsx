@@ -1,145 +1,40 @@
 import React, { useState } from 'react';
-import { PRICING_PLANS } from '../data/mockData';
-import { Check, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { paidPlans, BillingInterval } from '../config/plans';
 
-interface PricingSectionProps {
-  onSelectPlan: (planId: string) => void;
-}
-
-export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan }) => {
-  const [isAnnual, setIsAnnual] = useState(true);
-  const { t, isRtl } = useLanguage();
-
-  return (
-    <section id="pricing" className="py-20 md:py-28 border-b border-neutral-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
-            <span>{t.pricingSection.badge}</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
-            {t.pricingSection.title}
-          </h2>
-          <p className="text-base text-neutral-600 text-pretty">
-            {t.pricingSection.subtitle}
-          </p>
-
-          {/* Monthly / Annual Billing Toggle */}
-          <div className="mt-8 inline-flex items-center p-1 bg-neutral-100 border border-neutral-200 rounded-full">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
-                !isAnnual
-                  ? 'bg-neutral-900 text-white shadow-xs'
-                  : 'text-neutral-500 hover:text-neutral-900'
-              }`}
-            >
-              {t.pricingSection.monthly}
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
-                isAnnual
-                  ? 'bg-neutral-900 text-white shadow-xs'
-                  : 'text-neutral-500 hover:text-neutral-900'
-              }`}
-            >
-              <span>{t.pricingSection.yearly}</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-extrabold tracking-wider">
-                {t.pricingSection.yearlySave}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
-          {PRICING_PLANS.map((plan) => {
-            const price = isAnnual ? Math.round(plan.yearlyPrice / 12) : plan.monthlyPrice;
-            const loc = t.pricingSection.plans[plan.id] || {
-              name: plan.name,
-              tagline: plan.tagline,
-              features: plan.features,
-              ctaText: plan.ctaText,
-              billedAnnuallyText: (p: number) => `billed $${p}/yr`
-            };
-
-            return (
-              <div
-                key={plan.id}
-                className={`relative rounded-3xl p-8 flex flex-col justify-between transition-colors duration-200 text-start ${
-                  plan.popular
-                    ? 'bg-neutral-50/50 border-2 border-neutral-900 shadow-md'
-                    : 'bg-white border border-neutral-200 hover:border-neutral-300'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
-                    <span>{t.pricingSection.popular}</span>
-                  </div>
-                )}
-
-                <div>
-                  <div className="mb-6">
-                    <h3 className="font-brand font-bold text-xl text-neutral-900">
-                      {loc.name}
-                    </h3>
-                    <p className="text-xs text-neutral-500 mt-1 h-8 text-pretty">
-                      {loc.tagline}
-                    </p>
-                  </div>
-
-                  {/* Price display */}
-                  <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-neutral-200">
-                    <span className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 tabular-nums">
-                      ${price}
-                    </span>
-                    <span className="text-xs font-semibold text-neutral-500">
-                      {t.pricingSection.perMonth} {isAnnual && <span className="block text-[11px] text-neutral-400 tabular-nums">{loc.billedAnnuallyText(plan.yearlyPrice)}</span>}
-                    </span>
-                  </div>
-
-                  {/* Feature list */}
-                  <ul className="space-y-3 mb-8 text-xs text-neutral-600">
-                    {loc.features.map((feat, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[2.5] mt-0.5" />
-                        <span className="leading-relaxed">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <button
-                  onClick={() => onSelectPlan(plan.id)}
-                  className={`w-full py-3.5 px-4 rounded-full text-xs font-bold transition-colors active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
-                    plan.popular
-                      ? 'bg-neutral-900 hover:bg-neutral-800 text-white shadow-sm'
-                      : 'bg-neutral-100 border border-neutral-200 hover:bg-neutral-200 text-neutral-900'
-                  }`}
-                >
-                  <span>{loc.ctaText}</span>
-                  <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Guarantee Banner */}
-        <div className="mt-12 text-center text-xs text-neutral-500">
-          <p>
-            {isRtl 
-              ? 'جميع الخطط تشمل تجربة مجانية كاملة لمدة ١٤ يوماً. يمكنك الإلغاء في أي وقت بنقرة واحدة.' 
-              : 'All plans include a 14-day free trial. Cancel anytime with a single click. Zero lock-in.'}
-          </p>
-        </div>
-
+export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPlan: (plan: string, interval: BillingInterval) => void | Promise<void>; headingLevel?: 1 | 2 }) {
+  const Heading = headingLevel === 1 ? 'h1' : 'h2';
+  const { lang } = useLanguage();
+  const ar = lang === 'ar';
+  const [interval, setInterval] = useState<BillingInterval>(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('interval') === 'year' ? 'year' : 'month');
+  const [pending, setPending] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const currency = (cents: number) => new Intl.NumberFormat(lang, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(cents / 100);
+  const features = {
+    free: ar ? ['صفحة شخصية وروابط ووسائط', 'تخصيص المظهر', 'جمع اشتراكات البريد وإحصاءات الزيارات'] : ['Personal page, links and media', 'Theme customization', 'Email capture and visit analytics'],
+    pro: ar ? ['ميزات الخطة المجانية', 'نطاق مخصص بعد التحقق والإعداد', 'إزالة شارة المنصة وتخصيص CSS', 'جدولة الروابط وتتبع الحملات'] : ['Free features included', 'Custom domain after verification and setup', 'Remove platform badge and customize CSS', 'Link scheduling and campaign tracking'],
+    studio: ar ? ['ميزات Pro', 'إدارة ملفات متعددة', 'مفاتيح REST API'] : ['Pro features included', 'Multiple profile management', 'REST API keys']
+  };
+  return <section id="pricing" className="py-16 px-4 border-b border-neutral-200">
+    <div className="max-w-6xl mx-auto">
+      <Heading className="text-3xl sm:text-5xl font-bold text-center">{ar ? 'اختر خطتك' : 'Choose your plan'}</Heading>
+      <p className="text-center mt-4 text-neutral-600">{ar ? 'ابدأ بالخطة المجانية. الاشتراكات المدفوعة تُحصّل عبر Stripe.' : 'Start with the free plan. Paid subscriptions are billed through Stripe.'}</p>
+      <div className="flex justify-center gap-2 my-8">
+        {(['month', 'year'] as const).map(value => <button key={value} aria-pressed={interval === value} onClick={() => setInterval(value)} className={`rounded-full px-5 min-h-11 border ${interval === value ? 'bg-neutral-900 text-white' : ''}`}>{value === 'month' ? (ar ? 'شهري' : 'Monthly') : (ar ? 'سنوي' : 'Annual')}</button>)}
       </div>
-    </section>
-  );
-};
+      {error && <p role="alert" className="text-red-700 text-center mb-4">{ar ? 'تعذّر فتح صفحة الدفع. سجّل الدخول وحاول مجدداً. قد تكون خدمة الدفع غير مهيأة.' : 'Could not open checkout. Sign in and retry. Billing may not be configured.'}</p>}
+      <div className="grid md:grid-cols-3 gap-6">
+        {(['free', 'pro', 'studio'] as const).map(plan => <article key={plan} className="border rounded-3xl p-6 flex flex-col gap-5">
+          <h2 className="text-2xl font-bold">{plan === 'free' ? (ar ? 'مجاني' : 'Free') : paidPlans[plan].name}</h2>
+          <p className="text-3xl font-bold">{currency(plan === 'free' ? 0 : paidPlans[plan][interval])}<span className="text-sm font-normal"> / {interval === 'month' ? (ar ? 'شهر' : 'month') : (ar ? 'سنة' : 'year')}</span></p>
+          <ul className="space-y-3 flex-1">{features[plan].map(feature => <li key={feature}>{feature}</li>)}</ul>
+          <button disabled={pending !== null} className="min-h-11 rounded-full bg-neutral-900 text-white px-4 py-3 disabled:opacity-50" onClick={async () => {
+            setPending(plan); setError(false);
+            try { await onSelectPlan(plan, interval); } catch { setError(true); } finally { setPending(null); }
+          }}>{pending === plan ? (ar ? 'جارٍ الفتح…' : 'Opening…') : plan === 'free' ? (ar ? 'ابدأ مجاناً' : 'Start free') : (ar ? 'المتابعة إلى الدفع' : 'Continue to checkout')}</button>
+        </article>)}
+      </div>
+      <p className="mt-8 text-sm text-center text-neutral-600">{ar ? 'تُحصّل الخطة السنوية دفعة واحدة. لا توجد تجربة مدفوعة مجانية. إدارة الاشتراك والإلغاء من بوابة الفوترة.' : 'Annual plans are charged in one payment. No free trial on paid plans. Manage or cancel your subscription in the billing portal.'}</p>
+    </div>
+  </section>;
+}

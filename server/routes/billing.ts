@@ -2,13 +2,14 @@ import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { paidPlans } from '../../src/config/plans.js';
 
 export const billingRouter = Router();
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-export const stripeClient = stripeKey ? new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' as any }) : null;
+export const stripeClient = stripeKey ? new Stripe(stripeKey) : null;
 
 // Pricing tiers configuration
 const PLAN_PRICES: Record<'pro' | 'studio', { amountCents: number; name: string; envPriceId?: string }> = {
@@ -33,7 +34,7 @@ billingRouter.get('/billing/status', requireAuth, (req: AuthenticatedRequest, re
     }
 
     res.json({
-      configured: Boolean(stripeKey && stripeWebhookSecret),
+      configured: Boolean(stripeKey && stripeWebhookSecret && process.env.APP_ORIGIN),
       plan: profile.plan || 'free',
       hasStripeCustomer: Boolean(profile.stripe_customer_id),
       hasActiveSubscription: Boolean(profile.stripe_subscription_id)
@@ -47,12 +48,13 @@ billingRouter.get('/billing/status', requireAuth, (req: AuthenticatedRequest, re
 // 2. Create Real Stripe Checkout Session
 billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { plan } = req.body;
+    const { plan, interval = 'month' } = req.body;
+    if (!['month', 'year'].includes(interval)) return res.status(400).json({ error: 'Invalid billing interval.' });
     if (!['pro', 'studio'].includes(plan)) {
       return res.status(400).json({ error: 'Invalid plan. Choose from "pro" or "studio".' });
     }
 
-    if (!stripeClient) {
+    if (!stripeClient || !process.env.STRIPE_WEBHOOK_SECRET || !process.env.APP_ORIGIN) {
       return res.status(503).json({
         error: 'Stripe billing is not configured on this server. Please set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in environment.'
       });
@@ -65,26 +67,25 @@ billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: 
 
     const host = req.get('host') || 'localhost:3000';
     const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-    const origin = `${protocol}://${host}`;
+    const origin = process.env.APP_ORIGIN!;
 
-    const planConfig = PLAN_PRICES[plan as 'pro' | 'studio'];
+    const planConfig = paidPlans[plan as keyof typeof paidPlans];
+    if (profile.stripe_subscription_id) return res.status(409).json({ error: 'Manage your existing subscription in the billing portal.' });
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
       client_reference_id: profile.id,
       customer_email: req.user!.email,
-      line_items: planConfig.envPriceId
-        ? [{ price: planConfig.envPriceId, quantity: 1 }]
-        : [{
+      line_items: [{
             price_data: {
               currency: 'usd',
               product_data: {
                 name: planConfig.name,
-                description: `Monthly subscription for LIINX ${plan.toUpperCase()} tier.`
+                description: `${interval === 'year' ? 'Annual' : 'Monthly'} subscription for LIINX ${plan.toUpperCase()} tier.`
               },
-              unit_amount: planConfig.amountCents,
-              recurring: { interval: 'month' }
+              unit_amount: planConfig[interval as 'month' | 'year'],
+              recurring: { interval }
             },
             quantity: 1
           }],
@@ -135,7 +136,8 @@ billingRouter.post('/billing/create-portal-session', requireAuth, async (req: Au
 
     const host = req.get('host') || 'localhost:3000';
     const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-    const returnUrl = `${protocol}://${host}/studio`;
+    if (!process.env.APP_ORIGIN) return res.status(503).json({ error: 'Billing return address is not configured.' });
+    const returnUrl = `${process.env.APP_ORIGIN}/studio`;
 
     const portalSession = await stripeClient.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
@@ -185,7 +187,7 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
         const customerId = session.customer ? String(session.customer) : null;
         const subscriptionId = session.subscription ? String(session.subscription) : null;
 
-        if (profileId) {
+        if (profileId && ['pro', 'studio'].includes(plan) && ['paid', 'no_payment_required'].includes(session.payment_status)) {
           db.prepare(`
             UPDATE profiles 
             SET plan = ?, stripe_customer_id = coalesce(?, stripe_customer_id), stripe_subscription_id = coalesce(?, stripe_subscription_id), updated_at = ?

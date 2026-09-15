@@ -1,3 +1,5 @@
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
+import { Modal } from './Modal';
 import React, { useState } from 'react';
 import { api } from '../services/api';
 import { 
@@ -23,6 +25,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   onClose,
   onImportComplete
 }) => {
+  const { tr: ui } = useUiLanguage();
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +91,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
         origin: { y: 0.6 }
       });
 
-      onImportComplete();
+      await onImportComplete();
       onClose();
     } catch (err: any) {
       setError(err.message || 'Failed to import links.');
@@ -98,7 +101,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+    <Modal open={isOpen} onClose={onClose} label={ui('One-Click Linktree Importer')} wide>
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-neutral-100 dark:border-white/5 flex items-center justify-between">
@@ -108,15 +111,14 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-neutral-900 dark:text-white">
-                One-Click Linktree Importer
-              </h2>
+                {ui("One-Click Linktree Importer")}</h2>
               <p className="text-xs text-neutral-500">
-                Migrate in seconds with 0% manual copy-pasting
-              </p>
+                {ui("Preview and choose links before importing")}</p>
             </div>
           </div>
           <button 
             onClick={onClose}
+            aria-label={ui('Close modal')}
             className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -129,10 +131,9 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
             <form onSubmit={handlePreview} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                  Linktree or Beacons Profile URL
-                </label>
+                  {ui("Linktree or Beacons Profile URL")}</label>
                 <div className="relative">
-                  <input
+                  <input aria-label={ui("Linktree or Beacons Profile URL")}
                     type="text"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
@@ -143,8 +144,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   />
                 </div>
                 <p className="text-[11px] text-neutral-400 mt-1.5">
-                  Supports Linktree, Beacons, and public bio profiles.
-                </p>
+                  {ui("Supports Linktree, Beacons, and public bio profiles.")}</p>
               </div>
 
               {error && (
@@ -162,12 +162,12 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Extracting Profile & Links...</span>
+                    <span>{ui("Extracting Profile & Links...")}</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span>Scan & Preview Links</span>
+                    <span>{ui("Scan & Preview Links")}</span>
                   </>
                 )}
               </button>
@@ -193,8 +193,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     </p>
                   )}
                   <span className="inline-block mt-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
-                    {previewData.links.length} links discovered
-                  </span>
+                    {previewData.links.length} {ui("links discovered")}</span>
                 </div>
               </div>
 
@@ -206,13 +205,13 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   onChange={(e) => setUpdateProfileInfo(e.target.checked)}
                   className="rounded border-neutral-300 text-neutral-900 focus:ring-0 cursor-pointer"
                 />
-                <span>Also import avatar and bio info into profile</span>
+                <span>{ui("Also import avatar and bio info into profile")}</span>
               </label>
 
               {/* Links Selector */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-neutral-500">
-                  <span>Select links to import:</span>
+                  <span>{ui("Select links to import:")}</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -269,8 +268,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   onClick={() => setPreviewData(null)}
                   className="py-2 px-3 rounded-xl border border-neutral-200 dark:border-white/10 text-xs font-semibold hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer"
                 >
-                  Back
-                </button>
+                  {ui("Back")}</button>
                 <button
                   type="button"
                   onClick={handleCommit}
@@ -280,12 +278,12 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   {importing ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Importing {selectedIndices.size} Links...</span>
+                      <span>{ui("Importing")}{selectedIndices.size} {ui("Links...")}</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-4 h-4" />
-                      <span>Import {selectedIndices.size} Links into LIINX</span>
+                      <span>{ui("Import")}{selectedIndices.size} {ui("Links into LIINX")}</span>
                     </>
                   )}
                 </button>
@@ -294,6 +292,6 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

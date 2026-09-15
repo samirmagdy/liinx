@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
 import { Switch, Route, useLocation } from 'wouter';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { useLanguage } from './context/LanguageContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -10,15 +11,21 @@ import { TemplatesSection } from './components/TemplatesSection';
 import { PricingSection } from './components/PricingSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
-import { BuilderStudio } from './components/BuilderStudio';
+const BuilderStudio = lazy(() => import('./components/BuilderStudio').then(module => ({ default: module.BuilderStudio })));
 import { PublicBioView } from './components/PublicBioView';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
 import { CreatorProfile } from './types';
-import { api } from './services/api';
+import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
+import { PageMetadata } from './components/PageMetadata';
+
+function chooseTemplate(profile: CreatorProfile, navigate: (path: string) => void) {
+  const theme = encodeURIComponent(profile.themeId);
+  navigate(authStorage.getToken() ? `/studio?template=${theme}` : `/register?template=${theme}`);
+}
 
 function HomePage() {
   const [, setLocation] = useLocation();
@@ -32,11 +39,11 @@ function HomePage() {
   };
 
   const handleSelectTemplate = (profile: CreatorProfile) => {
-    setLocation(`/@${profile.username}`);
+    chooseTemplate(profile, setLocation);
   };
 
-  const handleSelectPlan = () => {
-    setLocation('/register');
+  const handleSelectPlan = (plan: string, interval: 'month' | 'year') => {
+    setLocation(`/register?plan=${plan}&interval=${interval}`);
   };
 
   return (
@@ -65,16 +72,20 @@ function HomePage() {
 
 function StudioPage() {
   const [, setLocation] = useLocation();
+  const { user, isLoading } = useAuth();
+  const { tr } = useLanguage();
+  if (isLoading) return <p role="status" className="p-8">{tr('Loading your profile…')}</p>;
+  if (!user) return <div className="p-8 text-center"><h1>{tr('Sign in to edit your page')}</h1><a href="/login" className="inline-block p-4 underline">{tr('Sign In')}</a></div>;
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="builder" />
       <main className="flex-1">
-        <BuilderStudio
+        <Suspense fallback={<p role="status" className="p-8">{tr('Loading your profile…')}</p>}><BuilderStudio
           onViewFullscreen={(profile) => {
             setLocation(`/@${profile.username}`);
           }}
-        />
+        /></Suspense>
       </main>
       <Footer onSelectView={(v) => {
         if (v === 'home') setLocation('/');
@@ -93,7 +104,7 @@ function TemplatesPage() {
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="templates" />
       <main className="flex-1 pt-8">
-        <TemplatesSection onSelectTemplate={(p) => setLocation(`/@${p.username}`)} />
+        <TemplatesSection headingLevel={1} onSelectTemplate={(p) => chooseTemplate(p, setLocation)} />
         <ComparisonSection />
       </main>
       <Footer onSelectView={(v) => {
@@ -109,31 +120,19 @@ function TemplatesPage() {
 function PricingPage() {
   const [, setLocation] = useLocation();
 
-  const handleSelectPlan = async (planId: string) => {
-    try {
-      const cleanPlan = planId.toLowerCase() as 'free' | 'pro' | 'studio';
-      if (cleanPlan === 'pro' || cleanPlan === 'studio') {
-        const res = await api.billing.createCheckoutSession(cleanPlan);
-        if (res.url) {
-          window.location.href = res.url;
-          return;
-        }
-      }
-      setLocation('/studio');
-    } catch (err: any) {
-      if (err?.message?.includes('authenticated') || err?.status === 401) {
-        setLocation(`/register?plan=${encodeURIComponent(planId)}`);
-      } else {
-        alert(err?.message || 'Unable to initiate Stripe checkout. Please try again or log in.');
-      }
-    }
+  const { user } = useAuth();
+  const handleSelectPlan = async (planId: string, interval: 'month' | 'year') => {
+    if (!user) { setLocation('/register?plan=' + planId + '&interval=' + interval); return; }
+    if (planId === 'free') { setLocation('/studio'); return; }
+    const res = await api.billing.createCheckoutSession(planId as 'pro' | 'studio', interval);
+    window.location.assign(res.url);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="pricing" />
       <main className="flex-1 pt-8">
-        <PricingSection onSelectPlan={handleSelectPlan} />
+        <PricingSection headingLevel={1} onSelectPlan={handleSelectPlan} />
         <ComparisonSection />
         <FaqSection />
       </main>
@@ -156,68 +155,22 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+function CrashFallback() {
+  const { tr } = useLanguage();
+  return <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-5">
+    <h1 className="text-2xl font-bold">{tr('Something went wrong')}</h1>
+    <p>{tr('Reload this page to try again.')}</p>
+    <a className="underline p-3" href="/">{tr('Back to Home')}</a>
+    <button className="rounded-full bg-neutral-900 text-white px-6 py-3" onClick={() => window.location.reload()}>{tr('Reload Page')}</button>
+  </main>;
+}
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  declare props: ErrorBoundaryProps;
   state: ErrorBoundaryState = { hasError: false, error: null };
-  props: ErrorBoundaryProps;
-
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.props = props;
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    if (error?.message && error.message.includes('removeChild')) {
-      console.warn('Suppressed third-party DOM mutation error:', error.message);
-      return { hasError: false, error: null };
-    }
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (error?.message && error.message.includes('removeChild')) {
-      return;
-    }
-    console.error('Unhandled Application Error:', error, errorInfo);
-  }
-
+  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
+  componentDidCatch(error: Error, info: React.ErrorInfo) { console.error('Application error', error, info); }
   render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] p-6 text-neutral-900">
-          <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-neutral-200 shadow-xl text-center space-y-5">
-            <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-white flex items-center justify-center mx-auto text-lg font-bold">
-              LX
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold text-neutral-900">Something went wrong</h2>
-              <p className="text-xs text-neutral-500 leading-relaxed">
-                An unexpected error occurred while loading this view.
-              </p>
-              {this.state.error?.message && (
-                <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl text-xs font-mono text-left text-neutral-700 overflow-x-auto">
-                  {this.state.error.message}
-                </div>
-              )}
-            </div>
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={() => window.location.href = '/'}
-                className="px-4 py-2.5 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer"
-              >
-                Back to Home
-              </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-5 py-2.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer"
-              >
-                Reload Page
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
+    return this.state.hasError ? <LanguageProvider><CrashFallback /></LanguageProvider> : this.props.children;
   }
 }
 
@@ -245,6 +198,7 @@ export default function App() {
     <ErrorBoundary>
       <LanguageProvider>
         <AuthProvider>
+          <PageMetadata />
           <Switch>
             {/* Core application routes */}
             <Route path="/" component={HomePage} />

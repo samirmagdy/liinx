@@ -239,7 +239,7 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_api_keys_profile ON api_keys(profile_id);
   `);
 
-  seedDefaultData();
+  if (process.env.NODE_ENV === 'test' || process.env.SEED_DEMO === 'true') seedDefaultData();
 }
 
 function seedDefaultData() {

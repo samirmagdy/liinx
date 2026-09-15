@@ -1,7 +1,12 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { randomBytes } from 'node:crypto';
+import 'dotenv/config';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'liinx_production_jwt_secret_key_8492048';
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32)) {
+  throw new Error('Production requires a JWT_SECRET of at least 32 characters.');
+}
+const JWT_SECRET = process.env.JWT_SECRET || randomBytes(48).toString('hex');
 
 export interface AuthPayload {
   userId: string;

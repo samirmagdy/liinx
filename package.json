@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "tsx watch server/server.ts",
-    "build": "vite build",
+    "build": "vite build && tsx scripts/prerender.tsx",
     "start": "NODE_ENV=production tsx server/server.ts",
     "test": "vitest run --no-file-parallelism",
     "clean": "rm -rf dist server.js",
