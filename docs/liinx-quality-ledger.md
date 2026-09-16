@@ -598,3 +598,49 @@ Baseline commit: `65e20e0` (`feat: implement account recovery, password reset, a
 ### Next eligible prompt
 
 `08 — Authoritative editor state`
+
+## Task 08 — Authoritative editor state
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline commit: `5b2fd6b` (`refactor: centralize subscription feature checks with new entitlements module`) on `main`. The worktree was clean at task start; Task 07 was already committed and was not reverted. Task 08 changes remain uncommitted.
+
+### Scope and changed files
+
+- `src/components/BuilderStudio.tsx`: removes the mutable `pages` state copy. Pages are now derived exclusively from `profile.pages`; page create/edit/reorder/delete operations update that authoritative profile state. Profile load, profile creation, profile switching, and importer reload reset the selected page to the new profile's home/first page when necessary. Profile switches also reset save status/error indicators after a successful reload.
+
+### Findings and behavior
+
+- The prior component kept both `profile.pages` and local `pages`, updating both in some handlers and only one in others. This could leave page tabs, block filtering, and preview out of sync.
+- `activePage` is derived from `profile.pages` and `activePageId`; the API receives the selected page ID only from this derived current-profile selection. Switching profiles explicitly selects the new profile's home/first page, preventing the previous profile's page ID from leaking into subsequent block creation/reorder requests.
+- Page reorder now changes only the authoritative page array and does not reconstruct or filter `profile.blocks`, preserving blocks belonging to every page. Existing block reorder logic maps only the visible block IDs and leaves other-page blocks untouched.
+- Page editor fields continue to derive from the active page selector, so edits update the same page object represented by tabs and preview. The preview intentionally receives the selected page projection while the underlying profile retains all pages.
+- No state-library migration or unrelated feature rewrite was introduced.
+
+### Acceptance criteria
+
+- PASS — Create two pages, create/edit a third, switch profiles, and return at the API/state boundary. Existing multi-page/profile journeys pass; component state now derives pages from the loaded profile and resets selection on profile changes.
+- PASS — All page tabs and blocks remain represented without a reload after local create/edit/reorder updates. There is no second mutable page collection; updates write through `profile.pages`.
+- PASS — Reordering one page does not remove another page's blocks from state. The page reorder handler updates only `profile.pages`; existing API/block ordering tests remain green.
+- PASS — Requests do not carry a stale page ID after profile changes. Profile switch/create/import handlers reset `activePageId`, and block creation uses the derived active page.
+- PASS — Type/build and relevant API/editor journeys. Evidence: lint, build, backend dynamic, concurrency, multiprofile, and API tests.
+- NOT RUN — Actual browser interaction for the multi-page journey; the required in-app browser Node REPL was not exposed in this session, so source inspection and API evidence are not represented as browser proof.
+
+### Exact commands and outcomes
+
+- `npm run lint` — PASS, `tsc --noEmit` exited 0.
+- `task08_dir=$(mktemp -d /tmp/liinx-task-08-XXXXXX) && mkdir -p "$task08_dir/uploads" && DATABASE_PATH="$task08_dir/liinx.db" UPLOADS_DIR="$task08_dir/uploads" NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts tests/multiprofile.test.ts tests/api.test.ts` — PASS, 4 files / 37 tests.
+- `task08_dir=$(mktemp -d /tmp/liinx-task-08-full-XXXXXX) && mkdir -p "$task08_dir/uploads" && DATABASE_PATH="$task08_dir/liinx.db" UPLOADS_DIR="$task08_dir/uploads" NODE_ENV=test npm test -- --run` — PASS, 28 files / 209 tests in 23.45s.
+- `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS, no whitespace errors.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest and the existing SQLite global initializer cover API-level page/profile/block flows using disposable database/uploads paths. No production data was used.
+- No dedicated React component test harness or browser runtime was available, so the no-reload UI acceptance remains externally unverified.
+- `profile.page` remains part of the shared API shape for preview/public compatibility, but the editor's active-page behavior is driven by `activePageId` plus derived `profile.pages`; a future contract cleanup may remove redundant selected-page payload state after consumer review.
+- SaveQueue behavior across rapid profile switching is guarded by flushing before switching, but multi-tab/browser concurrent editing remains outside this task.
+
+### Next eligible prompt
+
+`09 — Autosave and concurrent editing`

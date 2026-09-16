@@ -115,7 +115,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [showAddMenu, setShowAddMenu] = useState(false);
-  const [pages, setPages] = useState(profile.pages || []);
   const [activePageId, setActivePageId] = useState(profile.page?.id || profile.pages?.find(page => page.isHome)?.id || '');
   const [newPageTitle, setNewPageTitle] = useState('');
   const [newPageSlug, setNewPageSlug] = useState('');
@@ -171,6 +170,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [createProfileError, setCreateProfileError] = useState<string | null>(null);
 
+  const pages = profile.pages || [];
+  const initialPageId = (nextProfile: CreatorProfile) => nextProfile.pages?.find(page => page.isHome)?.id || nextProfile.pages?.[0]?.id || '';
+
   const loadProfilesList = () => {
     api.studio.getProfiles()
       .then(res => {
@@ -194,6 +196,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         authStorage.setToken(res.token);
         const newLiveProfile = await api.studio.getProfile();
         setProfile(newLiveProfile);
+        setActivePageId(initialPageId(newLiveProfile));
+        setSaveStatus('saved');
+        setSaveErrorBanner(null);
         const th = resolveTheme(newLiveProfile.themeId, newLiveProfile.customTheme);
         setCustomTheme(th);
         setGaInput(newLiveProfile.gaMeasurementId || '');
@@ -222,6 +227,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         authStorage.setToken(res.token);
         const newLiveProfile = await api.studio.getProfile();
         setProfile(newLiveProfile);
+        setActivePageId(initialPageId(newLiveProfile));
+        setSaveStatus('saved');
+        setSaveErrorBanner(null);
         const th = resolveTheme(newLiveProfile.themeId, newLiveProfile.customTheme);
         setCustomTheme(th);
         setShowNewProfileModal(false);
@@ -338,8 +346,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         }
         setLoadState('ready');
         setProfile(liveProfile);
-        setPages(liveProfile.pages || []);
-        setActivePageId(liveProfile.pages?.find(page => page.isHome)?.id || liveProfile.pages?.[0]?.id || '');
+        setActivePageId(initialPageId(liveProfile));
         setGaInput(liveProfile.gaMeasurementId || '');
         setMetaPixelInput(liveProfile.metaPixelId || '');
         setCustomDomainInput(liveProfile.customDomain || '');
@@ -358,11 +365,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
     loadProfilesList();
   }, []);
-
-  useEffect(() => {
-    if (profile.pages) setPages(profile.pages);
-    if (!activePageId && profile.pages?.length) setActivePageId(profile.pages.find(page => page.isHome)?.id || profile.pages[0].id);
-  }, [profile.id, profile.pages]);
 
   useEffect(() => {
     const page = pages.find(item => item.id === activePageId);
@@ -430,6 +432,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       });
       const refreshed = await api.studio.getProfile();
       setProfile(refreshed);
+      if (!refreshed.pages?.some(item => item.id === activePageId)) setActivePageId(initialPageId(refreshed));
       const status = await api.instagram.getStatus();
       setInstagramStatus(status);
     } catch (err: any) {
@@ -650,7 +653,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     if (!title || !slug) return setPageManagerError(ui('Enter a page title and URL slug.'));
     try {
       const result = await api.studio.createPage({ title, slug });
-      setPages(previous => [...previous, result.page]);
       setProfile(previous => ({ ...previous, pages: [...(previous.pages || []), result.page] }));
       setActivePageId(result.page.id);
       setNewPageTitle('');
@@ -667,7 +669,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     try {
       await api.studio.deletePage(pageId);
       const nextPages = pages.filter(item => item.id !== pageId);
-      setPages(nextPages);
       if (activePageId === pageId) setActivePageId(nextPages.find(item => item.isHome)?.id || nextPages[0]?.id || '');
       const refreshed = await api.studio.getProfile();
       setProfile(refreshed);
@@ -688,7 +689,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     try {
       await api.studio.updatePage(activePage.id, { title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished });
       const updated = { ...activePage, title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished };
-      setPages(previous => previous.map(page => page.id === activePage.id ? updated : page));
       setProfile(previous => ({ ...previous, pages: (previous.pages || []).map(page => page.id === activePage.id ? updated : page) }));
       setPageManagerError(null);
     } catch (error: any) {
@@ -706,7 +706,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     [reordered[index], reordered[nextIndex]] = [reordered[nextIndex], reordered[index]];
     try {
       await api.studio.reorderPages(reordered.map(page => page.id));
-      setPages(reordered.map((page, sortOrder) => ({ ...page, sortOrder })));
+      setProfile(previous => ({ ...previous, pages: reordered.map((page, sortOrder) => ({ ...page, sortOrder })) }));
     } catch (error: any) {
       setPageManagerError(friendlyErrorMessage(error, ui('Could not reorder pages.')));
     }
@@ -2914,6 +2914,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           try {
             const liveProfile = await api.studio.getProfile();
             setProfile(liveProfile);
+            if (!liveProfile.pages?.some(item => item.id === activePageId)) setActivePageId(initialPageId(liveProfile));
             const th = resolveTheme(liveProfile.themeId, liveProfile.customTheme);
             setCustomTheme(th);
           } catch (err) {
