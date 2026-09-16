@@ -2113,7 +2113,7 @@ Baseline: branch `main`, commit `9f91745` at task start. The worktree was clean;
 
 ### Implementation commit
 
-`9efbff79767916e25170f1b1497ae879b7419aca` — `feat: complete download block and file lifecycle`.
+`818b5c0bdd7ba79ee7ac831684bceb3ff6fe687c` — `feat: complete download block and file lifecycle` (implementation and ledger entry).
 
 ### Unresolved risks and dependencies
 
