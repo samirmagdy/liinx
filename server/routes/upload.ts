@@ -85,6 +85,7 @@ const uploadFields = upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'file', maxCount: 1 }
 ]);
+const documentUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
 const uploadAttempts = new Map<string, { count: number; resetAt: number }>();
 function uploadRateLimited(key: string): boolean {
@@ -155,4 +156,21 @@ uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', 
       mimeType: detected.mime
     });
   });
+});
+
+uploadRouter.post('/api/upload/file', requireAuth, sharedRateLimit({ name: 'file-upload', limit: 20, windowMs: 60 * 60 * 1000 }), documentUpload.single('file'), (req, res) => {
+  const file = req.file;
+  const allowed = new Set(['application/pdf', 'application/zip', 'application/x-zip-compressed', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4']);
+  if (!file || !allowed.has(file.mimetype)) return res.status(400).json({ error: 'Unsupported file type. Use PDF, ZIP, TXT, MP3, WAV, or MP4.' });
+  const extension = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '') || '.bin';
+  const safeFilename = `file_${Date.now()}-${crypto.randomBytes(8).toString('hex')}${extension}`;
+  try {
+    fs.writeFileSync(path.join(uploadsDir, safeFilename), file.buffer);
+    const fileUrl = `/uploads/${safeFilename}`;
+    db.prepare('INSERT INTO uploaded_files (path, owner_user_id, created_at) VALUES (?, ?, ?)').run(fileUrl, (req as any).user.userId, Date.now());
+    return res.status(201).json({ success: true, url: fileUrl, filename: safeFilename, originalName: file.originalname, size: file.size, mimeType: file.mimetype });
+  } catch (error) {
+    console.error('Failed to write uploaded file:', error);
+    return res.status(500).json({ error: 'Failed to store uploaded file.' });
+  }
 });

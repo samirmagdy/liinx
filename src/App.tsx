@@ -72,8 +72,8 @@ function HomePage() {
   );
 }
 
-function PublicProfilePage({ username }: { username: string }) {
-  return <PublicBioView username={username} onBackToStudio={() => window.location.href = '/studio'} />;
+function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?: string }) {
+  return <PublicBioView username={username} pageSlug={pageSlug} onBackToStudio={() => window.location.href = '/studio'} />;
 }
 
 function StudioPage() {
@@ -309,10 +309,21 @@ export default function App() {
             <Route path="/studio" component={StudioPage} />
 
             {/* Dynamic Public Bio Pages */}
+            <Route path="/@:username/:pageSlug">
+              {(params) => <PublicProfilePage username={params.username} pageSlug={params.pageSlug} />}
+            </Route>
             <Route path="/@:username">
               {(params) => (
                 <PublicProfilePage username={params.username} />
               )}
+            </Route>
+
+            <Route path="/:username/:pageSlug">
+              {(params) => {
+                const clean = params.username.toLowerCase();
+                if (RESERVED_USERNAMES.includes(clean as any)) return <HomePage />;
+                return <PublicBioView username={params.username} pageSlug={params.pageSlug} onBackToStudio={() => window.location.href = '/studio'} />;
+              }}
             </Route>
 
             <Route path="/:username">

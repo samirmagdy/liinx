@@ -24,7 +24,10 @@ const MAX_PUBLIC_PROFILE_CACHE_ENTRIES = 10_000;
 
 export function invalidatePublicProfileCache(profileId: string) {
   const row = db.prepare('SELECT username FROM profiles WHERE id = ?').get(profileId) as { username?: string } | undefined;
-  if (row?.username) publicProfileCache.delete(row.username.toLowerCase());
+  if (row?.username) {
+    const prefix = `${row.username.toLowerCase()}:`;
+    for (const key of publicProfileCache.keys()) if (key === row.username.toLowerCase() || key.startsWith(prefix)) publicProfileCache.delete(key);
+  }
 }
 
 const publicProfileCachePurge = setInterval(() => {
@@ -59,13 +62,15 @@ const avatarUrlSchema = z.string().refine(value => {
 profilesRouter.get('/profiles/:username', (req, res) => {
   try {
     const cleanUsername = req.params.username.toLowerCase().trim();
+    const requestedSlug = typeof req.query.page === 'string' ? req.query.page.toLowerCase().trim() : 'home';
+    const cacheKey = `${cleanUsername}:${requestedSlug}`;
     if (process.env.NODE_ENV !== 'test') {
-      const cached = publicProfileCache.get(cleanUsername);
+      const cached = publicProfileCache.get(cacheKey);
       if (cached && cached.expiresAt > Date.now()) {
         res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
         return res.json(cached.payload);
       }
-      if (cached) publicProfileCache.delete(cleanUsername);
+      if (cached) publicProfileCache.delete(cacheKey);
     }
 
     const profile = db.prepare('SELECT * FROM profiles WHERE lower(username) = ?').get(cleanUsername) as any;
@@ -74,14 +79,26 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       return res.status(404).json({ error: `Creator profile @${cleanUsername} was not found.` });
     }
 
+    let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? AND published = 1 ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
+    if (pages.length === 0) {
+      const homeId = createId('page');
+      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+        .run(homeId, profile.id, profile.display_name || 'Home', Date.now(), Date.now());
+      db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
+      pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? AND published = 1 ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
+    }
+    const selectedPage = pages.find(page => page.slug === requestedSlug) || (requestedSlug === 'home' ? pages.find(page => page.isHome) : undefined);
+    if (!selectedPage) return res.status(404).json({ error: 'This page is not available.' });
+
     const now = Date.now();
     const blocks = db.prepare(`
       SELECT * FROM blocks 
       WHERE profile_id = ? 
+        AND (page_id = ? OR (page_id IS NULL AND ? = 1))
         AND (start_at IS NULL OR start_at <= ?) 
         AND (end_at IS NULL OR end_at >= ?)
       ORDER BY position ASC
-    `).all(profile.id, now, now) as any[];
+    `).all(profile.id, selectedPage.id, selectedPage.isHome ? 1 : 0, now, now) as any[];
 
     // Calculate total clicks for blocks
     const clickCounts = db.prepare(`
@@ -101,6 +118,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
 
       const baseBlock: any = {
         id: b.id,
+        pageId: b.page_id || selectedPage.id,
         type: b.type,
         title: b.title,
         url: b.url,
@@ -152,6 +170,8 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: safeJsonParse(profile.socials_json, []),
+      pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
+      page: { ...selectedPage, isHome: Boolean(selectedPage.isHome), published: Boolean(selectedPage.published) },
       blocks: formattedBlocks
     };
 
@@ -160,7 +180,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
         const oldestKey = publicProfileCache.keys().next().value;
         if (oldestKey) publicProfileCache.delete(oldestKey);
       }
-      publicProfileCache.set(cleanUsername, {
+      publicProfileCache.set(cacheKey, {
         expiresAt: Date.now() + PUBLIC_PROFILE_CACHE_TTL_MS,
         payload
       });
@@ -182,7 +202,8 @@ profilesRouter.get('/profiles/by-domain/:domain', (req, res) => {
     if (!profile) {
       return res.status(404).json({ error: `No profile mapped to custom domain ${domain}` });
     }
-    return res.redirect(307, `/api/profiles/${encodeURIComponent(profile.username)}`);
+    const pageQuery = typeof req.query.page === 'string' ? `?page=${encodeURIComponent(req.query.page)}` : '';
+    return res.redirect(307, `/api/profiles/${encodeURIComponent(profile.username)}${pageQuery}`);
   } catch (err: any) {
     console.error('Custom domain lookup error:', err);
     res.status(500).json({ error: 'Failed to lookup custom domain.' });
@@ -199,6 +220,14 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     }
 
     const blocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profile.id) as any[];
+    let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
+    if (pages.length === 0) {
+      const homeId = createId('page');
+      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+        .run(homeId, profile.id, profile.display_name || 'Home', Date.now(), Date.now());
+      db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
+      pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
+    }
 
     // Calculate real total clicks per block
     const clickCounts = db.prepare(`
@@ -217,6 +246,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 
       const baseBlock: any = {
         id: b.id,
+        pageId: b.page_id || pages.find(page => page.isHome)?.id || null,
         type: b.type,
         title: b.title,
         url: b.url,
@@ -262,6 +292,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: safeJsonParse(profile.socials_json, []),
+      pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
       blocks: formattedBlocks
     });
   } catch (err: any) {
@@ -607,8 +638,11 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
 
     db.prepare(`
       INSERT INTO profiles (
-        id, user_id, username, display_name, bio, avatar_url, category, theme_id, plan, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, user_id, username, display_name, bio, avatar_url, category, theme_id, plan,
+        hide_branding, ga_measurement_id, meta_pixel_id, custom_css, custom_font_url,
+        custom_theme_json, socials_json, share_title, share_description, share_image_url,
+        footer_logo_url, background_media_url, background_media_type, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       newProfileId,
       userId,
@@ -619,15 +653,32 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       duplicateSource?.category || 'Creator',
       duplicateSource?.theme_id || 'editorial-stone',
       userPlan,
+      duplicateSource?.hide_branding || 0,
+      null,
+      null,
+      duplicateSource?.custom_css || null,
+      duplicateSource?.custom_font_url || null,
+      duplicateSource?.custom_theme_json || null,
+      duplicateSource?.socials_json || null,
+      duplicateSource?.share_title || null,
+      duplicateSource?.share_description || null,
+      duplicateSource?.share_image_url || null,
+      duplicateSource?.footer_logo_url || null,
+      duplicateSource?.background_media_url || null,
+      duplicateSource?.background_media_type || null,
       now,
       now
     );
 
+    const homePageId = createId('page');
+    db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+      .run(homePageId, newProfileId, displayName, now, now);
+
     // Add starter block
     db.prepare(`
       INSERT INTO blocks (
-        id, profile_id, type, title, url, position, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        id, profile_id, type, title, url, position, page_id, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       createId('blk'),
       newProfileId,
@@ -635,15 +686,25 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       'My Website',
       'https://example.com',
       0,
+      homePageId,
       now,
       now
     );
 
     if (duplicateSource) {
       db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(newProfileId);
+      db.prepare('DELETE FROM pages WHERE profile_id = ? AND id != ?').run(newProfileId, homePageId);
       const sourceBlocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(duplicateSource.id) as any[];
-      const copyBlock = db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-      for (const block of sourceBlocks) copyBlock.run(createId('blk'), newProfileId, block.type, block.title, block.url, block.subtitle, block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at, block.extra_json, now, now);
+      const sourcePages = db.prepare('SELECT * FROM pages WHERE profile_id = ? ORDER BY sort_order ASC').all(duplicateSource.id) as any[];
+      const pageMap = new Map<string, string>();
+      const insertPage = db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      for (const sourcePage of sourcePages) {
+        const copiedId = sourcePage.is_home ? homePageId : createId('page');
+        pageMap.set(sourcePage.id, copiedId);
+        if (!sourcePage.is_home) insertPage.run(copiedId, newProfileId, sourcePage.slug, sourcePage.title, sourcePage.description, sourcePage.sort_order, 0, sourcePage.published, now, now);
+      }
+      const copyBlock = db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      for (const block of sourceBlocks) copyBlock.run(createId('blk'), newProfileId, block.type, block.title, block.url, block.subtitle, block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at, pageMap.get(block.page_id) || homePageId, block.extra_json, now, now);
     }
 
     // Sign new token for the newly created profile

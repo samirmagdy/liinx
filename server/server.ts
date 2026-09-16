@@ -11,6 +11,7 @@ import { analyticsRouter } from './routes/analytics.js';
 import { newsletterRouter } from './routes/newsletter.js';
 import { uploadRouter } from './routes/upload.js';
 import { formsRouter } from './routes/forms.js';
+import { pagesRouter } from './routes/pages.js';
 import { instagramRouter } from './routes/instagram.js';
 import { importerRouter } from './routes/importer.js';
 import { apiV1Router } from './routes/apiV1.js';
@@ -230,10 +231,10 @@ export function safeJsonForHtml(value: unknown): string {
     .replace(/\u2029/g, '\\u2029');
 }
 
-function sendProfileShell(res: express.Response, filePath: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null }, canonical: string) {
+function sendProfileShell(res: express.Response, filePath: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null }, canonical: string) {
   let html = fs.readFileSync(filePath, 'utf8');
-  const title = `${profile.display_name} (@${profile.username}) | LIINX`;
-  const description = profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
+  const title = profile.share_title || `${profile.display_name} (@${profile.username}) | LIINX`;
+  const description = profile.share_description || profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`)
@@ -243,7 +244,8 @@ function sendProfileShell(res: express.Response, filePath: string, profile: { us
     .replace(/<meta property="og:url" content="[^"]*"\s*\/>/i, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
     .replace(/<meta property="og:title" content="[^"]*"\s*\/>/i, `<meta property="og:title" content="${safeTitle}" />`)
     .replace(/<meta property="og:description" content="[^"]*"\s*\/>/i, `<meta property="og:description" content="${safeDescription}" />`)
-    .replace('</head>', `<script type="application/ld+json">${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, image: profile.avatar_url || undefined } })}</script></head>`);
+    .replace(/<meta property="og:image" content="[^"]*"\s*\/>/i, `<meta property="og:image" content="${escapeHtml(profile.share_image_url || profile.avatar_url || '')}" />`)
+    .replace('</head>', `<script type="application/ld+json">${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, image: profile.share_image_url || profile.avatar_url || undefined, mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, image: profile.avatar_url || undefined } })}</script></head>`);
   res.type('html').send(html);
 }
 
@@ -262,7 +264,7 @@ app.use((req, res, next) => {
         const indexFile = path.resolve(__dirname, '../dist/index.html');
         const distIndex = fs.existsSync(shellFile) ? shellFile : indexFile;
         if (acceptsHtml && fs.existsSync(distIndex)) {
-          const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url FROM profiles WHERE username = ?').get(profile.username) as any;
+          const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE username = ?').get(profile.username) as any;
           return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}/`) : res.sendFile(distIndex);
         }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}`;
@@ -285,6 +287,7 @@ app.use(analyticsRouter);
 // API Routes
 app.use('/api/auth', authRouter);
 app.use('/api', profilesRouter);
+app.use('/api', pagesRouter);
 app.use('/api', blocksRouter);
 app.use(newsletterRouter);
 app.use(uploadRouter);
@@ -370,11 +373,17 @@ export async function startServer() {
     }));
     app.get('*', (req, res) => {
       res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
-      const profileMatch = req.path.match(/^\/@([a-z0-9_]+)$/i);
+      const profileMatch = req.path.match(/^\/@([a-z0-9_]+)(?:\/([a-z0-9-]+))?$/i);
       if (profileMatch) {
-        const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
+        const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
         const profileShell = path.join(distDir, 'shell.html');
-        if (publicProfile && fs.existsSync(profileShell)) return sendProfileShell(res, profileShell, publicProfile, `https://${process.env.PUBLIC_DOMAIN || 'liinx.app'}/@${encodeURIComponent(publicProfile.username)}`);
+        if (publicProfile && fs.existsSync(profileShell)) {
+          const page = db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE lower(username) = ?) AND slug = ? AND published = 1').get(profileMatch[1].toLowerCase(), profileMatch[2] || 'home') as { title?: string; description?: string } | undefined;
+          if (page && !publicProfile.share_title) publicProfile.share_title = page.title;
+          if (page && !publicProfile.share_description) publicProfile.share_description = page.description || publicProfile.bio;
+          const canonical = `https://${process.env.PUBLIC_DOMAIN || 'liinx.app'}/@${encodeURIComponent(publicProfile.username)}${profileMatch[2] ? `/${encodeURIComponent(profileMatch[2])}` : ''}`;
+          return sendProfileShell(res, profileShell, publicProfile, canonical);
+        }
       }
       const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
       if (['/studio', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');

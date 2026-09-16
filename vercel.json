@@ -18,6 +18,10 @@
       "destination": "https://liinx-app.fly.dev/@:username"
     },
     {
+      "source": "/@:username/:pageSlug",
+      "destination": "https://liinx-app.fly.dev/@:username/:pageSlug"
+    },
+    {
       "source": "/robots.txt",
       "destination": "https://liinx-app.fly.dev/robots.txt"
     },

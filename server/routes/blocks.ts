@@ -6,6 +6,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 import { createId } from '../utils/ids.js';
 import bcrypt from 'bcryptjs';
+import { sharedRateLimit } from '../middleware/rateLimit.js';
 
 export const blocksRouter = Router();
 
@@ -29,6 +30,7 @@ const createBlockSchema = z.object({
   highlighted: z.boolean().optional(),
   startAt: z.number().finite().int().min(0).nullable().optional(),
   endAt: z.number().finite().int().min(0).nullable().optional(),
+  pageId: z.string().max(100).optional(),
   extra: z.record(z.string(), z.unknown()).optional()
 });
 
@@ -47,7 +49,7 @@ const updateBlockSchema = z.object({
 // Public content-gate verification. Protected content is deliberately returned
 // only after the password is checked server-side; it is never included in the
 // public profile response.
-blocksRouter.post('/content-gates/verify', (req, res) => {
+blocksRouter.post('/content-gates/verify', sharedRateLimit({ name: 'content-gate', limit: 10, windowMs: 15 * 60 * 1000 }), async (req, res) => {
   const { profileId, blockId, password } = req.body || {};
   if (typeof profileId !== 'string' || typeof blockId !== 'string' || typeof password !== 'string') {
     return res.status(400).json({ error: 'A valid access code is required.' });
@@ -56,7 +58,7 @@ blocksRouter.post('/content-gates/verify', (req, res) => {
   if (!row?.extra_json) return res.status(404).json({ error: 'This gated content is unavailable.' });
   let extra: any;
   try { extra = JSON.parse(row.extra_json); } catch { return res.status(500).json({ error: 'This gated content is corrupted.' }); }
-  if (!extra.passwordHash || !bcrypt.compareSync(password, extra.passwordHash)) return res.status(403).json({ error: 'The access code is not correct.' });
+  if (!extra.passwordHash || !(await bcrypt.compare(password, extra.passwordHash))) return res.status(403).json({ error: 'The access code is not correct.' });
   res.json({ unlocked: true, body: typeof extra.body === 'string' ? extra.body : '' });
 });
 
@@ -68,12 +70,22 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
-    const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, extra } = parse.data;
+    const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, pageId, extra } = parse.data;
     if (type === 'booking' && (!bookingUrl(url) || extra != null)) {
       return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
     }
     const profileId = req.user!.profileId;
-    const profile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(profileId) as { plan?: string } | undefined;
+    const profile = db.prepare('SELECT plan, display_name as displayName FROM profiles WHERE id = ?').get(profileId) as { plan?: string; displayName?: string } | undefined;
+    const selectedPage = pageId
+      ? db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(pageId, profileId) as { id: string } | undefined
+      : db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined;
+    if (!selectedPage && !pageId && profile) {
+      const homeId = createId('page');
+      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+        .run(homeId, profileId, profile.displayName || 'Home', Date.now(), Date.now());
+    }
+    const resolvedPage = selectedPage || (!pageId ? db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined : undefined);
+    if (!resolvedPage) return res.status(400).json({ error: 'The selected page does not belong to this profile.' });
     if (profile?.plan === 'free' && (startAt != null || endAt != null)) {
       return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
     }
@@ -81,13 +93,13 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
     const id = createId('blk');
 
     // Get current max position
-    const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ?').get(profileId) as { maxPos: number | null };
+    const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, resolvedPage.id) as { maxPos: number | null };
     const nextPos = (maxPosRow && maxPosRow.maxPos !== null) ? maxPosRow.maxPos + 1 : 0;
 
     db.prepare(`
       INSERT INTO blocks (
-        id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, extra_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       profileId,
@@ -101,6 +113,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       nextPos,
       startAt || null,
       endAt || null,
+      resolvedPage.id,
       prepareBlockExtra(type, extra),
       now,
       now
@@ -119,6 +132,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       startAt: startAt || null,
       endAt: endAt || null,
       position: nextPos,
+      pageId: resolvedPage.id,
       clicks: 0,
       ...(extra || {})
     });
@@ -131,22 +145,28 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
 // Reorder blocks (must precede parameterized /:id route)
 blocksRouter.put('/studio/blocks/reorder', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
-    const { blockIds } = req.body;
+    const { blockIds, pageId } = req.body;
     if (!Array.isArray(blockIds)) {
       return res.status(400).json({ error: 'blockIds array is required.' });
     }
 
     const profileId = req.user!.profileId;
-    const owned = db.prepare('SELECT id FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profileId) as { id: string }[];
+    const page = pageId ? db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(pageId, profileId) as { id: string } | undefined : undefined;
+    if (pageId && !page) return res.status(400).json({ error: 'The selected page does not belong to this profile.' });
+    const owned = page
+      ? db.prepare('SELECT id FROM blocks WHERE profile_id = ? AND page_id = ? ORDER BY position ASC').all(profileId, page.id) as { id: string }[]
+      : db.prepare('SELECT id FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profileId) as { id: string }[];
     const ownedIds = owned.map(block => block.id);
     if (blockIds.length !== ownedIds.length || new Set(blockIds).size !== blockIds.length || blockIds.some((id: string) => !ownedIds.includes(id))) {
       return res.status(400).json({ error: 'Please include every block exactly once when reordering.' });
     }
-    const updatePos = db.prepare('UPDATE blocks SET position = ? WHERE id = ? AND profile_id = ?');
+    const updatePos = page
+      ? db.prepare('UPDATE blocks SET position = ? WHERE id = ? AND profile_id = ? AND page_id = ?')
+      : db.prepare('UPDATE blocks SET position = ? WHERE id = ? AND profile_id = ?');
 
     const reorderTx = db.transaction(() => {
       blockIds.forEach((id: string, index: number) => {
-        updatePos.run(index, id, profileId);
+        page ? updatePos.run(index, id, profileId, page.id) : updatePos.run(index, id, profileId);
       });
     });
 

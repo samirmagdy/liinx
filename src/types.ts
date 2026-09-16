@@ -165,11 +165,25 @@ export interface CreatorProfile {
   pageRedirectUntil?: number | null;
   customTheme?: ThemeConfig;
   blocks: ProfileBlock[];
+  pages?: CreatorPage[];
+  page?: CreatorPage;
   stats?: {
     viewsThisMonth: string;
     ctr: string;
     totalClicks: string;
   };
+}
+
+export interface CreatorPage {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string | null;
+  sortOrder: number;
+  isHome: boolean;
+  published: boolean;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface TemplateItem {

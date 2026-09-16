@@ -78,7 +78,23 @@ export function initDatabase() {
       FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS pages (
+      id TEXT PRIMARY KEY,
+      profile_id TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      is_home INTEGER NOT NULL DEFAULT 0,
+      published INTEGER NOT NULL DEFAULT 1,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+      UNIQUE (profile_id, slug)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_blocks_profile_pos ON blocks(profile_id, position);
+    CREATE INDEX IF NOT EXISTS idx_pages_profile_order ON pages(profile_id, sort_order);
     CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles(username);
 
     CREATE TABLE IF NOT EXISTS link_clicks (
@@ -176,6 +192,11 @@ export function initDatabase() {
   }
 
   try {
+    db.exec("ALTER TABLE blocks ADD COLUMN page_id TEXT");
+  } catch (e) {}
+  db.exec("CREATE INDEX IF NOT EXISTS idx_blocks_page_pos ON blocks(page_id, position)");
+
+  try {
     db.exec("ALTER TABLE link_clicks ADD COLUMN utm_source TEXT");
   } catch (e) {}
 
@@ -266,6 +287,22 @@ export function initDatabase() {
     db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_custom_domain ON profiles(custom_domain)");
   } catch (e) {}
 
+  // Protect any content-gate blocks created before password hashing was added.
+  try {
+    const gates = db.prepare("SELECT id, extra_json FROM blocks WHERE type = 'content_gate' AND extra_json IS NOT NULL").all() as Array<{ id: string; extra_json: string }>;
+    const updateGate = db.prepare('UPDATE blocks SET extra_json = ?, updated_at = ? WHERE id = ?');
+    for (const gate of gates) {
+      const extra = JSON.parse(gate.extra_json) as Record<string, unknown>;
+      if (typeof extra.password === 'string' && extra.password && !extra.passwordHash) {
+        extra.passwordHash = bcrypt.hashSync(extra.password, 12);
+        delete extra.password;
+        updateGate.run(JSON.stringify(extra), Date.now(), gate.id);
+      }
+    }
+  } catch (e) {
+    if (process.env.NODE_ENV === 'production') console.error('Content gate migration failed:', e);
+  }
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS api_keys (
       id TEXT PRIMARY KEY,
@@ -309,7 +346,26 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_form_submissions_profile ON form_submissions(profile_id, created_at);
   `);
 
+  // Every profile has a stable home page. Existing blocks remain visible by
+  // assigning them to that page during migration; this is idempotent.
+  const ensureHomePages = db.transaction(() => {
+    const profiles = db.prepare('SELECT id, display_name FROM profiles').all() as Array<{ id: string; display_name: string }>;
+    const findHome = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1 LIMIT 1');
+    const insertPage = db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`);
+    const assignBlocks = db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL');
+    const now = Date.now();
+    for (const profile of profiles) {
+      let home = findHome.get(profile.id) as { id: string } | undefined;
+      if (!home) {
+        const id = `page_home_${profile.id}`;
+        insertPage.run(id, profile.id, profile.display_name || 'Home', now, now);
+        home = { id };
+      }
+      assignBlocks.run(home.id, profile.id);
+    }
+  });
   if (process.env.NODE_ENV === 'test' || process.env.SEED_DEMO === 'true') seedDefaultData();
+  ensureHomePages();
 }
 
 function seedDefaultData() {

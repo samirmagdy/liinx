@@ -176,11 +176,15 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
         now
       );
 
+      const homePageId = createId('page');
+      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+        .run(homePageId, profileId, displayName, now, now);
+
       // Starter link block
       db.prepare(`
         INSERT INTO blocks (
-          id, profile_id, type, title, url, subtitle, badge, highlighted, position, extra_json, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, profile_id, type, title, url, subtitle, badge, highlighted, position, page_id, extra_json, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         starterBlockId,
         profileId,
@@ -191,6 +195,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
         'NEW',
         1,
         0,
+        homePageId,
         null,
         now,
         now

@@ -1,4 +1,4 @@
-import { CreatorProfile, ThemeConfig, ProfileBlock } from '../types';
+import { CreatorProfile, CreatorPage, ThemeConfig, ProfileBlock } from '../types';
 import { friendlyErrorMessage } from '../utils/errors';
 
 let sessionToken: string | null = null;
@@ -80,11 +80,13 @@ export const api = {
   },
 
   profiles: {
-    getByUsername: async (username: string): Promise<CreatorProfile> => {
-      return request<CreatorProfile>(`/api/profiles/${encodeURIComponent(username)}`);
+    getByUsername: async (username: string, pageSlug?: string): Promise<CreatorProfile> => {
+      const query = pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : '';
+      return request<CreatorProfile>(`/api/profiles/${encodeURIComponent(username)}${query}`);
     },
-    getByCustomDomain: async (domain: string): Promise<CreatorProfile> => {
-      return request<CreatorProfile>(`/api/profiles/by-domain/${encodeURIComponent(domain)}`);
+    getByCustomDomain: async (domain: string, pageSlug?: string): Promise<CreatorProfile> => {
+      const query = pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : '';
+      return request<CreatorProfile>(`/api/profiles/by-domain/${encodeURIComponent(domain)}${query}`);
     }
   },
 
@@ -92,6 +94,11 @@ export const api = {
     getProfile: async (): Promise<CreatorProfile> => {
       return request<CreatorProfile>('/api/studio/profile');
     },
+    getPages: async (): Promise<{ pages: CreatorPage[] }> => request<{ pages: CreatorPage[] }>('/api/studio/pages'),
+    createPage: async (data: { slug: string; title: string; description?: string; published?: boolean }): Promise<{ page: CreatorPage }> => request<{ page: CreatorPage }>('/api/studio/pages', { method: 'POST', body: JSON.stringify(data) }),
+    updatePage: async (id: string, data: Partial<CreatorPage>): Promise<{ success: boolean }> => request<{ success: boolean }>(`/api/studio/pages/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deletePage: async (id: string): Promise<{ success: boolean }> => request<{ success: boolean }>(`/api/studio/pages/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    reorderPages: async (pageIds: string[]): Promise<{ success: boolean }> => request<{ success: boolean }>('/api/studio/pages/reorder', { method: 'PUT', body: JSON.stringify({ pageIds }) }),
     updateProfile: async (data: Partial<CreatorProfile>): Promise<{ success: boolean }> => {
       return request<{ success: boolean }>('/api/studio/profile', {
         method: 'PUT',
@@ -121,10 +128,10 @@ export const api = {
         method: 'DELETE'
       });
     },
-    reorderBlocks: async (blockIds: string[]): Promise<{ success: boolean }> => {
+    reorderBlocks: async (blockIds: string[], pageId?: string): Promise<{ success: boolean }> => {
       return request<{ success: boolean }>('/api/studio/blocks/reorder', {
         method: 'PUT',
-        body: JSON.stringify({ blockIds })
+        body: JSON.stringify({ blockIds, pageId })
       });
     },
     getAnalytics: async () => {
@@ -163,6 +170,13 @@ export const api = {
       if (!res.ok) {
         throw new Error(data.error || 'Failed to upload image');
       }
+      return data;
+    },
+    uploadFile: async (file: File): Promise<{ success: boolean; url: string; originalName: string }> => {
+      const form = new FormData(); form.append('file', file);
+      const response = await fetch(`${API_BASE_URL}/api/upload/file`, { method: 'POST', body: form, credentials: 'include', headers: authStorage.getToken() ? { Authorization: `Bearer ${authStorage.getToken()}` } : undefined });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data) throw Object.assign(new Error(data?.error || 'File upload failed'), { status: response.status });
       return data;
     },
     getProfiles: async () => {

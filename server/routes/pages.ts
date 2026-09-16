@@ -1,0 +1,92 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import { db } from '../db.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { createId } from '../utils/ids.js';
+import { invalidatePublicProfileCache } from './profiles.js';
+
+export const pagesRouter = Router();
+
+const pageSchema = z.object({
+  slug: z.string().trim().min(1).max(40).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Page slug may only contain lowercase letters, numbers, and hyphens.'),
+  title: z.string().trim().min(1).max(80),
+  description: z.string().trim().max(240).nullable().optional(),
+  published: z.boolean().optional()
+});
+
+const pageUpdateSchema = pageSchema.partial().extend({ sortOrder: z.number().int().min(0).optional() });
+
+function pageForUser(pageId: string, userId: string) {
+  return db.prepare(`
+    SELECT pages.* FROM pages
+    JOIN profiles ON profiles.id = pages.profile_id
+    WHERE pages.id = ? AND profiles.user_id = ?
+  `).get(pageId, userId) as any;
+}
+
+function invalidateProfile(profileId: string) {
+  invalidatePublicProfileCache(profileId);
+}
+
+pagesRouter.get('/studio/pages', requireAuth, (req: AuthenticatedRequest, res) => {
+  const pages = db.prepare(`SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, created_at as createdAt, updated_at as updatedAt FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC`).all(req.user!.profileId) as any[];
+  res.json({ pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })) });
+});
+
+pagesRouter.post('/studio/pages', requireAuth, (req: AuthenticatedRequest, res) => {
+  const parsed = pageSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+  const profileId = req.user!.profileId;
+  const existing = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND slug = ?').get(profileId, parsed.data.slug);
+  if (existing) return res.status(409).json({ error: 'A page with this slug already exists.' });
+  const max = db.prepare('SELECT COALESCE(MAX(sort_order), -1) as value FROM pages WHERE profile_id = ?').get(profileId) as { value: number };
+  const now = Date.now();
+  const page = { id: createId('page'), profileId, slug: parsed.data.slug, title: parsed.data.title, description: parsed.data.description || null, sortOrder: max.value + 1, isHome: false, published: parsed.data.published !== false, createdAt: now, updatedAt: now };
+  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`).run(page.id, profileId, page.slug, page.title, page.description, page.sortOrder, page.published ? 1 : 0, now, now);
+  invalidateProfile(profileId);
+  res.status(201).json({ page });
+});
+
+pagesRouter.put('/studio/pages/reorder', requireAuth, (req: AuthenticatedRequest, res) => {
+  const ids = req.body?.pageIds;
+  if (!Array.isArray(ids) || ids.length === 0 || new Set(ids).size !== ids.length) return res.status(400).json({ error: 'pageIds must include every page exactly once.' });
+  const owned = db.prepare('SELECT id FROM pages WHERE profile_id = ? ORDER BY sort_order ASC').all(req.user!.profileId) as Array<{ id: string }>;
+  const ownedIds = owned.map(page => page.id);
+  if (ids.length !== ownedIds.length || ids.some((id: unknown) => typeof id !== 'string' || !ownedIds.includes(id))) return res.status(400).json({ error: 'pageIds must include every page exactly once.' });
+  const home = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(req.user!.profileId) as { id: string } | undefined;
+  if (home && ids[0] !== home.id) return res.status(400).json({ error: 'The home page must remain first.' });
+  const update = db.prepare('UPDATE pages SET sort_order = ?, updated_at = ? WHERE id = ? AND profile_id = ?');
+  const now = Date.now();
+  db.transaction(() => ids.forEach((id: string, index: number) => update.run(index, now, id, req.user!.profileId)))();
+  invalidateProfile(req.user!.profileId);
+  res.json({ success: true });
+});
+
+pagesRouter.put('/studio/pages/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+  const page = pageForUser(req.params.id, req.user!.userId);
+  if (!page) return res.status(404).json({ error: 'Page not found.' });
+  const parsed = pageUpdateSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+  if (page.is_home && parsed.data.slug && parsed.data.slug !== 'home') return res.status(400).json({ error: 'The home page slug cannot be changed.' });
+  if (parsed.data.slug && parsed.data.slug !== page.slug) {
+    const duplicate = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND slug = ? AND id != ?').get(page.profile_id, parsed.data.slug, page.id);
+    if (duplicate) return res.status(409).json({ error: 'A page with this slug already exists.' });
+  }
+  const next = { slug: page.is_home ? 'home' : (parsed.data.slug ?? page.slug), title: parsed.data.title ?? page.title, description: parsed.data.description === undefined ? page.description : parsed.data.description, published: page.is_home ? true : (parsed.data.published === undefined ? Boolean(page.published) : parsed.data.published), sortOrder: parsed.data.sortOrder ?? page.sort_order };
+  db.prepare('UPDATE pages SET slug = ?, title = ?, description = ?, published = ?, sort_order = ?, updated_at = ? WHERE id = ? AND profile_id = ?').run(next.slug, next.title, next.description || null, next.published ? 1 : 0, next.sortOrder, Date.now(), page.id, page.profile_id);
+  invalidateProfile(page.profile_id);
+  res.json({ success: true });
+});
+
+pagesRouter.delete('/studio/pages/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+  const page = pageForUser(req.params.id, req.user!.userId);
+  if (!page) return res.status(404).json({ error: 'Page not found.' });
+  if (page.is_home) return res.status(400).json({ error: 'The home page cannot be deleted.' });
+  const home = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(page.profile_id) as { id: string };
+  db.transaction(() => {
+    db.prepare('UPDATE blocks SET page_id = ? WHERE page_id = ? AND profile_id = ?').run(home.id, page.id, page.profile_id);
+    db.prepare('DELETE FROM pages WHERE id = ? AND profile_id = ?').run(page.id, page.profile_id);
+  })();
+  invalidateProfile(page.profile_id);
+  res.json({ success: true });
+});

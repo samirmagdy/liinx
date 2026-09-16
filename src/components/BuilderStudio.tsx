@@ -69,6 +69,35 @@ interface BuilderStudioProps {
   onViewFullscreen: (profile: CreatorProfile, theme: ThemeConfig) => void;
 }
 
+type StructuredEditorKind = 'gallery' | 'carousel' | 'faq' | 'testimonials' | 'form';
+
+function StructuredItemsEditor({ kind, value, onChange, onUpload, ui }: { kind: StructuredEditorKind; value: any[]; onChange: (value: any[]) => void; onUpload?: (file: File, index: number) => void; ui: (value: string) => string }) {
+  const items = Array.isArray(value) ? value : [];
+  const createItem = () => kind === 'form'
+    ? { name: `field_${items.length + 1}`, label: 'New field', type: 'text', required: false }
+    : kind === 'faq'
+      ? { id: `item-${Date.now()}`, question: 'Question', answer: 'Answer' }
+      : kind === 'testimonials'
+        ? { id: `item-${Date.now()}`, quote: 'A great experience.', name: 'Client name' }
+        : { id: `item-${Date.now()}`, imageUrl: '', alt: '', caption: '', title: '' };
+  const update = (index: number, key: string, value: unknown) => onChange(items.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item));
+  const remove = (index: number) => onChange(items.filter((_, itemIndex) => itemIndex !== index));
+  const move = (index: number, direction: -1 | 1) => { const next = index + direction; if (next < 0 || next >= items.length) return; const copy = [...items]; [copy[index], copy[next]] = [copy[next], copy[index]]; onChange(copy); };
+  return <div className="sm:col-span-2 space-y-2 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+    <div className="flex items-center justify-between"><span className="text-[11px] font-bold text-neutral-700">{ui(kind === 'form' ? 'Form fields' : 'Items')}</span><button type="button" onClick={() => onChange([...items, createItem()])} className="rounded-lg border border-neutral-300 px-2 py-1 text-[11px] font-semibold hover:border-neutral-900">{ui('Add item')}</button></div>
+    {items.length === 0 && <p className="py-3 text-[11px] text-neutral-500">{ui('No items yet. Add one to begin.')}</p>}
+    {items.map((item, index) => <div key={item.id || item.name || index} className="grid grid-cols-1 gap-2 rounded-lg border border-neutral-200 bg-white p-2 sm:grid-cols-[1fr_auto]">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {kind === 'form' && <><input value={item.label || ''} onChange={e => update(index, 'label', e.target.value)} placeholder={ui('Label')} aria-label={ui('Field label')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /><input value={item.name || ''} onChange={e => update(index, 'name', e.target.value.replace(/[^a-zA-Z0-9_-]/g, '_'))} placeholder={ui('Field name')} aria-label={ui('Field name')} className="rounded-lg border border-neutral-200 px-2 py-1.5 font-mono text-[11px] text-neutral-900" /><select value={item.type || 'text'} onChange={e => update(index, 'type', e.target.value)} aria-label={ui('Field type')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"><option value="text">{ui('Text')}</option><option value="email">{ui('Email')}</option><option value="tel">{ui('Phone')}</option><option value="textarea">{ui('Long text')}</option></select><label className="flex items-center gap-2 text-[11px] text-neutral-700"><input type="checkbox" checked={Boolean(item.required)} onChange={e => update(index, 'required', e.target.checked)} />{ui('Required')}</label></>}
+        {kind === 'gallery' || kind === 'carousel' ? <><input value={item.imageUrl || ''} onChange={e => update(index, 'imageUrl', e.target.value)} placeholder={ui('Image URL')} aria-label={ui('Image URL')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900 sm:col-span-2" /><input type="file" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if (file && onUpload) onUpload(file, index); }} aria-label={ui('Upload image')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /><input value={item.alt || ''} onChange={e => update(index, 'alt', e.target.value)} placeholder={ui('Alt text')} aria-label={ui('Alt text')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /><input value={item.caption || ''} onChange={e => update(index, 'caption', e.target.value)} placeholder={ui('Caption')} aria-label={ui('Caption')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /></> : null}
+        {kind === 'faq' && <><input value={item.question || ''} onChange={e => update(index, 'question', e.target.value)} placeholder={ui('Question')} aria-label={ui('Question')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /><textarea value={item.answer || ''} onChange={e => update(index, 'answer', e.target.value)} placeholder={ui('Answer')} aria-label={ui('Answer')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /></>}
+        {kind === 'testimonials' && <><textarea value={item.quote || ''} onChange={e => update(index, 'quote', e.target.value)} placeholder={ui('Quote')} aria-label={ui('Quote')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /><input value={item.name || ''} onChange={e => update(index, 'name', e.target.value)} placeholder={ui('Name')} aria-label={ui('Name')} className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /></>}
+      </div>
+      <div className="flex items-start justify-end gap-1"><button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label={ui('Move item up')} className="rounded p-1 text-neutral-500 disabled:opacity-30">↑</button><button type="button" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label={ui('Move item down')} className="rounded p-1 text-neutral-500 disabled:opacity-30">↓</button><button type="button" onClick={() => remove(index)} aria-label={ui('Remove item')} className="rounded p-1 text-rose-600">×</button></div>
+    </div>)}
+  </div>;
+}
+
 export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   initialProfile,
   onViewFullscreen
@@ -87,6 +116,16 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [pages, setPages] = useState(profile.pages || []);
+  const [activePageId, setActivePageId] = useState(profile.page?.id || profile.pages?.find(page => page.isHome)?.id || '');
+  const [newPageTitle, setNewPageTitle] = useState('');
+  const [newPageSlug, setNewPageSlug] = useState('');
+  const [pageEditTitle, setPageEditTitle] = useState('');
+  const [pageEditSlug, setPageEditSlug] = useState('');
+  const [pageEditDescription, setPageEditDescription] = useState('');
+  const [pageEditPublished, setPageEditPublished] = useState(true);
+  const [isSavingPage, setIsSavingPage] = useState(false);
+  const [pageManagerError, setPageManagerError] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -227,6 +266,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [isSavingPageSettings, setIsSavingPageSettings] = useState(false);
   const [pageSettingsFeedback, setPageSettingsFeedback] = useState<string | null>(null);
   const [formSubmissions, setFormSubmissions] = useState<{ id: string; blockId: string; fields: Record<string, string>; createdAt: number }[]>([]);
+  const [showAllFormSubmissions, setShowAllFormSubmissions] = useState(false);
   const [isSavingStyling, setIsSavingStyling] = useState(false);
   const [stylingSavedFeedback, setStylingSavedFeedback] = useState(false);
   const [stylingError, setStylingError] = useState<string | null>(null);
@@ -299,6 +339,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         }
         setLoadState('ready');
         setProfile(liveProfile);
+        setPages(liveProfile.pages || []);
+        setActivePageId(liveProfile.pages?.find(page => page.isHome)?.id || liveProfile.pages?.[0]?.id || '');
         setGaInput(liveProfile.gaMeasurementId || '');
         setMetaPixelInput(liveProfile.metaPixelId || '');
         setCustomDomainInput(liveProfile.customDomain || '');
@@ -317,6 +359,20 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
     loadProfilesList();
   }, []);
+
+  useEffect(() => {
+    if (profile.pages) setPages(profile.pages);
+    if (!activePageId && profile.pages?.length) setActivePageId(profile.pages.find(page => page.isHome)?.id || profile.pages[0].id);
+  }, [profile.id, profile.pages]);
+
+  useEffect(() => {
+    const page = pages.find(item => item.id === activePageId);
+    if (!page) return;
+    setPageEditTitle(page.title);
+    setPageEditSlug(page.slug);
+    setPageEditDescription(page.description || '');
+    setPageEditPublished(page.published);
+  }, [activePageId, pages]);
 
   // Fetch real analytics or subscribers/instagram/api-keys when tabs change
   useEffect(() => {
@@ -518,6 +574,32 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
+  const handleBlockImageUpload = async (blockId: string, file: File, field = 'imageUrl', itemIndex?: number) => {
+    try {
+      setSaveStatus('saving');
+      const uploaded = await api.studio.uploadImage(file);
+      const block = profile.blocks.find(candidate => candidate.id === blockId) as any;
+      const current = block?.items || [];
+      const nextItems = itemIndex === undefined ? current : current.map((item: any, index: number) => index === itemIndex ? { ...item, [field]: uploaded.url } : item);
+      await api.studio.updateBlock(blockId, itemIndex === undefined ? { extra: { [field]: uploaded.url } } : { extra: { items: nextItems } });
+      setProfile(previous => ({ ...previous, blocks: previous.blocks.map(candidate => candidate.id === blockId ? { ...candidate, ...(itemIndex === undefined ? { [field]: uploaded.url } : { items: nextItems }) } as any : candidate) }));
+      setSaveStatus('saved');
+    } catch (error) {
+      setSaveStatus('error');
+      setSaveErrorBanner(friendlyErrorMessage(error, ui('Image upload failed')));
+    }
+  };
+
+  const handleBlockFileUpload = async (blockId: string, file: File) => {
+    try {
+      setSaveStatus('saving');
+      const uploaded = await api.studio.uploadFile(file);
+      await api.studio.updateBlock(blockId, { extra: { fileUrl: uploaded.url, downloadName: uploaded.originalName } });
+      setProfile(previous => ({ ...previous, blocks: previous.blocks.map(candidate => candidate.id === blockId ? { ...candidate, fileUrl: uploaded.url, downloadName: uploaded.originalName } as any : candidate) }));
+      setSaveStatus('saved');
+    } catch (error) { setSaveStatus('error'); setSaveErrorBanner(friendlyErrorMessage(error, ui('File upload failed'))); }
+  };
+
   // Social Links Operations
   const handleAddSocial = () => {
     if (!newSocialUrl.trim()) return;
@@ -557,11 +639,84 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
+  const createBlockForPage = (data: { type: string; title: string; [key: string]: any }) =>
+    api.studio.createBlock({ ...data, pageId: activePageId || undefined });
+
+  const activePage = pages.find(page => page.id === activePageId) || pages.find(page => page.isHome);
+  const visibleBlocks = activePage ? profile.blocks.filter(block => !(block as any).pageId || (block as any).pageId === activePage.id) : profile.blocks;
+
+  const handleCreatePage = async () => {
+    const title = newPageTitle.trim();
+    const slug = newPageSlug.trim().toLowerCase();
+    if (!title || !slug) return setPageManagerError(ui('Enter a page title and URL slug.'));
+    try {
+      const result = await api.studio.createPage({ title, slug });
+      setPages(previous => [...previous, result.page]);
+      setActivePageId(result.page.id);
+      setNewPageTitle('');
+      setNewPageSlug('');
+      setPageManagerError(null);
+    } catch (error: any) {
+      setPageManagerError(friendlyErrorMessage(error, ui('Could not create this page.')));
+    }
+  };
+
+  const handleDeletePage = async (pageId: string) => {
+    const page = pages.find(item => item.id === pageId);
+    if (!page || page.isHome || !window.confirm(ui('Delete this page? Its blocks will move to Home.'))) return;
+    try {
+      await api.studio.deletePage(pageId);
+      const nextPages = pages.filter(item => item.id !== pageId);
+      setPages(nextPages);
+      if (activePageId === pageId) setActivePageId(nextPages.find(item => item.isHome)?.id || nextPages[0]?.id || '');
+      const refreshed = await api.studio.getProfile();
+      setProfile(refreshed);
+    } catch (error: any) {
+      setPageManagerError(friendlyErrorMessage(error, ui('Could not delete this page.')));
+    }
+  };
+
+  const handleSavePage = async () => {
+    if (!activePage || isSavingPage) return;
+    const title = pageEditTitle.trim();
+    const slug = pageEditSlug.trim().toLowerCase();
+    if (!title || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      setPageManagerError(ui('Use a title and a lowercase URL slug with hyphens only.'));
+      return;
+    }
+    setIsSavingPage(true);
+    try {
+      await api.studio.updatePage(activePage.id, { title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished });
+      const updated = { ...activePage, title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished };
+      setPages(previous => previous.map(page => page.id === activePage.id ? updated : page));
+      setProfile(previous => ({ ...previous, pages: (previous.pages || []).map(page => page.id === activePage.id ? updated : page) }));
+      setPageManagerError(null);
+    } catch (error: any) {
+      setPageManagerError(friendlyErrorMessage(error, ui('Could not save page settings.')));
+    } finally {
+      setIsSavingPage(false);
+    }
+  };
+
+  const handleMovePage = async (direction: -1 | 1) => {
+    const index = pages.findIndex(page => page.id === activePage?.id);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= pages.length) return;
+    const reordered = [...pages];
+    [reordered[index], reordered[nextIndex]] = [reordered[nextIndex], reordered[index]];
+    try {
+      await api.studio.reorderPages(reordered.map(page => page.id));
+      setPages(reordered.map((page, sortOrder) => ({ ...page, sortOrder })));
+    } catch (error: any) {
+      setPageManagerError(friendlyErrorMessage(error, ui('Could not reorder pages.')));
+    }
+  };
+
   // Block Operations with Real Database Calls
   const handleAddLink = async () => {
     try {
       setSaveStatus('saving');
-      const newBlock = await api.studio.createBlock({
+      const newBlock = await createBlockForPage({
         type: 'link',
         title: 'New Featured Link',
         url: 'https://',
@@ -581,7 +736,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const handleAddHeader = async () => {
     try {
       setSaveStatus('saving');
-      const newBlock = await api.studio.createBlock({
+      const newBlock = await createBlockForPage({
         type: 'header',
         title: 'New Section Header'
       });
@@ -597,7 +752,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const handleAddAudio = async () => {
     try {
       setSaveStatus('saving');
-      const newBlock = await api.studio.createBlock({
+      const newBlock = await createBlockForPage({
         type: 'audio',
         title: 'New Single Track',
         url: 'https://spotify.com',
@@ -620,7 +775,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const handleAddVideo = async () => {
     try {
       setSaveStatus('saving');
-      const newBlock = await api.studio.createBlock({
+      const newBlock = await createBlockForPage({
         type: 'video',
         title: 'Behind The Scenes Film',
         url: 'https://youtube.com',
@@ -642,7 +797,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const handleAddFolder = async () => {
     try {
       setSaveStatus('saving');
-      const newBlock = await api.studio.createBlock({
+      const newBlock = await createBlockForPage({
         type: 'folder',
         title: 'Curated Resource Links',
         extra: {
@@ -665,7 +820,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const handleAddNewsletter = async () => {
     try {
       setSaveStatus('saving');
-      const newBlock = await api.studio.createBlock({
+      const newBlock = await createBlockForPage({
         type: 'newsletter',
         title: 'Weekly Creator Dispatch',
         extra: {
@@ -703,14 +858,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     };
     const preset = defaults[type] || defaults.rich_text;
     try {
-      const newBlock = await api.studio.createBlock({ type: type as any, title: preset.title, subtitle: preset.subtitle, extra: preset.extra });
+      const newBlock = await createBlockForPage({ type: type as any, title: preset.title, subtitle: preset.subtitle, extra: preset.extra });
       setProfile(prev => ({ ...prev, blocks: [...prev.blocks, newBlock] }));
       setShowAddMenu(false);
     } catch (error) { setDataError(true); }
   };
 
   const handleMoveBlock = async (index: number, direction: 'up' | 'down') => {
-    const newBlocks = [...profile.blocks];
+    const newBlocks = [...visibleBlocks];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newBlocks.length) return;
     const temp = newBlocks[index];
@@ -719,7 +874,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
     try {
       setSaveStatus('saving');
-      await api.studio.reorderBlocks(newBlocks.map(b => b.id));
+      await api.studio.reorderBlocks(newBlocks.map(b => b.id), activePage?.id);
       setProfile(prev => ({ ...prev, blocks: newBlocks }));
       setSaveStatus('saved');
     } catch (err) {
@@ -1231,8 +1386,37 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
 
               {/* Action Bar: Add Block & Import Links */}
+              <section className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs" aria-labelledby="pages-heading">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h2 id="pages-heading" className="text-sm font-bold text-neutral-900">{ui('Pages')}</h2>
+                    <p className="mt-1 text-[11px] text-neutral-500">{ui('Create separate pages and publish them from your profile navigation.')}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2" role="tablist" aria-label={ui('Profile pages')}>
+                    {pages.map(page => <button key={page.id} type="button" role="tab" aria-selected={page.id === activePage?.id} onClick={() => setActivePageId(page.id)} className={`rounded-xl border px-3 py-1.5 text-xs font-semibold ${page.id === activePage?.id ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-700 hover:border-neutral-500'}`}>{page.title}{page.isHome ? ` (${ui('Home')})` : ''}</button>)}
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                  <input value={newPageTitle} onChange={event => setNewPageTitle(event.target.value)} placeholder={ui('New page title')} aria-label={ui('New page title')} className="rounded-xl border border-neutral-200 px-3 py-2 text-xs text-neutral-900" />
+                  <input value={newPageSlug} onChange={event => setNewPageSlug(event.target.value.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase())} placeholder={ui('url-slug')} aria-label={ui('New page URL slug')} className="rounded-xl border border-neutral-200 px-3 py-2 font-mono text-xs text-neutral-900" />
+                  <button type="button" onClick={handleCreatePage} className="rounded-xl bg-neutral-900 px-3 py-2 text-xs font-bold text-white hover:bg-black">{ui('Add page')}</button>
+                </div>
+                {activePage && <div className="mt-4 grid grid-cols-1 gap-2 border-t border-neutral-100 pt-4 sm:grid-cols-2">
+                  <label className="grid gap-1 text-[11px] font-semibold text-neutral-700">{ui('Page title')}<input value={pageEditTitle} onChange={event => setPageEditTitle(event.target.value)} aria-label={ui('Page title')} className="rounded-xl border border-neutral-200 px-3 py-2 text-xs text-neutral-900" /></label>
+                  <label className="grid gap-1 text-[11px] font-semibold text-neutral-700">{ui('URL slug')}<input value={pageEditSlug} disabled={activePage.isHome} onChange={event => setPageEditSlug(event.target.value.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase())} aria-label={ui('URL slug')} className="rounded-xl border border-neutral-200 px-3 py-2 font-mono text-xs text-neutral-900 disabled:bg-neutral-100" /></label>
+                  <label className="grid gap-1 text-[11px] font-semibold text-neutral-700 sm:col-span-2">{ui('Description')}<textarea value={pageEditDescription} onChange={event => setPageEditDescription(event.target.value)} aria-label={ui('Page description')} maxLength={240} rows={2} className="rounded-xl border border-neutral-200 px-3 py-2 text-xs text-neutral-900" /></label>
+                  <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+                    {!activePage.isHome && <label className="flex items-center gap-2 text-xs font-semibold text-neutral-700"><input type="checkbox" checked={pageEditPublished} onChange={event => setPageEditPublished(event.target.checked)} />{ui('Published')}</label>}
+                    <button type="button" onClick={handleSavePage} disabled={isSavingPage} className="rounded-xl border border-neutral-300 px-3 py-2 text-xs font-bold text-neutral-900 hover:border-neutral-900 disabled:opacity-50">{isSavingPage ? ui('Saving…') : ui('Save page settings')}</button>
+                    <button type="button" onClick={() => handleMovePage(-1)} disabled={activePage.isHome || pages.findIndex(page => page.id === activePage.id) <= 1} aria-label={ui('Move page left')} className="rounded-xl border border-neutral-200 px-2 py-2 text-xs font-bold disabled:opacity-30">←</button>
+                    <button type="button" onClick={() => handleMovePage(1)} disabled={pages.findIndex(page => page.id === activePage.id) === pages.length - 1} aria-label={ui('Move page right')} className="rounded-xl border border-neutral-200 px-2 py-2 text-xs font-bold disabled:opacity-30">→</button>
+                  </div>
+                </div>}
+                {activePage && !activePage.isHome && <button type="button" onClick={() => handleDeletePage(activePage.id)} className="mt-3 text-xs font-semibold text-rose-600 hover:text-rose-800">{ui('Delete current page')}</button>}
+                {pageManagerError && <p role="alert" className="mt-2 text-xs text-rose-700">{pageManagerError}</p>}
+              </section>
               <BookingEditor onSave={async (title, url) => {
-                const block = await api.studio.createBlock({ type: 'booking', title, url });
+                const block = await createBlockForPage({ type: 'booking', title, url });
                 setProfile(prev => ({ ...prev, blocks: [...prev.blocks, block] }));
               }} />
               <div className="flex flex-col sm:flex-row gap-3">
@@ -1322,7 +1506,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
               {/* Block List Draggable/Reorderable */}
               <div className="space-y-3">
-                {profile.blocks.map((block, index) => (
+                {visibleBlocks.map((block, index) => (
                   <div 
                     key={block.id}
                     className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs space-y-3 hover:border-neutral-400 transition-colors"
@@ -1361,7 +1545,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         </button>
                         <button
                           onClick={() => handleMoveBlock(index, 'down')}
-                          disabled={index === profile.blocks.length - 1}
+                          disabled={index === visibleBlocks.length - 1}
                           className="p-1 rounded-lg text-neutral-400 hover:text-black disabled:opacity-20 cursor-pointer"
                           title={ui("Move down")}
                         >
@@ -1462,7 +1646,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     </div>
 
                     {/* Secondary Fields per Block Type */}
-                    {block.type === 'link' && (
+                      {block.type === 'link' && (
                       <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                           <div>
@@ -1485,6 +1669,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                               className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
                             />
                           </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-neutral-100 text-xs">
+                          <label className="text-[11px] font-semibold text-neutral-600">{ui('Link layout')}<select value={(block as any).layout || 'list'} onChange={e => handleUpdateBlockExtra(block.id, { layout: e.target.value })} className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900"><option value="list">{ui('List')}</option><option value="grid">{ui('Grid card')}</option><option value="featured">{ui('Featured')}</option></select></label>
+                          <label className="text-[11px] font-semibold text-neutral-600">{ui('Link animation')}<select value={(block as any).animation || 'none'} onChange={e => handleUpdateBlockExtra(block.id, { animation: e.target.value })} className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900"><option value="none">{ui('None')}</option><option value="fade">{ui('Fade in')}</option><option value="lift">{ui('Lift on hover')}</option><option value="pulse">{ui('Subtle pulse')}</option></select></label>
                         </div>
 
                         {/* Link Scheduling (Time-Release) */}
@@ -1592,12 +1781,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       const advanced = block as any;
                       const updateAdvanced = (key: string, value: unknown) => handleUpdateBlockExtra(block.id, { [key]: value });
                       return <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-neutral-100 text-xs">
-                        {(['rich_text', 'form', 'download', 'map', 'content_gate'].includes(block.type)) && <div className="sm:col-span-2"><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui(block.type === 'rich_text' || block.type === 'content_gate' ? 'Content' : 'Description')}</label><textarea value={advanced.body || advanced.description || ''} onChange={e => updateAdvanced(block.type === 'rich_text' || block.type === 'content_gate' ? 'body' : 'description', e.target.value)} className="w-full min-h-20 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
-                        {['image', 'gallery', 'carousel'].includes(block.type) && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Image URL')}</label><input value={advanced.imageUrl || ''} onChange={e => updateAdvanced('imageUrl', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
-                        {['download', 'event', 'presave', 'product', 'tips', 'form'].includes(block.type) && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Destination URL')}</label><input value={advanced.fileUrl || advanced.url || ''} onChange={e => updateAdvanced(block.type === 'download' ? 'fileUrl' : 'url', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {(['rich_text', 'form', 'download', 'map', 'content_gate'].includes(block.type)) && <div className="sm:col-span-2"><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui(block.type === 'rich_text' || block.type === 'content_gate' ? 'Content' : 'Description')}</label>{block.type === 'rich_text' && <div className="mb-1 flex gap-1"><button type="button" onClick={() => updateAdvanced('body', `${advanced.body || ''} **bold**`)} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">B</button><button type="button" onClick={() => updateAdvanced('body', `${advanced.body || ''} *italic*`)} className="rounded border border-neutral-200 px-2 py-1 text-[10px] italic">I</button><button type="button" onClick={() => updateAdvanced('body', `${advanced.body || ''}\n## heading`)} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">H</button></div>}<textarea value={advanced.body || advanced.description || ''} onChange={e => updateAdvanced(block.type === 'rich_text' || block.type === 'content_gate' ? 'body' : 'description', e.target.value)} className="w-full min-h-20 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {block.type === 'image' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Image URL')}</label><input value={advanced.imageUrl || ''} onChange={e => updateAdvanced('imageUrl', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /><input type="file" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if (file) void handleBlockImageUpload(block.id, file); }} aria-label={ui('Upload image')} className="mt-2 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900" /></div>}
+                        {['download', 'event', 'presave', 'product', 'tips', 'form'].includes(block.type) && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Destination URL')}</label><input value={advanced.fileUrl || advanced.url || ''} onChange={e => updateAdvanced(block.type === 'download' ? 'fileUrl' : 'url', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" />{block.type === 'download' && <input type="file" onChange={e => { const file = e.target.files?.[0]; if (file) void handleBlockFileUpload(block.id, file); }} aria-label={ui('Upload downloadable file')} className="mt-2 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900" />}</div>}
                         {block.type === 'map' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Location')}</label><input value={advanced.location || ''} onChange={e => updateAdvanced('location', e.target.value)} placeholder={ui('City or address')} className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
                         {block.type === 'phone' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Phone number')}</label><input value={advanced.phone || ''} onChange={e => updateAdvanced('phone', e.target.value)} placeholder="+1..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
-                        {['gallery', 'carousel', 'faq', 'testimonials', 'form'].includes(block.type) && <div className="sm:col-span-2"><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Items / fields JSON')}</label><textarea value={JSON.stringify(advanced.items || advanced.fields || [], null, 2)} onChange={e => { try { updateAdvanced(block.type === 'form' ? 'fields' : 'items', JSON.parse(e.target.value)); } catch { /* wait for valid JSON */ } }} className="w-full min-h-24 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-[10px] text-neutral-900" /></div>}
+                        {['gallery', 'carousel', 'faq', 'testimonials', 'form'].includes(block.type) && <StructuredItemsEditor kind={block.type as StructuredEditorKind} value={advanced.items || advanced.fields || []} onChange={items => updateAdvanced(block.type === 'form' ? 'fields' : 'items', items)} onUpload={(file, index) => void handleBlockImageUpload(block.id, file, 'imageUrl', index)} ui={ui} />}
                         {block.type === 'spacer' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Height (px)')}</label><input type="number" min="16" max="240" value={advanced.height || 48} onChange={e => updateAdvanced('height', Number(e.target.value))} className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
                         {block.type === 'content_gate' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Access code')}</label><input type="password" value={advanced.password || ''} onChange={e => updateAdvanced('password', e.target.value)} className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
                       </div>;
@@ -2330,8 +2519,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                   <h3 className="font-bold text-sm text-neutral-900">{ui('Form submissions')}</h3>
                   <p className="text-xs text-neutral-500">{formSubmissions.length ? `${formSubmissions.length} ${ui('stored responses')}` : ui('No form responses yet.')}</p>
-                  {formSubmissions.slice(0, 3).map(item => <div key={item.id} className="rounded-xl border border-neutral-200 p-3 text-[11px] text-neutral-700"><span className="font-mono text-neutral-400">{new Date(item.createdAt).toLocaleString()}</span><pre className="mt-1 whitespace-pre-wrap font-sans">{JSON.stringify(item.fields, null, 2)}</pre></div>)}
-                  {formSubmissions.length > 3 && <p className="text-[11px] text-neutral-500">{ui('Showing the three most recent responses.')}</p>}
+                  <div className="max-h-96 space-y-2 overflow-auto">{(showAllFormSubmissions ? formSubmissions : formSubmissions.slice(0, 3)).map(item => <div key={item.id} className="rounded-xl border border-neutral-200 p-3 text-[11px] text-neutral-700"><span className="font-mono text-neutral-400">{new Date(item.createdAt).toLocaleString()}</span><pre className="mt-1 whitespace-pre-wrap font-sans">{JSON.stringify(item.fields, null, 2)}</pre></div>)}</div>
+                  {formSubmissions.length > 3 && <button type="button" onClick={() => setShowAllFormSubmissions(value => !value)} className="text-[11px] font-semibold text-neutral-700 underline">{showAllFormSubmissions ? ui('Show recent only') : ui('View all responses')}</button>}
                 </div>
               </div>
 
