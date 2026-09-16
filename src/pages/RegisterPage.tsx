@@ -6,7 +6,7 @@ import { api } from '../services/api';
 import { brand } from '../config/brand';
 import { THEMES } from '../data/mockData';
 import confetti from 'canvas-confetti';
-import { 
+import {
   ArrowRight, 
   ArrowLeft,
   Lock, 
@@ -25,6 +25,7 @@ import {
   Palette,
   Check
 } from 'lucide-react';
+import { friendlyErrorMessage } from '../utils/errors';
 
 const INTENT_OPTIONS = [
   { id: 'creator', label: 'Creator / Influencer', icon: Sparkles, defaultCategory: 'Creator' },
@@ -137,7 +138,7 @@ export const RegisterPage: React.FC = () => {
         setLocation(`/pricing?plan=${plan}&interval=${params.get('interval') === 'year' ? 'year' : 'month'}`);
       } else setLocation('/studio');
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+      setError(friendlyErrorMessage(err, 'We could not create your account. Check your details and try again.'));
       setStep(1);
     } finally {
       setIsSubmitting(false);

@@ -1,4 +1,5 @@
 import { CreatorProfile, ThemeConfig, ProfileBlock } from '../types';
+import { friendlyErrorMessage } from '../utils/errors';
 
 let sessionToken: string | null = null;
 
@@ -41,7 +42,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (!res.ok || data === null) {
     const errorMsg = data?.error || (!isJson ? `Backend unreachable or returned non-JSON response (${res.status})` : `HTTP error ${res.status}`);
-    throw Object.assign(new Error(errorMsg), { status: res.status });
+    throw Object.assign(new Error(friendlyErrorMessage({ message: errorMsg, status: res.status }, 'Request failed. Please try again.')), { status: res.status });
   }
 
   return data as T;

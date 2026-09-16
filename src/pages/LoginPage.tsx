@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Lock, Mail, AlertCircle, Loader2, User } from 'lucide-react';
+import { friendlyErrorMessage } from '../utils/errors';
 
 export const LoginPage: React.FC = () => {
   const { tr: ui } = useUiLanguage();
@@ -23,7 +24,7 @@ export const LoginPage: React.FC = () => {
       const after = new URLSearchParams(window.location.search).get('after');
       setLocation(after === 'import' ? '/studio?import=1' : '/studio');
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please verify your credentials.');
+      setError(friendlyErrorMessage(err, 'Sign in failed. Check your email and password, then try again.'));
     } finally {
       setIsSubmitting(false);
     }

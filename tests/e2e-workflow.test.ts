@@ -128,11 +128,13 @@ describe('End-to-End Creator Journey & Full Lifecycle Test', () => {
 
   it('Step 6: Reorder blocks sequence', async () => {
     // Reorder so Link is first, Newsletter second
+    const existingBlocks = db.prepare('SELECT id FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profileId) as { id: string }[];
+    const orderedBlockIds = [linkBlockId, newsletterBlockId, ...existingBlocks.map(block => block.id).filter(id => id !== linkBlockId && id !== newsletterBlockId)];
     const res = await request(app)
       .put('/api/studio/blocks/reorder')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        blockIds: [linkBlockId, newsletterBlockId]
+        blockIds: orderedBlockIds
       });
 
     expect(res.status).toBe(200);
@@ -178,7 +180,8 @@ describe('End-to-End Creator Journey & Full Lifecycle Test', () => {
       .send({
         profileId,
         blockId: newsletterBlockId,
-        email: subscriberEmail
+        email: subscriberEmail,
+        consent: true
       });
 
     expect(res.status).toBe(201);

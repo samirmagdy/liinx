@@ -6,6 +6,7 @@ import { THEMES } from '../data/mockData';
 import { brand } from '../config/brand';
 import { api } from '../services/api';
 import { ensureThemeContrast, getAccessibleTextColor } from '../utils/colorContrast';
+import { friendlyErrorMessage } from '../utils/errors';
 import { 
   ArrowLeft, 
   Share2, 
@@ -149,7 +150,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   // Google Analytics 4 (gtag.js) Injection
   useEffect(() => {
-    if (previewOnly || analyticsConsent !== 'granted' || !profile?.gaMeasurementId) return;
+    if (previewOnly || analyticsConsent !== 'granted' || typeof profile?.gaMeasurementId !== 'string') return;
     const gaId = profile.gaMeasurementId.trim();
     if (!gaId || !/^G-[A-Z0-9]+$/i.test(gaId)) return;
 
@@ -177,7 +178,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   // Meta Pixel (fbq) Injection
   useEffect(() => {
-    if (previewOnly || analyticsConsent !== 'granted' || !profile?.metaPixelId) return;
+    if (previewOnly || analyticsConsent !== 'granted' || typeof profile?.metaPixelId !== 'string') return;
     const pixelId = profile.metaPixelId.trim();
     if (!pixelId || !/^[0-9]+$/.test(pixelId)) return;
 
@@ -204,7 +205,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   // Custom Font Link Injection
   useEffect(() => {
-    if (previewOnly || !profile?.customFontUrl) return;
+    if (previewOnly || typeof profile?.customFontUrl !== 'string') return;
     const fontUrl = profile.customFontUrl.trim();
     if (!fontUrl || !/^https?:\/\//i.test(fontUrl)) return;
 
@@ -322,7 +323,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         setNewsletterEmail('');
       }, 5000);
     } catch (err: any) {
-      setNewsletterError(err.message || ui('Subscription failed. Please check your email.'));
+      setNewsletterError(friendlyErrorMessage(err, ui('Subscription failed. Please check your email.')));
     } finally {
       setNewsletterLoading(false);
     }
@@ -463,7 +464,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           </p>
 
           {/* Socials Row */}
-          {profile.socials && profile.socials.length > 0 && (
+          {Array.isArray(profile.socials) && profile.socials.length > 0 && (
             <div className="flex items-center justify-center gap-2.5 mb-2 flex-wrap">
               {profile.socials.map((social, idx) => (
                 <a
@@ -488,7 +489,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
         {/* Content Blocks */}
         <div className="space-y-4 mb-14">
-          {profile.blocks.map((block) => {
+          {(Array.isArray(profile.blocks) ? profile.blocks : []).map((block) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!

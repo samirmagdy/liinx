@@ -125,6 +125,8 @@ npm run db:backup
 - Runs `PRAGMA integrity_check` on the resulting backup to guarantee validity.
 - Automatically prunes older backups, retaining the 10 most recent snapshots in `data/backups/`.
 
+Upload media is backed up separately with `npm run uploads:backup`. Schedule both backup commands daily and copy their output to encrypted off-host storage. See [OPERATIONS.md](OPERATIONS.md) for retention, restore, monitoring, Stripe alerts, and rollback procedures.
+
 ---
 
 ## REST API Reference

@@ -11,7 +11,7 @@ const subscribeSchema = z.object({
   profileId: z.string().min(1, 'Profile ID is required'),
   blockId: z.string().optional().nullable(),
   email: z.string().email('Please enter a valid email address'),
-  consent: z.boolean().optional()
+  consent: z.literal(true, 'Please confirm that you want to receive updates.')
 });
 
 // Public: Subscribe to a creator's newsletter
@@ -23,9 +23,6 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
     }
 
     const { profileId, blockId, email, consent } = parse.data;
-    if (consent === false) {
-      return res.status(400).json({ error: 'Please confirm that you want to receive updates.' });
-    }
     const cleanEmail = email.toLowerCase().trim();
 
     // Verify creator exists
@@ -44,9 +41,7 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
         INSERT INTO newsletter_subscribers (id, profile_id, block_id, email, created_at, unsubscribe_token_hash)
         VALUES (?, ?, ?, ?, ?, ?)
       `).run(id, profileId, blockId || null, cleanEmail, now, unsubscribeTokenHash);
-      if (consent === true) {
-        db.prepare('INSERT INTO newsletter_consents (subscriber_id, consented_at) VALUES (?, ?)').run(id, now);
-      }
+      db.prepare('INSERT INTO newsletter_consents (subscriber_id, consented_at) VALUES (?, ?)').run(id, now);
 
       const origin = process.env.APP_ORIGIN || `${req.protocol}://${req.get('host')}`;
       res.status(201).json({

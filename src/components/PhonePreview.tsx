@@ -227,7 +227,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           </p>
 
           {/* Social Icons Row */}
-          {profile.socials && profile.socials.length > 0 && (
+          {Array.isArray(profile.socials) && profile.socials.length > 0 && (
             <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
               {profile.socials.map((social, idx) => (
                 <a
@@ -252,7 +252,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
         {/* Profile Blocks */}
         <div className="space-y-3 mb-8">
-          {profile.blocks.map((block) => {
+          {(Array.isArray(profile.blocks) ? profile.blocks : []).map((block) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
               const isComplexLink = Boolean(block.subtitle);

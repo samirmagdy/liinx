@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { db } from '../db.js';
 import { bookingUrl } from '../../src/utils/booking.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { invalidatePublicProfileCache } from './profiles.js';
+import { createId } from '../utils/ids.js';
 
 export const blocksRouter = Router();
 
@@ -45,7 +47,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
     }
     const profileId = req.user!.profileId;
     const now = Date.now();
-    const id = 'blk_' + Math.random().toString(36).substring(2, 10);
+    const id = createId('blk');
 
     // Get current max position
     const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ?').get(profileId) as { maxPos: number | null };
@@ -72,6 +74,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       now,
       now
     );
+    invalidatePublicProfileCache(profileId);
 
     res.status(201).json({
       id,
@@ -105,8 +108,8 @@ blocksRouter.put('/studio/blocks/reorder', requireAuth, (req: AuthenticatedReque
     const profileId = req.user!.profileId;
     const owned = db.prepare('SELECT id FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profileId) as { id: string }[];
     const ownedIds = owned.map(block => block.id);
-    if (new Set(blockIds).size !== blockIds.length || blockIds.some((id: string) => !ownedIds.includes(id))) {
-      return res.status(400).json({ error: 'blockIds must contain only unique blocks belonging to this profile.' });
+    if (blockIds.length !== ownedIds.length || new Set(blockIds).size !== blockIds.length || blockIds.some((id: string) => !ownedIds.includes(id))) {
+      return res.status(400).json({ error: 'Please include every block exactly once when reordering.' });
     }
     const updatePos = db.prepare('UPDATE blocks SET position = ? WHERE id = ? AND profile_id = ?');
 
@@ -117,6 +120,7 @@ blocksRouter.put('/studio/blocks/reorder', requireAuth, (req: AuthenticatedReque
     });
 
     reorderTx();
+    invalidatePublicProfileCache(profileId);
     res.json({ success: true, message: 'Blocks reordered successfully.' });
   } catch (err: any) {
     console.error('Reorder blocks error:', err);
@@ -183,6 +187,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
     );
 
     res.json({ success: true, message: 'Block updated successfully.' });
+    invalidatePublicProfileCache(profileId);
   } catch (err: any) {
     console.error('Update block error:', err);
     res.status(500).json({ error: 'Failed to update block.' });
@@ -201,6 +206,7 @@ blocksRouter.delete('/studio/blocks/:id', requireAuth, (req: AuthenticatedReques
     }
 
     res.json({ success: true, message: 'Block deleted successfully.' });
+    invalidatePublicProfileCache(profileId);
   } catch (err: any) {
     console.error('Delete block error:', err);
     res.status(500).json({ error: 'Failed to delete block.' });

@@ -34,6 +34,11 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
     return res.status(401).json({ error: 'This session has been revoked. Please log in again.' });
   }
 
+  // The active profile must belong to the authenticated user. This prevents a
+  // forged/stale profileId claim from crossing tenant boundaries.
+  const profile = db.prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?').get(payload.profileId, payload.userId);
+  if (!profile) return res.status(401).json({ error: 'Your selected profile is no longer available. Please sign in again.' });
+
   req.user = payload;
   next();
 }

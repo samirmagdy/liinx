@@ -13,6 +13,7 @@ import {
   X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { friendlyErrorMessage } from '../utils/errors';
 
 interface LinktreeImporterModalProps {
   isOpen: boolean;
@@ -53,7 +54,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
         setError('No links found on this profile.');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to inspect profile. Ensure the profile is public.');
+      setError(friendlyErrorMessage(err, 'We could not inspect that profile. Make sure it is public and try again.'));
     } finally {
       setLoading(false);
     }
@@ -94,7 +95,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
       await onImportComplete();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to import links.');
+      setError(friendlyErrorMessage(err, 'We could not import those links. Your profile was not changed; please try again.'));
     } finally {
       setImporting(false);
     }

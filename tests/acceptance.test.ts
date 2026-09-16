@@ -53,7 +53,7 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
     it('subscribes a real email to the creator newsletter', async () => {
       const res = await request(app)
         .post('/api/newsletter/subscribe')
-        .send({ profileId, email: subscriberEmail });
+        .send({ profileId, email: subscriberEmail, consent: true });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
@@ -90,7 +90,7 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
     it('duplicate newsletter subscription is idempotent (200, not 500)', async () => {
       const res = await request(app)
         .post('/api/newsletter/subscribe')
-        .send({ profileId, email: subscriberEmail });
+        .send({ profileId, email: subscriberEmail, consent: true });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -105,7 +105,7 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
     it('newsletter subscribe with invalid email format returns 400', async () => {
       const res = await request(app)
         .post('/api/newsletter/subscribe')
-        .send({ profileId, email: 'not-an-email' });
+        .send({ profileId, email: 'not-an-email', consent: true });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/valid email/i);
@@ -114,7 +114,7 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
     it('newsletter subscribe with non-existent profileId returns 404', async () => {
       const res = await request(app)
         .post('/api/newsletter/subscribe')
-        .send({ profileId: 'prf_does_not_exist', email: `orphan_${uniqueId}@test.com` });
+        .send({ profileId: 'prf_does_not_exist', email: `orphan_${uniqueId}@test.com`, consent: true });
 
       expect(res.status).toBe(404);
       expect(res.body.error).toMatch(/not found/i);

@@ -27,4 +27,19 @@ describe('theme contrast normalization', () => {
     expect(theme.cardBg).toBe('#F5F5F5');
     expect(theme.accentColor).toBe('#92400E');
   });
+
+  it('falls back safely for malformed runtime values from persisted JSON', () => {
+    const theme = ensureThemeContrast({
+      bgColor: { bad: true } as unknown as string,
+      cardBg: null as unknown as string,
+      cardBorder: 42 as unknown as string,
+      textColor: ['#fff'] as unknown as string,
+      isDark: 'yes' as unknown as boolean
+    });
+
+    expect(theme.bgColor).toBe('#FAF9F6');
+    expect(theme.cardBg).toBe('#FFFFFF');
+    expect(theme.cardBorder).toBe('1px solid #E5E5E0');
+    expect(theme.textColor).toBe('#181817');
+  });
 });

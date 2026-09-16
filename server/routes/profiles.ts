@@ -5,6 +5,8 @@ import { db } from '../db.js';
 import { signJwt } from '../auth.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
+import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
+import { createId } from '../utils/ids.js';
 
 export const profilesRouter = Router();
 
@@ -19,6 +21,11 @@ interface PublicProfileCacheEntry {
 const publicProfileCache = new Map<string, PublicProfileCacheEntry>();
 const PUBLIC_PROFILE_CACHE_TTL_MS = 5_000;
 const MAX_PUBLIC_PROFILE_CACHE_ENTRIES = 10_000;
+
+export function invalidatePublicProfileCache(profileId: string) {
+  const row = db.prepare('SELECT username FROM profiles WHERE id = ?').get(profileId) as { username?: string } | undefined;
+  if (row?.username) publicProfileCache.delete(row.username.toLowerCase());
+}
 
 const publicProfileCachePurge = setInterval(() => {
   const now = Date.now();
@@ -45,11 +52,7 @@ function isSafeCustomCss(value: string | null | undefined): boolean {
 const avatarUrlSchema = z.string().refine(value => {
   // Uploaded avatars are intentionally stored as same-origin relative paths.
   if (/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)) return true;
-  try {
-    return ['http:', 'https:'].includes(new URL(value).protocol);
-  } catch {
-    return false;
-  }
+  return isHttpUrl(value);
 }, 'Avatar must use HTTP(S) or a valid same-origin upload path.');
 
 // Public: Get profile by username
@@ -256,7 +259,7 @@ const updateProfileSchema = z.object({
   metaPixelId: z.string().max(50).nullable().optional(),
   customDomain: z.string().max(100).nullable().optional(),
   customCss: z.string().max(10000).nullable().optional(),
-  customFontUrl: z.string().url().max(300).refine(value => /^https?:$/i.test(new URL(value).protocol), 'Custom fonts must use HTTP(S).').nullable().optional(),
+  customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),
   customTheme: z.object({
     background: z.string().max(30).optional(),
     surface: z.string().max(30).optional(),
@@ -266,7 +269,7 @@ const updateProfileSchema = z.object({
   }).optional(),
   socials: z.array(z.object({
     platform: z.string().min(1).max(30),
-    url: z.string().url().refine(value => /^(https?:|mailto:|tel:)$/i.test(new URL(value).protocol), 'Social links must use a safe URL scheme.').max(500)
+    url: z.string().max(500).refine(isSafeLinkUrl, 'Social links must use a safe URL scheme.')
   })).max(20).optional()
 });
 
@@ -385,6 +388,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     );
 
     res.json({ success: true, message: 'Profile updated successfully.' });
+    publicProfileCache.delete(existing.username.toLowerCase());
   } catch (err: any) {
     console.error('Update profile error:', err);
     res.status(500).json({ error: 'Failed to update profile.' });
@@ -535,7 +539,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       return res.status(409).json({ error: `The handle @${cleanUsername} is already taken.` });
     }
 
-    const newProfileId = 'prf_' + Math.random().toString(36).substring(2, 10);
+    const newProfileId = createId('prf');
     const now = Date.now();
 
     db.prepare(`
@@ -562,7 +566,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
         id, profile_id, type, title, url, position, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      'blk_' + Math.random().toString(36).substring(2, 10),
+      createId('blk'),
       newProfileId,
       'link',
       'My Website',

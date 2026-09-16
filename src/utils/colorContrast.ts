@@ -3,14 +3,15 @@ import type { ThemeConfig } from '../types';
 const DARK_TEXT = '#181817';
 const LIGHT_TEXT = '#FFFFFF';
 
-function parseHex(value: string): [number, number, number] | null {
+function parseHex(value: unknown): [number, number, number] | null {
+  if (typeof value !== 'string') return null;
   const hex = value.trim().replace('#', '');
   if (!/^[\da-f]{3}([\da-f]{3})?$/i.test(hex)) return null;
   const expanded = hex.length === 3 ? hex.split('').map(char => char + char).join('') : hex;
   return [0, 2, 4].map(index => parseInt(expanded.slice(index, index + 2), 16) / 255) as [number, number, number];
 }
 
-function luminance(value: string): number | null {
+function luminance(value: unknown): number | null {
   const rgb = parseHex(value);
   if (!rgb) return null;
   return rgb.reduce((total, channel, index) => {
@@ -19,7 +20,7 @@ function luminance(value: string): number | null {
   }, 0);
 }
 
-export function contrastRatio(foreground: string, background: string): number | null {
+export function contrastRatio(foreground: unknown, background: unknown): number | null {
   const foregroundLum = luminance(foreground);
   const backgroundLum = luminance(background);
   if (foregroundLum === null || backgroundLum === null) return null;
@@ -29,7 +30,7 @@ export function contrastRatio(foreground: string, background: string): number | 
 }
 
 /** Selects button/badge text that remains readable over a theme accent. */
-export function getAccessibleTextColor(background: string, fallback: string = DARK_TEXT): string {
+export function getAccessibleTextColor(background: unknown, fallback: string = DARK_TEXT): string {
   const lightContrast = contrastRatio(LIGHT_TEXT, background);
   const darkContrast = contrastRatio(DARK_TEXT, background);
   if (lightContrast === null || darkContrast === null) return fallback;
@@ -38,27 +39,29 @@ export function getAccessibleTextColor(background: string, fallback: string = DA
 
 /** Normalizes creator-provided colors at render time so public pages stay readable. */
 export function ensureThemeContrast(theme: Partial<ThemeConfig> | null | undefined): ThemeConfig {
-  const isDark = theme?.isDark ?? false;
+  const stringOr = (value: unknown, fallback: string) => typeof value === 'string' && value.trim() ? value : fallback;
+  const isDark = typeof theme?.isDark === 'boolean' ? theme.isDark : false;
+  const fallbackCardBackground = isDark ? '#1E293B' : '#FFFFFF';
   const safeTheme: ThemeConfig = {
-    id: theme?.id ?? 'safe-default',
-    name: theme?.name ?? 'Safe Default',
-    bgType: theme?.bgType ?? 'solid',
-    bgColor: theme?.bgColor ?? '#FAF9F6',
-    bgGradient: theme?.bgGradient,
-    textColor: theme?.textColor ?? DARK_TEXT,
-    subtextColor: theme?.subtextColor ?? '#525252',
-    cardBg: theme?.cardBg ?? (isDark ? '#1E293B' : '#FFFFFF'),
-    cardText: theme?.cardText ?? (isDark ? '#E2E8F0' : DARK_TEXT),
-    cardBorder: theme?.cardBorder ?? (isDark ? '1px solid #334155' : '1px solid #E5E5E0'),
-    cardHover: theme?.cardHover ?? (isDark ? '#273548' : '#F9FAFA'),
-    cardRadius: theme?.cardRadius ?? 'xl',
-    accentColor: theme?.accentColor ?? (isDark ? '#38BDF8' : '#92400E'),
-    fontFamily: theme?.fontFamily ?? 'sans',
+    id: stringOr(theme?.id, 'safe-default'),
+    name: stringOr(theme?.name, 'Safe Default'),
+    bgType: theme?.bgType === 'gradient' || theme?.bgType === 'mesh' ? theme.bgType : 'solid',
+    bgColor: stringOr(theme?.bgColor, '#FAF9F6'),
+    bgGradient: typeof theme?.bgGradient === 'string' ? theme.bgGradient : undefined,
+    textColor: stringOr(theme?.textColor, DARK_TEXT),
+    subtextColor: stringOr(theme?.subtextColor, '#525252'),
+    cardBg: stringOr(theme?.cardBg, fallbackCardBackground),
+    cardText: stringOr(theme?.cardText, isDark ? '#E2E8F0' : DARK_TEXT),
+    cardBorder: stringOr(theme?.cardBorder, isDark ? '1px solid #334155' : '1px solid #E5E5E0'),
+    cardHover: stringOr(theme?.cardHover, isDark ? '#273548' : '#F9FAFA'),
+    cardRadius: theme?.cardRadius === 'none' || theme?.cardRadius === 'md' || theme?.cardRadius === 'full' ? theme.cardRadius : 'xl',
+    accentColor: stringOr(theme?.accentColor, isDark ? '#38BDF8' : '#92400E'),
+    fontFamily: theme?.fontFamily === 'display' || theme?.fontFamily === 'mono' ? theme.fontFamily : 'sans',
     isDark
   };
 
   const background = safeTheme.bgColor;
-  const cardBackground = safeTheme.cardBg.startsWith('#') ? safeTheme.cardBg : (safeTheme.isDark ? '#1E293B' : '#FFFFFF');
+  const cardBackground = safeTheme.cardBg.startsWith('#') ? safeTheme.cardBg : fallbackCardBackground;
   const readableText = contrastRatio(safeTheme.textColor, background) !== null && contrastRatio(safeTheme.textColor, background)! >= 4.5
     ? safeTheme.textColor
     : (safeTheme.isDark ? '#F8FAFC' : DARK_TEXT);

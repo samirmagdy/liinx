@@ -55,7 +55,8 @@ describe('Concurrency & Race Condition Testing', () => {
         .post('/api/newsletter/subscribe')
         .send({
           profileId: userProfileId,
-          email: targetEmail
+          email: targetEmail,
+          consent: true
         })
     );
 

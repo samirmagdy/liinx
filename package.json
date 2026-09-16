@@ -13,9 +13,13 @@
     "test": "vitest run --no-file-parallelism",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "db:backup": "tsx scripts/backup-db.ts"
+    "db:backup": "tsx scripts/backup-db.ts",
+    "uploads:backup": "tsx scripts/backup-uploads.ts",
+    "health:check": "node scripts/check-health.mjs"
   },
   "dependencies": {
+    "@sentry/node": "^10.74.0",
+    "@sentry/react": "^10.74.0",
     "@tailwindcss/vite": "^4.1.14",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",

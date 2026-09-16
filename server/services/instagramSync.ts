@@ -1,4 +1,6 @@
 import { db } from '../db.js';
+import { createId } from '../utils/ids.js';
+import { invalidatePublicProfileCache } from '../routes/profiles.js';
 
 export interface ExtractedLink {
   url: string;
@@ -195,7 +197,7 @@ export function syncMediaToBlocks(profileId: string, mediaItems: InstagramMediaI
           continue; // Skip duplicate link
         }
 
-        const blockId = `blk_insta_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const blockId = createId('blk_insta');
         const now = Date.now();
         const subtitle = link.snippet || 'Auto-synced from Instagram post';
 
@@ -234,6 +236,7 @@ export function syncMediaToBlocks(profileId: string, mediaItems: InstagramMediaI
   });
 
   runSyncTransaction();
+  invalidatePublicProfileCache(profileId);
 
   return {
     mediaProcessed: mediaItems.length,

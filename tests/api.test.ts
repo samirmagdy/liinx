@@ -182,7 +182,8 @@ describe('LIINX Production Backend API', () => {
       .send({
         profileId: profile.id,
         blockId: createdBlockId,
-        email: subscriberEmail
+        email: subscriberEmail,
+        consent: true
       });
 
     expect(res.status).toBe(201);

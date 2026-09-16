@@ -16,11 +16,24 @@ import { apiV1Router } from './routes/apiV1.js';
 import { billingRouter } from './routes/billing.js';
 import { contactRouter } from './routes/contact.js';
 import { pageTitles } from '../src/config/pages.js';
+import * as Sentry from '@sentry/node';
+import { log, logError } from './logger.js';
+import { startMaintenanceScheduler } from './maintenance.js';
+import { createId } from './utils/ids.js';
+import { startInstagramSyncScheduler } from './instagramScheduler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development',
+    sendDefaultPii: false,
+    tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE || 0.05)
+  });
+}
 const PORT = Number(process.env.PORT) || 3050;
 
 function validateProductionConfig() {
@@ -58,6 +71,10 @@ function validateProductionConfig() {
       }
     }
   }
+
+  if (process.env.CLUSTER === 'true' || process.env.HORIZONTAL_SCALING_ENABLED === 'true') {
+    throw new Error('Production horizontal scaling is disabled until a shared rate-limit, analytics queue, and event store are configured.');
+  }
 }
 
 validateProductionConfig();
@@ -88,7 +105,7 @@ app.use(cors({
 // Correlation ID & Response Time Observability Middleware
 app.use((req, res, next) => {
   const startHrTime = process.hrtime();
-  const requestId = (req.headers['x-request-id'] as string) || `req_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
+  const requestId = (req.headers['x-request-id'] as string) || createId('req');
   res.setHeader('X-Request-Id', requestId);
 
   const originalEnd = res.end;
@@ -98,6 +115,10 @@ app.use((req, res, next) => {
       const elapsedMs = (elapsedHrTime[0] * 1000 + elapsedHrTime[1] / 1e6).toFixed(2);
       res.setHeader('X-Response-Time', `${elapsedMs}ms`);
     }
+    log(res.statusCode >= 500 ? 'error' : 'info', 'HTTP request completed', {
+      requestId, method: req.method, path: req.path, status: res.statusCode,
+      durationMs: Number(((process.hrtime(startHrTime)[0] * 1000 + process.hrtime(startHrTime)[1] / 1e6)).toFixed(2))
+    });
     return originalEnd.apply(this, args as any);
   };
 
@@ -261,6 +282,8 @@ app.use('/api', apiV1Router);
 app.use('/api', billingRouter);
 app.use('/api', contactRouter);
 
+if (process.env.SENTRY_DSN) Sentry.setupExpressErrorHandler(app);
+
 // Comprehensive Health & Diagnostics Endpoint
 app.get('/api/health', (_req, res) => {
   try {
@@ -301,7 +324,8 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
       error: 'Payload exceeds maximum allowed limit of 2MB'
     });
   }
-  console.error('Unhandled server error:', err);
+  logError('Unhandled server error', err, { status: err.status || 500 });
+  if (process.env.SENTRY_DSN) Sentry.captureException(err);
   res.status(err.status || 500).json({
     error: process.env.NODE_ENV === 'production' ? 'Internal server error' : (err.message || 'Internal server error')
   });
@@ -345,11 +369,14 @@ export async function startServer() {
         ? path.join(distDir, 'shell.html')
         : path.join(distDir, 'index.html');
       res.sendFile(routeFile && fs.existsSync(routeFile) ? routeFile : fallbackFile);
-    });
-  }
+  });
+}
+
+startMaintenanceScheduler();
+startInstagramSyncScheduler();
 
   const server = app.listen(PORT, '0.0.0.0', 4096, () => {
-    console.log(`[LIINX] Server running in ${isProd ? 'production' : 'development'} mode on http://localhost:${PORT}`);
+    log('info', 'Server started', { environment: isProd ? 'production' : 'development', port: PORT });
   });
 
   // Keep-alive tuning for reverse proxies (Cloudflare, AWS ALB, Nginx)
@@ -361,6 +388,15 @@ export async function startServer() {
 
 // Cluster Mode or direct execution
 if (process.env.NODE_ENV !== 'test') {
+  process.on('uncaughtException', error => {
+    logError('Uncaught exception', error);
+    if (process.env.SENTRY_DSN) Sentry.captureException(error);
+    process.exit(1);
+  });
+  process.on('unhandledRejection', reason => {
+    logError('Unhandled promise rejection', reason);
+    if (process.env.SENTRY_DSN) Sentry.captureException(reason);
+  });
   if (process.env.CLUSTER === 'true') {
     const { default: cluster } = await import('node:cluster');
     const { default: os } = await import('node:os');

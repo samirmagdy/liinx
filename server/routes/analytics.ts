@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
+import { createId } from '../utils/ids.js';
 
 export const analyticsRouter = Router();
 
@@ -188,7 +189,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
       const utmCampaign = (req.query.utm_campaign as string) || null;
       if (isLikelyBot(userAgent)) return res.redirect(302, targetUrl);
       const now = Date.now();
-      const clickId = 'clk_' + Math.random().toString(36).substring(2, 10);
+      const clickId = createId('clk');
 
       clickBuffer.push({
         id: clickId,
@@ -241,7 +242,7 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
     const userAgent = (req.headers['user-agent'] as string) || '';
     if (isLikelyBot(userAgent)) return res.json({ success: true, recorded: false, reason: 'bot' });
     const now = Date.now();
-    const viewId = 'vw_' + Math.random().toString(36).substring(2, 10);
+    const viewId = createId('vw');
 
     viewBuffer.push({
       id: viewId,

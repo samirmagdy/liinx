@@ -9,6 +9,8 @@ import {
   fetchInstagramMedia 
 } from '../services/instagramSync.js';
 import { encryptSecret, decryptSecret } from '../secretStore.js';
+import { logError } from '../logger.js';
+import { createId } from '../utils/ids.js';
 
 export const instagramRouter = Router();
 
@@ -177,7 +179,7 @@ instagramRouter.get('/integrations/instagram/callback', async (req: Request, res
     // Step 4: Persist in database
     const now = Date.now();
     const tokenExpiresAt = now + tokenExpiresIn * 1000;
-    const syncId = `ins_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const syncId = createId('ins');
 
     db.prepare(`
       INSERT INTO instagram_sync (
@@ -346,12 +348,14 @@ instagramRouter.post('/webhooks/instagram', async (req: Request, res: Response) 
   const clientSecret = process.env.INSTAGRAM_CLIENT_SECRET;
   const signature = req.headers['x-hub-signature-256'] as string;
 
-  if (clientSecret && signature) {
-    const hmac = crypto.createHmac('sha256', clientSecret);
-    const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
-    if (signature !== digest) {
-      return res.status(401).send('Invalid signature');
-    }
+  if (!clientSecret) return res.status(503).send('Instagram webhook is not configured.');
+  if (!signature) return res.status(401).send('Missing signature');
+  const rawBody = (req as any).rawBody || Buffer.from(JSON.stringify(req.body));
+  const digest = 'sha256=' + crypto.createHmac('sha256', clientSecret).update(rawBody).digest('hex');
+  const digestBuffer = Buffer.from(digest, 'utf8');
+  const signatureBuffer = Buffer.from(signature, 'utf8');
+  if (digestBuffer.length !== signatureBuffer.length || !crypto.timingSafeEqual(digestBuffer, signatureBuffer)) {
+    return res.status(401).send('Invalid signature');
   }
 
   const body = req.body;
@@ -373,8 +377,8 @@ instagramRouter.post('/webhooks/instagram', async (req: Request, res: Response) 
           if (media.length > 0) {
             syncMediaToBlocks(syncRow.profile_id, media);
           }
-        } catch {
-          // Log or silently retry in next cycle
+        } catch (error) {
+          logError('Instagram webhook sync failed', error, { profileId: syncRow.profile_id });
         }
       }
     }

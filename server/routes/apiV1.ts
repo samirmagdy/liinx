@@ -3,6 +3,9 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { isHttpUrl } from '../utils/urlValidation.js';
+import { createId } from '../utils/ids.js';
+import { invalidatePublicProfileCache } from './profiles.js';
 
 export const apiV1Router = Router();
 
@@ -87,7 +90,7 @@ apiV1Router.post('/studio/api-keys', requireAuth, (req: AuthenticatedRequest, re
     const fullKey = `liinx_live_${rawSecret}`;
     const keyHash = crypto.createHash('sha256').update(fullKey).digest('hex');
     const prefix = `liinx_live_${rawSecret.substring(0, 6)}...`;
-    const keyId = 'key_' + Math.random().toString(36).substring(2, 10);
+    const keyId = createId('key');
     const now = Date.now();
 
     db.prepare(`
@@ -158,7 +161,7 @@ apiV1Router.get('/v1/profile', requireApiKey, (req: ApiKeyRequest, res: Response
 
 const v1CreateBlockSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100),
-  url: z.string().url('A valid URL is required').refine(value => /^https?:$/i.test(new URL(value).protocol), 'Only HTTP(S) links are allowed.'),
+  url: z.string().refine(isHttpUrl, 'A valid HTTP(S) URL is required.'),
   subtitle: z.string().max(100).optional(),
   badge: z.string().max(30).optional(),
   highlighted: z.boolean().optional()
@@ -175,7 +178,7 @@ apiV1Router.post('/v1/blocks', requireApiKey, (req: ApiKeyRequest, res: Response
     const profile = req.profile;
     const { title, url, subtitle, badge, highlighted } = parse.data;
     const now = Date.now();
-    const id = 'blk_' + Math.random().toString(36).substring(2, 10);
+    const id = createId('blk');
 
     const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ?').get(profile.id) as { maxPos: number | null };
     const nextPos = (maxPosRow && maxPosRow.maxPos !== null) ? maxPosRow.maxPos + 1 : 0;
@@ -184,6 +187,7 @@ apiV1Router.post('/v1/blocks', requireApiKey, (req: ApiKeyRequest, res: Response
       INSERT INTO blocks (id, profile_id, type, title, url, subtitle, badge, highlighted, position, created_at, updated_at)
       VALUES (?, ?, 'link', ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(id, profile.id, title, url, subtitle || null, badge || null, highlighted ? 1 : 0, nextPos, now, now);
+    invalidatePublicProfileCache(profile.id);
 
     res.status(201).json({
       success: true,
@@ -215,6 +219,7 @@ apiV1Router.delete('/v1/blocks/:id', requireApiKey, (req: ApiKeyRequest, res: Re
     if (result.changes === 0) {
       return res.status(404).json({ error: 'Block not found or does not belong to your profile' });
     }
+    invalidatePublicProfileCache(profile.id);
 
     res.json({ success: true, message: 'Block deleted successfully' });
   } catch (err: any) {

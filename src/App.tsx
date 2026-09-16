@@ -23,6 +23,7 @@ import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
 import { BackgroundAnimation } from './components/BackgroundAnimation';
 import { Lock, ArrowRight, Loader2, AlertTriangle, RotateCw } from 'lucide-react';
+import * as Sentry from '@sentry/react';
 
 function chooseTemplate(profile: CreatorProfile, navigate: (path: string) => void) {
   const theme = encodeURIComponent(profile.themeId);
@@ -251,7 +252,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   declare props: ErrorBoundaryProps;
   state: ErrorBoundaryState = { hasError: false, error: null };
   static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
-  componentDidCatch(error: Error, info: React.ErrorInfo) { console.error('Application error', error, info); }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('Application error', error, info);
+    Sentry.captureException(error, { contexts: { react: { componentStack: info.componentStack || 'unknown' } } });
+  }
   render() {
     return this.state.hasError ? <LanguageProvider><CrashFallback /></LanguageProvider> : this.props.children;
   }

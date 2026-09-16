@@ -4,6 +4,7 @@ import { db } from '../db.js';
 import { hashPassword, comparePassword, signJwt } from '../auth.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
+import { createId } from '../utils/ids.js';
 import fs from 'fs';
 import path from 'path';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
@@ -136,8 +137,8 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     }
 
     const now = Date.now();
-    const userId = 'usr_' + Math.random().toString(36).substring(2, 10);
-    const profileId = 'prf_' + Math.random().toString(36).substring(2, 10);
+    const userId = createId('usr');
+    const profileId = createId('prf');
     const passwordHash = hashPassword(password);
     const displayName = cleanUsername.charAt(0).toUpperCase() + cleanUsername.slice(1);
 
@@ -146,7 +147,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
       { platform: 'email', url: `mailto:${cleanEmail}` }
     ]);
 
-    const starterBlockId = 'blk_' + Math.random().toString(36).substring(2, 10);
+    const starterBlockId = createId('blk');
 
     // Transaction for atomic registration
     const registerTx = db.transaction(() => {

@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { paidPlans } from '../../src/config/plans.js';
+import * as Sentry from '@sentry/node';
+import { logError } from '../logger.js';
 
 export const billingRouter = Router();
 
@@ -166,18 +168,18 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
       return res.status(503).json({ error: 'Stripe webhook secret is not configured.' });
     }
   } catch (err: any) {
-    console.error('Stripe webhook signature error:', err.message);
-    return res.status(400).json({ error: `Webhook Signature Verification Failed: ${err.message}` });
+    logError('Stripe webhook signature verification failed', err);
+    if (process.env.SENTRY_DSN) Sentry.captureException(err);
+    return res.status(400).json({ error: 'Webhook signature verification failed. Stripe will retry if appropriate.' });
   }
 
   try {
-    const now = Date.now();
-
     const duplicate = db.prepare('SELECT event_id FROM processed_webhook_events WHERE event_id = ?').get(event.id);
     if (duplicate) return res.json({ received: true, duplicate: true });
-    db.prepare('INSERT INTO processed_webhook_events (event_id, processed_at) VALUES (?, ?)').run(event.id, now);
 
-    switch (event.type) {
+    const processEvent = db.transaction(() => {
+      const now = Date.now();
+      switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const profileId = session.client_reference_id || session.metadata?.profileId;
@@ -254,11 +256,18 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
       default:
         // Ignore unhandled event types
         break;
-    }
+      }
+
+      // Mark only after all business logic succeeds, in the same transaction.
+      // Any failure rolls back both the subscription update and this marker.
+      db.prepare('INSERT INTO processed_webhook_events (event_id, processed_at) VALUES (?, ?)').run(event.id, now);
+    });
+    processEvent();
 
     res.json({ received: true });
   } catch (err: any) {
-    console.error('Error processing Stripe webhook event:', err);
-    res.status(500).json({ error: 'Webhook processing error: ' + err.message });
+    logError('Stripe webhook event processing failed', err, { eventId: event?.id, eventType: event?.type });
+    if (process.env.SENTRY_DSN) Sentry.captureException(err, { tags: { stripe_event_type: event?.type || 'unknown' } });
+    res.status(500).json({ error: 'Webhook processing failed. Stripe will retry the event.' });
   }
 });

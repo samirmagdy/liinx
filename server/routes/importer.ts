@@ -4,6 +4,9 @@ import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { importFromPublicUrl } from '../services/importer.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
+import { isHttpUrl } from '../utils/urlValidation.js';
+import { createId } from '../utils/ids.js';
+import { invalidatePublicProfileCache } from './profiles.js';
 
 export const importerRouter = Router();
 
@@ -14,13 +17,13 @@ const previewSchema = z.object({
 const commitSchema = z.object({
   links: z.array(z.object({
     title: z.string().min(1).max(150),
-    url: z.string().url().refine(value => /^https?:$/i.test(new URL(value).protocol), 'Only HTTP(S) links are allowed.'),
+    url: z.string().refine(isHttpUrl, 'Only HTTP(S) links are allowed.'),
     subtitle: z.string().max(250).optional()
   })).max(100),
   updateProfileInfo: z.boolean().optional(),
   displayName: z.string().max(120).optional(),
   bio: z.string().max(500).optional(),
-  avatarUrl: z.string().url().refine(value => /^https?:$/i.test(new URL(value).protocol), 'Only HTTP(S) avatar URLs are allowed.').optional()
+  avatarUrl: z.string().refine(isHttpUrl, 'Only HTTP(S) avatar URLs are allowed.').optional()
 });
 
 // Authenticated: Preview imported links from public URL
@@ -66,7 +69,7 @@ importerRouter.post('/studio/import/commit', requireAuth, sharedRateLimit({ name
 
     const insertMany = db.transaction((linkItems: typeof links) => {
       for (const item of linkItems) {
-        const id = `blk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const id = createId('blk');
         insertBlock.run(
           id,
           profileId,
@@ -102,6 +105,7 @@ importerRouter.post('/studio/import/commit', requireAuth, sharedRateLimit({ name
     });
 
     insertMany(links);
+    invalidatePublicProfileCache(profileId);
 
     res.json({
       success: true,

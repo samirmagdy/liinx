@@ -62,6 +62,7 @@ import confetti from 'canvas-confetti';
 import { BookingEditor } from './BookingEditor';
 import { SaveQueue } from '../utils/saveQueue';
 import { useLanguage } from '../context/LanguageContext';
+import { friendlyErrorMessage } from '../utils/errors';
 
 interface BuilderStudioProps {
   initialProfile?: CreatorProfile;
@@ -163,7 +164,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         loadProfilesList();
       }
     } catch (err: any) {
-      setProfileSwitchError(err.message || ui('Failed to switch profile'));
+      setProfileSwitchError(friendlyErrorMessage(err, ui('Failed to switch profile')));
     }
   };
 
@@ -191,7 +192,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         loadProfilesList();
       }
     } catch (err: any) {
-      setCreateProfileError(err.message || 'Failed to create new bio profile.');
+      setCreateProfileError(friendlyErrorMessage(err, 'We could not create the new bio profile. Check the details and try again.'));
     } finally {
       setIsCreatingProfile(false);
     }
@@ -255,7 +256,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       setCreatedApiKey(res.apiKey);
       loadApiKeys();
     } catch (err: any) {
-      setGenerateKeyError(err.message || 'Failed to generate API key');
+      setGenerateKeyError(friendlyErrorMessage(err, 'We could not generate the API key. Please try again.'));
     } finally {
       setIsGeneratingKey(false);
     }
@@ -333,7 +334,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     } catch (err: any) {
       setInstagramFeedback({
         type: 'error',
-        message: err.message || 'Meta Instagram App credentials not configured in server environment.'
+        message: friendlyErrorMessage(err, 'Instagram connection is not available right now. Please try again later.')
       });
     }
   };
@@ -354,7 +355,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     } catch (err: any) {
       setInstagramFeedback({
         type: 'error',
-        message: err.message || 'Instagram sync failed.'
+        message: friendlyErrorMessage(err, 'Instagram could not be synced. Check the connection and try again.')
       });
     } finally {
       setIsSyncingInstagram(false);
@@ -370,7 +371,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     } catch (err: any) {
       setInstagramFeedback({
         type: 'error',
-        message: err.message || 'Failed to toggle auto-sync.'
+        message: friendlyErrorMessage(err, 'We could not update auto-sync. Please try again.')
       });
     }
   };
@@ -389,7 +390,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     } catch (err: any) {
       setInstagramFeedback({
         type: 'error',
-        message: err.message || 'Failed to disconnect.'
+        message: friendlyErrorMessage(err, 'We could not disconnect Instagram. Please try again.')
       });
     }
   };
@@ -422,7 +423,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     } catch (err: any) {
       setInstagramFeedback({
         type: 'error',
-        message: err.message || 'Caption extraction failed.'
+        message: friendlyErrorMessage(err, 'We could not read that caption. Check the text and try again.')
       });
     } finally {
       setIsTestingCaption(false);
@@ -486,7 +487,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       setProfile(updated);
       triggerAutoSave({ avatarUrl: res.url });
     } catch (err: any) {
-      setAvatarError(err.message || ui('Image upload failed'));
+      setAvatarError(friendlyErrorMessage(err, ui('Image upload failed')));
     } finally {
       setUploadingImage(false);
     }
@@ -526,7 +527,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         : await api.billing.createCheckoutSession(targetPlan);
       window.location.assign(res.url);
     } catch (err: any) {
-      setBillingError(err.message || ui('Failed to update plan'));
+      setBillingError(friendlyErrorMessage(err, ui('Failed to update plan')));
       setSaveStatus('error');
     }
   };
@@ -1977,7 +1978,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           setPixelsError(null);
                           setTimeout(() => setPixelsSavedFeedback(false), 3000);
                         } catch (err: any) {
-                          setPixelsError(err.message || ui('Failed to save pixel settings'));
+                          setPixelsError(friendlyErrorMessage(err, ui('Failed to save pixel settings')));
                           setPixelsSavedFeedback(false);
                         } finally {
                           setIsSavingPixels(false);
@@ -2085,7 +2086,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           } catch (err: any) {
                             setDnsVerificationResult({
                               verified: false,
-                              message: err.message || 'DNS verification request failed'
+                              message: friendlyErrorMessage(err, 'We could not verify the domain right now. Check your DNS records and try again.')
                             });
                           } finally {
                             setIsVerifyingDns(false);
@@ -2114,7 +2115,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           } catch (err: any) {
                             setDomainFeedback({
                               type: 'error',
-                              message: err.message || ui('Failed to save custom domain')
+                              message: friendlyErrorMessage(err, ui('Failed to save custom domain'))
                             });
                           } finally {
                             setIsSavingDomain(false);
@@ -2205,7 +2206,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             setStylingError(null);
                             setTimeout(() => setStylingSavedFeedback(false), 3000);
                           } catch (err: any) {
-                            setStylingError(err.message || ui('Failed to save styling'));
+                            setStylingError(friendlyErrorMessage(err, ui('Failed to save styling')));
                             setStylingSavedFeedback(false);
                           } finally {
                             setIsSavingStyling(false);
@@ -2291,7 +2292,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                                       setConfirmRevokeKeyId(null);
                                       loadApiKeys();
                                     } catch (err: any) {
-                                      setApiKeyError(err.message || ui('Failed to revoke key'));
+                                      setApiKeyError(friendlyErrorMessage(err, ui('Failed to revoke key')));
                                     }
                                   }}
                                   className="px-2.5 py-1 rounded-lg bg-rose-700 hover:bg-rose-800 text-white text-[11px] font-bold transition-colors cursor-pointer"
