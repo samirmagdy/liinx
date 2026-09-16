@@ -8,6 +8,7 @@ import { createId } from '../utils/ids.js';
 import bcrypt from 'bcryptjs';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { hasEntitlement } from '../entitlements.js';
+import { cleanupUploadedFileIfUnreferenced } from '../services/uploadLifecycle.js';
 
 export const blocksRouter = Router();
 
@@ -35,6 +36,11 @@ function prepareBlockExtra(type: string, extra: Record<string, unknown> | undefi
   return JSON.stringify(copy);
 }
 
+function ownedUploadForUser(fileUrl: unknown, userId: string): boolean {
+  if (typeof fileUrl !== 'string' || !fileUrl.startsWith('/uploads/')) return true;
+  return Boolean(db.prepare('SELECT 1 FROM uploaded_files WHERE path = ? AND owner_user_id = ?').get(fileUrl, userId));
+}
+
 // Public content-gate verification. Protected content is deliberately returned
 // only after the password is checked server-side; it is never included in the
 // public profile response.
@@ -60,6 +66,9 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
     }
 
     const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, pageId, extra } = parse.data as BlockRequestData & { type: ContractBlockType; title: string };
+    if (type === 'download' && !ownedUploadForUser(extra?.fileUrl, req.user!.userId)) {
+      return res.status(403).json({ error: 'The uploaded file does not belong to this account.' });
+    }
     if (type === 'booking' && (!bookingUrl(url) || extra != null)) {
       return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
     }
@@ -246,15 +255,19 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
       return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
     }
 
-    let existingExtra = {};
+    let existingExtra: Record<string, unknown> = {};
     if (existing.extra_json) {
       try { existingExtra = JSON.parse(existing.extra_json); } catch (e) {}
     }
 
     const mergedExtra = data.extra !== undefined ? { ...existingExtra, ...data.extra } : existingExtra;
+    const previousFileUrl = existing.type === 'download' && typeof (existingExtra as any).fileUrl === 'string' ? (existingExtra as any).fileUrl : null;
     if (data.extra !== undefined) {
       const extraParse = blockExtraSchemas[existing.type as ContractBlockType].safeParse(mergedExtra);
       if (!extraParse.success) return res.status(400).json({ error: extraParse.error.issues[0]?.message || 'Invalid block data.' });
+    }
+    if (existing.type === 'download' && !ownedUploadForUser(mergedExtra.fileUrl, req.user!.userId)) {
+      return res.status(403).json({ error: 'The uploaded file does not belong to this account.' });
     }
 
     const saved = db.prepare(`
@@ -288,6 +301,8 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
     );
 
     if (saved.changes === 0) return res.status(409).json({ error: 'This block changed in another tab. Reload it before retrying your changes.' });
+    const nextFileUrl = existing.type === 'download' && typeof (mergedExtra as any).fileUrl === 'string' ? (mergedExtra as any).fileUrl : null;
+    if (previousFileUrl && previousFileUrl !== nextFileUrl) cleanupUploadedFileIfUnreferenced(previousFileUrl, req.user!.userId);
     res.json({ success: true, revision: now, message: 'Block updated successfully.' });
     invalidatePublicProfileCache(profileId);
   } catch (err: any) {
@@ -302,10 +317,17 @@ blocksRouter.delete('/studio/blocks/:id', requireAuth, (req: AuthenticatedReques
     const blockId = req.params.id;
     const profileId = req.user!.profileId;
 
+    const existing = db.prepare('SELECT type, extra_json FROM blocks WHERE id = ? AND profile_id = ?').get(blockId, profileId) as { type: string; extra_json?: string | null } | undefined;
+    let previousFileUrl: string | null = null;
+    if (existing?.type === 'download' && existing.extra_json) {
+      try { const extra = JSON.parse(existing.extra_json); previousFileUrl = typeof extra?.fileUrl === 'string' ? extra.fileUrl : null; } catch { previousFileUrl = null; }
+    }
     const result = db.prepare('DELETE FROM blocks WHERE id = ? AND profile_id = ?').run(blockId, profileId);
     if (result.changes === 0) {
       return res.status(404).json({ error: 'Block not found or unauthorized.' });
     }
+
+    if (previousFileUrl) cleanupUploadedFileIfUnreferenced(previousFileUrl, req.user!.userId);
 
     res.json({ success: true, message: 'Block deleted successfully.' });
     invalidatePublicProfileCache(profileId);

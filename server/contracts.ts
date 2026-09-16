@@ -25,6 +25,7 @@ function rejectReservedKeys(value: Record<string, unknown>, context: z.Refinemen
 const extraObject = (shape: z.ZodRawShape = {}) => z.object(shape).catchall(z.unknown()).superRefine(rejectReservedKeys);
 const optionalHttpUrl = z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value), 'Must be an HTTP(S) URL.').optional().nullable();
 const optionalSafeUrl = z.string().max(MAX_URL).refine(value => value === '' || isSafeLinkUrl(value), 'Must use HTTP(S), mailto, or tel.').optional().nullable();
+const optionalDownloadUrl = z.string().max(MAX_URL).refine(value => value === '' || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value) || isHttpUrl(value), 'Must be an uploaded file or HTTP(S) URL.').optional().nullable();
 const shortText = z.string().max(500);
 const itemId = z.string().min(1).max(100).optional();
 
@@ -151,7 +152,7 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   spacer: extraObject({ height: z.number().int().min(16).max(240).optional() }),
   carousel: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
   form: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional(), fields: z.array(formFieldSchema).max(20).optional() }),
-  download: extraObject({ fileUrl: optionalSafeUrl, downloadName: z.string().max(150).optional(), description: z.string().max(1000).optional() }),
+  download: extraObject({ fileUrl: optionalDownloadUrl, downloadName: z.string().max(150).optional(), sizeBytes: z.number().int().min(0).max(25 * 1024 * 1024).optional(), mimeType: z.enum(['application/pdf', 'application/zip', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4']).optional(), description: z.string().max(1000).optional() }),
   map: extraObject({ location: z.string().max(300).optional() }),
   faq: extraObject({ items: z.array(faqItemSchema).max(50).optional() }),
   testimonials: extraObject({ items: z.array(testimonialItemSchema).max(50).optional() }),

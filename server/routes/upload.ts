@@ -7,8 +7,14 @@ import crypto from 'node:crypto';
 import { requireAuth } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { db } from '../db.js';
+import { cleanupUploadedFileIfUnreferenced } from '../services/uploadLifecycle.js';
 
 export const uploadRouter = Router();
+
+function safeDisplayFilename(value: string): string {
+  const name = path.basename(value).replace(/[\u0000-\u001f\u007f\\/<>:"|?*]+/g, '_').trim();
+  return (name || 'download').slice(0, 150);
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -195,10 +201,18 @@ uploadRouter.post('/api/upload/file', requireAuth, sharedRateLimit({ name: 'file
     fs.writeFileSync(targetPath, file.buffer, { flag: 'wx' });
     const fileUrl = `/uploads/${safeFilename}`;
     db.prepare('INSERT INTO uploaded_files (path, owner_user_id, created_at) VALUES (?, ?, ?)').run(fileUrl, (req as any).user.userId, Date.now());
-    return res.status(201).json({ success: true, url: fileUrl, filename: safeFilename, originalName: file.originalname, size: file.size, mimeType: detected.mime });
+    return res.status(201).json({ success: true, url: fileUrl, filename: safeFilename, originalName: safeDisplayFilename(file.originalname), size: file.size, mimeType: detected.mime });
   } catch (error) {
     try { fs.unlinkSync(targetPath); } catch { /* no file was persisted, or cleanup already completed */ }
     console.error('Failed to write uploaded file:', error);
     return res.status(500).json({ error: 'Failed to store uploaded file.' });
   }
+});
+
+uploadRouter.delete('/api/upload/file', requireAuth, (req, res) => {
+  const fileUrl = typeof req.body?.url === 'string' ? req.body.url : null;
+  const row = fileUrl ? db.prepare('SELECT path FROM uploaded_files WHERE path = ? AND owner_user_id = ?').get(fileUrl, (req as any).user.userId) : undefined;
+  if (!row) return res.status(404).json({ error: 'Uploaded file not found.' });
+  if (!cleanupUploadedFileIfUnreferenced(fileUrl, (req as any).user.userId)) return res.status(409).json({ error: 'The file is still in use or could not be removed.' });
+  return res.json({ success: true });
 });

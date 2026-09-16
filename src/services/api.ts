@@ -174,13 +174,14 @@ export const api = {
       }
       return data;
     },
-    uploadFile: async (file: File): Promise<{ success: boolean; url: string; originalName: string }> => {
+    uploadFile: async (file: File): Promise<{ success: boolean; url: string; originalName: string; size: number; mimeType: string }> => {
       const form = new FormData(); form.append('file', file);
       const response = await fetch(`${API_BASE_URL}/api/upload/file`, { method: 'POST', body: form, credentials: 'include', headers: authStorage.getToken() ? { Authorization: `Bearer ${authStorage.getToken()}` } : undefined });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data) throw Object.assign(new Error(data?.error || 'File upload failed'), { status: response.status });
       return data;
     },
+    deleteUploadedFile: async (url: string) => request<{ success: boolean }>('/api/upload/file', { method: 'DELETE', body: JSON.stringify({ url }) }),
     getProfiles: async () => {
       return request<{
         profiles: { id: string; username: string; displayName: string; avatarUrl: string; plan: string; category: string }[];

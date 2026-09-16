@@ -674,15 +674,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   const handleBlockFileUpload = async (blockId: string, file: File) => {
+    let uploaded: { url: string; originalName: string; size: number; mimeType: string } | null = null;
     try {
       setSaveStatus('saving');
-      const uploaded = await api.studio.uploadFile(file);
+      uploaded = await api.studio.uploadFile(file);
       if (queueRef.current?.dirty && !(await queueRef.current.flush())) throw new Error(ui('Changes are not saved. Check your connection and retry.'));
-      queueBlockUpdate(blockId, { extra: { fileUrl: uploaded.url, downloadName: uploaded.originalName } });
+      queueBlockUpdate(blockId, { extra: { fileUrl: uploaded.url, downloadName: uploaded.originalName, sizeBytes: uploaded.size, mimeType: uploaded.mimeType } });
       if (!(await queueRef.current!.flush())) throw new Error(ui('Changes are not saved. Check your connection and retry.'));
-      setProfile(previous => ({ ...previous, blocks: previous.blocks.map(candidate => candidate.id === blockId ? { ...candidate, fileUrl: uploaded.url, downloadName: uploaded.originalName } as any : candidate) }));
+      setProfile(previous => ({ ...previous, blocks: previous.blocks.map(candidate => candidate.id === blockId ? { ...candidate, fileUrl: uploaded!.url, downloadName: uploaded!.originalName, sizeBytes: uploaded!.size, mimeType: uploaded!.mimeType } as any : candidate) }));
       setSaveStatus('saved');
-    } catch (error) { setSaveStatus('error'); setSaveErrorBanner(friendlyErrorMessage(error, ui('File upload failed'))); }
+    } catch (error) {
+      if (uploaded) await api.studio.deleteUploadedFile(uploaded.url).catch(() => {});
+      setSaveStatus('error'); setSaveErrorBanner(friendlyErrorMessage(error, ui('File upload failed')));
+    }
   };
 
   const handleBackgroundImageUpload = async (file: File) => {

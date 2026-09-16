@@ -2065,3 +2065,62 @@ Baseline: branch `main`, commit `953ff8e` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `38 — Download block and file lifecycle`
+
+## Task 38 — Download block and file lifecycle
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `9f91745` at task start. The worktree was clean; prior task changes were preserved. Task changes were validated against the current code rather than assuming Prompt 02 findings were still present.
+
+### Scope and changed files
+
+- `server/contracts.ts`: permits only an exact local upload path or HTTP(S) URL for download resources; retains bounded display name, size, and validated MIME metadata.
+- `server/routes/upload.ts`: sanitizes returned display filenames and adds authenticated cleanup for unreferenced owned uploads.
+- `server/services/uploadLifecycle.ts`: centralizes ownership, shared-reference checks, path-safe deletion, and database/file cleanup.
+- `server/routes/blocks.ts`: validates ownership when attaching local uploads and cleans replaced/deleted download assets only after reference checks.
+- `src/services/api.ts`: exposes upload metadata and cleanup calls.
+- `src/components/BuilderStudio.tsx`: persists uploaded file URL, server-derived filename, size, and MIME; failed block persistence attempts clean up the newly uploaded file.
+- `src/components/PublicBioView.tsx`: renders filename/size information, honest unavailable and preview states, and an accessible download action without a fake `#` destination.
+- `tests/download_file_lifecycle.test.ts`: isolated regression coverage for supported formats, byte equality, headers, ownership, shared references, cleanup, missing resources, and metadata validation.
+
+### Findings and behavior
+
+- Download resources are public by product policy, not protected by an unguessable URL. The public route serves only validated files recorded by the upload service; local files are delivered as attachments with `nosniff`, immutable caching, and server-derived MIME handling. Non-image uploaded active content is not rendered inline on the application origin.
+- Supported file signatures are PDF, ZIP, MP3, WAV, MP4, and plain text, with a 25 MiB upload limit. The persisted extension and response MIME come from content detection, not the user filename or declared multipart MIME.
+- Display-label edits cannot alter the stored content type or delivery headers. Local upload references can be attached only by their owning account.
+- Replacements and block deletion remove an upload only when no block or supported profile field references it. Failed persistence cleanup is best-effort and reports the save error rather than claiming success; existing Prompt 02 persistence-failure coverage remains green.
+- Missing resources return an unavailable state/404. Preview download actions are disabled. External HTTP(S) download URLs remain creator-configured public links and are not transformed into Liinx-hosted protected downloads.
+- Existing unsafe/legacy files are not blindly deleted. The current serving path does not serve unregistered legacy paths; cleanup is reference-aware.
+
+### Acceptance criteria
+
+- PASS — Supported formats upload and download byte-for-byte. Evidence: `tests/download_file_lifecycle.test.ts`, 6 signatures and response-body equality.
+- PASS — Download delivery uses server-derived MIME, attachment disposition, and `nosniff`; display labels do not control executable MIME handling. Evidence: lifecycle assertions and serving implementation.
+- PASS — Missing/malformed resources fail cleanly without a fake successful download. Evidence: missing block public route returns 404; invalid MIME metadata returns 400.
+- PASS — Ownership is enforced for local upload attachment and cleanup; cross-account deletion returns 404. Evidence: lifecycle regression test.
+- PASS — Replacement/removal cleanup preserves shared assets and removes unreferenced assets. Evidence: shared-reference and replacement/deletion assertions, including filesystem checks.
+- PASS — Failed block persistence removes the newly uploaded file through the cleanup path. Evidence: BuilderStudio error path plus existing Prompt 02 persistence-failure regression coverage.
+- PASS — Public files are explicitly documented as public; protected-download authorization is not promised. Evidence: route policy and ledger.
+- NOT RUN — Actual browser download UX, mobile layouts, deployed asset-origin isolation, CDN cache behavior, and live storage outage/retry verification. Local API execution used disposable storage only.
+
+### Exact commands and outcomes
+
+- `task38_tmp=$(mktemp -d); DATABASE_PATH="$task38_tmp/liinx.sqlite" UPLOADS_DIR="$task38_tmp/uploads" mkdir -p "$UPLOADS_DIR"` — PASS: disposable SQLite database and uploads directory established for validation.
+- `task38_tmp=$(mktemp -d); export DATABASE_PATH="$task38_tmp/liinx.sqlite"; export UPLOADS_DIR="$task38_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/download_file_lifecycle.test.ts` — PASS: typecheck and 1 test file / 3 tests.
+- `task38_tmp=$(mktemp -d); export DATABASE_PATH="$task38_tmp/liinx.sqlite"; export UPLOADS_DIR="$task38_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/download_file_lifecycle.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 67 tests, production build, 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests did not use production data, production storage, paid providers, or external file services.
+
+### Implementation commit
+
+`9efbff79767916e25170f1b1497ae879b7419aca` — `feat: complete download block and file lifecycle`.
+
+### Unresolved risks and dependencies
+
+- Browser and deployed-origin checks remain required for actual download UX, responsive behavior, cache invalidation, and confirmation that deployment keeps uploaded active content off the application execution origin.
+- Public-resource policy is intentional; a future protected-download feature must add authenticated/expiring delivery rather than relying on URL secrecy.
+- Orphan cleanup after an infrastructure-level file/database outage is not a background reconciliation job; operational storage reconciliation remains outside this task.
+
+### Next eligible prompt
+
+`39 — Form field editor`
