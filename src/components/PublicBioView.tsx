@@ -851,7 +851,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               return <p role="status" className="rounded-xl border px-4 py-5 text-center text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.subtextColor }}>{ui('No matching content on this page.')}</p>;
             }
             return visibleBlocks.map((block, blockIndex) => {
-            if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
+            if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} previewOnly={previewOnly} /></div>;
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!
               const redirectUrl = analyticsHref(`/r/${block.id}`);

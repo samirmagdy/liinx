@@ -255,7 +255,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
         {/* Profile Blocks */}
         <div className="space-y-3 mb-8">
           {(Array.isArray(profile.blocks) ? profile.blocks : []).map((block) => {
-            if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
+            if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} previewOnly={!interactive} /></div>;
             if (block.type === 'link') {
               const isComplexLink = Boolean(block.subtitle);
               const isPill = theme.cardRadius === 'full' && !isComplexLink;

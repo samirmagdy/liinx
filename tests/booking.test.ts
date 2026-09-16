@@ -6,7 +6,8 @@ import { bookingUrl } from '../src/utils/booking';
 describe('Calendly booking', () => {
   it('accepts official event URLs and rejects unsafe or unrelated URLs', () => {
     expect(bookingUrl('https://calendly.com/studio/consultation?utm_source=bio')).toBe('https://calendly.com/studio/consultation');
-    for (const url of ['javascript:alert(1)', 'http://calendly.com/a/b', 'https://calendly.com.evil.test/a/b', 'https://user@calendly.com/a/b', 'https://calendly.com/', 'https://example.com/a/b']) expect(bookingUrl(url)).toBeNull();
+    expect(bookingUrl('https://calendly.com/studio')).toBe('https://calendly.com/studio');
+    for (const url of ['javascript:alert(1)', 'http://calendly.com/a/b', 'https://calendly.com.evil.test/a/b', 'https://user@calendly.com/a/b', 'https://calendly.com/', 'https://calendly.com/studio/consultation/embed', 'https://example.com/a/b']) expect(bookingUrl(url)).toBeNull();
   });
   it('persists booking blocks, rejects invalid updates, and supports removal', async () => {
     const username = `book_${Date.now()}`;
