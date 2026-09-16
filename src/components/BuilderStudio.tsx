@@ -160,6 +160,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     autoSyncEnabled?: boolean;
     lastSyncedAt?: number;
     syncedLinksCount?: number;
+    tokenExpiresAt?: number;
+    needsReconnect?: boolean;
+    lastSyncError?: string;
+    accountRequirement?: string;
   } | null>(null);
   const [isSyncingInstagram, setIsSyncingInstagram] = useState(false);
   const [instagramCaptionInput, setInstagramCaptionInput] = useState('');
@@ -3024,10 +3028,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     </div>
                     <div>
                       <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
-                        <span>{ui("Instagram Caption Auto-Sync")}</span>
+                        <span>{ui("Instagram Caption Link Sync")}</span>
                       </h3>
                       <p className="text-xs text-neutral-500 mt-0.5">
-                        {ui("Automatically pull and create link buttons whenever you mention links in post captions.")}</p>
+                        {ui("Sync links found in captions from your connected professional Instagram account. This does not provide an Instagram media grid.")}</p>
                     </div>
                   </div>
                   <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border ${
@@ -3066,6 +3070,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         <span className="font-mono text-neutral-500">
                           {instagramStatus.syncedLinksCount ?? 0} {ui("synced links active")}</span>
                       </div>
+                      {instagramStatus.needsReconnect && (
+                        <p role="alert" className="text-[11px] text-rose-700">
+                          {ui("Instagram access expired. Reconnect to sync again; existing links are unchanged.")}
+                        </p>
+                      )}
+                      {instagramStatus.lastSyncError && !instagramStatus.needsReconnect && (
+                        <p role="alert" className="text-[11px] text-rose-700">{instagramStatus.lastSyncError}</p>
+                      )}
                       <div className="flex items-center gap-2">
                         <button
                           onClick={handleSyncInstagramNow}
@@ -3084,7 +3096,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     </div>
 
                     <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs">
-                      <span className="text-neutral-600">{ui("Auto-sync on incoming Webhooks:")}</span>
+                      <span className="text-neutral-600">{ui("Scheduled sync:")}</span>
                       <button
                         onClick={handleToggleInstagramAutoSync}
                         className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold transition-colors cursor-pointer ${

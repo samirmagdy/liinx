@@ -166,15 +166,28 @@ export function initDatabase() {
       access_token TEXT NOT NULL,
       token_type TEXT DEFAULT 'bearer',
       token_expires_at INTEGER,
+      token_issued_at INTEGER,
       auto_sync_enabled INTEGER DEFAULT 1,
       last_synced_at INTEGER,
       last_media_id TEXT,
+      last_sync_error TEXT,
+      last_sync_attempt_at INTEGER,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
     );
 
     CREATE INDEX IF NOT EXISTS idx_insta_profile ON instagram_sync(profile_id);
+
+    CREATE TABLE IF NOT EXISTS instagram_oauth_states (
+      state_hash TEXT PRIMARY KEY,
+      profile_id TEXT NOT NULL,
+      redirect_uri TEXT NOT NULL,
+      expires_at INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_instagram_oauth_expiry ON instagram_oauth_states(expires_at);
 
     CREATE TABLE IF NOT EXISTS uploaded_files (
       path TEXT PRIMARY KEY,
@@ -293,6 +306,14 @@ export function initDatabase() {
   try {
     db.exec("ALTER TABLE newsletter_subscribers ADD COLUMN unsubscribe_token_hash TEXT");
   } catch (e) {}
+
+  for (const column of [
+    'token_issued_at INTEGER',
+    'last_sync_error TEXT',
+    'last_sync_attempt_at INTEGER'
+  ]) {
+    try { db.exec(`ALTER TABLE instagram_sync ADD COLUMN ${column}`); } catch (e) {}
+  }
 
   // Encrypt legacy Instagram tokens once the integration key is available.
   // Existing v1 ciphertext is left untouched; plaintext remains readable only

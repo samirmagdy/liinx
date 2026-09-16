@@ -6,7 +6,9 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { 
   extractLinksFromCaption, 
   syncMediaToBlocks, 
-  fetchInstagramMedia 
+  fetchInstagramMedia,
+  refreshInstagramToken,
+  InstagramProviderError
 } from '../services/instagramSync.js';
 import { encryptSecret, decryptSecret } from '../secretStore.js';
 import { logError } from '../logger.js';
@@ -19,7 +21,7 @@ instagramRouter.get('/integrations/instagram/status', requireAuth, (req: Authent
   try {
     const profileId = req.user!.profileId;
     const row = db.prepare(`
-      SELECT id, instagram_user_id, instagram_username, auto_sync_enabled, last_synced_at, last_media_id, created_at
+      SELECT id, instagram_user_id, instagram_username, auto_sync_enabled, last_synced_at, last_media_id, last_sync_error, token_expires_at
       FROM instagram_sync
       WHERE profile_id = ?
     `).get(profileId) as any;
@@ -33,7 +35,9 @@ instagramRouter.get('/integrations/instagram/status', requireAuth, (req: Authent
       return res.json({
         connected: false,
         configured: isConfigured,
-        autoSyncEnabled: false
+        autoSyncEnabled: false,
+        provider: 'instagram_login',
+        accountRequirement: 'Instagram professional account (Business or Creator)'
       });
     }
 
@@ -51,7 +55,12 @@ instagramRouter.get('/integrations/instagram/status', requireAuth, (req: Authent
       userId: row.instagram_user_id,
       autoSyncEnabled: Boolean(row.auto_sync_enabled),
       lastSyncedAt: row.last_synced_at,
-      syncedLinksCount: linkCountRow.count
+      syncedLinksCount: linkCountRow.count,
+      tokenExpiresAt: row.token_expires_at,
+      needsReconnect: Boolean(row.token_expires_at && row.token_expires_at <= Date.now()),
+      lastSyncError: row.last_sync_error || undefined,
+      provider: 'instagram_login',
+      accountRequirement: 'Instagram professional account (Business or Creator)'
     });
   } catch (err: any) {
     return res.status(500).json({ error: 'Failed to retrieve Instagram status: ' + err.message });
@@ -70,13 +79,16 @@ instagramRouter.get('/integrations/instagram/auth-url', requireAuth, (req: Authe
       });
     }
 
-    // CSRF state with profileId and HMAC signature
-    const statePayload = `${req.user!.profileId}:${Date.now()}`;
-    const secret = process.env.JWT_SECRET || 'secret';
-    const stateHmac = crypto.createHmac('sha256', secret).update(statePayload).digest('hex');
-    const state = `${statePayload}:${stateHmac}`;
+    // Single-use state is stored server-side; do not put profile ownership in a
+    // bearer value that can be replayed or moved between browser sessions.
+    const state = crypto.randomBytes(32).toString('base64url');
+    const stateHash = crypto.createHash('sha256').update(state).digest('hex');
+    const now = Date.now();
+    db.prepare('DELETE FROM instagram_oauth_states WHERE expires_at <= ?').run(now);
+    db.prepare(`INSERT INTO instagram_oauth_states (state_hash, profile_id, redirect_uri, expires_at, created_at) VALUES (?, ?, ?, ?, ?)`)
+      .run(stateHash, req.user!.profileId, redirectUri, now + 10 * 60 * 1000, now);
 
-    const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${encodeURIComponent(state)}`;
+    const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_business_basic&response_type=code&state=${encodeURIComponent(state)}`;
 
     return res.json({ authUrl });
   } catch (err: any) {
@@ -94,33 +106,37 @@ instagramRouter.get('/integrations/instagram/callback', async (req: Request, res
   };
 
   if (error || !code) {
+    if (typeof state === 'string' && /^[A-Za-z0-9_-]{40,}$/.test(state)) {
+      const stateHash = crypto.createHash('sha256').update(state).digest('hex');
+      db.prepare('DELETE FROM instagram_oauth_states WHERE state_hash = ?').run(stateHash);
+    }
     const reason = encodeURIComponent(error_description || error || 'Authorization was cancelled or denied');
     return res.redirect(`/studio?instagram_error=${reason}`);
   }
 
-  // Validate state
+  // Validate and consume state atomically. The callback intentionally does not
+  // require the Liinx session because the OAuth provider returns to this URL;
+  // ownership is bound to the single-use server-side state.
   if (!state) {
     return res.redirect('/studio?instagram_error=Missing_security_state');
   }
 
-  const [profileId, timestampStr, signature] = state.split(':');
-  if (!profileId || !timestampStr || !signature) {
-    return res.redirect('/studio?instagram_error=Malformed_security_state');
-  }
-  if (!/^\d+$/.test(timestampStr) || Date.now() - Number(timestampStr) > 10 * 60 * 1000) {
-    return res.redirect('/studio?instagram_error=Expired_security_state');
-  }
-
-  const secret = process.env.JWT_SECRET || 'secret';
-  const expectedHmac = crypto.createHmac('sha256', secret).update(`${profileId}:${timestampStr}`).digest('hex');
-  if (expectedHmac.length !== signature.length || !crypto.timingSafeEqual(Buffer.from(expectedHmac), Buffer.from(signature))) {
-    return res.redirect('/studio?instagram_error=Invalid_state_signature');
-  }
+  if (!/^[A-Za-z0-9_-]{40,}$/.test(state)) return res.redirect('/studio?instagram_error=Malformed_security_state');
+  const stateHash = crypto.createHash('sha256').update(state).digest('hex');
+  const consumed = db.transaction(() => {
+    const row = db.prepare('SELECT profile_id, redirect_uri, expires_at FROM instagram_oauth_states WHERE state_hash = ?').get(stateHash) as { profile_id: string; redirect_uri: string; expires_at: number } | undefined;
+    if (!row) return undefined;
+    db.prepare('DELETE FROM instagram_oauth_states WHERE state_hash = ?').run(stateHash);
+    return row;
+  })();
+  if (!consumed) return res.redirect('/studio?instagram_error=Invalid_or_reused_security_state');
+  if (consumed.expires_at <= Date.now()) return res.redirect('/studio?instagram_error=Expired_security_state');
+  const profileId = consumed.profile_id;
 
   try {
     const clientId = process.env.INSTAGRAM_CLIENT_ID;
     const clientSecret = process.env.INSTAGRAM_CLIENT_SECRET;
-    const redirectUri = process.env.INSTAGRAM_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/integrations/instagram/callback`;
+    const redirectUri = consumed.redirect_uri;
 
     if (!clientId || !clientSecret) {
       return res.redirect('/studio?instagram_error=Missing_server_credentials');
@@ -183,25 +199,26 @@ instagramRouter.get('/integrations/instagram/callback', async (req: Request, res
 
     db.prepare(`
       INSERT INTO instagram_sync (
-        id, profile_id, instagram_user_id, instagram_username, access_token, token_type, token_expires_at, auto_sync_enabled, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'bearer', ?, 1, ?, ?)
+        id, profile_id, instagram_user_id, instagram_username, access_token, token_type, token_expires_at, token_issued_at, auto_sync_enabled, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, 'bearer', ?, ?, 1, ?, ?)
       ON CONFLICT(profile_id) DO UPDATE SET
         instagram_user_id = excluded.instagram_user_id,
         instagram_username = excluded.instagram_username,
         access_token = excluded.access_token,
         token_expires_at = excluded.token_expires_at,
+        token_issued_at = excluded.token_issued_at,
+        last_sync_error = NULL,
         auto_sync_enabled = 1,
         updated_at = excluded.updated_at
-    `).run(syncId, profileId, String(tokenData.user_id), username, encryptSecret(longLivedToken), tokenExpiresAt, now, now);
+    `).run(syncId, profileId, String(tokenData.user_id), username, encryptSecret(longLivedToken), tokenExpiresAt, now, now, now);
 
     // Initial media pull
     try {
       const mediaItems = await fetchInstagramMedia(longLivedToken);
-      if (mediaItems.length > 0) {
-        syncMediaToBlocks(profileId, mediaItems);
-      }
-    } catch {
-      // Sync can proceed manually later
+      syncMediaToBlocks(profileId, mediaItems);
+    } catch (error) {
+      db.prepare('UPDATE instagram_sync SET last_sync_error = ?, updated_at = ? WHERE profile_id = ?')
+        .run(error instanceof Error ? error.message : 'Initial Instagram sync failed.', Date.now(), profileId);
     }
 
     return res.redirect('/studio?instagram_connected=true');
@@ -215,7 +232,7 @@ instagramRouter.post('/integrations/instagram/sync', requireAuth, async (req: Au
   try {
     const profileId = req.user!.profileId;
     const syncRow = db.prepare(`
-      SELECT access_token, token_expires_at, instagram_username 
+      SELECT access_token, token_expires_at, token_issued_at, last_sync_attempt_at, instagram_username
       FROM instagram_sync 
       WHERE profile_id = ?
     `).get(profileId) as any;
@@ -224,13 +241,39 @@ instagramRouter.post('/integrations/instagram/sync', requireAuth, async (req: Au
       return res.status(400).json({ error: 'No Instagram account connected to this profile.' });
     }
 
-    // Check token expiration
-    if (syncRow.token_expires_at && Date.now() > syncRow.token_expires_at) {
+    const now = Date.now();
+    if (syncRow.last_sync_attempt_at && now - syncRow.last_sync_attempt_at < 30_000) {
+      return res.status(429).json({ error: 'Instagram sync was requested recently. Please retry shortly.' });
+    }
+    db.prepare('UPDATE instagram_sync SET last_sync_attempt_at = ?, last_sync_error = NULL, updated_at = ? WHERE profile_id = ?')
+      .run(now, now, profileId);
+
+    // Long-lived Instagram Login tokens can be refreshed only while valid and
+    // after the provider's minimum token age. Never silently use an expired token.
+    if (syncRow.token_expires_at && now >= syncRow.token_expires_at) {
+      db.prepare('UPDATE instagram_sync SET last_sync_error = ?, updated_at = ? WHERE profile_id = ?')
+        .run('Instagram access expired. Reconnect your account.', now, profileId);
       return res.status(401).json({ error: 'Instagram access token has expired. Please reconnect your account.' });
     }
 
-    // Fetch media from Instagram
-    const mediaItems = await fetchInstagramMedia(decryptSecret(syncRow.access_token));
+    let accessToken = decryptSecret(syncRow.access_token);
+    if (syncRow.token_expires_at && syncRow.token_issued_at &&
+        syncRow.token_expires_at - now < 7 * 24 * 60 * 60 * 1000 &&
+        now - syncRow.token_issued_at >= 24 * 60 * 60 * 1000) {
+      try {
+        const refreshed = await refreshInstagramToken(accessToken);
+        const refreshedAt = Date.now();
+        db.prepare('UPDATE instagram_sync SET access_token = ?, token_expires_at = ?, token_issued_at = ?, updated_at = ? WHERE profile_id = ?')
+          .run(encryptSecret(refreshed.accessToken), refreshedAt + refreshed.expiresIn * 1000, refreshedAt, refreshedAt, profileId);
+        accessToken = refreshed.accessToken;
+      } catch {
+        db.prepare('UPDATE instagram_sync SET last_sync_error = ?, updated_at = ? WHERE profile_id = ?')
+          .run('Instagram access could not be refreshed. Reconnect your account.', Date.now(), profileId);
+        return res.status(401).json({ error: 'Instagram access needs to be refreshed. Please reconnect your account.' });
+      }
+    }
+
+    const mediaItems = await fetchInstagramMedia(accessToken);
     const result = syncMediaToBlocks(profileId, mediaItems);
 
     return res.json({
@@ -240,7 +283,17 @@ instagramRouter.post('/integrations/instagram/sync', requireAuth, async (req: Au
       linksCreated: result.linksCreated
     });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message || 'Instagram sync failed.' });
+    const message = err instanceof InstagramProviderError && (err.status === 401 || err.status === 403)
+      ? 'Instagram authorization is no longer valid. Please reconnect your account.'
+      : 'Instagram sync failed. Existing content was preserved; please retry.';
+    if (err instanceof InstagramProviderError && (err.status === 401 || err.status === 403)) {
+      db.prepare('UPDATE instagram_sync SET last_sync_error = ?, updated_at = ? WHERE profile_id = ?')
+        .run(message, Date.now(), req.user!.profileId);
+      return res.status(401).json({ error: message });
+    }
+    db.prepare('UPDATE instagram_sync SET last_sync_error = ?, updated_at = ? WHERE profile_id = ?')
+      .run(message, Date.now(), req.user!.profileId);
+    return res.status(502).json({ error: message });
   }
 });
 
@@ -322,7 +375,7 @@ instagramRouter.post('/integrations/instagram/disconnect', requireAuth, (req: Au
   try {
     const profileId = req.user!.profileId;
     db.prepare('DELETE FROM instagram_sync WHERE profile_id = ?').run(profileId);
-    return res.json({ success: true, message: 'Instagram account disconnected successfully.' });
+    return res.json({ success: true, message: 'Instagram access removed from Liinx. Revoke Liinx in Instagram settings if you also want to remove Meta-side authorization.' });
   } catch (err: any) {
     return res.status(500).json({ error: 'Failed to disconnect: ' + err.message });
   }
@@ -374,10 +427,10 @@ instagramRouter.post('/webhooks/instagram', async (req: Request, res: Response) 
       if (syncRow && syncRow.access_token) {
         try {
           const media = await fetchInstagramMedia(decryptSecret(syncRow.access_token));
-          if (media.length > 0) {
-            syncMediaToBlocks(syncRow.profile_id, media);
-          }
+          syncMediaToBlocks(syncRow.profile_id, media);
         } catch (error) {
+          db.prepare('UPDATE instagram_sync SET last_sync_error = ?, updated_at = ? WHERE profile_id = ?')
+            .run('Instagram sync failed. Existing content was preserved; please reconnect or retry.', Date.now(), syncRow.profile_id);
           logError('Instagram webhook sync failed', error, { profileId: syncRow.profile_id });
         }
       }

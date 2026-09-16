@@ -16,6 +16,13 @@ export interface InstagramMediaItem {
   timestamp?: string;
 }
 
+export class InstagramProviderError extends Error {
+  constructor(message: string, public readonly status?: number) {
+    super(message);
+    this.name = 'InstagramProviderError';
+  }
+}
+
 /**
  * Extracts, cleans, and derives contextual titles for URLs found inside an Instagram caption.
  */
@@ -152,11 +159,32 @@ export async function fetchInstagramMedia(accessToken: string): Promise<Instagra
     } catch {
       // Use default errorMsg
     }
-    throw new Error(errorMsg);
+    throw new InstagramProviderError(errorMsg, response.status);
   }
 
   const data = await response.json() as { data?: InstagramMediaItem[] };
   return data.data || [];
+}
+
+export async function refreshInstagramToken(accessToken: string): Promise<{ accessToken: string; expiresIn: number }> {
+  const url = `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(accessToken)}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+  try {
+    const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } });
+    const body = await response.text();
+    if (!response.ok) throw new InstagramProviderError('Instagram token refresh failed.', response.status);
+    const data = JSON.parse(body) as { access_token?: string; expires_in?: number };
+    if (!data.access_token || !Number.isFinite(data.expires_in) || data.expires_in <= 0) {
+      throw new InstagramProviderError('Instagram returned an invalid refresh response.', response.status);
+    }
+    return { accessToken: data.access_token, expiresIn: data.expires_in };
+  } catch (error) {
+    if (error instanceof InstagramProviderError) throw error;
+    throw new InstagramProviderError('Instagram token refresh is unavailable. Please reconnect your account.');
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 /**
@@ -229,13 +257,13 @@ export function syncMediaToBlocks(profileId: string, mediaItems: InstagramMediaI
     if (latestMediaId) {
       db.prepare(`
         UPDATE instagram_sync 
-        SET last_synced_at = ?, last_media_id = ?, updated_at = ?
+        SET last_synced_at = ?, last_media_id = ?, last_sync_error = NULL, updated_at = ?
         WHERE profile_id = ?
       `).run(now, latestMediaId, now, profileId);
     } else {
       db.prepare(`
         UPDATE instagram_sync 
-        SET last_synced_at = ?, updated_at = ?
+        SET last_synced_at = ?, last_sync_error = NULL, updated_at = ?
         WHERE profile_id = ?
       `).run(now, now, profileId);
     }

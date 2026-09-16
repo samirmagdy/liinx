@@ -2703,3 +2703,62 @@ Baseline: branch `main`, commit `ba84caf` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `50 — Instagram integration`
+
+## Task 50 — Instagram integration
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `1d921ae` at task start. The worktree was clean; prior task changes were preserved. No repository-level `AGENTS.md` or additional project instruction file was present.
+
+### Scope and changed files
+
+- `server/routes/instagram.ts`: uses current Instagram Login scope `instagram_business_basic`, stores single-use OAuth state server-side, reports expiry/reconnect/error state without exposing tokens, throttles manual sync, refreshes eligible long-lived tokens, classifies provider failures, and accurately describes local disconnect behavior.
+- `server/services/instagramSync.ts`: classifies provider errors, adds bounded token refresh handling, and acknowledges empty successful syncs while retaining duplicate-safe link insertion.
+- `server/instagramScheduler.ts`: records expired/provider failures, acknowledges empty results, and avoids reporting a successful sync when the provider failed.
+- `server/db.ts`: adds idempotent integration columns and the transactional `instagram_oauth_states` table with expiry indexing.
+- `src/components/BuilderStudio.tsx`: distinguishes caption-link sync from an Instagram media grid, shows account/expiry/error state, and labels the periodic setting as scheduled sync rather than claiming webhook delivery.
+- `tests/instagram_task50.test.ts`: covers current OAuth scope, single-use state, encrypted-token expiry handling, provider failure preservation, and truthful status responses.
+
+### Findings and behavior
+
+- The old OAuth flow used deprecated `user_profile,user_media` scopes and embedded profile/timestamp/HMAC state in the callback value. It now targets Instagram Login at `www.instagram.com`, requests `instagram_business_basic`, hashes state in the database, binds it to the selected profile and redirect URI, expires it after 10 minutes, and consumes it exactly once.
+- The supported account requirement is an Instagram professional account: Business or Creator. This task uses Instagram API with Instagram Login and does not support consumer accounts or the separate Facebook Login/Page-account flow.
+- Tokens are encrypted with the existing authenticated-encryption service. Legacy plaintext integration rows are migrated by the existing database migration; malformed/legacy values require reconnect rather than being returned or logged.
+- Manual sync is rate-limited to one request per 30 seconds per profile. Existing blocks are only appended after the media fetch succeeds and remain intact on timeout, provider error, refresh failure, or expired access. Repeated media/link sync remains destination-deduplicated.
+- Long-lived tokens are refreshed through the documented `refresh_access_token` endpoint only while valid and at least 24 hours old. Expired or invalid authorization returns a reconnect state. Disconnect removes Liinx-held access data; no unsupported Meta-side revoke endpoint is claimed, so the UI directs the creator to revoke Liinx in Instagram settings when needed.
+- The feature is caption-link sync only. No Instagram grid renderer, automated caption scraping, post metrics, follower counts, or fabricated live response is presented. Manual caption parsing remains explicitly separate from OAuth sync.
+- Official documentation reviewed: [Instagram API with Instagram Login](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/), [Instagram Login getting started](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/get-started), and [refresh access token](https://developers.facebook.com/docs/instagram-platform/reference/refresh_access_token/). Meta documentation was rate-limited during direct retrieval; the current official URL targets and permission names were cross-checked against Meta’s maintained Postman collection.
+
+### Acceptance criteria
+
+- PASS — Local OAuth contract/state validation. Evidence: current authorization host/scope, profile-bound hashed state, expiry, cancellation consumption, and replay rejection in `tests/instagram_task50.test.ts`.
+- PASS — Tokens are encrypted at rest and never returned by status or error responses. Evidence: existing `secretStore` plus encrypted-token regression fixture and status assertions.
+- PASS — Expired tokens request reconnection without contacting Instagram. Evidence: focused test returns HTTP 401, `needsReconnect: true`, and zero provider calls.
+- PASS — Provider failure preserves existing content and does not return success. Evidence: focused 503 test returns HTTP 502, unchanged block count, and persisted error status.
+- PASS — Duplicate sync insertion remains idempotent and scheduler acknowledges empty results. Evidence: existing `tests/instagram-sync.test.ts` deduplication tests and updated transaction/scheduler paths.
+- PASS — Disconnect removes local access and accurately states that Meta-side revocation requires creator action. Evidence: existing disconnect/ownership tests and response copy.
+- PASS — Mocked/local error and webhook signature tests pass. Evidence: focused suite includes existing webhook signature coverage; no mocked response is recorded as live verification.
+- NOT RUN — Real Meta OAuth, account-type validation, token refresh, media sync, permission review, webhook subscription delivery, and revocation with authorized credentials. No configured Meta client credentials or authorized professional test account was available.
+- NOT RUN — Instagram grid display; it is not implemented or claimed by this integration. Grid rendering remains a separate future feature.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `1d921aeb027ea4bcda35d9194d25612a86b6a216`.
+- `npm run lint` — PASS: TypeScript check.
+- `testdb=$(mktemp -d /tmp/liinx-task-50-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-50-final-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/instagram_task50.test.ts tests/instagram-sync.test.ts tests/audit_fixes.test.ts` — PASS: 3 files / 47 tests against disposable SQLite/uploads paths.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `git diff --check` — PASS.
+
+### Implementation commit
+
+Pending commit for Task 50 implementation and this ledger entry.
+
+### Unresolved risks and dependencies
+
+- Live use requires Meta app configuration, exact registered HTTPS redirect URI, the Instagram Login product, a Business/Creator test account, required permission review/app mode, and authorized credentials. These were not available and must be verified externally.
+- Provider API semantics, token refresh/revocation, webhook subscription, rate limits, and account eligibility remain unverified against a live account. The implementation does not claim those checks passed.
+- The current webhook handler validates signatures but no local evidence proves Meta has been configured to deliver events. Scheduled polling is the honest supported automatic path in this repository.
+
+### Next eligible prompt
+
+`51 — Custom domains and TLS`
