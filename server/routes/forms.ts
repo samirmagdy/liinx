@@ -53,6 +53,73 @@ formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', lim
 });
 
 formsRouter.get('/api/studio/form-submissions', requireAuth, (req: AuthenticatedRequest, res) => {
-  const rows = db.prepare(`SELECT id, block_id AS blockId, fields_json AS fieldsJson, created_at AS createdAt FROM form_submissions WHERE profile_id = ? ORDER BY created_at DESC LIMIT 500`).all(req.user!.profileId) as any[];
-  res.json({ submissions: rows.map(row => ({ ...row, fields: JSON.parse(row.fieldsJson) })) });
+  try {
+    const profileId = req.user!.profileId;
+    const page = Math.max(1, Number.parseInt(String(req.query.page || '1'), 10) || 1);
+    const pageSize = Math.min(100, Math.max(1, Number.parseInt(String(req.query.pageSize || '25'), 10) || 25));
+    const blockId = typeof req.query.blockId === 'string' && req.query.blockId ? req.query.blockId : null;
+    if (blockId && !db.prepare("SELECT id FROM blocks WHERE id = ? AND profile_id = ? AND type = 'form'").get(blockId, profileId)) return res.status(404).json({ error: 'Form not found.' });
+    const where = blockId ? 'WHERE profile_id = ? AND block_id = ?' : 'WHERE profile_id = ?';
+    const args = blockId ? [profileId, blockId] : [profileId];
+    const total = (db.prepare(`SELECT COUNT(*) AS count FROM form_submissions ${where}`).get(...args) as { count: number }).count;
+    const rows = db.prepare(`SELECT id, block_id AS blockId, fields_json AS fieldsJson, created_at AS createdAt FROM form_submissions ${where} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`).all(...args, pageSize, (page - 1) * pageSize) as any[];
+    const formRows = db.prepare("SELECT id, title, extra_json AS extraJson FROM blocks WHERE profile_id = ? AND type = 'form'").all(profileId) as Array<{ id: string; title: string; extraJson?: string | null }>;
+    const formInfo = new Map(formRows.map(form => {
+      let extra: Record<string, unknown> = {};
+      try { extra = JSON.parse(form.extraJson || '{}') as Record<string, unknown>; } catch {}
+      const labels = Object.fromEntries(normalizeFormFields(extra.fields).map(field => [field.name, field.label]));
+      return [form.id, { title: form.title, fieldLabels: labels }];
+    }));
+    res.json({
+      submissions: rows.map(row => ({ ...row, formTitle: formInfo.get(row.blockId)?.title || 'Form', fieldLabels: formInfo.get(row.blockId)?.fieldLabels || {}, fields: JSON.parse(row.fieldsJson) })),
+      page, pageSize, total, hasMore: page * pageSize < total, limited: false
+    });
+  } catch (error) {
+    console.error('Form submissions error:', error);
+    res.status(500).json({ error: 'Failed to retrieve form responses.' });
+  }
+});
+
+formsRouter.get('/api/studio/form-submissions/export', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const profileId = req.user!.profileId;
+    const blockId = typeof req.query.blockId === 'string' && req.query.blockId ? req.query.blockId : null;
+    if (blockId && !db.prepare("SELECT id FROM blocks WHERE id = ? AND profile_id = ? AND type = 'form'").get(blockId, profileId)) return res.status(404).json({ error: 'Form not found.' });
+    const where = blockId ? 'WHERE profile_id = ? AND block_id = ?' : 'WHERE profile_id = ?';
+    const args = blockId ? [profileId, blockId] : [profileId];
+    const rows = db.prepare(`SELECT id, block_id AS blockId, fields_json AS fieldsJson, created_at AS createdAt FROM form_submissions ${where} ORDER BY created_at DESC, id DESC`).all(...args) as any[];
+    const forms = db.prepare("SELECT id, title, extra_json AS extraJson FROM blocks WHERE profile_id = ? AND type = 'form'").all(profileId) as Array<{ id: string; title: string; extraJson?: string | null }>;
+    const formInfo = new Map(forms.map(form => {
+      let extra: Record<string, unknown> = {};
+      try { extra = JSON.parse(form.extraJson || '{}') as Record<string, unknown>; } catch {}
+      return [form.id, { title: form.title, fieldLabels: Object.fromEntries(normalizeFormFields(extra.fields).map(field => [field.name, field.label])) }];
+    }));
+    const neutralize = (value: unknown) => { const text = String(value ?? ''); return /^[=+\-@]/.test(text) ? `'${text}` : text; };
+    const csvCell = (value: unknown) => `"${neutralize(value).replace(/"/g, '""')}"`;
+    const lines = ['Submitted At,Form,Field,Value'];
+    for (const row of rows) {
+      let fields: Record<string, unknown> = {};
+      try { fields = JSON.parse(row.fieldsJson) as Record<string, unknown>; } catch { fields = {}; }
+      const info = formInfo.get(row.blockId) || { title: 'Form', fieldLabels: {} };
+      for (const [name, value] of Object.entries(fields)) lines.push([new Date(row.createdAt).toISOString(), info.title, info.fieldLabels[name] || name, value].map(csvCell).join(','));
+    }
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="liinx-${blockId ? 'form' : 'forms'}-responses.csv"`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(lines.join('\n'));
+  } catch (error) {
+    console.error('Export form submissions error:', error);
+    res.status(500).json({ error: 'Failed to export form responses.' });
+  }
+});
+
+formsRouter.delete('/api/studio/form-submissions/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const result = db.prepare('DELETE FROM form_submissions WHERE id = ? AND profile_id = ?').run(req.params.id, req.user!.profileId);
+    if (result.changes === 0) return res.status(404).json({ error: 'Form response not found.' });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete form submission error:', error);
+    res.status(500).json({ error: 'Failed to delete form response.' });
+  }
 });

@@ -208,7 +208,18 @@ export const api = {
         method: 'POST'
       });
     },
-    getFormSubmissions: async () => request<{ submissions: { id: string; blockId: string; fields: Record<string, string>; createdAt: number }[] }>('/api/studio/form-submissions'),
+    getFormSubmissions: async (options: { page?: number; pageSize?: number; blockId?: string } = {}) => {
+      const query = new URLSearchParams({ page: String(options.page || 1), pageSize: String(options.pageSize || 25) });
+      if (options.blockId) query.set('blockId', options.blockId);
+      return request<{ submissions: { id: string; blockId: string; formTitle: string; fieldLabels: Record<string, string>; fields: Record<string, string>; createdAt: number }[]; page: number; pageSize: number; total: number; hasMore: boolean; limited: boolean }>(`/api/studio/form-submissions?${query}`);
+    },
+    exportFormSubmissions: async (blockId?: string) => {
+      const query = blockId ? `?blockId=${encodeURIComponent(blockId)}` : '';
+      const response = await fetch(`${API_BASE_URL}/api/studio/form-submissions/export${query}`, { credentials: 'include', headers: authStorage.getToken() ? { Authorization: `Bearer ${authStorage.getToken()}` } : undefined });
+      if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Failed to export form responses.');
+      return response.blob();
+    },
+    deleteFormSubmission: async (id: string) => request<{ success: boolean }>(`/api/studio/form-submissions/${id}`, { method: 'DELETE' }),
     verifyCustomDomain: async (domain: string) => {
       return request<{
         domain: string;

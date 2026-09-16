@@ -2236,3 +2236,57 @@ Baseline: branch `main`, commit `afd3832` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `41 — Creator form inbox`
+
+## Task 41 — Creator form inbox
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `1288d6c` at task start. The worktree was clean; prior task changes were preserved.
+
+### Scope and changed files
+
+- `server/routes/forms.ts`: adds ownership-scoped pagination, per-form filtering, totals/has-more metadata, form titles and field labels, CSV export, and authorized response deletion. The previous hard `LIMIT 500` slice is removed; retained responses remain reachable through pagination.
+- `src/services/api.ts`: adds typed inbox pagination/filtering, CSV export, and deletion calls.
+- `src/components/BuilderStudio.tsx`: replaces the misleading recent/all slice with loading, error/retry, empty, paginated, filtered, labeled response views, export, and confirmed deletion; clears inbox state on profile changes.
+- `tests/form_inbox.test.ts`: seeds 506 retained responses, verifies pagination beyond 500, filtering, label-aware CSV export/formula neutralization, and cross-account deletion.
+
+### Findings and behavior
+
+- The prior inbox fetched only 500 rows, rendered raw field-name JSON, offered no filtering/export/deletion, and used “View all responses” for only the loaded slice.
+- The API now accepts `page`, `pageSize` (bounded to 100), and an owned form `blockId` filter. It returns `total`, `hasMore`, `page`, `pageSize`, and `limited: false`; there is no undocumented retention cap in this route.
+- CSV export uses the same optional form filter, readable configured field labels, ISO timestamps, no-store caching, and spreadsheet-formula neutralization for values beginning with `=`, `+`, `-`, or `@`.
+- Responses remain separate from newsletter subscribers. No combined audience table or undocumented merge was introduced.
+- Deletion requires authenticated ownership and returns 404 for another profile or an already-deleted response. This is the current retention control; no automatic retention period was invented.
+- Profile switching clears the current inbox immediately and reloads the new profile’s page one/filter state. Request cancellation prevents an old response from repopulating the new profile’s inbox.
+
+### Acceptance criteria
+
+- PASS — Browsing, per-form filtering, pagination, timestamps, and readable labels are implemented. Evidence: inbox UI/API and `tests/form_inbox.test.ts`.
+- PASS — More than one page and more than the former 500-row cap remain reachable. Evidence: 506 seeded rows; page 6 returns the final 5 and `total` is 505 for the filtered form.
+- PASS — CSV export respects ownership/filtering and neutralizes spreadsheet formulas. Evidence: selected-form export excludes another form and prefixes the formula fixture with `'`.
+- PASS — Authorized deletion is implemented without mixing newsletter contacts into form responses. Evidence: cross-account deletion returns 404; owned deletion succeeds; separate routes/tables remain.
+- PASS — Loading, error/retry, empty, and success/retained-response states are distinct in the creator UI. Evidence: dedicated state branches and retry control.
+- PASS — Profile-specific inbox state is cleared and refetched on profile switching. Evidence: `profile.id` reset effect and profile-scoped fetch cancellation.
+- NOT RUN — Actual browser pagination/filter/export download, keyboard confirmation, responsive layout, and screen-reader verification. API behavior is covered; browser execution was not performed.
+
+### Exact commands and outcomes
+
+- `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
+- `task41_tmp=$(mktemp -d); export DATABASE_PATH="$task41_tmp/liinx.sqlite"; export UPLOADS_DIR="$task41_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_inbox.test.ts tests/form_submission_pipeline.test.ts tests/profile_switching_onboarding.test.ts` — PASS: typecheck and 3 test files / 8 tests.
+- `task41_tmp=$(mktemp -d); export DATABASE_PATH="$task41_tmp/liinx.sqlite"; export UPLOADS_DIR="$task41_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_inbox.test.ts tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts tests/concurrency.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 6 test files / 48 tests, production build, 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests used disposable SQLite and uploads paths; no production data or newsletter audience data was used.
+
+### Implementation commit
+
+`TASK41_PENDING` — `feat: complete creator form inbox` (will be replaced with the implementation commit SHA after commit).
+
+### Unresolved risks and dependencies
+
+- Browser export/download, accessibility, and profile-switching interaction checks remain required.
+- No automatic retention schedule is defined; deletion is creator-authorized and permanent at the application layer.
+- CSV exports are intentionally full for the selected filter and may be large; pagination applies to browsing, not export.
+
+### Next eligible prompt
+
+`42 — Newsletter capture and subscriber management`

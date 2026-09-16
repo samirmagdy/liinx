@@ -303,8 +303,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [pageRedirectUntilInput, setPageRedirectUntilInput] = useState(profile.pageRedirectUntil ? new Date(profile.pageRedirectUntil).toISOString().slice(0, 16) : '');
   const [isSavingPageSettings, setIsSavingPageSettings] = useState(false);
   const [pageSettingsFeedback, setPageSettingsFeedback] = useState<string | null>(null);
-  const [formSubmissions, setFormSubmissions] = useState<{ id: string; blockId: string; fields: Record<string, string>; createdAt: number }[]>([]);
-  const [showAllFormSubmissions, setShowAllFormSubmissions] = useState(false);
+  const [formSubmissions, setFormSubmissions] = useState<{ id: string; blockId: string; formTitle: string; fieldLabels: Record<string, string>; fields: Record<string, string>; createdAt: number }[]>([]);
+  const [formSubmissionPage, setFormSubmissionPage] = useState(1);
+  const [formSubmissionTotal, setFormSubmissionTotal] = useState(0);
+  const [formSubmissionHasMore, setFormSubmissionHasMore] = useState(false);
+  const [formSubmissionFilter, setFormSubmissionFilter] = useState('');
+  const [formSubmissionRetry, setFormSubmissionRetry] = useState(0);
+  const [formSubmissionsLoading, setFormSubmissionsLoading] = useState(false);
+  const [formSubmissionsError, setFormSubmissionsError] = useState<string | null>(null);
   const [isSavingStyling, setIsSavingStyling] = useState(false);
   const [stylingSavedFeedback, setStylingSavedFeedback] = useState(false);
   const [stylingError, setStylingError] = useState<string | null>(null);
@@ -319,6 +325,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [copiedKey, setCopiedKey] = useState(false);
   const [confirmRevokeKeyId, setConfirmRevokeKeyId] = useState<string | null>(null);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFormSubmissions([]);
+    setFormSubmissionPage(1);
+    setFormSubmissionTotal(0);
+    setFormSubmissionHasMore(false);
+    setFormSubmissionFilter('');
+    setFormSubmissionsError(null);
+  }, [profile.id]);
 
   useEffect(() => {
     setShareTitleInput(profile.shareTitle || '');
@@ -418,10 +433,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           if (res && Array.isArray(res.subscribers)) setSubscribers(res.subscribers);
         })
         .catch(() => setDataError(true));
-      api.studio.getFormSubmissions()
-        .then(res => setFormSubmissions(res.submissions || []))
-        .catch(() => setDataError(true));
-
       api.instagram.getStatus()
         .then(status => {
           if (status) setInstagramStatus(status);
@@ -433,6 +444,18 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       }
     }
   }, [activeTab, profile.id, profile.plan]);
+
+  useEffect(() => {
+    if (activeTab !== 'settings') return;
+    let cancelled = false;
+    setFormSubmissionsLoading(true);
+    setFormSubmissionsError(null);
+    api.studio.getFormSubmissions({ page: formSubmissionPage, pageSize: 25, blockId: formSubmissionFilter || undefined })
+      .then(res => { if (cancelled) return; setFormSubmissions(res.submissions || []); setFormSubmissionTotal(res.total || 0); setFormSubmissionHasMore(Boolean(res.hasMore)); })
+      .catch(error => { if (!cancelled) setFormSubmissionsError(friendlyErrorMessage(error, ui('Could not load form responses.'))); })
+      .finally(() => { if (!cancelled) setFormSubmissionsLoading(false); });
+    return () => { cancelled = true; };
+  }, [activeTab, profile.id, formSubmissionPage, formSubmissionFilter, formSubmissionRetry]);
 
   const handleDeleteProfile = async (targetId: string) => {
     if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
@@ -1190,6 +1213,30 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   // Export CSV
+  const handleExportFormResponses = async () => {
+    try {
+      const blob = await api.studio.exportFormSubmissions(formSubmissionFilter || undefined);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `liinx-${formSubmissionFilter ? 'form' : 'forms'}-responses.csv`;
+      document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    } catch (error) {
+      setFormSubmissionsError(friendlyErrorMessage(error, ui('Could not export form responses.')));
+    }
+  };
+
+  const handleDeleteFormSubmission = async (id: string) => {
+    if (!window.confirm(ui('Delete this form response permanently?'))) return;
+    try {
+      await api.studio.deleteFormSubmission(id);
+      setFormSubmissions(current => current.filter(item => item.id !== id));
+      setFormSubmissionTotal(current => Math.max(0, current - 1));
+    } catch (error) {
+      setFormSubmissionsError(friendlyErrorMessage(error, ui('Could not delete form response.')));
+    }
+  };
+
   const handleExportCsv = () => {
     if (subscribers.length === 0) return;
     const headers = 'Email,Subscribed At\n';
@@ -2819,10 +2866,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <button type="button" onClick={async () => { const username = window.prompt(ui('New username')); if (!username) return; const displayName = window.prompt(ui('Display name'), profile.displayName) || profile.displayName; try { const result = await api.studio.createProfile({ username, displayName, duplicateProfileId: profile.id }); authStorage.setToken(result.token); const next = await api.studio.getProfile(); setProfile(next); setCustomTheme(resolveTheme(next.themeId, next.customTheme)); loadProfilesList(); } catch (error) { setPageSettingsFeedback(friendlyErrorMessage(error, ui('Could not duplicate profile.'))); } }} className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-bold text-neutral-900 hover:border-neutral-900">{ui('Duplicate Profile')}</button>
                 </div>
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
-                  <h3 className="font-bold text-sm text-neutral-900">{ui('Form submissions')}</h3>
-                  <p className="text-xs text-neutral-500">{formSubmissions.length ? `${formSubmissions.length} ${ui('stored responses')}` : ui('No form responses yet.')}</p>
-                  <div className="max-h-96 space-y-2 overflow-auto">{(showAllFormSubmissions ? formSubmissions : formSubmissions.slice(0, 3)).map(item => <div key={item.id} className="rounded-xl border border-neutral-200 p-3 text-[11px] text-neutral-700"><span className="font-mono text-neutral-400">{new Date(item.createdAt).toLocaleString()}</span><pre className="mt-1 whitespace-pre-wrap font-sans">{JSON.stringify(item.fields, null, 2)}</pre></div>)}</div>
-                  {formSubmissions.length > 3 && <button type="button" onClick={() => setShowAllFormSubmissions(value => !value)} className="text-[11px] font-semibold text-neutral-700 underline">{showAllFormSubmissions ? ui('Show recent only') : ui('View all responses')}</button>}
+                  <div className="flex flex-wrap items-start justify-between gap-2"><div><h3 className="font-bold text-sm text-neutral-900">{ui('Form submissions')}</h3><p className="text-xs text-neutral-500">{formSubmissionTotal ? `${formSubmissionTotal} ${ui('stored responses')}` : ui('No form responses yet.')}</p></div><button type="button" disabled={formSubmissionsLoading || formSubmissionTotal === 0} onClick={() => void handleExportFormResponses()} className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-[11px] font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-40">{ui('Export responses CSV')}</button></div>
+                  <label className="block text-[11px] font-semibold text-neutral-700">{ui('Filter by form')}<select value={formSubmissionFilter} onChange={event => { setFormSubmissionFilter(event.target.value); setFormSubmissionPage(1); }} className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[11px] font-normal text-neutral-900"><option value="">{ui('All forms')}</option>{profile.blocks.filter(block => block.type === 'form').map(block => <option key={block.id} value={block.id}>{block.title}</option>)}</select></label>
+                  {formSubmissionsLoading ? <p role="status" className="py-6 text-center text-xs text-neutral-500">{ui('Loading form responses...')}</p> : formSubmissionsError ? <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800"><p>{formSubmissionsError}</p><button type="button" onClick={() => setFormSubmissionRetry(value => value + 1)} className="mt-2 font-semibold underline">{ui('Retry')}</button></div> : formSubmissions.length === 0 ? <p role="status" className="py-6 text-center text-xs text-neutral-500">{formSubmissionTotal ? ui('No responses on this page.') : ui('No form responses yet.')}</p> : <div className="max-h-96 space-y-2 overflow-auto">{formSubmissions.map(item => <article key={item.id} className="rounded-xl border border-neutral-200 bg-white p-3 text-[11px] text-neutral-700"><div className="flex items-start justify-between gap-2"><div><p className="font-semibold text-neutral-900">{item.formTitle}</p><time className="font-mono text-neutral-400" dateTime={new Date(item.createdAt).toISOString()}>{new Date(item.createdAt).toLocaleString()}</time></div><button type="button" onClick={() => void handleDeleteFormSubmission(item.id)} aria-label={`${ui('Delete response')} ${item.formTitle}`} className="text-rose-700 underline">{ui('Delete')}</button></div><dl className="mt-2 space-y-1">{Object.entries(item.fields).map(([name, value]) => <div key={name} className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] gap-2"><dt className="font-semibold break-words">{item.fieldLabels[name] || name}</dt><dd className="whitespace-pre-wrap break-words">{value || '—'}</dd></div>)}</dl></article>)}</div>}
+                  <div className="flex items-center justify-between gap-2 border-t border-neutral-200 pt-2 text-[11px] text-neutral-500"><span>{formSubmissionTotal ? `${ui('Page')} ${formSubmissionPage} · ${formSubmissionTotal} ${ui('total')}` : ''}</span><div className="flex gap-2"><button type="button" disabled={formSubmissionsLoading || formSubmissionPage <= 1} onClick={() => setFormSubmissionPage(page => Math.max(1, page - 1))} className="rounded border border-neutral-300 px-2 py-1 font-semibold disabled:opacity-40">{ui('Previous')}</button><button type="button" disabled={formSubmissionsLoading || !formSubmissionHasMore} onClick={() => setFormSubmissionPage(page => page + 1)} className="rounded border border-neutral-300 px-2 py-1 font-semibold disabled:opacity-40">{ui('Next')}</button></div></div>
                 </div>
               </div>
 
