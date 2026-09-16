@@ -107,6 +107,7 @@ const formFieldSchema = z.object({
 const galleryItemSchema = z.object({
   id: itemId,
   imageUrl: z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value) || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value), 'Images must use HTTP(S) or a valid upload path.'),
+  linkUrl: optionalSafeUrl,
   alt: z.string().max(300).optional(),
   caption: z.string().max(500).optional(),
   title: z.string().max(150).optional()

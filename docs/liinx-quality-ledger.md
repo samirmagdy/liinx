@@ -1560,3 +1560,50 @@ Baseline: branch `main`, commit `f8c1a8cc0f8d419053cd161a656bb082790d3596` at ta
 ### Next eligible prompt
 
 `27 — Gallery block`
+
+## Task 27 — Gallery block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `134a4cfe3899dcdbabe0af5db5c3297de6ad9572` at task start. The worktree was clean; Task 26 changes were preserved. Implementation commit: recorded after this entry is committed.
+
+### Scope and changed files
+
+- `server/contracts.ts`: adds a validated optional `linkUrl` to gallery/carousel items while preserving the existing image, alt, caption, and identity contract.
+- `server/routes/analytics.ts`: resolves gallery item links through the existing item-id or legacy item-index redirect path.
+- `src/components/BuilderStudio.tsx`: adds gallery item link editing and passes stable item ids into shared image uploads; delayed uploads refuse to update removed items and use current state when saving.
+- `src/components/PublicBioView.tsx`: renders gallery captions, empty and unavailable-image states, safe optional links, responsive bounded layout, and non-navigating unlinked items without `#` placeholders.
+- `tests/gallery_block.test.ts`: covers multi-item persistence/reorder, captions, linked/unlinked tracking, empty galleries, and unsafe-link rejection.
+
+### Findings and behavior
+
+- The existing structured editor already had add/remove/reorder, upload, alt, and caption controls, but gallery items lacked optional links and upload callbacks used mutable indexes. A delayed response could therefore target a different item after deletion/reordering.
+- Gallery upload callbacks now carry the item id. At completion, the handler reads the latest block state, updates only that id, and refuses to restore a deleted item. The uploaded file remains an owned asset rather than being destructively removed.
+- Public gallery items with no validated link render as non-anchor content. Linked items use the existing tracked redirect and captions are rendered below each image.
+- Empty galleries show an explicit empty state. Missing or failed image loads show an unavailable state; layout remains bounded by the existing gallery/card container and carousel overflow behavior.
+- Gallery remains a bounded grid/carousel presentation; this task does not expand its layout model or claim arbitrary nesting.
+
+### Acceptance criteria
+
+- PASS — Create a multi-item gallery, edit/reorder/remove, and reload. Evidence: `tests/gallery_block.test.ts` persists three identified items, reverses order, edits a caption, and verifies Studio/public data.
+- PASS — Optional links open through tracking; unlinked items do not navigate to `#` or a new tab. Evidence: linked item returns HTTP 302; unlinked item returns HTTP 404; renderer has separate anchor/non-anchor branches and no gallery `#` fallback.
+- PASS — Captions appear publicly. Evidence: public profile round-trip includes all reordered captions; renderer explicitly outputs captions.
+- PASS — Empty and partial/unavailable states are represented. Evidence: empty-gallery API fixture and renderer empty state; image URL failures have a client fallback.
+- PASS — Delayed upload cannot restore a deleted item. Evidence: stable-id upload handler checks current state before updating; no index-based gallery upload callback remains.
+- NOT RUN — Actual browser slow-upload/edit/delete race, keyboard interaction, responsive visual overflow, and public image-load fallback. Browser-client Node REPL was unavailable; source/API evidence is not browser evidence.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `134a4cfe3899dcdbabe0af5db5c3297de6ad9572` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/gallery_block.test.ts tests/image_block.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 37 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/editor/public verification — NOT RUN; no supported browser-client Node REPL was available. Tests used disposable `mktemp` SQLite database and uploads directories; no production data or assets were changed.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, disposable database/uploads directories, and the shared upload route were used.
+- Real-browser verification remains required for the slow-upload race, keyboard controls, visual responsive grid/carousel behavior, and image load-error fallback.
+- An upload whose item is deleted remains in the owner’s uploaded-assets inventory by design; cleanup/lifecycle policy is owned by the file-lifecycle task.
+
+### Next eligible prompt
+
+`28 — Carousel block`

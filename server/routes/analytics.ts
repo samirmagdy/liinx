@@ -185,7 +185,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
         ? itemId ? extra.items.find((candidate: any) => candidate?.id === itemId) : extra.items[itemIndex]
         : null;
       if (!item) return res.status(404).send('Link not found or inactive.');
-      rawTarget = typeof item.url === 'string' ? item.url : null;
+      rawTarget = typeof item.linkUrl === 'string' ? item.linkUrl : typeof item.url === 'string' ? item.url : null;
     }
     if (!rawTarget || !rawTarget.trim()) {
       return res.status(404).send('Link not found or inactive.');
