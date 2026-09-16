@@ -1378,3 +1378,47 @@ Baseline: branch `main`, commit `e1a028a8b9a6b3811d705ee2b381b01ea0f59a2f` at ta
 ### Next eligible prompt
 
 `23 — Link animation`
+
+## Task 23 — Link animation
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `09af5c6c7edf44222fc1b65550a90239405db2c7` at task start. The worktree was clean; Task 22 changes were preserved. Implementation commit: `4d552e7271665ae03210f1e44bfdfa920961a0d3`.
+
+### Scope and changed files
+
+- `src/components/PublicBioView.tsx`: maps supported link animation values to dedicated stylesheet classes instead of implicit/generic utility classes.
+- `src/index.css`: defines restrained fade, lift, and pulse keyframes/classes; keeps `none` unanimated; disables animation, transitions, and lift transforms under `prefers-reduced-motion`; keeps focus indication independent of hover and movement.
+- `tests/link_animation.test.ts`: verifies supported animation persistence and rejects unsupported values at the API boundary.
+
+### Findings and behavior
+
+- The editor exposed `none`, `fade`, `lift`, and `pulse`, but fade relied on an implicit `animate-fade-in` class and pulse relied on a generic utility. These did not provide a sufficiently explicit link-specific stylesheet contract.
+- `fade` is a one-time 260ms opacity reveal. `pulse` is a slow, low-contrast 2.8s box-shadow emphasis without layout movement. `lift` is hover-only, uses a 2px transform, and explicitly resets on keyboard focus so the global focus ring works independently.
+- `none` adds no animation class. No layout properties are animated. Reduced-motion users receive no link animation or lift transform.
+- Unsupported animation values are rejected by the shared link extra schema, so controls cannot persist an inert unsupported choice.
+- Existing link tracking, layout, accessibility, and public/preview rendering paths were otherwise preserved.
+
+### Acceptance criteria
+
+- PASS — None, fade, lift, and pulse use real stylesheet definitions. Evidence: dedicated classes/keyframes in `src/index.css`, renderer mapping, and API persistence test.
+- PASS — None adds no animation and unsupported choices are rejected. Evidence: `none` round-trips without an animation class in the renderer; `flash` returns HTTP 400.
+- PASS — Reduced-motion disables nonessential motion. Evidence: explicit `prefers-reduced-motion` overrides disable fade/pulse animation and lift transition/transform; existing global reduced-motion rules remain in place.
+- PASS — Focus indication is independent of hover and does not shift surrounding layout. Evidence: lift has a `:focus-visible` transform reset; existing global `a:focus-visible` outline remains active; only transform/box-shadow/opacity are used.
+- NOT RUN — Browser confirmation that each animation is visibly distinct after reload, actual focus-ring appearance, and reduced-motion rendering. Browser-client Node REPL was unavailable; stylesheet/source evidence is not visual browser evidence.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `09af5c6c7edf44222fc1b65550a90239405db2c7` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_animation.test.ts tests/link_layouts.test.ts tests/basic_link.test.ts tests/profile_duplication.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 8 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/public/preview visual verification — NOT RUN; no supported browser-client Node REPL was available, and no production data, deployment, or external messages were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production database or uploads directory was changed.
+- Visual distinction, keyboard focus appearance, reload persistence in a real browser, and reduced-motion preference behavior remain external checks.
+- Pulse uses `color-mix`; the existing browser support baseline should be confirmed if older browsers are supported. It degrades to no pulse without affecting link usability.
+
+### Next eligible prompt
+
+`24 — Headings and rich text`
