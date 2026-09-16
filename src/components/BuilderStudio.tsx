@@ -867,10 +867,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       setSaveStatus('saving');
       const newBlock = await createBlockForPage({
         type: 'link',
-        title: 'New Featured Link',
-        url: 'https://',
-        subtitle: 'Tap to visit destination',
-        badge: 'NEW',
+        title: 'Untitled link',
+        url: null,
+        subtitle: 'Add a destination before publishing',
+        badge: null,
         highlighted: false
       });
       setProfile(prev => ({ ...prev, blocks: [newBlock, ...prev.blocks] }));
@@ -1877,6 +1877,17 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                               value={(block as LinkBlock).subtitle || ''}
                               onChange={(e) => handleUpdateBlockField(block.id, 'subtitle', e.target.value)}
                               placeholder={ui("Supporting text...")}
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Icon or emoji")}</label>
+                            <input aria-label={ui("Icon or emoji")}
+                              type="text"
+                              value={(block as LinkBlock).icon || ''}
+                              onChange={(e) => handleUpdateBlockField(block.id, 'icon', e.target.value || null)}
+                              placeholder={ui("Optional")}
+                              maxLength={50}
                               className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900"
                             />
                           </div>

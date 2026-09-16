@@ -15,7 +15,7 @@ export interface LinkBlock {
   id: string;
   type: 'link';
   title: string;
-  url: string;
+  url: string | null;
   subtitle?: string;
   icon?: string;
   badge?: string;

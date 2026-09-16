@@ -4,6 +4,7 @@ import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { createId } from '../utils/ids.js';
+import { isSafeLinkUrl } from '../utils/urlValidation.js';
 
 export const analyticsRouter = Router();
 
@@ -16,13 +17,13 @@ function hashIp(ip?: string): string {
 function sanitizeUrl(rawUrl?: string | null): string | null {
   if (!rawUrl) return null;
   const trimmed = rawUrl.trim();
-  if (/^javascript:/i.test(trimmed) || /^data:/i.test(trimmed)) {
-    return null;
+  if (isSafeLinkUrl(trimmed)) return trimmed;
+  // Preserve legacy bare-host links without accepting arbitrary schemes or markup.
+  if (/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?:[/:?#].*)?$/i.test(trimmed)) {
+    const normalized = `https://${trimmed}`;
+    return isSafeLinkUrl(normalized) ? normalized : null;
   }
-  if (/^https?:\/\//i.test(trimmed) || /^mailto:/i.test(trimmed) || /^tel:/i.test(trimmed)) {
-    return trimmed;
-  }
-  return `https://${trimmed}`;
+  return null;
 }
 
 interface ClickRecord {

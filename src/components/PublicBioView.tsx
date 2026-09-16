@@ -605,23 +605,14 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!
               const redirectUrl = `/r/${block.id}`;
+              const hasDestination = Boolean(safePublicHref(block.url));
               const isComplexLink = Boolean(block.subtitle);
               const isPill = theme.cardRadius === 'full' && !isComplexLink;
               const linkLayout = (block as any).layout || 'list';
               const linkAnimation = (block as any).animation || 'none';
-              return (
-                <a
-                  key={block.id}
-                  href={redirectUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`${linkLayout === 'grid' ? 'liinx-grid-link' : 'sm:col-span-2'} group relative ${isPill ? 'px-6 py-4' : 'p-4'} transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${linkAnimation === 'fade' ? 'animate-fade-in' : ''} ${linkAnimation === 'pulse' ? 'motion-safe:animate-pulse' : ''} ${linkAnimation === 'lift' ? 'hover:-translate-y-0.5' : ''} ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
-                  style={{
-                    backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
-                    border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
-                    color: theme.cardText
-                  }}
-                >
+              const linkContent = (
+                  <>
+                  {block.icon && <span aria-hidden="true" className="text-xl shrink-0">{block.icon}</span>}
                   <div className="flex-1 min-w-0" dir="auto">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="font-bold text-sm sm:text-base tracking-tight truncate" dir="auto">
@@ -645,10 +636,32 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       </p>
                     )}
                   </div>
-                  <div className="p-2 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-transform shrink-0">
+                  <div className="p-2 rounded-full opacity-60 shrink-0" aria-hidden="true">
                     <ExternalLink className="w-4 h-4" />
                   </div>
+                  </>
+                );
+              const className = `${linkLayout === 'grid' ? 'liinx-grid-link' : 'sm:col-span-2'} group relative ${isPill ? 'px-6 py-4' : 'p-4'} transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm ${hasDestination ? 'hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current' : 'opacity-75'} ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${linkAnimation === 'fade' ? 'animate-fade-in' : ''} ${linkAnimation === 'pulse' ? 'motion-safe:animate-pulse' : ''} ${linkAnimation === 'lift' && hasDestination ? 'hover:-translate-y-0.5' : ''} ${getRadiusClass(theme.cardRadius, isComplexLink)}`;
+              const style = {
+                backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
+                border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
+                color: theme.cardText
+              };
+              return hasDestination ? (
+                <a
+                  key={block.id}
+                  href={redirectUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={className}
+                  style={style}
+                >
+                  {linkContent}
                 </a>
+              ) : (
+                <div key={block.id} className={className} style={style} aria-disabled="true">
+                  {linkContent}
+                </div>
               );
             }
 
