@@ -231,6 +231,14 @@ export function initDatabase() {
     db.exec("ALTER TABLE profiles ADD COLUMN stripe_subscription_id TEXT");
   } catch (e) {}
 
+  for (const column of [
+    'share_title TEXT', 'share_description TEXT', 'share_image_url TEXT',
+    'footer_logo_url TEXT', 'background_media_url TEXT', 'background_media_type TEXT',
+    'page_redirect_url TEXT', 'page_redirect_until INTEGER'
+  ]) {
+    try { db.exec(`ALTER TABLE profiles ADD COLUMN ${column}`); } catch (e) {}
+  }
+
   try {
     db.exec("ALTER TABLE users ADD COLUMN session_version INTEGER NOT NULL DEFAULT 1");
   } catch (e) {}
@@ -289,6 +297,16 @@ export function initDatabase() {
       occurred_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_rate_limit_bucket_time ON rate_limit_events(bucket_key, occurred_at);
+
+    CREATE TABLE IF NOT EXISTS form_submissions (
+      id TEXT PRIMARY KEY,
+      profile_id TEXT NOT NULL,
+      block_id TEXT,
+      fields_json TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_form_submissions_profile ON form_submissions(profile_id, created_at);
   `);
 
   if (process.env.NODE_ENV === 'test' || process.env.SEED_DEMO === 'true') seedDefaultData();

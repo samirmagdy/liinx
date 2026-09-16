@@ -6,7 +6,10 @@ export type BlockType =
   | 'video' 
   | 'folder' 
   | 'newsletter' 
-  | 'instagram_grid';
+  | 'instagram_grid'
+  | 'rich_text' | 'image' | 'gallery' | 'spacer' | 'carousel' | 'form'
+  | 'download' | 'map' | 'faq' | 'testimonials' | 'event' | 'presave'
+  | 'phone' | 'product' | 'tips' | 'content_gate';
 
 export interface LinkBlock {
   id: string;
@@ -84,6 +87,16 @@ export interface InstagramGridBlock {
   }[];
 }
 
+/** Extensible creator blocks. `extra` is persisted JSON and rendered by type. */
+export interface AdvancedBlock {
+  id: string;
+  type: Exclude<BlockType, 'booking' | 'link' | 'header' | 'audio' | 'video' | 'folder' | 'newsletter' | 'instagram_grid'>;
+  title: string;
+  subtitle?: string;
+  url?: string;
+  extra?: Record<string, unknown>;
+}
+
 export type ProfileBlock = 
   | BookingBlock
   | LinkBlock 
@@ -91,8 +104,9 @@ export type ProfileBlock =
   | AudioBlock 
   | VideoBlock 
   | FolderBlock 
-  | NewsletterBlock 
-  | InstagramGridBlock;
+  | NewsletterBlock
+  | InstagramGridBlock
+  | AdvancedBlock;
 
 export interface BookingBlock {
   id: string;
@@ -141,6 +155,14 @@ export interface CreatorProfile {
   customDomain?: string | null;
   customCss?: string | null;
   customFontUrl?: string | null;
+  shareTitle?: string | null;
+  shareDescription?: string | null;
+  shareImageUrl?: string | null;
+  footerLogoUrl?: string | null;
+  backgroundMediaUrl?: string | null;
+  backgroundMediaType?: 'image' | 'video' | null;
+  pageRedirectUrl?: string | null;
+  pageRedirectUntil?: number | null;
   customTheme?: ThemeConfig;
   blocks: ProfileBlock[];
   stats?: {

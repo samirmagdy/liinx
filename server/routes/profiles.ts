@@ -114,6 +114,12 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       };
 
       if (extra) {
+        if (b.type === 'content_gate') {
+          delete extra.body;
+          delete extra.password;
+          delete extra.passwordHash;
+          extra.locked = true;
+        }
         Object.assign(baseBlock, extra);
       }
 
@@ -136,6 +142,14 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       customDomain: profile.custom_domain || null,
       customCss: profile.plan !== 'free' ? (profile.custom_css || null) : null,
       customFontUrl: profile.plan !== 'free' ? (profile.custom_font_url || null) : null,
+      shareTitle: profile.share_title || null,
+      shareDescription: profile.share_description || null,
+      shareImageUrl: profile.share_image_url || null,
+      footerLogoUrl: profile.plan !== 'free' ? (profile.footer_logo_url || null) : null,
+      backgroundMediaUrl: profile.plan !== 'free' ? (profile.background_media_url || null) : null,
+      backgroundMediaType: profile.background_media_type || null,
+      pageRedirectUrl: profile.page_redirect_url || null,
+      pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: safeJsonParse(profile.socials_json, []),
       blocks: formattedBlocks
@@ -238,6 +252,14 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       customDomain: profile.custom_domain || null,
       customCss: profile.custom_css || null,
       customFontUrl: profile.custom_font_url || null,
+      shareTitle: profile.share_title || null,
+      shareDescription: profile.share_description || null,
+      shareImageUrl: profile.share_image_url || null,
+      footerLogoUrl: profile.footer_logo_url || null,
+      backgroundMediaUrl: profile.background_media_url || null,
+      backgroundMediaType: profile.background_media_type || null,
+      pageRedirectUrl: profile.page_redirect_url || null,
+      pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: safeJsonParse(profile.socials_json, []),
       blocks: formattedBlocks
@@ -260,6 +282,14 @@ const updateProfileSchema = z.object({
   customDomain: z.string().max(100).nullable().optional(),
   customCss: z.string().max(10000).nullable().optional(),
   customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),
+  shareTitle: z.string().max(160).nullable().optional(),
+  shareDescription: z.string().max(300).nullable().optional(),
+  shareImageUrl: z.string().max(500).refine(isHttpUrl, 'Share image must use HTTP(S).').nullable().optional(),
+  footerLogoUrl: z.string().max(500).refine(isHttpUrl, 'Footer logo must use HTTP(S).').nullable().optional(),
+  backgroundMediaUrl: z.string().max(500).refine(isHttpUrl, 'Background media must use HTTP(S).').nullable().optional(),
+  backgroundMediaType: z.enum(['image', 'video']).nullable().optional(),
+  pageRedirectUrl: z.string().max(500).refine(isHttpUrl, 'Redirect URL must use HTTP(S).').nullable().optional(),
+  pageRedirectUntil: z.number().int().positive().nullable().optional(),
   customTheme: z.object({
     id: z.string().max(80).optional(), name: z.string().max(100).optional(),
     bgType: z.enum(['solid', 'gradient', 'mesh']).optional(), bgColor: z.string().max(50).optional(),
@@ -299,6 +329,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       customDomain,
       customCss,
       customFontUrl,
+      shareTitle, shareDescription, shareImageUrl, footerLogoUrl, backgroundMediaUrl, backgroundMediaType, pageRedirectUrl, pageRedirectUntil,
       customTheme, 
       socials 
     } = parse.data;
@@ -354,6 +385,14 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     const updatedMetaPixelId = metaPixelId !== undefined ? metaPixelId : existing.meta_pixel_id;
     const updatedCustomCss = customCss !== undefined ? customCss : existing.custom_css;
     const updatedCustomFontUrl = customFontUrl !== undefined ? customFontUrl : existing.custom_font_url;
+    const updatedShareTitle = shareTitle !== undefined ? shareTitle : existing.share_title;
+    const updatedShareDescription = shareDescription !== undefined ? shareDescription : existing.share_description;
+    const updatedShareImageUrl = shareImageUrl !== undefined ? shareImageUrl : existing.share_image_url;
+    const updatedFooterLogoUrl = footerLogoUrl !== undefined ? footerLogoUrl : existing.footer_logo_url;
+    const updatedBackgroundMediaUrl = backgroundMediaUrl !== undefined ? backgroundMediaUrl : existing.background_media_url;
+    const updatedBackgroundMediaType = backgroundMediaType !== undefined ? backgroundMediaType : existing.background_media_type;
+    const updatedPageRedirectUrl = pageRedirectUrl !== undefined ? pageRedirectUrl : existing.page_redirect_url;
+    const updatedPageRedirectUntil = pageRedirectUntil !== undefined ? pageRedirectUntil : existing.page_redirect_until;
     const updatedCustomThemeJson = customTheme !== undefined 
       ? (customTheme ? JSON.stringify(customTheme) : null) 
       : existing.custom_theme_json;
@@ -375,6 +414,8 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
           custom_domain_verified = ?,
           custom_css = ?,
           custom_font_url = ?,
+          share_title = ?, share_description = ?, share_image_url = ?, footer_logo_url = ?,
+          background_media_url = ?, background_media_type = ?, page_redirect_url = ?, page_redirect_until = ?,
           custom_theme_json = ?,
           socials_json = ?,
           updated_at = ?
@@ -392,6 +433,8 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       customDomainVerified,
       updatedCustomCss,
       updatedCustomFontUrl,
+      updatedShareTitle, updatedShareDescription, updatedShareImageUrl, updatedFooterLogoUrl,
+      updatedBackgroundMediaUrl, updatedBackgroundMediaType, updatedPageRedirectUrl, updatedPageRedirectUntil,
       updatedCustomThemeJson,
       updatedSocialsJson,
       now,
@@ -515,7 +558,8 @@ const createProfileSchema = z.object({
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username cannot exceed 30 characters')
     .regex(/^[a-z0-9_]+$/, 'Username may only contain lowercase letters, numbers, and underscores'),
-  displayName: z.string().min(1, 'Display name cannot be empty').max(100)
+  displayName: z.string().min(1, 'Display name cannot be empty').max(100),
+  duplicateProfileId: z.string().max(100).optional()
 });
 
 // Authenticated: Create a new profile under the same account (respecting plan limits)
@@ -529,6 +573,8 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
     const userId = req.user!.userId;
     const cleanUsername = parse.data.username.toLowerCase().trim();
     const displayName = parse.data.displayName.trim();
+    const duplicateSource = parse.data.duplicateProfileId ? db.prepare('SELECT * FROM profiles WHERE id = ? AND user_id = ?').get(parse.data.duplicateProfileId, userId) as any : null;
+    if (parse.data.duplicateProfileId && !duplicateSource) return res.status(404).json({ error: 'The profile to duplicate was not found.' });
 
     // Check user's primary/active profile plan to determine allowed limit
     // Free: 1 profile, Pro: 5 profiles, Studio: 25 profiles
@@ -568,10 +614,10 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       userId,
       cleanUsername,
       displayName,
-      '',
-      '',
-      'Creator',
-      'editorial-stone',
+      duplicateSource?.bio || '',
+      duplicateSource?.avatar_url || '',
+      duplicateSource?.category || 'Creator',
+      duplicateSource?.theme_id || 'editorial-stone',
       userPlan,
       now,
       now
@@ -592,6 +638,13 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       now,
       now
     );
+
+    if (duplicateSource) {
+      db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(newProfileId);
+      const sourceBlocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(duplicateSource.id) as any[];
+      const copyBlock = db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      for (const block of sourceBlocks) copyBlock.run(createId('blk'), newProfileId, block.type, block.title, block.url, block.subtitle, block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at, block.extra_json, now, now);
+    }
 
     // Sign new token for the newly created profile
     const token = signJwt({

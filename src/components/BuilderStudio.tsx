@@ -657,6 +657,33 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
+  const handleAddAdvancedBlock = async (type: string) => {
+    const defaults: Record<string, { title: string; subtitle?: string; extra?: Record<string, unknown> }> = {
+      rich_text: { title: 'About this work', extra: { body: 'Add your story, services, or introduction here.' } },
+      image: { title: 'Featured image', extra: { imageUrl: '', alt: '', caption: '' } },
+      gallery: { title: 'Gallery', extra: { items: [{ id: 'item-1', imageUrl: '', alt: '' }] } },
+      carousel: { title: 'Highlights', extra: { items: [{ id: 'item-1', imageUrl: '', alt: '' }] } },
+      spacer: { title: 'Spacer', extra: { height: 48 } },
+      form: { title: 'Get in touch', subtitle: 'Send me a message.', extra: { fields: [{ name: 'name', label: 'Name', type: 'text' }, { name: 'email', label: 'Email', type: 'email' }, { name: 'message', label: 'Message', type: 'textarea' }] } },
+      download: { title: 'Download', extra: { fileUrl: '', description: 'Download this file.' } },
+      map: { title: 'Find me', extra: { location: '' } },
+      faq: { title: 'Frequently asked questions', extra: { items: [{ id: 'item-1', question: 'Question', answer: 'Answer' }] } },
+      testimonials: { title: 'What clients say', extra: { items: [{ id: 'item-1', quote: 'A great experience.', name: 'Client name' }] } },
+      event: { title: 'Upcoming event', subtitle: 'Add event details.', extra: { date: '', url: '' } },
+      presave: { title: 'Pre-save my release', extra: { url: '', description: 'Save the next release.' } },
+      phone: { title: 'Call me', extra: { phone: '', description: 'Available for inquiries.' } },
+      product: { title: 'Featured product', extra: { price: '', url: '', description: '' } },
+      tips: { title: 'Support my work', extra: { url: '', description: 'Send a tip.' } },
+      content_gate: { title: 'Members-only content', extra: { password: '', description: 'Enter the access code.', body: 'Add the protected content here.' } }
+    };
+    const preset = defaults[type] || defaults.rich_text;
+    try {
+      const newBlock = await api.studio.createBlock({ type: type as any, title: preset.title, subtitle: preset.subtitle, extra: preset.extra });
+      setProfile(prev => ({ ...prev, blocks: [...prev.blocks, newBlock] }));
+      setShowAddMenu(false);
+    } catch (error) { setDataError(true); }
+  };
+
   const handleMoveBlock = async (index: number, direction: 'up' | 'down') => {
     const newBlocks = [...profile.blocks];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
@@ -1242,6 +1269,18 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         <Mail className="w-4 h-4 text-purple-600" />
                         <span className="text-xs font-bold text-neutral-900">{ui("Newsletter")}</span>
                       </button>
+
+                      {[
+                        ['rich_text', 'Rich Text'], ['image', 'Image'], ['gallery', 'Gallery'], ['carousel', 'Carousel'],
+                        ['spacer', 'Spacer'], ['form', 'Contact Form'], ['download', 'Download'], ['map', 'Location'],
+                        ['faq', 'FAQ'], ['testimonials', 'Testimonials'], ['event', 'Event'], ['presave', 'Pre-save'],
+                        ['phone', 'Phone'], ['product', 'Product'], ['tips', 'Tips'], ['content_gate', 'Content Gate']
+                      ].map(([type, label]) => (
+                        <button key={type} onClick={() => handleAddAdvancedBlock(type)} className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20">
+                          <Plus className="w-4 h-4 text-neutral-600" />
+                          <span className="text-xs font-bold text-neutral-900">{ui(label)}</span>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1523,6 +1562,21 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                         />
                       </div>
                     )}
+
+                    {['rich_text', 'image', 'gallery', 'carousel', 'spacer', 'form', 'download', 'map', 'faq', 'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate'].includes(block.type) && (() => {
+                      const advanced = block as any;
+                      const updateAdvanced = (key: string, value: unknown) => handleUpdateBlockExtra(block.id, { [key]: value });
+                      return <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-neutral-100 text-xs">
+                        {(['rich_text', 'form', 'download', 'map', 'content_gate'].includes(block.type)) && <div className="sm:col-span-2"><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui(block.type === 'rich_text' || block.type === 'content_gate' ? 'Content' : 'Description')}</label><textarea value={advanced.body || advanced.description || ''} onChange={e => updateAdvanced(block.type === 'rich_text' || block.type === 'content_gate' ? 'body' : 'description', e.target.value)} className="w-full min-h-20 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {['image', 'gallery', 'carousel'].includes(block.type) && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Image URL')}</label><input value={advanced.imageUrl || ''} onChange={e => updateAdvanced('imageUrl', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {['download', 'event', 'presave', 'product', 'tips', 'form'].includes(block.type) && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Destination URL')}</label><input value={advanced.fileUrl || advanced.url || ''} onChange={e => updateAdvanced(block.type === 'download' ? 'fileUrl' : 'url', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {block.type === 'map' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Location')}</label><input value={advanced.location || ''} onChange={e => updateAdvanced('location', e.target.value)} placeholder={ui('City or address')} className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {block.type === 'phone' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Phone number')}</label><input value={advanced.phone || ''} onChange={e => updateAdvanced('phone', e.target.value)} placeholder="+1..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {['gallery', 'carousel', 'faq', 'testimonials', 'form'].includes(block.type) && <div className="sm:col-span-2"><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Items / fields JSON')}</label><textarea value={JSON.stringify(advanced.items || advanced.fields || [], null, 2)} onChange={e => { try { updateAdvanced(block.type === 'form' ? 'fields' : 'items', JSON.parse(e.target.value)); } catch { /* wait for valid JSON */ } }} className="w-full min-h-24 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 font-mono text-[10px] text-neutral-900" /></div>}
+                        {block.type === 'spacer' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Height (px)')}</label><input type="number" min="16" max="240" value={advanced.height || 48} onChange={e => updateAdvanced('height', Number(e.target.value))} className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {block.type === 'content_gate' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Access code')}</label><input type="password" value={advanced.password || ''} onChange={e => updateAdvanced('password', e.target.value)} className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                      </div>;
+                    })()}
 
                     {block.type === 'folder' && (
                       <div className="space-y-2 pt-2 border-t border-neutral-100">

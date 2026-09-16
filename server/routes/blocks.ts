@@ -5,11 +5,22 @@ import { bookingUrl } from '../../src/utils/booking.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 import { createId } from '../utils/ids.js';
+import bcrypt from 'bcryptjs';
 
 export const blocksRouter = Router();
 
+function prepareBlockExtra(type: string, extra: Record<string, unknown> | undefined): string | null {
+  if (!extra) return null;
+  const copy = { ...extra };
+  if (type === 'content_gate' && typeof copy.password === 'string' && copy.password.length > 0) {
+    copy.passwordHash = bcrypt.hashSync(copy.password, 12);
+    delete copy.password;
+  }
+  return JSON.stringify(copy);
+}
+
 const createBlockSchema = z.object({
-  type: z.enum(['booking', 'link', 'header', 'audio', 'video', 'folder', 'newsletter', 'instagram_grid']),
+  type: z.enum(['booking', 'link', 'header', 'audio', 'video', 'folder', 'newsletter', 'instagram_grid', 'rich_text', 'image', 'gallery', 'spacer', 'carousel', 'form', 'download', 'map', 'faq', 'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate']),
   title: z.string().min(1, 'Title is required').max(150),
   url: z.string().optional().nullable(),
   subtitle: z.string().max(250).optional().nullable(),
@@ -31,6 +42,22 @@ const updateBlockSchema = z.object({
   startAt: z.number().finite().int().min(0).nullable().optional(),
   endAt: z.number().finite().int().min(0).nullable().optional(),
   extra: z.record(z.string(), z.unknown()).optional()
+});
+
+// Public content-gate verification. Protected content is deliberately returned
+// only after the password is checked server-side; it is never included in the
+// public profile response.
+blocksRouter.post('/content-gates/verify', (req, res) => {
+  const { profileId, blockId, password } = req.body || {};
+  if (typeof profileId !== 'string' || typeof blockId !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'A valid access code is required.' });
+  }
+  const row = db.prepare('SELECT extra_json FROM blocks WHERE id = ? AND profile_id = ? AND type = ?').get(blockId, profileId, 'content_gate') as { extra_json?: string | null } | undefined;
+  if (!row?.extra_json) return res.status(404).json({ error: 'This gated content is unavailable.' });
+  let extra: any;
+  try { extra = JSON.parse(row.extra_json); } catch { return res.status(500).json({ error: 'This gated content is corrupted.' }); }
+  if (!extra.passwordHash || !bcrypt.compareSync(password, extra.passwordHash)) return res.status(403).json({ error: 'The access code is not correct.' });
+  res.json({ unlocked: true, body: typeof extra.body === 'string' ? extra.body : '' });
 });
 
 // Create new block
@@ -74,7 +101,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       nextPos,
       startAt || null,
       endAt || null,
-      extra ? JSON.stringify(extra) : null,
+      prepareBlockExtra(type, extra),
       now,
       now
     );
@@ -188,7 +215,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
       data.highlighted !== undefined ? (data.highlighted ? 1 : 0) : existing.highlighted,
       data.startAt !== undefined ? data.startAt : existing.start_at,
       data.endAt !== undefined ? data.endAt : existing.end_at,
-      JSON.stringify(mergedExtra),
+      data.extra !== undefined ? prepareBlockExtra(existing.type, mergedExtra) : existing.extra_json,
       now,
       blockId,
       profileId

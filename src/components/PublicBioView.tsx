@@ -43,6 +43,46 @@ import {
   isDirectVideoFile 
 } from '../utils/mediaEmbeds';
 
+function safePublicHref(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value, window.location.origin);
+    if (!['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)) return null;
+    return url.toString();
+  } catch { return null; }
+}
+
+const advancedBlockTypes = new Set(['rich_text', 'image', 'gallery', 'spacer', 'carousel', 'form', 'download', 'map', 'faq', 'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate']);
+function advancedRadius(radius: ThemeConfig['cardRadius']): string {
+  return radius === 'none' ? 'rounded-none' : radius === 'full' ? 'rounded-3xl' : radius === 'md' ? 'rounded-xl' : 'rounded-2xl';
+}
+
+const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig }> = ({ block, profileId, theme }) => {
+  const extra = block.extra || block;
+  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [status, setStatus] = useState<string | null>(null);
+  const [gateValue, setGateValue] = useState('');
+  const [unlocked, setUnlocked] = useState(false);
+  if (!advancedBlockTypes.has(block.type)) return null;
+  const card = `p-5 shadow-sm ${advancedRadius(theme.cardRadius)}`;
+  const cardStyle = { backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText };
+  const fields = Array.isArray(extra.fields) ? extra.fields : [{ name: 'message', label: 'Message', type: 'textarea' }];
+  const links = Array.isArray(extra.items) ? extra.items : Array.isArray(extra.links) ? extra.links : [];
+
+  if (block.type === 'spacer') return <div key={block.id} aria-hidden="true" style={{ height: Math.min(240, Math.max(16, Number(extra.height) || 48)) }} />;
+  if (block.type === 'rich_text') return <article className={card} style={cardStyle}><h3 className="font-bold mb-2">{block.title}</h3><p className="whitespace-pre-wrap text-sm leading-7" style={{ color: theme.subtextColor }}>{extra.body || block.subtitle}</p></article>;
+  if (block.type === 'image') return <figure className={`overflow-hidden ${card}`} style={cardStyle}>{extra.imageUrl && <img src={extra.imageUrl} alt={extra.alt || block.title} className="w-full max-h-[520px] object-cover" loading="lazy" />}{extra.caption && <figcaption className="pt-3 text-xs" style={{ color: theme.subtextColor }}>{extra.caption}</figcaption>}</figure>;
+  if (block.type === 'gallery' || block.type === 'carousel') return <div className={`${card} ${block.type === 'carousel' ? 'overflow-x-auto' : ''}`} style={cardStyle}><h3 className="font-bold mb-3">{block.title}</h3><div className={`grid ${block.type === 'carousel' ? 'grid-flow-col auto-cols-[75%] sm:auto-cols-[45%]' : 'grid-cols-2'} gap-2`}>{links.map((item: any, index: number) => <a key={item.id || index} href={safePublicHref(item.url) || '#'} target="_blank" rel="noreferrer" className="block"><img src={item.imageUrl || item.url} alt={item.alt || item.title || block.title} className="aspect-square w-full object-cover rounded-xl" loading="lazy" /></a>)}</div></div>;
+  if (block.type === 'form') return <div className={card} style={cardStyle}><h3 className="font-bold mb-1">{block.title}</h3><p className="text-sm mb-4" style={{ color: theme.subtextColor }}>{block.subtitle || extra.description}</p><form className="space-y-3" onSubmit={async event => { event.preventDefault(); setStatus('Sending…'); try { const response = await fetch('/api/forms/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId, blockId: block.id, fields: formValues }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Unable to send'); setStatus(data.message || 'Sent successfully.'); setFormValues({}); } catch (error) { setStatus(error instanceof Error ? error.message : 'Unable to send.'); } }}><div className="grid gap-3">{fields.map((field: any) => <label key={field.name} className="grid gap-1 text-xs font-semibold">{field.label || field.name}{field.type === 'textarea' ? <textarea required={field.required !== false} value={formValues[field.name] || ''} onChange={e => setFormValues(v => ({ ...v, [field.name]: e.target.value }))} className="min-h-24 rounded-xl border bg-transparent p-3 font-normal" /> : <input required={field.required !== false} type={field.type || 'text'} value={formValues[field.name] || ''} onChange={e => setFormValues(v => ({ ...v, [field.name]: e.target.value }))} className="rounded-xl border bg-transparent p-3 font-normal" />}</label>)}</div><button className="rounded-xl px-4 py-2 text-sm font-bold" style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }} disabled={status === 'Sending…'}>{extra.buttonText || 'Send'}</button>{status && <p role="status" className="text-xs" style={{ color: theme.subtextColor }}>{status}</p>}</form></div>;
+  if (block.type === 'download') { const href = safePublicHref(extra.fileUrl || block.url); return <a href={href || '#'} download={extra.downloadName} target="_blank" rel="noreferrer" className={`${card} block hover:opacity-90`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.description || 'Download file'}</span></a>; }
+  if (block.type === 'map') { const query = encodeURIComponent(extra.location || block.subtitle || ''); return <a href={`https://www.google.com/maps/search/?api=1&query=${query}`} target="_blank" rel="noreferrer" className={`${card} block`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.location || block.subtitle}</span></a>; }
+  if (block.type === 'faq') return <div className="space-y-2">{links.map((item: any, index: number) => <details key={item.id || index} className={card} style={cardStyle}><summary className="cursor-pointer font-bold">{item.question || item.title}</summary><p className="pt-3 text-sm leading-6" style={{ color: theme.subtextColor }}>{item.answer || item.subtitle}</p></details>)}</div>;
+  if (block.type === 'testimonials') return <div className={`${card} space-y-4`} style={cardStyle}><h3 className="font-bold">{block.title}</h3>{links.map((item: any, index: number) => <blockquote key={item.id || index} className="border-l-2 pl-3"><p className="text-sm">“{item.quote || item.body}”</p><cite className="mt-1 block text-xs not-italic" style={{ color: theme.subtextColor }}>{item.name || item.author}</cite></blockquote>)}</div>;
+  if (block.type === 'event' || block.type === 'presave' || block.type === 'product' || block.type === 'tips' || block.type === 'phone') { const href = safePublicHref(extra.url || block.url || (block.type === 'phone' ? `tel:${extra.phone}` : undefined)); return <a href={href || '#'} target={href?.startsWith('tel:') ? undefined : '_blank'} rel="noreferrer" className={`${card} block`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.description || block.subtitle || extra.date || extra.price || extra.phone || 'Open'}</span></a>; }
+  if (block.type === 'content_gate') return <div className={card} style={cardStyle}>{unlocked ? <div className="whitespace-pre-wrap text-sm">{status}</div> : <form onSubmit={async e => { e.preventDefault(); setStatus('Checking…'); try { const response = await fetch('/api/content-gates/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId, blockId: block.id, password: gateValue }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Unable to unlock'); setStatus(data.body || 'Unlocked.'); setUnlocked(true); } catch (error) { setStatus(error instanceof Error ? error.message : 'Unable to unlock.'); } }}><h3 className="font-bold">{block.title}</h3><p className="text-sm my-3" style={{ color: theme.subtextColor }}>{extra.description || 'Enter the access code to continue.'}</p><input required type="password" value={gateValue} onChange={e => setGateValue(e.target.value)} className="w-full rounded-xl border bg-transparent p-3 mb-2" placeholder="Access code" /><button className="rounded-xl px-4 py-2 text-sm font-bold" style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}>Unlock</button>{status && <p role="alert" className="text-xs mt-2">{status}</p>}</form>}</div>;
+  return null;
+};
+
 interface PublicBioViewProps {
   previewOnly?: boolean;
   profile?: CreatorProfile;
@@ -81,6 +121,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [newsletterUnsubscribeUrl, setNewsletterUnsubscribeUrl] = useState<string | null>(null);
   const [analyticsConsent, setAnalyticsConsent] = useState<'granted' | 'denied' | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [pageSearch, setPageSearch] = useState('');
 
   useEffect(() => {
     if (previewOnly) return;
@@ -137,15 +178,21 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   useEffect(() => {
     if (!profile || previewOnly) return;
-    const title = `${profile.displayName} (@${profile.username}) | LIINX`;
+    if (profile.pageRedirectUrl && (!profile.pageRedirectUntil || profile.pageRedirectUntil > Date.now())) {
+      window.location.replace(profile.pageRedirectUrl);
+      return;
+    }
+    const title = profile.shareTitle || `${profile.displayName} (@${profile.username}) | LIINX`;
+    const description = profile.shareDescription || profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`;
     document.title = title;
-    document.querySelector('meta[name="description"]')?.setAttribute('content', profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`);
+    document.querySelector('meta[name="description"]')?.setAttribute('content', description);
     document.querySelector('meta[name="robots"]')?.setAttribute('content', 'index, follow');
     const canonical = customDomain ? `https://${customDomain}` : `https://liinx.app/@${profile.username}`;
     document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical);
     document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical);
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
-    document.querySelector('meta[property="og:description"]')?.setAttribute('content', profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`);
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+    if (profile.shareImageUrl) document.querySelector('meta[property="og:image"]')?.setAttribute('content', profile.shareImageUrl);
   }, [profile, previewOnly, customDomain]);
 
   // Google Analytics 4 (gtag.js) Injection
@@ -361,10 +408,14 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       className="min-h-screen w-full transition-colors duration-300 relative selection:bg-black selection:text-white"
       style={{
         background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
+        backgroundImage: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? `url(${profile.backgroundMediaUrl})` : undefined,
+        backgroundSize: profile.backgroundMediaUrl ? 'cover' : undefined,
+        backgroundAttachment: profile.backgroundMediaUrl ? 'fixed' : undefined,
         color: theme.textColor,
         fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
       }}
     >
+      {profile.backgroundMediaType === 'video' && profile.backgroundMediaUrl && <video className="fixed inset-0 -z-0 h-full w-full object-cover" src={profile.backgroundMediaUrl} autoPlay muted loop playsInline aria-hidden="true" />}
       {profile?.customCss && (
         <style dangerouslySetInnerHTML={{ __html: profile.customCss }} />
       )}
@@ -488,8 +539,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         </div>
 
         {/* Content Blocks */}
+        {profile.blocks.length > 5 && <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,.15)', color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /></label>}
         <div className="space-y-4 mb-14">
-          {(Array.isArray(profile.blocks) ? profile.blocks : []).map((block) => {
+          {(Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => !pageSearch.trim() || `${block.title} ${block.subtitle || ''}`.toLowerCase().includes(pageSearch.trim().toLowerCase())).map((block) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!
@@ -923,6 +975,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               );
             }
 
+            if (advancedBlockTypes.has(block.type)) {
+              return <AdvancedPublicBlock key={block.id} block={block} profileId={profile.id} theme={theme} />;
+            }
+
             return null;
           })}
         </div>
@@ -936,7 +992,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>
+              {profile.footerLogoUrl ? <img src={profile.footerLogoUrl} alt="" className="h-4 max-w-20 object-contain" /> : <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>}
             </button>
           </div>
         )}

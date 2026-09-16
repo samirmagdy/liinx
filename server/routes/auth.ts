@@ -331,6 +331,7 @@ authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res
           db.prepare('DELETE FROM link_clicks WHERE profile_id = ?').run(pId);
           db.prepare('DELETE FROM profile_views WHERE profile_id = ?').run(pId);
           db.prepare('DELETE FROM newsletter_subscribers WHERE profile_id = ?').run(pId);
+          db.prepare('DELETE FROM form_submissions WHERE profile_id = ?').run(pId);
           db.prepare('DELETE FROM instagram_sync WHERE profile_id = ?').run(pId);
           db.prepare('DELETE FROM api_keys WHERE profile_id = ?').run(pId);
           db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(pId);
