@@ -1332,3 +1332,49 @@ Baseline: branch `main`, commit `816d24d1cd97a3df030367fdec7343afe730e0f1` at ta
 ### Next eligible prompt
 
 `22 — Link layouts`
+
+## Task 22 — Link layouts
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `e1a028a8b9a6b3811d705ee2b381b01ea0f59a2f` at task start. The worktree was clean; Task 21 changes were preserved. Implementation commit: `6204b060e2dad864e95ada43e4aacee2fb84e366`.
+
+### Scope and changed files
+
+- `src/components/PublicBioView.tsx`: replaces the negative `:not(.liinx-grid-link)` span rule with an explicit grid model: all direct content items span the full width at desktop/tablet, and only links with `extra.layout === 'grid'` occupy one column. Mobile remains a single-column layout; odd grid counts leave the final card in one normal column.
+- `server/contracts.ts`: constrains link layout persistence to `list`, `grid`, or `featured`; ordinary links cannot claim a carousel layout.
+- `tests/link_layouts.test.ts`: covers mixed link/list/grid/featured plus heading, form, and video persistence/public deserialization, rejection of `carousel`, and profile-duplication compatibility via the existing duplication suite.
+
+### Findings and behavior
+
+- List, grid, and featured controls already existed, but the public grid wrapper used a negative selector and depended on unrelated block roots. The explicit default-full-span/explicit-grid-span model prevents forms, headings, videos, galleries, and other non-grid blocks from shrinking when any grid link is present.
+- Grid links are one column each at `sm` and above and one column at mobile widths. An odd number of grid cards does not stretch or reorder; the final card occupies the next available column.
+- List and featured links remain full-width. Featured retains its existing minimum-height treatment; no carousel semantics were added.
+- Invalid legacy layout data is normalized out through the existing shared block-extra boundary rather than rendered as an unsupported layout. Existing valid layouts remain compatible.
+- Existing profile duplication remaps block identities while retaining layout extras; no duplication implementation was broadened.
+
+### Acceptance criteria
+
+- PASS — List, grid, and featured layouts have an explicit supported model. Evidence: contract enum and renderer span rules; API test round-trips all three values.
+- PASS — Non-grid blocks retain intended width when grid links are present. Evidence: mixed API/public test creates grid/list/featured links plus heading, form, and video and confirms all block types remain in the public payload; renderer assigns non-grid direct children the full-span default.
+- PASS — Mobile behavior and odd grid counts are defined. Evidence: renderer uses `grid-cols-1` on mobile and two columns at `sm`; no positional or count-dependent redistribution is used. Browser visual verification remains open below.
+- PASS — Reload and duplication preserve layout semantics. Evidence: API public reload assertions pass; `tests/profile_duplication.test.ts` passes alongside the layout suite and confirms copied block extras/identities remain independent.
+- PASS — Ordinary links are not marked carousel-capable without a carousel implementation. Evidence: `extra.layout: 'carousel'` returns HTTP 400 and public test asserts no carousel layout.
+- NOT RUN — Actual browser preview/public checks at supported widths, including visual width of mixed forms/headings/videos and odd-card appearance. Browser-client Node REPL was unavailable; source/API evidence is not browser evidence.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `e1a028a8b9a6b3811d705ee2b381b01ea0f59a2f` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_layouts.test.ts tests/basic_link.test.ts tests/api.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 30 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_layouts.test.ts tests/profile_duplication.test.ts` — PASS, 2 files / 3 tests.
+- Browser/deployed visual verification — NOT RUN; no supported browser-client Node REPL was available, and no production data, deployment, or external messages were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production database or uploads directory was changed.
+- Browser-level responsive and visual checks remain required for 390/768/1280 or the project’s supported preview widths; API tests cannot establish rendered CSS geometry.
+- Tailwind arbitrary child selectors are now positive and explicit, but a future UI test should verify compiled CSS in the actual preview/public browser at mobile and desktop widths.
+
+### Next eligible prompt
+
+`23 — Link animation`
