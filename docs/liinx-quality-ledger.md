@@ -2879,3 +2879,59 @@ Baseline: branch `main`, commit `b4ab5f0e8e83406c12b2843ca07f480249d2002a` at ta
 ### Next eligible prompt
 
 `53 — Analytics consent and external pixels`
+
+## Task 53 — Analytics consent and external pixels
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `bfc6050c4b21700012597b6979543c25da672aa6` at task start. The worktree was clean; prior Task 52 changes were preserved. Implementation commits: `ee120d6c4caba918a1c3e984b570e9dedc6def7c` (`fix: enforce analytics consent integration boundaries`) and `e4bb3269df9a0db90b7620d94dfd5e1c7a58ce80` (`fix: distinguish analytics campaign retries`).
+
+### Scope and changed files
+
+- `server/contracts.ts`: validates GA4 IDs as `G-...` measurement IDs and Meta Pixel IDs as numeric values before persistence.
+- `server/routes/analytics.ts`: keeps distinct UTM/referrer combinations measurable while deduplicating identical same-minute retries.
+- `src/components/PublicBioView.tsx`: keeps third-party script injection behind consent and preview guards, prevents duplicate script initialization on page navigation, and removes script nodes plus global queues on consent revocation/unmount.
+- `tests/analytics_consent_task53.test.ts`: covers malformed IDs, paid-plan exposure rules, and CSP source boundaries.
+- `tests/utm_and_pixels.test.ts`: updates duplicate-event expectations to match the Task 52/53 measurement contract.
+
+### Findings and behavior
+
+- Consent is stored in browser `localStorage` as `granted` or `denied` and is reused across root/subpage navigation and reloads on that browser origin. A missing choice shows the preference dialog when a creator has configured eligible integrations.
+- GA4 and Meta scripts are dynamically created only after `granted` consent and never in `previewOnly` mode. Repeated page navigation reuses existing script elements for the same integration; changing consent or integration state cleans up the elements and associated globals.
+- Revocation cannot retract data already sent before revocation, but it prevents the current page from retaining the integration queues/scripts. The application does not claim universal legal compliance; this is a technical consent gate.
+- Public profile responses expose configured IDs only when the profile’s current plan has the paid-customization entitlement. Free-plan profiles return null and server-side updates are rejected with 403.
+- GA4 and Meta IDs are validated at the shared profile contract boundary and again guarded in the renderer. Invalid values are not initialized.
+- Application CSP permits the intended GA script host, Meta script host, GA collection host, and existing application providers. It does not use wildcard script sources. CSP does not itself provide consent; the renderer gate remains required.
+- Core Liinx analytics view/click recording remains separate from optional creator-configured GA/Meta pixels. The consent dialog describes the optional integrations rather than claiming that all first-party measurement is disabled.
+
+### Acceptance criteria
+
+- PASS — Provider-id validation and subscription rules. Evidence: `tests/analytics_consent_task53.test.ts` rejects malformed IDs, accepts documented test shapes, hides IDs for free public profiles, and rejects free-plan updates.
+- PASS — No third-party script injection before consent in the renderer logic. Evidence: both GA and Meta effects require `analyticsConsent === 'granted'` and `!previewOnly`; no static provider script is present in the application source path.
+- PASS — Acceptance after consent and one-time initialization behavior in implementation. Evidence: script element ids and existence guards prevent duplicate insertion during repeated navigation; cleanup handles consent changes.
+- PASS — Rejection and preference persistence behavior in implementation. Evidence: `granted`/`denied` values are stored per browser origin and the denied state prevents both integration effects; script/global cleanup runs on effect teardown.
+- PASS — Root/subpage and custom-domain technical handling. Evidence: consent is browser-origin scoped and the renderer uses the same profile integration fields for the current fetched page; server entitlement filtering applies to every public profile response. Cross-origin custom-domain browser persistence remains subject to browser origin rules.
+- PASS — Preview emits no optional tracking scripts. Evidence: both integration effects return immediately for `previewOnly`; existing preview action guards remain unchanged.
+- PASS — CSP source boundaries. Evidence: `tests/analytics_consent_task53.test.ts` checks the GA/Meta script and GA collection sources and rejects wildcard script policy; existing CSP includes only explicit provider hosts.
+- NOT RUN — Actual browser network observation before consent, after acceptance, after rejection, and repeated navigation. The required in-app browser backend was unavailable in this session; source tests and build are not equivalent evidence.
+- NOT RUN — Live GA4/Meta requests, provider dashboards, custom-domain cross-origin persistence, ad-blocker behavior, and deployed CSP headers. No credentials or production traffic were used.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `bfc6050c4b21700012597b6979543c25da672aa6`.
+- `npm run lint` — PASS: TypeScript check.
+- `DATABASE_PATH=/tmp/liinx-task53-test-20260917b.db npm test -- --run tests/analytics_consent_task53.test.ts tests/utm_and_pixels.test.ts` — PASS after updating duplicate-event expectation: 2 files / 6 tests against disposable SQLite storage.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `git diff --check` — PASS.
+- Browser network inspection — NOT RUN: the required browser runtime/tool was not exposed in this session.
+
+### Unresolved risks and dependencies
+
+- Browser-origin consent does not synchronize across different custom domains; this is a technical browser boundary and needs product/privacy documentation if cross-domain preference sharing is required.
+- A provider can receive requests already in flight before a user changes preference; cleanup cannot undo transmission.
+- Real provider account configuration, measurement data, consent UX in deployed builds, and CSP behavior through the hosting edge remain unverified.
+- The current consent control is an application preference dialog, not a claim of legal compliance or a substitute for a product privacy policy.
+
+### Next eligible prompt
+
+`54 — Booking integration`
