@@ -2482,6 +2482,53 @@ Baseline: branch `main`, commit `c22c904` at task start. The worktree was clean 
 - Browser-level image fallback, keyboard, screen-reader, responsive, and real remote-image checks remain outstanding.
 - Downgraded profiles retain logo settings in storage for reversibility but intentionally suppress them publicly until entitlement returns.
 
+## Task 46 — Sharing metadata and indexing
+
+Status: VERIFIED WITHIN SCOPE
+
+Baseline: branch `main`, commit `60d8314` at task start. The worktree was clean and prior task changes were preserved.
+
+### Scope and changed files
+
+- `server/server.ts`: makes robots/sitemap origins configuration-driven; includes only published pages in the sitemap; renders page-specific escaped title/description, canonical, Open Graph, Twitter, and ProfilePage JSON-LD metadata; removes generic structured data from creator shells; and returns 404 for unknown platform profiles in production routing.
+- `tests/sharing_metadata.test.ts`: verifies metadata escaping, per-page precedence, canonical/Twitter/JSON-LD output, missing-image behavior, published-only sitemap entries, unpublished-page status, and unknown-profile status.
+
+### Findings and behavior
+
+- The prior server shell hardcoded `https://liinx.app`, did not rewrite Twitter metadata, left generic marketing JSON-LD on creator pages, and listed profiles without requiring a published page.
+- Platform canonical URLs now use `PUBLIC_ORIGIN`, then `APP_ORIGIN`, then configured domain/request fallback. Custom-domain requests retain their verified host as canonical; no new domain mapping was introduced.
+- For subpages, page title and description are authoritative. Home uses creator share metadata, then bio/default fallback. User-provided values are escaped for HTML attributes and JSON-LD script context.
+- Missing share/avatar images remove creator image metadata instead of leaving the generic marketing image. External social-platform cache freshness is not inferred from generated HTML.
+- The sitemap contains static routes plus platform URLs for published Home/subpages only. Unpublished pages are excluded. The sitemap remains platform-origin-only; custom-domain duplication is not silently added.
+- Production smoke checks used disposable data and `BILLING_ENABLED=false`; no production deployment or external cache was contacted.
+
+### Acceptance criteria
+
+- PASS — Initial HTML for platform Home and published subpage contains intended metadata without JavaScript. Evidence: production-mode curl smoke test against `PORT=3156`, configured `APP_ORIGIN`, and disposable SQLite; title, description, canonical, Twitter metadata observed.
+- PASS — Initial HTML for a verified custom-domain subpage contains custom-host canonical and page metadata. Evidence: production-mode request with `Host: creator.example.test`.
+- PASS — Quotes/markup are escaped and structured data is safely serialized. Evidence: `tests/sharing_metadata.test.ts`; `safeJsonForHtml` and escaped attribute assertions.
+- PASS — Missing images do not retain the default image metadata. Evidence: metadata rendering test.
+- PASS — Unpublished pages and unknown profiles return 404 where server routing/API applies. Evidence: focused tests and production smoke request for an unknown platform profile returning 404.
+- PASS — Sitemap contains intended published Home/subpages and excludes unpublished pages. Evidence: focused sitemap test.
+- PASS — Robots sitemap URL and canonical origins use deployment configuration/fallbacks rather than an unconditional hardcoded domain. Evidence: `publicOrigin()` and robots/sitemap tests.
+- NOT RUN — Social-platform crawler cache refresh/freshness and previews from external networks. Generated HTML is verified; external cache behavior remains a separate check.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, commit `60d8314`, ahead of `origin/main` only by prior local task commits.
+- `tmpdb=$(mktemp -d /tmp/liinx-task-46b-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-46b-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/sharing_metadata.test.ts tests/published_pages_routing.test.ts tests/api.test.ts tests/profile_identity.test.ts` — PASS: TypeScript check and 4 files / 31 tests.
+- `DATABASE_PATH=/tmp/liinx-task-46-production.db UPLOADS_DIR=/tmp/liinx-task-46-production-uploads NODE_ENV=production PORT=3156 APP_ORIGIN=https://configured.example CORS_ORIGIN=https://configured.example INTEGRATION_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef BILLING_ENABLED=false npm run start` plus curl requests for platform Home/subpage, verified custom-domain subpage, sitemap, and unknown profile — PASS: initial HTML metadata observed; platform/custom routes returned 200; unknown profile returned 404. The database/uploads paths were disposable.
+- `tmpdb=$(mktemp -d /tmp/liinx-task-46d-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-46d-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: TypeScript check, Vite build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+
+### Implementation commit
+
+`d9cfe6c8b3676817d87920b3fd734c3f1ad63742` — `feat: render public sharing metadata`.
+
+### Unresolved risks and dependencies
+
+- Social-platform cache freshness and actual crawler rendering remain externally unverified.
+- Sitemap is intentionally platform-origin-only; custom-domain sitemap strategy would require a separate canonical/indexing decision.
+
 ### Next eligible prompt
 
-`46 — Sharing metadata and indexing`
+`47 — Temporary redirects and scheduling`
