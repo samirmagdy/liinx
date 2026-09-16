@@ -1699,7 +1699,7 @@ Baseline: branch `main`, commit `6da320cd5149c05398faaa30ff42831a243b2b5c` at ta
 
 ### Implementation commit
 
-To be recorded after final validation.
+`83c3acd30597cf42d8476b960e0da65c388fd1ae` — `feat: make spacer spacing predictable`.
 
 ### Next eligible prompt
 
