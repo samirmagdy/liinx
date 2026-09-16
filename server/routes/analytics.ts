@@ -255,7 +255,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
         utm_medium: utmMedium,
         utm_campaign: utmCampaign,
         page_id: block.page_id,
-        dedupe_key: analyticsDedupeKey('click', [ipHash, block.id], now),
+        dedupe_key: analyticsDedupeKey('click', [ipHash, block.id, targetUrl, utmSource || '', utmMedium || '', utmCampaign || ''], now),
         created_at: now
       };
       insertClicksBatch([clickRecord]);
@@ -310,7 +310,7 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
       utm_medium: boundedQueryValue(utmMedium),
       utm_campaign: boundedQueryValue(utmCampaign),
       page_id: pageId || null,
-      dedupe_key: analyticsDedupeKey('view', [ipHash, profileId, pageId || 'profile'], now),
+      dedupe_key: analyticsDedupeKey('view', [ipHash, profileId, pageId || 'profile', boundedQueryValue(referrer) || 'direct', boundedQueryValue(utmSource) || '', boundedQueryValue(utmMedium) || '', boundedQueryValue(utmCampaign) || ''], now),
       created_at: now
     };
     insertViewsBatch([viewRecord]);
