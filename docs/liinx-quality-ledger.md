@@ -2279,7 +2279,7 @@ Baseline: branch `main`, commit `1288d6c` at task start. The worktree was clean;
 
 ### Implementation commit
 
-`TASK41_PENDING` — `feat: complete creator form inbox` (will be replaced with the implementation commit SHA after commit).
+`6ac4e0a1e0353bbad7eff35127fa60986828184c` — `feat: complete creator form inbox`.
 
 ### Unresolved risks and dependencies
 
