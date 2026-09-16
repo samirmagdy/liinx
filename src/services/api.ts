@@ -362,6 +362,7 @@ export const api = {
           avatarUrl?: string;
           links: { title: string; url: string; subtitle?: string }[];
           socials: { platform: string; url: string }[];
+          warnings: string[];
         };
       }>('/api/studio/import/preview', {
         method: 'POST',
@@ -369,13 +370,14 @@ export const api = {
       });
     },
     commit: async (payload: {
+      pageId?: string;
       links: { title: string; url: string; subtitle?: string }[];
       updateProfileInfo?: boolean;
       displayName?: string;
       bio?: string;
       avatarUrl?: string;
     }) => {
-      return request<{ success: boolean; count: number; message: string }>('/api/studio/import/commit', {
+      return request<{ success: boolean; count: number; skippedDuplicates: number; message: string }>('/api/studio/import/commit', {
         method: 'POST',
         body: JSON.stringify(payload)
       });

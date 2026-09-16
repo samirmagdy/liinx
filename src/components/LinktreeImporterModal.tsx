@@ -1,6 +1,6 @@
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { Modal } from './Modal';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { api } from '../services/api';
 import { 
   Download, 
@@ -14,17 +14,20 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { friendlyErrorMessage } from '../utils/errors';
+import type { CreatorPage } from '../types';
 
 interface LinktreeImporterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImportComplete: () => void;
+  pages: CreatorPage[];
 }
 
 export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   isOpen,
   onClose,
-  onImportComplete
+  onImportComplete,
+  pages
 }) => {
   const { tr: ui } = useUiLanguage();
   const [url, setUrl] = useState('');
@@ -34,6 +37,9 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [importing, setImporting] = useState(false);
   const [updateProfileInfo, setUpdateProfileInfo] = useState(true);
+  const requestGeneration = useRef(0);
+  const availablePages = pages;
+  const [pageId, setPageId] = useState(() => availablePages.find(page => page.isHome)?.id || '');
 
   if (!isOpen) return null;
 
@@ -44,9 +50,11 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
     setLoading(true);
     setError(null);
     setPreviewData(null);
+    const generation = ++requestGeneration.current;
 
     try {
       const res = await api.importer.preview(url.trim());
+      if (generation !== requestGeneration.current) return;
       if (res.success && res.data) {
         setPreviewData(res.data);
         setSelectedIndices(new Set(res.data.links.map((_: any, i: number) => i)));
@@ -54,10 +62,19 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
         setError('No links found on this profile.');
       }
     } catch (err: any) {
-      setError(friendlyErrorMessage(err, 'We could not inspect that profile. Make sure it is public and try again.'));
+      if (generation === requestGeneration.current) setError(friendlyErrorMessage(err, 'We could not inspect that profile. Make sure it is public and try again.'));
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current) setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    requestGeneration.current++;
+    setLoading(false);
+    setImporting(false);
+    setPreviewData(null);
+    setError(null);
+    onClose();
   };
 
   const toggleSelectIndex = (idx: number) => {
@@ -79,6 +96,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
     try {
       const linksToImport = previewData.links.filter((_: any, i: number) => selectedIndices.has(i));
       await api.importer.commit({
+        pageId: pageId || undefined,
         links: linksToImport,
         updateProfileInfo,
         displayName: previewData.displayName,
@@ -102,7 +120,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   };
 
   return (
-    <Modal open={isOpen} onClose={onClose} label={ui('Import links')} wide>
+    <Modal open={isOpen} onClose={handleCancel} label={ui('Import links')} wide>
       <div className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-neutral-100 dark:border-white/5 flex items-center justify-between">
@@ -118,7 +136,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
             </div>
           </div>
           <button 
-            onClick={onClose}
+            onClick={handleCancel}
             aria-label={ui('Close modal')}
             className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/10 transition-colors cursor-pointer"
           >
@@ -132,20 +150,20 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
             <form onSubmit={handlePreview} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                  {ui("Linktree or Beacons Profile URL")}</label>
+                  {ui("Supported public profile URL")}</label>
                 <div className="relative">
                   <input aria-label={ui("Linktree or Beacons Profile URL")}
                     type="text"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://linktr.ee/yourname or yourname"
+                    placeholder="https://linktr.ee/yourname"
                     className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-neutral-100 dark:bg-neutral-900/10 border border-neutral-200 dark:border-neutral-800 focus:border-neutral-900 dark:focus:border-neutral-900 outline-none"
                     autoFocus
                     required
                   />
                 </div>
                 <p className="text-[11px] text-neutral-600 mt-1.5">
-                  {ui("Supports Linktree, Beacons, and public bio profiles.")}</p>
+                  {ui("Supports public Linktree, Beacons, and Bio.fm profiles. Preview is read-only until you choose what to import.")}</p>
               </div>
 
               {error && (
@@ -209,6 +227,21 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                 <span>{ui("Also import avatar and bio info into profile")}</span>
               </label>
 
+              <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                {ui("Import destination page")}
+                <select value={pageId} onChange={event => setPageId(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-normal text-neutral-900" aria-label={ui("Import destination page")}>
+                  {availablePages.map(page => <option key={page.id} value={page.id}>{page.isHome ? ui('Home') : `${page.title}${page.published ? '' : ' (draft)'}`}</option>)}
+                </select>
+                <span className="mt-1 block text-[10px] font-normal text-neutral-500">{ui("Imported links are appended to this page; existing content is not overwritten.")}</span>
+              </label>
+
+              {previewData.warnings?.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900" role="status">
+                  <p className="font-semibold">{ui("Some source content could not be imported")}</p>
+                  <ul className="mt-1 list-disc space-y-1 pl-4">{previewData.warnings.map((warning: string) => <li key={warning}>{warning}</li>)}</ul>
+                </div>
+              )}
+
               {/* Links Selector */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-neutral-500">
@@ -266,7 +299,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setPreviewData(null)}
+                  onClick={() => { requestGeneration.current++; setPreviewData(null); setError(null); }}
                   className="py-2 px-3 rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-900/10 cursor-pointer"
                 >
                   {ui("Back")}</button>

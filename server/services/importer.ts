@@ -1,6 +1,5 @@
 /**
- * 100% Genuine Importer for Linktree, Beacons, and public bio profiles.
- * Extracts real public links, social profiles, avatars, and bios.
+ * Imports selected content from supported public Linktree, Beacons, and Bio.fm pages.
  */
 
 export interface ImportedProfileData {
@@ -18,6 +17,7 @@ export interface ImportedProfileData {
     platform: string;
     url: string;
   }[];
+  warnings: string[];
 }
 
 import dns from 'dns';
@@ -125,6 +125,40 @@ export function isSafePublicUrl(inputUrl: string): boolean {
   }
 }
 
+const supportedSourceHosts = ['linktr.ee', 'beacons.ai', 'bio.fm'];
+
+function isSupportedSourceHost(hostname: string): boolean {
+  const lower = hostname.toLowerCase().replace(/^www\./, '');
+  return supportedSourceHosts.some(host => lower === host || lower.endsWith(`.${host}`));
+}
+
+export function normalizeImportUrl(inputUrl: string): string | null {
+  const value = inputUrl.trim();
+  if (!value) return null;
+  const explicitUrl = /^[a-z][a-z0-9+.-]*:\/\//i.test(value);
+  const candidate = explicitUrl
+    ? value
+    : /^(?:www\.)?(?:linktr\.ee|beacons\.ai|bio\.fm)\//i.test(value)
+      ? `https://${value}`
+      : `https://linktr.ee/${value.replace(/^@/, '')}`;
+  try {
+    const parsed = new URL(candidate);
+    if (!['http:', 'https:'].includes(parsed.protocol) || !parsed.pathname || (!explicitUrl && parsed.pathname === '/')) return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+export function isSupportedImportUrl(inputUrl: string): boolean {
+  try {
+    const parsed = new URL(inputUrl);
+    return parsed.protocol === 'https:' && isSupportedSourceHost(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export async function isSafePublicUrlAsync(inputUrl: string): Promise<boolean> {
   if (!isSafePublicUrl(inputUrl)) return false;
   try {
@@ -159,6 +193,7 @@ export function parseLinktreeNextData(html: string): Partial<ImportedProfileData
     const rawSocials = pageProps.socialLinks || [];
 
     const links: { title: string; url: string; subtitle?: string }[] = [];
+    const warnings: string[] = [];
     for (const item of rawLinks) {
       if (item.url && item.title) {
         links.push({
@@ -166,6 +201,8 @@ export function parseLinktreeNextData(html: string): Partial<ImportedProfileData
           url: String(item.url).trim(),
           subtitle: item.description || undefined
         });
+      } else if (item.url || item.title) {
+        warnings.push('Some source links were skipped because they had no usable title or destination.');
       }
     }
 
@@ -184,7 +221,8 @@ export function parseLinktreeNextData(html: string): Partial<ImportedProfileData
       bio: account.description || account.bio,
       avatarUrl: account.profilePictureUrl || account.avatar,
       links,
-      socials
+      socials,
+      warnings
     };
   } catch (err) {
     console.error('Failed to parse Linktree __NEXT_DATA__:', err);
@@ -205,6 +243,7 @@ export function parseGenericHtmlBio(html: string, baseUrl: string): Partial<Impo
   // Extract all anchor links: <a href="..." ...>...</a>
   const linkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
   const links: { title: string; url: string; subtitle?: string }[] = [];
+  const warnings: string[] = [];
   const seenUrls = new Set<string>();
 
   let match;
@@ -212,12 +251,16 @@ export function parseGenericHtmlBio(html: string, baseUrl: string): Partial<Impo
     let href = match[1].trim();
     const rawText = match[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
-    if (!href || href.startsWith('#') || href.startsWith('javascript:')) continue;
+    if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
+      if (href) warnings.push('Some source links were skipped because their destination was unsafe or incomplete.');
+      continue;
+    }
 
     // Resolve relative URLs
     try {
       href = new URL(href, baseUrl).toString();
     } catch {
+      warnings.push('Some source links were skipped because their destination was malformed.');
       continue;
     }
 
@@ -241,6 +284,8 @@ export function parseGenericHtmlBio(html: string, baseUrl: string): Partial<Impo
         title: rawText,
         url: href
       });
+    } else if (rawText || href) {
+      warnings.push('Some source links were skipped because their labels were empty or too long.');
     }
   }
 
@@ -249,42 +294,43 @@ export function parseGenericHtmlBio(html: string, baseUrl: string): Partial<Impo
     bio,
     avatarUrl,
     links,
-    socials: []
+    socials: [],
+    warnings: [...new Set(warnings)]
   };
 }
 
 export async function importFromPublicUrl(inputUrl: string): Promise<ImportedProfileData> {
-  let cleanUrl = inputUrl.trim();
-  if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-    if (cleanUrl.startsWith('linktr.ee/') || cleanUrl.startsWith('beacons.ai/')) {
-      cleanUrl = `https://${cleanUrl}`;
-    } else {
-      cleanUrl = `https://linktr.ee/${cleanUrl.replace(/^@/, '')}`;
-    }
-  }
+  const cleanUrl = normalizeImportUrl(inputUrl);
+  if (!cleanUrl) throw new Error('Only public Linktree, Beacons, or Bio.fm profile URLs are supported.');
 
   let currentUrl = cleanUrl;
   let redirects = 0;
   let res: Response;
 
   while (true) {
-    if (!isSafePublicUrl(currentUrl) || !(await isSafePublicUrlAsync(currentUrl))) {
+    if (!isSupportedImportUrl(currentUrl) || !isSafePublicUrl(currentUrl) || !(await isSafePublicUrlAsync(currentUrl))) {
       throw new Error('Invalid or non-public profile URL provided.');
     }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
-    res = await fetch(currentUrl, {
-      redirect: 'manual',
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-      }
-    });
+    try {
+      res = await fetch(currentUrl, {
+        redirect: 'manual',
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'LIINX public-profile importer/1.0',
+          'Accept': 'text/html,application/xhtml+xml'
+        }
+      });
+    } catch (error) {
+      if ((error as { name?: string })?.name === 'AbortError') throw new Error('The source profile timed out. Please try again.');
+      throw new Error('The source profile could not be reached. Please try again.');
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (res.status >= 300 && res.status < 400) {
-      clearTimeout(timeout);
       redirects++;
       if (redirects > 5) {
         throw new Error('Too many redirects encountered while importing profile.');
@@ -294,6 +340,7 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
         throw new Error('Redirect response missing Location header.');
       }
       const resolved = new URL(location, currentUrl).toString();
+      if (!isSupportedImportUrl(resolved)) throw new Error('The source redirected to an unsupported profile host.');
       currentUrl = resolved;
       continue;
     }
@@ -311,21 +358,37 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
   }
 
   const maxBytes = 2 * 1024 * 1024;
+  const contentLength = Number(res.headers.get('content-length') || 0);
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) throw new Error('The source profile is too large to import safely.');
+  const contentType = (res.headers.get('content-type') || '').split(';', 1)[0].trim().toLowerCase();
+  if (contentType && !['text/html', 'application/xhtml+xml'].includes(contentType)) throw new Error('The source did not return an HTML profile page.');
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
   if (!res.body) throw new Error('The source profile returned no readable body.');
   const reader = res.body.getReader();
+  const bodyTimeout = setTimeout(() => reader.cancel().catch(() => undefined), 10000);
   try {
     while (true) {
-      const chunk = await reader.read();
+      let chunk: ReadableStreamReadResult<Uint8Array>;
+      try {
+        chunk = await reader.read();
+      } catch (error) {
+        if ((error as { name?: string })?.name === 'AbortError') throw new Error('The source profile timed out. Please try again.');
+        throw error;
+      }
       if (chunk.done) break;
       totalBytes += chunk.value.byteLength;
-      if (totalBytes > maxBytes) throw new Error('The source profile is too large to import safely.');
+      if (totalBytes > maxBytes) {
+        await reader.cancel();
+        throw new Error('The source profile is too large to import safely.');
+      }
       chunks.push(chunk.value);
     }
   } finally {
+    clearTimeout(bodyTimeout);
     reader.releaseLock();
   }
+  if (contentLength > 0 && totalBytes < contentLength) throw new Error('The source profile response was truncated.');
   const html = new TextDecoder().decode(Buffer.concat(chunks.map(chunk => Buffer.from(chunk))));
 
   // Try Next.js embedded data first
@@ -338,7 +401,8 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
       bio: parsedNext.bio,
       avatarUrl: parsedNext.avatarUrl,
       links: parsedNext.links,
-      socials: parsedNext.socials || []
+      socials: parsedNext.socials || [],
+      warnings: parsedNext.warnings || []
     };
   }
 
@@ -351,6 +415,7 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
     bio: generic.bio,
     avatarUrl: generic.avatarUrl,
     links: generic.links || [],
-    socials: generic.socials || []
+    socials: generic.socials || [],
+    warnings: generic.warnings || []
   };
 }
