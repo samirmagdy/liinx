@@ -137,7 +137,8 @@ describe('Milestone 4: UTM Tracking & Tracking Pixels (0% Fake Implementation)',
     expect(bfCampaign).toBeDefined();
     expect(bfCampaign.source).toBe('instagram');
     expect(bfCampaign.medium).toBe('bio_story');
-    expect(bfCampaign.count).toBe(2);
+    // Identical delivery retries are deduplicated within the same minute.
+    expect(bfCampaign.count).toBe(1);
 
     const twitterCampaign = statsRes.body.topUtmCampaigns.find(
       (c: any) => c.campaign === 'launch_drop'
