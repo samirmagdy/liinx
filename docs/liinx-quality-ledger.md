@@ -1849,7 +1849,7 @@ Baseline: branch `main`, commit `6454172` at task start. The worktree was clean;
 
 ### Implementation commit
 
-To be recorded after final validation.
+`78e9497b4fbe97bd37d731402f91f95b8a44c6ec` — `feat: make location block directions explicit`.
 
 ### Unresolved risks and dependencies
 
