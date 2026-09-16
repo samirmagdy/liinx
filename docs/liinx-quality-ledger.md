@@ -2590,3 +2590,62 @@ Baseline: branch `main`, commit `5bdb7b884dd992fdcc31fcc5fe6d8c311751fb6c` at ta
 ### Next eligible prompt
 
 `48 — QR codes and contact sharing`
+
+## Task 48 — QR codes and contact sharing
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `5d10f44` at task start. The worktree was clean; prior task changes were preserved.
+
+### Scope and changed files
+
+- `src/components/QrCodeModal.tsx`: replaces the misleading dynamic-QR label, supports published Home/subpage target selection, custom-domain targets, contrast-safe preset tints, accessible controls, provider/privacy disclosure, image failure state, and timed/validated PNG download handling.
+- `src/utils/qr.ts`: constructs absolute platform or verified custom-domain public targets without redirect/campaign semantics.
+- `src/components/BuilderStudio.tsx`, `src/components/PublicBioView.tsx`: pass profile pages, current page, and custom-domain context into the QR modal.
+- `server/server.ts`: permits the existing QRServer download connection in CSP `connect-src` without broadening script, frame, or media policy.
+- `src/config/runtimeTranslations.ts`: adds Arabic strings for QR labeling, privacy disclosure, target selection, and provider failure.
+- `tests/qr_code.test.ts`: covers platform/custom-domain target construction, malformed-domain rejection, and the CSP connection boundary.
+
+### Findings and behavior
+
+- The prior modal always encoded the platform Home URL, called the result “Dynamic QR Code,” and used a cross-origin download fetch not allowed by the deployed CSP.
+- QR codes are now explicitly profile QR codes. They encode the selected public Home or published subpage URL directly; no managed redirect, campaign destination, scan analytics, vCard, wallet, or NFC behavior is claimed or added.
+- In Studio, only published pages are offered as targets. On a public page, the current published page is selected initially. Home uses `/@username` on the platform origin; custom-domain Home uses the custom-domain root, and custom-domain subpages use `/<slug>`.
+- The existing QRServer provider remains an external dependency. The UI discloses that only the selected public URL is sent. No creator credentials, profile payload, private page, or analytics data is sent to it by this feature.
+- Tint choices are bounded to dark colors intended to retain scan contrast on white. Provider image failure and download timeout/non-image responses show an honest retry state.
+- No native QR decoder/device was available in the environment. A public fixture request to QRServer returned a valid 300×300 PNG, but that proves provider response/image validity, not scan success.
+
+### Acceptance criteria
+
+- PASS — Profile/page target selection is implemented for published Home/subpages, with platform and custom-domain URL rules. Evidence: `buildQrTargetUrl`, modal target selector, and 4 passing QR tests.
+- PASS — Safe rendering and bounded color controls are implemented. Evidence: absolute HTTP(S) target construction, constrained domain validation, fixed tint palette, accessible image alt text and labels.
+- PASS — Download has loading, timeout, non-image response, provider failure, and retry-visible error behavior. Evidence: `AbortController`, content-type check, image fallback, and error state in `QrCodeModal.tsx`.
+- PASS — No dynamic campaign or scan analytics claim is made. Evidence: explicit “Profile QR code” copy and direct public URL construction; no QR tracking endpoint was introduced.
+- PASS — The existing provider receives only the selected public URL by feature design. Evidence: QRServer query contains only encoded `profileUrl`; disclosure is rendered in the modal.
+- PASS — The application CSP permits the existing download fetch without broadening unrelated capabilities. Evidence: `tests/qr_code.test.ts` checks the `connect-src` boundary.
+- NOT RUN — Scan of actual generated output on a decoder/device. No `zbarimg`/`qrdecode` executable or browser runtime was available.
+- NOT RUN — Download through deployed CSP and live custom-domain routing. Local CSP/header and target tests passed; no deployment or external production environment was changed.
+- NOT RUN — Handle/domain change behavior verified end-to-end through a browser/scan. URL construction follows current profile inputs; CDN/cache propagation and physical QR reprinting remain external checks.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --oneline` — PASS at baseline: clean `main`, exact baseline `5d10f44`.
+- `npm run lint` — PASS: TypeScript check.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `testdb=$(mktemp -d /tmp/liinx-task-48-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-48-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/qr_code.test.ts` — PASS: 1 file / 4 tests against disposable SQLite/uploads paths.
+- `qrfixture=$(mktemp /tmp/liinx-task-48-qr.XXXXXX.png); curl --fail --silent --show-error --max-time 15 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fliinx.example%2F%40creator&color=111315&bgcolor=FFFFFF' -o "$qrfixture" && file "$qrfixture" && magick identify "$qrfixture"` — PASS: isolated public fixture returned a 300×300, 1-bit PNG. This was not a scan verification.
+- `git diff --check` — PASS before implementation commit.
+
+### Implementation commit
+
+`d1d48e3ccc553a4557937497a864f547385db26c` — `feat: make profile QR targets explicit`
+
+### Unresolved risks and dependencies
+
+- QRServer availability, CORS behavior, deployed CSP, and actual device scanning require external/browser verification.
+- Changing a handle/domain affects newly generated QR targets; existing printed QR images remain encoded with their old direct URL and are not dynamically redirected by Liinx.
+- Custom-domain QR targets assume the stored custom domain has already passed the repository’s domain verification flow.
+
+### Next eligible prompt
+
+`49 — Competitor-page importer`
