@@ -238,24 +238,27 @@ export const pageContract = z.object({
 export const pageUpdateContract = pageContract.partial().extend({ sortOrder: z.number().int().min(0).optional(), revision: z.number().int().nonnegative().optional() }).strict();
 
 const uploadPath = z.string().regex(/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/, 'Must be a valid upload path.');
+const presetThemeIds = ['editorial-stone', 'obsidian-noir', 'tokyo-cyber', 'nordic-minimal', 'sunset-amber', 'velvet-plum', 'brutalist-mono', 'forest-canopy', 'coral-reef', 'midnight-ink', 'sahara-dune', 'elena-rostova'] as const;
+const cssColor = z.string().trim().regex(/^(?:#[\da-f]{3,8}|rgba?\(\s*[\d.]+[\s,]+[\d.]+[\s,]+[\d.]+(?:[\s,/]\s*[\d.]+%?)?\s*\))$/i, 'Use a valid hex or rgb color.');
+const cssGradient = z.string().trim().max(500).regex(/^(?:linear|radial)-gradient\([^;{}]+\)$/i, 'Only safe CSS gradients are supported.');
+const borderValue = z.string().trim().regex(/^(?:0|[1-9]\d*(?:\.\d+)?)px\s+(?:none|solid|dashed|dotted|double)\s+(?:#[\da-f]{3,8}|rgba?\([^)]*\))$/i, 'Use a simple color border declaration.');
 const customThemeSchema = z.object({
   id: z.string().max(80).optional(), name: z.string().max(100).optional(),
-  bgType: z.enum(['solid', 'gradient', 'mesh']).optional(), bgColor: z.string().max(50).optional(),
-  bgGradient: z.string().max(500).optional(), cardBg: z.string().max(50).optional(),
-  textColor: z.string().max(50).optional(), subtextColor: z.string().max(50).optional(),
-  mutedColor: z.string().max(50).optional(), cardText: z.string().max(50).optional(),
-  cardBorder: z.string().max(50).optional(), cardHover: z.string().max(50).optional(),
-  accentColor: z.string().max(50).optional(), cardRadius: z.string().max(20).optional(),
-  buttonStyle: z.string().max(30).optional(), shadow: z.string().max(30).optional(),
-  fontFamily: z.string().max(100).optional(), isDark: z.boolean().optional(),
-  background: z.string().max(100).optional(), surface: z.string().max(100).optional(),
-  text: z.string().max(100).optional(), accent: z.string().max(100).optional(), radius: z.string().max(20).optional()
+  bgType: z.enum(['solid', 'gradient', 'mesh']).optional(), bgColor: cssColor.optional(),
+  bgGradient: cssGradient.optional(), cardBg: cssColor.optional(),
+  textColor: cssColor.optional(), subtextColor: cssColor.optional(),
+  mutedColor: cssColor.optional(), cardText: cssColor.optional(),
+  cardBorder: borderValue.optional(), cardHover: cssColor.optional(),
+  accentColor: cssColor.optional(), cardRadius: z.enum(['none', 'md', 'xl', 'full']).optional(),
+  buttonStyle: z.enum(['fill', 'outline', 'ghost']).optional(), shadow: z.enum(['none', 'sm', 'md', 'lg']).optional(),
+  fontFamily: z.enum(['sans', 'display', 'mono']).optional(), isDark: z.boolean().optional(),
+  background: cssColor.optional(), surface: cssColor.optional(), text: cssColor.optional(), accent: cssColor.optional(), radius: z.enum(['none', 'md', 'xl', 'full']).optional()
 }).strict();
 export const profileUpdateContract = z.object({
   username: z.string().trim().min(3).max(30).regex(/^[a-z0-9_]+$/, 'Username may only contain lowercase letters, numbers, and underscores.').optional(),
   displayName: z.string().trim().min(1).max(100).optional(), bio: z.string().trim().max(500).optional(),
   avatarUrl: z.union([uploadPath, z.string().max(MAX_URL).refine(isHttpUrl, 'Avatar must use HTTP(S) or a valid upload path.')]).optional(),
-  category: z.string().trim().max(50).optional(), themeId: z.string().max(80).optional(), hideBranding: z.boolean().optional(),
+  category: z.string().trim().max(50).optional(), themeId: z.enum(presetThemeIds).optional(), hideBranding: z.boolean().optional(),
   gaMeasurementId: z.string().max(50).nullable().optional(), metaPixelId: z.string().max(50).nullable().optional(),
   customDomain: z.string().max(100).nullable().optional(), customCss: z.string().max(10000).nullable().optional(),
   customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),

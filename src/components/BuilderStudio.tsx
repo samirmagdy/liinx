@@ -1141,10 +1141,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   const handleThemeSelect = (theme: ThemeConfig) => {
-    setCustomTheme(theme);
-    const updated = { ...profile, themeId: theme.id, customTheme: theme };
+    // Presets intentionally replace prior overrides; the note beside the picker makes this explicit.
+    const nextTheme = resolveTheme(theme.id, theme);
+    setCustomTheme(nextTheme);
+    const updated = { ...profile, themeId: theme.id, customTheme: nextTheme };
     setProfile(updated);
     triggerAutoSave(updated);
+  };
+
+  const updateThemeOverride = (patch: Partial<ThemeConfig>) => {
+    const updatedTheme = resolveTheme(profile.themeId, { ...customTheme, ...patch });
+    setCustomTheme(updatedTheme);
+    setProfile(previous => ({ ...previous, customTheme: updatedTheme }));
+    triggerAutoSave({ customTheme: updatedTheme });
   };
 
   // Export CSV
@@ -2052,6 +2061,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <h3 className="font-bold text-sm text-neutral-900">{ui("Curated Visual Presets")}</h3>
                 <p className="text-xs text-neutral-500">
                   {ui("Choose from carefully crafted aesthetic profiles. Every palette is built with strong contrast and responsive tokens.")}</p>
+                <p className="text-[11px] text-amber-800" role="note">{ui("Selecting a preset replaces custom appearance overrides.")}</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   {THEMES.map((th) => (
@@ -2091,9 +2101,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <button
                       key={rad}
                       onClick={() => {
-                        const updated = { ...customTheme, cardRadius: rad };
-                        setCustomTheme(updated);
-                        triggerAutoSave({ customTheme: updated });
+                        updateThemeOverride({ cardRadius: rad });
                       }}
                       className={`py-2 px-3 border rounded-xl text-xs font-semibold capitalize transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
                         customTheme.cardRadius === rad 
@@ -2113,9 +2121,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <button
                         key={col}
                         onClick={() => {
-                          const updated = { ...customTheme, accentColor: col };
-                          setCustomTheme(updated);
-                          triggerAutoSave({ customTheme: updated });
+                          updateThemeOverride({ accentColor: col });
                         }}
                         className={`w-8 h-8 rounded-full border transition-transform cursor-pointer ${
                           customTheme.accentColor === col ? 'ring-2 ring-black scale-110' : 'opacity-80 hover:opacity-100'
@@ -2124,6 +2130,21 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       />
                     ))}
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 border-t border-neutral-200 pt-3 sm:grid-cols-2">
+                  <label className="flex items-center justify-between gap-3 text-xs font-semibold text-neutral-700">
+                    <span>{ui("Card surface")}</span>
+                    <input type="color" aria-label={ui("Card surface")} value={/^#[\da-f]{6}$/i.test(customTheme.cardBg) ? customTheme.cardBg : '#FFFFFF'} onChange={event => updateThemeOverride({ cardBg: event.target.value })} className="h-8 w-12 cursor-pointer rounded border border-neutral-300" />
+                  </label>
+                  <label className="flex items-center justify-between gap-3 text-xs font-semibold text-neutral-700">
+                    <span>{ui("Card border")}</span>
+                    <select aria-label={ui("Card border")} value={customTheme.cardBorder} onChange={event => updateThemeOverride({ cardBorder: event.target.value })} className="max-w-40 rounded-lg border border-neutral-300 px-2 py-1.5 text-xs font-normal">
+                      <option value="1px solid #E5E5E0">{ui("Subtle")}</option>
+                      <option value="1px solid #A3A3A3">{ui("Strong")}</option>
+                      <option value="0px none #000000">{ui("None")}</option>
+                    </select>
+                  </label>
                 </div>
               </div>
             </div>

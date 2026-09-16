@@ -1124,3 +1124,55 @@ Baseline: branch `main`, commit `03397a92b16b16246e55c61551b6cfd79ca4b5c9` at ta
 ### Next eligible prompt
 
 `18 — Theme selection and persistence`
+
+## Task 18 — Theme selection and persistence
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `1e9713af57aeb433308577e454e2ff5599eb7899` at task start. Existing Task 17 changes were preserved. Task 18 changes are currently uncommitted.
+
+### Scope and changed files
+
+- `server/contracts.ts`: restricts preset IDs and custom theme values to supported enums and safe color, gradient, border, radius, font, button, and shadow tokens; rejects arbitrary utility-class/CSS fragments.
+- `src/utils/colorContrast.ts`: normalizes legacy flattened aliases (`background`, `surface`, `text`, `accent`, `radius`) at the render boundary, safely falls back incomplete records, and filters invalid colors/gradients/borders before contrast handling.
+- `src/components/BuilderStudio.tsx`: makes preset replacement explicit, keeps individual overrides in profile state and autosave, and adds card surface/border controls alongside radius/accent controls.
+- `src/config/runtimeTranslations.ts`: adds Arabic UI copy for preset and surface/border behavior.
+- `tests/theme_persistence.test.ts`: covers all presets, persistence/public transformation, invalid theme fragments, legacy aliases, and incomplete records.
+
+### Findings and behavior
+
+- Preset selection already existed, but individual radius/accent updates changed only the local resolved theme and queued persistence; profile state could remain stale until reload. This was a current state-consistency defect.
+- Presets intentionally replace all appearance overrides with the selected preset. The editor now states this directly beside the preset picker.
+- `resolveTheme` is the shared transformation used by editor, iframe preview, phone preview, and public rendering. It applies legacy aliases, preset fallback, safe token fallback, and contrast normalization consistently.
+- Existing valid presets are retained. Incomplete or legacy custom records are repaired at read/render time without destructive database rewriting.
+- Theme persistence remains profile-scoped and uses the existing revision-aware profile save queue. Profile duplication continues to copy the theme fields; existing duplication regression coverage confirms this behavior.
+- Contrast normalization can adjust rendered text/accent colors for readability, but it does not mutate the saved creator choices. The saved values remain available for later correction or inspection.
+
+### Acceptance criteria
+
+- PASS — Every existing preset can be selected and persisted. Evidence: regression test iterates all `THEMES` entries; all requests return 200.
+- PASS — Individual radius, accent, card-surface, and border overrides use the shared contract and persist through profile state/autosave. Evidence: editor handlers and API round-trip test.
+- PASS — Preset reset/preservation behavior is defined and visible. Evidence: preset handler replaces overrides and UI note says selection replaces custom appearance overrides.
+- PASS — Editor, preview, saved data, and public renderer use the same theme transformation. Evidence: `resolveTheme` call sites and studio/public round-trip tests.
+- PASS — Incomplete legacy records normalize safely. Evidence: `colorContrast.test.ts` and alias normalization regression test.
+- PASS — Arbitrary unsupported utility-class/CSS fragments are rejected. Evidence: `made-up-theme`, `rounded-xl`, and `bg-red-500` return HTTP 400.
+- PASS — Profile duplication preserves theme data without new theme-specific identifiers or secrets. Evidence: existing `profile_duplication.test.ts` plus shared transform coverage.
+- NOT RUN — Browser selection/reload/duplicate journey, visual preview/public comparison, and contrast perception across all presets; browser automation was unavailable.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `1e9713af57aeb433308577e454e2ff5599eb7899` on `main`.
+- `task18_final=$(mktemp -d /tmp/liinx-task18-final-XXXXXX); mkdir -p "$task18_final/uploads"; DATABASE_PATH="$task18_final/liinx.db" UPLOADS_DIR="$task18_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task18_final/liinx.db" UPLOADS_DIR="$task18_final/uploads" NODE_ENV=test npm test -- tests/theme_persistence.test.ts tests/colorContrast.test.ts tests/profile_duplication.test.ts && git diff --check` — PASS, typecheck plus 3 files / 7 tests; diff check passed.
+- `task18_check=$(mktemp -d /tmp/liinx-task18-check-XXXXXX); mkdir -p "$task18_check/uploads"; DATABASE_PATH="$task18_check/liinx.db" UPLOADS_DIR="$task18_check/uploads" NODE_ENV=test npm test -- tests/api.test.ts tests/acceptance.test.ts tests/e2e-workflow.test.ts tests/resilience.test.ts` — PASS, 4 files / 73 tests.
+- `npm run build && git diff --check` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/deployed verification — NOT RUN; no production data, deployment, or external provider was used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production data was changed.
+- Browser verification is still needed for the visual result of every preset, saved reload behavior, profile duplication comparison, keyboard controls, and Arabic/RTL presentation.
+- Existing full-suite failures recorded in Task 17 remain outside this task; this task’s relevant suites passed.
+
+### Next eligible prompt
+
+`19 — Background media`

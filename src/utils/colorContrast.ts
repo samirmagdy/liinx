@@ -53,9 +53,18 @@ function hasRequiredContrast(foreground: string, backgrounds: string[], minimum:
 }
 
 /** Returns the complete selected preset with creator overrides applied. */
-export function resolveTheme(themeId?: string | null, customTheme?: Partial<ThemeConfig> | null): ThemeConfig {
+export function resolveTheme(themeId?: string | null, customTheme?: Partial<ThemeConfig> | Record<string, unknown> | null): ThemeConfig {
   const preset = THEMES.find(theme => theme.id === themeId) || THEMES[0];
-  return ensureThemeContrast({ ...preset, ...(customTheme || {}) });
+  const legacy = (customTheme || {}) as Partial<ThemeConfig> & Record<string, unknown>;
+  const overrides = {
+    ...legacy,
+    bgColor: legacy.bgColor || legacy.background,
+    cardBg: legacy.cardBg || legacy.surface,
+    textColor: legacy.textColor || legacy.text,
+    accentColor: legacy.accentColor || legacy.accent,
+    cardRadius: legacy.cardRadius || legacy.radius
+  };
+  return ensureThemeContrast({ ...preset, ...overrides } as Partial<ThemeConfig>);
 }
 
 /** Extracts a valid color from a CSS border declaration without splitting rgba(). */
@@ -98,22 +107,25 @@ export function getAccessibleTextColor(background: unknown, fallback: string = D
 /** Normalizes creator-provided colors at render time so public pages stay readable. */
 export function ensureThemeContrast(theme: Partial<ThemeConfig> | null | undefined): ThemeConfig {
   const stringOr = (value: unknown, fallback: string) => typeof value === 'string' && value.trim() ? value : fallback;
+  const colorOr = (value: unknown, fallback: string) => typeof value === 'string' && parseColor(value) ? value.trim() : fallback;
+  const gradientOr = (value: unknown, fallback?: string) => typeof value === 'string' && /^(?:linear|radial)-gradient\([^;{}]+\)$/i.test(value.trim()) ? value.trim() : fallback;
+  const borderOr = (value: unknown, fallback: string) => typeof value === 'string' && /^(?:0|[1-9]\d*(?:\.\d+)?)px\s+(?:none|solid|dashed|dotted|double)\s+(?:#[\da-f]{3,8}|rgba?\([^)]*\))$/i.test(value.trim()) ? value.trim() : fallback;
   const isDark = typeof theme?.isDark === 'boolean' ? theme.isDark : false;
   const fallbackCardBackground = isDark ? '#1E293B' : '#FFFFFF';
   const safeTheme: ThemeConfig = {
     id: stringOr(theme?.id, 'safe-default'),
     name: stringOr(theme?.name, 'Safe Default'),
     bgType: theme?.bgType === 'gradient' || theme?.bgType === 'mesh' ? theme.bgType : 'solid',
-    bgColor: stringOr(theme?.bgColor, '#FAF9F6'),
-    bgGradient: typeof theme?.bgGradient === 'string' ? theme.bgGradient : undefined,
-    textColor: stringOr(theme?.textColor, DARK_TEXT),
-    subtextColor: stringOr(theme?.subtextColor, '#525252'),
-    cardBg: stringOr(theme?.cardBg, fallbackCardBackground),
-    cardText: stringOr(theme?.cardText, isDark ? '#E2E8F0' : DARK_TEXT),
-    cardBorder: stringOr(theme?.cardBorder, isDark ? '1px solid #334155' : '1px solid #E5E5E0'),
-    cardHover: stringOr(theme?.cardHover, isDark ? '#273548' : '#F9FAFA'),
+    bgColor: colorOr(theme?.bgColor, '#FAF9F6'),
+    bgGradient: gradientOr(theme?.bgGradient),
+    textColor: colorOr(theme?.textColor, DARK_TEXT),
+    subtextColor: colorOr(theme?.subtextColor, '#525252'),
+    cardBg: colorOr(theme?.cardBg, fallbackCardBackground),
+    cardText: colorOr(theme?.cardText, isDark ? '#E2E8F0' : DARK_TEXT),
+    cardBorder: borderOr(theme?.cardBorder, isDark ? '1px solid #334155' : '1px solid #E5E5E0'),
+    cardHover: colorOr(theme?.cardHover, isDark ? '#273548' : '#F9FAFA'),
     cardRadius: theme?.cardRadius === 'none' || theme?.cardRadius === 'md' || theme?.cardRadius === 'full' ? theme.cardRadius : 'xl',
-    accentColor: stringOr(theme?.accentColor, isDark ? '#38BDF8' : '#92400E'),
+    accentColor: colorOr(theme?.accentColor, isDark ? '#38BDF8' : '#92400E'),
     fontFamily: theme?.fontFamily === 'display' || theme?.fontFamily === 'mono' ? theme.fontFamily : 'sans',
     isDark
   };
