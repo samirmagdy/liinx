@@ -1422,3 +1422,48 @@ Baseline: branch `main`, commit `09af5c6c7edf44222fc1b65550a90239405db2c7` at ta
 ### Next eligible prompt
 
 `24 — Headings and rich text`
+
+## Task 24 — Headings and rich text
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `15fa285698a99f6a4323d64b59a672d3e004519e` at task start. The worktree was clean; Task 23 changes were preserved. Implementation commit: `69bb842c57b80230c6527ac55350d90e9b104afa`.
+
+### Scope and changed files
+
+- `src/components/BuilderStudio.tsx`: turns the existing limited editor into an explicit markdown-like editor with caret/selection-aware bold, italic, heading, bulleted-list, numbered-list, and safe-link actions. Adds accessible labels and documents the format; toolbar actions no longer append sample words.
+- `src/components/PublicBioView.tsx`: safely renders paragraphs, h2/h3/h4 headings, unordered/ordered lists, bold, italic, and validated links. Literal HTML and unsafe link markup remain escaped text; no HTML injection pipeline was introduced.
+- `tests/rich_text.test.ts`: covers Arabic/mixed content, lists, links, literal HTML/script markup, reload/public round-trip, and oversized-update rejection without data loss.
+
+### Findings and behavior
+
+- Existing rich text was stored as plain text and rendered with a small bold/italic/heading parser. Its toolbar inserted fabricated `bold`, `italic`, or `heading` words at the end when no text was selected, and it did not support lists or links.
+- The supported format is intentionally limited: paragraphs are newline-separated; `#`, `##`, and `###` produce h2, h3, and h4; `-`/`*` and numbered prefixes produce lists; `**text**` and `*text*` format inline text; `[label](url)` produces a link only for HTTP(S), mailto, or tel protocols.
+- Formatting uses the current textarea selection or insertion caret. Bold/italic insert an empty pair at the caret; line formats apply to the current line; link insertion requires selected text plus a creator-entered URL.
+- Rendering uses React text nodes rather than `dangerouslySetInnerHTML`; literal `<script>`, HTML tags, and unsafe markdown URLs cannot execute. Unsafe markdown links are shown as literal text.
+- Empty rich-text blocks remain an accessible article with a heading and empty paragraph. Heading levels are deterministic and do not skip the supported h2–h4 mapping.
+
+### Acceptance criteria
+
+- PASS — Supports bold, italic, headings, paragraphs, lists, and links in a documented format. Evidence: editor toolbar/help copy, parser implementation, and round-trip test fixture.
+- PASS — Toolbar actions operate on selection/insertion position rather than appending sample words. Evidence: caret/selection-based editor implementation; browser interaction remains unverified below.
+- PASS — Arabic, mixed-direction content, lists, links, pasted literal markup, and persistence round-trip. Evidence: `tests/rich_text.test.ts` passes API/editor serialization and public deserialization with Arabic and literal HTML content.
+- PASS — Unsafe HTML and URLs cannot execute. Evidence: no HTML injection API is used; React escapes literal markup; `safePublicHref` filters markdown link protocols and unsafe links remain text; oversized content is rejected.
+- PASS — Empty blocks and heading hierarchy remain accessible. Evidence: empty lines render as paragraphs, headings map to semantic h2/h3/h4 elements, and editor content has an accessible label.
+- NOT RUN — Actual browser typing, selection, toolbar activation, undo, paste behavior, reload visual rendering, and keyboard verification. Browser-client Node REPL was unavailable; native textarea undo and source-level selection logic are not equivalent to a browser journey.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `15fa285698a99f6a4323d64b59a672d3e004519e` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/rich_text.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 10 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/editor/deployed verification — NOT RUN; no supported browser-client Node REPL was available, and no production data, deployment, or external messages were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production database or uploads directory was changed.
+- Browser verification remains required for actual selection/caret behavior, undo, paste, visual RTL layout, link activation, and reload rendering.
+- The editor intentionally does not accept arbitrary HTML, tables, nested rich formatting, or custom link titles. Unsupported markup is displayed literally and should not be represented as supported.
+
+### Next eligible prompt
+
+`25 — Folders and content groups`
