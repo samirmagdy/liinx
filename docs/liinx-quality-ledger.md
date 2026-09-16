@@ -2935,3 +2935,55 @@ Baseline: branch `main`, commit `bfc6050c4b21700012597b6979543c25da672aa6` at ta
 ### Next eligible prompt
 
 `54 — Booking integration`
+
+## Task 54 — Booking integration
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `d913eec99f9abd0994c7868644c039c9d2e1d11a` at task start. The worktree was clean; prior Task 53 changes were preserved. Implementation commit: `abd1477811981c6ef313e7cda1394dd698d29e4a` (`fix: harden Calendly booking integration`).
+
+### Scope and changed files
+
+- `src/utils/booking.ts`: accepts official Calendly profile scheduling paths and specific event-type paths on HTTPS `calendly.com` only; rejects arbitrary hosts, credentials, ports, unsafe schemes, and deeper embed paths.
+- `src/components/BookingCard.tsx`: adds responsive bounded iframe sizing, loading status, timeout/error fallback, explicit external-provider/payment wording, keyboard-visible controls, and preview-disabled behavior.
+- `src/components/BookingEditor.tsx`: keeps creator validation inline and clarifies that the configured destination is a Calendly URL.
+- `src/components/PublicBioView.tsx`, `src/components/PhonePreview.tsx`: pass preview state so editor/template previews cannot open external booking embeds.
+- `tests/booking.test.ts`: covers profile URLs, event URLs, malformed/arbitrary URLs, persistence, update rejection, public rendering, and removal.
+
+### Findings and behavior
+
+- Calendly’s current developer documentation describes embedding a landing/profile scheduling page or a specific event-type page using the scheduling URL. The validator therefore supports `/user` and `/user/event`, while stripping query and fragment values from the persisted embed URL. Official references: [Calendly getting started with embeds](https://developer.calendly.com/api-docs/overview/embedding/getting-started) and [Calendly embed guide](https://developer.calendly.com/docs/api-guides/how-to-display-the-scheduling-page-for-users-of-your-app).
+- The creator configures a URL and title; availability, scheduling, confirmation, and any payment behavior remain at Calendly. Liinx does not claim native calendar management, booking completion, or payment processing.
+- The iframe is not loaded until a visitor activates the booking button. A new-tab Calendly link remains available as a fallback. A 10-second timeout and iframe error path disclose failure instead of claiming that availability loaded.
+- Preview/template mode disables the booking activation button and does not render the iframe. Public keyboard users receive a native button, expanded state, native iframe title, and a focus-visible fallback link.
+- CSP already allows `frame-src https://calendly.com`; no arbitrary iframe source or broader CSP exception was added. The external Calendly frame remains subject to provider availability, browser privacy settings, and deployment CSP.
+
+### Acceptance criteria
+
+- PASS — Supported Calendly profile and event URL variants. Evidence: updated `bookingUrl` tests and server persistence test.
+- PASS — Arbitrary iframe/host URLs rejected. Evidence: URL contract rejects non-Calendly hosts, HTTP, credentials, ports, and unsupported path depth; existing contract tests remain green.
+- PASS — Loading failure and fallback behavior implemented. Evidence: iframe `onError`, 10-second timeout, honest alert, and always-available new-tab link in `BookingCard`.
+- PASS — Responsive/mobile sizing and keyboard access implemented. Evidence: `w-full max-w-full`, bounded viewport-relative height, native button/link controls, accessible iframe title, and focus-visible styles.
+- PASS — Creator integration state and external-provider wording. Evidence: editor helper copy identifies Calendly ownership of availability/confirmations; public copy states Liinx does not process bookings or payments.
+- PASS — Preview does not trigger external booking actions. Evidence: `previewOnly`/`interactive` state disables the button and prevents iframe creation in public and phone previews.
+- PASS — CSP compatibility. Evidence: existing explicit `frame-src https://calendly.com` policy and focused build/tests; no wildcard frame source added.
+- NOT RUN — Live Calendly supported URL availability, private/removed event behavior, provider-denied embeds, iframe timeout under a real network failure, and deployed CSP enforcement. No authorized Calendly account or deployed environment was available.
+- NOT RUN — Browser-level mobile layout and keyboard journey. Browser automation was unavailable in this session; source/type/build evidence is not equivalent.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `d913eec99f9abd0994c7868644c039c9d2e1d11a`.
+- `npm run lint && DATABASE_PATH=/tmp/liinx-task54-test-20260917.db npm test -- --run tests/booking.test.ts tests/contracts.test.ts tests/published_pages_routing.test.ts tests/analytics_consent_task53.test.ts && git diff --check` — PASS: TypeScript check; 4 files / 11 tests against disposable SQLite storage; diff check clean.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- Official Calendly documentation review — PASS for supported URL model; live provider behavior NOT RUN.
+
+### Unresolved risks and dependencies
+
+- Calendly can change URL formats, embed behavior, availability, or account restrictions; live provider verification remains required before promising a working schedule.
+- Browser privacy controls, third-party cookie policy, network blocking, and provider CSP headers may prevent an iframe even when the URL is valid; the fallback link is the supported recovery path.
+- Cross-origin iframe keyboard and screen-reader behavior depends partly on Calendly’s own accessibility implementation; Liinx supplies an accessible container/title and fallback but does not control provider internals.
+- No native calendar, booking database, payment, confirmation, or booking analytics feature was added.
+
+### Next eligible prompt
+
+`55 — Developer API and key management`
