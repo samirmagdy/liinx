@@ -424,10 +424,14 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       id="public-bio-view"
       className="min-h-screen w-full transition-colors duration-300 relative selection:bg-black selection:text-white"
       style={{
-        background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
-        backgroundImage: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? `url(${profile.backgroundMediaUrl})` : undefined,
-        backgroundSize: profile.backgroundMediaUrl ? 'cover' : undefined,
-        backgroundAttachment: profile.backgroundMediaUrl ? 'fixed' : undefined,
+        backgroundColor: theme.bgColor,
+        backgroundImage: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl
+          ? `url(${profile.backgroundMediaUrl})`
+          : theme.bgType === 'gradient'
+            ? theme.bgGradient
+            : undefined,
+        backgroundSize: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? 'cover' : undefined,
+        backgroundAttachment: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? 'fixed' : undefined,
         color: theme.textColor,
         fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
       }}

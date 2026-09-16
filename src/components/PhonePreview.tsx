@@ -126,7 +126,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           dir={isProfileRtl ? 'rtl' : 'ltr'}
           className="rounded-[28px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300 shadow-lg"
           style={{
-            background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
+            backgroundColor: theme.bgColor,
+            backgroundImage: theme.bgType === 'gradient' ? theme.bgGradient : undefined,
             color: theme.textColor,
             fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)',
             aspectRatio: '9 / 16',
@@ -142,7 +143,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             dir={isProfileRtl ? 'rtl' : 'ltr'}
             className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
             style={{
-              background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
+              backgroundColor: theme.bgColor,
+              backgroundImage: theme.bgType === 'gradient' ? theme.bgGradient : undefined,
               color: theme.textColor,
               fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
             }}>
