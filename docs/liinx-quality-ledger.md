@@ -2287,6 +2287,50 @@ Baseline: branch `main`, commit `1288d6c` at task start. The worktree was clean;
 - No automatic retention schedule is defined; deletion is creator-authorized and permanent at the application layer.
 - CSV exports are intentionally full for the selected filter and may be large; pagination applies to browsing, not export.
 
+## Task 42 — Newsletter capture and subscriber management
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Implementation commit: `9c4a95f501a44be39a6fb2b8ea741058a3b67d43` on `main`, based on prior ledger state `ec1cded`. The worktree was clean before this task and prior work was preserved.
+
+### Changed files and behavior
+
+- `server/routes/newsletter.ts`: supplied public block IDs must be published newsletter blocks owned by the profile; subscriber and consent writes are transactional; unsubscribe tokens are strict 32-character base64url, hashed, one-use, and `no-store`; CSV is quoted, escaped, formula-neutralized, and `no-store`.
+- `src/services/api.ts`, `src/components/BuilderStudio.tsx`: authorized server CSV download, profile-scoped subscriber loading with cancellation on switching, and distinct loading/error/empty states.
+- `src/components/PublicBioView.tsx`, `src/config/runtimeTranslations.ts`: explicit Arabic/English policy copy: this is single opt-in, consent stores immediately, and no confirmation email is sent.
+- `tests/newsletter_capture.test.ts`: focused regression coverage for consent, validation, deduplication/retry, block/profile isolation, unsubscribe abuse/reuse, export escaping, deletion, and isolation.
+- `tests/api.test.ts`: existing subscription test now uses the supported profile-only path because its fixture is a link block, not a newsletter block.
+
+The product remains single opt-in. No campaign sending, sequences, double-opt-in mail, or delivery success is claimed. No provider credentials were needed or used.
+
+### Acceptance criteria
+
+- PASS — Valid capture with consent stores one subscriber and one consent row.
+- PASS — Invalid email and missing consent return 400.
+- PASS — Case-insensitive duplicate and concurrent retries preserve one row.
+- PASS — Unauthenticated unsubscribe works once; reuse returns 404; malformed/abusive tokens return 400.
+- PASS — Authenticated list, deletion, export, and profile isolation are covered by focused and existing security/profile tests.
+- PASS — CSV formula-leading values are neutralized and response is non-cacheable.
+- PASS — No response/UI claims email delivery; actual single-opt-in behavior is disclosed.
+- NOT RUN — Actual browser capture, studio switching, loading/error rendering, and file-download journey; browser automation was unavailable because no Node REPL browser tool was exposed.
+- NOT RUN — Live transactional-email/provider verification; no provider workflow exists in scope.
+
+### Exact validation and outcomes
+
+- `DATABASE_PATH=/tmp/liinx-task-42d-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42d-uploads NODE_ENV=test npm run build` — PASS: typecheck, Vite build, and prerender; existing non-blocking >500 kB chunk warning remains.
+- `DATABASE_PATH=/tmp/liinx-task-42g-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42g-uploads NODE_ENV=test npx vitest run tests/newsletter_capture.test.ts tests/api.test.ts tests/concurrency.test.ts tests/profile_switching_onboarding.test.ts tests/security.test.ts` — PASS: 5 files / 54 tests against disposable SQLite.
+- `DATABASE_PATH=/tmp/liinx-task-42f-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42f-uploads NODE_ENV=test npx vitest run tests/newsletter_capture.test.ts tests/api.test.ts tests/acceptance.test.ts tests/concurrency.test.ts tests/profile_switching_onboarding.test.ts tests/security.test.ts` — PARTIAL: newsletter/API/concurrency/profile/security coverage passed; acceptance had an unrelated existing `x-content-type-options` header assertion failure.
+- `DATABASE_PATH=/tmp/liinx-task-42e-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42e-uploads NODE_ENV=test npm test` — PARTIAL: 57 files passed, 2 failed, 286 tests total; failures were the pre-existing multiprofile setup (400) and the API test’s stale non-newsletter block assumption. The latter was corrected and focused validation rerun; full suite was not rerun afterward.
+- `git diff --check` — PASS: no whitespace errors.
+
+### Unresolved risks and dependencies
+
+- Browser UI/download evidence remains outstanding.
+- There is no double-opt-in/provider delivery flow; adding one requires separate product/provider authorization.
+- Full-suite multiprofile and acceptance security-header failures remain outside Task 42.
+- Subscriber list is profile-scoped but unpaginated; no undocumented row cap was added.
+- Existing data was retained; no destructive migration or cleanup was performed.
+
 ### Next eligible prompt
 
-`42 — Newsletter capture and subscriber management`
+`43 — Protected-content gates`
