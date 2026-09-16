@@ -918,6 +918,27 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
+  const handleMoveBlockToPage = async (blockId: string, pageId: string) => {
+    if (!pageId || queueRef.current?.dirty && !(await queueRef.current.flush())) return;
+    try {
+      setSaveStatus('saving');
+      await api.studio.moveBlock(blockId, pageId);
+      const refreshed = await api.studio.getProfile();
+      setProfile(refreshed);
+      setSaveStatus('saved');
+    } catch { setSaveStatus('error'); }
+  };
+
+  const handleDuplicateBlock = async (blockId: string) => {
+    if (!activePage || queueRef.current?.dirty && !(await queueRef.current.flush())) return;
+    try {
+      setSaveStatus('saving');
+      const result = await api.studio.duplicateBlock(blockId, activePage.id);
+      setProfile(previous => ({ ...previous, blocks: [...previous.blocks, result.block] }));
+      setSaveStatus('saved');
+    } catch { setSaveStatus('error'); }
+  };
+
   const handleDeleteBlock = async (id: string) => {
     if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
     try {
@@ -1573,20 +1594,35 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                       <div className="flex items-center gap-1 shrink-0">
                         <button
+                          type="button"
                           onClick={() => handleMoveBlock(index, 'up')}
                           disabled={index === 0}
+                          aria-label={ui('Move block up')}
                           className="p-1 rounded-lg text-neutral-400 hover:text-black disabled:opacity-20 cursor-pointer"
                           title={ui("Move up")}
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleMoveBlock(index, 'down')}
                           disabled={index === visibleBlocks.length - 1}
+                          aria-label={ui('Move block down')}
                           className="p-1 rounded-lg text-neutral-400 hover:text-black disabled:opacity-20 cursor-pointer"
                           title={ui("Move down")}
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                        <select
+                          aria-label={ui('Move block to page')}
+                          value={(block as any).pageId || activePage?.id || ''}
+                          onChange={event => void handleMoveBlockToPage(block.id, event.target.value)}
+                          className="max-w-28 rounded-lg border border-neutral-200 bg-white px-1 py-1 text-[10px] text-neutral-700"
+                        >
+                          {pages.map(page => <option key={page.id} value={page.id}>{page.title}</option>)}
+                        </select>
+                        <button type="button" onClick={() => void handleDuplicateBlock(block.id)} aria-label={ui('Duplicate block')} title={ui('Duplicate block')} className="rounded-lg p-1 text-neutral-400 hover:text-black">
+                          <Copy className="h-3.5 w-3.5" />
                         </button>
                         {confirmDeleteBlockId === block.id ? (
                           <div className="flex items-center gap-1">

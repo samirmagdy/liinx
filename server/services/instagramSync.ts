@@ -163,6 +163,8 @@ export async function fetchInstagramMedia(accessToken: string): Promise<Instagra
  * Synchronizes Instagram media items into real LinkBlock database rows for a profile.
  */
 export function syncMediaToBlocks(profileId: string, mediaItems: InstagramMediaItem[]) {
+  const homePage = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined;
+  if (!homePage) throw new Error('The Home page is unavailable, so synced links cannot be assigned safely.');
   // 1. Fetch existing URLs to avoid duplicate blocks
   const existingBlocks = db.prepare(
     'SELECT url FROM blocks WHERE profile_id = ? AND url IS NOT NULL'
@@ -172,8 +174,8 @@ export function syncMediaToBlocks(profileId: string, mediaItems: InstagramMediaI
 
   // 2. Fetch min position to insert new synced links at top of profile
   const minPosRow = db.prepare(
-    'SELECT MIN(position) as minPos FROM blocks WHERE profile_id = ?'
-  ).get(profileId) as { minPos: number | null };
+    'SELECT MIN(position) as minPos FROM blocks WHERE profile_id = ? AND page_id = ?'
+  ).get(profileId, homePage.id) as { minPos: number | null };
 
   let currentPos = minPosRow && minPosRow.minPos !== null ? minPosRow.minPos - 1 : 0;
 
@@ -182,8 +184,8 @@ export function syncMediaToBlocks(profileId: string, mediaItems: InstagramMediaI
 
   const insertBlockStmt = db.prepare(`
     INSERT INTO blocks (
-      id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, created_at, updated_at
-    ) VALUES (?, ?, 'link', ?, ?, ?, NULL, 'INSTAGRAM', 0, ?, ?, ?)
+      id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, page_id, created_at, updated_at
+    ) VALUES (?, ?, 'link', ?, ?, ?, NULL, 'INSTAGRAM', 0, ?, ?, ?, ?)
   `);
 
   const runSyncTransaction = db.transaction(() => {
@@ -211,6 +213,7 @@ export function syncMediaToBlocks(profileId: string, mediaItems: InstagramMediaI
           link.url,
           subtitle,
           currentPos,
+          homePage.id,
           now,
           now
         );

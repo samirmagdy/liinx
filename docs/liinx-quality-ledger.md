@@ -755,3 +755,59 @@ Baseline commit: `f10d166` (`feat: add revision tracking and concurrency control
 ### Next eligible prompt
 
 `11 — Block placement and ordering`
+
+## Task 11 — Block placement and ordering
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline commit: `f10d1668cb54de676f393e2b624b8c111dc5a0f4` on `main` at task start. Task 10 is now present as commit `964c5f14d55d6ffb19727513c3e0f6de326a929a`; Task 11 changes remain uncommitted. Existing Task 10 work was preserved.
+
+### Scope and changed files
+
+- `server/routes/blocks.ts`: tightens page-scoped reorder validation and adds ownership-checked move and duplicate endpoints with deterministic destination append ordering.
+- `server/routes/importer.ts`: assigns imported links to Home, repairing a missing Home page first when necessary.
+- `server/routes/apiV1.ts`: assigns REST-created blocks to Home and exposes `pageId` in REST profile output, repairing missing Home for legacy profiles.
+- `server/services/instagramSync.ts`: assigns synced links to Home and calculates positions within that page.
+- `src/services/api.ts`: exposes move and duplicate block operations.
+- `src/components/BuilderStudio.tsx`: adds accessible up/down labels, destination-page controls, and duplicate controls; move/duplicate/delete operations refresh or update authoritative profile state and flush pending saves before mutation.
+- `tests/block_placement_ordering.test.ts`: covers three-page isolation, reorder/move/duplicate/reload, invalid and foreign reorder requests, importer/API assignment, and update/delete race behavior.
+
+### Findings and behavior
+
+- Studio block creation already validated the requested page against the authenticated profile and assigned a valid Home page when no page was supplied. Imported links, Instagram sync, and REST API creation bypassed that path and could leave `page_id` null; those paths now assign Home explicitly.
+- Reordering with a `pageId` now operates only on blocks owned by that page. Missing or incomplete lists, duplicate IDs, foreign-page IDs, and foreign-account IDs are rejected. Legacy callers without `pageId` remain supported only when every requested block belongs to one page.
+- Moving a block preserves its ID and appends it after the destination page's current blocks. Duplication creates a new ID, copies the block content, and appends it to the selected destination page.
+- Existing accessible up/down controls now have explicit ARIA labels. The new page selector and duplicate button are keyboard-operable; drag-and-drop was not added because it was optional.
+- Delete already flushed the save queue before deletion. The regression race confirms that whether update or delete wins, the deleted block is absent after reload and cannot be resurrected by a later response.
+
+### Acceptance criteria
+
+- PASS — Several blocks across three pages can be reordered, moved, duplicated, removed, and reloaded without cross-page loss. Evidence: `tests/block_placement_ordering.test.ts` verifies identities, destinations, and order after reload.
+- PASS — New blocks receive valid page assignments. Evidence: studio/importer/REST paths assign Home; importer and REST assignment tests pass, while Instagram sync uses the same Home assignment path.
+- PASS — Block IDs remain stable on move and change only for duplication. Evidence: move/reload test checks the moved ID; duplicate test checks a distinct ID.
+- PASS — Incomplete, duplicate, foreign-page, and foreign-account reorder requests are rejected with 400. Evidence: dedicated regression test covers all four cases.
+- PASS — Other pages remain intact when one page is reordered. Evidence: three-page test verifies Home and the untouched page after page-two/page-three operations.
+- PASS — Delete during an in-flight update does not resurrect the block. Evidence: concurrent update/delete test accepts either valid request ordering and verifies the block is absent after reload.
+- PASS — Accessible move controls exist. Evidence: up/down buttons have explicit ARIA labels; destination selection and duplication are native keyboard controls.
+- NOT RUN — Actual browser journey for focus, screen-reader announcements, touch behavior, and no-reload visual state. Browser automation was unavailable.
+
+### Exact commands and outcomes
+
+- `npm run lint` — PASS, `tsc --noEmit` exited 0.
+- `task11_target2=$(mktemp -d /tmp/liinx-task11-target2-XXXXXX) && mkdir -p "$task11_target2/uploads" && DATABASE_PATH="$task11_target2/liinx.db" UPLOADS_DIR="$task11_target2/uploads" NODE_ENV=test npm test -- --run tests/block_placement_ordering.test.ts tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts tests/api_v1.test.ts tests/instagram-sync.test.ts` — PASS, 5 files / 31 tests.
+- `task11_final=$(mktemp -d /tmp/liinx-task11-final-XXXXXX) && mkdir -p "$task11_final/uploads" && DATABASE_PATH="$task11_final/liinx.db" UPLOADS_DIR="$task11_final/uploads" NODE_ENV=test npm test` — PASS, 31 files / 219 tests.
+- `task11_pages=$(mktemp -d /tmp/liinx-task11-pages-XXXXXX) && mkdir -p "$task11_pages/uploads" && DATABASE_PATH="$task11_pages/liinx.db" UPLOADS_DIR="$task11_pages/uploads" NODE_ENV=test npm test -- --run tests/block_placement_ordering.test.ts` — PASS, 1 file / 3 tests after the explicit foreign-account assertion.
+- `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS, no whitespace errors.
+- Browser journey — NOT RUN; no in-app browser automation tool was exposed in this environment.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, the SQLite global initializer, and disposable `mktemp` database/uploads directories were used. No production data was used.
+- No browser/component harness was available, so UI focus, touch, responsive, Arabic/English, and live no-reload state remain externally unverified.
+- Move and duplicate operations refresh or append authoritative profile state, but conflict/revision protection for reorder/move/duplicate collection mutations is not yet modeled as an optimistic collection revision. Concurrent collection edits remain a future hardening risk.
+- Legacy null-page rows are repaired by database invariants and the covered creation/import/API paths; existing production rows require the established migration/repair path and were not modified directly.
+
+### Next eligible prompt
+
+`12 — Published pages and public routing`

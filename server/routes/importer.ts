@@ -57,14 +57,23 @@ importerRouter.post('/studio/import/commit', requireAuth, sharedRateLimit({ name
     const profileId = req.user!.profileId;
 
     // Get current max position
-    const maxPosRow = db.prepare('SELECT MAX(position) as max_pos FROM blocks WHERE profile_id = ?').get(profileId) as { max_pos: number | null };
+    let homePage = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined;
+    if (!homePage) {
+      const profile = db.prepare('SELECT display_name as displayName FROM profiles WHERE id = ?').get(profileId) as { displayName?: string } | undefined;
+      if (!profile) return res.status(404).json({ error: 'Creator profile not found.' });
+      const homeId = createId('page');
+      const now = Date.now();
+      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`).run(homeId, profileId, profile.displayName || 'Home', now, now);
+      homePage = { id: homeId };
+    }
+    const maxPosRow = db.prepare('SELECT MAX(position) as max_pos FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, homePage.id) as { max_pos: number | null };
     let currentPos = (maxPosRow?.max_pos ?? -1) + 1;
 
     const now = Date.now();
     const insertBlock = db.prepare(`
       INSERT INTO blocks (
-        id, profile_id, type, title, url, subtitle, position, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, profile_id, type, title, url, subtitle, position, page_id, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const insertMany = db.transaction((linkItems: typeof links) => {
@@ -78,6 +87,7 @@ importerRouter.post('/studio/import/commit', requireAuth, sharedRateLimit({ name
           item.url,
           item.subtitle || null,
           currentPos++,
+          homePage.id,
           now,
           now
         );

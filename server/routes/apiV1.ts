@@ -145,7 +145,7 @@ apiV1Router.delete('/studio/api-keys/:id', requireAuth, (req: AuthenticatedReque
 apiV1Router.get('/v1/profile', requireApiKey, (req: ApiKeyRequest, res: Response) => {
   try {
     const profile = req.profile;
-    const blocks = db.prepare('SELECT id, type, title, url, subtitle, badge, icon, highlighted, position, created_at FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profile.id);
+    const blocks = db.prepare('SELECT id, type, title, url, subtitle, badge, icon, highlighted, position, page_id as pageId, created_at FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profile.id);
 
     res.json({
       id: profile.id,
@@ -177,14 +177,20 @@ apiV1Router.post('/v1/blocks', requireApiKey, (req: ApiKeyRequest, res: Response
     };
     const now = Date.now();
     const id = createId('blk');
+    let homePage = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profile.id) as { id: string } | undefined;
+    if (!homePage) {
+      const homeId = createId('page');
+      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`).run(homeId, profile.id, profile.display_name || 'Home', now, now);
+      homePage = { id: homeId };
+    }
 
-    const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ?').get(profile.id) as { maxPos: number | null };
+    const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ? AND page_id = ?').get(profile.id, homePage.id) as { maxPos: number | null };
     const nextPos = (maxPosRow && maxPosRow.maxPos !== null) ? maxPosRow.maxPos + 1 : 0;
 
     db.prepare(`
-      INSERT INTO blocks (id, profile_id, type, title, url, subtitle, badge, highlighted, position, created_at, updated_at)
-      VALUES (?, ?, 'link', ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, profile.id, title, url, subtitle || null, badge || null, highlighted ? 1 : 0, nextPos, now, now);
+      INSERT INTO blocks (id, profile_id, type, title, url, subtitle, badge, highlighted, position, page_id, created_at, updated_at)
+      VALUES (?, ?, 'link', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, profile.id, title, url, subtitle || null, badge || null, highlighted ? 1 : 0, nextPos, homePage.id, now, now);
     invalidatePublicProfileCache(profile.id);
 
     res.status(201).json({
@@ -198,6 +204,7 @@ apiV1Router.post('/v1/blocks', requireApiKey, (req: ApiKeyRequest, res: Response
         badge: badge || null,
         highlighted: Boolean(highlighted),
         position: nextPos,
+        pageId: homePage.id,
         createdAt: now
       }
     });

@@ -136,13 +136,17 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
 blocksRouter.put('/studio/blocks/reorder', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
     const { blockIds, pageId } = req.body;
-    if (!Array.isArray(blockIds)) {
+    if (!Array.isArray(blockIds) || blockIds.length === 0) {
       return res.status(400).json({ error: 'blockIds array is required.' });
     }
 
     const profileId = req.user!.profileId;
     const page = pageId ? db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(pageId, profileId) as { id: string } | undefined : undefined;
     if (pageId && !page) return res.status(400).json({ error: 'The selected page does not belong to this profile.' });
+    if (!pageId) {
+      const requested = db.prepare(`SELECT id, page_id as pageId FROM blocks WHERE profile_id = ? AND id IN (${blockIds.map(() => '?').join(',')})`).all(profileId, ...blockIds) as Array<{ id: string; pageId: string | null }>;
+      if (requested.length !== blockIds.length || new Set(requested.map(block => block.pageId)).size !== 1) return res.status(400).json({ error: 'A valid pageId is required to reorder these blocks.' });
+    }
     const owned = page
       ? db.prepare('SELECT id FROM blocks WHERE profile_id = ? AND page_id = ? ORDER BY position ASC').all(profileId, page.id) as { id: string }[]
       : db.prepare('SELECT id FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profileId) as { id: string }[];
@@ -171,6 +175,46 @@ blocksRouter.put('/studio/blocks/reorder', requireAuth, (req: AuthenticatedReque
   } catch (err: any) {
     console.error('Reorder blocks error:', err);
     res.status(500).json({ error: 'Failed to reorder blocks.' });
+  }
+});
+
+blocksRouter.put('/studio/blocks/:id/move', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const blockId = req.params.id;
+    const profileId = req.user!.profileId;
+    const targetPageId = typeof req.body?.pageId === 'string' ? req.body.pageId : '';
+    const block = db.prepare('SELECT id, page_id as pageId FROM blocks WHERE id = ? AND profile_id = ?').get(blockId, profileId) as { id: string; pageId: string | null } | undefined;
+    const page = db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(targetPageId, profileId) as { id: string } | undefined;
+    if (!block || !page) return res.status(400).json({ error: 'The block and destination page must belong to this profile.' });
+    if (block.pageId === page.id) return res.json({ success: true, block: { id: block.id, pageId: page.id } });
+    const max = db.prepare('SELECT COALESCE(MAX(position), -1) as value FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, page.id) as { value: number };
+    db.prepare('UPDATE blocks SET page_id = ?, position = ?, updated_at = ? WHERE id = ? AND profile_id = ?').run(page.id, max.value + 1, Date.now(), blockId, profileId);
+    invalidatePublicProfileCache(profileId);
+    res.json({ success: true, block: { id: block.id, pageId: page.id, position: max.value + 1 } });
+  } catch (err: any) {
+    console.error('Move block error:', err);
+    res.status(500).json({ error: 'Failed to move block.' });
+  }
+});
+
+blocksRouter.post('/studio/blocks/:id/duplicate', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const blockId = req.params.id;
+    const profileId = req.user!.profileId;
+    const source = db.prepare('SELECT * FROM blocks WHERE id = ? AND profile_id = ?').get(blockId, profileId) as any;
+    if (!source) return res.status(404).json({ error: 'Block not found or unauthorized.' });
+    const targetPageId = typeof req.body?.pageId === 'string' ? req.body.pageId : source.page_id;
+    const page = db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(targetPageId, profileId) as { id: string } | undefined;
+    if (!page) return res.status(400).json({ error: 'The destination page does not belong to this profile.' });
+    const max = db.prepare('SELECT COALESCE(MAX(position), -1) as value FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, page.id) as { value: number };
+    const now = Date.now();
+    const id = createId('blk');
+    db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, profileId, source.type, source.title, source.url, source.subtitle, source.icon, source.badge, source.highlighted, max.value + 1, source.start_at, source.end_at, page.id, source.extra_json, now, now);
+    invalidatePublicProfileCache(profileId);
+    res.status(201).json({ success: true, block: { id, revision: now, type: source.type, title: source.title, url: source.url, subtitle: source.subtitle, icon: source.icon, badge: source.badge, highlighted: Boolean(source.highlighted), position: max.value + 1, pageId: page.id } });
+  } catch (err: any) {
+    console.error('Duplicate block error:', err);
+    res.status(500).json({ error: 'Failed to duplicate block.' });
   }
 });
 

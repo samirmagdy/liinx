@@ -128,6 +128,8 @@ export const api = {
         method: 'DELETE'
       });
     },
+    moveBlock: async (id: string, pageId: string): Promise<{ success: boolean; block: { id: string; pageId: string; position?: number } }> => request<{ success: boolean; block: { id: string; pageId: string; position?: number } }>(`/api/studio/blocks/${id}/move`, { method: 'PUT', body: JSON.stringify({ pageId }) }),
+    duplicateBlock: async (id: string, pageId: string): Promise<{ success: boolean; block: ProfileBlock }> => request<{ success: boolean; block: ProfileBlock }>(`/api/studio/blocks/${id}/duplicate`, { method: 'POST', body: JSON.stringify({ pageId }) }),
     reorderBlocks: async (blockIds: string[], pageId?: string): Promise<{ success: boolean }> => {
       return request<{ success: boolean }>('/api/studio/blocks/reorder', {
         method: 'PUT',
