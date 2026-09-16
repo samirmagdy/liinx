@@ -8,6 +8,7 @@ import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
 import { createId } from '../utils/ids.js';
 import { normalizeBlockExtra, profileUpdateContract } from '../contracts.js';
+import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
 
 export const profilesRouter = Router();
 
@@ -127,8 +128,8 @@ profilesRouter.get('/profiles/:username', (req, res) => {
         icon: b.icon,
         badge: b.badge,
         highlighted: Boolean(b.highlighted),
-        startAt: b.start_at || null,
-        endAt: b.end_at || null,
+        startAt: hasEntitlement(profile.plan, 'scheduling') ? (b.start_at || null) : null,
+        endAt: hasEntitlement(profile.plan, 'scheduling') ? (b.end_at || null) : null,
         clicks: clickMap.get(b.id) || 0
       };
 
@@ -154,18 +155,18 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       category: profile.category || 'Creator',
       verified: Boolean(profile.verified),
       themeId: profile.theme_id || 'editorial-stone',
-      plan: profile.plan || 'free',
-      hideBranding: profile.plan !== 'free' && Boolean(profile.hide_branding),
-      gaMeasurementId: profile.plan !== 'free' ? (profile.ga_measurement_id || null) : null,
-      metaPixelId: profile.plan !== 'free' ? (profile.meta_pixel_id || null) : null,
+      plan: normalizePlan(profile.plan),
+      hideBranding: hasEntitlement(profile.plan, 'paidCustomization') && Boolean(profile.hide_branding),
+      gaMeasurementId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
+      metaPixelId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
       customDomain: profile.custom_domain || null,
-      customCss: profile.plan !== 'free' ? (profile.custom_css || null) : null,
-      customFontUrl: profile.plan !== 'free' ? (profile.custom_font_url || null) : null,
+      customCss: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_css || null) : null,
+      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_font_url || null) : null,
       shareTitle: profile.share_title || null,
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
-      footerLogoUrl: profile.plan !== 'free' ? (profile.footer_logo_url || null) : null,
-      backgroundMediaUrl: profile.plan !== 'free' ? (profile.background_media_url || null) : null,
+      footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
+      backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
       backgroundMediaType: profile.background_media_type || null,
       pageRedirectUrl: profile.page_redirect_url || null,
       pageRedirectUntil: profile.page_redirect_until || null,
@@ -199,8 +200,8 @@ profilesRouter.get('/profiles/:username', (req, res) => {
 profilesRouter.get('/profiles/by-domain/:domain', (req, res) => {
   try {
     const domain = req.params.domain.toLowerCase().trim();
-    const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(domain) as { username: string } | undefined;
-    if (!profile) {
+    const profile = db.prepare('SELECT username, plan FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(domain) as { username: string; plan: string } | undefined;
+    if (!profile || !hasEntitlement(profile.plan, 'customDomain')) {
       return res.status(404).json({ error: `No profile mapped to custom domain ${domain}` });
     }
     const pageQuery = typeof req.query.page === 'string' ? `?page=${encodeURIComponent(req.query.page)}` : '';
@@ -255,8 +256,8 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
         icon: b.icon,
         badge: b.badge,
         highlighted: Boolean(b.highlighted),
-        startAt: b.start_at || null,
-        endAt: b.end_at || null,
+        startAt: hasEntitlement(profile.plan, 'scheduling') ? (b.start_at || null) : null,
+        endAt: hasEntitlement(profile.plan, 'scheduling') ? (b.end_at || null) : null,
         clicks: clickMap.get(b.id) || 0
       };
 
@@ -276,18 +277,18 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       category: profile.category || 'Creator',
       verified: Boolean(profile.verified),
       themeId: profile.theme_id || 'editorial-stone',
-      plan: profile.plan || 'free',
-      hideBranding: Boolean(profile.hide_branding),
-      gaMeasurementId: profile.ga_measurement_id || null,
-      metaPixelId: profile.meta_pixel_id || null,
-      customDomain: profile.custom_domain || null,
-      customCss: profile.custom_css || null,
-      customFontUrl: profile.custom_font_url || null,
+      plan: normalizePlan(profile.plan),
+      hideBranding: hasEntitlement(profile.plan, 'paidCustomization') && Boolean(profile.hide_branding),
+      gaMeasurementId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
+      metaPixelId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
+      customDomain: hasEntitlement(profile.plan, 'customDomain') ? (profile.custom_domain || null) : null,
+      customCss: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_css || null) : null,
+      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_font_url || null) : null,
       shareTitle: profile.share_title || null,
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
-      footerLogoUrl: profile.footer_logo_url || null,
-      backgroundMediaUrl: profile.background_media_url || null,
+      footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
+      backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
       backgroundMediaType: profile.background_media_type || null,
       pageRedirectUrl: profile.page_redirect_url || null,
       pageRedirectUntil: profile.page_redirect_until || null,
@@ -338,8 +339,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       return res.status(404).json({ error: 'Profile not found.' });
     }
 
-    const isPaid = existing.plan === 'pro' || existing.plan === 'studio';
-    if (!isPaid && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl))) {
+    if (!hasEntitlement(existing.plan, 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl))) {
       return res.status(403).json({ error: 'Custom styling, analytics, and branding removal require a Pro or Studio subscription plan.' });
     }
 
@@ -352,7 +352,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
         customDomainVerified = 0;
       } else {
         const cleanDomain = customDomain.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-        if (existing.plan === 'free') {
+        if (!hasEntitlement(existing.plan, 'customDomain')) {
           return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
         }
         if (!/^[a-z0-9][a-z0-9.-]+\.[a-z]{2,}$/.test(cleanDomain)) {
@@ -572,11 +572,11 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
     if (parse.data.duplicateProfileId && !duplicateSource) return res.status(404).json({ error: 'The profile to duplicate was not found.' });
 
     // Check user's primary/active profile plan to determine allowed limit
-    // Free: 1 profile, Pro: 5 profiles, Studio: 25 profiles
+    // Profile limits are centralized in the entitlement policy.
     const activeProfile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
     const planRow = db.prepare("SELECT plan FROM profiles WHERE user_id = ? ORDER BY CASE plan WHEN 'studio' THEN 3 WHEN 'pro' THEN 2 ELSE 1 END DESC LIMIT 1").get(userId) as any;
     const userPlan = planRow?.plan || activeProfile?.plan || 'free';
-    const maxProfiles = userPlan === 'studio' ? 25 : userPlan === 'pro' ? 5 : 1;
+    const maxProfiles = entitlementsFor(userPlan).maxProfiles;
 
     const currentCountRow = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(userId) as { count: number };
     const currentCount = currentCountRow ? currentCountRow.count : 0;

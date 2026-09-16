@@ -5,6 +5,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { paidPlans } from '../../src/config/plans.js';
 import * as Sentry from '@sentry/node';
 import { logError } from '../logger.js';
+import { hasEntitlement, normalizePlan } from '../entitlements.js';
 
 export const billingRouter = Router();
 
@@ -174,25 +175,27 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
   }
 
   try {
+    if (!event.id || !event.type || !event.data?.object) return res.status(400).json({ error: 'Invalid Stripe event.' });
     const duplicate = db.prepare('SELECT event_id FROM processed_webhook_events WHERE event_id = ?').get(event.id);
     if (duplicate) return res.json({ received: true, duplicate: true });
 
     const processEvent = db.transaction(() => {
       const now = Date.now();
+      const eventCreatedAt = Number.isFinite(event.created) ? event.created * 1000 : now;
       switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const profileId = session.client_reference_id || session.metadata?.profileId;
-        const plan = session.metadata?.plan || 'pro';
+        const plan = normalizePlan(session.metadata?.plan);
         const customerId = session.customer ? String(session.customer) : null;
         const subscriptionId = session.subscription ? String(session.subscription) : null;
 
-        if (profileId && ['pro', 'studio'].includes(plan) && ['paid', 'no_payment_required'].includes(session.payment_status)) {
+        if (profileId && hasEntitlement(plan, 'customDomain') && ['paid', 'no_payment_required'].includes(session.payment_status)) {
           db.prepare(`
             UPDATE profiles 
-            SET plan = ?, stripe_customer_id = coalesce(?, stripe_customer_id), stripe_subscription_id = coalesce(?, stripe_subscription_id), updated_at = ?
-            WHERE user_id = (SELECT user_id FROM profiles WHERE id = ?)
-          `).run(plan, customerId, subscriptionId, now, profileId);
+            SET plan = ?, stripe_customer_id = coalesce(?, stripe_customer_id), stripe_subscription_id = coalesce(?, stripe_subscription_id), billing_event_created_at = ?, updated_at = ?
+            WHERE id = ? AND coalesce(billing_event_created_at, 0) <= ?
+          `).run(plan, customerId, subscriptionId, eventCreatedAt, now, profileId, eventCreatedAt);
         }
         break;
       }
@@ -201,23 +204,26 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
         const sub = event.data.object as Stripe.Subscription;
         const profileId = sub.metadata?.profileId;
         const customerId = String(sub.customer);
-        const targetPlan = sub.metadata?.plan || 'pro';
+        const targetPlan = normalizePlan(sub.metadata?.plan);
 
         const isGoodStanding = ['active', 'trialing'].includes(sub.status);
         const resolvedPlan = isGoodStanding ? targetPlan : 'free';
 
+        const subscriptionId = sub.id;
         if (profileId) {
           db.prepare(`
             UPDATE profiles 
-            SET plan = ?, stripe_subscription_id = ?, updated_at = ?
-            WHERE user_id = (SELECT user_id FROM profiles WHERE id = ?)
-          `).run(resolvedPlan, sub.id, now, profileId);
+            SET plan = ?, stripe_subscription_id = ?, billing_event_created_at = ?, updated_at = ?
+            WHERE id = ? AND coalesce(billing_event_created_at, 0) <= ?
+              AND (stripe_subscription_id IS NULL OR stripe_subscription_id = ?)
+          `).run(resolvedPlan, subscriptionId, eventCreatedAt, now, profileId, eventCreatedAt, subscriptionId);
         } else if (customerId) {
           db.prepare(`
             UPDATE profiles 
-            SET plan = ?, stripe_subscription_id = ?, updated_at = ?
-            WHERE stripe_customer_id = ?
-          `).run(resolvedPlan, sub.id, now, customerId);
+            SET plan = ?, stripe_subscription_id = ?, billing_event_created_at = ?, updated_at = ?
+            WHERE stripe_customer_id = ? AND coalesce(billing_event_created_at, 0) <= ?
+              AND (stripe_subscription_id IS NULL OR stripe_subscription_id = ?)
+          `).run(resolvedPlan, subscriptionId, eventCreatedAt, now, customerId, eventCreatedAt, subscriptionId);
         }
         break;
       }
@@ -230,15 +236,17 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
         if (profileId) {
           db.prepare(`
             UPDATE profiles 
-            SET plan = 'free', stripe_subscription_id = null, updated_at = ?
-            WHERE user_id = (SELECT user_id FROM profiles WHERE id = ?)
-          `).run(now, profileId);
+            SET plan = 'free', stripe_subscription_id = null, billing_event_created_at = ?, updated_at = ?
+            WHERE id = ? AND coalesce(billing_event_created_at, 0) <= ?
+              AND (stripe_subscription_id IS NULL OR stripe_subscription_id = ?)
+          `).run(eventCreatedAt, now, profileId, eventCreatedAt, String(sub.id));
         } else if (customerId) {
           db.prepare(`
             UPDATE profiles 
-            SET plan = 'free', stripe_subscription_id = null, updated_at = ?
-            WHERE stripe_customer_id = ?
-          `).run(now, customerId);
+            SET plan = 'free', stripe_subscription_id = null, billing_event_created_at = ?, updated_at = ?
+            WHERE stripe_customer_id = ? AND coalesce(billing_event_created_at, 0) <= ?
+              AND (stripe_subscription_id IS NULL OR stripe_subscription_id = ?)
+          `).run(eventCreatedAt, now, customerId, eventCreatedAt, String(sub.id));
         }
         break;
       }
@@ -247,8 +255,9 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
       case 'customer.subscription.paused': {
         const object = event.data.object as any;
         const customerId = object.customer ? String(object.customer) : null;
+        const subscriptionId = object.subscription ? String(object.subscription) : null;
         if (customerId) {
-          db.prepare("UPDATE profiles SET plan = 'free', stripe_subscription_id = null, updated_at = ? WHERE stripe_customer_id = ?").run(now, customerId);
+          db.prepare("UPDATE profiles SET plan = 'free', stripe_subscription_id = null, billing_event_created_at = ?, updated_at = ? WHERE stripe_customer_id = ? AND coalesce(billing_event_created_at, 0) <= ? AND (? IS NULL OR stripe_subscription_id = ?)").run(eventCreatedAt, now, customerId, eventCreatedAt, subscriptionId, subscriptionId);
         }
         break;
       }

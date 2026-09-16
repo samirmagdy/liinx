@@ -66,6 +66,7 @@ export function initDatabase() {
       verified INTEGER DEFAULT 0,
       theme_id TEXT DEFAULT 'editorial-stone',
       plan TEXT DEFAULT 'free',
+      billing_event_created_at INTEGER,
       hide_branding INTEGER DEFAULT 0,
       ga_measurement_id TEXT,
       meta_pixel_id TEXT,
@@ -267,6 +268,10 @@ export function initDatabase() {
 
   try {
     db.exec("ALTER TABLE profiles ADD COLUMN stripe_subscription_id TEXT");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE profiles ADD COLUMN billing_event_created_at INTEGER");
   } catch (e) {}
 
   for (const column of [

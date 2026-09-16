@@ -538,3 +538,63 @@ Baseline commit: `9f272661b05afcf6b21cb1a79fa12ce0a69a700f` (`main`, matching `o
 ### Next eligible prompt
 
 `07 — Subscription entitlements`
+
+## Task 07 — Subscription entitlements
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline commit: `65e20e0` (`feat: implement account recovery, password reset, and secure account deletion workflows`) on `main`. The worktree was clean at task start; Task 06 is already committed and was not reverted. Task 07 changes remain uncommitted.
+
+### Scope and changed files
+
+- `server/entitlements.ts`: centralizes Free/Pro/Studio entitlement policy: profile limits of 1/5/25, paid customization, custom domains, scheduling, and Studio API access.
+- `server/db.ts`: adds the idempotent `profiles.billing_event_created_at` field used to reject stale billing state transitions.
+- `server/routes/profiles.ts`: uses shared entitlement checks for profile limits and paid settings; public and studio payloads no longer expose paid customization or scheduling metadata after downgrade; free profiles no longer resolve through custom-domain routing.
+- `server/routes/blocks.ts`: enforces scheduling entitlement on create and update through the shared policy.
+- `server/routes/apiV1.ts`: enforces Studio API entitlement both when creating keys and when using an existing key, so downgraded keys cannot retain access.
+- `server/routes/billing.ts`: applies checkout state per profile rather than all profiles on the account, validates event shape, records event timestamps, ignores stale subscription events, protects subscription identity, and retains transactional duplicate-event handling.
+- `tests/subscription_entitlements.test.ts`: covers per-profile upgrade, profile duplication/switching, cancellation, repeated webhook delivery, out-of-order delivery, payment failure, downgrade public output, and unsigned production-mode webhook rejection.
+
+### Findings and behavior
+
+- Existing plan limits were duplicated in profile creation and existing paid checks were spread across routes. The shared policy now defines the actual limits and capabilities used by server authorization.
+- Existing content is preserved during downgrade. Paid scheduling behavior is disabled by removing scheduling metadata from public/studio payloads; blocks are not deleted. Paid customization is withheld from public/studio output, and custom-domain routing is unavailable while Free.
+- Stripe checkout completion now updates only the profile identified by the signed checkout metadata. Profile duplication retains the current effective plan as existing product behavior, while later subscription events remain profile-scoped.
+- Webhook event IDs are recorded in the same transaction as state changes. A repeated event returns `{ received: true, duplicate: true }` without reapplying business logic.
+- Subscription state transitions compare Stripe event creation time and subscription identity. Older active events cannot resurrect a cancelled subscription, and an old subscription cannot clear or overwrite a newer subscription.
+- Signed webhook validation remains mandatory whenever `STRIPE_WEBHOOK_SECRET` is configured. Test-mode synthetic events are accepted only when the secret is absent; no production bypass was added.
+- Payment failures and non-active subscription statuses remove paid entitlements locally. No creator commerce, storefront, payout, or new billing infrastructure was added.
+- UI plan copy already states Pro supports up to 5 profiles and Studio up to 25; the server policy now matches those labels. The billing controls continue to show provider-backed checkout/portal states rather than claiming a local payment succeeded.
+
+### Acceptance criteria
+
+- PASS — Upgrade in local test mode. Evidence: synthetic `checkout.session.completed` updates the selected profile to Pro.
+- PASS — Cancellation in local test mode. Evidence: `customer.subscription.deleted` returns the profile to Free.
+- PASS — Payment failure. Evidence: `invoice.payment_failed` removes Studio entitlement and clears the subscription ID.
+- PASS — Repeated webhook. Evidence: the same event ID is returned as duplicate and does not reapply state.
+- PASS — Profile switching. Evidence: duplicated Pro profile can be selected and `/api/studio/profile` reports the selected profile's plan.
+- PASS — Profile duplication. Evidence: duplicate remains account-owned and inherits the effective plan within the existing product model; transactional duplication tests remain green.
+- PASS — Downgrade with excess content. Evidence: scheduled content remains stored and publicly visible, while paid scheduling metadata/customization and custom-domain routing are withheld for Free.
+- PASS — Server-side paid enforcement. Evidence: shared checks cover profile settings, scheduling, custom domains, and API-key use; this is not UI-only gating.
+- PASS — Webhook authentication boundary. Evidence: production-mode unsigned request returns 400 for missing Stripe signature; test-mode synthetic events are isolated to local tests.
+- NOT RUN — Real Stripe test-mode checkout, signed webhook delivery, duplicate/out-of-order delivery through Stripe, and billing portal cancellation. Stripe credentials/webhook fixtures were not supplied.
+- NOT RUN — Browser verification of Arabic/English billing labels and responsive billing controls; source labels and server limits were inspected, but no browser journey was run.
+
+### Exact commands and outcomes
+
+- `npm run lint` — PASS, `tsc --noEmit` exited 0.
+- `task07_dir=$(mktemp -d /tmp/liinx-task-07-XXXXXX) && mkdir -p "$task07_dir/uploads" && DATABASE_PATH="$task07_dir/liinx.db" UPLOADS_DIR="$task07_dir/uploads" NODE_ENV=test npm test -- --run tests/subscription_entitlements.test.ts tests/multiprofile.test.ts tests/api_v1.test.ts` — PASS, 13 tests.
+- `task07_dir=$(mktemp -d /tmp/liinx-task-07-full-XXXXXX) && mkdir -p "$task07_dir/uploads" && DATABASE_PATH="$task07_dir/liinx.db" UPLOADS_DIR="$task07_dir/uploads" NODE_ENV=test npm test -- --run` — PASS, 28 files / 209 tests in 22.69s.
+- `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS, no whitespace errors.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest and the existing SQLite global initializer provide local integration coverage. Task-specific billing tests use a disposable database/uploads directory and synthetic Stripe-shaped events with the test-only unsigned path; this is not evidence of live-provider delivery.
+- `PUT /api/studio/plan` remains a test/admin synchronization seam and is rejected in production. Real entitlement activation depends on signed Stripe webhooks and was not exercised with credentials.
+- The webhook processed-event table has local idempotency, but multi-instance delivery coordination and retention/cleanup of processed event records remain operational concerns.
+- Provider-side subscription state, refund/chargeback policy, billing portal behavior, and live payment failure timing remain externally unverified.
+
+### Next eligible prompt
+
+`08 — Authoritative editor state`

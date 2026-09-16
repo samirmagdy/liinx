@@ -6,6 +6,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { parseBlockContract } from '../contracts.js';
 import { createId } from '../utils/ids.js';
 import { invalidatePublicProfileCache } from './profiles.js';
+import { hasEntitlement } from '../entitlements.js';
 
 export const apiV1Router = Router();
 
@@ -41,6 +42,9 @@ export function requireApiKey(req: ApiKeyRequest, res: Response, next: NextFunct
   }
 
   req.profile = profile;
+  if (!hasEntitlement(profile.plan, 'apiAccess')) {
+    return res.status(403).json({ error: 'Public REST API access is available exclusively on the Studio tier.' });
+  }
   req.apiKeyId = keyRecord.id;
   next();
 }
@@ -75,7 +79,7 @@ const createKeySchema = z.object({
 apiV1Router.post('/studio/api-keys', requireAuth, (req: AuthenticatedRequest, res: Response) => {
   try {
     const profile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
-    if (!profile || profile.plan !== 'studio') {
+    if (!profile || !hasEntitlement(profile.plan, 'apiAccess')) {
       return res.status(403).json({
         error: 'Public REST API access is available exclusively on the Studio tier. Please upgrade to create API keys.'
       });
