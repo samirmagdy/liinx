@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { bookingUrl } from '../src/utils/booking.js';
 import { isHttpUrl, isSafeLinkUrl } from './utils/urlValidation.js';
+import { getMailtoHref, getPhoneHref } from '../src/utils/contactLinks.js';
 
 /** Versioned wire/storage boundary for creator-owned content. */
 export const CONTRACT_VERSION = 1 as const;
@@ -164,7 +165,7 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
     url: optionalSafeUrl
   }),
   presave: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
-  phone: extraObject({ phone: z.string().max(40).optional(), description: z.string().max(1000).optional() }),
+  phone: extraObject({ contactType: z.enum(['phone', 'email']).optional(), phone: z.string().max(40).refine(value => value === '' || getPhoneHref(value) !== null, 'Enter a valid phone number with 4–15 digits.').optional(), email: z.string().max(254).refine(value => value === '' || getMailtoHref(value) !== null, 'Enter a valid email address.').optional(), subject: z.string().max(200).optional(), body: z.string().max(1000).optional(), description: z.string().max(1000).optional(), availability: z.string().max(200).optional() }),
   product: extraObject({ price: z.string().max(50).optional(), priceAmount: z.string().refine(value => value === '' || /^\d{1,8}(?:\.\d{1,2})?$/.test(value), 'Price must be a positive amount with up to two decimals.').optional(), currency: z.string().refine(value => value === '' || /^[A-Z]{3}$/.test(value), 'Currency must be a three-letter ISO code.').optional(), imageUrl: optionalHttpUrl, url: optionalSafeUrl, description: z.string().max(1000).optional() }),
   tips: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
   content_gate: extraObject({ password: z.string().max(128).optional(), passwordHash: z.string().max(200).optional(), description: z.string().max(1000).optional(), body: z.string().max(20000).optional(), locked: z.boolean().optional() })

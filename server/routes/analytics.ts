@@ -5,6 +5,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { createId } from '../utils/ids.js';
 import { isSafeLinkUrl } from '../utils/urlValidation.js';
+import { getMailtoHref, getPhoneHref } from '../../src/utils/contactLinks.js';
 
 export const analyticsRouter = Router();
 
@@ -180,6 +181,14 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
       try {
         const extra = block.extra_json ? JSON.parse(block.extra_json) : null;
         rawTarget = typeof extra?.url === 'string' ? extra.url : null;
+      } catch { rawTarget = null; }
+    }
+    if (!rawTarget && block.type === 'phone') {
+      try {
+        const extra = block.extra_json ? JSON.parse(block.extra_json) : null;
+        rawTarget = extra?.contactType === 'email'
+          ? getMailtoHref(extra?.email, extra?.subject, extra?.body)
+          : getPhoneHref(extra?.phone);
       } catch { rawTarget = null; }
     }
     const itemId = typeof req.query.item === 'string' ? req.query.item : null;

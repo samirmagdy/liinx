@@ -2012,3 +2012,56 @@ Baseline: branch `main`, commit `c86d10a` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `37 — Phone and direct-contact blocks`
+
+## Task 37 — Phone and direct-contact blocks
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `953ff8e` at task start. The worktree was clean; prior task changes were preserved.
+
+### Scope and changed files
+
+- `src/utils/contactLinks.ts`: adds shared phone normalization and safe `tel:`/`mailto:` URI construction with encoded subject/body parameters.
+- `server/contracts.ts`: validates phone/email contact modes, bounded message fields, and international number shape at the shared contract boundary.
+- `server/routes/analytics.ts`: resolves phone/email block destinations for the existing tracked redirect path using the shared safe builders.
+- `src/components/BuilderStudio.tsx`: adds click-to-call/email mode, country-code guidance, optional availability/description, and optional email parameters; explicitly distinguishes this from visitor data collection.
+- `src/components/PublicBioView.tsx`: renders separate call/email actions, preserves readable LTR contact values in RTL pages, provides availability and no-dialer guidance, and disables actions in preview.
+- `tests/direct_contact_blocks.test.ts`: covers international numbers, spaces/plus signs, invalid characters and lengths, mailto parameters, persistence, public output, safe redirects, and missing configuration.
+
+### Findings and behavior
+
+- The previous phone block accepted arbitrary text and built `tel:` targets in the renderer. It now accepts only 4–15 digits with optional international `+`, spaces, parentheses, or hyphens, while displaying the creator’s formatted input and redirecting to normalized digits.
+- A phone block can now be explicitly configured as click-to-call or send-email. Email subjects and bodies are URL-encoded; neither mode collects visitor data in Liinx.
+- Availability is optional creator text. Desktop devices without a dialer are not treated as an application failure; the public card says the device may not support calling.
+- Missing or invalid contact data shows a non-actionable status and the tracked redirect returns 404. No messaging provider integration was invented; existing social/contact links remain separate.
+- Phone and email display values use `dir="ltr"` so addresses and handles remain readable inside Arabic/RTL pages.
+
+### Acceptance criteria
+
+- PASS — International numbers, spaces, plus signs, invalid characters, and overlong numbers are covered. Evidence: `tests/direct_contact_blocks.test.ts` and shared contract validation.
+- PASS — Mailto subject/body parameters are safely encoded and preserved after reload. Evidence: helper and public API/redirect assertions.
+- PASS — Desktop/no-dialer behavior is honestly disclosed. Evidence: public renderer copy; no device capability claim is made.
+- PASS — RTL display preserves phone/email destination text direction. Evidence: `dir="ltr"` on public contact values and source review.
+- PASS — Public controls disclose call versus email action and preserve the correct destination through reload/tracked redirect. Evidence: API round-trip and 302 assertions.
+- PASS — Visitor contact data is not collected by this block. Evidence: creator-published `tel:`/`mailto:` actions only; no submission endpoint was added.
+- NOT RUN — Actual browser activation, OS dialer/mail-client availability, mobile layout, and screen-reader verification. Browser execution was unavailable.
+
+### Exact commands and outcomes
+
+- `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
+- `task37_tmp=$(mktemp -d); DATABASE_PATH="$task37_tmp/liinx.db" UPLOADS_DIR="$task37_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task37_tmp/liinx.db" UPLOADS_DIR="$task37_tmp/uploads" NODE_ENV=test npm test -- --run tests/direct_contact_blocks.test.ts tests/social_links.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 44 tests, production build with 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests used a disposable SQLite database and uploads directory; no visitor contact data, production messaging, or device action was used.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Unresolved risks and dependencies
+
+- Browser/OS verification remains required for actual dialer/mail-client handoff, mobile behavior, and screen-reader announcements.
+- No WhatsApp or other messaging-provider action is implemented in this task; adding one requires an explicit supported-provider decision.
+
+### Next eligible prompt
+
+`38 — Download block and file lifecycle`
