@@ -2649,3 +2649,57 @@ Baseline: branch `main`, commit `5d10f44` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `49 — Competitor-page importer`
+
+## Task 49 — Competitor-page importer
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `ba84caf` at task start. The worktree was clean; prior task changes were preserved. No `AGENTS.md` or additional repository instruction file was present.
+
+### Scope and changed files
+
+- `server/services/importer.ts`: validates supported source syntax, rejects private/reserved destinations including IPv6, preserves SSRF-safe DNS/redirect/body-limit helpers for an authorized adapter, and now refuses production scraping without an authorized provider API or export.
+- `server/routes/importer.ts`: supports destination-page selection, validates ownership, commits imported blocks atomically, creates a missing Home page inside the transaction, suppresses duplicate destinations, and reports warnings/skips without overwriting existing content.
+- `src/components/LinktreeImporterModal.tsx`, `src/components/BuilderStudio.tsx`, `src/services/api.ts`, `src/config/runtimeTranslations.ts`: expose page selection, draft/warning/unavailable states, cancellation guards, and the versioned response fields.
+- `tests/importer_security.test.ts`: covers unavailable-provider behavior, private/unsupported URL rejection, selected-page atomic commit, duplicate handling, and repeat import.
+
+### Findings and behavior
+
+- The previous importer fetched public profile HTML directly. Current official terms for Linktree and Beacons prohibit automated scraping/copying, so no authorized API/export credentials or access method exists in this repository. Production upstream fetching is therefore disabled and returns an honest unavailable error; it does not fabricate preview or imported content. See [Linktree Terms](https://linktr.ee/s/terms) and [Beacons Terms](https://beacons.ai/i/legal).
+- Supported source validation remains limited to Linktree, Beacons, and bio.fm hostnames. Malformed, unsupported, private, loopback, reserved, and IPv6-local targets fail before network access.
+- The future authorized fetch adapter has bounded manual redirects, DNS revalidation, a 10-second timeout, 2 MiB response limits, content-type checks, and truncation detection. Those live fetch boundaries cannot be exercised while upstream fetching is disabled.
+- Preview is read-only, shows explicit unsupported-content warnings, and uses a request-generation guard for cancellation/stale responses. Commit appends to the selected owned page in one transaction, preserves existing blocks, generates new block identities, and skips duplicate destinations deterministically.
+- Imported links are filtered to safe HTTP(S) destinations. Unsupported content is reported as a warning rather than guessed or represented as a working match.
+
+### Acceptance criteria
+
+- PASS — Preview-before-import flow, destination-page selection, warning states, and stale-request cancellation guard are implemented. Evidence: importer modal and route code; source-level tests cover the commit boundary, but no browser journey was available.
+- PASS — Malformed, private-network, unsupported, and unavailable-provider requests fail honestly without a fetch. Evidence: `tests/importer_security.test.ts` and `tests/audit_fixes.test.ts`.
+- PASS — Atomic selected-page commit, duplicate suppression, repeat import, and preservation of existing content are verified. Evidence: `tests/importer_security.test.ts`.
+- PASS — No fabricated imported content is returned when the upstream is unavailable. Evidence: authorized-access error and no-network assertion.
+- NOT RUN — Actual supported-provider fixture preview/import, redirect-chain behavior, oversized/truncated response behavior, and DNS rebinding under a live authorized adapter; the production fetch path is intentionally blocked pending an approved access method.
+- NOT RUN — Full browser cancellation and public editor journey. Local type/build and route-level evidence passed.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --oneline` — PASS at baseline: clean `main`, exact baseline `ba84caf`.
+- `npm run lint` — PASS: TypeScript check.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `testdb=$(mktemp -d /tmp/liinx-task-49-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-49-final-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/importer.test.ts tests/importer_security.test.ts tests/block_placement_ordering.test.ts` — PASS: 3 files / 9 tests against disposable SQLite/uploads paths.
+- `testdb=$(mktemp -d /tmp/liinx-task-49-audit-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-49-audit-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/audit_fixes.test.ts tests/importer_security.test.ts` — PASS: 2 files / 32 tests against disposable SQLite/uploads paths.
+- `git diff --check` — PASS before documentation commit.
+
+### Implementation commits
+
+- `797857f15217fd0b95e171e4a7747a5d2e32af17` — `fix: harden competitor profile importer`
+- `73c0913e5a30c0ff2d73135946b825ec8e029ad2` — `fix: make profile importer honest and atomic`
+
+### Unresolved risks and dependencies
+
+- An approved official provider API, export upload, or other legally authorized access method is required before live importer preview/import can be enabled. No such credential or integration is configured.
+- Consequently, live provider content, redirect chains, response-size/truncation failures, and browser cancellation remain external/unverified. The parser is retained for a future authorized adapter and is not evidence of a working upstream integration.
+- No production deployment, provider account, or external data sharing was changed.
+
+### Next eligible prompt
+
+`50 — Instagram integration`
