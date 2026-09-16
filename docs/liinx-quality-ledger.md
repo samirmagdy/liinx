@@ -1810,3 +1810,52 @@ Baseline: branch `main`, commit `156710c` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `32 — Location block`
+
+## Task 32 — Location block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `6454172` at task start. The worktree was clean; Task 31 changes were preserved. Implementation commit is recorded below after verification.
+
+### Scope and changed files
+
+- `src/utils/mapLinks.ts`: adds a bounded, encoded Google Maps search-link builder that returns null for empty/non-string locations.
+- `src/components/PublicBioView.tsx`: renders the location block as a directions/search card, with a validated Maps URL only when an address exists and an explicit empty state otherwise. No embedded map or geolocation request was added.
+- `src/components/BuilderStudio.tsx`: labels the editor as an address/place field and explains that the feature is directions-only.
+- `tests/location_block.test.ts`: covers Arabic/English persistence, encoding, exact Maps URL shape, empty input, and overlong input rejection.
+
+### Findings and behavior
+
+- The prior renderer always created a Google Maps search link, including for empty input, and did not make clear that it was not an embedded map. It now uses `https://www.google.com/maps/search/?api=1&query=...`, with a visible “Get directions” label and accessible destination label.
+- The saved value remains the creator’s address/search text, not a fabricated geocoded result or place ID. Google Maps performs the search when the visitor activates the link.
+- Existing legacy records using `subtitle` for the location remain renderable through the existing fallback path. New editor values are capped at the shared 300-character contract limit.
+- Empty locations show “Add an address to show directions” and expose no dead/blank link. Invalid overlong values return 400. No iframe, Maps SDK, API key, or device geolocation request is used.
+- The URL shape follows [Google Maps URLs official documentation](https://developers.google.com/maps/documentation/urls/get-started), which documents the required `api=1` search format, URL encoding, cross-device behavior, and no API-key requirement.
+
+### Acceptance criteria
+
+- PASS — Arabic and English addresses save, reload, and remain present in public data. Evidence: `tests/location_block.test.ts` persists both values and verifies the public API round trip.
+- PASS — Public directions/search target is deterministic and properly encoded. Evidence: the test verifies exact Google Maps origin/path, `api=1`, and decoded `query` for both languages.
+- PASS — Empty input has a clear state. Evidence: `getGoogleMapsSearchUrl('   ')` returns null and renderer emits an explicit empty status without an anchor.
+- PASS — Invalid input fails cleanly. Evidence: 301-character location returns HTTP 400 through the shared block contract.
+- PASS — No unnecessary geolocation or embedded-map behavior is claimed. Evidence: no map iframe/SDK or geolocation API was added; editor/public copy says directions-only.
+- NOT RUN — Actual browser activation, Google Maps handoff, narrow/mobile layout, and external Maps availability. Browser execution and live external navigation were unavailable.
+
+### Exact commands and outcomes
+
+- `git status --short --branch && git log -3 --oneline` — PASS, baseline `6454172` on `main`; clean worktree before Task 32.
+- `task32_tmp=$(mktemp -d) && DATABASE_PATH="$task32_tmp/liinx.db" UPLOADS_DIR="$task32_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task32_tmp/liinx.db" UPLOADS_DIR="$task32_tmp/uploads" NODE_ENV=test npm test -- --run tests/location_block.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 36 tests, production build/prerender of 10 routes, and diff check. Existing non-blocking warning: one generated chunk exceeds 500 kB.
+- Tests used a disposable SQLite database and uploads directory; no external Maps request was made.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Unresolved risks and dependencies
+
+- Live Google Maps handoff and browser responsive/accessibility verification remain required.
+- Search links depend on Google Maps resolving the creator-provided text; the application does not verify a place identity or guarantee a pin.
+
+### Next eligible prompt
+
+`33 — FAQ block`
