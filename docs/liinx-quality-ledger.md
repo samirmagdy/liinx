@@ -2331,6 +2331,57 @@ The product remains single opt-in. No campaign sending, sequences, double-opt-in
 - Subscriber list is profile-scoped but unpaginated; no undocumented row cap was added.
 - Existing data was retained; no destructive migration or cleanup was performed.
 
+## Task 43 — Protected-content gates
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `4278304` at task start. The worktree was clean and already contained prior task changes; no unrelated work was discarded.
+
+### Scope and changed files
+
+- `server/contracts.ts`: makes `content_gate` a strict, version-compatible inline-text contract; reserved/unknown fields are rejected and public normalization removes body, password, and hash. Authenticated studio normalization returns editable body text but never a password or hash.
+- `server/routes/blocks.ts`: hashes access codes with bcrypt, removes plaintext codes from persistence and responses, supports explicit code replacement/removal, validates empty/oversized codes, verifies asynchronously, rate-limits verification, and requires the containing page to be published. Corrupt or incomplete stored gates fail closed.
+- `server/routes/profiles.ts`: separates public and authenticated block normalization so public profile responses and caches cannot disclose protected text or credentials while the creator can edit/preview the text.
+- `src/components/PublicBioView.tsx`, `src/components/PhonePreview.tsx`, `src/components/BuilderStudio.tsx`, `src/config/runtimeTranslations.ts`: adds honest unconfigured/preview-only states, creator guidance, and Arabic translations. Preview never calls the verification endpoint.
+- `tests/content_gates.test.ts`: regression coverage for hashing, response redaction, correct/wrong/empty codes, replacement/removal, hidden pages, deleted blocks, malformed storage, and unavailable verification.
+
+### Findings and behavior
+
+- The prior implementation could echo a submitted gate password in the create response and could retain plaintext in `extra_json`; both paths now remove plaintext before persistence/response.
+- The public contract is intentionally limited to password-protected inline text. It does not claim to protect files, links, whole pages, paid membership, or identity. Direct resource protection is therefore not promised by this feature.
+- A configured gate is visible publicly only as a locked shell plus description. Protected body text is returned only by the verification response after bcrypt success. Public profile serialization, authenticated API serialization, preview, and cache invalidation do not expose the hash.
+- Empty password explicitly removes the code and leaves the gate unconfigured; the body remains private and is not published accidentally. Changing a code replaces the bcrypt hash.
+- Verification of unpublished or deleted content returns unavailable/not-found behavior. Malformed JSON or missing/invalid hashes fail closed with a generic unavailable/corrupt response.
+- The existing shared IP limiter remains 10 attempts per 15 minutes in non-test environments. Tests run with `NODE_ENV=test`, so the limiter itself is not claimed as runtime-tested here.
+
+### Acceptance criteria
+
+- PASS — Correct, wrong, and empty code behavior; asynchronous bcrypt verification and code replacement/removal. Evidence: `tests/content_gates.test.ts` and `tests/backend-e2e.dynamic.test.ts` (43 focused tests total).
+- PASS — Repeated-attempt protection is configured at 10 attempts/15 minutes through the shared rate-limit middleware. Runtime 429 behavior was not exercised because test mode bypasses the limiter.
+- PASS — Hidden/unpublished and deleted blocks cannot be verified; malformed stored data fails closed. Evidence: `tests/content_gates.test.ts`.
+- PASS — Protected body, password, and hash are absent from public payloads and creator responses; successful verification returns only the intended inline text. Evidence: `tests/content_gates.test.ts`, contract normalization, and profile routes.
+- PASS — Anonymous preview cannot unlock gates or emit verification requests; it shows a preview-only state. Evidence: `PhonePreview.tsx` source path and preview component changes.
+- PASS — The supported scope is explicitly inline text only; no unsupported file/link/page gate promise or membership/identity claim was introduced.
+- NOT RUN — Actual browser journey at public/preview widths, cache inspection through a running browser, keyboard/screen-reader checks, and network-request observation. No browser automation tool was available in this run.
+- NOT RUN — Production-mode rate-limit/429 integration check; local unit/API tests intentionally use `NODE_ENV=test`.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch` and `git rev-parse HEAD` — PASS at baseline: clean `main`, commit `4278304`, ahead of `origin/main` only by prior local task commits.
+- `testdb=$(mktemp -d /tmp/liinx-task-43b-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-43b-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npx vitest run tests/content_gates.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts tests/profile_duplication.test.ts tests/acceptance.test.ts` — PASS: 5 files / 43 tests against disposable SQLite and uploads directories.
+- `testdb=$(mktemp -d /tmp/liinx-task-43c-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-43c-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run build` — PASS: TypeScript check, Vite production build, and 10 prerendered routes. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+- `git diff --check` — PASS after implementation; no whitespace errors.
+
+### Implementation commit
+
+`2a8d0b77871de5214cf30e4e43dcabba5021cf53` — `feat: harden protected content gates`.
+
+### Unresolved risks and dependencies
+
+- Browser-level preview/public leak, accessibility, responsive, and cache-header evidence remains outstanding.
+- Production rate limiting requires deployment-mode verification; no production deployment or external provider was used.
+- Existing legacy records with plaintext codes are treated as configured by normalization but require the existing migration/write path to hash before verification; malformed records fail closed. No user data was deleted.
+
 ### Next eligible prompt
 
-`43 — Protected-content gates`
+`44 — Public-page search`
