@@ -2055,7 +2055,7 @@ Baseline: branch `main`, commit `953ff8e` at task start. The worktree was clean;
 
 ### Implementation commit
 
-To be recorded after final validation.
+`9f917457531bcfbdbe0ddd6d6a95d4721e9a5e72` — `feat: complete direct contact blocks`.
 
 ### Unresolved risks and dependencies
 
