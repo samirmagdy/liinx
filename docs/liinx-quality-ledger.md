@@ -1518,7 +1518,7 @@ Baseline: branch `main`, commit `f3671ff2975b5ea2d5761d56c362db795486e60a` at ta
 
 Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
 
-Baseline: branch `main`, commit `f8c1a8cc0f8d419053cd161a656bb082790d3596` at task start. The worktree was clean; Task 25 changes were preserved. Implementation commit: recorded after this entry is committed.
+Baseline: branch `main`, commit `f8c1a8cc0f8d419053cd161a656bb082790d3596` at task start. The worktree was clean; Task 25 changes were preserved. Implementation commit: `042433bfced070e0a311cbef4f61850cfa995f3e`.
 
 ### Scope and changed files
 
