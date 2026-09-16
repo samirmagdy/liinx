@@ -111,6 +111,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
 
     res.status(201).json({
       id,
+      revision: now,
       type,
       title,
       url: url || null,
@@ -192,6 +193,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
 
     const now = Date.now();
     const data = parse.data as BlockRequestData;
+    const revision = (parse.data as { revision?: number }).revision;
     const profile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(profileId) as { plan?: string } | undefined;
         if (!hasEntitlement(profile?.plan, 'scheduling') && (data.startAt != null || data.endAt != null || existing.start_at != null || existing.end_at != null)) {
       return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
@@ -211,7 +213,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
       if (!extraParse.success) return res.status(400).json({ error: extraParse.error.issues[0]?.message || 'Invalid block data.' });
     }
 
-    db.prepare(`
+    const saved = db.prepare(`
       UPDATE blocks
       SET title = coalesce(?, title),
           url = ?,
@@ -223,7 +225,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
           end_at = ?,
           extra_json = ?,
           updated_at = ?
-      WHERE id = ? AND profile_id = ?
+      WHERE id = ? AND profile_id = ? AND (? IS NULL OR updated_at = ?)
     `).run(
       data.title !== undefined ? data.title : existing.title,
       data.url !== undefined ? data.url : existing.url,
@@ -236,10 +238,13 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
       data.extra !== undefined ? prepareBlockExtra(existing.type, mergedExtra) : existing.extra_json,
       now,
       blockId,
-      profileId
+      profileId,
+      revision ?? null,
+      revision ?? null
     );
 
-    res.json({ success: true, message: 'Block updated successfully.' });
+    if (saved.changes === 0) return res.status(409).json({ error: 'This block changed in another tab. Reload it before retrying your changes.' });
+    res.json({ success: true, revision: now, message: 'Block updated successfully.' });
     invalidatePublicProfileCache(profileId);
   } catch (err: any) {
     console.error('Update block error:', err);

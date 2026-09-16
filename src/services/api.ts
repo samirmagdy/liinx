@@ -96,11 +96,11 @@ export const api = {
     },
     getPages: async (): Promise<{ pages: CreatorPage[] }> => request<{ pages: CreatorPage[] }>('/api/studio/pages'),
     createPage: async (data: { slug: string; title: string; description?: string; published?: boolean }): Promise<{ page: CreatorPage }> => request<{ page: CreatorPage }>('/api/studio/pages', { method: 'POST', body: JSON.stringify(data) }),
-    updatePage: async (id: string, data: Partial<CreatorPage>): Promise<{ success: boolean }> => request<{ success: boolean }>(`/api/studio/pages/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
+    updatePage: async (id: string, data: Partial<CreatorPage>): Promise<{ success: boolean; revision?: number }> => request<{ success: boolean; revision?: number }>(`/api/studio/pages/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
     deletePage: async (id: string): Promise<{ success: boolean }> => request<{ success: boolean }>(`/api/studio/pages/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-    reorderPages: async (pageIds: string[]): Promise<{ success: boolean }> => request<{ success: boolean }>('/api/studio/pages/reorder', { method: 'PUT', body: JSON.stringify({ pageIds }) }),
-    updateProfile: async (data: Partial<CreatorProfile>): Promise<{ success: boolean }> => {
-      return request<{ success: boolean }>('/api/studio/profile', {
+    reorderPages: async (pageIds: string[]): Promise<{ success: boolean; pages?: CreatorPage[] }> => request<{ success: boolean; pages?: CreatorPage[] }>('/api/studio/pages/reorder', { method: 'PUT', body: JSON.stringify({ pageIds }) }),
+    updateProfile: async (data: Partial<CreatorProfile>): Promise<{ success: boolean; revision?: number }> => {
+      return request<{ success: boolean; revision?: number }>('/api/studio/profile', {
         method: 'PUT',
         body: JSON.stringify(data)
       });
@@ -117,8 +117,8 @@ export const api = {
         body: JSON.stringify(blockData)
       });
     },
-    updateBlock: async (id: string, blockData: Record<string, any>): Promise<{ success: boolean }> => {
-      return request<{ success: boolean }>(`/api/studio/blocks/${id}`, {
+    updateBlock: async (id: string, blockData: Record<string, any>): Promise<{ success: boolean; revision?: number }> => {
+      return request<{ success: boolean; revision?: number }>(`/api/studio/blocks/${id}`, {
         method: 'PUT',
         body: JSON.stringify(blockData)
       });

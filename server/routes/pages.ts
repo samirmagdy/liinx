@@ -23,7 +23,7 @@ function invalidateProfile(profileId: string) {
 }
 
 pagesRouter.get('/studio/pages', requireAuth, (req: AuthenticatedRequest, res) => {
-  const pages = db.prepare(`SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, created_at as createdAt, updated_at as updatedAt FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC`).all(req.user!.profileId) as any[];
+  const pages = db.prepare(`SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, created_at as createdAt, updated_at as updatedAt, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC`).all(req.user!.profileId) as any[];
   res.json({ pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })) });
 });
 
@@ -35,7 +35,7 @@ pagesRouter.post('/studio/pages', requireAuth, (req: AuthenticatedRequest, res) 
   if (existing) return res.status(409).json({ error: 'A page with this slug already exists.' });
   const max = db.prepare('SELECT COALESCE(MAX(sort_order), -1) as value FROM pages WHERE profile_id = ?').get(profileId) as { value: number };
   const now = Date.now();
-  const page = { id: createId('page'), profileId, slug: parsed.data.slug, title: parsed.data.title, description: parsed.data.description || null, sortOrder: max.value + 1, isHome: false, published: parsed.data.published !== false, createdAt: now, updatedAt: now };
+  const page = { id: createId('page'), profileId, slug: parsed.data.slug, title: parsed.data.title, description: parsed.data.description || null, sortOrder: max.value + 1, isHome: false, published: parsed.data.published !== false, createdAt: now, updatedAt: now, revision: now };
   db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`).run(page.id, profileId, page.slug, page.title, page.description, page.sortOrder, page.published ? 1 : 0, now, now);
   invalidateProfile(profileId);
   res.status(201).json({ page });
@@ -53,7 +53,8 @@ pagesRouter.put('/studio/pages/reorder', requireAuth, (req: AuthenticatedRequest
   const now = Date.now();
   db.transaction(() => ids.forEach((id: string, index: number) => update.run(index, now, id, req.user!.profileId)))();
   invalidateProfile(req.user!.profileId);
-  res.json({ success: true });
+  const pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, created_at as createdAt, updated_at as updatedAt, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(req.user!.profileId) as any[];
+  res.json({ success: true, pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })) });
 });
 
 pagesRouter.put('/studio/pages/:id', requireAuth, (req: AuthenticatedRequest, res) => {
@@ -67,9 +68,12 @@ pagesRouter.put('/studio/pages/:id', requireAuth, (req: AuthenticatedRequest, re
     if (duplicate) return res.status(409).json({ error: 'A page with this slug already exists.' });
   }
   const next = { slug: page.is_home ? 'home' : (parsed.data.slug ?? page.slug), title: parsed.data.title ?? page.title, description: parsed.data.description === undefined ? page.description : parsed.data.description, published: page.is_home ? true : (parsed.data.published === undefined ? Boolean(page.published) : parsed.data.published), sortOrder: parsed.data.sortOrder ?? page.sort_order };
-  db.prepare('UPDATE pages SET slug = ?, title = ?, description = ?, published = ?, sort_order = ?, updated_at = ? WHERE id = ? AND profile_id = ?').run(next.slug, next.title, next.description || null, next.published ? 1 : 0, next.sortOrder, Date.now(), page.id, page.profile_id);
+  const revision = parsed.data.revision;
+  const now = Date.now();
+  const result = db.prepare('UPDATE pages SET slug = ?, title = ?, description = ?, published = ?, sort_order = ?, updated_at = ? WHERE id = ? AND profile_id = ? AND (? IS NULL OR updated_at = ?)').run(next.slug, next.title, next.description || null, next.published ? 1 : 0, next.sortOrder, now, page.id, page.profile_id, revision ?? null, revision ?? null);
+  if (result.changes === 0) return res.status(409).json({ error: 'This page changed in another tab. Reload it before retrying your changes.' });
   invalidateProfile(page.profile_id);
-  res.json({ success: true });
+  res.json({ success: true, revision: now });
 });
 
 pagesRouter.delete('/studio/pages/:id', requireAuth, (req: AuthenticatedRequest, res) => {

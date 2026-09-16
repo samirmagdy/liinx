@@ -97,7 +97,7 @@ export interface AdvancedBlock {
   extra?: Record<string, unknown>;
 }
 
-export type ProfileBlock = 
+export type ProfileBlock = { revision?: number } & (
   | BookingBlock
   | LinkBlock 
   | HeaderBlock 
@@ -106,7 +106,7 @@ export type ProfileBlock =
   | FolderBlock 
   | NewsletterBlock
   | InstagramGridBlock
-  | AdvancedBlock;
+  | AdvancedBlock);
 
 export interface BookingBlock {
   id: string;
@@ -140,6 +140,7 @@ export interface ThemeConfig {
 
 export interface CreatorProfile {
   id: string;
+  revision?: number;
   username: string;
   displayName: string;
   bio: string;
@@ -176,6 +177,7 @@ export interface CreatorProfile {
 
 export interface CreatorPage {
   id: string;
+  revision?: number;
   slug: string;
   title: string;
   description?: string | null;

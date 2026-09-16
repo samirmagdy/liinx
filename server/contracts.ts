@@ -116,7 +116,7 @@ export const createBlockContract = blockCreateEnvelope.superRefine((value, conte
   }
   if (value.startAt != null && value.endAt != null && value.endAt < value.startAt) context.addIssue({ code: 'custom', path: ['endAt'], message: 'End time must be after start time.' });
 });
-const updateBlockEnvelope = blockCreateEnvelope.omit({ type: true, pageId: true }).partial().strict();
+const updateBlockEnvelope = blockCreateEnvelope.omit({ type: true, pageId: true }).partial().extend({ revision: z.number().int().nonnegative().optional() }).strict();
 
 function invalidContract(message: string, path: (string | number)[]) {
   return { success: false as const, error: new z.ZodError([{ code: 'custom', path, message }]) };
@@ -172,7 +172,7 @@ export const pageContract = z.object({
   description: z.string().trim().max(240).nullable().optional(),
   published: z.boolean().optional()
 }).strict();
-export const pageUpdateContract = pageContract.partial().extend({ sortOrder: z.number().int().min(0).optional() }).strict();
+export const pageUpdateContract = pageContract.partial().extend({ sortOrder: z.number().int().min(0).optional(), revision: z.number().int().nonnegative().optional() }).strict();
 
 const uploadPath = z.string().regex(/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/, 'Must be a valid upload path.');
 const customThemeSchema = z.object({
@@ -203,5 +203,6 @@ export const profileUpdateContract = z.object({
   pageRedirectUrl: z.string().max(500).refine(isHttpUrl, 'Redirect URL must use HTTP(S).').nullable().optional(),
   pageRedirectUntil: z.number().int().positive().nullable().optional(),
   customTheme: customThemeSchema.optional(),
-  socials: z.array(z.object({ platform: z.enum(['instagram', 'tiktok', 'youtube', 'spotify', 'twitter', 'github', 'email', 'linkedin']), url: z.string().max(MAX_URL).refine(isSafeLinkUrl, 'Social links must use a safe URL scheme.') }).strict()).max(20).optional()
+  socials: z.array(z.object({ platform: z.enum(['instagram', 'tiktok', 'youtube', 'spotify', 'twitter', 'github', 'email', 'linkedin']), url: z.string().max(MAX_URL).refine(isSafeLinkUrl, 'Social links must use a safe URL scheme.') }).strict()).max(20).optional(),
+  revision: z.number().int().nonnegative().optional()
 }).strict();

@@ -74,4 +74,20 @@ describe('editor save queue', () => {
     expect(write).toHaveBeenCalledTimes(2);
     expect(queue.dirty).toBe(false);
   });
+
+  it('reports saved only after the slow persistence promise resolves', async () => {
+    vi.useFakeTimers();
+    let finish!: () => void;
+    const write = vi.fn().mockImplementation(() => new Promise<void>(resolve => { finish = resolve; }));
+    const report = vi.fn();
+    const queue = new SaveQueue(write, report);
+    queue.enqueue('profile', { bio: 'pending' });
+    const flush = queue.flush();
+    expect(report).toHaveBeenLastCalledWith('saving');
+    expect(queue.dirty).toBe(true);
+    expect(report).not.toHaveBeenCalledWith('saved');
+    finish();
+    await flush;
+    expect(report).toHaveBeenLastCalledWith('saved');
+  });
 });

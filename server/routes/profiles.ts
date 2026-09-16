@@ -222,13 +222,13 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     }
 
     const blocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profile.id) as any[];
-    let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
+    let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
     if (pages.length === 0) {
       const homeId = createId('page');
       db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
         .run(homeId, profile.id, profile.display_name || 'Home', Date.now(), Date.now());
       db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
-      pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
+      pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
     }
 
     // Calculate real total clicks per block
@@ -248,6 +248,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 
       const baseBlock: any = {
         id: b.id,
+        revision: b.updated_at,
         pageId: b.page_id || pages.find(page => page.isHome)?.id || null,
         type: b.type,
         title: b.title,
@@ -270,6 +271,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 
     res.json({
       id: profile.id,
+      revision: profile.updated_at,
       username: profile.username,
       displayName: profile.display_name,
       bio: profile.bio || '',
@@ -329,6 +331,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       customTheme, 
       socials 
     } = parse.data;
+    const revision = parse.data.revision;
 
     if (!isSafeCustomCss(customCss)) {
       return res.status(400).json({ error: 'Custom CSS may not import external content or execute scripts.' });
@@ -395,7 +398,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       ? (socials ? JSON.stringify(socials) : null) 
       : existing.socials_json;
 
-    db.prepare(`
+    const saved = db.prepare(`
       UPDATE profiles
       SET display_name = ?,
           bio = ?,
@@ -414,7 +417,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
           custom_theme_json = ?,
           socials_json = ?,
           updated_at = ?
-      WHERE id = ?
+      WHERE id = ? AND (? IS NULL OR updated_at = ?)
     `).run(
       updatedDisplayName,
       updatedBio || '',
@@ -433,10 +436,14 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       updatedCustomThemeJson,
       updatedSocialsJson,
       now,
-      req.user!.profileId
+      req.user!.profileId,
+      revision ?? null,
+      revision ?? null
     );
 
-    res.json({ success: true, message: 'Profile updated successfully.' });
+    if (saved.changes === 0) return res.status(409).json({ error: 'This profile changed in another tab. Reload it before retrying your changes.' });
+
+    res.json({ success: true, revision: now, message: 'Profile updated successfully.' });
     publicProfileCache.delete(existing.username.toLowerCase());
   } catch (err: any) {
     console.error('Update profile error:', err);

@@ -171,6 +171,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [createProfileError, setCreateProfileError] = useState<string | null>(null);
 
   const pages = profile.pages || [];
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
   const initialPageId = (nextProfile: CreatorProfile) => nextProfile.pages?.find(page => page.isHome)?.id || nextProfile.pages?.[0]?.id || '';
 
   const loadProfilesList = () => {
@@ -516,7 +518,22 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [saveErrorBanner, setSaveErrorBanner] = useState<string | null>(null);
   const queueRef = useRef<SaveQueue | null>(null);
   if (!queueRef.current) queueRef.current = new SaveQueue(
-    (key, patch) => key === 'profile' ? api.studio.updateProfile(patch) : api.studio.updateBlock(key, patch),
+    async (key, patch) => {
+      if (key === 'profile') {
+        const result = await api.studio.updateProfile(patch);
+        if (result.revision !== undefined) {
+          profileRef.current = { ...profileRef.current, revision: result.revision };
+          setProfile(previous => ({ ...previous, revision: result.revision }));
+        }
+        return result;
+      }
+      const result = await api.studio.updateBlock(key, patch);
+      if (result.revision !== undefined) {
+        profileRef.current = { ...profileRef.current, blocks: profileRef.current.blocks.map(block => block.id === key ? { ...block, revision: result.revision } : block) };
+        setProfile(previous => ({ ...previous, blocks: previous.blocks.map(block => block.id === key ? { ...block, revision: result.revision } : block) }));
+      }
+      return result;
+    },
     state => {
       setSaveStatus(state);
       setSaveErrorBanner(state === 'error' ? 'Changes are not saved. Check your connection and retry.' : null);
@@ -546,7 +563,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       Object.entries(updated).filter(([k, v]) => allowedKeys.has(k) && v !== undefined)
     );
     if (Object.keys(patch).length > 0) {
-      queueRef.current!.enqueue('profile', patch);
+      queueRef.current!.enqueue('profile', { ...patch, revision: profileRef.current.revision });
     }
   };
   const handleRetryFailedSaves = () => queueRef.current!.flush();
@@ -580,10 +597,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     try {
       setSaveStatus('saving');
       const uploaded = await api.studio.uploadImage(file);
-      const block = profile.blocks.find(candidate => candidate.id === blockId) as any;
+      if (queueRef.current?.dirty && !(await queueRef.current.flush())) throw new Error(ui('Changes are not saved. Check your connection and retry.'));
+      const block = profileRef.current.blocks.find(candidate => candidate.id === blockId) as any;
       const current = block?.items || [];
       const nextItems = itemIndex === undefined ? current : current.map((item: any, index: number) => index === itemIndex ? { ...item, [field]: uploaded.url } : item);
-      await api.studio.updateBlock(blockId, itemIndex === undefined ? { extra: { [field]: uploaded.url } } : { extra: { items: nextItems } });
+      queueBlockUpdate(blockId, itemIndex === undefined ? { extra: { [field]: uploaded.url } } : { extra: { items: nextItems } });
+      if (!(await queueRef.current!.flush())) throw new Error(ui('Changes are not saved. Check your connection and retry.'));
       setProfile(previous => ({ ...previous, blocks: previous.blocks.map(candidate => candidate.id === blockId ? { ...candidate, ...(itemIndex === undefined ? { [field]: uploaded.url } : { items: nextItems }) } as any : candidate) }));
       setSaveStatus('saved');
     } catch (error) {
@@ -596,7 +615,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     try {
       setSaveStatus('saving');
       const uploaded = await api.studio.uploadFile(file);
-      await api.studio.updateBlock(blockId, { extra: { fileUrl: uploaded.url, downloadName: uploaded.originalName } });
+      if (queueRef.current?.dirty && !(await queueRef.current.flush())) throw new Error(ui('Changes are not saved. Check your connection and retry.'));
+      queueBlockUpdate(blockId, { extra: { fileUrl: uploaded.url, downloadName: uploaded.originalName } });
+      if (!(await queueRef.current!.flush())) throw new Error(ui('Changes are not saved. Check your connection and retry.'));
       setProfile(previous => ({ ...previous, blocks: previous.blocks.map(candidate => candidate.id === blockId ? { ...candidate, fileUrl: uploaded.url, downloadName: uploaded.originalName } as any : candidate) }));
       setSaveStatus('saved');
     } catch (error) { setSaveStatus('error'); setSaveErrorBanner(friendlyErrorMessage(error, ui('File upload failed'))); }
@@ -687,8 +708,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
     setIsSavingPage(true);
     try {
-      await api.studio.updatePage(activePage.id, { title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished });
-      const updated = { ...activePage, title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished };
+      const result = await api.studio.updatePage(activePage.id, { title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished, revision: activePage.revision });
+      const updated = { ...activePage, title, slug, description: pageEditDescription.trim() || null, published: activePage.isHome ? true : pageEditPublished, revision: result.revision ?? activePage.revision };
       setProfile(previous => ({ ...previous, pages: (previous.pages || []).map(page => page.id === activePage.id ? updated : page) }));
       setPageManagerError(null);
     } catch (error: any) {
@@ -705,8 +726,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     const reordered = [...pages];
     [reordered[index], reordered[nextIndex]] = [reordered[nextIndex], reordered[index]];
     try {
-      await api.studio.reorderPages(reordered.map(page => page.id));
-      setProfile(previous => ({ ...previous, pages: reordered.map((page, sortOrder) => ({ ...page, sortOrder })) }));
+      const result = await api.studio.reorderPages(reordered.map(page => page.id));
+      setProfile(previous => ({ ...previous, pages: result.pages || reordered.map((page, sortOrder) => ({ ...page, sortOrder })) }));
     } catch (error: any) {
       setPageManagerError(friendlyErrorMessage(error, ui('Could not reorder pages.')));
     }
@@ -902,7 +923,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   const queueBlockUpdate = (id: string, fields: Record<string, any>) => {
-    queueRef.current!.enqueue(id, fields);
+    const revision = profileRef.current.blocks.find(block => block.id === id)?.revision;
+    queueRef.current!.enqueue(id, { ...fields, revision });
   };
 
   const handleUpdateBlockField = (id: string, field: string, value: any) => {

@@ -644,3 +644,62 @@ Baseline commit: `5b2fd6b` (`refactor: centralize subscription feature checks wi
 ### Next eligible prompt
 
 `09 — Autosave and concurrent editing`
+
+## Task 09 — Autosave and concurrent editing
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline commit: `995a6f29cc364b6541b07c5f0f32fd8b5a8c1c49` (`refactor: derive builder studio pages directly from profile state`) on `main`. The worktree was clean at task start; Task 08 was already committed and was not reverted. Task 09 changes remain uncommitted in the current worktree.
+
+### Scope and changed files
+
+- `src/utils/saveQueue.ts`: revalidated the existing debounced, per-key patch-merging queue, serialized in-flight writes, retained failed payloads for explicit retry, and delayed the saved state until persistence resolves. No rewrite was required.
+- `src/components/BuilderStudio.tsx`: routes profile/block autosaves through the current profile reference and optimistic revisions; upload completion now joins the queue and flushes before reporting success; page saves send and acknowledge revisions; page reorder consumes refreshed server state.
+- `server/contracts.ts`: accepts non-negative optional revisions on profile, page, and block updates while preserving strict request validation.
+- `server/routes/profiles.ts`, `server/routes/blocks.ts`, `server/routes/pages.ts`: expose studio revisions and reject stale profile/block/page writes with HTTP 409 instead of silently overwriting newer data. Page list/reorder responses include refreshed revisions.
+- `src/services/api.ts`, `src/types.ts`: carry revision metadata through the shared client contracts.
+- `tests/saveQueue.test.ts`: verifies a slow persistence promise cannot report saved early.
+- `tests/concurrent_revisions.test.ts`: verifies stale profile, block, and page writes are rejected and the first acknowledged value remains persisted.
+
+### Findings and behavior
+
+- The existing queue already debounced rapid edits, merged nested `extra`/`customTheme` patches, serialized writes, and retained failed patches. The defect was that the editor did not consistently supply a current revision or use the queue for upload-triggered block writes.
+- Profile, block, and page update endpoints now use the record's `updated_at` as an optimistic revision. A stale revision receives 409 with a reload/retry message; the server does not apply that payload.
+- The editor keeps the authoritative current profile in a ref for queue writers and updates the acknowledged revision only after the API resolves. Failed writes remain dirty and visible through the existing retry UI.
+- Upload completion waits for pending editor writes, enqueues its block patch, and waits for that patch to persist before setting the local saved state. Page reorder refreshes page revisions so a following page edit is not rejected solely because reorder changed `updated_at`.
+- Existing page/profile switching and navigation guards were revalidated: pending queue work is flushed before switching, preview/fullscreen navigation, anchor navigation, and unload warning handling. No state-library or block-editor rewrite was introduced.
+- Revision conflict detection is record-based for profile, block, and page edits. Browser-level conflict UX, upload completion, and unload-warning journeys were not run because the required in-app browser Node REPL tool was unavailable in this session.
+
+### Acceptance criteria
+
+- PASS — Fast typing. Evidence: existing SaveQueue debounce/merge tests remain green; rapid same-key edits collapse into one ordered persistence payload.
+- PASS — Slow first response. Evidence: queue tests verify a second edit waits behind the first and that saved is not reported before the slow writer resolves.
+- PASS — Network failure and retry. Evidence: existing queue tests verify failed payload retention and explicit retry; dirty/error state remains until a retry succeeds.
+- NOT RUN — Upload completion during editing in an actual browser. Source evidence shows upload patches now use the queue and await flush; no browser runtime was available.
+- PASS — Page/profile switching with pending saves at the code path level. Evidence: existing BuilderStudio guards flush before switching/creating profiles and page navigation; targeted TypeScript/build and API suites pass. Actual no-reload UI interaction was not run.
+- NOT RUN — Tab-closure warning in an actual browser. Source inspection confirms a `beforeunload` handler when the queue is dirty; browser event behavior was not externally verified.
+- PASS — Saved indicator only after persistence succeeds. Evidence: the new slow-writer regression test passes and the upload paths await queue flush before setting `saved`.
+- PASS — Reloaded data matches the last acknowledged version for profile/block/page edits. Evidence: optimistic revision API test passes for all three record types; stale requests return 409 and database values remain from the first acknowledged write.
+- PASS — Concurrent stale writes are not silently overwritten. Evidence: `tests/concurrent_revisions.test.ts` passes profile, block, and page 409 assertions.
+
+### Exact commands and outcomes
+
+- `npm run lint` — PASS, `tsc --noEmit` exited 0.
+- `task09_target=$(mktemp -d /tmp/liinx-task09-target-XXXXXX) && mkdir -p "$task09_target/uploads" && DATABASE_PATH="$task09_target/liinx.db" UPLOADS_DIR="$task09_target/uploads" NODE_ENV=test npm test -- --run tests/saveQueue.test.ts tests/concurrent_revisions.test.ts tests/api.test.ts` — PASS, 3 files / 32 tests.
+- `task09_e2e=$(mktemp -d /tmp/liinx-task09-e2e-XXXXXX) && mkdir -p "$task09_e2e/uploads" && DATABASE_PATH="$task09_e2e/liinx.db" UPLOADS_DIR="$task09_e2e/uploads" NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts` — PASS, 1 file / 4 tests; public rendering and upload rejection journey completed through the API.
+- `task09_full=$(mktemp -d /tmp/liinx-task09-full-XXXXXX) && mkdir -p "$task09_full/uploads" && DATABASE_PATH="$task09_full/liinx.db" UPLOADS_DIR="$task09_full/uploads" NODE_ENV=test npm test` — PASS, 29 files / 211 tests.
+- `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS, no whitespace errors.
+- Initial combined targeted invocation with dynamic/API/saveQueue/revision files — FAIL, 2 of 36 tests; one `ECONNRESET` reported with Supertest's `double callback bug`, and the dynamic catalogue request returned 400. The dynamic file passed independently and the full isolated suite passed, so this was not reproducible as an application failure; it remains a test-order/harness observation.
+- Browser journey — NOT RUN; the repository has Playwright dependencies, but the required in-app browser Node REPL tool was not exposed in this environment.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, the SQLite global initializer, and `mktemp`-based `DATABASE_PATH`/`UPLOADS_DIR` isolation were used. No production database or uploads directory was touched.
+- No dedicated React component/browser harness was available. Fast typing, slow response, retry, upload completion, profile switching, and unload behavior have API/source/unit evidence where noted, but not browser evidence.
+- Revisions use millisecond `updated_at` values. The current tests pass, but a future hardening task should use a database revision counter or equivalent monotonic mechanism if same-millisecond writes must be provably distinguishable across all SQLite/runtime conditions.
+- Upload failure/orphan cleanup remains owned by the uploaded-file lifecycle work from Task 02; Task 09 only prevents upload-triggered block metadata from bypassing the save queue.
+
+### Next eligible prompt
+
+`10 — Page creation and settings`
