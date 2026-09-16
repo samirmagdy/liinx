@@ -564,6 +564,33 @@ const createProfileSchema = z.object({
   duplicateProfileId: z.string().max(100).optional()
 });
 
+function remapDuplicatedValue(value: unknown, pageMap: Map<string, string>, blockMap: Map<string, string>): unknown {
+  if (typeof value === 'string') {
+    const direct = pageMap.get(value) || blockMap.get(value);
+    if (direct) return direct;
+    return value.replace(/\/r\/([^/?#]+)/g, (_match, id: string) => `/r/${blockMap.get(id) || id}`);
+  }
+  if (Array.isArray(value)) return value.map(item => remapDuplicatedValue(item, pageMap, blockMap));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, remapDuplicatedValue(item, pageMap, blockMap)]));
+  }
+  return value;
+}
+
+function duplicatedBlockExtra(type: string, raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    const value = JSON.parse(raw) as Record<string, unknown>;
+    // Gate passwords are credentials, not reusable page content. A duplicated
+    // gate must be configured with a new password by its owner.
+    delete value.password;
+    delete value.passwordHash;
+    return JSON.stringify(value);
+  } catch {
+    return null;
+  }
+}
+
 // Authenticated: Create a new profile under the same account (respecting plan limits)
 profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
@@ -606,6 +633,9 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
 
     const newProfileId = createId('prf');
     const now = Date.now();
+    const sourcePages = duplicateSource ? db.prepare('SELECT * FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC, id ASC').all(duplicateSource.id) as any[] : [];
+    const sourceBlocks = duplicateSource ? db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC, created_at ASC, id ASC').all(duplicateSource.id) as any[] : [];
+    const sourceHome = sourcePages.find(page => page.is_home);
 
     db.exec('BEGIN');
     db.prepare(`
@@ -643,8 +673,8 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
     );
 
     const homePageId = createId('page');
-    db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-      .run(homePageId, newProfileId, displayName, now, now);
+    db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, ?, 0, 1, 1, ?, ?)`)
+      .run(homePageId, newProfileId, sourceHome?.title || displayName, sourceHome?.description || null, now, now);
 
     // Add starter block
     db.prepare(`
@@ -666,17 +696,23 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
     if (duplicateSource) {
       db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(newProfileId);
       db.prepare('DELETE FROM pages WHERE profile_id = ? AND id != ?').run(newProfileId, homePageId);
-      const sourceBlocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(duplicateSource.id) as any[];
-      const sourcePages = db.prepare('SELECT * FROM pages WHERE profile_id = ? ORDER BY sort_order ASC').all(duplicateSource.id) as any[];
       const pageMap = new Map<string, string>();
+      const blockMap = new Map<string, string>();
+      for (const sourcePage of sourcePages) pageMap.set(sourcePage.id, sourcePage.is_home ? homePageId : createId('page'));
+      for (const sourceBlock of sourceBlocks) blockMap.set(sourceBlock.id, createId('blk'));
       const insertPage = db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
       for (const sourcePage of sourcePages) {
-        const copiedId = sourcePage.is_home ? homePageId : createId('page');
-        pageMap.set(sourcePage.id, copiedId);
+        const copiedId = pageMap.get(sourcePage.id)!;
         if (!sourcePage.is_home) insertPage.run(copiedId, newProfileId, sourcePage.slug, sourcePage.title, sourcePage.description, sourcePage.sort_order, 0, sourcePage.published, now, now);
       }
       const copyBlock = db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-      for (const block of sourceBlocks) copyBlock.run(createId('blk'), newProfileId, block.type, block.title, block.url, block.subtitle, block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at, pageMap.get(block.page_id) || homePageId, block.extra_json, now, now);
+      for (const block of sourceBlocks) {
+        const extra = duplicatedBlockExtra(block.type, block.extra_json);
+        let remappedExtra = extra;
+        if (extra) remappedExtra = JSON.stringify(remapDuplicatedValue(JSON.parse(extra), pageMap, blockMap));
+        const remappedUrl = typeof block.url === 'string' ? remapDuplicatedValue(block.url, pageMap, blockMap) : block.url;
+        copyBlock.run(blockMap.get(block.id)!, newProfileId, block.type, block.title, remappedUrl, block.subtitle, block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at, pageMap.get(block.page_id) || homePageId, remappedExtra, now, now);
+      }
     }
 
     db.exec('COMMIT');

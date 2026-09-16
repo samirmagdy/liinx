@@ -862,3 +862,53 @@ Baseline: branch `main`, commit `95428f3` (`feat: add support for page-aware blo
 ### Next eligible prompt
 
 `13 — Profile duplication`
+
+## Task 13 — Profile duplication
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `feb192e` (`feat: enforce 404 routing for unpublished pages and add test coverage for public profile routing`) at task start. Task 13 changes remain uncommitted. Existing Task 12 work was preserved.
+
+### Scope and changed files
+
+- `server/routes/profiles.ts`: hardens the existing authenticated profile-copy transaction, preserves Home/page metadata and supported presentation/content fields, generates fresh page/block identities, remaps internal references, and excludes credentials/private account state.
+- `tests/profile_duplication.test.ts`: covers multi-page copying, representative core/advanced blocks, design/content equality, internal redirect remapping, ownership independence, private-state exclusion, and rollback after a forced persistence failure.
+
+### Findings and behavior
+
+- The existing route already required the source profile to belong to the authenticated account and wrapped creation in a transaction. It copied most profile presentation fields but recreated Home metadata from the new display name and copied block JSON without reference or secret handling.
+- Duplication now preserves source Home title/description, page titles/descriptions/slugs/order/publication flags, profile socials/theme overrides/background/font/footer/sharing settings, block content, and page-scoped positions.
+- Every copied page and block receives a new ID. JSON values and `/r/:blockId` URLs are remapped from source IDs to copied IDs. Blocks with missing/legacy page assignment fall back to copied Home.
+- Billing plan entitlement is inherited from the account's current highest plan so duplication remains subject to existing profile limits. Billing customer/subscription IDs, analytics IDs/history, custom domains and verification, credentials, integrations, form submissions, and temporary redirects are intentionally reset/excluded.
+- Redirects are reset because they are account/page-routing behavior, not reusable profile design. Integration configuration is reset because it contains provider identity/credentials and must be connected explicitly on the new profile. Content-gate passwords are reset while non-secret gate content is copied.
+- A failed insert rolls back the entire profile/page/block copy; no partially created profile remains.
+
+### Acceptance criteria
+
+- PASS — Duplicate a profile with multiple pages and representative major block types. Evidence: `tests/profile_duplication.test.ts` copies link, rich text, image, and content-gate blocks across Home and a subpage; the route copies all persisted block types generically.
+- PASS — Design/content equality for intended fields. Evidence: test compares profile bio/theme/socials, Home/page metadata, block count/type/content, and ordering.
+- PASS — Subsequent edits are independent. Evidence: updating a copied block leaves the source block unchanged.
+- PASS — Internal navigation is remapped. Evidence: copied `/r/:blockId` link points to the copied block ID; page/block IDs are disjoint.
+- PASS — No shared ownership IDs or copied secrets. Evidence: copied profile/page/block IDs differ; billing IDs, domain, analytics IDs, redirect, form submissions, integration row, and gate passwords are absent/reset.
+- PASS — Copy failure leaves no partial profile. Evidence: SQLite trigger forces block persistence failure; request returns 500 and the failed target username has zero profiles before a successful retry.
+- PASS — Redirect and integration reset policy is explicit and implemented; no broad SQL copy is used for those settings.
+- NOT RUN — Browser duplication form, accessible input workflow, Arabic/English visual behavior, and deployed/storage-provider verification; no browser automation or deployment access was available.
+
+### Exact commands and outcomes
+
+- `task13_db=$(mktemp -d /tmp/liinx-task13-db-XXXXXX); task13_uploads=$(mktemp -d /tmp/liinx-task13-uploads-XXXXXX); DATABASE_PATH="$task13_db/liinx.db" UPLOADS_DIR="$task13_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task13_db/liinx.db" UPLOADS_DIR="$task13_uploads" NODE_ENV=test npm test -- --run tests/profile_duplication.test.ts tests/multiprofile.test.ts tests/subscription_entitlements.test.ts` — PASS, typecheck plus 3 files / 8 tests.
+- `task13_full=$(mktemp -d /tmp/liinx-task13-full-XXXXXX); mkdir -p "$task13_full/uploads"; DATABASE_PATH="$task13_full/liinx.db" UPLOADS_DIR="$task13_full/uploads" NODE_ENV=test npm test` — PASS, 33 files / 222 tests.
+- `task13_build=$(mktemp -d /tmp/liinx-task13-build-XXXXXX); mkdir -p "$task13_build/uploads"; DATABASE_PATH="$task13_build/liinx.db" UPLOADS_DIR="$task13_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS after the final ledger edit.
+- Browser/deployed provider verification — NOT RUN; no browser automation, production deployment, billing provider, or integration credentials were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, direct disposable database fixtures, and `mktemp` uploads directories were used. No production data was used.
+- The editor still uses browser `window.prompt` for choosing the new handle/display name. It functions, but accessible form/dialog replacement should be addressed in a UI-focused task.
+- Arbitrary future block types may contain new secret fields; duplication currently explicitly removes known gate password fields and resets integration/profile secrets. New credential-bearing schemas must extend the duplication sanitizer.
+- Live uploaded-file references are copied as URLs/content references, not physical file bytes. Existing assets remain shared by path; a future file-lifecycle decision is needed if duplicated profiles must own independent asset copies.
+
+### Next eligible prompt
+
+`14 — Profile switching and onboarding`
