@@ -22,7 +22,7 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
-    const { profileId, blockId, email, consent } = parse.data;
+    const { profileId, blockId, email } = parse.data;
     const cleanEmail = email.toLowerCase().trim();
 
     // Verify creator exists
@@ -31,17 +31,30 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
       return res.status(404).json({ error: 'Creator profile not found.' });
     }
 
+    if (blockId) {
+      const block = db.prepare(`
+        SELECT b.id
+        FROM blocks b
+        INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id
+        WHERE b.id = ? AND b.profile_id = ? AND b.type = 'newsletter' AND p.published = 1
+      `).get(blockId, profileId);
+      if (!block) return res.status(404).json({ error: 'This newsletter form is unavailable.' });
+    }
+
     const id = 'sub_' + crypto.randomBytes(8).toString('hex');
     const unsubscribeToken = crypto.randomBytes(24).toString('base64url');
     const unsubscribeTokenHash = crypto.createHash('sha256').update(unsubscribeToken).digest('hex');
     const now = Date.now();
 
     try {
-      db.prepare(`
-        INSERT INTO newsletter_subscribers (id, profile_id, block_id, email, created_at, unsubscribe_token_hash)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(id, profileId, blockId || null, cleanEmail, now, unsubscribeTokenHash);
-      db.prepare('INSERT INTO newsletter_consents (subscriber_id, consented_at) VALUES (?, ?)').run(id, now);
+      const saveSubscription = db.transaction(() => {
+        db.prepare(`
+          INSERT INTO newsletter_subscribers (id, profile_id, block_id, email, created_at, unsubscribe_token_hash)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(id, profileId, blockId || null, cleanEmail, now, unsubscribeTokenHash);
+        db.prepare('INSERT INTO newsletter_consents (subscriber_id, consented_at) VALUES (?, ?)').run(id, now);
+      });
+      saveSubscription();
 
       const origin = process.env.APP_ORIGIN || `${req.protocol}://${req.get('host')}`;
       res.status(201).json({
@@ -66,9 +79,10 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
 
 newsletterRouter.get('/api/newsletter/unsubscribe', (req, res) => {
   const token = typeof req.query.token === 'string' ? req.query.token : '';
-  if (!token || token.length > 200) return res.status(400).send('A valid unsubscribe link is required.');
+  if (!/^[A-Za-z0-9_-]{32}$/.test(token)) return res.status(400).send('A valid unsubscribe link is required.');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
   const result = db.prepare('DELETE FROM newsletter_subscribers WHERE unsubscribe_token_hash = ?').run(tokenHash);
+  res.setHeader('Cache-Control', 'no-store');
   if (result.changes === 0) return res.status(404).send('This unsubscribe link is invalid or has already been used.');
   return res.status(200).send('You have been unsubscribed successfully.');
 });
@@ -123,13 +137,19 @@ newsletterRouter.get('/api/studio/subscribers/export', requireAuth, (req: Authen
       })
     ]);
 
+    const escapeCsvCell = (value: unknown) => {
+      let cell = String(value ?? '');
+      if (/^[=+\-@]/.test(cell)) cell = `'${cell}`;
+      return `"${cell.replace(/"/g, '""')}"`;
+    };
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map(row => row.map(escapeCsvCell).join(','))
     ].join('\n');
 
-    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="subscribers.csv"');
+    res.setHeader('Cache-Control', 'no-store');
     res.send(csvContent);
   } catch (err: any) {
     console.error('Export subscribers error:', err);

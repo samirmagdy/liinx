@@ -1257,6 +1257,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         <input id={`newsletter-consent-${block.id}`} name="consent" autoComplete="off" type="checkbox" checked={newsletterConsent} onChange={e => setNewsletterConsent(e.target.checked)} className="mt-0.5 min-h-0" />
                         <span>{ui("I agree to receive updates from this creator and can unsubscribe later.")}</span>
                       </label>
+                      <p className="text-[10px] leading-relaxed opacity-75" style={{ color: theme.subtextColor }} dir="auto">
+                        {ui('Single opt-in: checking consent adds your email immediately. No confirmation email is sent.')}
+                      </p>
                       <button
                         type="submit"
                         disabled={newsletterLoading}

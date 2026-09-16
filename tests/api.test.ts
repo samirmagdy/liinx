@@ -193,7 +193,6 @@ describe('LIINX Production Backend API', () => {
       .post('/api/newsletter/subscribe')
       .send({
         profileId: profile.id,
-        blockId: createdBlockId,
         email: subscriberEmail,
         consent: true
       });

@@ -154,6 +154,18 @@ export const api = {
         subscribers: { id: string; email: string; subscribedAt: string }[];
       }>('/api/studio/subscribers');
     },
+    exportSubscribers: async (): Promise<Blob> => {
+      const token = authStorage.getToken();
+      const res = await fetch(`${API_BASE_URL}/api/studio/subscribers/export`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw Object.assign(new Error(data?.error || `HTTP error ${res.status}`), { status: res.status });
+      }
+      return res.blob();
+    },
     deleteSubscriber: async (id: string) => {
       return request<{ success: boolean }>(`/api/studio/subscribers/${encodeURIComponent(id)}`, { method: 'DELETE' });
     },

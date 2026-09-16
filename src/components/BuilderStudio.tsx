@@ -149,6 +149,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   // Subscribers state
   const [subscribers, setSubscribers] = useState<{ id: string; email: string; subscribedAt: string }[]>([]);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
+  const [subscribersError, setSubscribersError] = useState<string | null>(null);
 
   // Instagram Auto-Sync state
   const [instagramStatus, setInstagramStatus] = useState<{
@@ -336,6 +338,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   }, [profile.id]);
 
   useEffect(() => {
+    setSubscribers([]);
+    setSubscribersError(null);
+  }, [profile.id]);
+
+  useEffect(() => {
     setShareTitleInput(profile.shareTitle || '');
     setShareDescriptionInput(profile.shareDescription || '');
     setShareImageUrlInput(profile.shareImageUrl || '');
@@ -428,11 +435,6 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         })
         .catch(() => setDataError(true));
     } else if (activeTab === 'settings') {
-      api.studio.getSubscribers()
-        .then(res => {
-          if (res && Array.isArray(res.subscribers)) setSubscribers(res.subscribers);
-        })
-        .catch(() => setDataError(true));
       api.instagram.getStatus()
         .then(status => {
           if (status) setInstagramStatus(status);
@@ -444,6 +446,18 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       }
     }
   }, [activeTab, profile.id, profile.plan]);
+
+  useEffect(() => {
+    if (activeTab !== 'settings') return;
+    let cancelled = false;
+    setSubscribersLoading(true);
+    setSubscribersError(null);
+    api.studio.getSubscribers()
+      .then(res => { if (!cancelled) setSubscribers(res?.subscribers || []); })
+      .catch(error => { if (!cancelled) setSubscribersError(friendlyErrorMessage(error, ui('Could not load subscribers.'))); })
+      .finally(() => { if (!cancelled) setSubscribersLoading(false); });
+    return () => { cancelled = true; };
+  }, [activeTab, profile.id]);
 
   useEffect(() => {
     if (activeTab !== 'settings') return;
@@ -1237,19 +1251,21 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     }
   };
 
-  const handleExportCsv = () => {
+  const handleExportCsv = async () => {
     if (subscribers.length === 0) return;
-    const headers = 'Email,Subscribed At\n';
-    const rows = subscribers.map(s => `"${s.email}","${s.subscribedAt}"`).join('\n');
-    const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `liinx-${profile.username}-subscribers.csv`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = await api.studio.exportSubscribers();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `liinx-${profile.username}-subscribers.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setSubscribersError(friendlyErrorMessage(error, ui('Could not export subscribers.')));
+    }
   };
 
   const handleDeleteSubscriber = async (id: string) => {
@@ -1258,7 +1274,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       await api.studio.deleteSubscriber(id);
       setSubscribers(current => current.filter(subscriber => subscriber.id !== id));
     } catch (err: any) {
-      setDataError(true);
+      setSubscribersError(friendlyErrorMessage(err, ui('Could not remove subscriber.')));
     }
   };
 
@@ -3164,7 +3180,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   </div>
                 </div>
 
-                {subscribers.length === 0 ? (
+                {subscribersLoading ? (
+                  <div className="py-8 text-center text-xs text-neutral-400" role="status">{ui('Loading subscribers...')}</div>
+                ) : subscribersError ? (
+                  <div className="py-4 text-center text-xs text-rose-600" role="alert">{subscribersError}</div>
+                ) : subscribers.length === 0 ? (
                   <div className="py-8 text-center text-xs text-neutral-400 border border-dashed rounded-xl">
                     {ui("No subscribers collected yet. Add a Newsletter block to your page to start capturing leads!")}</div>
                 ) : (
