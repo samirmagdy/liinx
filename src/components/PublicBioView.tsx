@@ -58,6 +58,18 @@ function safePublicHref(value: unknown): string | null {
   } catch { return null; }
 }
 
+function analyticsHref(path: string): string {
+  if (typeof window === 'undefined') return path;
+  const source = new URLSearchParams(window.location.search);
+  const tracking = new URLSearchParams();
+  for (const key of ['utm_source', 'utm_medium', 'utm_campaign']) {
+    const value = source.get(key)?.trim();
+    if (value) tracking.set(key, value.slice(0, 200));
+  }
+  const query = tracking.toString();
+  return query ? `${path}${path.includes('?') ? '&' : '?'}${query}` : path;
+}
+
 const advancedBlockTypes = new Set(['rich_text', 'image', 'gallery', 'spacer', 'carousel', 'form', 'download', 'map', 'faq', 'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate']);
 function normalizeFormFields(value: unknown): Array<{ id?: string; name: string; label?: string; type?: string; required?: boolean; minLength?: number; maxLength?: number; helpText?: string }> {
   if (!Array.isArray(value)) return [];
@@ -172,7 +184,7 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
     const image = imageSrc && !imageFailed ? <img src={imageSrc} alt={imageAlt} className={`w-full max-h-[520px] ${aspectClass} ${extra.aspect && extra.aspect !== 'auto' ? 'h-full' : ''}`} style={{ objectFit: extra.fit === 'contain' ? 'contain' : 'cover', objectPosition: extra.cropPosition || 'center' }} loading="lazy" onError={() => setImageFailed(true)} /> : <div role="status" className="flex min-h-32 items-center justify-center rounded-lg bg-neutral-100/60 px-4 text-center text-xs" style={{ color: theme.subtextColor }}>{translate('Image unavailable. Please try again later.')}</div>;
     const content = <>{image}{extra.caption && <figcaption className="pt-3 text-xs" style={{ color: theme.subtextColor }}>{extra.caption}</figcaption>}</>;
     const destination = safePublicHref(extra.linkUrl);
-    return <figure className={`overflow-hidden ${card}`} style={cardStyle}>{destination && !previewOnly ? <a href={`/r/${block.id}`} target="_blank" rel="noreferrer" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{content}</a> : content}</figure>;
+    return <figure className={`overflow-hidden ${card}`} style={cardStyle}>{destination && !previewOnly ? <a href={analyticsHref(`/r/${block.id}`)} target="_blank" rel="noreferrer" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{content}</a> : content}</figure>;
   }
   if (block.type === 'carousel') {
     if (links.length === 0) return <div className={card} style={cardStyle}><h3 className="font-bold mb-2">{block.title}</h3><p className="text-sm" style={{ color: theme.subtextColor }}>{translate('No slides in this carousel yet.')}</p></div>;
@@ -183,7 +195,7 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
     const image = imageSrc ? <><img src={imageSrc} alt={item.alt || block.title} className="aspect-[4/3] w-full object-cover rounded-xl" loading="lazy" onError={event => { event.currentTarget.style.display = 'none'; const fallback = event.currentTarget.nextElementSibling; if (fallback instanceof HTMLElement) fallback.removeAttribute('hidden'); }} /><span hidden role="status" className="flex aspect-[4/3] items-center justify-center rounded-xl bg-neutral-100/60 p-3 text-center text-xs" style={{ color: theme.subtextColor }}>{translate('Image unavailable.')}</span></> : <span role="status" className="flex aspect-[4/3] items-center justify-center rounded-xl bg-neutral-100/60 p-3 text-center text-xs" style={{ color: theme.subtextColor }}>{translate('Image unavailable.')}</span>;
     const content = <>{image}{item.caption && <p className="mt-2 text-sm leading-6" style={{ color: theme.subtextColor }}>{item.caption}</p>}</>;
     const move = (direction: -1 | 1) => setCarouselIndex(current => Math.max(0, Math.min(links.length - 1, current + direction)));
-    const trackingHref = item.id ? '/r/' + block.id + '?item=' + encodeURIComponent(item.id) : '/r/' + block.id + '?itemIndex=' + activeIndex;
+    const trackingHref = analyticsHref(item.id ? '/r/' + block.id + '?item=' + encodeURIComponent(item.id) : '/r/' + block.id + '?itemIndex=' + activeIndex);
     return <section className={card + ' overflow-hidden'} style={cardStyle} aria-roledescription="carousel" aria-label={block.title} onKeyDown={event => { if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); } else if (event.key === 'ArrowRight') { event.preventDefault(); move(1); } else if (event.key === 'Home') { event.preventDefault(); setCarouselIndex(0); } else if (event.key === 'End') { event.preventDefault(); setCarouselIndex(links.length - 1); } }} tabIndex={0} onTouchStart={event => { carouselTouchStart.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={event => { const start = carouselTouchStart.current; carouselTouchStart.current = null; const end = event.changedTouches[0]?.clientX; if (start == null || end == null || Math.abs(end - start) < 40) return; move(end < start ? 1 : -1); }}><h3 className="font-bold mb-3">{block.title}</h3><div className="min-w-0">{linkHref && !previewOnly ? <a href={trackingHref} target="_blank" rel="noreferrer" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{content}</a> : content}</div><div className="mt-3 flex items-center justify-between gap-3"><button type="button" disabled={activeIndex === 0} onClick={() => move(-1)} aria-label={translate('Previous slide')} className="rounded-lg border px-3 py-1.5 text-xs font-semibold disabled:opacity-40">{translate('Previous')}</button><span className="text-xs" aria-live="polite">{activeIndex + 1} / {links.length}</span><button type="button" disabled={activeIndex === links.length - 1} onClick={() => move(1)} aria-label={translate('Next slide')} className="rounded-lg border px-3 py-1.5 text-xs font-semibold disabled:opacity-40">{translate('Next')}</button></div></section>;
   }
   if (block.type === 'gallery') {
@@ -225,7 +237,7 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
   if (block.type === 'testimonials') return <div className={`${card} space-y-4`} style={cardStyle}><h3 className="font-bold">{block.title}</h3>{links.map((item: any, index: number) => <blockquote key={item.id || index} className="border-l-2 pl-3"><p className="text-sm">“{item.quote || item.body}”</p><cite className="mt-1 block text-xs not-italic" style={{ color: theme.subtextColor }}>{item.name || item.author}</cite></blockquote>)}</div>;
   if (block.type === 'event') {
     const href = safePublicHref(extra.url || block.url);
-    const actionHref = href && !previewOnly ? `/r/${block.id}` : null;
+    const actionHref = href && !previewOnly ? analyticsHref(`/r/${block.id}`) : null;
     const artwork = safePublicHref(extra.artworkUrl);
     const description = extra.description || block.subtitle;
     const details = [extra.date, extra.time, extra.timezone, extra.location].filter(value => typeof value === 'string' && value.trim()).map(value => String(value).trim());
@@ -239,7 +251,7 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
   }
   if (block.type === 'presave') {
     const href = safePublicHref(extra.url || block.url);
-    const actionHref = href && !previewOnly ? `/r/${block.id}` : null;
+    const actionHref = href && !previewOnly ? analyticsHref(`/r/${block.id}`) : null;
     return <article className={`${card} space-y-3`} style={cardStyle}>
       <h3 className="font-bold break-words">{block.title}</h3>
       <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: theme.subtextColor }}>{translate('External release link')}</p>
@@ -249,7 +261,7 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
   }
   if (block.type === 'product') {
     const href = safePublicHref(extra.url || block.url);
-    const actionHref = href && !previewOnly ? `/r/${block.id}` : null;
+    const actionHref = href && !previewOnly ? analyticsHref(`/r/${block.id}`) : null;
     const description = extra.description || block.subtitle;
     const image = safePublicHref(extra.imageUrl);
     const priceAmount = typeof extra.priceAmount === 'string' && /^\d{1,8}(?:\.\d{1,2})?$/.test(extra.priceAmount) ? extra.priceAmount : '';
@@ -265,7 +277,7 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
   }
   if (block.type === 'tips') {
     const href = safePublicHref(extra.url || block.url);
-    const actionHref = href && !previewOnly ? `/r/${block.id}` : null;
+    const actionHref = href && !previewOnly ? analyticsHref(`/r/${block.id}`) : null;
     return <article className={`${card} space-y-3`} style={cardStyle}>
       <h3 className="break-words font-bold">{block.title}</h3>
       <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: theme.subtextColor }}>{translate('External support link')}</p>
@@ -277,7 +289,7 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
     const isEmail = extra.contactType === 'email';
     const rawHref = isEmail ? getMailtoHref(extra.email, extra.subject, extra.body) : getPhoneHref(extra.phone);
     const href = safePublicHref(rawHref);
-    const actionHref = href && !previewOnly ? `/r/${block.id}` : null;
+    const actionHref = href && !previewOnly ? analyticsHref(`/r/${block.id}`) : null;
     const displayValue = isEmail ? (typeof extra.email === 'string' ? extra.email : '') : (typeof extra.phone === 'string' ? extra.phone : '');
     return <article className={`${card} space-y-3`} style={cardStyle}>
       <h3 className="break-words font-bold">{block.title}</h3>
@@ -395,6 +407,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     if (initialProfile) {
       setProfile(initialProfile);
       setLoading(false);
+      if (!previewOnly) api.analytics.recordView(initialProfile.id, undefined, initialProfile.page?.id).catch(() => {});
       return;
     }
 
@@ -417,7 +430,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         setProfile(fetchedProfile);
         document.title = `${fetchedProfile.displayName} (@${fetchedProfile.username}) | LIINX`;
         // Record profile visit for real analytics with UTM parameters
-        api.analytics.recordView(fetchedProfile.id).catch(() => {});
+        if (!previewOnly) api.analytics.recordView(fetchedProfile.id, undefined, fetchedProfile.page?.id).catch(() => {});
       })
       .catch((err: any) => {
         const is404 = err?.status === 404 || err?.statusCode === 404 || err?.message?.toLowerCase().includes('not found');
@@ -430,7 +443,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [initialProfile, routeUsername, customDomain, pageSlug]);
+  }, [initialProfile, routeUsername, customDomain, pageSlug, previewOnly]);
 
   useEffect(() => {
     if (!profile || previewOnly) return;
@@ -832,7 +845,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!
-              const redirectUrl = `/r/${block.id}`;
+              const redirectUrl = analyticsHref(`/r/${block.id}`);
               const hasDestination = Boolean(safePublicHref(block.url));
               const isComplexLink = Boolean(block.subtitle);
               const isPill = theme.cardRadius === 'full' && !isComplexLink;
@@ -1145,9 +1158,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           )}
                           </>
                           );
-                        const trackingHref = item.id
+                        const trackingHref = analyticsHref(item.id
                           ? `/r/${block.id}?item=${encodeURIComponent(item.id)}`
-                          : `/r/${block.id}?itemIndex=${itemIndex}`;
+                          : `/r/${block.id}?itemIndex=${itemIndex}`);
                         return itemHref ? <a key={item.id || itemIndex} href={trackingHref} target="_blank" rel="noreferrer" className="p-3 rounded-xl block transition-colors hover:bg-neutral-100/5 dark:hover:bg-neutral-900/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{content}</a> : <div key={item.id || itemIndex} aria-disabled="true" className="p-3 rounded-xl block opacity-70">{content}</div>;
                       })}
                     </div>

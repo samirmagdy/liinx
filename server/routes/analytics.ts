@@ -38,6 +38,8 @@ interface ClickRecord {
   utm_source?: string | null;
   utm_medium?: string | null;
   utm_campaign?: string | null;
+  page_id?: string | null;
+  dedupe_key?: string | null;
   created_at: number;
 }
 
@@ -50,6 +52,8 @@ interface ViewRecord {
   utm_source?: string | null;
   utm_medium?: string | null;
   utm_campaign?: string | null;
+  page_id?: string | null;
+  dedupe_key?: string | null;
   created_at: number;
 }
 
@@ -58,21 +62,21 @@ let viewBuffer: ViewRecord[] = [];
 
 const insertClicksBatch = db.transaction((clicks: ClickRecord[]) => {
   const stmt = db.prepare(`
-    INSERT INTO link_clicks (id, block_id, profile_id, target_url, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO link_clicks (id, block_id, profile_id, target_url, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, page_id, dedupe_key, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   for (const c of clicks) {
-    stmt.run(c.id, c.block_id, c.profile_id, c.target_url, c.ip_hash, c.referrer, c.user_agent, c.utm_source || null, c.utm_medium || null, c.utm_campaign || null, c.created_at);
+    stmt.run(c.id, c.block_id, c.profile_id, c.target_url, c.ip_hash, c.referrer, c.user_agent, c.utm_source || null, c.utm_medium || null, c.utm_campaign || null, c.page_id || null, c.dedupe_key || null, c.created_at);
   }
 });
 
 const insertViewsBatch = db.transaction((views: ViewRecord[]) => {
   const stmt = db.prepare(`
-    INSERT INTO profile_views (id, profile_id, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO profile_views (id, profile_id, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, page_id, dedupe_key, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   for (const v of views) {
-    stmt.run(v.id, v.profile_id, v.ip_hash, v.referrer, v.user_agent, v.utm_source || null, v.utm_medium || null, v.utm_campaign || null, v.created_at);
+    stmt.run(v.id, v.profile_id, v.ip_hash, v.referrer, v.user_agent, v.utm_source || null, v.utm_medium || null, v.utm_campaign || null, v.page_id || null, v.dedupe_key || null, v.created_at);
   }
 });
 
@@ -152,6 +156,17 @@ function isLikelyBot(userAgent: string): boolean {
   return /bot|crawler|spider|slurp|bingpreview|facebookexternalhit|linkedinbot|embedly|quora link preview|pinterest/i.test(userAgent);
 }
 
+function boundedQueryValue(value: unknown, max = 200): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed.slice(0, max) : null;
+}
+
+function analyticsDedupeKey(kind: 'view' | 'click', parts: string[], now: number): string {
+  const bucket = Math.floor(now / 60000);
+  return crypto.createHash('sha256').update(`${kind}:${parts.join(':')}:${bucket}`).digest('hex');
+}
+
 // Background flusher every 100ms
 setInterval(flushAnalyticsBuffers, 100).unref();
 process.on('exit', flushAnalyticsBuffers);
@@ -219,11 +234,11 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
 
     // Abuse protection: Only record metric if not flooded with repeated clicks from same IP
     if (!isClickRateLimited(ipHash, block.id)) {
-      const referrer = (req.headers['referer'] as string) || 'direct';
+      const referrer = boundedQueryValue(req.headers['referer']) || 'direct';
       const userAgent = (req.headers['user-agent'] as string) || '';
-      const utmSource = (req.query.utm_source as string) || null;
-      const utmMedium = (req.query.utm_medium as string) || null;
-      const utmCampaign = (req.query.utm_campaign as string) || null;
+      const utmSource = boundedQueryValue(req.query.utm_source);
+      const utmMedium = boundedQueryValue(req.query.utm_medium);
+      const utmCampaign = boundedQueryValue(req.query.utm_campaign);
       if (isLikelyBot(userAgent)) return res.redirect(302, targetUrl);
       const now = Date.now();
       const clickId = createId('clk');
@@ -239,6 +254,8 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
         utm_source: utmSource,
         utm_medium: utmMedium,
         utm_campaign: utmCampaign,
+        page_id: block.page_id,
+        dedupe_key: analyticsDedupeKey('click', [ipHash, block.id], now),
         created_at: now
       };
       insertClicksBatch([clickRecord]);
@@ -255,7 +272,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
 // Public Record Profile View
 analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-view-ip', limit: 120, windowMs: 60000 }), (req, res) => {
   try {
-    const { profileId, referrer, utmSource, utmMedium, utmCampaign } = req.body;
+    const { profileId, pageId, referrer, utmSource, utmMedium, utmCampaign } = req.body;
     if (!profileId) {
       return res.status(400).json({ error: 'profileId is required' });
     }
@@ -263,6 +280,11 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
     const profileExists = db.prepare('SELECT id FROM profiles WHERE id = ?').get(profileId);
     if (!profileExists) {
       return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    if (pageId) {
+      const page = db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ? AND published = 1').get(pageId, profileId);
+      if (!page) return res.status(404).json({ error: 'Page not found or inactive' });
     }
 
     const ip = req.ip || req.socket.remoteAddress || '';
@@ -282,11 +304,13 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
       id: viewId,
       profile_id: profileId,
       ip_hash: ipHash,
-      referrer: referrer || 'direct',
+      referrer: boundedQueryValue(referrer) || 'direct',
       user_agent: userAgent,
-      utm_source: utmSource || null,
-      utm_medium: utmMedium || null,
-      utm_campaign: utmCampaign || null,
+      utm_source: boundedQueryValue(utmSource),
+      utm_medium: boundedQueryValue(utmMedium),
+      utm_campaign: boundedQueryValue(utmCampaign),
+      page_id: pageId || null,
+      dedupe_key: analyticsDedupeKey('view', [ipHash, profileId, pageId || 'profile'], now),
       created_at: now
     };
     insertViewsBatch([viewRecord]);
@@ -305,6 +329,13 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
     flushAnalyticsBuffers();
 
     const profileId = req.user!.profileId;
+    const pageId = typeof req.query.pageId === 'string' ? req.query.pageId : null;
+    if (pageId) {
+      const page = db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(pageId, profileId);
+      if (!page) return res.status(403).json({ error: 'You do not have access to this page.' });
+    }
+    const scope = pageId ? ' AND page_id = ?' : '';
+    const scopeArgs = pageId ? [profileId, pageId] : [profileId];
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
@@ -312,8 +343,8 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
     const viewsRow = db.prepare(`
       SELECT COUNT(*) as count, COUNT(DISTINCT ip_hash) as uniqueCount 
       FROM profile_views 
-      WHERE profile_id = ? AND created_at >= ?
-    `).get(profileId, thirtyDaysAgo) as { count: number; uniqueCount: number };
+      WHERE profile_id = ?${scope} AND created_at >= ?
+    `).get(...scopeArgs, thirtyDaysAgo) as { count: number; uniqueCount: number };
 
     const totalViews = viewsRow ? viewsRow.count : 0;
     const uniqueVisitors = viewsRow ? viewsRow.uniqueCount : 0;
@@ -322,45 +353,47 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
     const clicksRow = db.prepare(`
       SELECT COUNT(*) as count 
       FROM link_clicks 
-      WHERE profile_id = ? AND created_at >= ?
-    `).get(profileId, thirtyDaysAgo) as { count: number };
+      WHERE profile_id = ?${scope} AND created_at >= ?
+    `).get(...scopeArgs, thirtyDaysAgo) as { count: number };
 
     const totalClicks = clicksRow ? clicksRow.count : 0;
     const ctr = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0';
 
     // Top Links
     const topLinks = db.prepare(`
-      SELECT b.id, b.title, b.url, b.type, COUNT(c.id) as clicks
-      FROM blocks b
-      LEFT JOIN link_clicks c ON b.id = c.block_id AND c.created_at >= ?
-      WHERE b.profile_id = ? AND b.type IN ('link', 'audio', 'video')
-      GROUP BY b.id
+      SELECT c.block_id AS id, COALESCE(b.title, 'Deleted link') AS title,
+        COALESCE(b.url, MAX(c.target_url)) AS url, COALESCE(b.type, 'link') AS type,
+        COUNT(c.id) AS clicks
+      FROM link_clicks c
+      LEFT JOIN blocks b ON b.id = c.block_id AND b.profile_id = c.profile_id
+      WHERE c.profile_id = ?${pageId ? ' AND c.page_id = ?' : ''} AND c.created_at >= ?
+      GROUP BY c.block_id, b.title, b.url, b.type
       ORDER BY clicks DESC
       LIMIT 5
-    `).all(thirtyDaysAgo, profileId) as any[];
+    `).all(...scopeArgs, thirtyDaysAgo) as any[];
 
     // 7-Day Timeline Breakdown
     const dayMs = 24 * 60 * 60 * 1000;
     const dailyTimeline = [];
     const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+    todayStart.setUTCHours(0, 0, 0, 0);
 
     for (let i = 6; i >= 0; i--) {
       const dayStartTime = todayStart.getTime() - i * dayMs;
       const dayEndTime = dayStartTime + dayMs;
-      const dateLabel = new Date(dayStartTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const dateLabel = new Date(dayStartTime).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
 
       const dayViews = (db.prepare(`
         SELECT COUNT(*) as count 
         FROM profile_views 
-        WHERE profile_id = ? AND created_at >= ? AND created_at < ?
-      `).get(profileId, dayStartTime, dayEndTime) as { count: number }).count;
+        WHERE profile_id = ?${scope} AND created_at >= ? AND created_at < ?
+      `).get(...scopeArgs, dayStartTime, dayEndTime) as { count: number }).count;
 
       const dayClicks = (db.prepare(`
         SELECT COUNT(*) as count 
         FROM link_clicks 
-        WHERE profile_id = ? AND created_at >= ? AND created_at < ?
-      `).get(profileId, dayStartTime, dayEndTime) as { count: number }).count;
+        WHERE profile_id = ?${scope} AND created_at >= ? AND created_at < ?
+      `).get(...scopeArgs, dayStartTime, dayEndTime) as { count: number }).count;
 
       dailyTimeline.push({
         date: dateLabel,
@@ -373,11 +406,11 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
     const topReferrers = db.prepare(`
       SELECT referrer, COUNT(*) as count
       FROM profile_views
-      WHERE profile_id = ? AND created_at >= ?
+      WHERE profile_id = ?${scope} AND created_at >= ?
       GROUP BY referrer
       ORDER BY count DESC
       LIMIT 5
-    `).all(profileId, thirtyDaysAgo) as { referrer: string; count: number }[];
+    `).all(...scopeArgs, thirtyDaysAgo) as { referrer: string; count: number }[];
 
     // Top UTM Campaigns (Source / Medium / Campaign)
     const topUtmCampaigns = db.prepare(`
@@ -387,11 +420,11 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
         COALESCE(utm_campaign, '(unnamed)') as campaign,
         COUNT(*) as count
       FROM profile_views
-      WHERE profile_id = ? AND created_at >= ? AND (utm_campaign IS NOT NULL OR utm_source IS NOT NULL)
+      WHERE profile_id = ?${scope} AND created_at >= ? AND (utm_campaign IS NOT NULL OR utm_source IS NOT NULL)
       GROUP BY utm_source, utm_medium, utm_campaign
       ORDER BY count DESC
       LIMIT 5
-    `).all(profileId, thirtyDaysAgo) as { source: string; medium: string; campaign: string; count: number }[];
+    `).all(...scopeArgs, thirtyDaysAgo) as { source: string; medium: string; campaign: string; count: number }[];
 
     res.json({
       totalViews,
@@ -405,6 +438,10 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
       dailyTimeline,
       topReferrers,
       topUtmCampaigns
+      , timezone: 'UTC'
+      , period: 'last_30_days'
+      , ctrBasis: 'total_clicks / total_views'
+      , pageId
     });
   } catch (err: any) {
     console.error('Analytics stats error:', err);

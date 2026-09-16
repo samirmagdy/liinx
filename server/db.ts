@@ -126,6 +126,8 @@ export function initDatabase() {
       utm_source TEXT,
       utm_medium TEXT,
       utm_campaign TEXT,
+      page_id TEXT,
+      dedupe_key TEXT,
       created_at INTEGER NOT NULL
     );
 
@@ -141,6 +143,8 @@ export function initDatabase() {
       utm_source TEXT,
       utm_medium TEXT,
       utm_campaign TEXT,
+      page_id TEXT,
+      dedupe_key TEXT,
       created_at INTEGER NOT NULL
     );
 
@@ -250,6 +254,21 @@ export function initDatabase() {
   try {
     db.exec("ALTER TABLE profile_views ADD COLUMN utm_campaign TEXT");
   } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE link_clicks ADD COLUMN page_id TEXT");
+  } catch (e) {}
+  try {
+    db.exec("ALTER TABLE link_clicks ADD COLUMN dedupe_key TEXT");
+  } catch (e) {}
+  try {
+    db.exec("ALTER TABLE profile_views ADD COLUMN page_id TEXT");
+  } catch (e) {}
+  try {
+    db.exec("ALTER TABLE profile_views ADD COLUMN dedupe_key TEXT");
+  } catch (e) {}
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_clicks_dedupe ON link_clicks(dedupe_key) WHERE dedupe_key IS NOT NULL');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_views_dedupe ON profile_views(dedupe_key) WHERE dedupe_key IS NOT NULL');
 
   try {
     db.exec("ALTER TABLE profiles ADD COLUMN ga_measurement_id TEXT");

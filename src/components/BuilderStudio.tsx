@@ -2302,6 +2302,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           {/* TAB 3: REAL ANALYTICS */}
           {activeTab === 'analytics' && (
             <div className="space-y-6 animate-fade-in">
+              {dataError && <div role="alert" className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700"><span>{ui('Analytics could not be loaded. Check your connection and try again.')}</span><button type="button" onClick={() => { setDataError(false); setActiveTab('content'); setTimeout(() => setActiveTab('analytics'), 0); }} className="rounded-lg border border-rose-300 px-2 py-1 font-semibold">{ui('Retry')}</button></div>}
+              <p className="text-[11px] text-neutral-500">{ui('Reports use UTC and the last 30 days. Views count accepted page loads, unique visitors are distinct anonymous visitor hashes, and click-through is total clicks divided by total views.')}</p>
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
                   <span className="text-xs text-neutral-500">{ui("30-Day Views")}</span>

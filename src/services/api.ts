@@ -142,6 +142,10 @@ export const api = {
         uniqueVisitors: number;
         totalClicks: number;
         ctr: string;
+        timezone: string;
+        period: string;
+        ctrBasis: string;
+        pageId: string | null;
         topLinks: { id: string; title: string; url: string; clicks: number; percentage: number }[];
         dailyTimeline: { date: string; views: number; clicks: number }[];
         topReferrers: { referrer: string; count: number }[];
@@ -268,7 +272,7 @@ export const api = {
   },
 
   analytics: {
-    recordView: async (profileId: string, referrer?: string) => {
+    recordView: async (profileId: string, referrer?: string, pageId?: string) => {
       let utmSource: string | undefined;
       let utmMedium: string | undefined;
       let utmCampaign: string | undefined;
@@ -284,6 +288,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ 
           profileId, 
+          pageId,
           referrer: referrer || (typeof document !== 'undefined' ? document.referrer : '') || 'direct',
           utmSource,
           utmMedium,
