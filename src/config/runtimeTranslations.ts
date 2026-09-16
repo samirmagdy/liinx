@@ -128,6 +128,8 @@ export const runtimeTranslations: Record<string, string> = {
   'Leave blank to keep the current code; enter a new code to replace it.': 'اتركه فارغاً للإبقاء على الرمز الحالي؛ أو أدخل رمزاً جديداً لاستبداله.',
   'Set a code to protect this text.': 'عيّن رمزاً لحماية هذا النص.',
   'Content gates protect inline text only. They do not provide membership or identity verification.': 'تحمي بوابات المحتوى النص المضمّن فقط. ولا توفر عضوية أو تحققاً من الهوية.',
+  'Search includes this page only': 'يشمل البحث هذه الصفحة فقط',
+  'No matching content on this page.': 'لا يوجد محتوى مطابق في هذه الصفحة.',
   'Could not export subscribers.': 'تعذّر تصدير المشتركين.',
   'Could not remove subscriber.': 'تعذّرت إزالة المشترك.',
   'Remove subscriber': 'إزالة المشترك',

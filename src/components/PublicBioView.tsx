@@ -9,6 +9,7 @@ import { getAccessibleTextColor, getBorderColor, getThemeBackground, resolveThem
 import { friendlyErrorMessage } from '../utils/errors';
 import { isAllowedFontStylesheetUrl } from '../utils/fontValidation';
 import { getGoogleMapsSearchUrl } from '../utils/mapLinks';
+import { matchesPublicPageSearch } from '../utils/publicSearch';
 import { getMailtoHref, getPhoneHref } from '../utils/contactLinks';
 import { 
   ArrowLeft, 
@@ -345,6 +346,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     media.addEventListener?.('change', update);
     return () => media.removeEventListener?.('change', update);
   }, []);
+
+  // Search is scoped to the currently rendered published page. Never carry a
+  // query into another page or profile context.
+  useEffect(() => {
+    setPageSearch('');
+  }, [profile?.id, profile?.page?.id]);
 
   useEffect(() => {
     if (!profile?.customFontUrl || !isAllowedFontStylesheetUrl(profile.customFontUrl)) return;
@@ -791,11 +798,15 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           )}
         </div>
 
-        {/* Content Blocks */}
-        {profile.blocks.length > 5 && <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /></label>}
+        {/* Content Blocks: search is deliberately scoped to this published page. */}
+        <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /><span className="sr-only" role="status">{ui('Search includes this page only')}</span></label>
         <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*]:sm:col-span-2 [&>.liinx-grid-link]:sm:col-span-1' : 'space-y-4'}`}>
           {(() => {
-            const visibleBlocks = (Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => !pageSearch.trim() || `${block.title} ${block.subtitle || ''}`.toLowerCase().includes(pageSearch.trim().toLowerCase()));
+            const normalizedQuery = pageSearch.trim();
+            const visibleBlocks = (Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => matchesPublicPageSearch(block as unknown as Record<string, unknown>, normalizedQuery));
+            if (normalizedQuery && visibleBlocks.length === 0) {
+              return <p role="status" className="rounded-xl border px-4 py-5 text-center text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.subtextColor }}>{ui('No matching content on this page.')}</p>;
+            }
             return visibleBlocks.map((block, blockIndex) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
