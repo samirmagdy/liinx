@@ -2225,7 +2225,7 @@ Baseline: branch `main`, commit `afd3832` at task start. The worktree was clean;
 
 ### Implementation commit
 
-`TASK40_PENDING` — `feat: harden form submission pipeline` (will be replaced with the implementation commit SHA after commit).
+`1bbbdfb170408241e372d7e920531eb1f42d5147` — `feat: harden form submission pipeline`.
 
 ### Unresolved risks and dependencies
 
