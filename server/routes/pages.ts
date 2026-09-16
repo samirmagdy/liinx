@@ -1,20 +1,14 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import { db } from '../db.js';
+import { pageContract, pageUpdateContract } from '../contracts.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { createId } from '../utils/ids.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 
 export const pagesRouter = Router();
 
-const pageSchema = z.object({
-  slug: z.string().trim().min(1).max(40).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Page slug may only contain lowercase letters, numbers, and hyphens.'),
-  title: z.string().trim().min(1).max(80),
-  description: z.string().trim().max(240).nullable().optional(),
-  published: z.boolean().optional()
-});
-
-const pageUpdateSchema = pageSchema.partial().extend({ sortOrder: z.number().int().min(0).optional() });
+const pageSchema = pageContract;
+const pageUpdateSchema = pageUpdateContract;
 
 function pageForUser(pageId: string, userId: string) {
   return db.prepare(`

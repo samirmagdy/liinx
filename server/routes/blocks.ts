@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import { db } from '../db.js';
 import { bookingUrl } from '../../src/utils/booking.js';
+import { blockExtraSchemas, parseBlockContract, type ContractBlockType } from '../contracts.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 import { createId } from '../utils/ids.js';
@@ -9,6 +9,20 @@ import bcrypt from 'bcryptjs';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 
 export const blocksRouter = Router();
+
+interface BlockRequestData {
+  type?: ContractBlockType;
+  title?: string;
+  url?: string | null;
+  subtitle?: string | null;
+  badge?: string | null;
+  icon?: string | null;
+  highlighted?: boolean;
+  startAt?: number | null;
+  endAt?: number | null;
+  pageId?: string;
+  extra?: Record<string, unknown>;
+}
 
 function prepareBlockExtra(type: string, extra: Record<string, unknown> | undefined): string | null {
   if (!extra) return null;
@@ -19,32 +33,6 @@ function prepareBlockExtra(type: string, extra: Record<string, unknown> | undefi
   }
   return JSON.stringify(copy);
 }
-
-const createBlockSchema = z.object({
-  type: z.enum(['booking', 'link', 'header', 'audio', 'video', 'folder', 'newsletter', 'instagram_grid', 'rich_text', 'image', 'gallery', 'spacer', 'carousel', 'form', 'download', 'map', 'faq', 'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate']),
-  title: z.string().min(1, 'Title is required').max(150),
-  url: z.string().optional().nullable(),
-  subtitle: z.string().max(250).optional().nullable(),
-  badge: z.string().max(30).optional().nullable(),
-  icon: z.string().max(50).optional().nullable(),
-  highlighted: z.boolean().optional(),
-  startAt: z.number().finite().int().min(0).nullable().optional(),
-  endAt: z.number().finite().int().min(0).nullable().optional(),
-  pageId: z.string().max(100).optional(),
-  extra: z.record(z.string(), z.unknown()).optional()
-});
-
-const updateBlockSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(150).optional(),
-  url: z.string().optional().nullable(),
-  subtitle: z.string().max(250).optional().nullable(),
-  badge: z.string().max(30).optional().nullable(),
-  icon: z.string().max(50).optional().nullable(),
-  highlighted: z.boolean().optional(),
-  startAt: z.number().finite().int().min(0).nullable().optional(),
-  endAt: z.number().finite().int().min(0).nullable().optional(),
-  extra: z.record(z.string(), z.unknown()).optional()
-});
 
 // Public content-gate verification. Protected content is deliberately returned
 // only after the password is checked server-side; it is never included in the
@@ -65,12 +53,12 @@ blocksRouter.post('/content-gates/verify', sharedRateLimit({ name: 'content-gate
 // Create new block
 blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
-    const parse = createBlockSchema.safeParse(req.body);
+    const parse = parseBlockContract(req.body);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
-    const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, pageId, extra } = parse.data;
+    const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, pageId, extra } = parse.data as BlockRequestData & { type: ContractBlockType; title: string };
     if (type === 'booking' && (!bookingUrl(url) || extra != null)) {
       return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
     }
@@ -191,13 +179,13 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
       return res.status(404).json({ error: 'Block not found or unauthorized.' });
     }
 
-    const parse = updateBlockSchema.safeParse(req.body);
+    const parse = parseBlockContract(req.body, existing.type as ContractBlockType);
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
     const now = Date.now();
-    const data = parse.data;
+    const data = parse.data as BlockRequestData;
     const profile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(profileId) as { plan?: string } | undefined;
     if (profile?.plan === 'free' && (data.startAt != null || data.endAt != null || existing.start_at != null || existing.end_at != null)) {
       return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
@@ -212,6 +200,10 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
     }
 
     const mergedExtra = data.extra !== undefined ? { ...existingExtra, ...data.extra } : existingExtra;
+    if (data.extra !== undefined) {
+      const extraParse = blockExtraSchemas[existing.type as ContractBlockType].safeParse(mergedExtra);
+      if (!extraParse.success) return res.status(400).json({ error: extraParse.error.issues[0]?.message || 'Invalid block data.' });
+    }
 
     db.prepare(`
       UPDATE blocks

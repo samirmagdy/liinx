@@ -119,6 +119,18 @@ describe('LIINX Production Backend API', () => {
     createdBlockId = res.body.id;
   });
 
+  it('POST /api/studio/blocks rejects reserved ownership fields', async () => {
+    const before = db.prepare('SELECT COUNT(*) as count FROM blocks').get() as { count: number };
+    const res = await request(app)
+      .post('/api/studio/blocks')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ type: 'link', title: 'Impersonation attempt', profileId: 'another-profile', extra: { page_id: 'another-page' } });
+
+    expect(res.status).toBe(400);
+    const after = db.prepare('SELECT COUNT(*) as count FROM blocks').get() as { count: number };
+    expect(after.count).toBe(before.count);
+  });
+
   it('PUT /api/studio/blocks/:id should update block in database', async () => {
     const res = await request(app)
       .put(`/api/studio/blocks/${createdBlockId}`)

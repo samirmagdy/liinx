@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { z } from 'zod';
 import { db } from '../db.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
-import { isHttpUrl } from '../utils/urlValidation.js';
+import { parseBlockContract } from '../contracts.js';
 import { createId } from '../utils/ids.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 
@@ -159,24 +159,18 @@ apiV1Router.get('/v1/profile', requireApiKey, (req: ApiKeyRequest, res: Response
   }
 });
 
-const v1CreateBlockSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100),
-  url: z.string().refine(isHttpUrl, 'A valid HTTP(S) URL is required.'),
-  subtitle: z.string().max(100).optional(),
-  badge: z.string().max(30).optional(),
-  highlighted: z.boolean().optional()
-});
-
 // POST /api/v1/blocks
 apiV1Router.post('/v1/blocks', requireApiKey, (req: ApiKeyRequest, res: Response) => {
   try {
-    const parse = v1CreateBlockSchema.safeParse(req.body);
+    const parse = parseBlockContract({ ...req.body, type: 'link' });
     if (!parse.success) {
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
     const profile = req.profile;
-    const { title, url, subtitle, badge, highlighted } = parse.data;
+    const { title, url, subtitle, badge, highlighted } = parse.data as {
+      title: string; url: string; subtitle?: string | null; badge?: string | null; highlighted?: boolean;
+    };
     const now = Date.now();
     const id = createId('blk');
 

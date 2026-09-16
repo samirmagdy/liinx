@@ -1,0 +1,207 @@
+import { z } from 'zod';
+import { bookingUrl } from '../src/utils/booking.js';
+import { isHttpUrl, isSafeLinkUrl } from './utils/urlValidation.js';
+
+/** Versioned wire/storage boundary for creator-owned content. */
+export const CONTRACT_VERSION = 1 as const;
+
+const MAX_URL = 2048;
+const MAX_EXTRA_BYTES = 64 * 1024;
+const RESERVED_KEYS = new Set([
+  'id', 'type', 'profileid', 'profile_id', 'pageid', 'page_id',
+  'owneruserid', 'owner_user_id', 'profileownership', 'pageownership',
+  'position', 'createdat', 'updatedat', 'created_at', 'updated_at'
+]);
+
+function rejectReservedKeys(value: Record<string, unknown>, context: z.RefinementCtx) {
+  for (const key of Object.keys(value)) {
+    if (RESERVED_KEYS.has(key.toLowerCase())) {
+      context.addIssue({ code: 'custom', path: [key], message: `The field ${key} is reserved.` });
+    }
+  }
+}
+
+const extraObject = (shape: z.ZodRawShape = {}) => z.object(shape).catchall(z.unknown()).superRefine(rejectReservedKeys);
+const optionalHttpUrl = z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value), 'Must be an HTTP(S) URL.').optional().nullable();
+const optionalSafeUrl = z.string().max(MAX_URL).refine(value => value === '' || isSafeLinkUrl(value), 'Must use HTTP(S), mailto, or tel.').optional().nullable();
+const shortText = z.string().max(500);
+const itemId = z.string().min(1).max(100).optional();
+
+const folderItemSchema = z.object({
+  id: itemId,
+  title: z.string().min(1).max(150),
+  url: z.string().max(MAX_URL).refine(isSafeLinkUrl, 'Folder links must use HTTP(S), mailto, or tel.'),
+  subtitle: z.string().max(250).optional().nullable()
+}).strict();
+
+const formFieldSchema = z.object({
+  name: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Field names may use letters, numbers, underscores, and hyphens.'),
+  label: z.string().min(1).max(120),
+  type: z.enum(['text', 'email', 'tel', 'textarea']),
+  required: z.boolean().optional()
+}).strict();
+
+const galleryItemSchema = z.object({
+  id: itemId,
+  imageUrl: z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value) || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value), 'Images must use HTTP(S) or a valid upload path.'),
+  alt: z.string().max(300).optional(),
+  caption: z.string().max(500).optional(),
+  title: z.string().max(150).optional()
+}).strict();
+
+const faqItemSchema = z.object({ id: itemId, question: z.string().min(1).max(300), answer: z.string().max(5000) }).strict();
+const testimonialItemSchema = z.object({ id: itemId, quote: z.string().min(1).max(2000), name: z.string().max(150) }).strict();
+
+export const blockTypeSchema = z.enum([
+  'booking', 'link', 'header', 'audio', 'video', 'folder', 'newsletter', 'instagram_grid',
+  'rich_text', 'image', 'gallery', 'spacer', 'carousel', 'form', 'download', 'map', 'faq',
+  'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate'
+]);
+export type ContractBlockType = z.infer<typeof blockTypeSchema>;
+
+export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
+  booking: extraObject(),
+  link: extraObject(),
+  header: extraObject(),
+  audio: extraObject({ artist: shortText.optional(), coverUrl: optionalHttpUrl, audioUrl: optionalHttpUrl, platform: z.enum(['spotify', 'soundcloud', 'apple']).optional() }),
+  video: extraObject({ videoUrl: optionalHttpUrl, thumbnailUrl: optionalHttpUrl, platform: z.enum(['youtube', 'vimeo', 'tiktok']).optional() }),
+  folder: extraObject({ subtitle: shortText.optional(), items: z.array(folderItemSchema).max(50).optional() }),
+  newsletter: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional() }),
+  instagram_grid: extraObject({ handle: z.string().max(100).optional(), posts: z.array(extraObject({ id: itemId, imageUrl: optionalHttpUrl, likes: z.string().max(50).optional(), linkUrl: optionalSafeUrl })).max(50).optional() }),
+  rich_text: extraObject({ body: z.string().max(20000).optional() }),
+  image: extraObject({ imageUrl: z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value) || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value), 'Images must use HTTP(S) or a valid upload path.').optional(), alt: z.string().max(300).optional(), caption: z.string().max(500).optional() }),
+  gallery: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
+  spacer: extraObject({ height: z.number().int().min(16).max(240).optional() }),
+  carousel: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
+  form: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional(), fields: z.array(formFieldSchema).max(20).optional() }),
+  download: extraObject({ fileUrl: optionalSafeUrl, downloadName: z.string().max(150).optional(), description: z.string().max(1000).optional() }),
+  map: extraObject({ location: z.string().max(300).optional() }),
+  faq: extraObject({ items: z.array(faqItemSchema).max(50).optional() }),
+  testimonials: extraObject({ items: z.array(testimonialItemSchema).max(50).optional() }),
+  event: extraObject({ date: z.string().max(100).optional(), url: optionalSafeUrl }),
+  presave: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
+  phone: extraObject({ phone: z.string().max(40).optional(), description: z.string().max(1000).optional() }),
+  product: extraObject({ price: z.string().max(50).optional(), url: optionalSafeUrl, description: z.string().max(1000).optional() }),
+  tips: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
+  content_gate: extraObject({ password: z.string().max(128).optional(), passwordHash: z.string().max(200).optional(), description: z.string().max(1000).optional(), body: z.string().max(20000).optional(), locked: z.boolean().optional() })
+};
+
+const blockCreateEnvelope = z.object({
+  type: blockTypeSchema,
+  title: z.string().min(1, 'Title is required').max(150),
+  url: z.string().max(MAX_URL).optional().nullable(),
+  subtitle: z.string().max(250).optional().nullable(),
+  badge: z.string().max(30).optional().nullable(),
+  icon: z.string().max(50).optional().nullable(),
+  highlighted: z.boolean().optional(),
+  startAt: z.number().finite().int().min(0).nullable().optional(),
+  endAt: z.number().finite().int().min(0).nullable().optional(),
+  pageId: z.string().min(1).max(100).optional(),
+  extra: z.record(z.string(), z.unknown()).optional()
+}).strict();
+
+const blockUpdateEnvelope = blockCreateEnvelope.omit({ type: true, pageId: true }).strict();
+
+function validatePurposefulUrl(type: ContractBlockType, value: string | null | undefined, context: z.RefinementCtx) {
+  if (value == null || value === '') return;
+  const valid = type === 'booking' ? Boolean(bookingUrl(value)) : isSafeLinkUrl(value);
+  if (!valid) context.addIssue({ code: 'custom', path: ['url'], message: type === 'booking' ? 'A valid Calendly event URL is required.' : 'URL must use HTTP(S), mailto, or tel.' });
+}
+
+export const createBlockContract = blockCreateEnvelope.superRefine((value, context) => {
+  validatePurposefulUrl(value.type, value.url, context);
+  if (value.extra !== undefined) {
+    const parsed = blockExtraSchemas[value.type].safeParse(value.extra);
+    if (!parsed.success) context.addIssue({ code: 'custom', path: ['extra'], message: parsed.error.issues[0]?.message || 'Invalid block data.' });
+  }
+  if (value.startAt != null && value.endAt != null && value.endAt < value.startAt) context.addIssue({ code: 'custom', path: ['endAt'], message: 'End time must be after start time.' });
+});
+const updateBlockEnvelope = blockCreateEnvelope.omit({ type: true, pageId: true }).partial().strict();
+
+function invalidContract(message: string, path: (string | number)[]) {
+  return { success: false as const, error: new z.ZodError([{ code: 'custom', path, message }]) };
+}
+
+export function parseBlockContract(input: unknown, existingType?: ContractBlockType) {
+  const raw = typeof input === 'object' && input !== null ? input as Record<string, unknown> : {};
+  const parsed = existingType
+    ? updateBlockEnvelope.safeParse(input)
+    : createBlockContract.safeParse(input);
+  if (!parsed.success) return parsed;
+  const type = existingType || (raw.type as ContractBlockType);
+  const extra = raw.extra === undefined ? undefined : blockExtraSchemas[type].safeParse(raw.extra);
+  if (extra && !extra.success) return extra;
+  if (existingType && raw.url !== undefined) {
+    const url = typeof raw.url === 'string' || raw.url === null ? raw.url : undefined;
+    if (url !== undefined && url !== null && url !== '' && (existingType === 'booking' ? !bookingUrl(url) : !isSafeLinkUrl(url))) {
+      return invalidContract(existingType === 'booking' ? 'A valid Calendly event URL is required.' : 'URL must use HTTP(S), mailto, or tel.', ['url']);
+    }
+  }
+  if (existingType && raw.startAt != null && raw.endAt != null && typeof raw.startAt === 'number' && typeof raw.endAt === 'number' && raw.endAt < raw.startAt) {
+    return invalidContract('End time must be after start time.', ['endAt']);
+  }
+  return { success: true as const, data: { ...parsed.data, ...(extra ? { extra: extra.data } : {}), contractVersion: CONTRACT_VERSION, type } };
+}
+
+export function normalizeBlockExtra(type: string, input: unknown): Record<string, unknown> {
+  const schema = blockExtraSchemas[type as ContractBlockType];
+  if (!schema) return {};
+  const parsed = schema.safeParse(input || {});
+  if (!parsed.success) return {};
+  const value = Object.fromEntries(Object.entries(parsed.data));
+  if (JSON.stringify(value).length > MAX_EXTRA_BYTES) return {};
+  delete value.id;
+  delete value.type;
+  delete value.profileId;
+  delete value.profile_id;
+  delete value.pageId;
+  delete value.page_id;
+  delete value.position;
+  if (type === 'content_gate') {
+    delete value.body;
+    delete value.password;
+    delete value.passwordHash;
+    value.locked = true;
+  }
+  return value;
+}
+
+export const pageContract = z.object({
+  slug: z.string().trim().min(1).max(40).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Page slug may only contain lowercase letters, numbers, and hyphens.'),
+  title: z.string().trim().min(1).max(80),
+  description: z.string().trim().max(240).nullable().optional(),
+  published: z.boolean().optional()
+}).strict();
+export const pageUpdateContract = pageContract.partial().extend({ sortOrder: z.number().int().min(0).optional() }).strict();
+
+const uploadPath = z.string().regex(/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/, 'Must be a valid upload path.');
+const customThemeSchema = z.object({
+  id: z.string().max(80).optional(), name: z.string().max(100).optional(),
+  bgType: z.enum(['solid', 'gradient', 'mesh']).optional(), bgColor: z.string().max(50).optional(),
+  bgGradient: z.string().max(500).optional(), cardBg: z.string().max(50).optional(),
+  textColor: z.string().max(50).optional(), subtextColor: z.string().max(50).optional(),
+  mutedColor: z.string().max(50).optional(), cardText: z.string().max(50).optional(),
+  cardBorder: z.string().max(50).optional(), cardHover: z.string().max(50).optional(),
+  accentColor: z.string().max(50).optional(), cardRadius: z.string().max(20).optional(),
+  buttonStyle: z.string().max(30).optional(), shadow: z.string().max(30).optional(),
+  fontFamily: z.string().max(100).optional(), isDark: z.boolean().optional(),
+  background: z.string().max(100).optional(), surface: z.string().max(100).optional(),
+  text: z.string().max(100).optional(), accent: z.string().max(100).optional(), radius: z.string().max(20).optional()
+}).strict();
+export const profileUpdateContract = z.object({
+  displayName: z.string().min(1).max(100).optional(), bio: z.string().max(500).optional(),
+  avatarUrl: z.union([uploadPath, z.string().max(MAX_URL).refine(isHttpUrl, 'Avatar must use HTTP(S) or a valid upload path.')]).optional(),
+  category: z.string().max(50).optional(), themeId: z.string().max(80).optional(), hideBranding: z.boolean().optional(),
+  gaMeasurementId: z.string().max(50).nullable().optional(), metaPixelId: z.string().max(50).nullable().optional(),
+  customDomain: z.string().max(100).nullable().optional(), customCss: z.string().max(10000).nullable().optional(),
+  customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),
+  shareTitle: z.string().max(160).nullable().optional(), shareDescription: z.string().max(300).nullable().optional(),
+  shareImageUrl: z.string().max(500).refine(isHttpUrl, 'Share image must use HTTP(S).').nullable().optional(),
+  footerLogoUrl: z.string().max(500).refine(isHttpUrl, 'Footer logo must use HTTP(S).').nullable().optional(),
+  backgroundMediaUrl: z.string().max(500).refine(isHttpUrl, 'Background media must use HTTP(S).').nullable().optional(),
+  backgroundMediaType: z.enum(['image', 'video']).nullable().optional(),
+  pageRedirectUrl: z.string().max(500).refine(isHttpUrl, 'Redirect URL must use HTTP(S).').nullable().optional(),
+  pageRedirectUntil: z.number().int().positive().nullable().optional(),
+  customTheme: customThemeSchema.optional(),
+  socials: z.array(z.object({ platform: z.enum(['instagram', 'tiktok', 'youtube', 'spotify', 'twitter', 'github', 'email', 'linkedin']), url: z.string().max(MAX_URL).refine(isSafeLinkUrl, 'Social links must use a safe URL scheme.') }).strict()).max(20).optional()
+}).strict();

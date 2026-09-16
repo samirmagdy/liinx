@@ -7,6 +7,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
 import { createId } from '../utils/ids.js';
+import { normalizeBlockExtra, profileUpdateContract } from '../contracts.js';
 
 export const profilesRouter = Router();
 
@@ -138,7 +139,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
           delete extra.passwordHash;
           extra.locked = true;
         }
-        Object.assign(baseBlock, extra);
+        Object.assign(baseBlock, normalizeBlockExtra(b.type, extra));
       }
 
       return baseBlock;
@@ -260,7 +261,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       };
 
       if (extra) {
-        Object.assign(baseBlock, extra);
+        Object.assign(baseBlock, normalizeBlockExtra(b.type, extra));
       }
 
       return baseBlock;
@@ -301,44 +302,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
   }
 });
 
-const updateProfileSchema = z.object({
-  displayName: z.string().min(1, 'Display name cannot be empty').max(100).optional(),
-  bio: z.string().max(500).optional(),
-  avatarUrl: avatarUrlSchema.optional(),
-  category: z.string().max(50).optional(),
-  themeId: z.string().optional(),
-  hideBranding: z.boolean().optional(),
-  gaMeasurementId: z.string().max(50).nullable().optional(),
-  metaPixelId: z.string().max(50).nullable().optional(),
-  customDomain: z.string().max(100).nullable().optional(),
-  customCss: z.string().max(10000).nullable().optional(),
-  customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),
-  shareTitle: z.string().max(160).nullable().optional(),
-  shareDescription: z.string().max(300).nullable().optional(),
-  shareImageUrl: z.string().max(500).refine(isHttpUrl, 'Share image must use HTTP(S).').nullable().optional(),
-  footerLogoUrl: z.string().max(500).refine(isHttpUrl, 'Footer logo must use HTTP(S).').nullable().optional(),
-  backgroundMediaUrl: z.string().max(500).refine(isHttpUrl, 'Background media must use HTTP(S).').nullable().optional(),
-  backgroundMediaType: z.enum(['image', 'video']).nullable().optional(),
-  pageRedirectUrl: z.string().max(500).refine(isHttpUrl, 'Redirect URL must use HTTP(S).').nullable().optional(),
-  pageRedirectUntil: z.number().int().positive().nullable().optional(),
-  customTheme: z.object({
-    id: z.string().max(80).optional(), name: z.string().max(100).optional(),
-    bgType: z.enum(['solid', 'gradient', 'mesh']).optional(), bgColor: z.string().max(50).optional(),
-    bgGradient: z.string().max(500).optional(), cardBg: z.string().max(50).optional(),
-    textColor: z.string().max(50).optional(), subtextColor: z.string().max(50).optional(),
-    mutedColor: z.string().max(50).optional(), cardText: z.string().max(50).optional(),
-    cardBorder: z.string().max(50).optional(), cardHover: z.string().max(50).optional(),
-    accentColor: z.string().max(50).optional(), cardRadius: z.string().max(20).optional(),
-    buttonStyle: z.string().max(30).optional(), shadow: z.string().max(30).optional(),
-    fontFamily: z.string().max(30).optional(), isDark: z.boolean().optional(),
-    background: z.string().max(30).optional(), surface: z.string().max(30).optional(),
-    text: z.string().max(30).optional(), accent: z.string().max(30).optional(), radius: z.string().max(20).optional()
-  }).optional(),
-  socials: z.array(z.object({
-    platform: z.string().min(1).max(30),
-    url: z.string().max(500).refine(isSafeLinkUrl, 'Social links must use a safe URL scheme.')
-  })).max(20).optional()
-});
+const updateProfileSchema = profileUpdateContract;
 
 // Authenticated: Update studio profile
 profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, res) => {
