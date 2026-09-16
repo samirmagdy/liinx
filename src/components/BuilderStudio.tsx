@@ -171,11 +171,32 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [newDisplayName, setNewDisplayName] = useState('');
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [createProfileError, setCreateProfileError] = useState<string | null>(null);
+  const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
 
   const pages = profile.pages || [];
   const profileRef = useRef(profile);
   profileRef.current = profile;
   const initialPageId = (nextProfile: CreatorProfile) => nextProfile.pages?.find(page => page.isHome)?.id || nextProfile.pages?.[0]?.id || '';
+
+  const syncProfileScopedState = (nextProfile: CreatorProfile) => {
+    setGaInput(nextProfile.gaMeasurementId || '');
+    setMetaPixelInput(nextProfile.metaPixelId || '');
+    setCustomDomainInput(nextProfile.customDomain || '');
+    setCustomCssInput(nextProfile.customCss || '');
+    setCustomFontUrlInput(nextProfile.customFontUrl || '');
+    setShareTitleInput(nextProfile.shareTitle || '');
+    setShareDescriptionInput(nextProfile.shareDescription || '');
+    setShareImageUrlInput(nextProfile.shareImageUrl || '');
+    setFooterLogoUrlInput(nextProfile.footerLogoUrl || '');
+    setBackgroundMediaUrlInput(nextProfile.backgroundMediaUrl || '');
+    setBackgroundMediaTypeInput((nextProfile.backgroundMediaType as 'image' | 'video') || 'image');
+    setPageRedirectUrlInput(nextProfile.pageRedirectUrl || '');
+    setPageRedirectUntilInput(nextProfile.pageRedirectUntil ? new Date(nextProfile.pageRedirectUntil).toISOString().slice(0, 16) : '');
+    setSubscribers([]);
+    setFormSubmissions([]);
+    setInstagramStatus(null);
+    setAnalyticsData(null);
+  };
 
   const loadProfilesList = () => {
     api.studio.getProfiles()
@@ -205,8 +226,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         setSaveErrorBanner(null);
         const th = resolveTheme(newLiveProfile.themeId, newLiveProfile.customTheme);
         setCustomTheme(th);
-        setGaInput(newLiveProfile.gaMeasurementId || '');
-        setMetaPixelInput(newLiveProfile.metaPixelId || '');
+        syncProfileScopedState(newLiveProfile);
         setProfileDropdownOpen(false);
         loadProfilesList();
       }
@@ -351,11 +371,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         setLoadState('ready');
         setProfile(liveProfile);
         setActivePageId(initialPageId(liveProfile));
-        setGaInput(liveProfile.gaMeasurementId || '');
-        setMetaPixelInput(liveProfile.metaPixelId || '');
-        setCustomDomainInput(liveProfile.customDomain || '');
-        setCustomCssInput(liveProfile.customCss || '');
-        setCustomFontUrlInput(liveProfile.customFontUrl || '');
+        syncProfileScopedState(liveProfile);
         const th = resolveTheme(liveProfile.themeId, liveProfile.customTheme);
         setCustomTheme(th);
         if (shouldOpenImporter) {
@@ -408,7 +424,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         loadApiKeys();
       }
     }
-  }, [activeTab, profile.plan]);
+  }, [activeTab, profile.id, profile.plan]);
+
+  const handleDeleteProfile = async (targetId: string) => {
+    if (queueRef.current?.dirty && !(await queueRef.current.flush())) return;
+    try {
+      await api.studio.deleteProfile(targetId);
+      setDeleteProfileId(null);
+      setProfileSwitchError(null);
+      loadProfilesList();
+    } catch (error) {
+      setProfileSwitchError(friendlyErrorMessage(error, ui('Could not delete this profile.')));
+    }
+  };
 
   const handleConnectInstagram = async () => {
     try {
@@ -1144,21 +1172,18 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 </div>
                 <div className="max-h-56 overflow-y-auto divide-y divide-neutral-50">
                   {profileList.map(p => (
-                    <button
+                    <div
                       key={p.id}
-                      onClick={() => handleSelectProfile(p.id)}
                       className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs hover:bg-neutral-50 transition-colors cursor-pointer ${
                         p.id === profile.id ? 'bg-neutral-50 font-bold text-neutral-900' : 'text-neutral-700'
                       }`}
                     >
-                      <div className="flex flex-col truncate">
+                      <button type="button" onClick={() => handleSelectProfile(p.id)} className="flex min-w-0 flex-1 flex-col truncate text-left">
                         <span className="truncate">{p.displayName || p.username}</span>
                         <span className="text-[10px] font-mono text-neutral-400">@{p.username}</span>
-                      </div>
-                      {p.id === profile.id && (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      )}
-                    </button>
+                      </button>
+                      {p.id === profile.id ? <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <button type="button" onClick={event => { event.stopPropagation(); setDeleteProfileId(p.id); }} aria-label={`${ui('Delete profile')} @${p.username}`} className="rounded-lg px-1.5 py-1 text-rose-600 hover:bg-rose-50">×</button>}
+                    </div>
                   ))}
                 </div>
                 <div className="pt-2 mt-1 border-t border-neutral-100 px-2">
@@ -2998,6 +3023,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => setDeletePageId(null)} className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-semibold">{ui('Cancel')}</button>
             <button type="button" onClick={() => deletePageId && void handleDeletePage(deletePageId)} className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white">{ui('Delete page')}</button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={Boolean(deleteProfileId)} onClose={() => setDeleteProfileId(null)} label={ui('Confirm profile deletion')}>
+        <div className="space-y-4 bg-white p-6 text-neutral-900">
+          <div>
+            <h2 className="text-base font-bold">{ui('Delete this profile?')}</h2>
+            <p className="mt-2 text-sm text-neutral-600">{ui('This removes the selected profile and its pages, blocks, files, forms, subscribers, and provider connection. Your current profile remains active.')}</p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setDeleteProfileId(null)} className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-semibold">{ui('Cancel')}</button>
+            <button type="button" onClick={() => deleteProfileId && void handleDeleteProfile(deleteProfileId)} className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white">{ui('Delete profile')}</button>
           </div>
         </div>
       </Modal>

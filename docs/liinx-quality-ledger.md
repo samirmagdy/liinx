@@ -912,3 +912,54 @@ Baseline: branch `main`, commit `feb192e` (`feat: enforce 404 routing for unpubl
 ### Next eligible prompt
 
 `14 — Profile switching and onboarding`
+
+## Task 14 — Profile switching and onboarding
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `deaa9e6` (`feat: implement profile duplication with internal reference remapping and private state sanitization`) at task start. Task 14 changes remain uncommitted. Existing Task 13 work was preserved.
+
+### Scope and changed files
+
+- `server/routes/profiles.ts`: adds authenticated profile deletion with ownership checks, active-profile protection, last-profile protection, and transactional cleanup of profile-scoped records before blocks/pages/profile deletion.
+- `src/services/api.ts`: adds the profile deletion client method.
+- `src/components/BuilderStudio.tsx`: resets profile-scoped settings/data when switching or creating profiles, reloads settings-side data on profile identity changes, and adds accessible delete controls and confirmation dialog for inactive profiles.
+- `tests/profile_switching_onboarding.test.ts`: covers registration/onboarding, public Home availability, profile switching isolation, failed-switch context preservation, deletion, and stale-token rejection.
+
+### Findings and behavior
+
+- Registration already creates a real editable Home page and starter link, and the starter copy is instructional/example content rather than a fabricated customer, metric, testimonial, purchase, or provider claim.
+- Profile selection already issued a new profile-scoped JWT and refreshed the main profile/page state, but settings inputs and settings-tab data were not fully keyed by profile ID. Switching profiles with the same plan could leave stale forms, subscribers, analytics, provider status, or settings values visible.
+- Profile switching now resets/reloads all profile-scoped inputs and collections, resets selected page to the new Home page, and reruns analytics/subscriber/forms/provider/API-key loading when the profile ID changes. Failed selection leaves the existing profile/token/context unchanged.
+- Profile deletion is restricted to another profile owned by the same account. The active profile cannot be deleted, and an account cannot delete its only profile. Profile-scoped tables are explicitly cleaned in a transaction before the profile is removed.
+- External billing cancellation is not claimed by this endpoint. A future account/profile lifecycle task must coordinate external subscription cancellation before removing a paid profile.
+
+### Acceptance criteria
+
+- PASS — A new user reaches an editable Home page and valid public URL. Evidence: registration creates Home and starter content; regression obtains `/api/studio/profile` and `/api/profiles/:username` successfully.
+- PASS — Switching between two profiles does not expose the other profile's pages, blocks, forms, subscribers, or provider context. Evidence: `tests/profile_switching_onboarding.test.ts` switches profiles and verifies isolated studio/subscriber/form responses; source resets all settings-scoped state.
+- PASS — Failed switches preserve the previous context. Evidence: unauthorized target returns 404 and the active profile remains unchanged.
+- PASS — Plan limits remain server-enforced. Evidence: existing multiprofile and subscription entitlement tests continue to pass; creation still uses centralized entitlement limits.
+- PASS — Profile deletion is ownership-checked, active-profile protected, and transactionally cleans profile-scoped records. Evidence: new regression deletes an inactive profile, rejects active deletion, and verifies stale token failure.
+- PASS — Empty onboarding/settings states remain honest; no invented testimonials, metrics, customers, purchases, or provider success claims were added.
+- NOT RUN — Browser first-run, switch, delete-dialog focus, responsive behavior, Arabic/English visual rendering, and deployed-session verification; browser/deployment tooling was unavailable.
+- NOT RUN — Physical upload-file removal and external billing cancellation during profile deletion; the endpoint removes database ownership records but does not claim external cancellation or verify storage-provider cleanup.
+
+### Exact commands and outcomes
+
+- `task14_db=$(mktemp -d /tmp/liinx-task14-db-XXXXXX); task14_uploads=$(mktemp -d /tmp/liinx-task14-uploads-XXXXXX); DATABASE_PATH="$task14_db/liinx.db" UPLOADS_DIR="$task14_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task14_db/liinx.db" UPLOADS_DIR="$task14_uploads" NODE_ENV=test npm test -- --run tests/profile_switching_onboarding.test.ts tests/multiprofile.test.ts tests/account_recovery.test.ts tests/subscription_entitlements.test.ts` — PASS, typecheck plus 4 files / 12 tests.
+- `task14_full=$(mktemp -d /tmp/liinx-task14-full-XXXXXX); mkdir -p "$task14_full/uploads"; DATABASE_PATH="$task14_full/liinx.db" UPLOADS_DIR="$task14_full/uploads" NODE_ENV=test npm test` — PASS, 34 files / 223 tests.
+- `task14_build=$(mktemp -d /tmp/liinx-task14-build-XXXXXX); mkdir -p "$task14_build/uploads"; DATABASE_PATH="$task14_build/liinx.db" UPLOADS_DIR="$task14_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS after the final ledger edit.
+- Browser/deployed provider verification — NOT RUN; no browser automation, production deployment, or external provider credentials were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production data was used.
+- The client delete confirmation uses the shared accessible `Modal`; actual keyboard/focus behavior remains browser-unverified.
+- Profile deletion currently removes uploaded-file database records but does not physically unlink files or coordinate external billing cancellation. Those actions require a dedicated lifecycle policy and safe storage/provider verification.
+- Settings refresh is source/API verified; a real browser is still needed to confirm no stale controlled-input values during rapid switching.
+
+### Next eligible prompt
+
+`15 — Page-isolated preview`

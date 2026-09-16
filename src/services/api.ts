@@ -197,6 +197,7 @@ export const api = {
         body: JSON.stringify(data)
       });
     },
+    deleteProfile: async (profileId: string) => request<{ success: boolean; message: string }>(`/api/studio/profiles/${profileId}`, { method: 'DELETE' }),
     selectProfile: async (profileId: string) => {
       return request<{
         success: boolean;

@@ -744,6 +744,27 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
   }
 });
 
+// Authenticated: Delete a non-active profile owned by the current account.
+profilesRouter.delete('/studio/profiles/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const target = db.prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?').get(req.params.id, req.user!.userId) as { id: string } | undefined;
+    if (!target) return res.status(404).json({ error: 'Profile not found or does not belong to your account.' });
+    if (target.id === req.user!.profileId) return res.status(409).json({ error: 'Switch to another profile before deleting this profile.' });
+    const count = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(req.user!.userId) as { count: number };
+    if (count.count <= 1) return res.status(400).json({ error: 'Your account must keep at least one profile.' });
+    db.transaction(() => {
+      for (const table of ['link_clicks', 'profile_views', 'newsletter_subscribers', 'form_submissions', 'instagram_sync', 'api_keys', 'uploaded_files', 'blocks', 'pages']) {
+        try { db.prepare(`DELETE FROM ${table} WHERE profile_id = ?`).run(target.id); } catch {}
+      }
+      db.prepare('DELETE FROM profiles WHERE id = ? AND user_id = ?').run(target.id, req.user!.userId);
+    })();
+    res.json({ success: true, message: 'Profile deleted.' });
+  } catch (err: any) {
+    console.error('Delete profile error:', err);
+    res.status(500).json({ error: 'Failed to delete profile.' });
+  }
+});
+
 // Authenticated: Switch active profile and receive an updated JWT session
 profilesRouter.post('/studio/profiles/:id/select', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
