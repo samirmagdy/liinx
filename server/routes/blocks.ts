@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db.js';
 import { bookingUrl } from '../../src/utils/booking.js';
-import { blockExtraSchemas, parseBlockContract, type ContractBlockType } from '../contracts.js';
+import { blockExtraSchemas, normalizeFormFields, parseBlockContract, type ContractBlockType } from '../contracts.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 import { createId } from '../utils/ids.js';
@@ -29,6 +29,7 @@ interface BlockRequestData {
 function prepareBlockExtra(type: string, extra: Record<string, unknown> | undefined): string | null {
   if (!extra) return null;
   const copy = { ...extra };
+  if (type === 'form' && Array.isArray(copy.fields)) copy.fields = normalizeFormFields(copy.fields);
   if (type === 'content_gate' && typeof copy.password === 'string' && copy.password.length > 0) {
     copy.passwordHash = bcrypt.hashSync(copy.password, 12);
     delete copy.password;

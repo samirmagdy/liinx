@@ -2124,3 +2124,58 @@ Baseline: branch `main`, commit `9f91745` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `39 — Form field editor`
+
+## Task 39 — Form field editor
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `d416ef5` at task start. The worktree was clean; prior task changes were preserved.
+
+### Scope and changed files
+
+- `server/contracts.ts`: defines the normalized form-field schema for text, email, phone (`tel`), and multiline (`textarea`) fields, including stable IDs, unique names, labels, required flags, help text, bounded minimum/maximum lengths, and a 20-field maximum.
+- `server/routes/blocks.ts`: persists normalized form fields and deterministic IDs for legacy fields that omitted IDs.
+- `server/routes/forms.ts`: uses the shared normalized fields, preserves the legacy missing-`required` default as required, and enforces configured length limits at submission time.
+- `src/components/BuilderStudio.tsx`: adds creator controls for field add, rename, type, required, help text, min/max limits, reorder, duplicate, and delete; disables adding beyond 20 fields; removes the irrelevant destination URL control from native forms.
+- `src/components/PublicBioView.tsx`: renders normalized IDs, labels, help text, required flags, and HTML min/max constraints for public form controls.
+- `tests/form_field_editor.test.ts`: covers API/public round-trip, ordering/identity, invalid names and counts, legacy required behavior, and server-side length validation.
+
+### Findings and behavior
+
+- The previous editor offered only label/name/type/required controls, did not expose help or limits, had no duplicate action, and the native form was incorrectly included in the generic destination URL editor.
+- Field names are ASCII identifiers, trimmed, 1–64 characters, and unique case-insensitively. IDs are separate stable identifiers; creator-created IDs persist across reorder and duplicate operations generate a new ID and unique name.
+- Supported field types remain limited to text, email, phone, and multiline. No select/rating choices were added.
+- Missing `required` on older stored forms normalizes to `true`, matching the prior public/backend behavior. Explicit `required: false` remains optional in both public HTML and backend submission validation.
+- Browser-side constraints are supplemented by server validation. Unknown submitted field names, missing required values, invalid email/phone values, and min/max length violations fail without creating a submission.
+
+### Acceptance criteria
+
+- PASS — Add, rename, reorder, duplicate, and delete controls exist for form fields. Evidence: `StructuredItemsEditor` form branch and API round-trip/reorder regression coverage.
+- PASS — Duplicate/empty names and excessive field counts are rejected by the server. Evidence: `tests/form_field_editor.test.ts`; duplicate names are case-insensitive and the maximum is 20.
+- PASS — Stable IDs and normalized ordering persist through studio/public serialization. Evidence: explicit IDs round-trip unchanged and reorder assertions pass; legacy ID derivation is deterministic.
+- PASS — Required checkboxes match public and backend behavior, including legacy fields without explicit booleans. Evidence: normalized default plus submission tests for missing legacy required email.
+- PASS — Labels, help text, length limits, and supported types use one validated persisted schema. Evidence: shared contract, renderer attributes, and server length checks.
+- PASS — Native forms have no irrelevant destination control. Evidence: creator advanced destination controls exclude `form`.
+- NOT RUN — Actual browser add/edit/drag or keyboard journey, screen-reader announcements, and responsive visual verification. Source controls are wired, but browser execution was not performed in this task.
+
+### Exact commands and outcomes
+
+- `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
+- `task39_tmp=$(mktemp -d); export DATABASE_PATH="$task39_tmp/liinx.sqlite"; export UPLOADS_DIR="$task39_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_field_editor.test.ts` — PASS: typecheck and 1 test file / 3 tests.
+- `task39_tmp=$(mktemp -d); export DATABASE_PATH="$task39_tmp/liinx.sqlite"; export UPLOADS_DIR="$task39_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_field_editor.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 42 tests, production build, 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests used disposable SQLite and uploads paths; no production data or external provider was used.
+
+### Implementation commit
+
+`TASK39_PENDING` — `feat: complete form field editor` (will be replaced with the implementation commit SHA after commit).
+
+### Unresolved risks and dependencies
+
+- Browser keyboard/accessibility and responsive verification remains required.
+- The supported phone type is represented as HTML/API `tel` for compatibility; no new field types are promised.
+- Public submissions remain subject to the existing form pipeline and rate limiting; inbox UX is owned by the later form inbox task.
+
+### Next eligible prompt
+
+`40 — Form submission pipeline`

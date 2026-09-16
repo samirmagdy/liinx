@@ -100,11 +100,33 @@ const folderItemSchema = z.object({
 }).strict();
 
 const formFieldSchema = z.object({
-  name: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Field names may use letters, numbers, underscores, and hyphens.'),
-  label: z.string().min(1).max(120),
+  id: z.string().trim().regex(/^[A-Za-z0-9_-]{1,100}$/, 'Field IDs may use letters, numbers, underscores, and hyphens.').optional(),
+  name: z.string().trim().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Field names may use letters, numbers, underscores, and hyphens.'),
+  label: z.string().trim().min(1).max(120),
   type: z.enum(['text', 'email', 'tel', 'textarea']),
-  required: z.boolean().optional()
+  required: z.boolean().default(true),
+  maxLength: z.number().int().min(1).max(2000).optional(),
+  minLength: z.number().int().min(0).max(2000).optional(),
+  helpText: z.string().trim().max(300).optional()
 }).strict();
+const formFieldsSchema = z.array(formFieldSchema).max(20, 'Forms can contain at most 20 fields.').superRefine((fields, context) => {
+  const names = new Set<string>();
+  fields.forEach((field, index) => {
+    const normalizedName = field.name.toLowerCase();
+    if (names.has(normalizedName)) context.addIssue({ code: 'custom', path: [index, 'name'], message: 'Field names must be unique.' });
+    names.add(normalizedName);
+    if (field.minLength !== undefined && field.maxLength !== undefined && field.minLength > field.maxLength) context.addIssue({ code: 'custom', path: [index, 'minLength'], message: 'Minimum length cannot exceed maximum length.' });
+  });
+});
+export interface FormFieldContract {
+  id?: string; name: string; label: string; type: 'text' | 'email' | 'tel' | 'textarea'; required: boolean;
+  maxLength?: number; minLength?: number; helpText?: string;
+}
+export function normalizeFormFields(value: unknown): FormFieldContract[] {
+  const parsed = formFieldsSchema.safeParse(value);
+  if (!parsed.success) return [];
+  return parsed.data.map(field => ({ ...field, id: field.id || `field_${field.name}` }));
+}
 
 const galleryItemSchema = z.object({
   id: itemId,
@@ -151,7 +173,7 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   gallery: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
   spacer: extraObject({ height: z.number().int().min(16).max(240).optional() }),
   carousel: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
-  form: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional(), fields: z.array(formFieldSchema).max(20).optional() }),
+  form: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional(), fields: formFieldsSchema.optional() }),
   download: extraObject({ fileUrl: optionalDownloadUrl, downloadName: z.string().max(150).optional(), sizeBytes: z.number().int().min(0).max(25 * 1024 * 1024).optional(), mimeType: z.enum(['application/pdf', 'application/zip', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4']).optional(), description: z.string().max(1000).optional() }),
   map: extraObject({ location: z.string().max(300).optional() }),
   faq: extraObject({ items: z.array(faqItemSchema).max(50).optional() }),
@@ -236,6 +258,7 @@ export function normalizeBlockExtra(type: string, input: unknown): Record<string
   if (!parsed.success) return {};
   const value = Object.fromEntries(Object.entries(parsed.data));
   if (JSON.stringify(value).length > MAX_EXTRA_BYTES) return {};
+  if (type === 'form' && Array.isArray(value.fields)) value.fields = normalizeFormFields(value.fields);
   delete value.id;
   delete value.type;
   delete value.profileId;
