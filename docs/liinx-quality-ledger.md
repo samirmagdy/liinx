@@ -2532,3 +2532,61 @@ Baseline: branch `main`, commit `60d8314` at task start. The worktree was clean 
 ### Next eligible prompt
 
 `47 — Temporary redirects and scheduling`
+
+## Task 47 — Temporary redirects and scheduling
+
+Status: VERIFIED WITHIN SCOPE
+
+Baseline: branch `main`, commit `5bdb7b884dd992fdcc31fcc5fe6d8c311751fb6c` at task start. The worktree was clean; prior task changes were preserved. Disposable SQLite and uploads directories were used for validation.
+
+### Scope and changed files
+
+- `server/server.ts`: applies whole-profile redirects at server routing for platform and custom-domain HTML requests, validates HTTP(S) targets, prevents same-profile loops, marks redirects `no-store`, and honors expiry.
+- `server/routes/profiles.ts`: rejects self-referential redirect destinations and filters expired blocks with an exclusive end boundary; legacy invalid redirect URLs are not exposed to clients.
+- `server/routes/analytics.ts`: click redirects require an owned block on a published page and enforce the same start-inclusive/end-exclusive schedule.
+- `server/routes/forms.ts`, `server/routes/newsletter.ts`, `server/routes/blocks.ts`: scheduled-hidden forms, newsletter blocks, and content gates cannot be used through direct action endpoints.
+- `src/components/PublicBioView.tsx`: preview never redirects; public rendering re-evaluates scheduled blocks at the next boundary while an open page remains active; redirect URLs are safely constrained.
+- `src/components/BuilderStudio.tsx`, `src/config/runtimeTranslations.ts`: document browser-timezone input, UTC-instant persistence, and exclusive expiry; align the editor expiry status with server behavior.
+- `tests/scheduling.test.ts`: repairs the fixture for the current page ownership invariant and adds end-boundary, action-bypass, and self-redirect regressions.
+
+### Findings and behavior
+
+- The prior whole-page redirect was client-side only, allowing an initial HTML request to render the page before JavaScript. Server routing now redirects before the shell for platform and verified custom-domain requests. Redirects are not emitted for preview and do not record a client-side view before redirect.
+- Redirect destinations remain external HTTP(S) URLs. Same-profile platform paths and same-host custom-domain targets are rejected to prevent direct loops. No general redirect-chain resolver was added; destinations are not fetched or followed server-side.
+- Scheduling is an instant-based policy: start is inclusive and end is exclusive. Browser `datetime-local` values are converted to epoch milliseconds and the editor now states that the browser timezone is used and UTC instants are stored.
+- Public profile payloads omit scheduled-hidden blocks. The public click redirect, form submit, newsletter subscribe, and content-gate verification paths apply the same availability and published-page checks.
+- An open public page refreshes its block availability at the next scheduled boundary. Preview continues to show the selected draft and never performs page redirects.
+
+### Acceptance criteria
+
+- PASS — Before/at/after availability boundaries are enforced for public reads and click/action routes. Evidence: `tests/scheduling.test.ts`, 4/4 passed; exact end boundary is covered as unavailable.
+- PASS — Expired/unsafe/self-referential redirects do not act. Evidence: server-side target validation, self-loop regression, expiry condition, and `no-store` redirect responses.
+- PASS — Unpublished or foreign-page click targets are unavailable. Evidence: `/r/:blockId` joins the owning published page and the focused route regression returns 404 at expiry; existing published-routing tests pass.
+- PASS — Scheduled-hidden forms, newsletters, and content gates cannot bypass visibility through direct endpoints. Evidence: focused action regression, 404 outcomes.
+- PASS — Preview does not redirect and public rendering re-evaluates an open page at schedule boundaries. Evidence: `previewOnly` guards in `PublicBioView.tsx`; source-level evidence only for timer/browser behavior.
+- PASS — Redirect expiry and availability behavior is cache-safe within the application: redirect responses are `no-store`, and profile block payloads are re-filtered on requests. Evidence: route implementation and focused API tests.
+- NOT RUN — Browser journey for a visitor keeping a page open, actual back/forward/cache-layer expiry, responsive preview, and daylight-saving timezone transitions. The server uses epoch instants; browser/DST behavior needs a browser harness in a timezone-enabled environment.
+- NOT RUN — Live custom-domain TLS/proxy routing and an external redirect destination. Local route code and custom-domain routing tests passed; no external service was contacted.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, exact baseline `5bdb7b8`, ahead of `origin/main` only by prior local task commits.
+- `testdb=$(mktemp -d /tmp/liinx-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run lint` — PASS: TypeScript check.
+- `testdb=$(mktemp -d /tmp/liinx-task-47-build-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-build-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `testdb=$(mktemp -d /tmp/liinx-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/scheduling.test.ts` — PASS: 1 file / 4 tests.
+- `testdb=$(mktemp -d /tmp/liinx-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/scheduling.test.ts tests/page_creation_settings.test.ts tests/custom_domain.test.ts tests/sharing_metadata.test.ts tests/backend-e2e.dynamic.test.ts` — PASS: 5 files / 22 tests.
+- `git diff --check` — PASS before implementation commit.
+
+### Implementation commit
+
+`75a20cb0c9c2a09146bcea9e8220097370ca0b96` — `fix: enforce scheduled public availability`
+
+### Unresolved risks and dependencies
+
+- Browser-level verification of open-page boundary timers, preview non-redirect behavior, DST display conversion, and HTTP cache behavior remains outstanding.
+- The implementation does not provide a revision system; scheduling changes affect the current saved/public state only. This is consistent with the existing publishing model.
+- Whole-page redirect is profile-wide, including subpage requests; custom-domain production behavior depends on the deployment proxy forwarding the original host correctly.
+
+### Next eligible prompt
+
+`48 — QR codes and contact sharing`
