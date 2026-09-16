@@ -2382,6 +2382,54 @@ Baseline: branch `main`, commit `4278304` at task start. The worktree was clean 
 - Production rate limiting requires deployment-mode verification; no production deployment or external provider was used.
 - Existing legacy records with plaintext codes are treated as configured by normalization but require the existing migration/write path to hash before verification; malformed records fail closed. No user data was deleted.
 
+## Task 44 — Public-page search
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `98bff8f` at task start. The worktree was clean and prior task changes were preserved.
+
+### Scope and changed files
+
+- `src/components/PublicBioView.tsx`: makes search explicitly current-page-only, always exposes an accessible search control, resets the query when profile/page context changes, searches normalized public block content, and renders a distinct no-results status.
+- `src/utils/publicSearch.ts`: centralizes Unicode-aware normalization and indexing for titles, subtitles, descriptions, one-level folder entries, and FAQ questions/answers. It consumes the already-public block payload only; gated body text is not indexed.
+- `src/config/runtimeTranslations.ts`: adds Arabic copy for the search scope and no-results state.
+- `tests/public_search.test.ts`: covers mixed Arabic/English text, punctuation/whitespace normalization, folder and FAQ content, zero matches, and exclusion of protected gate body text.
+
+### Findings and behavior
+
+- The previous search was only rendered when a page had more than five blocks and matched only title/subtitle using simple lowercase comparison.
+- Search now covers the currently rendered published page, not all profile pages. Published-page navigation remains the separate page navigation mechanism; search never queries or reveals unpublished pages.
+- A matching block remains in its normal rendered position, so the result itself is the navigation target/visible content rather than a separate remote result index.
+- Punctuation and repeated whitespace are normalized, while Arabic letters/numbers and English text remain searchable. URLs are not treated as searchable content.
+- Folder item labels/subtitles and FAQ questions/answers are searchable. The public gate payload does not contain its protected body, so the search index cannot expose it.
+- No remote search service or new persistence layer was introduced.
+
+### Acceptance criteria
+
+- PASS — Search scope is explicit and limited to the current published page. Evidence: UI scope copy, page-context reset effect, and existing published-page route tests.
+- PASS — Titles, descriptions, folder entries, and FAQ content are included where present in the public block payload. Evidence: `src/utils/publicSearch.ts` and focused utility tests.
+- PASS — Mixed Arabic/English text, punctuation, whitespace, and zero matches are handled. Evidence: `tests/public_search.test.ts`.
+- PASS — Unpublished content and protected gate bodies are not exposed through search. Evidence: public profile route only returns published-page blocks; gate-body exclusion test.
+- PASS — No-results state and accessible label/status are implemented. Evidence: `PublicBioView.tsx` search label, scope status, and no-results status branch.
+- PASS — Search state is reset when profile or selected page changes. Evidence: `[profile?.id, profile?.page?.id]` reset effect.
+- NOT RUN — Actual browser typing, keyboard navigation, page switching, responsive layout, and scroll/focus behavior. Browser automation was unavailable in this run.
+- NOT RUN — Full live-cache/browser-network inspection; no remote search provider was added.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, commit `98bff8f`, ahead of `origin/main` only by prior local task commits.
+- `tmpdb=$(mktemp -d /tmp/liinx-task-44c-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-44c-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/public_search.test.ts tests/folders.test.ts tests/faq_block.test.ts tests/published_pages_routing.test.ts tests/content_gates.test.ts tests/profile_switching_onboarding.test.ts` — PASS: TypeScript check and 6 files / 13 tests against disposable SQLite/uploads paths.
+- `tmpdb=$(mktemp -d /tmp/liinx-task-44e-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-44e-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: Vite production build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+
+### Implementation commit
+
+`3d58fd9c3141e986b155bc114daa94a659914711` — `feat: improve public page search`.
+
+### Unresolved risks and dependencies
+
+- Browser-level verification of input behavior, page switching, keyboard operation, responsive layouts, and result focus/scroll remains outstanding.
+- Search is intentionally client-side and current-page-only. A cross-page or indexed search would require a separate product decision and scale evidence.
+
 ### Next eligible prompt
 
-`44 — Public-page search`
+`45 — Footer branding`
