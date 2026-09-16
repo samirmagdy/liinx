@@ -703,3 +703,55 @@ Baseline commit: `995a6f29cc364b6541b07c5f0f32fd8b5a8c1c49` (`refactor: derive b
 ### Next eligible prompt
 
 `10 — Page creation and settings`
+
+## Task 10 — Page creation and settings
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline commit: `f10d166` (`feat: add revision tracking and concurrency control for profiles, blocks, and pages`) on `main`. Task 09 was committed before this task and was not reverted. Task 10 changes remain uncommitted; existing uncommitted work at task start was preserved.
+
+### Scope and changed files
+
+- `server/routes/pages.ts`: rejects reserved page slugs, preserves existing strict slug/title/description validation, protects Home, refuses unsafe deletion of unpublished pages containing blocks, and reports the ordered move-to-Home behavior on successful deletion.
+- `src/components/BuilderStudio.tsx`: replaces page deletion `window.confirm` with the existing accessible `Modal`, describes the block migration, flushes pending saves before deletion, and keeps inline errors for failed saves/deletes.
+- `tests/page_creation_settings.test.ts`: covers creation/normalization/reload/public routing, duplicate/reserved/malformed/overlong slugs, authorization, Home rules, deterministic block migration, and unpublished draft protection.
+
+### Findings and behavior
+
+- Page creation and update already used the shared strict schema: trimmed title/description, lowercase slug syntax, 40-character slug limit, 80-character title limit, and 240-character description limit. The editor normalizes typing to lowercase/hyphen input, while the API remains authoritative.
+- Page slugs now reserve `home` and the application route names from `RESERVED_USERNAMES` (`api`, `studio`, `login`, `uploads`, etc.) for consistent routing boundaries. Duplicate slugs remain profile-scoped conflicts with 409 responses.
+- Home cannot be deleted, renamed away from `home`, or unpublished. Page deletion moves blocks to Home in their original `position, created_at, id` order and appends them after existing Home blocks.
+- Deleting an unpublished page that still contains blocks returns 409. This prevents draft content from becoming visible on the published Home page; the creator must publish the page or remove its blocks first. No content is silently deleted.
+- The deletion confirmation is an accessible dialog using the shared `Modal`; it states that blocks move to Home and are not deleted. Pending autosaves are flushed before the delete request, and a failed flush prevents deletion.
+- Public direct routing was verified through `/api/profiles/:username?page=:slug`, including persisted settings and published content. Browser UI interaction and responsive/Arabic visual behavior were not available for external verification.
+
+### Acceptance criteria
+
+- PASS — Create a page, save settings, reload, and open its direct URL. Evidence: `tests/page_creation_settings.test.ts` creates/updates, reloads `/api/studio/profile`, and gets the public page route successfully.
+- PASS — Duplicate slugs rejected. Evidence: page regression test receives 409 for a same-profile duplicate.
+- PASS — Reserved, whitespace, length, and case-invalid slugs rejected. Evidence: regression test receives 400 for `home`, `api`, padded/invalid-case, whitespace, malformed, and 41-character values; valid padded input is normalized at the schema boundary.
+- PASS — Unauthorized edits rejected. Evidence: a second registered account receives 404 when updating the first account's page.
+- PASS — Home cannot be deleted or accidentally hidden. Evidence: deleting Home returns 400; updating Home with `published: false` or a non-`home` slug returns 400.
+- PASS — Published page deletion preserves blocks exactly as promised. Evidence: deletion response explicitly says blocks moved to Home in original order; test verifies both block identities, order, destination, and page removal.
+- PASS — Unpublished draft content is not silently published by deletion. Evidence: deletion of an unpublished page containing a block returns 409 and both page/block remain.
+- NOT RUN — Actual browser dialog keyboard/focus journey and responsive Arabic/English rendering. Source inspection confirms shared accessible dialog and translated strings; browser tool was unavailable.
+
+### Exact commands and outcomes
+
+- `npm run lint` — PASS, `tsc --noEmit` exited 0.
+- `task10_pages=$(mktemp -d /tmp/liinx-task10-pages-XXXXXX) && mkdir -p "$task10_pages/uploads" && DATABASE_PATH="$task10_pages/liinx.db" UPLOADS_DIR="$task10_pages/uploads" NODE_ENV=test npm test -- --run tests/page_creation_settings.test.ts tests/backend-e2e.dynamic.test.ts tests/audit_fixes.test.ts` — PASS, 3 files / 38 tests.
+- `task10_final=$(mktemp -d /tmp/liinx-task10-final-XXXXXX) && mkdir -p "$task10_final/uploads" && DATABASE_PATH="$task10_final/liinx.db" UPLOADS_DIR="$task10_final/uploads" NODE_ENV=test npm test` — PASS, 30 files / 216 tests.
+- `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS, no whitespace errors.
+- Browser journey — NOT RUN; no in-app browser automation tool was exposed in this environment.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, the SQLite global initializer, and disposable `mktemp` database/uploads directories were used. No production data was used.
+- There is no dedicated React component/browser test harness available in this session, so dialog focus behavior, no-reload UI interaction, touch layout, and Arabic visual rendering remain externally unverified.
+- The server's published-page deletion migration is transactional, but a future product decision may add a separate explicit “delete draft page and delete/move blocks” workflow; this task intentionally refuses the unsafe implicit publish case.
+- Reserved page slugs currently share the application username route reservation list. If routing expands, that shared list must be reviewed with the new route.
+
+### Next eligible prompt
+
+`11 — Block placement and ordering`

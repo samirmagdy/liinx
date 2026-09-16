@@ -64,6 +64,7 @@ import { BookingEditor } from './BookingEditor';
 import { SaveQueue } from '../utils/saveQueue';
 import { useLanguage } from '../context/LanguageContext';
 import { friendlyErrorMessage } from '../utils/errors';
+import { Modal } from './Modal';
 
 interface BuilderStudioProps {
   initialProfile?: CreatorProfile;
@@ -124,6 +125,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [pageEditPublished, setPageEditPublished] = useState(true);
   const [isSavingPage, setIsSavingPage] = useState(false);
   const [pageManagerError, setPageManagerError] = useState<string | null>(null);
+  const [deletePageId, setDeletePageId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -686,13 +688,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
   const handleDeletePage = async (pageId: string) => {
     const page = pages.find(item => item.id === pageId);
-    if (!page || page.isHome || !window.confirm(ui('Delete this page? Its blocks will move to Home.'))) return;
+    if (!page || page.isHome) return;
     try {
+      if (queueRef.current?.dirty && !(await queueRef.current.flush())) {
+        setPageManagerError(ui('Changes are not saved. Retry before deleting this page.'));
+        return;
+      }
       await api.studio.deletePage(pageId);
       const nextPages = pages.filter(item => item.id !== pageId);
       if (activePageId === pageId) setActivePageId(nextPages.find(item => item.isHome)?.id || nextPages[0]?.id || '');
       const refreshed = await api.studio.getProfile();
       setProfile(refreshed);
+      setDeletePageId(null);
+      setPageManagerError(null);
     } catch (error: any) {
       setPageManagerError(friendlyErrorMessage(error, ui('Could not delete this page.')));
     }
@@ -1441,7 +1449,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <button type="button" onClick={() => handleMovePage(1)} disabled={pages.findIndex(page => page.id === activePage.id) === pages.length - 1} aria-label={ui('Move page right')} className="rounded-xl border border-neutral-200 px-2 py-2 text-xs font-bold disabled:opacity-30">→</button>
                   </div>
                 </div>}
-                {activePage && !activePage.isHome && <button type="button" onClick={() => handleDeletePage(activePage.id)} className="mt-3 text-xs font-semibold text-rose-600 hover:text-rose-800">{ui('Delete current page')}</button>}
+                {activePage && !activePage.isHome && <button type="button" onClick={() => setDeletePageId(activePage.id)} className="mt-3 text-xs font-semibold text-rose-600 hover:text-rose-800">{ui('Delete current page')}</button>}
                 {pageManagerError && <p role="alert" className="mt-2 text-xs text-rose-700">{pageManagerError}</p>}
               </section>
               <BookingEditor onSave={async (title, url) => {
@@ -2944,6 +2952,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           }
         }}
       />
+
+      <Modal open={Boolean(deletePageId)} onClose={() => setDeletePageId(null)} label={ui('Confirm page deletion')}>
+        <div className="space-y-4 bg-white p-6 text-neutral-900">
+          <div>
+            <h2 className="text-base font-bold">{ui('Delete this page?')}</h2>
+            <p className="mt-2 text-sm text-neutral-600">{ui('This page will be deleted. Its blocks will move to Home in their current order and will not be deleted.')}</p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setDeletePageId(null)} className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-semibold">{ui('Cancel')}</button>
+            <button type="button" onClick={() => deletePageId && void handleDeletePage(deletePageId)} className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white">{ui('Delete page')}</button>
+          </div>
+        </div>
+      </Modal>
 
       {/* New Profile Creation Modal */}
       {showNewProfileModal && (
