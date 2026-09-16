@@ -1467,3 +1467,49 @@ Baseline: branch `main`, commit `15fa285698a99f6a4323d64b59a672d3e004519e` at ta
 ### Next eligible prompt
 
 `25 — Folders and content groups`
+
+## Task 25 — Folders and content groups
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `f3671ff2975b5ea2d5761d56c362db795486e60a` at task start. The worktree was clean; Task 24 changes were preserved. Implementation commit: recorded after this entry is committed.
+
+### Scope and changed files
+
+- `server/contracts.ts`: permits an intentionally empty folder destination as an honest, non-working draft placeholder while retaining HTTP(S), `mailto:`, and `tel:` validation; the strict item schema rejects nested-folder data and limits item fields.
+- `server/routes/analytics.ts`: resolves folder item ids or legacy array indexes before validating and redirecting; records clicks against the parent folder block and returns clear 404/400 responses for missing or invalid destinations.
+- `src/components/BuilderStudio.tsx`: adds folder description editing, one-level nesting disclosure, empty-folder state, add/edit/remove controls, and accessible up/down item ordering controls; new items start without a working destination.
+- `src/components/PublicBioView.tsx`: adds semantic folder expansion state, accessible relationships, empty state, constrained item overflow, tracked item links, and non-clickable rendering for incomplete/invalid destinations.
+- `tests/folders.test.ts`: covers creation, three-item reorder, persistence/public reload, tracked item redirect and attribution, empty destination behavior, nested-folder rejection, unsafe URL rejection, and validation limits.
+
+### Findings and behavior
+
+- Folders are collapsible content groups, distinct from subpages. Supported nesting depth is exactly one folder containing link items; nested folders are rejected at the shared contract boundary and are not claimed by the UI.
+- Item identity is retained during reorder and public tracking uses the item id. Legacy items without ids use a validated numeric `itemIndex` fallback.
+- Empty destinations remain visible as editable draft placeholders but do not produce working anchors; tracking returns 404. Non-empty unsafe destinations are rejected by validation or redirect sanitization.
+- Public expansion uses a native button with `aria-expanded` and `aria-controls`; folder content is constrained with `max-w-full overflow-hidden`. Existing authored destinations and parent-block analytics semantics are preserved.
+- The old review hypothesis that folder content was directly rendered without tracking was current and is addressed. The prior presence of a folder menu/control alone was not treated as evidence of complete behavior.
+
+### Acceptance criteria
+
+- PASS — Create a folder with several links, reorder them, reload, and preserve identities/destinations. Evidence: `tests/folders.test.ts` creates three items, reverses them through the API, and verifies Studio/public persistence.
+- PASS — Empty, long-content, unsupported, and incomplete states fail or render honestly. Evidence: test coverage for empty destination, nested item, unsafe URL, overlong title, and server-enforced description/item limits; public empty state and non-clickable placeholder are implemented.
+- PASS — Destinations open through the intended tracking path and attribution is consistent. Evidence: folder item redirect returns 302 to the item URL and one `link_clicks` row is attributed to the parent folder block.
+- PASS — Supported nesting depth is explicit and enforced. Evidence: editor disclosure says one-level folders are not subpages; strict schema rejects nested-folder fields with HTTP 400.
+- NOT RUN — Actual browser keyboard activation, narrow viewport overflow, and visual responsive behavior. Native semantic controls and overflow constraints are source evidence only; browser-client Node REPL was unavailable.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `f3671ff2975b5ea2d5761d56c362db795486e60a` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/folders.test.ts tests/acceptance.test.ts tests/basic_link.test.ts tests/security.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 58 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/public visual and keyboard verification — NOT RUN; no supported browser-client Node REPL was available. No production database or uploads directory was used; tests used disposable `mktemp` database/uploads paths.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable database/uploads directories are the existing test utilities used here.
+- Real browser confirmation is still required for keyboard activation, focus behavior, long-content layout at narrow widths, and public visual rendering. Tracking was verified through local API execution, not a deployed browser journey.
+- This task does not add nested folders, subpage conversion, or a new analytics model. Existing provider/deployment behavior remains outside this scope.
+
+### Next eligible prompt
+
+`26 — Standalone image block`

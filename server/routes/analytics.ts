@@ -161,7 +161,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
     const blockId = req.params.blockId;
     const block = db.prepare('SELECT * FROM blocks WHERE id = ?').get(blockId) as any;
 
-    if (!block || !block.url) {
+    if (!block) {
       return res.status(404).send('Link not found or inactive.');
     }
     const now = Date.now();
@@ -169,7 +169,22 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
       return res.status(404).send('Link not found or inactive.');
     }
 
-    const targetUrl = sanitizeUrl(block.url);
+    let rawTarget = block.url as string | null;
+    const itemId = typeof req.query.item === 'string' ? req.query.item : null;
+    const itemIndex = typeof req.query.itemIndex === 'string' && /^\d+$/.test(req.query.itemIndex) ? Number(req.query.itemIndex) : null;
+    if (itemId || itemIndex !== null) {
+      let extra: any = null;
+      try { extra = block.extra_json ? JSON.parse(block.extra_json) : null; } catch { extra = null; }
+      const item = Array.isArray(extra?.items)
+        ? itemId ? extra.items.find((candidate: any) => candidate?.id === itemId) : extra.items[itemIndex]
+        : null;
+      if (!item) return res.status(404).send('Link not found or inactive.');
+      rawTarget = typeof item.url === 'string' ? item.url : null;
+    }
+    if (!rawTarget || !rawTarget.trim()) {
+      return res.status(404).send('Link not found or inactive.');
+    }
+    const targetUrl = sanitizeUrl(rawTarget);
     if (!targetUrl) {
       return res.status(400).send('Invalid destination URL.');
     }

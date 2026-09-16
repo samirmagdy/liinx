@@ -1098,8 +1098,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     const block = profile.blocks.find(b => b.id === blockId) as FolderBlock;
     if (!block) return;
     const currentItems = block.items || [];
-    const newItems = [...currentItems, { id: 'fi_' + Date.now(), title: 'New Link', url: 'https://' }];
+    const newItems = [...currentItems, { id: 'fi_' + Date.now(), title: 'Untitled folder link', url: '', subtitle: 'Add a destination before publishing' }];
     handleUpdateBlockExtra(blockId, { items: newItems });
+  };
+
+  const handleMoveFolderItem = (blockId: string, itemId: string, direction: -1 | 1) => {
+    const block = profile.blocks.find(b => b.id === blockId) as FolderBlock;
+    if (!block) return;
+    const items = [...(block.items || [])];
+    const index = items.findIndex(item => item.id === itemId);
+    const next = index + direction;
+    if (index < 0 || next < 0 || next >= items.length) return;
+    [items[index], items[next]] = [items[next], items[index]];
+    handleUpdateBlockExtra(blockId, { items });
   };
 
   const handleRemoveFolderItem = (blockId: string, itemId: string) => {
@@ -2046,6 +2057,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                     {block.type === 'folder' && (
                       <div className="space-y-2 pt-2 border-t border-neutral-100">
+                        <label className="block text-[11px] font-semibold text-neutral-500">{ui('Folder description')}<input value={(block as FolderBlock).subtitle || ''} onChange={e => handleUpdateBlockField(block.id, 'subtitle', e.target.value)} maxLength={250} placeholder={ui('Optional description')} className="mt-1 w-full rounded border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900" /></label>
+                        <p className="text-[10px] text-neutral-500">{ui('Folders are collapsible one-level link groups, not subpages. Nested folders are not supported.')}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-bold text-neutral-700">{ui("Folder Links")}</span>
                           <button
@@ -2055,7 +2068,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           >
                             <Plus className="w-3 h-3" /> {ui("Add Item")}</button>
                         </div>
-                        {((block as FolderBlock).items || []).map((item) => (
+                        {((block as FolderBlock).items || []).length === 0 && <p className="py-2 text-[11px] text-neutral-500">{ui('No folder links yet. Add one to begin.')}</p>}
+                        {((block as FolderBlock).items || []).map((item, itemIndex) => (
                           <div key={item.id} className="flex items-center gap-2">
                             <input aria-label={ui("Title")}
                               type="text"
@@ -2071,6 +2085,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                               placeholder="https://..."
                               className="flex-1 px-2 py-1 rounded border border-neutral-200 text-[11px] font-mono bg-neutral-50 text-neutral-900"
                             />
+                            <button type="button" onClick={() => handleMoveFolderItem(block.id, item.id, -1)} disabled={itemIndex === 0} aria-label={ui('Move item up')} className="rounded p-1 text-neutral-500 disabled:opacity-30">↑</button>
+                            <button type="button" onClick={() => handleMoveFolderItem(block.id, item.id, 1)} disabled={itemIndex === (block as FolderBlock).items.length - 1} aria-label={ui('Move item down')} className="rounded p-1 text-neutral-500 disabled:opacity-30">↓</button>
                             <button
                               type="button"
                               onClick={() => handleRemoveFolderItem(block.id, item.id)}

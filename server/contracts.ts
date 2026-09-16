@@ -93,7 +93,7 @@ export function normalizePublicSocials(input: unknown): Array<{ platform: string
 const folderItemSchema = z.object({
   id: itemId,
   title: z.string().min(1).max(150),
-  url: z.string().max(MAX_URL).refine(isSafeLinkUrl, 'Folder links must use HTTP(S), mailto, or tel.'),
+  url: z.string().max(MAX_URL).refine(value => value === '' || isSafeLinkUrl(value), 'Folder links must use HTTP(S), mailto, or tel.'),
   subtitle: z.string().max(250).optional().nullable()
 }).strict();
 

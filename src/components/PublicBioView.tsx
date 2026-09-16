@@ -891,7 +891,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   }}
                 >
                   <button
+                    type="button"
                     onClick={() => toggleFolder(block.id)}
+                    aria-expanded={Boolean(isOpen)}
+                    aria-controls={`folder-items-${block.id}`}
                     className="w-full p-4 flex items-center justify-between text-left hover:opacity-95 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current gap-2"
                   >
                     <div className="min-w-0 flex-1" dir="auto">
@@ -913,15 +916,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   </button>
 
                   {isOpen && block.items && (
-                    <div className="px-4 pb-4 pt-1 space-y-2 border-t border-black/5 dark:border-white/10">
-                      {block.items.map((item) => (
-                        <a
-                          key={item.id}
-                          href={item.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="p-3 rounded-xl block transition-colors hover:bg-neutral-100/5 dark:hover:bg-neutral-900/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
-                        >
+                    <div id={`folder-items-${block.id}`} className="max-w-full overflow-hidden px-4 pb-4 pt-1 space-y-2 border-t border-black/5 dark:border-white/10">
+                      {block.items.length === 0 && <p className="py-2 text-xs" style={{ color: theme.subtextColor }}>{ui('No links in this folder yet.')}</p>}
+                      {block.items.map((item, itemIndex) => {
+                        const itemHref = /^(?:https?:|mailto:|tel:)/i.test(item.url) ? safePublicHref(item.url) : null;
+                        const content = (
+                          <>
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-xs sm:text-sm font-semibold group-hover:underline truncate" dir="auto">{item.title}</span>
                             <ExternalLink className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 shrink-0" />
@@ -929,8 +929,13 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                           {item.subtitle && (
                             <p className="text-xs truncate mt-0.5 text-pretty" style={{ color: theme.subtextColor }} dir="auto">{item.subtitle}</p>
                           )}
-                        </a>
-                      ))}
+                          </>
+                          );
+                        const trackingHref = item.id
+                          ? `/r/${block.id}?item=${encodeURIComponent(item.id)}`
+                          : `/r/${block.id}?itemIndex=${itemIndex}`;
+                        return itemHref ? <a key={item.id || itemIndex} href={trackingHref} target="_blank" rel="noreferrer" className="p-3 rounded-xl block transition-colors hover:bg-neutral-100/5 dark:hover:bg-neutral-900/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{content}</a> : <div key={item.id || itemIndex} aria-disabled="true" className="p-3 rounded-xl block opacity-70">{content}</div>;
+                      })}
                     </div>
                   )}
                 </div>
