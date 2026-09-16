@@ -1859,3 +1859,54 @@ Baseline: branch `main`, commit `6454172` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `33 — FAQ block`
+
+## Task 33 — FAQ block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `927a6d565df0b4ec4c73dca8cb472d55b30fabd9` at task start. The worktree was clean; Task 32 changes were preserved.
+
+### Scope and changed files
+
+- `server/contracts.ts`: trims and rejects blank FAQ questions while preserving multiline answers up to 5,000 characters.
+- `src/components/BuilderStudio.tsx`: new FAQ items start empty instead of public-looking sample Q&A; question/answer limits and plain-text/line-break behavior are visible in the editor.
+- `src/components/PublicBioView.tsx`: adds a labelled FAQ section, native keyboard-accessible disclosure controls, Arabic/English direction handling, long-content wrapping, and an honest empty state; malformed legacy items are omitted.
+- `tests/faq_block.test.ts`: covers ordered persistence/public round-trip, Arabic/English and multiline content, empty FAQ state, and blank-question rejection.
+
+### Findings and behavior
+
+- Existing native `<details>/<summary>` controls already provided browser disclosure and keyboard activation. They now have a proper section heading, visible focus indication, and stable item keys where supplied.
+- FAQ answers remain plain text. Line breaks are preserved with `whitespace-pre-wrap`; links are intentionally not supported by this block, so no unsafe HTML/link pipeline was added.
+- Reordering sends and persists the complete item array, preserving each question-answer pair and item identity together.
+- New FAQ blocks contain no fabricated public answers. The creator must add each question and answer; empty blocks render an explicit “No questions yet.” state.
+- Legacy malformed items with blank/non-string questions are excluded from public rendering without deleting stored creator data.
+
+### Acceptance criteria
+
+- PASS — Several questions can be edited, reordered, persisted, reloaded, and returned by the public API. Evidence: `tests/faq_block.test.ts`.
+- PASS — Answers remain associated with their questions during reorder. Evidence: the test compares the complete reordered item array, including answers.
+- PASS — Long Arabic/English and multiline content is contract-bounded and preserved. Evidence: API round-trip test plus `whitespace-pre-wrap`, `break-words`, and `dir="auto"` public rendering.
+- PASS — Only the intended FAQ item expands through independent native `<details>` elements. Evidence: source inspection; no shared expanded state or cross-item rendering exists.
+- PASS — Empty state is honest and contains no fabricated FAQ content. Evidence: empty-array API test and blank defaults in the editor.
+- NOT RUN — Actual browser keyboard journey, visual narrow-width wrapping, and screen-reader behavior. The browser runtime was unavailable in this session; source evidence is not browser evidence.
+
+### Exact commands and outcomes
+
+- `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
+- `task33_tmp=$(mktemp -d); DATABASE_PATH="$task33_tmp/liinx.db" UPLOADS_DIR="$task33_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task33_tmp/liinx.db" UPLOADS_DIR="$task33_tmp/uploads" NODE_ENV=test npm test -- --run tests/faq_block.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 3 test files / 37 tests, production build with 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests used a disposable SQLite database and uploads directory; no production data or external provider was used.
+- Browser attempt — NOT RUN: no `node_repl` browser tool was exposed, so keyboard and responsive claims remain unverified.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Unresolved risks and dependencies
+
+- Browser keyboard, screen-reader, narrow viewport, and deployed public rendering still require verification when the browser workflow is available.
+- FAQ links are intentionally unsupported; creators should use a supported rich-text block when they need safe links.
+
+### Next eligible prompt
+
+`34 — Testimonials block`

@@ -61,6 +61,19 @@ function normalizeFormFields(value: unknown): any[] {
   if (!Array.isArray(value)) return [];
   return value.filter(field => field && typeof field === 'object' && typeof field.name === 'string').map(field => ({ ...field, required: field.required === undefined ? true : Boolean(field.required) }));
 }
+function normalizeFaqItems(value: unknown): Array<{ id?: string; question: string; answer: string }> {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap(item => {
+    if (!item || typeof item !== 'object') return [];
+    const candidate = item as Record<string, unknown>;
+    if (typeof candidate.question !== 'string' || !candidate.question.trim()) return [];
+    return [{
+      id: typeof candidate.id === 'string' && candidate.id ? candidate.id : undefined,
+      question: candidate.question,
+      answer: typeof candidate.answer === 'string' ? candidate.answer : ''
+    }];
+  });
+}
 function advancedRadius(radius: ThemeConfig['cardRadius']): string {
   return radius === 'none' ? 'rounded-none' : radius === 'full' ? 'rounded-3xl' : radius === 'md' ? 'rounded-xl' : 'rounded-2xl';
 }
@@ -181,7 +194,16 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
       {location ? <><span className="block text-sm mt-1" style={{ color: theme.subtextColor }} dir="auto">{location}</span><a href={mapsHref || undefined} target="_blank" rel="noreferrer" className="mt-3 inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current" aria-label={`${translate('Get directions to')} ${location}`}>{translate('Get directions')}</a></> : <p role="status" className="mt-2 text-sm" style={{ color: theme.subtextColor }}>{translate('Add an address to show directions.')}</p>}
     </div>;
   }
-  if (block.type === 'faq') return <div className="space-y-2">{links.map((item: any, index: number) => <details key={item.id || index} className={card} style={cardStyle}><summary className="cursor-pointer font-bold">{item.question || item.title}</summary><p className="pt-3 text-sm leading-6" style={{ color: theme.subtextColor }}>{item.answer || item.subtitle}</p></details>)}</div>;
+  if (block.type === 'faq') {
+    const faqItems = normalizeFaqItems(links);
+    return <section className="space-y-2" aria-labelledby={`faq-title-${block.id}`}>
+      <h3 id={`faq-title-${block.id}`} className="font-bold" style={{ color: theme.cardText }}>{block.title}</h3>
+      {faqItems.length > 0 ? faqItems.map((item, index) => <details key={item.id || index} className={card} style={cardStyle}>
+        <summary className="cursor-pointer break-words font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-current" dir="auto">{item.question}</summary>
+        <p className="whitespace-pre-wrap break-words pt-3 text-sm leading-6" style={{ color: theme.subtextColor }} dir="auto">{item.answer}</p>
+      </details>) : <p role="status" className="text-sm" style={{ color: theme.subtextColor }}>{translate('No questions yet.')}</p>}
+    </section>;
+  }
   if (block.type === 'testimonials') return <div className={`${card} space-y-4`} style={cardStyle}><h3 className="font-bold">{block.title}</h3>{links.map((item: any, index: number) => <blockquote key={item.id || index} className="border-l-2 pl-3"><p className="text-sm">“{item.quote || item.body}”</p><cite className="mt-1 block text-xs not-italic" style={{ color: theme.subtextColor }}>{item.name || item.author}</cite></blockquote>)}</div>;
   if (block.type === 'event' || block.type === 'presave' || block.type === 'product' || block.type === 'tips' || block.type === 'phone') { const href = safePublicHref(extra.url || block.url || (block.type === 'phone' ? `tel:${extra.phone}` : undefined)); return <a href={href || '#'} target={href?.startsWith('tel:') ? undefined : '_blank'} rel="noreferrer" className={`${card} block`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.description || block.subtitle || extra.date || extra.price || extra.phone || 'Open'}</span></a>; }
   if (block.type === 'content_gate') return <div className={card} style={cardStyle}>{unlocked ? <div className="whitespace-pre-wrap text-sm">{status}</div> : <form onSubmit={async e => { e.preventDefault(); setStatus('Checking…'); try { const response = await fetch('/api/content-gates/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId, blockId: block.id, password: gateValue }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Unable to unlock'); setStatus(data.body || 'Unlocked.'); setUnlocked(true); } catch (error) { setStatus(error instanceof Error ? error.message : 'Unable to unlock.'); } }}><h3 className="font-bold">{block.title}</h3><p className="text-sm my-3" style={{ color: theme.subtextColor }}>{extra.description || 'Enter the access code to continue.'}</p><input required type="password" value={gateValue} onChange={e => setGateValue(e.target.value)} className="w-full rounded-xl border bg-transparent p-3 mb-2" placeholder="Access code" /><button className="rounded-xl px-4 py-2 text-sm font-bold" style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}>Unlock</button>{status && <p role="alert" className="text-xs mt-2">{status}</p>}</form>}</div>;

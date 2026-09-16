@@ -113,7 +113,7 @@ const galleryItemSchema = z.object({
   title: z.string().max(150).optional()
 }).strict();
 
-const faqItemSchema = z.object({ id: itemId, question: z.string().min(1).max(300), answer: z.string().max(5000) }).strict();
+const faqItemSchema = z.object({ id: itemId, question: z.string().trim().min(1).max(300), answer: z.string().max(5000) }).strict();
 const testimonialItemSchema = z.object({ id: itemId, quote: z.string().min(1).max(2000), name: z.string().max(150) }).strict();
 
 export const blockTypeSchema = z.enum([
