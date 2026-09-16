@@ -2002,7 +2002,7 @@ Baseline: branch `main`, commit `c86d10a` at task start. The worktree was clean;
 
 ### Implementation commit
 
-To be recorded after final validation.
+`9da627eca10dfa2e9f9dc3bab056765c89a2b8c5` — `feat: complete product and support cards`.
 
 ### Unresolved risks and dependencies
 
