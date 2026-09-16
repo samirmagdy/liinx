@@ -130,6 +130,8 @@ export const runtimeTranslations: Record<string, string> = {
   'Content gates protect inline text only. They do not provide membership or identity verification.': 'تحمي بوابات المحتوى النص المضمّن فقط. ولا توفر عضوية أو تحققاً من الهوية.',
   'Search includes this page only': 'يشمل البحث هذه الصفحة فقط',
   'No matching content on this page.': 'لا يوجد محتوى مطابق في هذه الصفحة.',
+  'Footer logo destination': 'وجهة شعار التذييل',
+  'Footer logo accessible name': 'الاسم الميسّر لشعار التذييل',
   'Could not export subscribers.': 'تعذّر تصدير المشتركين.',
   'Could not remove subscriber.': 'تعذّرت إزالة المشترك.',
   'Remove subscriber': 'إزالة المشترك',

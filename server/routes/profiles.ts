@@ -163,6 +163,8 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
       footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
+      footerLogoLink: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_link || null) : null,
+      footerLogoAlt: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
       backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
       backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
       pageRedirectUrl: profile.page_redirect_url || null,
@@ -287,6 +289,8 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
       footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
+      footerLogoLink: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_link || null) : null,
+      footerLogoAlt: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
       backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
       backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
       pageRedirectUrl: profile.page_redirect_url || null,
@@ -325,7 +329,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       customDomain,
       customCss,
       customFontUrl,
-      shareTitle, shareDescription, shareImageUrl, footerLogoUrl, backgroundMediaUrl, backgroundMediaType, pageRedirectUrl, pageRedirectUntil,
+      shareTitle, shareDescription, shareImageUrl, footerLogoUrl, footerLogoLink, footerLogoAlt, backgroundMediaUrl, backgroundMediaType, pageRedirectUrl, pageRedirectUntil,
       customTheme, 
       socials 
     } = parse.data;
@@ -351,7 +355,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       invalidatePublicProfileCache(existing.id);
     }
 
-    if (!hasEntitlement(existing.plan, 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl))) {
+    if (!hasEntitlement(existing.plan, 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl) || Boolean(footerLogoUrl) || Boolean(footerLogoLink) || Boolean(footerLogoAlt))) {
       return res.status(403).json({ error: 'Custom styling, analytics, and branding removal require a Pro or Studio subscription plan.' });
     }
     const isEnablingBackgroundMedia = (backgroundMediaUrl !== undefined && backgroundMediaUrl !== null) || (backgroundMediaType !== undefined && backgroundMediaType !== null);
@@ -400,6 +404,8 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     const updatedShareDescription = shareDescription !== undefined ? shareDescription : existing.share_description;
     const updatedShareImageUrl = shareImageUrl !== undefined ? shareImageUrl : existing.share_image_url;
     const updatedFooterLogoUrl = footerLogoUrl !== undefined ? footerLogoUrl : existing.footer_logo_url;
+    const updatedFooterLogoLink = footerLogoLink !== undefined ? footerLogoLink : existing.footer_logo_link;
+    const updatedFooterLogoAlt = footerLogoAlt !== undefined ? (footerLogoAlt?.trim() || null) : existing.footer_logo_alt;
     const updatedBackgroundMediaUrl = backgroundMediaUrl !== undefined ? backgroundMediaUrl : existing.background_media_url;
     const updatedBackgroundMediaType = backgroundMediaType !== undefined ? backgroundMediaType : existing.background_media_type;
     const updatedPageRedirectUrl = pageRedirectUrl !== undefined ? pageRedirectUrl : existing.page_redirect_url;
@@ -426,7 +432,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
           custom_domain_verified = ?,
           custom_css = ?,
           custom_font_url = ?,
-          share_title = ?, share_description = ?, share_image_url = ?, footer_logo_url = ?,
+          share_title = ?, share_description = ?, share_image_url = ?, footer_logo_url = ?, footer_logo_link = ?, footer_logo_alt = ?,
           background_media_url = ?, background_media_type = ?, page_redirect_url = ?, page_redirect_until = ?,
           custom_theme_json = ?,
           socials_json = ?,
@@ -446,7 +452,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       customDomainVerified,
       updatedCustomCss,
       updatedCustomFontUrl,
-      updatedShareTitle, updatedShareDescription, updatedShareImageUrl, updatedFooterLogoUrl,
+      updatedShareTitle, updatedShareDescription, updatedShareImageUrl, updatedFooterLogoUrl, updatedFooterLogoLink, updatedFooterLogoAlt,
       updatedBackgroundMediaUrl, updatedBackgroundMediaType, updatedPageRedirectUrl, updatedPageRedirectUntil,
       updatedCustomThemeJson,
       updatedSocialsJson,
@@ -663,8 +669,8 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
         id, user_id, username, display_name, bio, avatar_url, category, theme_id, plan,
         hide_branding, ga_measurement_id, meta_pixel_id, custom_css, custom_font_url,
         custom_theme_json, socials_json, share_title, share_description, share_image_url,
-        footer_logo_url, background_media_url, background_media_type, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        footer_logo_url, footer_logo_link, footer_logo_alt, background_media_url, background_media_type, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       newProfileId,
       userId,
@@ -686,6 +692,8 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       duplicateSource?.share_description || null,
       duplicateSource?.share_image_url || null,
       duplicateSource?.footer_logo_url || null,
+      duplicateSource?.footer_logo_link || null,
+      duplicateSource?.footer_logo_alt || null,
       duplicateSource?.background_media_url || null,
       duplicateSource?.background_media_type || null,
       now,

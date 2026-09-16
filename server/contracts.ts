@@ -348,6 +348,8 @@ export const profileUpdateContract = z.object({
   shareTitle: z.string().max(160).nullable().optional(), shareDescription: z.string().max(300).nullable().optional(),
   shareImageUrl: z.string().max(500).refine(isHttpUrl, 'Share image must use HTTP(S).').nullable().optional(),
   footerLogoUrl: z.string().max(500).refine(isHttpUrl, 'Footer logo must use HTTP(S).').nullable().optional(),
+  footerLogoLink: z.string().max(500).refine(isHttpUrl, 'Footer logo destination must use HTTP(S).').nullable().optional(),
+  footerLogoAlt: z.string().trim().max(120).nullable().optional(),
   backgroundMediaUrl: mediaUrl.nullable().optional(),
   backgroundMediaType: z.enum(['image', 'video']).nullable().optional(),
   pageRedirectUrl: z.string().max(500).refine(isHttpUrl, 'Redirect URL must use HTTP(S).').nullable().optional(),

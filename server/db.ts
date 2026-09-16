@@ -276,7 +276,7 @@ export function initDatabase() {
 
   for (const column of [
     'share_title TEXT', 'share_description TEXT', 'share_image_url TEXT',
-    'footer_logo_url TEXT', 'background_media_url TEXT', 'background_media_type TEXT',
+    'footer_logo_url TEXT', 'footer_logo_link TEXT', 'footer_logo_alt TEXT', 'background_media_url TEXT', 'background_media_type TEXT',
     'page_redirect_url TEXT', 'page_redirect_until INTEGER'
   ]) {
     try { db.exec(`ALTER TABLE profiles ADD COLUMN ${column}`); } catch (e) {}

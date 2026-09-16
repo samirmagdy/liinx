@@ -64,6 +64,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [previewNotice, setPreviewNotice] = useState<string | null>(null);
+  const [footerLogoFailed, setFooterLogoFailed] = useState(false);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => ({
@@ -706,6 +707,12 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             return null;
           })}
         </div>
+
+        {profile.footerLogoUrl && (
+          <div className="pt-2 text-center">
+            {footerLogoFailed ? <span role="img" aria-label={profile.footerLogoAlt || `${profile.displayName} logo`} className="text-xs font-semibold">{profile.footerLogoAlt || `${profile.displayName} logo`}</span> : <img src={profile.footerLogoUrl} alt={profile.footerLogoAlt || `${profile.displayName} logo`} onError={() => setFooterLogoFailed(true)} className="mx-auto h-4 max-w-20 object-contain" />}
+          </div>
+        )}
 
         {/* LIINX Branding Footer Badge - omitted when white-labeled on Pro/Studio plans */}
         {!(profile.plan && profile.plan !== 'free' && profile.hideBranding) && (

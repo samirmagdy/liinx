@@ -195,6 +195,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     setShareDescriptionInput(nextProfile.shareDescription || '');
     setShareImageUrlInput(nextProfile.shareImageUrl || '');
     setFooterLogoUrlInput(nextProfile.footerLogoUrl || '');
+    setFooterLogoLinkInput(nextProfile.footerLogoLink || '');
+    setFooterLogoAltInput(nextProfile.footerLogoAlt || '');
     setBackgroundMediaUrlInput(nextProfile.backgroundMediaUrl || '');
     setBackgroundMediaTypeInput((nextProfile.backgroundMediaType as 'image' | 'video') || 'image');
     setPageRedirectUrlInput(nextProfile.pageRedirectUrl || '');
@@ -299,6 +301,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [shareDescriptionInput, setShareDescriptionInput] = useState(profile.shareDescription || '');
   const [shareImageUrlInput, setShareImageUrlInput] = useState(profile.shareImageUrl || '');
   const [footerLogoUrlInput, setFooterLogoUrlInput] = useState(profile.footerLogoUrl || '');
+  const [footerLogoLinkInput, setFooterLogoLinkInput] = useState(profile.footerLogoLink || '');
+  const [footerLogoAltInput, setFooterLogoAltInput] = useState(profile.footerLogoAlt || '');
   const [backgroundMediaUrlInput, setBackgroundMediaUrlInput] = useState(profile.backgroundMediaUrl || '');
   const [backgroundMediaTypeInput, setBackgroundMediaTypeInput] = useState<'image' | 'video'>((profile.backgroundMediaType as 'image' | 'video') || 'image');
   const [pageRedirectUrlInput, setPageRedirectUrlInput] = useState(profile.pageRedirectUrl || '');
@@ -347,6 +351,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     setShareDescriptionInput(profile.shareDescription || '');
     setShareImageUrlInput(profile.shareImageUrl || '');
     setFooterLogoUrlInput(profile.footerLogoUrl || '');
+    setFooterLogoLinkInput(profile.footerLogoLink || '');
+    setFooterLogoAltInput(profile.footerLogoAlt || '');
     setBackgroundMediaUrlInput(profile.backgroundMediaUrl || '');
     setBackgroundMediaTypeInput(profile.backgroundMediaType || 'image');
     setPageRedirectUrlInput(profile.pageRedirectUrl || '');
@@ -2863,6 +2869,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <label className="text-xs font-semibold text-neutral-800">{ui('Share image URL')}<input type="url" value={shareImageUrlInput} onChange={e => setShareImageUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" placeholder="https://..." /></label>
                   <label className="sm:col-span-2 text-xs font-semibold text-neutral-800">{ui('Share description')}<textarea value={shareDescriptionInput} onChange={e => setShareDescriptionInput(e.target.value)} maxLength={300} rows={2} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" /></label>
                   <label className="text-xs font-semibold text-neutral-800">{ui('Footer logo URL')}<input type="url" disabled={profile.plan === 'free'} value={footerLogoUrlInput} onChange={e => setFooterLogoUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50" placeholder="https://..." /></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Footer logo destination')}<input type="url" disabled={profile.plan === 'free'} value={footerLogoLinkInput} onChange={e => setFooterLogoLinkInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50" placeholder="https://..." /></label>
+                  <label className="sm:col-span-2 text-xs font-semibold text-neutral-800">{ui('Footer logo accessible name')}<input type="text" disabled={profile.plan === 'free'} value={footerLogoAltInput} onChange={e => setFooterLogoAltInput(e.target.value)} maxLength={120} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50" placeholder={profile.displayName} /></label>
                   <label className="text-xs font-semibold text-neutral-800">{ui('Background media URL')}<input type="url" disabled={profile.plan === 'free'} value={backgroundMediaUrlInput} onChange={e => setBackgroundMediaUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50" placeholder="https://..." /></label>
                   <label className="text-xs font-semibold text-neutral-800">{ui('Upload background image')}<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={profile.plan === 'free' || uploadingImage} onChange={event => { const file = event.target.files?.[0]; if (file) void handleBackgroundImageUpload(file); event.currentTarget.value = ''; }} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2 text-xs font-normal text-neutral-900 disabled:opacity-50" />{profile.plan === 'free' && <span className="mt-1 block text-[11px] font-normal text-neutral-500">{ui('Background media requires a paid plan.')}</span>}</label>
                   <label className="text-xs font-semibold text-neutral-800">{ui('Background type')}<select disabled={profile.plan === 'free'} value={backgroundMediaTypeInput} onChange={e => setBackgroundMediaTypeInput(e.target.value as 'image' | 'video')} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50"><option value="image">{ui('Image')}</option><option value="video">{ui('Video')}</option></select></label>
@@ -2871,7 +2879,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 </div>
                 {profile.plan === 'free' && <p className="text-[11px] text-neutral-500" role="note">{ui('Background media is unavailable on the free plan. Existing media is hidden publicly until the plan is upgraded.')}</p>}
                 {pageSettingsFeedback && <p role="status" className="text-xs text-emerald-700">{pageSettingsFeedback}</p>}
-                <button type="button" disabled={isSavingPageSettings} onClick={async () => { setIsSavingPageSettings(true); setPageSettingsFeedback(null); try { const data = { shareTitle: shareTitleInput.trim() || null, shareDescription: shareDescriptionInput.trim() || null, shareImageUrl: shareImageUrlInput.trim() || null, footerLogoUrl: footerLogoUrlInput.trim() || null, backgroundMediaUrl: backgroundMediaUrlInput.trim() || null, backgroundMediaType: backgroundMediaUrlInput.trim() ? backgroundMediaTypeInput : null, pageRedirectUrl: pageRedirectUrlInput.trim() || null, pageRedirectUntil: pageRedirectUntilInput ? new Date(pageRedirectUntilInput).getTime() : null }; await api.studio.updateProfile(data); setProfile(prev => ({ ...prev, ...data })); setPageSettingsFeedback(ui('Public page settings saved.')); } catch (error) { setPageSettingsFeedback(friendlyErrorMessage(error, ui('Could not save public page settings.'))); } finally { setIsSavingPageSettings(false); } }} className="rounded-xl bg-neutral-900 px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{isSavingPageSettings ? ui('Saving...') : ui('Save Public Page Settings')}</button>
+                <button type="button" disabled={isSavingPageSettings} onClick={async () => { setIsSavingPageSettings(true); setPageSettingsFeedback(null); try { const data = { shareTitle: shareTitleInput.trim() || null, shareDescription: shareDescriptionInput.trim() || null, shareImageUrl: shareImageUrlInput.trim() || null, footerLogoUrl: footerLogoUrlInput.trim() || null, footerLogoLink: footerLogoLinkInput.trim() || null, footerLogoAlt: footerLogoAltInput.trim() || null, backgroundMediaUrl: backgroundMediaUrlInput.trim() || null, backgroundMediaType: backgroundMediaUrlInput.trim() ? backgroundMediaTypeInput : null, pageRedirectUrl: pageRedirectUrlInput.trim() || null, pageRedirectUntil: pageRedirectUntilInput ? new Date(pageRedirectUntilInput).getTime() : null }; await api.studio.updateProfile(data); setProfile(prev => ({ ...prev, ...data })); setPageSettingsFeedback(ui('Public page settings saved.')); } catch (error) { setPageSettingsFeedback(friendlyErrorMessage(error, ui('Could not save public page settings.'))); } finally { setIsSavingPageSettings(false); } }} className="rounded-xl bg-neutral-900 px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{isSavingPageSettings ? ui('Saving...') : ui('Save Public Page Settings')}</button>
               </div>
 
               {/* Duplicate profile and creator submissions */}

@@ -160,6 +160,8 @@ export interface CreatorProfile {
   shareDescription?: string | null;
   shareImageUrl?: string | null;
   footerLogoUrl?: string | null;
+  footerLogoLink?: string | null;
+  footerLogoAlt?: string | null;
   backgroundMediaUrl?: string | null;
   backgroundMediaType?: 'image' | 'video' | null;
   pageRedirectUrl?: string | null;

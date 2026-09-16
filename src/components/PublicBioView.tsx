@@ -337,6 +337,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [analyticsConsent, setAnalyticsConsent] = useState<'granted' | 'denied' | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [pageSearch, setPageSearch] = useState('');
+  const [footerLogoFailed, setFooterLogoFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -361,6 +362,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     document.head.appendChild(link);
     return () => link.remove();
   }, [profile?.customFontUrl]);
+
+  useEffect(() => {
+    setFooterLogoFailed(false);
+  }, [profile?.footerLogoUrl]);
 
   useEffect(() => {
     if (previewOnly) return;
@@ -1304,10 +1309,16 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           })()}
         </div>
 
-        {/* Footer Brand Credit - omitted when white-labeled on Pro/Studio plans */}
+        {/* Creator identity and platform attribution are independent controls. */}
         {(profile.footerLogoUrl || !(profile.plan && profile.plan !== 'free' && profile.hideBranding)) && (
           <div className="text-center pt-4 pb-12">
-            {profile.footerLogoUrl ? <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-xs" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}><img src={profile.footerLogoUrl} alt={`${profile.displayName} logo`} className="h-4 max-w-20 object-contain" /></span> : <button
+            {profile.footerLogoUrl ? (() => {
+              const logoLabel = profile.footerLogoAlt?.trim() || `${profile.displayName} logo`;
+              const logoContent = footerLogoFailed ? <span role="img" aria-label={logoLabel} className="text-xs font-semibold">{logoLabel}</span> : <img src={profile.footerLogoUrl} alt={logoLabel} onError={() => setFooterLogoFailed(true)} className="h-4 max-w-20 object-contain" />;
+              const logo = <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-xs" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}>{logoContent}</span>;
+              const href = safePublicHref(profile.footerLogoLink);
+              return href ? <a href={href} target="_blank" rel="noreferrer" aria-label={logoLabel} className="inline-flex rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{logo}</a> : logo;
+            })() : <button
               onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
               style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}
