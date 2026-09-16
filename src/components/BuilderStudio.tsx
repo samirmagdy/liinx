@@ -1251,7 +1251,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           </button>
 
           <button
-            onClick={async () => { if (!queueRef.current?.dirty || await queueRef.current.flush()) onViewFullscreen(profile, customTheme); }}
+            onClick={async () => { if (!queueRef.current?.dirty || await queueRef.current.flush()) { window.sessionStorage.setItem(`liinx-fullscreen-preview:${profile.username.toLowerCase()}`, '1'); onViewFullscreen(profile, customTheme); } }}
             className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition-colors active:scale-95 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
           >
             <Maximize2 className="w-3.5 h-3.5 text-amber-300" />

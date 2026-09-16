@@ -72,7 +72,7 @@ function renderRichText(value: string) {
   });
 }
 
-const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig }> = ({ block, profileId, theme }) => {
+const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig; previewOnly?: boolean }> = ({ block, profileId, theme, previewOnly = false }) => {
   const extra = block.extra || block;
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<string | null>(null);
@@ -497,7 +497,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       </header>
 
       {/* Main Centered Bio Column */}
-      <main dir={isProfileRtl ? 'rtl' : 'ltr'} className="max-w-xl mx-auto px-4 py-12 sm:py-16">
+      <main dir={isProfileRtl ? 'rtl' : 'ltr'} className="max-w-xl mx-auto px-4 py-12 sm:py-16" onClickCapture={previewOnly ? event => { event.preventDefault(); event.stopPropagation(); } : undefined} onSubmitCapture={previewOnly ? event => { event.preventDefault(); event.stopPropagation(); } : undefined}>
         
         {/* Profile Card Header */}
         <div className="flex flex-col items-center text-center mb-8">
@@ -1007,7 +1007,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             }
 
             if (advancedBlockTypes.has(block.type)) {
-              return <AdvancedPublicBlock key={block.id} block={block} profileId={profile.id} theme={theme} />;
+              return <AdvancedPublicBlock key={block.id} block={block} profileId={profile.id} theme={theme} previewOnly={previewOnly} />;
             }
 
             return null;

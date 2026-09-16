@@ -73,6 +73,9 @@ function HomePage() {
 }
 
 function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?: string }) {
+  const previewKey = `liinx-fullscreen-preview:${username.toLowerCase()}`;
+  const fullscreenPreview = window.sessionStorage.getItem(previewKey) === '1';
+  if (fullscreenPreview) window.sessionStorage.removeItem(previewKey);
   const previewTheme = (() => {
     try {
       const raw = window.sessionStorage.getItem(`liinx-preview-theme:${username}`);
@@ -84,7 +87,7 @@ function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?
       return undefined;
     }
   })();
-  return <PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} onBackToStudio={() => window.location.href = '/studio'} />;
+  return <PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} previewOnly={fullscreenPreview} onBackToStudio={() => window.location.href = '/studio'} />;
 }
 
 function StudioPage() {

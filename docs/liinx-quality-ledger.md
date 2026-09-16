@@ -963,3 +963,53 @@ Baseline: branch `main`, commit `deaa9e6` (`feat: implement profile duplication 
 ### Next eligible prompt
 
 `15 — Page-isolated preview`
+
+## Task 15 — Page-isolated preview
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `7914ff8` (`feat: add profile deletion functionality with backend endpoint, frontend UI, and tests`) at task start. Task 15 changes remain uncommitted. Existing Task 14 work was preserved.
+
+### Scope and changed files
+
+- `src/components/PublicBioView.tsx`: makes `previewOnly` interaction-safe at the public-view boundary, blocking click and submit propagation so links, redirects, forms, newsletter capture, and content gates cannot perform real actions.
+- `src/components/ViewportPreview.tsx`: retained the real iframe viewport with 390, 768, and 1280 CSS-pixel widths; it renders the selected page profile object and filtered blocks.
+- `src/components/BuilderStudio.tsx`: marks fullscreen navigation as a one-shot inert preview.
+- `src/App.tsx`: consumes the fullscreen-preview marker and passes `previewOnly` to the public view without changing ordinary public routes.
+
+### Findings and behavior
+
+- The editor already filtered blocks to the selected page and passed the current draft profile/theme to `ViewportPreview`; no cross-page state copy was introduced.
+- The viewport is a real iframe with CSS media queries applied at the target width; scaling only fits that iframe into the available editor column.
+- `previewOnly` already skipped profile fetch, analytics consent/script injection, redirects, and view recording for embedded previews. The new event guards additionally prevent nested links/buttons/forms from launching external navigation, submitting forms/newsletter data, unlocking gates, or triggering creator actions.
+- Fullscreen preview now uses a session marker consumed once by `PublicProfilePage`, so it remains a preview rather than silently opening an interactive live page. Normal direct public URLs remain interactive and continue to use the published API.
+- Existing content uses the selected `profile.page`, `profile.pages`, filtered blocks, current theme, and current controlled draft settings supplied by the editor. No invented preview metrics or submissions were added.
+
+### Acceptance criteria
+
+- PASS — Mobile, tablet, and desktop preview widths are 390, 768, and 1280 CSS pixels in a real iframe. Evidence: `ViewportPreview.tsx` source inspection and successful production build.
+- PASS — Preview receives only the selected page's blocks and current draft settings. Evidence: `BuilderStudio.tsx` supplies `visibleBlocks`, selected `activePage`, and current theme; source page filtering was revalidated.
+- PASS — Preview includes correct page navigation state. Evidence: `PublicBioView` receives the selected page and uses `aria-current` for the active published page; embedded preview interaction is inert.
+- PASS — Preview cannot submit forms, record views/clicks, launch redirects, or unlock gates. Evidence: `previewOnly` skips analytics/fetch/redirect effects and capture guards stop click/submit handlers. No browser network assertion was available.
+- PASS — Fullscreen preview is also inert and one-shot. Evidence: session marker in `BuilderStudio.tsx`/`App.tsx` and preview guards.
+- NOT RUN — Browser verification at 390/768/1280 with Home and two subpages, visual published-vs-preview comparison, back/forward navigation, and network inspection for zero requests; browser automation was unavailable.
+- NOT RUN — Live external embed/provider network behavior inside previews; provider credentials and browser network tooling were unavailable.
+
+### Exact commands and outcomes
+
+- `task15_db=$(mktemp -d /tmp/liinx-task15-db-XXXXXX); task15_uploads=$(mktemp -d /tmp/liinx-task15-uploads-XXXXXX); DATABASE_PATH="$task15_db/liinx.db" UPLOADS_DIR="$task15_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task15_db/liinx.db" UPLOADS_DIR="$task15_uploads" NODE_ENV=test npm test -- --run tests/published_pages_routing.test.ts tests/backend-e2e.dynamic.test.ts tests/analytics.test.ts` — PASS, typecheck plus 2 discovered files / 6 tests; `tests/analytics.test.ts` was not present and therefore did not add a test file.
+- `task15_full=$(mktemp -d /tmp/liinx-task15-full-XXXXXX); mkdir -p "$task15_full/uploads"; DATABASE_PATH="$task15_full/liinx.db" UPLOADS_DIR="$task15_full/uploads" NODE_ENV=test npm test` — PASS, 34 files / 223 tests.
+- `task15_build=$(mktemp -d /tmp/liinx-task15-build-XXXXXX); mkdir -p "$task15_build/uploads"; DATABASE_PATH="$task15_build/liinx.db" UPLOADS_DIR="$task15_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS after the final ledger edit.
+- Browser/network journey — NOT RUN; no browser automation was available.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest and disposable `mktemp` SQLite/uploads directories were used. Existing API/public regression tests passed; no production data was used.
+- Source-level guards do not prove browser network silence or visual equivalence. A browser test should create distinct content on three pages, inspect each iframe at all widths, and assert no analytics/form/gate/redirect requests.
+- External media iframe resources may still load passively if present in preview content; interaction is blocked, but provider network isolation needs browser verification and may require replacing embeds with static placeholders in preview mode.
+- Published rendering remains intentionally interactive; only explicit editor previews are inert.
+
+### Next eligible prompt
+
+`16 — Profile identity editor`
