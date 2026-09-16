@@ -1607,3 +1607,49 @@ Baseline: branch `main`, commit `134a4cfe3899dcdbabe0af5db5c3297de6ad9572` at ta
 ### Next eligible prompt
 
 `28 — Carousel block`
+
+## Task 28 — Carousel block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `c0f5f06330cf6f66f3621d6edf4ffa77c1aadb23` at task start. The worktree was clean; Task 27 changes were preserved. Implementation commit: recorded after this entry is committed.
+
+### Scope and changed files
+
+- `src/components/PublicBioView.tsx`: replaces the carousel’s horizontal-gallery behavior with active-slide state, previous/next controls, Home/End and arrow-key navigation, touch swipe handling, bounded responsive sizing, captions, safe optional links, empty/unavailable states, and no autoplay.
+- `server/contracts.ts`: reuses the gallery item contract, including image, caption, alt, identity, and validated optional link fields.
+- `server/routes/analytics.ts`: retains item-id and item-index tracking for carousel destinations through the existing redirect path.
+- `tests/carousel_block.test.ts`: covers zero, one, and many slides, long-caption rejection, Arabic slide data, saved ordering, linked/unlinked destinations, and unsafe-link rejection.
+
+### Findings and behavior
+
+- The previous carousel was only a horizontally styled row and had no actual slide controls, active-slide model, keyboard behavior, or touch navigation.
+- Carousel autoplay is not offered and is therefore off by default without a hidden timer or external media action. The carousel exposes Previous/Next controls, disables them at the boundaries, supports ArrowLeft/ArrowRight/Home/End, and handles horizontal touch swipes.
+- Each active slide keeps its caption visible. Image failures use the existing honest unavailable state. A slide without a validated link renders as content rather than an anchor; linked slides use the existing tracked redirect.
+- The carousel is bounded to its card width with a responsive 4:3 slide and `overflow-hidden`, so navigation does not intentionally scroll the document. Focus remains on the carousel or native controls; no focus trap was introduced.
+- Slide order remains the persisted item-array order and is shared with the gallery editor contract. Arabic content inherits the public page direction; browser visual verification remains pending.
+
+### Acceptance criteria
+
+- PASS — Zero, one, and many slides are represented and persisted in order. Evidence: `tests/carousel_block.test.ts` covers empty, valid one-slide, oversized-caption rejection, and reordered three-slide fixtures.
+- PASS — Long captions are bounded by the shared 500-character contract and rendered in the active slide. Evidence: oversized caption returns HTTP 400; valid captions round-trip in public data.
+- PASS — Optional links open through tracking, while unlinked slides do not navigate. Evidence: linked item returns HTTP 302; unlinked item returns HTTP 404 through the redirect endpoint; renderer uses separate anchor/content branches.
+- PASS — Actual slide controls exist with keyboard and touch handlers. Evidence: source implementation includes native Previous/Next buttons, ArrowLeft/ArrowRight/Home/End handling, active-slide counter, and touch swipe threshold.
+- PASS — Autoplay is off by default. Evidence: no autoplay timer or automatic slide transition exists in the carousel implementation.
+- NOT RUN — Browser touch/keyboard journey, RTL visual direction, reduced-motion behavior, focus traversal, and narrow viewport visual inspection. Browser-client Node REPL was unavailable; source/API evidence is not browser evidence.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `c0f5f06330cf6f66f3621d6edf4ffa77c1aadb23` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/carousel_block.test.ts tests/gallery_block.test.ts tests/image_block.test.ts tests/preview.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 6 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/editor/public verification — NOT RUN; no supported browser-client Node REPL was available. Tests used disposable `mktemp` SQLite database and uploads directories; no production data or assets were changed.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, disposable database/uploads directories, and the existing gallery/upload services were used.
+- Real-browser verification remains required for swipe behavior, keyboard focus traversal, RTL presentation, reduced-motion expectations, and responsive sizing at actual viewport widths.
+- Reduced-motion does not need to suppress carousel movement because movement is user initiated and no autoplay or animation timer is present; this should still be confirmed in browser accessibility testing.
+
+### Next eligible prompt
+
+`29 — Spacer and section spacing`
