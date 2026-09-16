@@ -124,7 +124,10 @@ export type ContractBlockType = z.infer<typeof blockTypeSchema>;
 
 export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   booking: extraObject(),
-  link: extraObject(),
+  link: extraObject({
+    layout: z.enum(['list', 'grid', 'featured']).optional(),
+    animation: z.enum(['none', 'fade', 'lift', 'pulse']).optional()
+  }),
   header: extraObject(),
   audio: extraObject({ artist: shortText.optional(), coverUrl: optionalHttpUrl, audioUrl: optionalHttpUrl, platform: z.enum(['spotify', 'soundcloud', 'apple']).optional() }),
   video: extraObject({ videoUrl: optionalHttpUrl, thumbnailUrl: optionalHttpUrl, platform: z.enum(['youtube', 'vimeo', 'tiktok']).optional() }),

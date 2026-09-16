@@ -599,7 +599,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
         {/* Content Blocks */}
         {profile.blocks.length > 5 && <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /></label>}
-        <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*:not(.liinx-grid-link)]:sm:col-span-2' : 'space-y-4'}`}>
+        <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*]:sm:col-span-2 [&>.liinx-grid-link]:sm:col-span-1' : 'space-y-4'}`}>
           {(Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => !pageSearch.trim() || `${block.title} ${block.subtitle || ''}`.toLowerCase().includes(pageSearch.trim().toLowerCase())).map((block) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
