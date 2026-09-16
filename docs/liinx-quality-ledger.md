@@ -1799,7 +1799,7 @@ Baseline: branch `main`, commit `156710c` at task start. The worktree was clean;
 
 ### Implementation commit
 
-To be recorded after final validation.
+`963641c9875f302a501e92f9925d0eb2b74b76e8` — `feat: make audio embeds accessible and single active`.
 
 ### Unresolved risks and dependencies
 
