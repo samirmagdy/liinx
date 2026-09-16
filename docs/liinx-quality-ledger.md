@@ -2751,7 +2751,7 @@ Baseline: branch `main`, commit `1d921ae` at task start. The worktree was clean;
 
 ### Implementation commit
 
-Pending commit for Task 50 implementation and this ledger entry.
+`5779e332ffa2298e683e43edbfbd97c5cffe4810` — `fix: harden Instagram integration lifecycle`
 
 ### Unresolved risks and dependencies
 
