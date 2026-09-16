@@ -2430,6 +2430,58 @@ Baseline: branch `main`, commit `98bff8f` at task start. The worktree was clean 
 - Browser-level verification of input behavior, page switching, keyboard operation, responsive layouts, and result focus/scroll remains outstanding.
 - Search is intentionally client-side and current-page-only. A cross-page or indexed search would require a separate product decision and scale evidence.
 
+## Task 45 — Footer branding
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `c22c904` at task start. The worktree was clean and prior task changes were preserved.
+
+### Scope and changed files
+
+- `server/db.ts`: adds idempotent profile columns for creator logo destination and accessible name.
+- `server/contracts.ts`: validates the optional creator-logo destination as HTTP(S) and bounds the accessible name.
+- `server/routes/profiles.ts`: persists and returns the new fields, copies them during profile duplication, and rejects creator-branding writes on free plans server-side. Public output exposes creator branding only when entitled.
+- `src/types.ts`, `src/components/BuilderStudio.tsx`: adds the creator logo destination/name controls, profile-scoped state synchronization, and paid-plan disabled behavior.
+- `src/components/PublicBioView.tsx`: separates creator identity from platform attribution, keeps the creator logo visible when platform branding is hidden, uses only the configured destination, and provides an accessible text fallback if the image fails.
+- `src/components/PhonePreview.tsx`: renders the creator identity in preview without activating external navigation, plus a broken-image text fallback.
+- `src/config/runtimeTranslations.ts`: adds Arabic labels for the new controls.
+- `tests/footer_branding.test.ts`: covers free/paid entitlement, logo persistence, platform-branding toggling, unsafe destination rejection, and removal.
+
+### Findings and behavior
+
+- The old footer branch coupled creator-logo presence to platform attribution and rendered a creator logo as a non-actionable image with no independent destination/name.
+- Platform attribution and creator identity are now independent. A paid profile with `hideBranding=true` still shows its creator logo; the Liinx attribution is separately omitted.
+- Creator logo destinations are optional and HTTP(S)-only. When absent, the logo is non-interactive; it never defaults to the Liinx studio or another route.
+- Missing/broken images fall back to the configured accessible name, or a display-name-derived label. The fallback remains non-navigational unless an explicit safe destination was configured.
+- Free-plan UI controls remain disabled with the existing upgrade context, and the API rejects attempts to set logo URL, destination, or accessible name. Existing stored values are not deleted during downgrade, but are withheld from public output while unentitled.
+- No external provider, logo hosting service, or new data-sharing integration was introduced.
+
+### Acceptance criteria
+
+- PASS — Free/paid plan rules and hide-platform-branding on/off are enforced and persisted. Evidence: `tests/footer_branding.test.ts` and entitlement-gated public/studio payloads.
+- PASS — Custom logo on/off and optional destination behavior are implemented. Evidence: persisted fields, API test, and public footer branch.
+- PASS — A creator logo does not unexpectedly navigate to Liinx studio; absent destination is non-interactive. Evidence: public renderer only creates an anchor for the explicit validated destination.
+- PASS — Accessible name and broken-image fallback are implemented. Evidence: `alt`, `aria-label`, and fallback branches in public/preview renderers.
+- PASS — Unsafe destinations are rejected server-side. Evidence: `javascript:` update returns 400 in `tests/footer_branding.test.ts`.
+- PASS — Keyboard/screen-reader semantics are defined: linked logos are labeled/focusable; unlinked logos are noninteractive; platform attribution remains a separate labeled button/link. Source-level evidence only.
+- NOT RUN — Actual browser image-error event, keyboard traversal, screen-reader announcement, responsive layout, and visual comparison. Browser automation was unavailable in this run.
+- NOT RUN — Real remote image delivery/CSP behavior; test URLs were isolated fixtures and no external fetch was performed.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, commit `c22c904`, ahead of `origin/main` only by prior local task commits.
+- `tmpdb=$(mktemp -d /tmp/liinx-task-45a-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-45a-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/footer_branding.test.ts tests/subscription_entitlements.test.ts tests/profile_duplication.test.ts tests/profile_switching_onboarding.test.ts tests/acceptance.test.ts` — PASS: TypeScript check and 5 files / 38 tests against disposable SQLite/uploads paths.
+- `tmpdb=$(mktemp -d /tmp/liinx-task-45b-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-45b-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: Vite production build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+
+### Implementation commit
+
+`b41cbdb354dd09dde73d631da2af6c329ef79a48` — `feat: separate creator footer branding`.
+
+### Unresolved risks and dependencies
+
+- Browser-level image fallback, keyboard, screen-reader, responsive, and real remote-image checks remain outstanding.
+- Downgraded profiles retain logo settings in storage for reversibility but intentionally suppress them publicly until entitlement returns.
+
 ### Next eligible prompt
 
-`45 — Footer branding`
+`46 — Sharing metadata and indexing`
