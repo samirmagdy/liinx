@@ -111,7 +111,7 @@ function renderRichText(value: string) {
   return output;
 }
 
-const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig; previewOnly?: boolean; translate?: (value: string) => string }> = ({ block, profileId, theme, previewOnly = false, translate = value => value }) => {
+const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig; previewOnly?: boolean; translate?: (value: string) => string; blockIndex?: number; blockCount?: number }> = ({ block, profileId, theme, previewOnly = false, translate = value => value, blockIndex = 0, blockCount = 1 }) => {
   const extra = block.extra || block;
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<string | null>(null);
@@ -127,7 +127,22 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
   const carouselTouchStart = useRef<number | null>(null);
   useEffect(() => { setCarouselIndex(0); }, [block.id, links.length]);
 
-  if (block.type === 'spacer') return <div key={block.id} aria-hidden="true" style={{ height: Math.min(240, Math.max(16, Number(extra.height) || 48)) }} />;
+  if (block.type === 'spacer') {
+    const height = Math.min(240, Math.max(16, Number(extra.height) || 48));
+    // The block stack supplies a 1rem gap. Cancel only the gaps adjacent to a
+    // spacer so its configured height is the actual resulting separation.
+    return <div
+      key={block.id}
+      aria-hidden="true"
+      data-spacing-height={height}
+      className="pointer-events-none min-w-0 shrink-0"
+      style={{
+        height,
+        marginTop: blockIndex > 0 ? '-1rem' : undefined,
+        marginBottom: blockIndex < blockCount - 1 ? '-1rem' : undefined
+      }}
+    />;
+  }
   if (block.type === 'rich_text') return <article className={card} style={cardStyle}><h3 className="font-bold mb-2">{block.title}</h3><div className="text-sm leading-7" style={{ color: theme.subtextColor }}>{renderRichText(extra.body || block.subtitle || '')}</div></article>;
   if (block.type === 'image') {
     const imageSrc = safePublicHref(extra.imageUrl);
@@ -663,7 +678,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         {/* Content Blocks */}
         {profile.blocks.length > 5 && <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /></label>}
         <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*]:sm:col-span-2 [&>.liinx-grid-link]:sm:col-span-1' : 'space-y-4'}`}>
-          {(Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => !pageSearch.trim() || `${block.title} ${block.subtitle || ''}`.toLowerCase().includes(pageSearch.trim().toLowerCase())).map((block) => {
+          {(() => {
+            const visibleBlocks = (Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => !pageSearch.trim() || `${block.title} ${block.subtitle || ''}`.toLowerCase().includes(pageSearch.trim().toLowerCase()));
+            return visibleBlocks.map((block, blockIndex) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
               // Real click redirection through /r/:blockId for 0% fake tracking!
@@ -1118,11 +1135,12 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             }
 
             if (advancedBlockTypes.has(block.type)) {
-              return <AdvancedPublicBlock key={block.id} block={block} profileId={profile.id} theme={theme} previewOnly={previewOnly} translate={ui} />;
+              return <AdvancedPublicBlock key={block.id} block={block} profileId={profile.id} theme={theme} previewOnly={previewOnly} translate={ui} blockIndex={blockIndex} blockCount={visibleBlocks.length} />;
             }
 
             return null;
-          })}
+            });
+          })()}
         </div>
 
         {/* Footer Brand Credit - omitted when white-labeled on Pro/Studio plans */}

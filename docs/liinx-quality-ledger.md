@@ -1653,3 +1653,54 @@ Baseline: branch `main`, commit `c0f5f06330cf6f66f3621d6edf4ffa77c1aadb23` at ta
 ### Next eligible prompt
 
 `29 — Spacer and section spacing`
+
+## Task 29 — Spacer and section spacing
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `6da320cd5149c05398faaa30ff42831a243b2b5c` at task start. The worktree was clean; prior task changes were preserved. Implementation commit is recorded below after verification.
+
+### Scope and changed files
+
+- `src/components/BuilderStudio.tsx`: clamps the editor's spacer height to 16–240px, gives the field an explicit label/help relationship, and explains that the configured value is intentional spacing rather than a CSS value.
+- `src/components/PublicBioView.tsx`: keeps spacers decorative and noninteractive, bounds legacy values, and cancels only the surrounding 1rem stack/grid gaps so configured height is the resulting separation. The same behavior applies to filtered and mixed block layouts.
+- `tests/spacer.test.ts`: covers API validation, minimum/maximum heights, persistence, public ordering/data, reload, and deletion.
+
+### Findings and behavior
+
+- The existing shared contract already rejected spacer heights outside 16–240px and non-integer values; that contract was retained rather than duplicated or broadened.
+- The editor previously sent `NaN` for an empty numeric field and did not explain the visual result. It now presents a bounded integer value and accessible help text.
+- The public renderer previously combined spacer height with the generic `space-y-4` or grid gap. Adjacent gaps are now cancelled per spacer position, including first/last and consecutive spacers, without changing ordinary block spacing.
+- Spacer output has `aria-hidden="true"`, `pointer-events-none`, no focusable descendants, and no width-setting styles; it cannot create a focus target or horizontal overflow.
+- No unrestricted layout engine or new contract was introduced. Existing legacy records continue to use the renderer fallback of 48px when their height is absent/invalid.
+
+### Acceptance criteria
+
+- PASS — Minimum/maximum valid values persist and invalid values/types fail cleanly. Evidence: `tests/spacer.test.ts` receives 201 for 16/240 and 400 for 15/241/NaN/string.
+- PASS — Multiple spacers, ordering, deletion, and reload preserve the remaining content. Evidence: the focused test creates two spacers between links, verifies their order/heights through Studio and public API, deletes one, and reloads.
+- PASS — Spacer blocks are decorative/noninteractive and bounded in the public renderer. Evidence: source inspection shows `aria-hidden`, `pointer-events-none`, bounded height, and no interactive descendants.
+- PASS — Normal block spacing is not cumulatively added around a spacer. Evidence: renderer cancels only the adjacent 1rem stack/grid gaps based on block position; ordinary blocks retain their existing spacing.
+- NOT RUN — Actual browser visual comparison at mobile/desktop preview widths, narrow-viewport overflow inspection, and keyboard focus traversal. No supported browser-client execution was available; source/API evidence is not browser evidence.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `6da320cd5149c05398faaa30ff42831a243b2b5c` on `main`; worktree was clean before changes.
+- `npm run lint` — PASS, TypeScript check exited 0.
+- `mkdir -p /tmp/liinx-task-29c-db /tmp/liinx-task-29c-uploads && DATABASE_PATH=/tmp/liinx-task-29c-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-29c-uploads NODE_ENV=test npm test -- --run tests/spacer.test.ts` — first attempt was NOT RUN because the disposable parent directory was absent; after creating the isolated directory, the focused test passed: 1 file / 1 test.
+- `mkdir -p /tmp/liinx-task-29d-db /tmp/liinx-task-29d-uploads && DATABASE_PATH=/tmp/liinx-task-29d-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-29d-uploads NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts` — PASS, 2 files / 35 tests.
+- `npm run build` — PASS, production build and prerender completed; 10 routes prerendered. Existing non-blocking warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — pending until the final commit is created.
+
+### Unresolved risks and dependencies
+
+- Browser verification remains required for actual 390px/mobile and desktop preview geometry, visual gap measurement, and keyboard/focus inspection.
+- The negative adjacent-margin technique is intentionally scoped to the existing 1rem stack/grid gap; any future container-spacing redesign must preserve or revisit this invariant.
+- Public API tests verify serialized block data, not browser layout pixels.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Next eligible prompt
+
+`30 — Video block`
