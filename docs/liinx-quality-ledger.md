@@ -1910,3 +1910,54 @@ Baseline: branch `main`, commit `927a6d565df0b4ec4c73dca8cb472d55b30fabd9` at ta
 ### Next eligible prompt
 
 `34 — Testimonials block`
+
+## Task 35 — Event and release-link cards
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `2484487` at task start. The worktree was clean; prior task changes were preserved.
+
+### Scope and changed files
+
+- `server/contracts.ts`: extends event data with description, date, time, timezone, location, artwork URL, and safe destination fields; preserves the existing pre-save URL/description contract.
+- `src/components/BuilderStudio.tsx`: adds editor controls and explicit policy copy for event metadata and external release links; new defaults contain no invented event or release claim.
+- `src/components/PublicBioView.tsx`: renders distinct event and external-release cards, metadata, artwork, honest missing-configuration states, legacy subtitle fallback, and preview-disabled actions.
+- `server/routes/analytics.ts`: allows event/pre-save destinations stored in `extra.url` to use the existing tracked redirect path with server-side URL sanitization.
+- `tests/event_release_cards.test.ts`: covers full event/release persistence, multilingual/multiline event data, safe redirects, invalid destinations, and missing-link 404 behavior.
+
+### Findings and behavior
+
+- The prior renderer treated event, pre-save, and unrelated cards as one generic anchor, used `#` when configuration was missing, and did not expose event time/location/artwork controls. Event and release cards are now separate.
+- Date/time/timezone are display-only creator-entered strings. Liinx does not parse or convert them by visitor timezone; creators are instructed to include the timezone. An event with no date remains publishable if its destination is configured, and does not claim expiry because no scheduling model exists for event dates.
+- An event with no destination shows an unavailable status rather than a functional-looking link. A release card is explicitly labelled “External release link”; it does not imply music-service pre-save authorization or completion.
+- Existing event descriptions stored in `subtitle` remain visible through the public fallback. Safe destinations go through `/r/:blockId` for click tracking and server validation. Preview actions are disabled by the existing preview mode behavior.
+- Artwork is URL-based only in this task; no new upload or provider dependency was added.
+
+### Acceptance criteria
+
+- PASS — Event title, description, date, time, timezone, location, artwork, and destination persist and reload. Evidence: `tests/event_release_cards.test.ts` and shared contract validation.
+- PASS — Creator/visitor timezone policy is explicit and consistent: entered date/time/timezone are displayed as saved without conversion. Evidence: editor copy and renderer implementation.
+- PASS — Missing-date/destination behavior is intentional. Missing dates display no fabricated date; missing destinations return an unavailable state and tracked redirect returns 404.
+- PASS — External event and release links open through validated tracked redirects. Evidence: regression test asserts 302 targets.
+- PASS — Missing release configuration does not look functional and no native pre-save workflow is claimed. Evidence: explicit external-link copy and unavailable-state rendering.
+- NOT RUN — Actual browser visual rendering, live ticket/release provider availability, timezone locale behavior in browsers, and mobile layout. Browser/provider execution was unavailable.
+
+### Exact commands and outcomes
+
+- `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
+- `task35_tmp=$(mktemp -d); DATABASE_PATH="$task35_tmp/liinx.db" UPLOADS_DIR="$task35_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task35_tmp/liinx.db" UPLOADS_DIR="$task35_tmp/uploads" NODE_ENV=test npm test -- --run tests/event_release_cards.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 3 test files / 37 tests, production build with 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests used a disposable SQLite database and uploads directory; no production data, tickets, payments, or external provider request was used.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Unresolved risks and dependencies
+
+- Live browser/provider verification remains required for actual external destination availability, artwork failures, responsive layout, and timezone presentation.
+- There is no native ticketing or music-service authorization/pre-save workflow; external destinations are the supported scope.
+
+### Next eligible prompt
+
+`36 — Product and support-link cards`

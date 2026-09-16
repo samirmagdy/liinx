@@ -176,6 +176,12 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
         rawTarget = typeof extra?.linkUrl === 'string' ? extra.linkUrl : null;
       } catch { rawTarget = null; }
     }
+    if (!rawTarget && (block.type === 'event' || block.type === 'presave')) {
+      try {
+        const extra = block.extra_json ? JSON.parse(block.extra_json) : null;
+        rawTarget = typeof extra?.url === 'string' ? extra.url : null;
+      } catch { rawTarget = null; }
+    }
     const itemId = typeof req.query.item === 'string' ? req.query.item : null;
     const itemIndex = typeof req.query.itemIndex === 'string' && /^\d+$/.test(req.query.itemIndex) ? Number(req.query.itemIndex) : null;
     if (itemId || itemIndex !== null) {

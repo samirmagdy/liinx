@@ -154,7 +154,15 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   map: extraObject({ location: z.string().max(300).optional() }),
   faq: extraObject({ items: z.array(faqItemSchema).max(50).optional() }),
   testimonials: extraObject({ items: z.array(testimonialItemSchema).max(50).optional() }),
-  event: extraObject({ date: z.string().max(100).optional(), url: optionalSafeUrl }),
+  event: extraObject({
+    date: z.string().max(100).optional(),
+    time: z.string().max(50).optional(),
+    timezone: z.string().max(80).optional(),
+    location: z.string().max(300).optional(),
+    artworkUrl: optionalHttpUrl,
+    description: z.string().max(1000).optional(),
+    url: optionalSafeUrl
+  }),
   presave: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
   phone: extraObject({ phone: z.string().max(40).optional(), description: z.string().max(1000).optional() }),
   product: extraObject({ price: z.string().max(50).optional(), url: optionalSafeUrl, description: z.string().max(1000).optional() }),
