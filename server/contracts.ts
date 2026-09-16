@@ -135,7 +135,16 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   newsletter: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional() }),
   instagram_grid: extraObject({ handle: z.string().max(100).optional(), posts: z.array(extraObject({ id: itemId, imageUrl: optionalHttpUrl, likes: z.string().max(50).optional(), linkUrl: optionalSafeUrl })).max(50).optional() }),
   rich_text: extraObject({ body: z.string().max(20000).optional() }),
-  image: extraObject({ imageUrl: z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value) || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value), 'Images must use HTTP(S) or a valid upload path.').optional(), alt: z.string().max(300).optional(), caption: z.string().max(500).optional() }),
+  image: extraObject({
+    imageUrl: z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value) || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value), 'Images must use HTTP(S) or a valid upload path.').optional(),
+    linkUrl: optionalSafeUrl,
+    alt: z.string().max(300).optional(),
+    decorative: z.boolean().optional(),
+    caption: z.string().max(500).optional(),
+    fit: z.enum(['cover', 'contain']).optional(),
+    aspect: z.enum(['auto', 'square', 'portrait', 'landscape']).optional(),
+    cropPosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).optional()
+  }),
   gallery: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
   spacer: extraObject({ height: z.number().int().min(16).max(240).optional() }),
   carousel: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),

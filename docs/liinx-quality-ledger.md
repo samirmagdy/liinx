@@ -1513,3 +1513,50 @@ Baseline: branch `main`, commit `f3671ff2975b5ea2d5761d56c362db795486e60a` at ta
 ### Next eligible prompt
 
 `26 — Standalone image block`
+
+## Task 26 — Standalone image block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `f8c1a8cc0f8d419053cd161a656bb082790d3596` at task start. The worktree was clean; Task 25 changes were preserved. Implementation commit: recorded after this entry is committed.
+
+### Scope and changed files
+
+- `server/contracts.ts`: extends the image block contract with safe optional destination, alt/decorative semantics, caption, fit, aspect, and crop-position fields; legacy image fields remain compatible.
+- `server/routes/analytics.ts`: resolves an image block’s optional `linkUrl` through the existing validated redirect/tracking path.
+- `src/components/BuilderStudio.tsx`: wires image URL/upload replacement, alt text, decorative toggle, caption, destination, fit, shape, and crop-position controls to the existing save queue and shared uploader.
+- `src/components/PublicBioView.tsx`: renders configured image sizing/crop, safe tracked destinations, meaningful or decorative alt text, translated unavailable fallback, and preview-safe non-navigation behavior.
+- `tests/image_block.test.ts`: covers two owned uploads, replacement persistence, Studio/public round-trip, tracked destination, unsafe destination rejection, and retained broken-image data.
+
+### Findings and behavior
+
+- The previous standalone image editor only exposed image URL/upload and the renderer silently omitted the image when empty or broken. It had no destination, caption, accessibility mode, or crop/sizing persistence.
+- Replacements use `/api/upload` and create a new owned asset; the prior asset is not deleted, so shared or historically referenced assets are not destroyed.
+- New image settings are validated at the shared block boundary. Destinations allow only the existing safe HTTP(S), `mailto:`, or `tel:` protocols. Upload validation remains exclusively in the shared upload service.
+- Informative images use authored alt text with a title fallback; decorative images expose an empty alt attribute. Broken or missing images render an honest unavailable state without making the page unusable.
+- Public image destinations use `/r/:blockId` and are disabled in preview. Fit (`cover`/`contain`), aspect (`auto`/square/portrait/landscape), and crop position are persisted and used by the public/preview renderer.
+
+### Acceptance criteria
+
+- PASS — Upload and replace images without deleting prior assets. Evidence: `tests/image_block.test.ts` uploads two owned files, verifies distinct paths, replacement persistence, and two `uploaded_files` rows.
+- PASS — Edit alt text/caption and persist after reload. Evidence: API update plus Studio/public profile reload assertions.
+- PASS — Optional destination is validated and tracked. Evidence: unsafe `javascript:` update returns HTTP 400; valid destination returns HTTP 302 through `/r/:blockId`.
+- PASS — Informative and decorative image semantics are supported. Evidence: shared `alt`/`decorative` fields and renderer behavior; informative fallback uses title when authored alt is absent.
+- PASS — Broken image data has a useful fallback path. Evidence: renderer has an `onError` status fallback and the test preserves an unreachable image URL without falsely claiming it loaded.
+- NOT RUN — Actual browser upload interaction, replacement UI journey, preview/public visual comparison, and responsive image inspection. Browser-client Node REPL was unavailable; API/source evidence is not equivalent to browser evidence.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `f8c1a8cc0f8d419053cd161a656bb082790d3596` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/image_block.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts tests/preview.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 35 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/public/preview visual verification — NOT RUN; no supported browser-client Node REPL was available. Tests used disposable `mktemp` SQLite database and uploads directories; no production data or assets were changed.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and the shared upload route are the existing test utilities and services used here.
+- Browser verification remains required for actual upload/replacement controls, image load-error presentation, keyboard activation of linked images, crop appearance, and narrow responsive layout.
+- The renderer cannot verify that an external image URL is reachable until the browser requests it; unreachable URLs are handled client-side with the fallback. No image transformation or crop-processing service was introduced.
+
+### Next eligible prompt
+
+`27 — Gallery block`

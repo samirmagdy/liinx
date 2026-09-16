@@ -111,12 +111,13 @@ function renderRichText(value: string) {
   return output;
 }
 
-const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig; previewOnly?: boolean }> = ({ block, profileId, theme, previewOnly = false }) => {
+const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig; previewOnly?: boolean; translate?: (value: string) => string }> = ({ block, profileId, theme, previewOnly = false, translate = value => value }) => {
   const extra = block.extra || block;
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<string | null>(null);
   const [gateValue, setGateValue] = useState('');
   const [unlocked, setUnlocked] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   if (!advancedBlockTypes.has(block.type)) return null;
   const card = `p-5 shadow-sm ${advancedRadius(theme.cardRadius)}`;
   const cardStyle = { backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText };
@@ -125,7 +126,15 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
 
   if (block.type === 'spacer') return <div key={block.id} aria-hidden="true" style={{ height: Math.min(240, Math.max(16, Number(extra.height) || 48)) }} />;
   if (block.type === 'rich_text') return <article className={card} style={cardStyle}><h3 className="font-bold mb-2">{block.title}</h3><div className="text-sm leading-7" style={{ color: theme.subtextColor }}>{renderRichText(extra.body || block.subtitle || '')}</div></article>;
-  if (block.type === 'image') return <figure className={`overflow-hidden ${card}`} style={cardStyle}>{extra.imageUrl && <img src={extra.imageUrl} alt={extra.alt || block.title} className="w-full max-h-[520px] object-cover" loading="lazy" />}{extra.caption && <figcaption className="pt-3 text-xs" style={{ color: theme.subtextColor }}>{extra.caption}</figcaption>}</figure>;
+  if (block.type === 'image') {
+    const imageSrc = safePublicHref(extra.imageUrl);
+    const imageAlt = extra.decorative ? '' : String(extra.alt || block.title || 'Image');
+    const aspectClass = extra.aspect === 'square' ? 'aspect-square' : extra.aspect === 'portrait' ? 'aspect-[3/4]' : extra.aspect === 'landscape' ? 'aspect-[16/9]' : '';
+    const image = imageSrc && !imageFailed ? <img src={imageSrc} alt={imageAlt} className={`w-full max-h-[520px] ${aspectClass} ${extra.aspect && extra.aspect !== 'auto' ? 'h-full' : ''}`} style={{ objectFit: extra.fit === 'contain' ? 'contain' : 'cover', objectPosition: extra.cropPosition || 'center' }} loading="lazy" onError={() => setImageFailed(true)} /> : <div role="status" className="flex min-h-32 items-center justify-center rounded-lg bg-neutral-100/60 px-4 text-center text-xs" style={{ color: theme.subtextColor }}>{translate('Image unavailable. Please try again later.')}</div>;
+    const content = <>{image}{extra.caption && <figcaption className="pt-3 text-xs" style={{ color: theme.subtextColor }}>{extra.caption}</figcaption>}</>;
+    const destination = safePublicHref(extra.linkUrl);
+    return <figure className={`overflow-hidden ${card}`} style={cardStyle}>{destination && !previewOnly ? <a href={`/r/${block.id}`} target="_blank" rel="noreferrer" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{content}</a> : content}</figure>;
+  }
   if (block.type === 'gallery' || block.type === 'carousel') return <div className={`${card} ${block.type === 'carousel' ? 'overflow-x-auto' : ''}`} style={cardStyle}><h3 className="font-bold mb-3">{block.title}</h3><div className={`grid ${block.type === 'carousel' ? 'grid-flow-col auto-cols-[75%] sm:auto-cols-[45%]' : 'grid-cols-2'} gap-2`}>{links.map((item: any, index: number) => <a key={item.id || index} href={safePublicHref(item.url) || '#'} target="_blank" rel="noreferrer" className="block"><img src={item.imageUrl || item.url} alt={item.alt || item.title || block.title} className="aspect-square w-full object-cover rounded-xl" loading="lazy" />{item.caption && <span className="mt-1 block text-xs" style={{ color: theme.subtextColor }}>{item.caption}</span>}</a>)}</div></div>;
   if (block.type === 'form') return <div className={card} style={cardStyle}><h3 className="font-bold mb-1">{block.title}</h3><p className="text-sm mb-4" style={{ color: theme.subtextColor }}>{block.subtitle || extra.description}</p><form className="space-y-3" onSubmit={async event => { event.preventDefault(); setStatus('Sending…'); try { const response = await fetch('/api/forms/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId, blockId: block.id, fields: formValues }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Unable to send'); setStatus(data.message || 'Sent successfully.'); setFormValues({}); } catch (error) { setStatus(error instanceof Error ? error.message : 'Unable to send.'); } }}><div className="grid gap-3">{fields.map((field: any) => <label key={field.name} className="grid gap-1 text-xs font-semibold">{field.label || field.name}{field.type === 'textarea' ? <textarea required={field.required !== false} value={formValues[field.name] || ''} onChange={e => setFormValues(v => ({ ...v, [field.name]: e.target.value }))} className="min-h-24 rounded-xl border bg-transparent p-3 font-normal" /> : <input required={field.required !== false} type={field.type || 'text'} value={formValues[field.name] || ''} onChange={e => setFormValues(v => ({ ...v, [field.name]: e.target.value }))} className="rounded-xl border bg-transparent p-3 font-normal" />}</label>)}</div><button className="rounded-xl px-4 py-2 text-sm font-bold" style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }} disabled={status === 'Sending…'}>{extra.buttonText || 'Send'}</button>{status && <p role="status" className="text-xs" style={{ color: theme.subtextColor }}>{status}</p>}</form></div>;
   if (block.type === 'download') { const href = safePublicHref(extra.fileUrl || block.url); return <a href={href || '#'} download={extra.downloadName} target="_blank" rel="noreferrer" className={`${card} block hover:opacity-90`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.description || 'Download file'}</span></a>; }
@@ -1091,7 +1100,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             }
 
             if (advancedBlockTypes.has(block.type)) {
-              return <AdvancedPublicBlock key={block.id} block={block} profileId={profile.id} theme={theme} previewOnly={previewOnly} />;
+              return <AdvancedPublicBlock key={block.id} block={block} profileId={profile.id} theme={theme} previewOnly={previewOnly} translate={ui} />;
             }
 
             return null;
