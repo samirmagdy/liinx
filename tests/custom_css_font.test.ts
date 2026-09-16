@@ -4,6 +4,7 @@ import express from 'express';
 import { db, initDatabase } from '../server/db';
 import { signJwt } from '../server/auth';
 import { profilesRouter } from '../server/routes/profiles';
+import { app as serverApp } from '../server/server';
 
 describe('Milestone 7: Custom CSS & Custom Font Engine (0% Fake Implementation)', () => {
   const app = express();
@@ -69,5 +70,18 @@ describe('Milestone 7: Custom CSS & Custom Font Engine (0% Fake Implementation)'
 
     expect(publicRes.body.customCss).toBe(customCssCode);
     expect(publicRes.body.customFontUrl).toBe(customFont);
+  });
+
+  it('rejects unsafe CSS, unscoped selectors, and font sources outside the CSP policy', async () => {
+    await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customCss: '@import url(https://evil.example/style.css);' }).expect(400);
+    await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customCss: '.public-header { display: none; }' }).expect(400);
+    await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customCss: '#public-bio-view .x { position: fixed; z-index: 9999; }' }).expect(400);
+    await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customFontUrl: 'https://fonts.example.test/font.css' }).expect(400);
+  });
+
+  it('keeps the CSP aligned with the supported Google Fonts source', async () => {
+    const response = await request(serverApp).get('/api/health').expect(200);
+    expect(response.headers['content-security-policy']).toContain("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
+    expect(response.headers['content-security-policy']).toContain("font-src 'self' https://fonts.gstatic.com data:");
   });
 });

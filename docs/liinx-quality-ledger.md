@@ -1227,3 +1227,56 @@ Baseline: branch `main`, commit `353df4a868855dd8db8f4e99e2f1ca29f256ac61` at ta
 ### Next eligible prompt
 
 `20 — Typography and custom CSS`
+
+## Task 20 — Typography and custom CSS
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `7bfc9e060d6c8683124e2ba8fa48eacaf2aa1551` at task start. Existing Task 19 changes were preserved. Task 20 changes are currently uncommitted.
+
+### Scope and changed files
+
+- `server/contracts.ts`: makes creator CSS policy part of the shared profile contract and restricts custom font URLs to HTTPS Google Fonts stylesheets.
+- `server/routes/profiles.ts`: rejects unscoped/dangerous CSS and unsupported font sources, and filters legacy unsafe CSS/font values from public responses without deleting stored creator data.
+- `src/utils/fontValidation.ts`: adds the shared client-side font-source allowlist.
+- `src/components/PublicBioView.tsx`: loads allowed custom font stylesheets in the public document with normal fallback behavior.
+- `src/components/ViewportPreview.tsx`: removes duplicate unrestricted font injection so preview uses the public renderer’s same font-loading path.
+- `src/components/BuilderStudio.tsx`: documents the CSS/font policy in the editor UI.
+- `src/config/runtimeTranslations.ts`: adds Arabic policy copy.
+- `tests/custom_css_font.test.ts`: covers valid persistence, unsafe/unscoped CSS, unsupported font sources, and CSP alignment.
+
+### Findings and behavior
+
+- Existing custom CSS was only checked for a few dangerous substrings and could use unscoped selectors or rules affecting stacking/visibility. Existing custom font URLs accepted any HTTP(S) host even though CSP only allowed Google Fonts sources. These were current defects.
+- Creator CSS must target `#public-bio-view`; imports, external `url()`, script-like constructs, global selectors, control-obscuring positioning/z-index/pointer rules, hidden/display-none rules, keyframes, and font-face declarations are rejected.
+- Custom fonts must use HTTPS `fonts.googleapis.com` stylesheets, matching the existing CSP `style-src` and `font-src` directives. Blocked/offline fonts naturally fall back to the selected theme’s system font stack; unsupported sources are rejected and explained.
+- Public output applies only validated custom CSS and font URLs. Preview renders the same `PublicBioView` path in its isolated iframe, so creator styles do not reach studio/auth/consent controls or another profile document.
+- Existing supported theme font choices (`sans`, `display`, `mono`) remain unchanged. No CSP relaxation or new font provider was added.
+- CSS/URL rejection does not claim the style applied; editor errors use the existing save-error path.
+
+### Acceptance criteria
+
+- PASS — Supported font selection, font loading, and fallback are preserved. Evidence: theme font stack remains in `resolveTheme`; public and preview use the allowlisted stylesheet loader; successful build.
+- PASS — Custom font URL policy is reconciled with CSP. Evidence: Google Fonts URL accepted, non-Google source rejected, and CSP header regression asserts `fonts.googleapis.com`/`fonts.gstatic.com` sources.
+- PASS — Creator styles are scoped to the public page/preview. Evidence: contract rejects unscoped selectors; preview is an iframe and public style is rendered inside `#public-bio-view`.
+- PASS — Unsafe CSS/imports/URLs are rejected. Evidence: tests reject `@import`, unscoped control selectors, fixed/z-index control-obscuring rules, and unsupported font hosts with HTTP 400.
+- PASS — Incomplete/legacy public styles fail safely without deleting stored data. Evidence: public response filters values before rendering; theme/font fallback logic remains deterministic.
+- PASS — Arabic/RTL typography remains supported. Evidence: existing public main direction logic and iframe language/direction setup were preserved; no global document direction changes were introduced.
+- NOT RUN — Browser reload/preview font rendering, offline/slow font loading, visual RTL verification, cross-profile isolation, and manual checks that mandatory consent/control UI remains visible. Browser automation and live font-provider verification were unavailable.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `7bfc9e060d6c8683124e2ba8fa48eacaf2aa1551` on `main`.
+- `task20_final=$(mktemp -d /tmp/liinx-task20-final-XXXXXX); mkdir -p "$task20_final/uploads"; DATABASE_PATH="$task20_final/liinx.db" UPLOADS_DIR="$task20_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task20_final/liinx.db" UPLOADS_DIR="$task20_final/uploads" NODE_ENV=test npm test -- tests/custom_css_font.test.ts tests/colorContrast.test.ts tests/api.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS, typecheck plus 4 files / 62 tests; production build/prerender completed with 10 routes; diff check passed. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/deployed/offline font verification — NOT RUN; no production data, deployment, or external messages were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production database or uploads directory was changed.
+- The CSS policy is intentionally conservative; unsupported advanced styling is rejected rather than silently represented as working. A future product decision may expand the allowlist with a proper CSS parser and sanitizer.
+- Browser checks remain necessary for actual font rendering after reload, blocked font fallback, Arabic typography, preview isolation, and consent/control visibility.
+- Existing full-suite failures recorded in prior ledger tasks remain outside this task; the relevant CSS/font/API suites passed.
+
+### Next eligible prompt
+
+`21 — Basic link block`

@@ -20,13 +20,6 @@ export function ViewportPreview({ profile, customTheme, deviceMode }: { profile:
     return () => observer.disconnect();
   }, []);
   useEffect(() => { if (root) { root.ownerDocument.documentElement.lang = lang; root.ownerDocument.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'; } }, [root, lang]);
-  useEffect(() => {
-    if (!root || !profile.customFontUrl) return;
-    const link = root.ownerDocument.createElement('link');
-    link.rel = 'stylesheet'; link.href = profile.customFontUrl;
-    root.ownerDocument.head.appendChild(link);
-    return () => link.remove();
-  }, [root, profile.customFontUrl]);
   return <div ref={host} className="w-full min-w-0">
     <p className="text-xs text-neutral-600 text-center mb-3">{lang === 'ar' ? 'معاينة التخطيط فقط. افتح الصفحة المنشورة للتفاعل.' : 'Layout preview only. Open the live page to interact.'} <bdi>{width} × {height}</bdi></p>
     <div className="relative mx-auto overflow-hidden border rounded-2xl bg-neutral-50" style={{ width: width * scale, height: height * scale }}>

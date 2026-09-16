@@ -7,6 +7,7 @@ import { brand } from '../config/brand';
 import { api } from '../services/api';
 import { getAccessibleTextColor, getBorderColor, getThemeBackground, resolveTheme } from '../utils/colorContrast';
 import { friendlyErrorMessage } from '../utils/errors';
+import { isAllowedFontStylesheetUrl } from '../utils/fontValidation';
 import { 
   ArrowLeft, 
   Share2, 
@@ -150,6 +151,15 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     media.addEventListener?.('change', update);
     return () => media.removeEventListener?.('change', update);
   }, []);
+
+  useEffect(() => {
+    if (!profile?.customFontUrl || !isAllowedFontStylesheetUrl(profile.customFontUrl)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = profile.customFontUrl;
+    document.head.appendChild(link);
+    return () => link.remove();
+  }, [profile?.customFontUrl]);
 
   useEffect(() => {
     if (previewOnly) return;

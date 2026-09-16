@@ -2652,7 +2652,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <div>
                       <h3 className="font-bold text-sm text-neutral-900">{ui("Custom CSS & Custom Webfonts")}</h3>
                       <p className="text-xs text-neutral-500 mt-0.5">
-                        {ui("Inject custom stylesheet overrides and Google Fonts to match your brand guide.")}</p>
+                        {ui("Custom styles are limited to the public page; font stylesheets must use Google Fonts.")}</p>
                     </div>
                   </div>
                   {profile.plan === 'free' ? (
@@ -2676,6 +2676,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
                     />
                   </div>
+                  <p className="text-[11px] text-neutral-500">{ui("Unsupported imports, external URLs, and rules that can hide or cover controls are rejected.")}</p>
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">

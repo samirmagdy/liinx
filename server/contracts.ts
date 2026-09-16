@@ -239,6 +239,24 @@ export const pageUpdateContract = pageContract.partial().extend({ sortOrder: z.n
 
 const uploadPath = z.string().regex(/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/, 'Must be a valid upload path.');
 const mediaUrl = z.union([uploadPath, z.string().max(500).refine(isHttpUrl, 'Background media must use HTTP(S) or a valid upload path.')]);
+export function isSafeCreatorCss(value: string | null | undefined): boolean {
+  if (!value) return true;
+  if (value.length > 10000 || /(?:@import|expression\s*\(|behavior\s*:|javascript\s*:|url\s*\(|@(?:keyframes|font-face)|position\s*:\s*(?:fixed|absolute|sticky)|z-index\s*:|pointer-events\s*:|display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0)/i.test(value)) return false;
+  const withoutComments = value.replace(/\/\*[\s\S]*?\*\//g, '');
+  return withoutComments.split('{').slice(0, -1).every(selector => {
+    const trimmed = selector.trim();
+    return !trimmed || trimmed.startsWith('@media') || trimmed.startsWith('@supports') || trimmed.split(',').every(part => part.trim().startsWith('#public-bio-view'));
+  });
+}
+
+const googleFontStylesheet = (value: unknown) => {
+  if (value === null || value === undefined || value === '') return true;
+  if (typeof value !== 'string') return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' && (parsed.hostname === 'fonts.googleapis.com' || parsed.hostname.endsWith('.fonts.googleapis.com'));
+  } catch { return false; }
+};
 const presetThemeIds = ['editorial-stone', 'obsidian-noir', 'tokyo-cyber', 'nordic-minimal', 'sunset-amber', 'velvet-plum', 'brutalist-mono', 'forest-canopy', 'coral-reef', 'midnight-ink', 'sahara-dune', 'elena-rostova'] as const;
 const cssColor = z.string().trim().regex(/^(?:#[\da-f]{3,8}|rgba?\(\s*[\d.]+[\s,]+[\d.]+[\s,]+[\d.]+(?:[\s,/]\s*[\d.]+%?)?\s*\))$/i, 'Use a valid hex or rgb color.');
 const cssGradient = z.string().trim().max(500).regex(/^(?:linear|radial)-gradient\([^;{}]+\)$/i, 'Only safe CSS gradients are supported.');
@@ -261,8 +279,8 @@ export const profileUpdateContract = z.object({
   avatarUrl: z.union([uploadPath, z.string().max(MAX_URL).refine(isHttpUrl, 'Avatar must use HTTP(S) or a valid upload path.')]).optional(),
   category: z.string().trim().max(50).optional(), themeId: z.enum(presetThemeIds).optional(), hideBranding: z.boolean().optional(),
   gaMeasurementId: z.string().max(50).nullable().optional(), metaPixelId: z.string().max(50).nullable().optional(),
-  customDomain: z.string().max(100).nullable().optional(), customCss: z.string().max(10000).nullable().optional(),
-  customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),
+  customDomain: z.string().max(100).nullable().optional(), customCss: z.string().max(10000).refine(isSafeCreatorCss, 'Custom CSS must be scoped to the public page and cannot hide controls or load external content.').nullable().optional(),
+  customFontUrl: z.string().max(300).refine(googleFontStylesheet, 'Custom fonts must use an HTTPS Google Fonts stylesheet URL.').nullable().optional(),
   shareTitle: z.string().max(160).nullable().optional(), shareDescription: z.string().max(300).nullable().optional(),
   shareImageUrl: z.string().max(500).refine(isHttpUrl, 'Share image must use HTTP(S).').nullable().optional(),
   footerLogoUrl: z.string().max(500).refine(isHttpUrl, 'Footer logo must use HTTP(S).').nullable().optional(),

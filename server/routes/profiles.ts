@@ -7,7 +7,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
 import { createId } from '../utils/ids.js';
-import { normalizeBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
+import { isSafeCreatorCss, normalizeBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
 
 export const profilesRouter = Router();
@@ -49,9 +49,12 @@ function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   }
 }
 
-function isSafeCustomCss(value: string | null | undefined): boolean {
+export function isAllowedFontStylesheetUrl(value: string | null | undefined): boolean {
   if (!value) return true;
-  return !/(?:@import|expression\s*\(|behavior\s*:|javascript\s*:|url\s*\()/i.test(value);
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' && (parsed.hostname === 'fonts.googleapis.com' || parsed.hostname.endsWith('.fonts.googleapis.com'));
+  } catch { return false; }
 }
 
 const avatarUrlSchema = z.string().refine(value => {
@@ -160,8 +163,8 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       gaMeasurementId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
       metaPixelId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
       customDomain: profile.custom_domain || null,
-      customCss: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_css || null) : null,
-      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_font_url || null) : null,
+      customCss: hasEntitlement(profile.plan, 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
+      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
       shareTitle: profile.share_title || null,
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
@@ -284,8 +287,8 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       gaMeasurementId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
       metaPixelId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
       customDomain: hasEntitlement(profile.plan, 'customDomain') ? (profile.custom_domain || null) : null,
-      customCss: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_css || null) : null,
-      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.custom_font_url || null) : null,
+      customCss: hasEntitlement(profile.plan, 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
+      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
       shareTitle: profile.share_title || null,
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
@@ -334,8 +337,11 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     } = parse.data;
     const revision = parse.data.revision;
 
-    if (!isSafeCustomCss(customCss)) {
+    if (!isSafeCreatorCss(customCss)) {
       return res.status(400).json({ error: 'Custom CSS may not import external content or execute scripts.' });
+    }
+    if (!isAllowedFontStylesheetUrl(customFontUrl)) {
+      return res.status(400).json({ error: 'Custom fonts must use an HTTPS Google Fonts stylesheet URL supported by the site policy.' });
     }
 
     const existing = db.prepare('SELECT * FROM profiles WHERE id = ?').get(req.user!.profileId) as any;

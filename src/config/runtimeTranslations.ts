@@ -59,6 +59,8 @@ export const runtimeTranslations: Record<string, string> = {
   'Background image upload failed.': 'فشل رفع صورة الخلفية.',
   'Background media requires a paid plan.': 'تتطلب وسائط الخلفية خطة مدفوعة.',
   'Background media is unavailable on the free plan. Existing media is hidden publicly until the plan is upgraded.': 'وسائط الخلفية غير متاحة في الخطة المجانية. ستظل الوسائط الحالية مخفية للعامة حتى ترقية الخطة.',
+  'Custom styles are limited to the public page; font stylesheets must use Google Fonts.': 'التنسيقات المخصصة محصورة في الصفحة العامة؛ ويجب أن تستخدم أوراق الخطوط Google Fonts.',
+  'Unsupported imports, external URLs, and rules that can hide or cover controls are rejected.': 'تُرفض الاستيرادات والروابط الخارجية والقواعد التي قد تخفي عناصر التحكم أو تغطيها.',
   'Add New Link or Block to Profile': 'إضافة رابط أو عنصر جديد للملف',
   'Custom Link': 'رابط مخصص',
   'Section Title': 'عنوان قسم',
