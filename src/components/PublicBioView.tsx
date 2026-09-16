@@ -141,6 +141,15 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [analyticsConsent, setAnalyticsConsent] = useState<'granted' | 'denied' | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [pageSearch, setPageSearch] = useState('');
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(media.matches);
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
 
   useEffect(() => {
     if (previewOnly) return;
@@ -350,6 +359,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   const theme = resolveTheme(profile.themeId, customTheme || profile.customTheme);
   const themeBackground = getThemeBackground(theme);
+  const backgroundMediaHref = safePublicHref(profile.backgroundMediaUrl);
+  const hasBackgroundMedia = Boolean(backgroundMediaHref && (profile.backgroundMediaType === 'image' || profile.backgroundMediaType === 'video'));
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => ({
@@ -430,16 +441,18 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       className="min-h-screen w-full transition-colors duration-300 relative selection:bg-black selection:text-white"
       style={{
         ...themeBackground,
-        backgroundImage: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl
-          ? `url(${profile.backgroundMediaUrl})`
+        backgroundImage: hasBackgroundMedia && profile.backgroundMediaType === 'image'
+          ? `url(${backgroundMediaHref})`
           : themeBackground.backgroundImage,
-        backgroundSize: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? 'cover' : undefined,
-        backgroundAttachment: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? 'fixed' : undefined,
+        backgroundSize: hasBackgroundMedia && profile.backgroundMediaType === 'image' ? 'cover' : undefined,
+        backgroundPosition: hasBackgroundMedia && profile.backgroundMediaType === 'image' ? 'center center' : undefined,
+        backgroundAttachment: hasBackgroundMedia && profile.backgroundMediaType === 'image' ? 'scroll' : undefined,
         color: theme.textColor,
         fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
       }}
     >
-      {profile.backgroundMediaType === 'video' && profile.backgroundMediaUrl && <video className="fixed inset-0 -z-0 h-full w-full object-cover" src={profile.backgroundMediaUrl} autoPlay muted loop playsInline aria-hidden="true" />}
+      {hasBackgroundMedia && profile.backgroundMediaType === 'video' && !reducedMotion && <video className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover" src={backgroundMediaHref || undefined} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" />}
+      {hasBackgroundMedia && <div className="pointer-events-none fixed inset-0 z-0 bg-black/15" aria-hidden="true" />}
       {profile?.customCss && (
         <style dangerouslySetInnerHTML={{ __html: profile.customCss }} />
       )}
@@ -501,7 +514,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       </header>
 
       {/* Main Centered Bio Column */}
-      <main dir={isProfileRtl ? 'rtl' : 'ltr'} className="max-w-xl mx-auto px-4 py-12 sm:py-16" onClickCapture={previewOnly ? event => { event.preventDefault(); event.stopPropagation(); } : undefined} onSubmitCapture={previewOnly ? event => { event.preventDefault(); event.stopPropagation(); } : undefined}>
+      <main dir={isProfileRtl ? 'rtl' : 'ltr'} className="relative z-10 max-w-xl mx-auto px-4 py-12 sm:py-16" onClickCapture={previewOnly ? event => { event.preventDefault(); event.stopPropagation(); } : undefined} onSubmitCapture={previewOnly ? event => { event.preventDefault(); event.stopPropagation(); } : undefined}>
         
         {/* Profile Card Header */}
         <div className="flex flex-col items-center text-center mb-8">

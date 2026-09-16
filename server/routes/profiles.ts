@@ -167,7 +167,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       shareImageUrl: profile.share_image_url || null,
       footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
       backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
-      backgroundMediaType: profile.background_media_type || null,
+      backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
       pageRedirectUrl: profile.page_redirect_url || null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
@@ -291,7 +291,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       shareImageUrl: profile.share_image_url || null,
       footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
       backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
-      backgroundMediaType: profile.background_media_type || null,
+      backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
       pageRedirectUrl: profile.page_redirect_url || null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
@@ -353,6 +353,10 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 
     if (!hasEntitlement(existing.plan, 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl))) {
       return res.status(403).json({ error: 'Custom styling, analytics, and branding removal require a Pro or Studio subscription plan.' });
+    }
+    const isEnablingBackgroundMedia = (backgroundMediaUrl !== undefined && backgroundMediaUrl !== null) || (backgroundMediaType !== undefined && backgroundMediaType !== null);
+    if (!hasEntitlement(existing.plan, 'paidCustomization') && isEnablingBackgroundMedia) {
+      return res.status(403).json({ error: 'Background media requires a Pro or Studio subscription plan.' });
     }
 
     // Custom Domain Plan Enforcement & Validation

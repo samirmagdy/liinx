@@ -238,6 +238,7 @@ export const pageContract = z.object({
 export const pageUpdateContract = pageContract.partial().extend({ sortOrder: z.number().int().min(0).optional(), revision: z.number().int().nonnegative().optional() }).strict();
 
 const uploadPath = z.string().regex(/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/, 'Must be a valid upload path.');
+const mediaUrl = z.union([uploadPath, z.string().max(500).refine(isHttpUrl, 'Background media must use HTTP(S) or a valid upload path.')]);
 const presetThemeIds = ['editorial-stone', 'obsidian-noir', 'tokyo-cyber', 'nordic-minimal', 'sunset-amber', 'velvet-plum', 'brutalist-mono', 'forest-canopy', 'coral-reef', 'midnight-ink', 'sahara-dune', 'elena-rostova'] as const;
 const cssColor = z.string().trim().regex(/^(?:#[\da-f]{3,8}|rgba?\(\s*[\d.]+[\s,]+[\d.]+[\s,]+[\d.]+(?:[\s,/]\s*[\d.]+%?)?\s*\))$/i, 'Use a valid hex or rgb color.');
 const cssGradient = z.string().trim().max(500).regex(/^(?:linear|radial)-gradient\([^;{}]+\)$/i, 'Only safe CSS gradients are supported.');
@@ -265,7 +266,7 @@ export const profileUpdateContract = z.object({
   shareTitle: z.string().max(160).nullable().optional(), shareDescription: z.string().max(300).nullable().optional(),
   shareImageUrl: z.string().max(500).refine(isHttpUrl, 'Share image must use HTTP(S).').nullable().optional(),
   footerLogoUrl: z.string().max(500).refine(isHttpUrl, 'Footer logo must use HTTP(S).').nullable().optional(),
-  backgroundMediaUrl: z.string().max(500).refine(isHttpUrl, 'Background media must use HTTP(S).').nullable().optional(),
+  backgroundMediaUrl: mediaUrl.nullable().optional(),
   backgroundMediaType: z.enum(['image', 'video']).nullable().optional(),
   pageRedirectUrl: z.string().max(500).refine(isHttpUrl, 'Redirect URL must use HTTP(S).').nullable().optional(),
   pageRedirectUntil: z.number().int().positive().nullable().optional(),

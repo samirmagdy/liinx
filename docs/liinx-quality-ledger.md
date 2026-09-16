@@ -1176,3 +1176,54 @@ Baseline: branch `main`, commit `1e9713af57aeb433308577e454e2ff5599eb7899` at ta
 ### Next eligible prompt
 
 `19 — Background media`
+
+## Task 19 — Background media
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `353df4a868855dd8db8f4e99e2f1ca29f256ac61` at task start. Existing Task 18 changes were preserved. Task 19 changes are currently uncommitted.
+
+### Scope and changed files
+
+- `server/contracts.ts`: accepts safe HTTP(S) or validated upload paths for background media and retains image/video type validation.
+- `server/routes/profiles.ts`: enforces paid background-media writes and hides background media from public responses for free plans while allowing cleanup.
+- `src/components/BuilderStudio.tsx`: adds paid-plan background-image upload using the existing image uploader, preserves URL/type controls, and explains the free-plan restriction and upload/save state.
+- `src/components/PublicBioView.tsx`: validates media hrefs, supports centered image backgrounds and readable overlays, layers video below content with pointer-events disabled, uses metadata-only preload, and suppresses autoplay under `prefers-reduced-motion`.
+- `src/config/runtimeTranslations.ts`: adds Arabic copy for background upload, failure, and entitlement states.
+- `tests/background_media.test.ts`: covers free-plan enforcement, paid image/video persistence, downgrade hiding, cleanup, unsafe URLs, and unsupported types.
+
+### Findings and behavior
+
+- Background URL/type controls already existed, but the server did not enforce the paid restriction that the UI implied, and public payloads could continue exposing background media after downgrade. These were current defects.
+- Existing image/video backgrounds remain supported. Image URLs use safe href validation, centered/cover rendering, and the theme background remains underneath as a failure fallback. Uploaded images use the existing magic-byte-validated uploader and upload directory.
+- Video backgrounds are muted, looped, inline, metadata-preloaded, pointer-transparent, and placed below the header/content stacking layers. Reduced-motion users receive the theme background/overlay instead of autoplaying video.
+- A restrained dark overlay is present only when valid media is configured, improving text readability without modifying saved theme/media choices. Controls remain above the media layer and clickable.
+- Free profiles cannot enable background media through the API; existing media is hidden publicly after downgrade. Clearing media remains available so legacy paid content is not trapped.
+- No stock-photo, video, or external provider dependency was introduced.
+
+### Acceptance criteria
+
+- PASS — Solid, gradient, image, and video backgrounds retain support through the existing theme/media pipeline. Evidence: shared renderer inspection, existing theme tests, and successful build.
+- PASS — Image upload/URL controls and video URL/type controls provide success/error/fallback behavior. Evidence: existing uploader integration plus API persistence tests; browser upload feedback is unverified below.
+- PASS — Paid restrictions apply server-side and public rendering. Evidence: free enable returns 403; after downgrade public media fields are null; cleanup succeeds.
+- PASS — Unsafe media URLs and unsupported media types fail cleanly. Evidence: `javascript:` and `audio` type requests return HTTP 400.
+- PASS — Video does not cover controls or create autoplay audio. Evidence: `pointer-events-none`, z-index layering, `muted`, `playsInline`, and `preload="metadata"` source inspection.
+- PASS — Media failure has a theme fallback rather than an empty page. Evidence: safe href gating leaves the resolved theme background in place; missing/invalid media is not applied.
+- NOT RUN — Browser tests for portrait/landscape rendering, unavailable media, slow network, unsupported remote video, mobile viewport, reduced-motion preference, text contrast perception, and control clicks. Browser automation and live media providers were unavailable.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `353df4a868855dd8db8f4e99e2f1ca29f256ac61` on `main`.
+- `task19_final=$(mktemp -d /tmp/liinx-task19-final-XXXXXX); mkdir -p "$task19_final/uploads"; DATABASE_PATH="$task19_final/liinx.db" UPLOADS_DIR="$task19_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task19_final/liinx.db" UPLOADS_DIR="$task19_final/uploads" NODE_ENV=test npm test -- tests/background_media.test.ts tests/theme_persistence.test.ts tests/colorContrast.test.ts tests/api.test.ts && npm run build && git diff --check` — PASS, typecheck plus 4 files / 33 tests; production build/prerender completed with 10 routes; diff check passed. Existing warning: one generated chunk exceeds 500 kB.
+- Browser/deployed/live-media verification — NOT RUN; no production data, deployment, stock-media provider, or external messages were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production database or uploads directory was changed.
+- Remote media content is not byte-verified by the background URL field; unavailable or mislabeled remote media falls back visually, but browser verification is needed for provider-specific behavior.
+- The image upload control is implemented; video remains URL-based because the existing general document uploader does not establish a dedicated video-only background lifecycle. A future task may define that if product requirements require local video upload.
+- Browser verification remains needed for reduced-motion/mobile behavior, slow connections, and visual contrast across portrait/landscape assets.
+
+### Next eligible prompt
+
+`20 — Typography and custom CSS`
