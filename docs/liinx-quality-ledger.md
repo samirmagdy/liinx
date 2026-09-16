@@ -1280,3 +1280,55 @@ Baseline: branch `main`, commit `7bfc9e060d6c8683124e2ba8fa48eacaf2aa1551` at ta
 ### Next eligible prompt
 
 `21 — Basic link block`
+
+## Task 21 — Basic link block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `816d24d1cd97a3df030367fdec7343afe730e0f1` at task start. The worktree was clean; existing Task 20 changes were preserved. Implementation commit: `447cacd53ed99a50fcda065145233509044e3699`.
+
+### Scope and changed files
+
+- `src/components/BuilderStudio.tsx`: creates an honest link draft with no fake destination or marketing badge, and exposes title, destination, subtitle, badge, highlight, icon/emoji, duplicate, and delete controls through the existing editor.
+- `src/components/PublicBioView.tsx`: renders only links with a validated destination as `/r/:blockId` tracking anchors; incomplete/invalid links remain visible as non-clickable content instead of appearing functional, and authored icons render accessibly as decorative content.
+- `server/routes/analytics.ts`: validates redirect destinations against the shared safe-link protocol policy and safely preserves legacy bare-host links by normalizing them to HTTPS; unsafe schemes and unfinished values remain inactive.
+- `src/types.ts`: permits the persisted null destination used by an honest unpublished/incomplete link draft.
+- `tests/basic_link.test.ts`: adds real API regression coverage for create/persist/reload/public rendering, long and Unicode values, icon/badge/highlight fields, tracking/click logging, deletion, unsafe/unfinished destinations, and non-clickable drafts.
+
+### Findings and behavior
+
+- The old Studio action created `url: 'https://'`, which the API rejected, and assigned a `NEW` badge without creator authorship. It now creates `Untitled link` with no badge and an explicit “Add a destination before publishing” subtitle.
+- Public basic links use `/r/:blockId` only when the stored destination passes the same safe HTTP(S)/mailto/tel protocol gate. A missing or malformed destination has no `href`, does not increment clicks, and cannot be activated by keyboard as a link.
+- New API/editor writes reject malformed, `javascript:`, `data:`, and unfinished `https://` destinations before persistence. Existing bare-host records remain compatible through constrained HTTPS normalization at redirect time; arbitrary schemes and markup are not normalized.
+- Creator-authored subtitles, icons, badges, highlight state, long labels, and Unicode destinations round-trip through persistence and public output. No popularity, customer, or performance claim is generated.
+- Existing authenticated block ownership, page-aware creation, duplicate, update, and delete routes were retained and exercised; deletion removes the tracking target and the public block.
+
+### Acceptance criteria
+
+- PASS — Create/edit/reload/open a basic link and verify one click event. Evidence: `tests/basic_link.test.ts` creates a 150-character link, reloads Studio/public API state, follows `/r/:id` with HTTP 302, and verifies one persisted `link_clicks` row.
+- PASS — Long labels, missing icon/image state, Unicode destination, invalid schemes, and deleted links. Evidence: targeted test covers 150-character title, optional icon, Unicode URL, four rejected destinations, and post-delete public/redirect 404. Basic links use an authored icon/emoji rather than an unvalidated remote thumbnail; no unsafe image path is introduced.
+- PASS — Intended tracking path. Evidence: public renderer emits `/r/:blockId`, and redirect test verifies the destination plus click persistence.
+- PASS — Honest placeholder/default behavior and no invented marketing badge. Evidence: Studio default has null URL/null badge and explicit incomplete-destination copy; placeholder API/public test confirms no working redirect.
+- NOT RUN — Actual browser keyboard activation, visual responsive layout, and manual editor create/edit journey. The required browser-client Node REPL tool was unavailable after capability search; source semantics and native controls were inspected, but this is not browser evidence.
+- NOT RUN — Live external destination/provider verification. No external provider is required for this basic-link path; only local safe redirect behavior was tested.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `816d24d1cd97a3df030367fdec7343afe730e0f1` on `main`.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/basic_link.test.ts` — initial run exposed a legacy bare-host compatibility failure; the implementation was adjusted without weakening new-write validation.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/basic_link.test.ts tests/api.test.ts tests/security.test.ts` — PASS, 3 files / 49 tests; uses disposable SQLite and uploads paths. The first invocation’s 49-test run was the only failed intermediate result and is superseded by this passing rerun.
+- `npm run lint` — PASS, TypeScript check completed.
+- `npm run build` — PASS, Vite production build and prerender completed 10 routes; existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS before commit.
+- Browser/deployed/live-provider verification — NOT RUN; browser-client Node REPL was unavailable, and no production data, deployment, or external messages were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories are available and were used. No production database or uploads directory was changed.
+- The browser-level keyboard, responsive, and visual checks remain open. Native anchors/buttons provide the intended keyboard semantics, but source inspection is not equivalent to an actual browser journey.
+- Redirect compatibility intentionally accepts legacy bare-host values only when constrained normalization produces a safe URL. New writes still require explicit safe protocols.
+- The editor currently reports asynchronous update failures through the existing save-status path; a future focused UX task may add field-level validation messaging, but this task does not redesign persistence orchestration.
+
+### Next eligible prompt
+
+`22 — Link layouts`
