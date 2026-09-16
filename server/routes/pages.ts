@@ -78,7 +78,11 @@ pagesRouter.delete('/studio/pages/:id', requireAuth, (req: AuthenticatedRequest,
   if (page.is_home) return res.status(400).json({ error: 'The home page cannot be deleted.' });
   const home = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(page.profile_id) as { id: string };
   db.transaction(() => {
-    db.prepare('UPDATE blocks SET page_id = ? WHERE page_id = ? AND profile_id = ?').run(home.id, page.id, page.profile_id);
+    const blocks = db.prepare('SELECT id FROM blocks WHERE page_id = ? AND profile_id = ? ORDER BY position ASC, created_at ASC, id ASC').all(page.id, page.profile_id) as Array<{ id: string }>;
+    db.prepare('UPDATE blocks SET position = position + 1000000 WHERE page_id = ? AND profile_id = ?').run(page.id, page.profile_id);
+    const maxPosition = db.prepare('SELECT COALESCE(MAX(position), -1) as value FROM blocks WHERE page_id = ? AND profile_id = ?').get(home.id, page.profile_id) as { value: number };
+    const moveBlock = db.prepare('UPDATE blocks SET page_id = ?, position = ? WHERE id = ? AND profile_id = ?');
+    blocks.forEach((block, index) => moveBlock.run(home.id, maxPosition.value + 1 + index, block.id, page.profile_id));
     db.prepare('DELETE FROM pages WHERE id = ? AND profile_id = ?').run(page.id, page.profile_id);
   })();
   invalidateProfile(page.profile_id);

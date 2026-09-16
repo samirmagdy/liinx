@@ -153,6 +153,11 @@ blocksRouter.put('/studio/blocks/reorder', requireAuth, (req: AuthenticatedReque
       : db.prepare('UPDATE blocks SET position = ? WHERE id = ? AND profile_id = ?');
 
     const reorderTx = db.transaction(() => {
+      // The uniqueness invariant requires a temporary disjoint range while
+      // positions are swapped one row at a time.
+      ownedIds.forEach((id, index) => {
+        page ? updatePos.run(index + 1000000, id, profileId, page.id) : updatePos.run(index + 1000000, id, profileId);
+      });
       blockIds.forEach((id: string, index: number) => {
         page ? updatePos.run(index, id, profileId, page.id) : updatePos.run(index, id, profileId);
       });

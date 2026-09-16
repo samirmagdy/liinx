@@ -600,6 +600,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
     const newProfileId = createId('prf');
     const now = Date.now();
 
+    db.exec('BEGIN');
     db.prepare(`
       INSERT INTO profiles (
         id, user_id, username, display_name, bio, avatar_url, category, theme_id, plan,
@@ -671,6 +672,8 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       for (const block of sourceBlocks) copyBlock.run(createId('blk'), newProfileId, block.type, block.title, block.url, block.subtitle, block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at, pageMap.get(block.page_id) || homePageId, block.extra_json, now, now);
     }
 
+    db.exec('COMMIT');
+
     // Sign new token for the newly created profile
     const token = signJwt({
       userId,
@@ -692,6 +695,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       token
     });
   } catch (err: any) {
+    try { db.exec('ROLLBACK'); } catch {}
     console.error('Create profile error:', err);
     res.status(500).json({ error: 'Failed to create profile.' });
   }

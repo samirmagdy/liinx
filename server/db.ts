@@ -38,6 +38,11 @@ export function initDatabase() {
       created_at INTEGER NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version TEXT PRIMARY KEY,
+      applied_at INTEGER NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS profiles (
       id TEXT PRIMARY KEY,
       user_id TEXT,
@@ -350,22 +355,103 @@ export function initDatabase() {
   // assigning them to that page during migration; this is idempotent.
   const ensureHomePages = db.transaction(() => {
     const profiles = db.prepare('SELECT id, display_name FROM profiles').all() as Array<{ id: string; display_name: string }>;
-    const findHome = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1 LIMIT 1');
+    const findHomes = db.prepare('SELECT id, slug FROM pages WHERE profile_id = ? AND is_home = 1 ORDER BY sort_order ASC, created_at ASC, id ASC');
+    const findLegacyHome = db.prepare("SELECT id FROM pages WHERE profile_id = ? AND slug = 'home' ORDER BY sort_order ASC, created_at ASC, id ASC LIMIT 1");
     const insertPage = db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`);
     const assignBlocks = db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL');
+    const moveBlocks = db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id = ?');
+    const deletePage = db.prepare('DELETE FROM pages WHERE id = ? AND profile_id = ?');
+    const promotePage = db.prepare("UPDATE pages SET is_home = 1, sort_order = 0, published = 1, updated_at = ? WHERE id = ? AND profile_id = ?");
     const now = Date.now();
     for (const profile of profiles) {
-      let home = findHome.get(profile.id) as { id: string } | undefined;
+      const homes = findHomes.all(profile.id) as Array<{ id: string; slug: string }>;
+      let home = homes[0];
+      if (!home) {
+        const legacyHome = findLegacyHome.get(profile.id) as { id: string } | undefined;
+        if (legacyHome) {
+          promotePage.run(now, legacyHome.id, profile.id);
+          home = { id: legacyHome.id, slug: 'home' };
+        }
+      }
       if (!home) {
         const id = `page_home_${profile.id}`;
         insertPage.run(id, profile.id, profile.display_name || 'Home', now, now);
-        home = { id };
+        home = { id, slug: 'home' };
+      }
+      for (const duplicate of homes.slice(1)) {
+        moveBlocks.run(home.id, profile.id, duplicate.id);
+        deletePage.run(duplicate.id, profile.id);
       }
       assignBlocks.run(home.id, profile.id);
     }
   });
   if (process.env.NODE_ENV === 'test' || process.env.SEED_DEMO === 'true') seedDefaultData();
   ensureHomePages();
+  runSchemaMigrations();
+}
+
+/** Apply data repairs and database guards as named, repeatable migrations. */
+export function runSchemaMigrations() {
+  const migration = db.transaction(() => {
+    // Forward-recovery cleanup for the first invariant draft, which conflicted
+    // with the account-deletion cascade. Application routes still protect home
+    // pages; profile deletion must be allowed to cascade them.
+    db.exec('DROP TRIGGER IF EXISTS trg_pages_home_delete');
+    const existing = db.prepare("SELECT 1 FROM schema_migrations WHERE version = '0002_content_ownership_invariants'").get();
+    if (existing) return;
+
+    const profiles = db.prepare('SELECT id FROM profiles ORDER BY id').all() as Array<{ id: string }>;
+    const homeForProfile = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1 ORDER BY sort_order ASC, created_at ASC, id ASC LIMIT 1');
+    const repairOrphans = db.prepare(`UPDATE blocks SET page_id = ? WHERE profile_id = ? AND (page_id IS NULL OR NOT EXISTS (SELECT 1 FROM pages WHERE pages.id = blocks.page_id AND pages.profile_id = blocks.profile_id))`);
+    for (const profile of profiles) {
+      const home = homeForProfile.get(profile.id) as { id: string } | undefined;
+      if (home) repairOrphans.run(home.id, profile.id);
+    }
+
+    const pages = db.prepare('SELECT id, profile_id FROM pages ORDER BY profile_id, sort_order ASC, created_at ASC, id ASC').all() as Array<{ id: string; profile_id: string }>;
+    const blocksForPage = db.prepare('SELECT id FROM blocks WHERE profile_id = ? AND page_id = ? ORDER BY position ASC, created_at ASC, id ASC');
+    const setPosition = db.prepare('UPDATE blocks SET position = ? WHERE id = ?');
+    for (const page of pages) {
+      const blocks = blocksForPage.all(page.profile_id, page.id) as Array<{ id: string }>;
+      blocks.forEach((block, position) => setPosition.run(position, block.id));
+    }
+
+    db.exec(`
+      DROP TRIGGER IF EXISTS trg_blocks_page_owner_insert;
+      DROP TRIGGER IF EXISTS trg_blocks_page_owner_update;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_blocks_page_position_unique ON blocks(profile_id, page_id, position);
+      CREATE TRIGGER IF NOT EXISTS trg_blocks_page_owner_insert
+      BEFORE INSERT ON blocks
+      WHEN NEW.page_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM pages WHERE id = NEW.page_id AND profile_id = NEW.profile_id)
+      BEGIN SELECT RAISE(ABORT, 'block page must belong to profile'); END;
+      CREATE TRIGGER IF NOT EXISTS trg_blocks_page_owner_update
+      BEFORE UPDATE OF profile_id, page_id ON blocks
+      WHEN NEW.page_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM pages WHERE id = NEW.page_id AND profile_id = NEW.profile_id)
+      BEGIN SELECT RAISE(ABORT, 'block page must belong to profile'); END;
+      CREATE TRIGGER IF NOT EXISTS trg_blocks_page_assign_insert
+      AFTER INSERT ON blocks
+      WHEN NEW.page_id IS NULL
+      BEGIN UPDATE blocks SET page_id = (SELECT id FROM pages WHERE profile_id = NEW.profile_id AND is_home = 1 LIMIT 1) WHERE id = NEW.id; END;
+      CREATE TRIGGER IF NOT EXISTS trg_blocks_page_assign_update
+      AFTER UPDATE OF profile_id, page_id ON blocks
+      WHEN NEW.page_id IS NULL
+      BEGIN UPDATE blocks SET page_id = (SELECT id FROM pages WHERE profile_id = NEW.profile_id AND is_home = 1 LIMIT 1) WHERE id = NEW.id; END;
+      CREATE TRIGGER IF NOT EXISTS trg_pages_home_insert
+      BEFORE INSERT ON pages
+      WHEN NEW.is_home = 1 AND EXISTS (SELECT 1 FROM pages WHERE profile_id = NEW.profile_id AND is_home = 1)
+      BEGIN SELECT RAISE(ABORT, 'profile already has a home page'); END;
+      CREATE TRIGGER IF NOT EXISTS trg_pages_home_update
+      BEFORE UPDATE OF profile_id, is_home ON pages
+      WHEN NEW.is_home = 1 AND EXISTS (SELECT 1 FROM pages WHERE profile_id = NEW.profile_id AND is_home = 1 AND id != NEW.id)
+      BEGIN SELECT RAISE(ABORT, 'profile already has a home page'); END;
+      CREATE TRIGGER IF NOT EXISTS trg_pages_with_blocks_delete
+      BEFORE DELETE ON pages
+      WHEN EXISTS (SELECT 1 FROM blocks WHERE page_id = OLD.id)
+      BEGIN SELECT RAISE(ABORT, 'page with blocks must be reassigned before deletion'); END;
+    `);
+    db.prepare("INSERT INTO schema_migrations (version, applied_at) VALUES ('0002_content_ownership_invariants', ?)").run(Date.now());
+  });
+  migration();
 }
 
 function seedDefaultData() {
