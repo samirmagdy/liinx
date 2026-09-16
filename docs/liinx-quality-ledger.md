@@ -1900,7 +1900,7 @@ Baseline: branch `main`, commit `927a6d565df0b4ec4c73dca8cb472d55b30fabd9` at ta
 
 ### Implementation commit
 
-To be recorded after final validation.
+`b4997a0d9defb23b13a4e2c6c7e0778ddd30fd35` — `feat: make FAQ blocks honest and accessible`.
 
 ### Unresolved risks and dependencies
 
