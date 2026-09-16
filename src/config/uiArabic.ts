@@ -2,7 +2,7 @@ export const uiArabic: Record<string, string> = {
   'Reload this page to try again.': 'أعد تحميل الصفحة للمحاولة مجدداً.',
   'Could not load data. Reopen this tab to retry.': 'تعذّر تحميل البيانات. افتح هذا التبويب مجدداً لإعادة المحاولة.',
   'Uploading...': 'جارٍ الرفع…', 'Upload Avatar Image': 'رفع صورة الملف', 'Dark': 'داكن', 'Light': 'فاتح', 'Square': 'مربّع', 'Pill': 'بيضاوي',
-  'loading': 'جارٍ التحميل', 'Current Plan': 'الخطة الحالية', 'Downgrade': 'إدارة الاشتراك', 'Select Pro': 'اختيار Pro', 'Select Studio': 'اختيار Studio', 'Analytics': 'التحليلات', 'Published page': 'الصفحة المنشورة', 'Saved': 'تم الحفظ', 'Studio': 'Studio',
+  'loading': 'جارٍ التحميل', 'Current Plan': 'الخطة الحالية', 'Downgrade': 'إدارة الاشتراك', 'Select Pro': 'اختيار Pro', 'Select Studio': 'اختيار Studio', 'Analytics': 'التحليلات', 'Published page': 'الصفحة المنشورة', 'Published autosave': 'حفظ مباشر للصفحة المنشورة', 'Changes save directly to the published page. Unpublished pages are hidden; Liinx does not keep a separate draft revision.': 'تُحفظ التغييرات مباشرةً على الصفحة المنشورة. الصفحات غير المنشورة مخفية؛ ولا يحتفظ Liinx بإصدار مسودة منفصل.', 'Saved': 'تم الحفظ', 'Studio': 'Studio',
   '✓ Pixel settings saved!': 'تم حفظ إعدادات التتبع', 'Save Tracking IDs': 'حفظ معرّفات التتبع', 'Checking DNS...': 'جارٍ فحص DNS…', 'Verify DNS': 'التحقق من DNS',
   'Save Domain': 'حفظ النطاق', '✓ Custom styling saved!': 'تم حفظ المظهر المخصص', 'Save Custom CSS & Fonts': 'حفظ CSS والخطوط',
   'CONNECTED': 'متصل', 'DISCONNECTED': 'غير متصل', 'Syncing...': 'جارٍ المزامنة…', 'Sync Now': 'المزامنة الآن', 'ENABLED': 'مفعّل', 'PAUSED': 'متوقف',

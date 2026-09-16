@@ -279,6 +279,7 @@ app.use((req, res, next) => {
         if (acceptsHtml && fs.existsSync(distIndex)) {
           const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE username = ?').get(profile.username) as any;
           const page = pageSlug ? db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE username = ?) AND slug = ? AND published = 1').get(profile.username, pageSlug) as { title?: string; description?: string } | undefined : undefined;
+          if (pageSlug && !page) return res.status(404).send('This page is not available.');
           if (page && !customProfile.share_title) customProfile.share_title = page.title;
           if (page && !customProfile.share_description) customProfile.share_description = page.description || customProfile.bio;
           return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`) : res.sendFile(distIndex);
@@ -434,9 +435,10 @@ export async function startServer() {
       const profileMatch = req.path.match(/^\/@([a-z0-9_]+)(?:\/([a-z0-9-]+))?$/i);
       if (profileMatch) {
         const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
-        const profileShell = path.join(distDir, 'shell.html');
+          const profileShell = path.join(distDir, 'shell.html');
         if (publicProfile && fs.existsSync(profileShell)) {
           const page = db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE lower(username) = ?) AND slug = ? AND published = 1').get(profileMatch[1].toLowerCase(), profileMatch[2] || 'home') as { title?: string; description?: string } | undefined;
+          if (!page) return res.status(404).send('This page is not available.');
           if (page && !publicProfile.share_title) publicProfile.share_title = page.title;
           if (page && !publicProfile.share_description) publicProfile.share_description = page.description || publicProfile.bio;
           const canonical = `https://${process.env.PUBLIC_DOMAIN || 'liinx.app'}/@${encodeURIComponent(publicProfile.username)}${profileMatch[2] ? `/${encodeURIComponent(profileMatch[2])}` : ''}`;

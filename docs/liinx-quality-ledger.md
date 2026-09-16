@@ -811,3 +811,54 @@ Baseline commit: `f10d1668cb54de676f393e2b624b8c111dc5a0f4` on `main` at task st
 ### Next eligible prompt
 
 `12 — Published pages and public routing`
+
+## Task 12 — Published pages and public routing
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `95428f3` (`feat: add support for page-aware block movement, duplication, and reordering`) at task start. Task 12 changes remain uncommitted. Existing Task 11 work was preserved.
+
+### Scope and changed files
+
+- `server/server.ts`: production platform and verified custom-domain HTML routing now returns HTTP 404 when a requested page slug is missing or unpublished instead of serving the SPA shell with a misleading 200.
+- `src/components/BuilderStudio.tsx`: clarifies that edits are saved directly to the published page; unpublished pages are hidden and Liinx does not maintain a separate draft revision stream.
+- `tests/published_pages_routing.test.ts`: verifies Home, published/unpublished/unknown page API visibility, custom-domain lookup, and custom-domain missing-page routing.
+
+### Findings and product model
+
+- The API already selected only `published = 1` pages and exposed only those pages to public navigation. Home is forced published by existing page rules.
+- The client navigation already filtered unpublished pages and marked the selected page with `aria-current="page"`.
+- Production HTML fallback previously returned the shell for an unknown or unpublished platform slug. Verified custom-domain HTML requests had the same problem. Both now return 404.
+- Liinx currently has a single persisted page state. Saving content/settings updates the live state; an unpublished page is hidden, not an unpublished revision of a published page. The studio now states this explicitly.
+- The public API returns 404 for unknown and unpublished pages, including encoded query slugs. Custom-domain resolution preserves the page query.
+
+### Acceptance criteria
+
+- PASS — Home and a published subpage are publicly available; evidence: new routing regression and existing dynamic E2E tests.
+- PASS — Unpublished and unknown pages are excluded and return 404 through the public profile API.
+- PASS — Public navigation lists only published pages and marks the current page; evidence: `PublicBioView.tsx` source inspection. Browser rendering remains unverified.
+- PASS — Production platform and verified custom-domain HTML routing reject missing/unpublished slugs with 404; evidence: route code and custom-domain regression coverage for the available app path.
+- PASS — Custom-domain page lookup preserves the encoded page query; evidence: `tests/published_pages_routing.test.ts`.
+- PASS — UI clearly communicates immediate published autosave and absence of separate draft revisions.
+- NOT RUN — Browser direct reload, back/forward navigation, focus/screen-reader behavior, responsive Arabic/English rendering, and deployed Vercel/Fly/custom-domain behavior; browser/deployment tooling and live domains were unavailable.
+- NOT RUN — Form, content-gate, and download behavior on every visibility permutation; existing endpoint/block tests cover authorization and public filtering, but no new browser journey was run for this task.
+
+### Exact commands and outcomes
+
+- `task12_db=$(mktemp -d /tmp/liinx-task12-db-XXXXXX); task12_uploads=$(mktemp -d /tmp/liinx-task12-uploads-XXXXXX); DATABASE_PATH="$task12_db/liinx.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task12_db/liinx.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm test -- --run tests/published_pages_routing.test.ts tests/backend-e2e.dynamic.test.ts tests/custom_domain.test.ts tests/page_creation_settings.test.ts` — PASS, typecheck plus 4 files / 18 tests.
+- `task12_db=$(mktemp -d /tmp/liinx-task12-full-db-XXXXXX); task12_uploads=$(mktemp -d /tmp/liinx-task12-full-uploads-XXXXXX); DATABASE_PATH="$task12_db/liinx.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm test` — PASS, 32 files / 221 tests.
+- `task12_build_db=$(mktemp -d /tmp/liinx-task12-build-db-XXXXXX); task12_build_uploads=$(mktemp -d /tmp/liinx-task12-build-uploads-XXXXXX); DATABASE_PATH="$task12_build_db/liinx.db" UPLOADS_DIR="$task12_build_uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS before the final ledger-only edit; must be rerun after handoff edits.
+- Browser/deployed routing — NOT RUN; no browser automation or live deployment access was available.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, the SQLite global initializer, and disposable `mktemp` database/uploads directories were used. No production data was used.
+- API evidence cannot prove client-side direct reload or back/forward rendering, despite the route state being encoded in the URL and fetch effect dependencies.
+- The production 404 branch is source/build verified but not exercised against a running production server with a real dist shell and reverse proxy.
+- The current product has no separate draft revision system. Adding one would require an explicit product decision and a later scoped task; this task does not introduce it.
+- Visibility behavior for forms, gates, and downloads remains dependent on their existing block/API authorization paths and needs a dedicated browser journey in a later task.
+
+### Next eligible prompt
+
+`13 — Profile duplication`
