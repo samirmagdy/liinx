@@ -189,9 +189,10 @@ const customThemeSchema = z.object({
   text: z.string().max(100).optional(), accent: z.string().max(100).optional(), radius: z.string().max(20).optional()
 }).strict();
 export const profileUpdateContract = z.object({
-  displayName: z.string().min(1).max(100).optional(), bio: z.string().max(500).optional(),
+  username: z.string().trim().min(3).max(30).regex(/^[a-z0-9_]+$/, 'Username may only contain lowercase letters, numbers, and underscores.').optional(),
+  displayName: z.string().trim().min(1).max(100).optional(), bio: z.string().trim().max(500).optional(),
   avatarUrl: z.union([uploadPath, z.string().max(MAX_URL).refine(isHttpUrl, 'Avatar must use HTTP(S) or a valid upload path.')]).optional(),
-  category: z.string().max(50).optional(), themeId: z.string().max(80).optional(), hideBranding: z.boolean().optional(),
+  category: z.string().trim().max(50).optional(), themeId: z.string().max(80).optional(), hideBranding: z.boolean().optional(),
   gaMeasurementId: z.string().max(50).nullable().optional(), metaPixelId: z.string().max(50).nullable().optional(),
   customDomain: z.string().max(100).nullable().optional(), customCss: z.string().max(10000).nullable().optional(),
   customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),

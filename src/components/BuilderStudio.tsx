@@ -171,11 +171,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [newDisplayName, setNewDisplayName] = useState('');
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [createProfileError, setCreateProfileError] = useState<string | null>(null);
+  const [usernameCheck, setUsernameCheck] = useState<{ loading: boolean; error: string | null }>({ loading: false, error: null });
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
 
   const pages = profile.pages || [];
   const profileRef = useRef(profile);
   profileRef.current = profile;
+  const savedUsernameRef = useRef(profile.username);
   const initialPageId = (nextProfile: CreatorProfile) => nextProfile.pages?.find(page => page.isHome)?.id || nextProfile.pages?.[0]?.id || '';
 
   const syncProfileScopedState = (nextProfile: CreatorProfile) => {
@@ -220,6 +222,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       if (res.token) {
         authStorage.setToken(res.token);
         const newLiveProfile = await api.studio.getProfile();
+        savedUsernameRef.current = newLiveProfile.username;
         setProfile(newLiveProfile);
         setActivePageId(initialPageId(newLiveProfile));
         setSaveStatus('saved');
@@ -250,6 +253,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       if (res.token) {
         authStorage.setToken(res.token);
         const newLiveProfile = await api.studio.getProfile();
+        savedUsernameRef.current = newLiveProfile.username;
         setProfile(newLiveProfile);
         setActivePageId(initialPageId(newLiveProfile));
         setSaveStatus('saved');
@@ -369,6 +373,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           window.history.replaceState(null, '', '/studio');
         }
         setLoadState('ready');
+        savedUsernameRef.current = liveProfile.username;
         setProfile(liveProfile);
         setActivePageId(initialPageId(liveProfile));
         syncProfileScopedState(liveProfile);
@@ -602,6 +607,29 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     const updated = { ...profile, [field]: value };
     setProfile(updated);
     triggerAutoSave({ [field]: value });
+  };
+
+  const handleUsernameBlur = async () => {
+    const username = profile.username.trim().toLowerCase();
+    if (username === savedUsernameRef.current) return;
+    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+      setUsernameCheck({ loading: false, error: ui('Use 3–30 lowercase letters, numbers, or underscores.') });
+      return;
+    }
+    setUsernameCheck({ loading: true, error: null });
+    try {
+      const availability = await api.auth.checkUsername(username);
+      if (!availability.available) throw new Error(availability.reason || ui('That handle is unavailable.'));
+      const result = await api.studio.updateProfile({ username });
+      if (result.token) authStorage.setToken(result.token);
+      savedUsernameRef.current = username;
+      setProfile(previous => ({ ...previous, username }));
+      setUsernameCheck({ loading: false, error: null });
+      loadProfilesList();
+    } catch (error) {
+      setUsernameCheck({ loading: false, error: friendlyErrorMessage(error, ui('That handle is unavailable.')) });
+      setProfile(previous => ({ ...previous, username: savedUsernameRef.current }));
+    }
   };
 
   // Avatar Image Upload
@@ -1337,6 +1365,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <img
                       src={profile.avatarUrl}
                       alt={profile.displayName}
+                      onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = '/favicon.svg'; }}
                       className="w-16 h-16 rounded-full object-cover ring-2 ring-neutral-200"
                     />
                     <button
@@ -1373,9 +1402,15 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <div>
+                    <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui('Username / Handle')}</label>
+                    <input aria-label={ui('Username / Handle')} type="text" value={profile.username} maxLength={30} onChange={event => setProfile(previous => ({ ...previous, username: event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') }))} onBlur={() => void handleUsernameBlur()} className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-neutral-900 focus:ring-1 focus:ring-neutral-900/10" />
+                    <p className="mt-1 text-[11px] text-neutral-500">{usernameCheck.loading ? ui('Checking handle…') : usernameCheck.error || ui('3–30 lowercase letters, numbers, or underscores.')}</p>
+                  </div>
+                  <div>
                     <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Display Name")}</label>
                     <input aria-label={ui("Display Name")}
                       type="text"
+                      maxLength={100}
                       value={profile.displayName}
                       onChange={(e) => handleProfileChange('displayName', e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-semibold text-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
@@ -1386,6 +1421,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Category / Tag")}</label>
                     <input aria-label={ui("Category / Tag")}
                       type="text"
+                      maxLength={50}
                       value={profile.category}
                       onChange={(e) => handleProfileChange('category', e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
@@ -1397,6 +1433,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Short Bio")}</label>
                   <textarea aria-label={ui("Short Bio")}
                     rows={2}
+                    maxLength={500}
                     value={profile.bio}
                     onChange={(e) => handleProfileChange('bio', e.target.value)}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900 resize-none focus:ring-1 focus:ring-neutral-900/10"

@@ -316,6 +316,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     }
 
     const { 
+      username,
       displayName, 
       bio, 
       avatarUrl, 
@@ -340,6 +341,14 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     const existing = db.prepare('SELECT * FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
     if (!existing) {
       return res.status(404).json({ error: 'Profile not found.' });
+    }
+
+    const updatedUsername = username !== undefined ? username.toLowerCase().trim() : existing.username;
+    if (updatedUsername !== existing.username) {
+      if (RESERVED_USERNAMES.includes(updatedUsername as any)) return res.status(400).json({ error: 'This username is reserved and cannot be claimed.' });
+      const conflict = db.prepare('SELECT id FROM profiles WHERE lower(username) = ? AND id != ?').get(updatedUsername, existing.id);
+      if (conflict) return res.status(409).json({ error: `The handle @${updatedUsername} is already taken.` });
+      invalidatePublicProfileCache(existing.id);
     }
 
     if (!hasEntitlement(existing.plan, 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl))) {
@@ -401,6 +410,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     const saved = db.prepare(`
       UPDATE profiles
       SET display_name = ?,
+          username = ?,
           bio = ?,
           avatar_url = ?,
           category = ?,
@@ -420,6 +430,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       WHERE id = ? AND (? IS NULL OR updated_at = ?)
     `).run(
       updatedDisplayName,
+      updatedUsername,
       updatedBio || '',
       updatedAvatarUrl || '',
       updatedCategory || 'Creator',
@@ -443,8 +454,13 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 
     if (saved.changes === 0) return res.status(409).json({ error: 'This profile changed in another tab. Reload it before retrying your changes.' });
 
-    res.json({ success: true, revision: now, message: 'Profile updated successfully.' });
-    publicProfileCache.delete(existing.username.toLowerCase());
+    invalidatePublicProfileCache(existing.id);
+    let token: string | undefined;
+    if (updatedUsername !== existing.username) {
+      token = signJwt({ userId: req.user!.userId, email: req.user!.email, profileId: existing.id, username: updatedUsername, sessionVersion: Number((db.prepare('SELECT session_version FROM users WHERE id = ?').get(req.user!.userId) as any)?.session_version || 1) });
+      res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
+    }
+    res.json({ success: true, revision: now, ...(token ? { token } : {}), message: 'Profile updated successfully.' });
   } catch (err: any) {
     console.error('Update profile error:', err);
     res.status(500).json({ error: 'Failed to update profile.' });

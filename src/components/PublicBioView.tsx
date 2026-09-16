@@ -505,6 +505,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             <img 
               src={profile.avatarUrl} 
               alt={profile.displayName}
+              onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = '/favicon.svg'; }}
               className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-md ring-4 ring-white/20"
               referrerPolicy="no-referrer"
             />

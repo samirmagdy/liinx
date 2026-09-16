@@ -99,8 +99,8 @@ export const api = {
     updatePage: async (id: string, data: Partial<CreatorPage>): Promise<{ success: boolean; revision?: number }> => request<{ success: boolean; revision?: number }>(`/api/studio/pages/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
     deletePage: async (id: string): Promise<{ success: boolean }> => request<{ success: boolean }>(`/api/studio/pages/${encodeURIComponent(id)}`, { method: 'DELETE' }),
     reorderPages: async (pageIds: string[]): Promise<{ success: boolean; pages?: CreatorPage[] }> => request<{ success: boolean; pages?: CreatorPage[] }>('/api/studio/pages/reorder', { method: 'PUT', body: JSON.stringify({ pageIds }) }),
-    updateProfile: async (data: Partial<CreatorProfile>): Promise<{ success: boolean; revision?: number }> => {
-      return request<{ success: boolean; revision?: number }>('/api/studio/profile', {
+    updateProfile: async (data: Partial<CreatorProfile>): Promise<{ success: boolean; revision?: number; token?: string }> => {
+      return request<{ success: boolean; revision?: number; token?: string }>('/api/studio/profile', {
         method: 'PUT',
         body: JSON.stringify(data)
       });

@@ -1013,3 +1013,58 @@ Baseline: branch `main`, commit `7914ff8` (`feat: add profile deletion functiona
 ### Next eligible prompt
 
 `16 — Profile identity editor`
+
+## Task 16 — Profile identity editor
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `4951863` (`feat: implement page-isolated inert preview mode to block interactions in previews`) at task start. Task 16 changes remain uncommitted. Existing Task 15 work was preserved.
+
+### Scope and changed files
+
+- `server/contracts.ts`: trims and validates display name, biography, category, and editable username constraints at the shared profile boundary.
+- `server/routes/profiles.ts`: supports authenticated username changes with reserved-name/availability checks, cache invalidation, and refreshed session token/cookie.
+- `src/services/api.ts`: accepts the refreshed profile-update token.
+- `src/components/BuilderStudio.tsx`: adds username/handle editing with availability feedback, visible length/format constraints, and loading/error states; preserves existing avatar upload flow and adds missing-avatar fallback.
+- `src/components/PublicBioView.tsx`: adds safe missing-avatar fallback for public rendering.
+- `tests/profile_identity.test.ts`: covers validation, Arabic/mixed-direction text, unavailable handles, stale-save failures, public URL changes, and missing-avatar data.
+
+### Findings and behavior
+
+- Display name, bio, category, and avatar controls already existed, but username was not editable from the identity editor and identity text constraints were not visible. Username is now editable only through server validation: lowercase letters/numbers/underscores, 3–30 characters, reserved-name rejection, and duplicate-name 409 handling.
+- A successful handle change issues a new profile-scoped JWT/cookie, invalidates old and new public-profile cache keys, and updates the client profile. The old public URL is no longer served; no redirect history is invented.
+- QR defaults derive from the current `profile.username`, so the editor’s QR modal follows the updated handle. Public canonical/OG URLs derive from the routed username and therefore follow the new URL on the next public request.
+- Avatar uploads continue using the existing validated image uploader (JPG/PNG/WEBP/GIF, 5MB limit). No crop tool exists in the current stack; the product keeps the uploaded image and uses object-fit presentation. Missing/broken avatar URLs fall back to the repository favicon rather than rendering a broken image.
+- `verified` remains read-only in the public/studio data model; no verification claim or customer-facing verification program was added.
+- Save failures use existing revision conflicts and inline error handling. Username availability is checked before the authoritative save, while the server remains the final authority for races.
+
+### Acceptance criteria
+
+- PASS — Display name, biography, category, and username controls are present with constraints. Evidence: editor fields and shared schema; empty/overlong identity tests pass.
+- PASS — Arabic and mixed-direction text persists safely. Evidence: `tests/profile_identity.test.ts` saves and reads Arabic/mixed text.
+- PASS — Unavailable usernames are rejected. Evidence: test receives 409 for a handle owned by another account.
+- PASS — Handle changes update public routing/session/cache behavior. Evidence: test confirms old URL 404, new URL 200, and response contains a refreshed token; QR/canonical sources derive from current username.
+- PASS — Verification is controlled and non-editable. Evidence: no profile update field exists for `verified`; it remains server-managed.
+- PASS — Missing avatars have safe fallback rendering. Evidence: public avatar response remains valid and both studio/public image components install `/favicon.svg` on load failure.
+- PASS — Stale save failures remain explicit. Evidence: stale revision update returns 409 and does not overwrite the acknowledged save.
+- NOT RUN — Browser slow-upload journey, crop interaction, keyboard/focus behavior, responsive rendering, and Arabic visual layout; browser automation was unavailable. Slow upload behavior remains covered only by existing upload request/error handling, not a timed browser test.
+- NOT RUN — Live CDN/cache propagation, QR image generation after a handle change, and deployed canonical metadata; external/deployed verification was unavailable.
+
+### Exact commands and outcomes
+
+- `task16_db=$(mktemp -d /tmp/liinx-task16-db-XXXXXX); task16_uploads=$(mktemp -d /tmp/liinx-task16-uploads-XXXXXX); DATABASE_PATH="$task16_db/liinx.db" UPLOADS_DIR="$task16_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task16_db/liinx.db" UPLOADS_DIR="$task16_uploads" NODE_ENV=test npm test -- --run tests/profile_identity.test.ts tests/api.test.ts tests/security.test.ts tests/profile_switching_onboarding.test.ts` — PASS, typecheck plus 4 files / 49 tests.
+- `task16_full=$(mktemp -d /tmp/liinx-task16-full-XXXXXX); mkdir -p "$task16_full/uploads"; DATABASE_PATH="$task16_full/liinx.db" UPLOADS_DIR="$task16_full/uploads" NODE_ENV=test npm test` — PASS, 35 files / 225 tests.
+- `task16_build=$(mktemp -d /tmp/liinx-task16-build-XXXXXX); mkdir -p "$task16_build/uploads"; DATABASE_PATH="$task16_build/liinx.db" UPLOADS_DIR="$task16_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS before the final ledger edit; must be rerun after this ledger edit.
+- Browser/deployed verification — NOT RUN; no browser automation, CDN, QR provider, or production deployment was used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production data was used.
+- Handle changes intentionally do not create redirects from the old username. Existing shared links to the old handle will fail unless a future product decision adds redirect retention.
+- Broken avatar fallback is source/build verified but not browser-verified; the fallback is a favicon rather than a cropped identity image.
+- Profile update responses can refresh the session token for username changes, but other already-open tabs may retain an old JWT until their next session refresh.
+
+### Next eligible prompt
+
+`17 — Social icons and contact links`
