@@ -20,7 +20,7 @@ Schedule both commands daily using the host scheduler (example: 02:00 UTC), then
 
 Telemetry is retained for `ANALYTICS_RETENTION_DAYS` days (default 90), and processed Stripe event IDs for `WEBHOOK_EVENT_RETENTION_DAYS` days (default 30). Hashed IPs are still treated as personal data and must be included in the privacy policy.
 
-Contact messages are always persisted. If `RESEND_API_KEY`, `CONTACT_NOTIFICATION_EMAIL`, and `CONTACT_FROM_EMAIL` are configured, each new message also sends a real notification through Resend. `SUPPORT_INBOX_ADMIN_EMAIL` enables the authenticated `/api/support/inbox` endpoint for that one operator account.
+Contact messages are always persisted. If `RESEND_API_KEY`, `CONTACT_NOTIFICATION_EMAIL`, and `CONTACT_FROM_EMAIL` are configured, each new message also sends a real notification through Resend. `SUPPORT_INBOX_ADMIN_USER_ID` enables the authenticated `/api/support/inbox` endpoint for one explicitly provisioned operator account; an email address alone is never used for authorization.
 
 ## Stripe alerts
 

@@ -134,7 +134,7 @@ app.use((_req, res, next) => {
   res.setHeader('X-DNS-Prefetch-Control', 'off');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com;");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com https://embed.music.apple.com;");
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
@@ -218,6 +218,17 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>'\"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character] || character));
 }
 
+// JSON is placed inside an HTML script element. Escaping the HTML-significant
+// characters prevents user content such as `</script>` from breaking out of it.
+export function safeJsonForHtml(value: unknown): string {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 function sendProfileShell(res: express.Response, filePath: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null }, canonical: string) {
   let html = fs.readFileSync(filePath, 'utf8');
   const title = `${profile.display_name} (@${profile.username}) | LIINX`;
@@ -231,7 +242,7 @@ function sendProfileShell(res: express.Response, filePath: string, profile: { us
     .replace(/<meta property="og:url" content="[^"]*"\s*\/>/i, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
     .replace(/<meta property="og:title" content="[^"]*"\s*\/>/i, `<meta property="og:title" content="${safeTitle}" />`)
     .replace(/<meta property="og:description" content="[^"]*"\s*\/>/i, `<meta property="og:description" content="${safeDescription}" />`)
-    .replace('</head>', `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, image: profile.avatar_url || undefined } })}</script></head>`);
+    .replace('</head>', `<script type="application/ld+json">${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, image: profile.avatar_url || undefined } })}</script></head>`);
   res.type('html').send(html);
 }
 

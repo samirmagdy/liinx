@@ -10,6 +10,14 @@
       "destination": "https://liinx-app.fly.dev/uploads/:path*"
     },
     {
+      "source": "/r/:path*",
+      "destination": "https://liinx-app.fly.dev/r/:path*"
+    },
+    {
+      "source": "/@:username",
+      "destination": "https://liinx-app.fly.dev/@:username"
+    },
+    {
       "source": "/robots.txt",
       "destination": "https://liinx-app.fly.dev/robots.txt"
     },

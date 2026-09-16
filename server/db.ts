@@ -141,6 +141,14 @@ export function initDatabase() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_insta_profile ON instagram_sync(profile_id);
+
+    CREATE TABLE IF NOT EXISTS uploaded_files (
+      path TEXT PRIMARY KEY,
+      owner_user_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_uploaded_files_owner ON uploaded_files(owner_user_id);
   `);
 
   try {

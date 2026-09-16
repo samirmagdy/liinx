@@ -34,8 +34,8 @@ async function notifySupport(message: { name: string; email: string; message: st
 }
 
 contactRouter.get('/support/inbox', requireAuth, (req: AuthenticatedRequest, res) => {
-  const adminEmail = process.env.SUPPORT_INBOX_ADMIN_EMAIL?.toLowerCase().trim();
-  if (!adminEmail || req.user?.email.toLowerCase() !== adminEmail) {
+  const adminUserId = process.env.SUPPORT_INBOX_ADMIN_USER_ID?.trim();
+  if (!adminUserId || req.user?.userId !== adminUserId) {
     return res.status(403).json({ error: 'Support inbox access is not enabled for this account.' });
   }
   try {

@@ -134,9 +134,12 @@ function deriveTitleFromContext(fullCaption: string, targetMatch: string, normal
 export async function fetchInstagramMedia(accessToken: string): Promise<InstagramMediaItem[]> {
   const url = `https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,permalink,timestamp&access_token=${encodeURIComponent(accessToken)}`;
   
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
   const response = await fetch(url, {
+    signal: controller.signal,
     headers: { 'Accept': 'application/json' }
-  });
+  }).finally(() => clearTimeout(timeout));
 
   if (!response.ok) {
     const errorBody = await response.text();

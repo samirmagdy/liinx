@@ -77,9 +77,9 @@ const insertViewsBatch = db.transaction((views: ViewRecord[]) => {
 export function flushAnalyticsBuffers() {
   if (clickBuffer.length > 0) {
     const toFlush = clickBuffer;
-    clickBuffer = [];
     try {
       insertClicksBatch(toFlush);
+      clickBuffer = clickBuffer.slice(toFlush.length);
     } catch (e) {
       console.error('Error flushing click batch:', e);
     }
@@ -87,9 +87,9 @@ export function flushAnalyticsBuffers() {
 
   if (viewBuffer.length > 0) {
     const toFlush = viewBuffer;
-    viewBuffer = [];
     try {
       insertViewsBatch(toFlush);
+      viewBuffer = viewBuffer.slice(toFlush.length);
     } catch (e) {
       console.error('Error flushing view batch:', e);
     }
@@ -120,32 +120,24 @@ setInterval(() => {
 export function isViewRateLimited(ipHash: string, profileId: string, limit = 10, windowMs = 60000): boolean {
   const key = `${ipHash}:${profileId}`;
   const now = Date.now();
-  let entry = viewRateLimits.get(key);
-  if (!entry) {
-    entry = { timestamps: [] };
-    viewRateLimits.set(key, entry);
-  }
-  entry.timestamps = entry.timestamps.filter(t => now - t < windowMs);
-  if (entry.timestamps.length >= limit) {
+  db.prepare('DELETE FROM rate_limit_events WHERE bucket_key = ? AND occurred_at <= ?').run(`view:${key}`, now - windowMs);
+  const count = (db.prepare('SELECT COUNT(*) AS count FROM rate_limit_events WHERE bucket_key = ?').get(`view:${key}`) as { count: number }).count;
+  if (count >= limit) {
     return true;
   }
-  entry.timestamps.push(now);
+  db.prepare('INSERT INTO rate_limit_events (bucket_key, occurred_at) VALUES (?, ?)').run(`view:${key}`, now);
   return false;
 }
 
 export function isClickRateLimited(ipHash: string, blockId: string, limit = 15, windowMs = 60000): boolean {
   const key = `${ipHash}:${blockId}`;
   const now = Date.now();
-  let entry = clickRateLimits.get(key);
-  if (!entry) {
-    entry = { timestamps: [] };
-    clickRateLimits.set(key, entry);
-  }
-  entry.timestamps = entry.timestamps.filter(t => now - t < windowMs);
-  if (entry.timestamps.length >= limit) {
+  db.prepare('DELETE FROM rate_limit_events WHERE bucket_key = ? AND occurred_at <= ?').run(`click:${key}`, now - windowMs);
+  const count = (db.prepare('SELECT COUNT(*) AS count FROM rate_limit_events WHERE bucket_key = ?').get(`click:${key}`) as { count: number }).count;
+  if (count >= limit) {
     return true;
   }
-  entry.timestamps.push(now);
+  db.prepare('INSERT INTO rate_limit_events (bucket_key, occurred_at) VALUES (?, ?)').run(`click:${key}`, now);
   return false;
 }
 
@@ -171,6 +163,10 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
     if (!block || !block.url) {
       return res.status(404).send('Link not found or inactive.');
     }
+    const now = Date.now();
+    if ((block.start_at != null && block.start_at > now) || (block.end_at != null && block.end_at < now)) {
+      return res.status(404).send('Link not found or inactive.');
+    }
 
     const targetUrl = sanitizeUrl(block.url);
     if (!targetUrl) {
@@ -191,7 +187,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
       const now = Date.now();
       const clickId = createId('clk');
 
-      clickBuffer.push({
+      const clickRecord = {
         id: clickId,
         block_id: block.id,
         profile_id: block.profile_id,
@@ -203,11 +199,8 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
         utm_medium: utmMedium,
         utm_campaign: utmCampaign,
         created_at: now
-      });
-
-      if (clickBuffer.length >= 100 || process.env.NODE_ENV === 'test') {
-        flushAnalyticsBuffers();
-      }
+      };
+      insertClicksBatch([clickRecord]);
     }
 
     // Fast 302 Found redirect
@@ -244,7 +237,7 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
     const now = Date.now();
     const viewId = createId('vw');
 
-    viewBuffer.push({
+    const viewRecord = {
       id: viewId,
       profile_id: profileId,
       ip_hash: ipHash,
@@ -254,11 +247,8 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
       utm_medium: utmMedium || null,
       utm_campaign: utmCampaign || null,
       created_at: now
-    });
-
-    if (viewBuffer.length >= 100 || process.env.NODE_ENV === 'test') {
-      flushAnalyticsBuffers();
-    }
+    };
+    insertViewsBatch([viewRecord]);
 
     res.json({ success: true });
   } catch (err: any) {

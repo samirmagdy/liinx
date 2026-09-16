@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
+import { db } from '../db.js';
 
 interface RateLimitBucket {
   timestamps: number[];
 }
 
-// Rate limiting is deliberately process-local. A database write on every public
-// request serializes SQLite under load and turns abuse protection into the
-// application's primary bottleneck. Clustered deployments should place a
-// shared edge limiter (for example, a reverse proxy/WAF) in front of workers.
+// The database bucket is shared by all workers that use the same persistent
+// database. Production startup also rejects unsupported multi-node scaling.
 const buckets = new Map<string, RateLimitBucket>();
 const MAX_BUCKETS = 100_000;
 
@@ -30,6 +29,10 @@ export function sharedRateLimit(options: { name: string; limit: number; windowMs
     if (process.env.NODE_ENV === 'test') return next();
     const key = `${options.name}:${req.ip || req.socket.remoteAddress || 'unknown'}`;
     const now = Date.now();
+    const cutoff = now - options.windowMs;
+    db.prepare('DELETE FROM rate_limit_events WHERE bucket_key = ? AND occurred_at <= ?').run(key, cutoff);
+    const row = db.prepare('SELECT COUNT(*) AS count FROM rate_limit_events WHERE bucket_key = ?').get(key) as { count: number };
+    const count = row.count;
     let bucket = buckets.get(key);
     if (!bucket) {
       // Prevent an unbounded memory growth attack using many source IPs.
@@ -41,17 +44,16 @@ export function sharedRateLimit(options: { name: string; limit: number; windowMs
       buckets.set(key, bucket);
     }
 
-    bucket.timestamps = bucket.timestamps.filter(timestamp => now - timestamp < options.windowMs);
     res.setHeader('X-RateLimit-Limit', options.limit);
-    res.setHeader('X-RateLimit-Remaining', Math.max(0, options.limit - bucket.timestamps.length - 1));
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, options.limit - count - 1));
 
-    if (bucket.timestamps.length >= options.limit) {
-      const oldest = bucket.timestamps[0] || now;
+    if (count >= options.limit) {
+      const oldest = (db.prepare('SELECT occurred_at FROM rate_limit_events WHERE bucket_key = ? ORDER BY occurred_at ASC LIMIT 1').get(key) as { occurred_at?: number } | undefined)?.occurred_at || now;
       res.setHeader('Retry-After', Math.max(1, Math.ceil((oldest + options.windowMs - now) / 1000)));
       return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
 
-    bucket.timestamps.push(now);
+    db.prepare('INSERT INTO rate_limit_events (bucket_key, occurred_at) VALUES (?, ?)').run(key, now);
     return next();
   };
 }

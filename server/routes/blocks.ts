@@ -46,6 +46,10 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
     }
     const profileId = req.user!.profileId;
+    const profile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(profileId) as { plan?: string } | undefined;
+    if (profile?.plan === 'free' && (startAt != null || endAt != null)) {
+      return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
+    }
     const now = Date.now();
     const id = createId('blk');
 
@@ -147,6 +151,10 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
 
     const now = Date.now();
     const data = parse.data;
+    const profile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(profileId) as { plan?: string } | undefined;
+    if (profile?.plan === 'free' && (data.startAt != null || data.endAt != null || existing.start_at != null || existing.end_at != null)) {
+      return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
+    }
     if (existing.type === 'booking' && (!bookingUrl(data.url === undefined ? existing.url : data.url) || data.extra != null)) {
       return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
     }

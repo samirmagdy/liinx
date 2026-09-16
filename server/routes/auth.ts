@@ -8,6 +8,7 @@ import { createId } from '../utils/ids.js';
 import fs from 'fs';
 import path from 'path';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
+import { cancelStripeSubscription } from '../services/billingCancellation.js';
 
 export const authRouter = Router();
 
@@ -310,19 +311,15 @@ authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res) => {
 });
 
 // Delete account & all associated data permanently (GDPR / Privacy compliance)
-authRouter.delete('/account', requireAuth, (req: AuthenticatedRequest, res) => {
+authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user!.userId;
-    const profileMedia = db.prepare('SELECT avatar_url FROM profiles WHERE user_id = ?').all(userId) as { avatar_url?: string }[];
-    const ownedProfiles = db.prepare('SELECT id FROM profiles WHERE user_id = ?').all(userId) as { id: string }[];
-    const uploadPaths = new Set<string>(profileMedia.map(media => media.avatar_url).filter((value): value is string => Boolean(value && value.startsWith('/uploads/'))));
-    for (const profile of ownedProfiles) {
-      const blocks = db.prepare('SELECT extra_json FROM blocks WHERE profile_id = ?').all(profile.id) as { extra_json?: string | null }[];
-      for (const block of blocks) {
-        if (!block.extra_json) continue;
-        for (const match of block.extra_json.matchAll(/\/uploads\/[A-Za-z0-9._-]+/g)) uploadPaths.add(match[0]);
-      }
-    }
+    const subscriptions = db.prepare('SELECT stripe_subscription_id FROM profiles WHERE user_id = ? AND stripe_subscription_id IS NOT NULL').all(userId) as { stripe_subscription_id: string }[];
+    // Cancel provider subscriptions first. If Stripe is unavailable, retain the
+    // account so the operation can be retried instead of deleting local state.
+    for (const subscription of subscriptions) await cancelStripeSubscription(subscription.stripe_subscription_id);
+    const uploadRows = db.prepare('SELECT path FROM uploaded_files WHERE owner_user_id = ?').all(userId) as { path: string }[];
+    const uploadPaths = new Set(uploadRows.map(row => row.path));
 
     const deleteAccountTx = db.transaction(() => {
       // Find all profiles for this user
@@ -338,6 +335,7 @@ authRouter.delete('/account', requireAuth, (req: AuthenticatedRequest, res) => {
           db.prepare('DELETE FROM api_keys WHERE profile_id = ?').run(pId);
           db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(pId);
         }
+        db.prepare('DELETE FROM uploaded_files WHERE owner_user_id = ?').run(userId);
         db.prepare('DELETE FROM profiles WHERE user_id = ?').run(userId);
       }
 

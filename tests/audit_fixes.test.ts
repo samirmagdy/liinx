@@ -5,12 +5,19 @@ import path from 'path';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 import { signJwt } from '../server/auth.js';
+import { safeJsonForHtml } from '../server/server.js';
 
 describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)', () => {
   const testUserId = 'usr_audit_test';
   const testProfileId = 'prf_audit_test';
   const testUsername = 'audituser';
   let authToken = '';
+
+  it('escapes JSON-LD HTML breakout characters', () => {
+    const output = safeJsonForHtml({ bio: '</script><script>window.pwned=1</script>' });
+    expect(output).not.toContain('</script>');
+    expect(output).toContain('\\u003c/script\\u003e');
+  });
 
   beforeAll(() => {
     initDatabase();
@@ -171,6 +178,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
   // Point 4: Custom Domains
   describe('Point 4: Custom Domain Verification & Routing', () => {
     it('provides DNS CNAME ownership verification via /api/studio/custom-domain/verify', async () => {
+      db.prepare('UPDATE profiles SET custom_domain = ?, custom_domain_verified = 0 WHERE id = ?').run('links.customdomain.org', testProfileId);
       const res = await request(app)
         .post('/api/studio/custom-domain/verify')
         .set('Authorization', `Bearer ${authToken}`)

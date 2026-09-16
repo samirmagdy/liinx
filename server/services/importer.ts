@@ -281,9 +281,10 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
       }
-    }).finally(() => clearTimeout(timeout));
+    });
 
     if (res.status >= 300 && res.status < 400) {
+      clearTimeout(timeout);
       redirects++;
       if (redirects > 5) {
         throw new Error('Too many redirects encountered while importing profile.');
@@ -309,10 +310,23 @@ export async function importFromPublicUrl(inputUrl: string): Promise<ImportedPro
     throw new Error(`Failed to access ${provider} profile: HTTP ${res.status}`);
   }
 
-  const html = await res.text();
-  if (html.length > 2 * 1024 * 1024) {
-    throw new Error('The source profile is too large to import safely.');
+  const maxBytes = 2 * 1024 * 1024;
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  if (!res.body) throw new Error('The source profile returned no readable body.');
+  const reader = res.body.getReader();
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      totalBytes += chunk.value.byteLength;
+      if (totalBytes > maxBytes) throw new Error('The source profile is too large to import safely.');
+      chunks.push(chunk.value);
+    }
+  } finally {
+    reader.releaseLock();
   }
+  const html = new TextDecoder().decode(Buffer.concat(chunks.map(chunk => Buffer.from(chunk))));
 
   // Try Next.js embedded data first
   const parsedNext = parseLinktreeNextData(html);

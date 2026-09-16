@@ -130,12 +130,12 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       verified: Boolean(profile.verified),
       themeId: profile.theme_id || 'editorial-stone',
       plan: profile.plan || 'free',
-      hideBranding: Boolean(profile.hide_branding),
-      gaMeasurementId: profile.ga_measurement_id || null,
-      metaPixelId: profile.meta_pixel_id || null,
+      hideBranding: profile.plan !== 'free' && Boolean(profile.hide_branding),
+      gaMeasurementId: profile.plan !== 'free' ? (profile.ga_measurement_id || null) : null,
+      metaPixelId: profile.plan !== 'free' ? (profile.meta_pixel_id || null) : null,
       customDomain: profile.custom_domain || null,
-      customCss: profile.custom_css || null,
-      customFontUrl: profile.custom_font_url || null,
+      customCss: profile.plan !== 'free' ? (profile.custom_css || null) : null,
+      customFontUrl: profile.plan !== 'free' ? (profile.custom_font_url || null) : null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: safeJsonParse(profile.socials_json, []),
       blocks: formattedBlocks
@@ -261,11 +261,17 @@ const updateProfileSchema = z.object({
   customCss: z.string().max(10000).nullable().optional(),
   customFontUrl: z.string().max(300).refine(isHttpUrl, 'Custom fonts must use HTTP(S).').nullable().optional(),
   customTheme: z.object({
-    background: z.string().max(30).optional(),
-    surface: z.string().max(30).optional(),
-    text: z.string().max(30).optional(),
-    accent: z.string().max(30).optional(),
-    radius: z.string().max(20).optional()
+    id: z.string().max(80).optional(), name: z.string().max(100).optional(),
+    bgType: z.enum(['solid', 'gradient', 'mesh']).optional(), bgColor: z.string().max(50).optional(),
+    bgGradient: z.string().max(500).optional(), cardBg: z.string().max(50).optional(),
+    textColor: z.string().max(50).optional(), subtextColor: z.string().max(50).optional(),
+    mutedColor: z.string().max(50).optional(), cardText: z.string().max(50).optional(),
+    cardBorder: z.string().max(50).optional(), cardHover: z.string().max(50).optional(),
+    accentColor: z.string().max(50).optional(), cardRadius: z.string().max(20).optional(),
+    buttonStyle: z.string().max(30).optional(), shadow: z.string().max(30).optional(),
+    fontFamily: z.string().max(30).optional(), isDark: z.boolean().optional(),
+    background: z.string().max(30).optional(), surface: z.string().max(30).optional(),
+    text: z.string().max(30).optional(), accent: z.string().max(30).optional(), radius: z.string().max(20).optional()
   }).optional(),
   socials: z.array(z.object({
     platform: z.string().min(1).max(30),
@@ -304,6 +310,11 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     const existing = db.prepare('SELECT * FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
     if (!existing) {
       return res.status(404).json({ error: 'Profile not found.' });
+    }
+
+    const isPaid = existing.plan === 'pro' || existing.plan === 'studio';
+    if (!isPaid && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl))) {
+      return res.status(403).json({ error: 'Custom styling, analytics, and branding removal require a Pro or Studio subscription plan.' });
     }
 
     // Custom Domain Plan Enforcement & Validation
@@ -420,10 +431,15 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
     }
 
     // Update verified status in database upon successful verification
+    const saved = db.prepare('SELECT custom_domain FROM profiles WHERE id = ?').get(req.user!.profileId) as { custom_domain?: string | null } | undefined;
+    if (!saved?.custom_domain || saved.custom_domain !== cleanDomain) {
+      return res.status(409).json({ error: 'Verify the exact custom domain saved on this profile.' });
+    }
     if (isVerified) {
-      db.prepare('UPDATE profiles SET custom_domain_verified = 1, updated_at = ? WHERE id = ?').run(
+      db.prepare('UPDATE profiles SET custom_domain_verified = 1, updated_at = ? WHERE id = ? AND custom_domain = ?').run(
         Date.now(),
-        req.user!.profileId
+        req.user!.profileId,
+        cleanDomain
       );
     }
 
@@ -517,7 +533,8 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
     // Check user's primary/active profile plan to determine allowed limit
     // Free: 1 profile, Pro: 5 profiles, Studio: 25 profiles
     const activeProfile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
-    const userPlan = activeProfile?.plan || 'free';
+    const planRow = db.prepare("SELECT plan FROM profiles WHERE user_id = ? ORDER BY CASE plan WHEN 'studio' THEN 3 WHEN 'pro' THEN 2 ELSE 1 END DESC LIMIT 1").get(userId) as any;
+    const userPlan = planRow?.plan || activeProfile?.plan || 'free';
     const maxProfiles = userPlan === 'studio' ? 25 : userPlan === 'pro' ? 5 : 1;
 
     const currentCountRow = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(userId) as { count: number };
@@ -581,8 +598,10 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
       userId,
       email: req.user!.email,
       profileId: newProfileId,
-      username: cleanUsername
+      username: cleanUsername,
+      sessionVersion: Number((db.prepare('SELECT session_version FROM users WHERE id = ?').get(userId) as any)?.session_version || 1)
     });
+    res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
     res.status(201).json({
       success: true,
@@ -615,8 +634,10 @@ profilesRouter.post('/studio/profiles/:id/select', requireAuth, (req: Authentica
       userId,
       email: req.user!.email,
       profileId: profile.id,
-      username: profile.username
+      username: profile.username,
+      sessionVersion: Number((db.prepare('SELECT session_version FROM users WHERE id = ?').get(userId) as any)?.session_version || 1)
     });
+    res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
     res.json({
       success: true,

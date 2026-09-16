@@ -6,6 +6,7 @@ import fs from 'fs';
 import crypto from 'node:crypto';
 import { requireAuth } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
+import { db } from '../db.js';
 
 export const uploadRouter = Router();
 
@@ -144,6 +145,8 @@ uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', 
     }
 
     const fileUrl = `/uploads/${safeFilename}`;
+    db.prepare('INSERT INTO uploaded_files (path, owner_user_id, created_at) VALUES (?, ?, ?)')
+      .run(fileUrl, (req as any).user.userId, Date.now());
     res.status(201).json({
       success: true,
       url: fileUrl,

@@ -191,7 +191,7 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
           db.prepare(`
             UPDATE profiles 
             SET plan = ?, stripe_customer_id = coalesce(?, stripe_customer_id), stripe_subscription_id = coalesce(?, stripe_subscription_id), updated_at = ?
-            WHERE id = ?
+            WHERE user_id = (SELECT user_id FROM profiles WHERE id = ?)
           `).run(plan, customerId, subscriptionId, now, profileId);
         }
         break;
@@ -210,7 +210,7 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
           db.prepare(`
             UPDATE profiles 
             SET plan = ?, stripe_subscription_id = ?, updated_at = ?
-            WHERE id = ?
+            WHERE user_id = (SELECT user_id FROM profiles WHERE id = ?)
           `).run(resolvedPlan, sub.id, now, profileId);
         } else if (customerId) {
           db.prepare(`
@@ -231,7 +231,7 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
           db.prepare(`
             UPDATE profiles 
             SET plan = 'free', stripe_subscription_id = null, updated_at = ?
-            WHERE id = ?
+            WHERE user_id = (SELECT user_id FROM profiles WHERE id = ?)
           `).run(now, profileId);
         } else if (customerId) {
           db.prepare(`
