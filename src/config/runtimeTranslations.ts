@@ -132,6 +132,8 @@ export const runtimeTranslations: Record<string, string> = {
   'No matching content on this page.': 'لا يوجد محتوى مطابق في هذه الصفحة.',
   'Footer logo destination': 'وجهة شعار التذييل',
   'Footer logo accessible name': 'الاسم الميسّر لشعار التذييل',
+  'Times use this browser timezone and are saved as UTC instants. The redirect expires at the selected time.': 'تستخدم الأوقات المنطقة الزمنية لهذا المتصفح وتُحفظ كلحظات بتوقيت UTC. تنتهي إعادة التوجيه في الوقت المحدد.',
+  'Schedule times use this browser timezone and are saved as UTC instants. The block is available from its start until (but not including) its end time.': 'تستخدم أوقات الجدولة المنطقة الزمنية لهذا المتصفح وتُحفظ كلحظات بتوقيت UTC. يكون البلوك متاحًا من وقت البدء حتى وقت الانتهاء (دون تضمينه).',
   'Could not export subscribers.': 'تعذّر تصدير المشتركين.',
   'Could not remove subscriber.': 'تعذّرت إزالة المشترك.',
   'Remove subscriber': 'إزالة المشترك',

@@ -59,7 +59,8 @@ blocksRouter.post('/content-gates/verify', sharedRateLimit({ name: 'content-gate
     FROM blocks b
     INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id
     WHERE b.id = ? AND b.profile_id = ? AND b.type = 'content_gate' AND p.published = 1
-  `).get(blockId, profileId) as { extra_json?: string | null } | undefined;
+      AND (b.start_at IS NULL OR b.start_at <= ?) AND (b.end_at IS NULL OR b.end_at > ?)
+  `).get(blockId, profileId, Date.now(), Date.now()) as { extra_json?: string | null } | undefined;
   if (!row?.extra_json) return res.status(404).json({ error: 'This gated content is unavailable.' });
   let extra: any;
   try { extra = JSON.parse(row.extra_json); } catch { return res.status(500).json({ error: 'This gated content is corrupted.' }); }

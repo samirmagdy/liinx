@@ -1210,7 +1210,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     if (startAt && now < startAt) {
       return { label: `SCHEDULED (${new Date(startAt).toLocaleDateString()})`, color: 'bg-amber-100 text-amber-800' };
     }
-    if (endAt && now > endAt) {
+    if (endAt && now >= endAt) {
       return { label: 'EXPIRED', color: 'bg-neutral-100 text-neutral-600' };
     }
     return { label: 'LIVE SCHEDULED', color: 'bg-emerald-100 text-emerald-800' };
@@ -2017,6 +2017,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           </div>
 
                           {profile.plan !== 'free' ? (
+                            <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                               <div>
                                 <span className="text-neutral-400 block mb-1">{ui("Publish (Start Date/Time):")}</span>
@@ -2037,6 +2038,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                                 />
                               </div>
                             </div>
+                            <p className="text-[10px] leading-relaxed text-neutral-400 sm:col-span-2">
+                              {ui("Schedule times use this browser timezone and are saved as UTC instants. The block is available from its start until (but not including) its end time.")}
+                            </p>
+                            </>
                           ) : (
                             <p className="text-[11px] text-neutral-400">
                               {ui("Upgrade to Pro to automatically schedule links to go live and expire at specific dates and times.")}</p>
@@ -2875,7 +2880,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <label className="text-xs font-semibold text-neutral-800">{ui('Upload background image')}<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={profile.plan === 'free' || uploadingImage} onChange={event => { const file = event.target.files?.[0]; if (file) void handleBackgroundImageUpload(file); event.currentTarget.value = ''; }} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2 text-xs font-normal text-neutral-900 disabled:opacity-50" />{profile.plan === 'free' && <span className="mt-1 block text-[11px] font-normal text-neutral-500">{ui('Background media requires a paid plan.')}</span>}</label>
                   <label className="text-xs font-semibold text-neutral-800">{ui('Background type')}<select disabled={profile.plan === 'free'} value={backgroundMediaTypeInput} onChange={e => setBackgroundMediaTypeInput(e.target.value as 'image' | 'video')} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50"><option value="image">{ui('Image')}</option><option value="video">{ui('Video')}</option></select></label>
                   <label className="text-xs font-semibold text-neutral-800">{ui('Temporary page redirect')}<input type="url" value={pageRedirectUrlInput} onChange={e => setPageRedirectUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" placeholder="https://..." /></label>
-                  <label className="text-xs font-semibold text-neutral-800">{ui('Redirect ends')}<input type="datetime-local" value={pageRedirectUntilInput} onChange={e => setPageRedirectUntilInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" /></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Redirect ends')}<input type="datetime-local" value={pageRedirectUntilInput} onChange={e => setPageRedirectUntilInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" /><span className="mt-1 block text-[10px] font-normal text-neutral-500">{ui('Times use this browser timezone and are saved as UTC instants. The redirect expires at the selected time.')}</span></label>
                 </div>
                 {profile.plan === 'free' && <p className="text-[11px] text-neutral-500" role="note">{ui('Background media is unavailable on the free plan. Existing media is hidden publicly until the plan is upgraded.')}</p>}
                 {pageSettingsFeedback && <p role="status" className="text-xs text-emerald-700">{pageSettingsFeedback}</p>}

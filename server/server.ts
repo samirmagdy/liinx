@@ -25,6 +25,7 @@ import { startMaintenanceScheduler } from './maintenance.js';
 import { createId } from './utils/ids.js';
 import { startInstagramSyncScheduler } from './instagramScheduler.js';
 import { detectDocument, detectImageMagicBytes } from './routes/upload.js';
+import { isHttpUrl } from './utils/urlValidation.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -257,6 +258,18 @@ function publicOrigin(req: express.Request): string {
   return `${req.protocol}://${req.get('host')}`;
 }
 
+function safeRedirectTarget(raw: unknown, req: express.Request, username: string, customDomain: boolean): string | null {
+  if (!isHttpUrl(raw) || typeof username !== 'string') return null;
+  const target = new URL(raw as string);
+  const requestHost = (req.headers.host || '').split(':')[0].toLowerCase();
+  if (customDomain && target.hostname.toLowerCase() === requestHost) return null;
+  const platformHost = new URL(publicOrigin(req)).hostname.toLowerCase();
+  const targetPath = target.pathname.toLowerCase();
+  const ownPlatformPath = `/@${username.toLowerCase()}`;
+  if (!customDomain && [platformHost, requestHost].includes(target.hostname.toLowerCase()) && (targetPath === ownPlatformPath || targetPath.startsWith(`${ownPlatformPath}/`))) return null;
+  return target.toString();
+}
+
 // JSON is placed inside an HTML script element. Escaping the HTML-significant
 // characters prevents user content such as `</script>` from breaking out of it.
 export function safeJsonForHtml(value: unknown): string {
@@ -314,9 +327,14 @@ app.use((req, res, next) => {
         const indexFile = path.resolve(__dirname, '../dist/index.html');
         const distIndex = fs.existsSync(shellFile) ? shellFile : indexFile;
         if (acceptsHtml && fs.existsSync(distIndex)) {
-          const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE username = ?').get(profile.username) as any;
+          const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE username = ?').get(profile.username) as any;
           const page = pageSlug ? db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE username = ?) AND slug = ? AND published = 1').get(profile.username, pageSlug) as { title?: string; description?: string } | undefined : undefined;
           if (pageSlug && !page) return res.status(404).send('This page is not available.');
+          const redirect = safeRedirectTarget(customProfile?.page_redirect_url, req, customProfile?.username, true);
+          if (redirect && (!customProfile.page_redirect_until || customProfile.page_redirect_until > Date.now())) {
+            res.setHeader('Cache-Control', 'no-store');
+            return res.redirect(302, redirect);
+          }
           return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page) : res.sendFile(distIndex);
         }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
@@ -469,12 +487,17 @@ export async function startServer() {
       res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
       const profileMatch = req.path.match(/^\/@([a-z0-9_]+)(?:\/([a-z0-9-]+))?$/i);
       if (profileMatch) {
-        const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
+        const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
           const profileShell = path.join(distDir, 'shell.html');
         if (!publicProfile) return res.status(404).send('This profile is not available.');
         if (fs.existsSync(profileShell)) {
           const page = db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE lower(username) = ?) AND slug = ? AND published = 1').get(profileMatch[1].toLowerCase(), profileMatch[2] || 'home') as { title?: string; description?: string } | undefined;
           if (!page) return res.status(404).send('This page is not available.');
+          const redirect = safeRedirectTarget(publicProfile.page_redirect_url, req, publicProfile.username, false);
+          if (redirect && (!publicProfile.page_redirect_until || publicProfile.page_redirect_until > Date.now())) {
+            res.setHeader('Cache-Control', 'no-store');
+            return res.redirect(302, redirect);
+          }
           const canonical = `${publicOrigin(req)}/@${encodeURIComponent(publicProfile.username)}${profileMatch[2] ? `/${encodeURIComponent(profileMatch[2])}` : ''}`;
           return sendProfileShell(res, profileShell, publicProfile, canonical, page);
         }

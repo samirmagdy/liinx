@@ -20,7 +20,8 @@ formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', lim
   try {
     const parsed = submissionSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: 'Please complete the form with valid values.' });
-    const block = db.prepare(`SELECT b.id, b.extra_json FROM blocks b JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id WHERE b.id = ? AND b.profile_id = ? AND b.type = 'form' AND p.published = 1`).get(parsed.data.blockId, parsed.data.profileId) as { id: string; extra_json?: string | null } | undefined;
+    const now = Date.now();
+    const block = db.prepare(`SELECT b.id, b.extra_json FROM blocks b JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id WHERE b.id = ? AND b.profile_id = ? AND b.type = 'form' AND p.published = 1 AND (b.start_at IS NULL OR b.start_at <= ?) AND (b.end_at IS NULL OR b.end_at > ?)`).get(parsed.data.blockId, parsed.data.profileId, now, now) as { id: string; extra_json?: string | null } | undefined;
     if (!block) return res.status(404).json({ error: 'This form is no longer available.' });
     let rawExtra: Record<string, unknown> = {};
     try { rawExtra = JSON.parse(block.extra_json || '{}') as Record<string, unknown>; } catch { return res.status(500).json({ error: 'This form configuration is invalid.' }); }
@@ -44,7 +45,7 @@ formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', lim
       if (duplicate) return res.status(200).json({ success: true, duplicate: true, message: 'Your response was already received.' });
     }
     db.prepare('INSERT INTO form_submissions (id, profile_id, block_id, fields_json, submission_key, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-      .run(createId('form'), parsed.data.profileId, parsed.data.blockId, JSON.stringify(parsed.data.fields), parsed.data.submissionKey || null, Date.now());
+      .run(createId('form'), parsed.data.profileId, parsed.data.blockId, JSON.stringify(parsed.data.fields), parsed.data.submissionKey || null, now);
     res.status(201).json({ success: true, message: 'Thanks — your response was sent.' });
   } catch (error) {
     console.error('Form submission error:', error);

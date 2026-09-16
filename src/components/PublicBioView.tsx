@@ -337,6 +337,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [analyticsConsent, setAnalyticsConsent] = useState<'granted' | 'denied' | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [pageSearch, setPageSearch] = useState('');
+  const [renderNow, setRenderNow] = useState(() => Date.now());
   const [footerLogoFailed, setFooterLogoFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -362,6 +363,17 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     document.head.appendChild(link);
     return () => link.remove();
   }, [profile?.customFontUrl]);
+
+  useEffect(() => {
+    if (!profile || previewOnly) return;
+    const nextBoundary = profile.blocks
+      .flatMap(block => [block.startAt, block.endAt])
+      .filter((timestamp): timestamp is number => typeof timestamp === 'number' && timestamp > Date.now())
+      .sort((a, b) => a - b)[0];
+    if (!nextBoundary) return;
+    const timer = window.setTimeout(() => setRenderNow(Date.now()), Math.max(1, nextBoundary - Date.now() + 1));
+    return () => window.clearTimeout(timer);
+  }, [profile, previewOnly, renderNow]);
 
   useEffect(() => {
     setFooterLogoFailed(false);
@@ -422,8 +434,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
   useEffect(() => {
     if (!profile || previewOnly) return;
-    if (profile.pageRedirectUrl && (!profile.pageRedirectUntil || profile.pageRedirectUntil > Date.now())) {
-      window.location.replace(profile.pageRedirectUrl);
+    const redirectUrl = safePublicHref(profile.pageRedirectUrl);
+    if (redirectUrl && /^https?:$/i.test(new URL(redirectUrl).protocol) && (!profile.pageRedirectUntil || profile.pageRedirectUntil > Date.now())) {
+      window.location.replace(redirectUrl);
       return;
     }
     const title = profile.shareTitle || `${profile.displayName} (@${profile.username}) | LIINX`;
@@ -808,7 +821,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*]:sm:col-span-2 [&>.liinx-grid-link]:sm:col-span-1' : 'space-y-4'}`}>
           {(() => {
             const normalizedQuery = pageSearch.trim();
-            const visibleBlocks = (Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => matchesPublicPageSearch(block as unknown as Record<string, unknown>, normalizedQuery));
+            const availableBlocks = (Array.isArray(profile.blocks) ? profile.blocks : []).filter(block =>
+              (block.startAt == null || block.startAt <= renderNow) && (block.endAt == null || block.endAt > renderNow)
+            );
+            const visibleBlocks = availableBlocks.filter(block => matchesPublicPageSearch(block as unknown as Record<string, unknown>, normalizedQuery));
             if (normalizedQuery && visibleBlocks.length === 0) {
               return <p role="status" className="rounded-xl border px-4 py-5 text-center text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.subtextColor }}>{ui('No matching content on this page.')}</p>;
             }

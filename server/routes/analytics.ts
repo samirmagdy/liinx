@@ -160,13 +160,17 @@ process.on('exit', flushAnalyticsBuffers);
 analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip', limit: 180, windowMs: 60000 }), (req, res) => {
   try {
     const blockId = req.params.blockId;
-    const block = db.prepare('SELECT * FROM blocks WHERE id = ?').get(blockId) as any;
+    const block = db.prepare(`
+      SELECT b.* FROM blocks b
+      INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id AND p.published = 1
+      WHERE b.id = ?
+    `).get(blockId) as any;
 
     if (!block) {
       return res.status(404).send('Link not found or inactive.');
     }
     const now = Date.now();
-    if ((block.start_at != null && block.start_at > now) || (block.end_at != null && block.end_at < now)) {
+    if ((block.start_at != null && block.start_at > now) || (block.end_at != null && block.end_at <= now)) {
       return res.status(404).send('Link not found or inactive.');
     }
 

@@ -24,6 +24,7 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
 
     const { profileId, blockId, email } = parse.data;
     const cleanEmail = email.toLowerCase().trim();
+    const now = Date.now();
 
     // Verify creator exists
     const profile = db.prepare('SELECT id, display_name FROM profiles WHERE id = ?').get(profileId) as any;
@@ -37,15 +38,14 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
         FROM blocks b
         INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id
         WHERE b.id = ? AND b.profile_id = ? AND b.type = 'newsletter' AND p.published = 1
-      `).get(blockId, profileId);
+          AND (b.start_at IS NULL OR b.start_at <= ?) AND (b.end_at IS NULL OR b.end_at > ?)
+      `).get(blockId, profileId, now, now);
       if (!block) return res.status(404).json({ error: 'This newsletter form is unavailable.' });
     }
 
     const id = 'sub_' + crypto.randomBytes(8).toString('hex');
     const unsubscribeToken = crypto.randomBytes(24).toString('base64url');
     const unsubscribeTokenHash = crypto.createHash('sha256').update(unsubscribeToken).digest('hex');
-    const now = Date.now();
-
     try {
       const saveSubscription = db.transaction(() => {
         db.prepare(`

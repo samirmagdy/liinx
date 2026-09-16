@@ -101,7 +101,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       WHERE profile_id = ? 
         AND (page_id = ? OR (page_id IS NULL AND ? = 1))
         AND (start_at IS NULL OR start_at <= ?) 
-        AND (end_at IS NULL OR end_at >= ?)
+        AND (end_at IS NULL OR end_at > ?)
       ORDER BY position ASC
     `).all(profile.id, selectedPage.id, selectedPage.isHome ? 1 : 0, now, now) as any[];
 
@@ -167,7 +167,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       footerLogoAlt: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
       backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
       backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
-      pageRedirectUrl: profile.page_redirect_url || null,
+      pageRedirectUrl: isHttpUrl(profile.page_redirect_url) ? profile.page_redirect_url : null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
@@ -293,7 +293,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       footerLogoAlt: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
       backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
       backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
-      pageRedirectUrl: profile.page_redirect_url || null,
+      pageRedirectUrl: isHttpUrl(profile.page_redirect_url) ? profile.page_redirect_url : null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
       socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
@@ -353,6 +353,22 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       const conflict = db.prepare('SELECT id FROM profiles WHERE lower(username) = ? AND id != ?').get(updatedUsername, existing.id);
       if (conflict) return res.status(409).json({ error: `The handle @${updatedUsername} is already taken.` });
       invalidatePublicProfileCache(existing.id);
+    }
+
+    if (pageRedirectUrl) {
+      try {
+        const target = new URL(pageRedirectUrl);
+        const requestHost = String(req.headers.host || '').split(':')[0];
+        const configuredHosts = [requestHost, process.env.PUBLIC_DOMAIN, process.env.PUBLIC_ORIGIN, process.env.APP_ORIGIN]
+          .filter(Boolean)
+          .flatMap(value => {
+            try { return [new URL(value as string).hostname]; } catch { return [String(value).replace(/^https?:\/\//, '').split('/')[0].split(':')[0]]; }
+          });
+        const sameCustomDomain = existing.custom_domain && target.hostname.toLowerCase() === String(existing.custom_domain).toLowerCase();
+        const samePlatformProfile = configuredHosts.some(host => target.hostname.toLowerCase() === host.toLowerCase())
+          && (target.pathname.toLowerCase() === `/@${updatedUsername}` || target.pathname.toLowerCase().startsWith(`/@${updatedUsername}/`));
+        if (sameCustomDomain || samePlatformProfile) return res.status(400).json({ error: 'A page redirect cannot point back to this profile.' });
+      } catch { /* schema validation already rejects malformed destinations */ }
     }
 
     if (!hasEntitlement(existing.plan, 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl) || Boolean(footerLogoUrl) || Boolean(footerLogoLink) || Boolean(footerLogoAlt))) {
