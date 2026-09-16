@@ -25,18 +25,21 @@ describe('Media Embed Utilities (0% Fake Implementation)', () => {
 
   it('converts YouTube watch, short, and share URLs to privacy-enhanced embeds', () => {
     const watch = getYouTubeEmbedUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-    expect(watch).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0');
+    expect(watch).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0');
 
     const share = getYouTubeEmbedUrl('https://youtu.be/dQw4w9WgXcQ');
-    expect(share).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0');
+    expect(share).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0');
 
     const shorts = getYouTubeEmbedUrl('https://www.youtube.com/shorts/dQw4w9WgXcQ');
-    expect(shorts).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0');
+    expect(shorts).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0');
+    expect(getYouTubeEmbedUrl('https://www.youtube.com/watch?v=short')).toBeNull();
+    expect(getYouTubeEmbedUrl('https://youtube.com.evil.example/watch?v=dQw4w9WgXcQ')).toBeNull();
   });
 
   it('converts Vimeo URLs to iframe embeds', () => {
     const vimeo = getVimeoEmbedUrl('https://vimeo.com/76979871');
-    expect(vimeo).toBe('https://player.vimeo.com/video/76979871?autoplay=1');
+    expect(vimeo).toBe('https://player.vimeo.com/video/76979871');
+    expect(getVimeoEmbedUrl('https://vimeo.com.evil.example/76979871')).toBeNull();
   });
 
   it('detects SoundCloud and Apple Music embeds', () => {

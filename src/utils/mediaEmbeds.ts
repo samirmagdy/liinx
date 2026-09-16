@@ -29,12 +29,18 @@ export function getSpotifyEmbedUrl(url?: string): string | null {
 export function getYouTubeEmbedUrl(url?: string): string | null {
   if (!url) return null;
   const cleanUrl = url.trim();
-
-  // Extract 11-character YouTube video ID
-  const ytMatch = cleanUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
-  if (ytMatch && ytMatch[1]) {
-    return `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+  let parsed: URL;
+  try { parsed = new URL(cleanUrl); } catch { return null; }
+  if (!['http:', 'https:'].includes(parsed.protocol)) return null;
+  const host = parsed.hostname.toLowerCase();
+  let videoId: string | null = null;
+  if (host === 'youtu.be') {
+    videoId = parsed.pathname.slice(1).split('/')[0] || null;
+  } else if (host === 'youtube.com' || host === 'www.youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com' || host === 'www.youtube-nocookie.com') {
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    videoId = pathParts[0] === 'watch' ? parsed.searchParams.get('v') : pathParts[0] === 'embed' || pathParts[0] === 'shorts' || pathParts[0] === 'v' ? pathParts[1] || null : null;
   }
+  if (videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId)) return `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
 
   return null;
 }
@@ -42,11 +48,13 @@ export function getYouTubeEmbedUrl(url?: string): string | null {
 export function getVimeoEmbedUrl(url?: string): string | null {
   if (!url) return null;
   const cleanUrl = url.trim();
-
-  const vimeoMatch = cleanUrl.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)/i);
-  if (vimeoMatch && vimeoMatch[3]) {
-    return `https://player.vimeo.com/video/${vimeoMatch[3]}?autoplay=1`;
-  }
+  let parsed: URL;
+  try { parsed = new URL(cleanUrl); } catch { return null; }
+  if (!['http:', 'https:'].includes(parsed.protocol)) return null;
+  const host = parsed.hostname.toLowerCase();
+  if (host !== 'vimeo.com' && host !== 'www.vimeo.com' && host !== 'player.vimeo.com') return null;
+  const videoId = parsed.pathname.match(/(?:^|\/)(\d+)(?:$|\/)/)?.[1];
+  if (videoId) return `https://player.vimeo.com/video/${videoId}`;
 
   return null;
 }
@@ -80,5 +88,8 @@ export function isDirectAudioFile(url?: string): boolean {
 
 export function isDirectVideoFile(url?: string): boolean {
   if (!url) return false;
-  return /\.(mp4|webm|ogv|mov)(\?.*)?$/i.test(url.trim());
+  try {
+    const parsed = new URL(url.trim());
+    return ['http:', 'https:'].includes(parsed.protocol) && /\.(mp4|webm|ogv|mov)$/i.test(parsed.pathname);
+  } catch { return false; }
 }

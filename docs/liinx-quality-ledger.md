@@ -1704,3 +1704,57 @@ Baseline: branch `main`, commit `6da320cd5149c05398faaa30ff42831a243b2b5c` at ta
 ### Next eligible prompt
 
 `30 — Video block`
+
+## Task 30 — Video block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `9d4efef` at task start. The worktree was clean; Task 29 changes were preserved. Implementation commit is recorded below after verification.
+
+### Scope and changed files
+
+- `src/utils/mediaEmbeds.ts`: validates exact YouTube/Vimeo host shapes, parses watch/short/embed and Vimeo numeric URLs, removes autoplay parameters, and requires HTTP(S) direct-media URLs.
+- `src/components/PublicBioView.tsx`: lazy-loads user-initiated YouTube/Vimeo iframes, uses metadata-only direct video loading, adds thumbnail failure fallback and validated external fallback links, and disables empty-source no-op controls.
+- `src/components/BuilderStudio.tsx`: makes the video starter an explicit empty draft, documents supported URL shapes/hosting boundaries, and explains thumbnail fallback behavior.
+- `tests/embeds_and_branding.test.ts`: updates embed expectations and adds malformed/host-spoof regression cases.
+- `tests/video_block.test.ts`: covers YouTube, Vimeo, direct media, persistence/public serialization, and active-scheme rejection.
+
+### Findings and behavior
+
+- Existing video playback supported YouTube, Vimeo, and direct video extensions, but generated autoplay URLs and used `autoPlay` on direct files. These were removed. YouTube’s official parameter documentation states autoplay is opt-in and causes playback/data collection without user interaction; Vimeo’s official embed guidance likewise treats autoplay as an explicit parameter. [YouTube embed parameters](https://developers.google.com/youtube/player_parameters), [Vimeo autoplay/embed guidance](https://help.vimeo.com/hc/en-us/articles/12426486963857-How-to-add-autoplay-and-loop-parameters-to-my-video-s-embed-code).
+- Supported native behavior is limited to YouTube embeds, Vimeo embeds, and direct HTTPS MP4/WebM/OGV/MOV URLs. Liinx does not host remote video URLs. TikTok remains a legacy contract/platform value but has no native video renderer or false playback claim; it falls back only if a validated external URL is supplied.
+- Provider privacy, removed, private, or domain-denied videos cannot be confirmed locally. The public card keeps a validated “Open video” fallback; provider error pages remain provider-controlled.
+- The existing CSP already allows the genuinely used video frame origins (`www.youtube.com`, `www.youtube-nocookie.com`, and `player.vimeo.com`) and HTTPS media. No broad CSP relaxation was needed. The CSP also contains entries owned by other media/features and was not removed in this task.
+- Thumbnail URLs are validated as safe public HTTP(S) values at the shared contract boundary. Missing/failed thumbnails render a neutral preview state. Empty or malformed video sources cannot trigger a no-op or unsafe window-open control.
+
+### Acceptance criteria
+
+- PASS — One supported URL shape per implemented provider and direct-media files are parsed/accepted. Evidence: `tests/embeds_and_branding.test.ts` and `tests/video_block.test.ts` cover YouTube watch/short/embed parsing, Vimeo numeric parsing, and direct MP4.
+- PASS — Malformed host-spoofed URLs and active schemes are rejected by parser/API. Evidence: utility tests return null for malformed/spoofed providers; API test returns 400 for `javascript:`.
+- PASS — Responsive aspect ratio and lazy loading are present. Evidence: public renderer uses `aspect-video`, `w-full`, `overflow-hidden`, and `loading="lazy"` for iframes/thumbnails.
+- PASS — Preview/public playback does not start automatically. Evidence: no autoplay URL parameter, no `autoPlay` attribute, and playback iframe/video mounts only after user activation.
+- PASS — Missing thumbnails and unsupported/empty sources have honest fallback behavior. Evidence: renderer provides neutral thumbnail fallback, validated external “Open video” link, or disabled unavailable control.
+- PASS — Persistence and public serialization preserve video URLs. Evidence: `tests/video_block.test.ts` creates three video blocks and verifies public values.
+- NOT RUN — Live provider playback, private/removed/domain-denied provider responses, slow network behavior, and actual browser preview journey. External provider access and browser execution were unavailable.
+
+### Exact commands and outcomes
+
+- `git status --short --branch && git log -3 --oneline` — PASS, baseline `9d4efef` on `main`; clean worktree before Task 30.
+- `npm run lint` — PASS, TypeScript check exited 0.
+- `task30_tmp=$(mktemp -d) && DATABASE_PATH="$task30_tmp/liinx.db" UPLOADS_DIR="$task30_tmp/uploads" NODE_ENV=test npm test -- --run tests/video_block.test.ts tests/embeds_and_branding.test.ts tests/acceptance.test.ts` — PASS, 3 files / 37 tests using a disposable database/uploads directory.
+- `npm run build` — PASS, production build and prerender completed; 10 routes prerendered. Existing non-blocking warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Unresolved risks and dependencies
+
+- Browser and live-provider verification remain required for actual playback, provider error/fallback UX, network timing, and preview behavior.
+- Vimeo owners can disable embedding or use privacy requirements; the application cannot certify those remote settings without live provider checks.
+- Direct media support depends on the remote server’s CORS/range/content behavior; Liinx only accepts and renders the URL and does not provide hosting.
+
+### Next eligible prompt
+
+`31 — Audio and music block`

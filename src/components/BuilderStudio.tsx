@@ -928,11 +928,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       setSaveStatus('saving');
       const newBlock = await createBlockForPage({
         type: 'video',
-        title: 'Behind The Scenes Film',
-        url: 'https://youtube.com',
+        title: 'Add a video',
+        url: '',
         extra: {
-          videoUrl: 'https://youtube.com',
-          thumbnailUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600&auto=format&fit=crop',
+          videoUrl: '',
+          thumbnailUrl: '',
           platform: 'youtube'
         }
       });
@@ -1863,6 +1863,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             placeholder="https://youtube.com/watch?v=..."
                             className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-[11px] text-neutral-900"
                           />
+                          <p className="mt-1 text-[10px] font-normal text-neutral-500">{ui('Supported: YouTube watch, youtu.be, or Shorts URLs; Vimeo links; or direct HTTPS MP4, WebM, OGV, or MOV files. Other HTTPS URLs remain external fallback links. Playback is never started automatically.')}</p>
                         </div>
                       )}
 
@@ -2006,6 +2007,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           placeholder="https://..."
                           className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-[11px] text-neutral-900"
                         />
+                        <p className="mt-1 text-[10px] font-normal text-neutral-500">{ui('Optional thumbnail. If it is unavailable, visitors see a neutral fallback. Remote video is hosted by the selected provider or media host; Liinx does not host these URLs.')}</p>
                       </div>
                     )}
 

@@ -209,6 +209,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   const [qrModalOpen, setQrModalOpen] = useState(false);
 
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+  const [videoThumbnailFailures, setVideoThumbnailFailures] = useState<Record<string, boolean>>({});
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({ 'b3': true });
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -991,6 +992,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               const vimeoEmbed = getVimeoEmbedUrl(block.videoUrl);
               const directVideo = isDirectVideoFile(block.videoUrl);
               const isPlaying = activeVideoId === block.id;
+              const videoSource = safePublicHref(block.videoUrl);
+              const thumbnailSource = safePublicHref(block.thumbnailUrl);
+              const hasThumbnail = Boolean(thumbnailSource && !videoThumbnailFailures[block.id]);
 
               return (
                 <div
@@ -1007,44 +1011,49 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       <iframe
                         src={ytEmbed}
                         title={block.title}
+                        loading="lazy"
                         className="w-full h-full border-0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                       />
                     ) : isPlaying && vimeoEmbed ? (
                       <iframe
                         src={vimeoEmbed}
                         title={block.title}
+                        loading="lazy"
                         className="w-full h-full border-0"
-                        allow="autoplay; fullscreen; picture-in-picture"
+                        allow="fullscreen; picture-in-picture"
                         allowFullScreen
                       />
                     ) : isPlaying && directVideo ? (
                       <video
                         src={block.videoUrl}
                         controls
-                        autoPlay
+                        preload="metadata"
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <button
                         type="button"
+                        disabled={!ytEmbed && !vimeoEmbed && !directVideo && !videoSource}
                         onClick={() => {
                           if (ytEmbed || vimeoEmbed || directVideo) {
                             setActiveVideoId(block.id);
-                          } else {
-                            window.open(block.videoUrl || `/r/${block.id}`, '_blank', 'noreferrer');
+                          } else if (videoSource) {
+                            window.open(videoSource, '_blank', 'noopener,noreferrer');
                           }
                         }}
-                        className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
-                        aria-label={`Play ${block.title}`}
+                        className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-80"
+                        aria-label={ytEmbed || vimeoEmbed || directVideo ? `Play ${block.title}` : videoSource ? ui('Open video externally') : ui('Video unavailable')}
                       >
-                        <img 
-                          src={block.thumbnailUrl} 
-                          alt={block.title} 
+                        {hasThumbnail ? <img
+                          src={thumbnailSource || undefined}
+                          alt={block.title}
+                          loading="lazy"
+                          onError={() => setVideoThumbnailFailures(previous => ({ ...previous, [block.id]: true }))}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           referrerPolicy="no-referrer"
-                        />
+                        /> : <div role="img" aria-label={ui('Video thumbnail unavailable')} className="flex h-full w-full items-center justify-center bg-neutral-800 text-xs text-white/80">{ui('Video preview unavailable')}</div>}
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <div className="w-12 h-12 rounded-full bg-red-700 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                             <Play className="w-5 h-5 fill-white ml-0.5" />
@@ -1053,8 +1062,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                       </button>
                     )}
                   </div>
-                  <div className="p-4" dir="auto">
+                  <div className="flex items-center justify-between gap-3 p-4" dir="auto">
                     <p className="text-sm font-bold line-clamp-1" dir="auto">{block.title}</p>
+                    {videoSource && <a href={videoSource} target="_blank" rel="noreferrer" className="shrink-0 text-xs font-semibold underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{ui('Open video')}</a>}
                   </div>
                 </div>
               );
