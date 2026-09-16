@@ -7,7 +7,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
 import { createId } from '../utils/ids.js';
-import { normalizeBlockExtra, profileUpdateContract } from '../contracts.js';
+import { normalizeBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
 
 export const profilesRouter = Router();
@@ -171,7 +171,7 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       pageRedirectUrl: profile.page_redirect_url || null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
-      socials: safeJsonParse(profile.socials_json, []),
+      socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
       pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
       page: { ...selectedPage, isHome: Boolean(selectedPage.isHome), published: Boolean(selectedPage.published) },
       blocks: formattedBlocks
@@ -295,7 +295,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       pageRedirectUrl: profile.page_redirect_url || null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
-      socials: safeJsonParse(profile.socials_json, []),
+      socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
       pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
       blocks: formattedBlocks
     });

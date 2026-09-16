@@ -1068,3 +1068,59 @@ Baseline: branch `main`, commit `4951863` (`feat: implement page-isolated inert 
 ### Next eligible prompt
 
 `17 — Social icons and contact links`
+
+## Task 17 — Social icons and contact links
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `03397a92b16b16246e55c61551b6cfd79ca4b5c9` at task start. Existing Task 16 work was preserved. Task 17 changes are currently uncommitted.
+
+### Scope and changed files
+
+- `server/contracts.ts`: adds the version-1 social-link contract for supported providers, `mailto:`, and `tel:`; checks protocol, provider hostname, purpose, length, and duplicate destinations. Adds public normalization that filters malformed legacy entries without deleting stored data.
+- `server/routes/profiles.ts`: uses normalized social data for both public profile response paths.
+- `src/types.ts`: adds `phone` as a supported social/contact platform.
+- `src/components/BuilderStudio.tsx`: replaces implicit URL prefixing with inline validation; adds editable URL fields, keyboard-operable reorder/remove controls, duplicate errors, provider-specific add options, and Arabic UI translations through the existing translation layer.
+- `src/components/PublicBioView.tsx`: renders phone and TikTok fallbacks, adds accessible labels and LTR direction, and refuses unsafe public hrefs.
+- `src/config/runtimeTranslations.ts`: adds Arabic translations for the new validation and control labels.
+- `tests/social_links.test.ts`: covers persistence/order round trips, Arabic provider handles, invalid protocols, provider mismatch, invalid contact formats, and duplicate destinations.
+
+### Findings and behavior
+
+- The previous implementation only added/removed links, auto-prefixed arbitrary input with `https://`, and accepted any safe protocol for every platform. That was a current defect, not merely an old review hypothesis.
+- Social providers now require HTTP(S) hosts matching the selected provider (`instagram.com`, `tiktok.com`, `youtube.com`/`youtu.be`, `spotify.com`, `twitter.com`/`x.com`, `github.com`, or `linkedin.com`). Email requires a valid `mailto:` address; phone requires a valid `tel:` number.
+- Exact duplicate destinations are rejected server-side and client-side. Updates remain authenticated through the existing profile endpoint and therefore retain profile ownership/revision handling.
+- Public legacy JSON is filtered at deserialization. Invalid stored links remain in storage for later repair rather than being silently deleted; valid images/media and existing compatible social records are preserved.
+- Public icons have recognizable provider icons where the current icon library supports them, with explicit `AtSign`/external fallback for TikTok/unknown values. Anchors have accessible labels, safe href handling, and `dir="ltr"` so Arabic page direction does not reverse handles or addresses.
+- No OAuth or external provider integration was added; links are display-only.
+
+### Acceptance criteria
+
+- PASS — Supported social providers, email, and phone can be validated, persisted, returned by studio API, and returned by public API in deterministic order. Evidence: `tests/social_links.test.ts` (9 tests pass).
+- PASS — Edit/reorder/remove controls exist and are keyboard-operable native inputs/buttons. Evidence: `BuilderStudio.tsx` source inspection; reorder controls are disabled at boundaries and all controls have labels. Browser focus journey is external/unverified below.
+- PASS — Unsafe protocols are rejected server-side. Evidence: `javascript:` regression test returns HTTP 400.
+- PASS — Provider/destination mismatches and malformed contact formats are rejected server-side. Evidence: mismatch, HTTPS-email, mailto-phone, and invalid mailto tests return HTTP 400.
+- PASS — Duplicate accidental entries are rejected without replacing the prior saved list. Evidence: duplicate regression test returns HTTP 400 and reload matches the preexisting list.
+- PASS — Arabic handles and contact addresses remain direction-safe in public rendering. Evidence: Arabic-path persistence test plus public anchor `dir="ltr"` and safe URL normalization source inspection.
+- PASS — Legacy malformed links are not made clickable by public rendering and are not blindly deleted. Evidence: `normalizePublicSocials` filters public output while leaving persistence untouched; `PublicBioView` also applies `safePublicHref`.
+- NOT RUN — Browser journey for adding/editing/reordering/removing, keyboard focus, responsive layout, and opening every external destination. Browser automation/provider live checks were unavailable.
+
+### Exact commands and outcomes
+
+- `git rev-parse HEAD` — PASS, baseline `03397a92b16b16246e55c61551b6cfd79ca4b5c9` on `main`.
+- `task17_root=$(mktemp -d /tmp/liinx-task17-XXXXXX); mkdir -p "$task17_root/uploads"; DATABASE_PATH="$task17_root/liinx.db" UPLOADS_DIR="$task17_root/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task17_root/liinx.db" UPLOADS_DIR="$task17_root/uploads" NODE_ENV=test npm test -- tests/social_links.test.ts tests/api.test.ts tests/public_pages_routing.test.ts` — PASS, typecheck and 2 discovered test files / 32 tests. `tests/public_pages_routing.test.ts` was not present in this checkout, so it added no test file.
+- `task17_full=$(mktemp -d /tmp/liinx-task17-full-XXXXXX); mkdir -p "$task17_full/uploads"; DATABASE_PATH="$task17_full/liinx.db" UPLOADS_DIR="$task17_full/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task17_full/liinx.db" UPLOADS_DIR="$task17_full/uploads" NODE_ENV=test npm test` — FAIL outside Task 17: typecheck passed; 33 files / 226 tests passed, 6 failed in existing `api_v1.test.ts` authentication flow, `concurrency.test.ts` newsletter race assertion, and `concurrent_revisions.test.ts` with `ECONNRESET`. These failures do not exercise social-link behavior and were not changed.
+- `npm run build` — PASS, Vite production build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS.
+- Browser/live external destination verification — NOT RUN; no production data, OAuth, or external messages were used.
+
+### Existing test utilities and remaining risks
+
+- Vitest/Supertest, the SQLite global setup, and disposable `mktemp` database/uploads directories were used. No production database or uploads directory was used.
+- UI behavior is source/build verified but not browser verified. The next useful regression is a browser journey covering add/edit/reorder/delete with keyboard navigation and reload at both Arabic and English page direction.
+- Public API consumers should use the normalized social list; the React renderer independently guards hrefs. External destinations, provider availability, and deployed cache behavior remain unverified.
+- Existing full-suite failures in API-v1/concurrency/revision tests remain separate defects/environment-sensitive failures and were not widened into this task.
+
+### Next eligible prompt
+
+`18 — Theme selection and persistence`

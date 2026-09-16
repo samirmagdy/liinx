@@ -25,6 +25,8 @@ import {
   Github, 
   Linkedin, 
   Mail, 
+  Phone,
+  AtSign,
   Check,
   AlertCircle,
   Loader2,
@@ -416,6 +418,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       case 'github': return <Github className="w-4 h-4" />;
       case 'linkedin': return <Linkedin className="w-4 h-4" />;
       case 'email': return <Mail className="w-4 h-4" />;
+      case 'phone': return <Phone className="w-4 h-4" />;
+      case 'tiktok': return <AtSign className="w-4 h-4" />;
       default: return <ExternalLink className="w-4 h-4" />;
     }
   };
@@ -541,9 +545,11 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               {profile.socials.map((social, idx) => (
                 <a
                   key={idx}
-                  href={social.url}
-                  target="_blank"
-                  rel="noreferrer"
+                  href={safePublicHref(social.url) || '#'}
+                  target={/^(https?:)/i.test(social.url) ? '_blank' : undefined}
+                  rel={/^(https?:)/i.test(social.url) ? 'noreferrer' : undefined}
+                  aria-label={`${social.platform} link`}
+                  dir="ltr"
                   className="p-2.5 rounded-full transition-transform duration-200 hover:scale-110 active:scale-95 border shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
                   style={{
                     backgroundColor: theme.cardBg,

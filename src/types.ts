@@ -116,7 +116,7 @@ export interface BookingBlock {
 }
 
 export interface SocialLink {
-  platform: 'instagram' | 'tiktok' | 'youtube' | 'spotify' | 'twitter' | 'github' | 'email' | 'linkedin';
+  platform: 'instagram' | 'tiktok' | 'youtube' | 'spotify' | 'twitter' | 'github' | 'email' | 'linkedin' | 'phone';
   url: string;
 }
 

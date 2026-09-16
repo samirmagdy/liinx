@@ -132,6 +132,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   // Social Links helper state
   const [newSocialPlatform, setNewSocialPlatform] = useState<SocialLink['platform']>('instagram');
   const [newSocialUrl, setNewSocialUrl] = useState('');
+  const [socialError, setSocialError] = useState<string | null>(null);
+  const [socialDrafts, setSocialDrafts] = useState<Record<number, string>>({});
 
   // Live Analytics state
   const [analyticsData, setAnalyticsData] = useState<{
@@ -682,26 +684,72 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   };
 
   // Social Links Operations
-  const handleAddSocial = () => {
-    if (!newSocialUrl.trim()) return;
-    let cleanUrl = newSocialUrl.trim();
-    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://') && !cleanUrl.startsWith('mailto:')) {
-      cleanUrl = `https://${cleanUrl}`;
+  const socialDomains: Record<string, string[]> = {
+    instagram: ['instagram.com'], tiktok: ['tiktok.com'], youtube: ['youtube.com', 'youtu.be'],
+    spotify: ['spotify.com'], twitter: ['twitter.com', 'x.com'], github: ['github.com'], linkedin: ['linkedin.com']
+  };
+  const validateSocialUrl = (platform: SocialLink['platform'], raw: string) => {
+    const value = raw.trim();
+    if (!value) return ui('Enter a social link.');
+    if (platform === 'email') return /^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/i.test(value) ? null : ui('Use a valid mailto email address.');
+    if (platform === 'phone') {
+      const digits = value.replace(/\D/g, '');
+      return /^tel:\+?[0-9][0-9 ()-]{3,24}$/i.test(value) && digits.length >= 4 ? null : ui('Use a valid tel phone number.');
     }
-    const currentSocials = profile.socials || [];
-    const updatedSocials = [...currentSocials, { platform: newSocialPlatform, url: cleanUrl }];
-    const updated = { ...profile, socials: updatedSocials };
-    setProfile(updated);
+    try {
+      const parsed = new URL(value);
+      const host = parsed.hostname.toLowerCase();
+      const validHost = (socialDomains[platform] || []).some(domain => host === domain || host.endsWith(`.${domain}`));
+      return ['http:', 'https:'].includes(parsed.protocol) && validHost ? null : ui('Use the selected provider URL.');
+    } catch { return ui('Enter a valid URL.'); }
+  };
+  const persistSocials = (updatedSocials: SocialLink[]) => {
+    setProfile(previous => ({ ...previous, socials: updatedSocials }));
     triggerAutoSave({ socials: updatedSocials });
+    setSocialDrafts({});
+  };
+  const handleAddSocial = () => {
+    const cleanUrl = newSocialUrl.trim();
+    const validationError = validateSocialUrl(newSocialPlatform, cleanUrl);
+    if (validationError) { setSocialError(validationError); return; }
+    const currentSocials = profile.socials || [];
+    if (currentSocials.some(social => social.url.trim().toLowerCase() === cleanUrl.toLowerCase())) {
+      setSocialError(ui('That social link is already added.')); return;
+    }
+    const updatedSocials = [...currentSocials, { platform: newSocialPlatform, url: cleanUrl }];
+    setSocialError(null);
+    persistSocials(updatedSocials);
     setNewSocialUrl('');
+  };
+
+  const handleEditSocial = (index: number, value: string) => {
+    const currentSocials = profile.socials || [];
+    const social = currentSocials[index];
+    if (!social) return;
+    const validationError = validateSocialUrl(social.platform, value);
+    if (validationError) { setSocialError(validationError); return; }
+    if (currentSocials.some((candidate, candidateIndex) => candidateIndex !== index && candidate.url.trim().toLowerCase() === value.trim().toLowerCase())) {
+      setSocialError(ui('That social link is already added.')); return;
+    }
+    setSocialError(null);
+    persistSocials(currentSocials.map((candidate, candidateIndex) => candidateIndex === index ? { ...candidate, url: value.trim() } : candidate));
+  };
+
+  const handleMoveSocial = (index: number, direction: -1 | 1) => {
+    const currentSocials = profile.socials || [];
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= currentSocials.length) return;
+    const updatedSocials = [...currentSocials];
+    [updatedSocials[index], updatedSocials[nextIndex]] = [updatedSocials[nextIndex], updatedSocials[index]];
+    setSocialError(null);
+    persistSocials(updatedSocials);
   };
 
   const handleRemoveSocial = (index: number) => {
     const currentSocials = profile.socials || [];
     const updatedSocials = currentSocials.filter((_, i) => i !== index);
-    const updated = { ...profile, socials: updatedSocials };
-    setProfile(updated);
-    triggerAutoSave({ socials: updatedSocials });
+    setSocialError(null);
+    persistSocials(updatedSocials);
   };
 
   // Plan Upgrade Operation
@@ -1448,16 +1496,26 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <div className="space-y-2 mb-3">
                     {profile.socials && profile.socials.length > 0 ? (
                       profile.socials.map((soc, sIdx) => (
-                        <div key={sIdx} className="flex items-center justify-between p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-xs">
-                          <div className="flex items-center gap-2 truncate">
+                        <div key={sIdx} className="flex items-center gap-2 p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-xs">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
                             <span className="capitalize font-bold text-neutral-700 font-mono text-[11px] bg-neutral-200 px-2 py-0.5 rounded">
                               {soc.platform}
                             </span>
-                            <span className="text-neutral-600 truncate font-mono text-[11px]">{soc.url}</span>
+                            <input
+                              dir="ltr"
+                              aria-label={`${ui('Edit social link')} ${soc.platform}`}
+                              value={socialDrafts[sIdx] ?? soc.url}
+                              onChange={event => setSocialDrafts(previous => ({ ...previous, [sIdx]: event.target.value }))}
+                              onBlur={event => handleEditSocial(sIdx, event.target.value)}
+                              className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-neutral-600 truncate font-mono text-[11px] focus:border-neutral-900 focus:outline-none"
+                            />
                           </div>
+                          <button type="button" onClick={() => handleMoveSocial(sIdx, -1)} disabled={sIdx === 0} aria-label={ui('Move social link up')} className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30">↑</button>
+                          <button type="button" onClick={() => handleMoveSocial(sIdx, 1)} disabled={sIdx === profile.socials.length - 1} aria-label={ui('Move social link down')} className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30">↓</button>
                           <button
                             type="button"
                             onClick={() => handleRemoveSocial(sIdx)}
+                            aria-label={`${ui('Remove social link')} ${soc.platform}`}
                             className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/30 rounded"
                             title={ui("Remove social link")}
                           >
@@ -1484,6 +1542,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       <option value="github">{ui("GitHub")}</option>
                       <option value="linkedin">{ui("LinkedIn")}</option>
                       <option value="email">{ui("Email")}</option>
+                      <option value="phone">{ui("Phone")}</option>
                     </select>
 
                     <input aria-label={ui("Connected Social Icons")}
@@ -1491,6 +1550,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       value={newSocialUrl}
                       onChange={(e) => setNewSocialUrl(e.target.value)}
                       placeholder="https://instagram.com/yourhandle"
+                      dir="ltr"
                       className="flex-1 px-3 py-1.5 rounded-xl border border-neutral-200 bg-neutral-50 text-xs outline-none focus:border-neutral-900 font-mono"
                     />
 
@@ -1501,6 +1561,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     >
                       {ui("Add")}</button>
                   </div>
+                  {socialError && <p role="alert" className="mt-2 text-[11px] text-rose-700">{socialError}</p>}
                 </div>
 
               </div>

@@ -27,6 +27,69 @@ const optionalSafeUrl = z.string().max(MAX_URL).refine(value => value === '' || 
 const shortText = z.string().max(500);
 const itemId = z.string().min(1).max(100).optional();
 
+const socialDomains: Record<string, string[]> = {
+  instagram: ['instagram.com'], tiktok: ['tiktok.com'], youtube: ['youtube.com', 'youtu.be'],
+  spotify: ['spotify.com'], twitter: ['twitter.com', 'x.com'], github: ['github.com'], linkedin: ['linkedin.com']
+};
+
+function hostnameMatches(hostname: string, domain: string) {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
+function validateSocialLink(value: { platform: string; url: string }, context: z.RefinementCtx) {
+  const url = value.url.trim();
+  if (value.platform === 'email') {
+    if (!/^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/i.test(url)) {
+      context.addIssue({ code: 'custom', path: ['url'], message: 'Email links must use a valid mailto address.' });
+    }
+    return;
+  }
+  if (value.platform === 'phone') {
+    const digits = url.replace(/\D/g, '');
+    if (!/^tel:\+?[0-9][0-9 ()-]{3,24}$/i.test(url) || digits.length < 4) {
+      context.addIssue({ code: 'custom', path: ['url'], message: 'Phone links must use a valid tel number.' });
+    }
+    return;
+  }
+  try {
+    const parsed = new URL(url);
+    const domains = socialDomains[value.platform] || [];
+    if (!['http:', 'https:'].includes(parsed.protocol) || !domains.some(domain => hostnameMatches(parsed.hostname.toLowerCase(), domain))) {
+      context.addIssue({ code: 'custom', path: ['url'], message: 'The URL does not match the selected social provider.' });
+    }
+  } catch {
+    context.addIssue({ code: 'custom', path: ['url'], message: 'Enter a valid URL for the selected social provider.' });
+  }
+}
+
+export const socialLinkSchema = z.object({
+  platform: z.enum(['instagram', 'tiktok', 'youtube', 'spotify', 'twitter', 'github', 'email', 'linkedin', 'phone']),
+  url: z.string().trim().min(1).max(MAX_URL).refine(isSafeLinkUrl, 'Social links must use HTTP(S), mailto, or tel.')
+}).strict().superRefine(validateSocialLink);
+
+const socialsSchema = z.array(socialLinkSchema).max(20).superRefine((socials, context) => {
+  const seen = new Set<string>();
+  socials.forEach((social, index) => {
+    const key = social.url.trim().toLowerCase();
+    if (seen.has(key)) context.addIssue({ code: 'custom', path: [index, 'url'], message: 'Duplicate social links are not allowed.' });
+    seen.add(key);
+  });
+});
+
+/** Keep legacy malformed entries out of public output without deleting stored creator data. */
+export function normalizePublicSocials(input: unknown): Array<{ platform: string; url: string }> {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  return input.flatMap(candidate => {
+    const parsed = socialLinkSchema.safeParse(candidate);
+    if (!parsed.success) return [];
+    const key = parsed.data.url.toLowerCase();
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [parsed.data];
+  });
+}
+
 const folderItemSchema = z.object({
   id: itemId,
   title: z.string().min(1).max(150),
@@ -204,6 +267,6 @@ export const profileUpdateContract = z.object({
   pageRedirectUrl: z.string().max(500).refine(isHttpUrl, 'Redirect URL must use HTTP(S).').nullable().optional(),
   pageRedirectUntil: z.number().int().positive().nullable().optional(),
   customTheme: customThemeSchema.optional(),
-  socials: z.array(z.object({ platform: z.enum(['instagram', 'tiktok', 'youtube', 'spotify', 'twitter', 'github', 'email', 'linkedin']), url: z.string().max(MAX_URL).refine(isSafeLinkUrl, 'Social links must use a safe URL scheme.') }).strict()).max(20).optional(),
+  socials: socialsSchema.optional(),
   revision: z.number().int().nonnegative().optional()
 }).strict();
