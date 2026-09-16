@@ -1951,7 +1951,7 @@ Baseline: branch `main`, commit `2484487` at task start. The worktree was clean;
 
 ### Implementation commit
 
-To be recorded after final validation.
+`524d44f0bcc95aa6113f9b38baf2fa658b7b5b1e` — `feat: complete event and release cards`.
 
 ### Unresolved risks and dependencies
 
