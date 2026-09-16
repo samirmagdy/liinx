@@ -7,7 +7,7 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
 import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
 import { createId } from '../utils/ids.js';
-import { isSafeCreatorCss, normalizeBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
+import { isSafeCreatorCss, normalizeBlockExtra, normalizeEditorBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
 
 export const profilesRouter = Router();
@@ -137,12 +137,6 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       };
 
       if (extra) {
-        if (b.type === 'content_gate') {
-          delete extra.body;
-          delete extra.password;
-          delete extra.passwordHash;
-          extra.locked = true;
-        }
         Object.assign(baseBlock, normalizeBlockExtra(b.type, extra));
       }
 
@@ -266,7 +260,7 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       };
 
       if (extra) {
-        Object.assign(baseBlock, normalizeBlockExtra(b.type, extra));
+        Object.assign(baseBlock, normalizeEditorBlockExtra(b.type, extra));
       }
 
       return baseBlock;

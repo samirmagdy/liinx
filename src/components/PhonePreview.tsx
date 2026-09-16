@@ -694,6 +694,15 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               );
             }
 
+            if (block.type === 'content_gate') {
+              const gate = block as ProfileBlock & { body?: string; locked?: boolean };
+              return <div key={block.id} className={`p-3.5 shadow-xs ${getRadiusClass(theme.cardRadius, true)}`} style={{ backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText }}>
+                <p className="text-xs font-bold" dir="auto">{block.title}</p>
+                <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.subtextColor }}>{ui('Protected text preview')}</p>
+                {gate.locked ? <p className="mt-2 whitespace-pre-wrap break-words text-xs" dir="auto">{gate.body || ui('Protected text is empty.')}</p> : <p className="mt-2 text-xs" style={{ color: theme.subtextColor }}>{ui('This gate is not configured yet.')}</p>}
+              </div>;
+            }
+
             return null;
           })}
         </div>

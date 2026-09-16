@@ -191,7 +191,7 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   phone: extraObject({ contactType: z.enum(['phone', 'email']).optional(), phone: z.string().max(40).refine(value => value === '' || getPhoneHref(value) !== null, 'Enter a valid phone number with 4–15 digits.').optional(), email: z.string().max(254).refine(value => value === '' || getMailtoHref(value) !== null, 'Enter a valid email address.').optional(), subject: z.string().max(200).optional(), body: z.string().max(1000).optional(), description: z.string().max(1000).optional(), availability: z.string().max(200).optional() }),
   product: extraObject({ price: z.string().max(50).optional(), priceAmount: z.string().refine(value => value === '' || /^\d{1,8}(?:\.\d{1,2})?$/.test(value), 'Price must be a positive amount with up to two decimals.').optional(), currency: z.string().refine(value => value === '' || /^[A-Z]{3}$/.test(value), 'Currency must be a three-letter ISO code.').optional(), imageUrl: optionalHttpUrl, url: optionalSafeUrl, description: z.string().max(1000).optional() }),
   tips: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
-  content_gate: extraObject({ password: z.string().max(128).optional(), passwordHash: z.string().max(200).optional(), description: z.string().max(1000).optional(), body: z.string().max(20000).optional(), locked: z.boolean().optional() })
+  content_gate: z.object({ password: z.string().max(128).optional(), passwordHash: z.string().max(200).optional(), description: z.string().max(1000).optional(), body: z.string().max(20000).optional(), locked: z.boolean().optional() }).strict().superRefine(rejectReservedKeys)
 };
 
 const blockCreateEnvelope = z.object({
@@ -267,11 +267,29 @@ export function normalizeBlockExtra(type: string, input: unknown): Record<string
   delete value.page_id;
   delete value.position;
   if (type === 'content_gate') {
+    const configured =
+      (typeof value.passwordHash === 'string' && value.passwordHash.length > 0) ||
+      (typeof value.password === 'string' && value.password.length > 0);
     delete value.body;
     delete value.password;
     delete value.passwordHash;
-    value.locked = true;
+    value.locked = configured;
   }
+  return value;
+}
+
+/** Authenticated studio normalization may expose the creator's text, never its code/hash. */
+export function normalizeEditorBlockExtra(type: string, input: unknown): Record<string, unknown> {
+  if (type !== 'content_gate') return normalizeBlockExtra(type, input);
+  const parsed = blockExtraSchemas.content_gate.safeParse(input || {});
+  if (!parsed.success) return {};
+  const value = Object.fromEntries(Object.entries(parsed.data));
+  const configured =
+    (typeof value.passwordHash === 'string' && value.passwordHash.length > 0) ||
+    (typeof value.password === 'string' && value.password.length > 0);
+  delete value.password;
+  delete value.passwordHash;
+  value.locked = configured;
   return value;
 }
 

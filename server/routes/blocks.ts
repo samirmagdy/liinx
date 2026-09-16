@@ -33,6 +33,9 @@ function prepareBlockExtra(type: string, extra: Record<string, unknown> | undefi
   if (type === 'content_gate' && typeof copy.password === 'string' && copy.password.length > 0) {
     copy.passwordHash = bcrypt.hashSync(copy.password, 12);
     delete copy.password;
+  } else if (type === 'content_gate' && copy.password === '') {
+    delete copy.password;
+    delete copy.passwordHash;
   }
   return JSON.stringify(copy);
 }
@@ -50,11 +53,22 @@ blocksRouter.post('/content-gates/verify', sharedRateLimit({ name: 'content-gate
   if (typeof profileId !== 'string' || typeof blockId !== 'string' || typeof password !== 'string') {
     return res.status(400).json({ error: 'A valid access code is required.' });
   }
-  const row = db.prepare('SELECT extra_json FROM blocks WHERE id = ? AND profile_id = ? AND type = ?').get(blockId, profileId, 'content_gate') as { extra_json?: string | null } | undefined;
+  if (password.length === 0 || password.length > 128) return res.status(400).json({ error: 'An access code is required.' });
+  const row = db.prepare(`
+    SELECT b.extra_json
+    FROM blocks b
+    INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id
+    WHERE b.id = ? AND b.profile_id = ? AND b.type = 'content_gate' AND p.published = 1
+  `).get(blockId, profileId) as { extra_json?: string | null } | undefined;
   if (!row?.extra_json) return res.status(404).json({ error: 'This gated content is unavailable.' });
   let extra: any;
   try { extra = JSON.parse(row.extra_json); } catch { return res.status(500).json({ error: 'This gated content is corrupted.' }); }
-  if (!extra.passwordHash || !(await bcrypt.compare(password, extra.passwordHash))) return res.status(403).json({ error: 'The access code is not correct.' });
+  if (typeof extra.passwordHash !== 'string' || !extra.passwordHash.startsWith('$2')) return res.status(500).json({ error: 'This gated content is unavailable.' });
+  try {
+    if (!(await bcrypt.compare(password, extra.passwordHash))) return res.status(403).json({ error: 'The access code is not correct.' });
+  } catch {
+    return res.status(500).json({ error: 'This gated content is unavailable.' });
+  }
   res.json({ unlocked: true, body: typeof extra.body === 'string' ? extra.body : '' });
 });
 
@@ -134,7 +148,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       position: nextPos,
       pageId: resolvedPage.id,
       clicks: 0,
-      ...(extra || {})
+      ...(type === 'content_gate' ? { locked: typeof extra?.password === 'string' && extra.password.length > 0 } : (extra || {}))
     });
   } catch (err: any) {
     console.error('Create block error:', err);
