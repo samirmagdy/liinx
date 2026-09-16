@@ -2168,7 +2168,7 @@ Baseline: branch `main`, commit `d416ef5` at task start. The worktree was clean;
 
 ### Implementation commit
 
-`TASK39_PENDING` — `feat: complete form field editor` (will be replaced with the implementation commit SHA after commit).
+`ca06578613cd26aa766f496b8b56c82899367123` — `feat: complete form field editor`.
 
 ### Unresolved risks and dependencies
 
