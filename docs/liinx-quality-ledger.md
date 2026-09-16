@@ -1747,7 +1747,7 @@ Baseline: branch `main`, commit `9d4efef` at task start. The worktree was clean;
 
 ### Implementation commit
 
-To be recorded after final validation.
+`14bc11a0039325e1d54af0e633d822d333962b22` — `feat: make video embeds safe and explicit`.
 
 ### Unresolved risks and dependencies
 
