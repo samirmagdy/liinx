@@ -2808,7 +2808,7 @@ Baseline: branch `main`, commit `7f8194a` at task start. The worktree was clean;
 
 ### Implementation commit
 
-Pending commit for Task 51 implementation and this ledger entry.
+`6ea79293b0e15691ef178593aaa190630dc6c87d` — `fix: harden custom domain routing and status`
 
 ### Unresolved risks and dependencies
 
