@@ -641,7 +641,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   </div>
                   </>
                 );
-              const className = `${linkLayout === 'grid' ? 'liinx-grid-link' : 'sm:col-span-2'} group relative ${isPill ? 'px-6 py-4' : 'p-4'} transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm ${hasDestination ? 'hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current' : 'opacity-75'} ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${linkAnimation === 'fade' ? 'animate-fade-in' : ''} ${linkAnimation === 'pulse' ? 'motion-safe:animate-pulse' : ''} ${linkAnimation === 'lift' && hasDestination ? 'hover:-translate-y-0.5' : ''} ${getRadiusClass(theme.cardRadius, isComplexLink)}`;
+              const className = `${linkLayout === 'grid' ? 'liinx-grid-link' : 'sm:col-span-2'} group relative ${isPill ? 'px-6 py-4' : 'p-4'} transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm ${hasDestination ? 'hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current' : 'opacity-75'} ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${linkAnimation === 'fade' ? 'liinx-link-animation-fade' : ''} ${linkAnimation === 'pulse' ? 'liinx-link-animation-pulse' : ''} ${linkAnimation === 'lift' && hasDestination ? 'liinx-link-animation-lift' : ''} ${getRadiusClass(theme.cardRadius, isComplexLink)}`;
               const style = {
                 backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
                 border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,

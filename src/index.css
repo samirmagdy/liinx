@@ -373,6 +373,43 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 @media (prefers-reduced-motion: reduce) {
   .motion-reduce { animation: none !important; transition: none !important; }
 }
+
+/* Public link motion is intentionally local, subtle, and independent of focus styling. */
+@keyframes liinx-link-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes liinx-link-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 16%, transparent); }
+}
+
+.liinx-link-animation-fade { animation: liinx-link-fade 260ms ease-out both; }
+
+.liinx-link-animation-lift {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.liinx-link-animation-lift:hover { transform: translateY(-2px); }
+
+.liinx-link-animation-lift:focus-visible {
+  /* Focus has its own outline and must not depend on hover or move the card. */
+  transform: none;
+}
+
+.liinx-link-animation-pulse { animation: liinx-link-pulse 2.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .liinx-link-animation-fade,
+  .liinx-link-animation-pulse { animation: none !important; }
+  .liinx-link-animation-lift,
+  .liinx-link-animation-lift:hover,
+  .liinx-link-animation-lift:focus-visible {
+    transition: none !important;
+    transform: none !important;
+  }
+}
 [dir="rtl"] .public-header-actions { flex-direction: row-reverse; }
 [dir="rtl"] .studio-toolbar, [dir="rtl"] .studio-tabs { direction: rtl; }
 [dir="rtl"] .hero-section .hero-proof svg { order: 2; }
