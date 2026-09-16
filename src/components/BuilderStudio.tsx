@@ -3269,6 +3269,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         onClose={() => setQrModalOpen(false)}
         username={profile.username}
         displayName={profile.displayName}
+        pages={profile.pages}
+        customDomain={profile.customDomain}
       />
 
       <LinktreeImporterModal

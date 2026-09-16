@@ -1352,6 +1352,9 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         onClose={() => setQrModalOpen(false)}
         username={profile.username}
         displayName={profile.displayName}
+        pages={profile.pages}
+        currentPageSlug={profile.page?.isHome ? 'home' : profile.page?.slug}
+        customDomain={customDomain}
       />
 
       {!previewOnly && analyticsConsent === null && (profile.gaMeasurementId || profile.metaPixelId) && (
