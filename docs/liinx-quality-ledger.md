@@ -2564,8 +2564,8 @@ Baseline: branch `main`, commit `5bdb7b884dd992fdcc31fcc5fe6d8c311751fb6c` at ta
 - PASS — Unpublished or foreign-page click targets are unavailable. Evidence: `/r/:blockId` joins the owning published page and the focused route regression returns 404 at expiry; existing published-routing tests pass.
 - PASS — Scheduled-hidden forms, newsletters, and content gates cannot bypass visibility through direct endpoints. Evidence: focused action regression, 404 outcomes.
 - PASS — Preview does not redirect and public rendering re-evaluates an open page at schedule boundaries. Evidence: `previewOnly` guards in `PublicBioView.tsx`; source-level evidence only for timer/browser behavior.
-- PASS — Redirect expiry and availability behavior is cache-safe within the application: redirect responses are `no-store`, and profile block payloads are re-filtered on requests. Evidence: route implementation and focused API tests.
-- NOT RUN — Browser journey for a visitor keeping a page open, actual back/forward/cache-layer expiry, responsive preview, and daylight-saving timezone transitions. The server uses epoch instants; browser/DST behavior needs a browser harness in a timezone-enabled environment.
+- PASS — Redirect responses are `no-store`, and profile block payloads are re-filtered on requests. Evidence: route implementation and focused API tests.
+- NOT RUN — Browser journey for a visitor keeping a page open, actual proxy/browser cache expiry, responsive preview, and daylight-saving timezone transitions. The server uses epoch instants; browser/DST behavior needs a browser harness in a timezone-enabled environment.
 - NOT RUN — Live custom-domain TLS/proxy routing and an external redirect destination. Local route code and custom-domain routing tests passed; no external service was contacted.
 
 ### Exact validation commands and outcomes
