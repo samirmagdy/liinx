@@ -31,7 +31,7 @@ import {
   isDirectAudioFile, 
   isDirectVideoFile 
 } from '../utils/mediaEmbeds';
-import { ensureThemeContrast, getAccessibleTextColor } from '../utils/colorContrast';
+import { getAccessibleTextColor, getBorderColor, getThemeBackground, resolveTheme } from '../utils/colorContrast';
 
 interface PhonePreviewProps {
   profile: CreatorProfile;
@@ -53,7 +53,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   deviceMode = 'mobile',
 }) => {
   const { tr: ui } = useUiLanguage();
-  const theme = ensureThemeContrast(customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0]);
+  const theme = resolveTheme(profile.themeId, customTheme);
+  const themeBackground = getThemeBackground(theme);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
@@ -126,8 +127,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           dir={isProfileRtl ? 'rtl' : 'ltr'}
           className="rounded-[28px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300 shadow-lg"
           style={{
-            backgroundColor: theme.bgColor,
-            backgroundImage: theme.bgType === 'gradient' ? theme.bgGradient : undefined,
+            ...themeBackground,
             color: theme.textColor,
             fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)',
             aspectRatio: '9 / 16',
@@ -143,8 +143,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             dir={isProfileRtl ? 'rtl' : 'ltr'}
             className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
             style={{
-              backgroundColor: theme.bgColor,
-              backgroundImage: theme.bgType === 'gradient' ? theme.bgGradient : undefined,
+              ...themeBackground,
               color: theme.textColor,
               fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
             }}>
@@ -240,7 +239,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                   className="p-2 rounded-full transition-transform hover:scale-110 active:scale-95 border focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
                   style={{
                     backgroundColor: theme.cardBg,
-                    borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.06)',
+                    borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.06)'),
                     color: theme.cardText
                   }}
                   title={social.platform}
@@ -676,7 +675,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                         onChange={(e) => setNewsletterEmail(e.target.value)}
                         placeholder="your@email.com…"
                         className="w-full px-3 py-2 text-xs rounded-xl border outline-none transition-colors focus:ring-1 focus:ring-neutral-900/10"
-                        style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)', color: theme.cardText }}
+                        style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)'), color: theme.cardText }}
                         required
                         spellCheck={false}
                         dir="auto"
@@ -705,7 +704,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             <a 
               href="#builder" 
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-neutral-50/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-              style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}
+              style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>

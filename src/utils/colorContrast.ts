@@ -1,23 +1,81 @@
 import type { ThemeConfig } from '../types';
+import { THEMES } from '../data/mockData';
 
 const DARK_TEXT = '#181817';
 const LIGHT_TEXT = '#FFFFFF';
 
-function parseHex(value: unknown): [number, number, number] | null {
+type Rgba = [number, number, number, number];
+
+function parseColor(value: unknown): Rgba | null {
   if (typeof value !== 'string') return null;
-  const hex = value.trim().replace('#', '');
-  if (!/^[\da-f]{3}([\da-f]{3})?$/i.test(hex)) return null;
-  const expanded = hex.length === 3 ? hex.split('').map(char => char + char).join('') : hex;
-  return [0, 2, 4].map(index => parseInt(expanded.slice(index, index + 2), 16) / 255) as [number, number, number];
+  const input = value.trim();
+  const hex = input.replace(/^#/, '');
+  if (/^[\da-f]{3}([\da-f]{3})?$/i.test(hex)) {
+    const expanded = hex.length === 3 ? hex.split('').map(char => char + char).join('') : hex;
+    return [0, 2, 4].map(index => parseInt(expanded.slice(index, index + 2), 16) / 255).concat(1) as Rgba;
+  }
+  const rgba = input.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+%?))?\s*\)$/i);
+  if (!rgba) return null;
+  const alpha = rgba[4] ? (rgba[4].endsWith('%') ? Number(rgba[4].slice(0, -1)) / 100 : Number(rgba[4])) : 1;
+  return [Number(rgba[1]) / 255, Number(rgba[2]) / 255, Number(rgba[3]) / 255, Math.min(Math.max(alpha, 0), 1)];
 }
 
 function luminance(value: unknown): number | null {
-  const rgb = parseHex(value);
+  const rgb = parseColor(value);
   if (!rgb) return null;
   return rgb.reduce((total, channel, index) => {
+    if (index === 3) return total;
     const linear = channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
     return total + linear * [0.2126, 0.7152, 0.0722][index];
   }, 0);
+}
+
+function compositeColor(foreground: string, background: string): string {
+  const fg = parseColor(foreground);
+  const bg = parseColor(background);
+  if (!fg || !bg || fg[3] >= 1) return foreground;
+  const alpha = fg[3] + bg[3] * (1 - fg[3]);
+  if (alpha <= 0) return background;
+  const channels = [0, 1, 2].map(index => Math.round(((fg[index] * fg[3]) + (bg[index] * bg[3] * (1 - fg[3]))) / alpha * 255));
+  return `rgb(${channels.join(', ')})`;
+}
+
+function extractGradientColors(value: unknown): string[] {
+  if (typeof value !== 'string') return [];
+  return [...value.matchAll(/#[\da-f]{3,8}\b|rgba?\([^)]*\)/gi)].map(match => match[0]);
+}
+
+function hasRequiredContrast(foreground: string, backgrounds: string[], minimum: number): boolean {
+  return backgrounds.every(background => {
+    const ratio = contrastRatio(foreground, background);
+    return ratio !== null && ratio >= minimum;
+  });
+}
+
+/** Returns the complete selected preset with creator overrides applied. */
+export function resolveTheme(themeId?: string | null, customTheme?: Partial<ThemeConfig> | null): ThemeConfig {
+  const preset = THEMES.find(theme => theme.id === themeId) || THEMES[0];
+  return ensureThemeContrast({ ...preset, ...(customTheme || {}) });
+}
+
+/** Extracts a valid color from a CSS border declaration without splitting rgba(). */
+export function getBorderColor(border: unknown, fallback: string): string {
+  if (typeof border !== 'string') return fallback;
+  const match = border.trim().match(/^(?:\d+(?:\.\d+)?px|thin|medium|thick)\s+(?:none|hidden|solid|dashed|dotted|double|groove|ridge|inset|outset)\s+(.+)$/i);
+  return match?.[1]?.trim() || fallback;
+}
+
+/** Builds a usable background declaration for solid, gradient, and mesh themes. */
+export function getThemeBackground(theme: ThemeConfig): { backgroundColor: string; backgroundImage?: string } {
+  if (theme.bgType === 'gradient' && theme.bgGradient) return { backgroundColor: theme.bgColor, backgroundImage: theme.bgGradient };
+  if (theme.bgType === 'mesh') {
+    const color = theme.bgColor;
+    return {
+      backgroundColor: color,
+      backgroundImage: theme.bgGradient || `radial-gradient(circle at 20% 20%, ${color}, transparent 55%), radial-gradient(circle at 80% 80%, ${color}, transparent 55%)`
+    };
+  }
+  return { backgroundColor: theme.bgColor };
 }
 
 export function contrastRatio(foreground: unknown, background: unknown): number | null {
@@ -60,18 +118,18 @@ export function ensureThemeContrast(theme: Partial<ThemeConfig> | null | undefin
     isDark
   };
 
-  const background = safeTheme.bgColor;
-  const cardBackground = safeTheme.cardBg.startsWith('#') ? safeTheme.cardBg : fallbackCardBackground;
-  const readableText = contrastRatio(safeTheme.textColor, background) !== null && contrastRatio(safeTheme.textColor, background)! >= 4.5
+  const backgrounds = [safeTheme.bgColor, ...extractGradientColors(safeTheme.bgGradient)];
+  const cardBackgrounds = backgrounds.map(background => compositeColor(safeTheme.cardBg, background));
+  const readableText = hasRequiredContrast(safeTheme.textColor, backgrounds, 4.5)
     ? safeTheme.textColor
     : (safeTheme.isDark ? '#F8FAFC' : DARK_TEXT);
-  const readableSubtext = contrastRatio(safeTheme.subtextColor, background) !== null && contrastRatio(safeTheme.subtextColor, background)! >= 4.5
+  const readableSubtext = hasRequiredContrast(safeTheme.subtextColor, backgrounds, 4.5)
     ? safeTheme.subtextColor
     : (safeTheme.isDark ? '#CBD5E1' : '#525252');
-  const readableCardText = contrastRatio(safeTheme.cardText, cardBackground) !== null && contrastRatio(safeTheme.cardText, cardBackground)! >= 4.5
+  const readableCardText = hasRequiredContrast(safeTheme.cardText, cardBackgrounds, 4.5)
     ? safeTheme.cardText
     : readableText;
-  const readableAccent = contrastRatio(safeTheme.accentColor, background) !== null && contrastRatio(safeTheme.accentColor, background)! >= 3
+  const readableAccent = hasRequiredContrast(safeTheme.accentColor, backgrounds, 3)
     ? safeTheme.accentColor
     : (safeTheme.isDark ? '#38BDF8' : '#92400E');
 

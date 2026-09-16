@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import fs from 'fs';
 import path from 'path';
@@ -257,6 +257,10 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
 
       expect(res.body.url).toBeDefined();
       expect(res.body.url).toMatch(/\.png$/i); // Normalized to true detected MIME
+
+      const asset = await request(app).get(res.body.url).expect(200);
+      expect(asset.headers['content-type']).toMatch(/^image\/png/);
+      expect(asset.headers['content-disposition']).toBe('inline');
     });
 
     it('accepts genuine JPEG image bytes and normalizes extension', async () => {
@@ -270,6 +274,70 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
 
       expect(res.body.url).toBeDefined();
       expect(res.body.url).toMatch(/\.jpe?g$/i);
+    });
+
+    it('derives document extension and MIME from bytes, then serves it as an attachment', async () => {
+      const res = await request(app)
+        .post('/api/upload/file')
+        .set('Authorization', `Bearer ${authToken}`)
+        .attach('file', Buffer.from('%PDF-1.7\nfixture'), 'document.html')
+        .expect(201);
+
+      expect(res.body.url).toMatch(/\.pdf$/i);
+      expect(res.body.mimeType).toBe('application/pdf');
+
+      const asset = await request(app).get(res.body.url).expect(200);
+      expect(asset.headers['content-type']).toMatch(/^application\/pdf/);
+      expect(asset.headers['content-disposition']).toMatch(/^attachment/i);
+    });
+
+    it('does not execute an active legacy asset placed in the uploads directory', async () => {
+      const root = process.env.UPLOADS_DIR || path.resolve('public/uploads');
+      const filename = `legacy_${Date.now()}_${Math.random().toString(36).slice(2)}.html`;
+      const target = path.join(root, filename);
+      fs.writeFileSync(target, '<!doctype html><script>window.pwned=1</script>');
+      try {
+        const res = await request(app).get(`/uploads/${filename}`).expect(404);
+        expect(res.headers['content-type'] || '').not.toMatch(/text\/html/i);
+      } finally {
+        fs.unlinkSync(target);
+      }
+    });
+
+    it('removes the written file when the uploaded-file database record cannot be persisted', async () => {
+      const root = process.env.UPLOADS_DIR || path.resolve('public/uploads');
+      const before = fs.readdirSync(root).sort();
+      const originalPrepare = db.prepare.bind(db);
+      const prepareSpy = vi.spyOn(db, 'prepare').mockImplementation(((sql: string) => {
+        if (sql.includes('INSERT INTO uploaded_files')) throw new Error('simulated persistence failure');
+        return originalPrepare(sql) as any;
+      }) as any);
+
+      try {
+        await request(app)
+          .post('/api/upload')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('image', Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'), 'rollback.png')
+          .expect(500);
+      } finally {
+        prepareSpy.mockRestore();
+      }
+
+      expect(fs.readdirSync(root).sort()).toEqual(before);
+    });
+
+    it('rejects oversized and unauthenticated image uploads cleanly', async () => {
+      const oversized = await request(app)
+        .post('/api/upload')
+        .set('Authorization', `Bearer ${authToken}`)
+        .attach('image', Buffer.alloc(5 * 1024 * 1024 + 1), 'oversized.png');
+      expect(oversized.status).toBe(400);
+      expect(oversized.body.error).toMatch(/5MB/i);
+
+      const unauthenticated = await request(app)
+        .post('/api/upload')
+        .attach('image', Buffer.from('not-an-image'), 'unauthorized.png');
+      expect(unauthenticated.status).toBe(401);
     });
   });
 

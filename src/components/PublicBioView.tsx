@@ -5,7 +5,7 @@ import { CreatorProfile, ThemeConfig } from '../types';
 import { THEMES } from '../data/mockData';
 import { brand } from '../config/brand';
 import { api } from '../services/api';
-import { ensureThemeContrast, getAccessibleTextColor } from '../utils/colorContrast';
+import { getAccessibleTextColor, getBorderColor, getThemeBackground, resolveTheme } from '../utils/colorContrast';
 import { friendlyErrorMessage } from '../utils/errors';
 import { 
   ArrowLeft, 
@@ -346,7 +346,8 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
     );
   }
 
-  const theme = ensureThemeContrast(customTheme || profile.customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0]);
+  const theme = resolveTheme(profile.themeId, customTheme || profile.customTheme);
+  const themeBackground = getThemeBackground(theme);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => ({
@@ -424,12 +425,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
       id="public-bio-view"
       className="min-h-screen w-full transition-colors duration-300 relative selection:bg-black selection:text-white"
       style={{
-        backgroundColor: theme.bgColor,
+        ...themeBackground,
         backgroundImage: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl
           ? `url(${profile.backgroundMediaUrl})`
-          : theme.bgType === 'gradient'
-            ? theme.bgGradient
-            : undefined,
+          : themeBackground.backgroundImage,
         backgroundSize: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? 'cover' : undefined,
         backgroundAttachment: profile.backgroundMediaType === 'image' && profile.backgroundMediaUrl ? 'fixed' : undefined,
         color: theme.textColor,
@@ -452,7 +451,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           <button
             onClick={onBackToStudio}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full border font-medium transition-opacity hover:opacity-80 cursor-pointer"
-            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)') }}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{ui("Back to Studio")}</span>
@@ -461,7 +460,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           <button
             onClick={() => setLocation('/')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full border font-medium transition-opacity hover:opacity-80 cursor-pointer"
-            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)') }}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{ui("LIINX")}</span>
@@ -472,7 +471,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           <button
             onClick={onOpenQr ? onOpenQr : () => setQrModalOpen(true)}
             className="px-3 py-1.5 rounded-full border font-medium transition-opacity hover:opacity-80 cursor-pointer flex items-center gap-1.5"
-            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)') }}
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>{ui("QR Code")}</span>
@@ -480,7 +479,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
           <button
             onClick={handleShare}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-semibold transition-opacity hover:opacity-80 shadow-xs cursor-pointer"
-            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)' }}
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)') }}
           >
             {copiedLink ? (
               <>
@@ -547,7 +546,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   className="p-2.5 rounded-full transition-transform duration-200 hover:scale-110 active:scale-95 border shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
                   style={{
                     backgroundColor: theme.cardBg,
-                    borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.1)',
+                    borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.1)'),
                     color: theme.cardText
                   }}
                   title={social.platform}
@@ -562,14 +561,14 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
               {profile.pages.filter(page => page.published).map(page => {
                 const href = customDomain ? `${page.isHome ? '/' : `/${page.slug}`}` : `/@${profile.username}${page.isHome ? '' : `/${page.slug}`}`;
                 const active = profile.page?.id === page.id;
-                return <a key={page.id} href={href} aria-current={active ? 'page' : undefined} className="rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors" style={{ backgroundColor: active ? theme.cardText : theme.cardBg, color: active ? theme.cardBg : theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,.15)' }}>{page.title}</a>;
+                return <a key={page.id} href={href} aria-current={active ? 'page' : undefined} className="rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors" style={{ backgroundColor: active ? theme.cardText : theme.cardBg, color: active ? theme.cardBg : theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)') }}>{page.title}</a>;
               })}
             </nav>
           )}
         </div>
 
         {/* Content Blocks */}
-        {profile.blocks.length > 5 && <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,.15)', color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /></label>}
+        {profile.blocks.length > 5 && <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'), color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /></label>}
         <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*:not(.liinx-grid-link)]:sm:col-span-2' : 'space-y-4'}`}>
           {(Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => !pageSearch.trim() || `${block.title} ${block.subtitle || ''}`.toLowerCase().includes(pageSearch.trim().toLowerCase())).map((block) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
@@ -969,7 +968,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                         }}
                         placeholder={ui("Enter your email address")}
                         className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl border outline-none focus:ring-2 focus:ring-neutral-900/20"
-                        style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.12)', color: theme.cardText }}
+                        style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)'), color: theme.cardText }}
                         required
                         spellCheck={false}
                         dir="auto"
@@ -1018,10 +1017,10 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         {/* Footer Brand Credit - omitted when white-labeled on Pro/Studio plans */}
         {(profile.footerLogoUrl || !(profile.plan && profile.plan !== 'free' && profile.hideBranding)) && (
           <div className="text-center pt-4 pb-12">
-            {profile.footerLogoUrl ? <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-xs" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}><img src={profile.footerLogoUrl} alt={`${profile.displayName} logo`} className="h-4 max-w-20 object-contain" /></span> : <button
+            {profile.footerLogoUrl ? <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-xs" style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}><img src={profile.footerLogoUrl} alt={`${profile.displayName} logo`} className="h-4 max-w-20 object-contain" /></span> : <button
               onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
-              style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}
+              style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>

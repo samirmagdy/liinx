@@ -23,6 +23,7 @@ import { log, logError } from './logger.js';
 import { startMaintenanceScheduler } from './maintenance.js';
 import { createId } from './utils/ids.js';
 import { startInstagramSyncScheduler } from './instagramScheduler.js';
+import { detectDocument, detectImageMagicBytes } from './routes/upload.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -279,22 +280,54 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve uploaded media with caching
+// Serve only content that can be classified from its bytes. In particular,
+// never let a legacy or manually placed .html/.svg file execute on the app
+// origin just because it lives below the uploads directory.
 const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../public/uploads'));
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
-app.use('/uploads', express.static(uploadsDir, {
-  maxAge: '30d',
-  setHeaders: (res, filePath) => {
-    const extension = path.extname(filePath).toLowerCase();
-    if (extension !== '.jpg' && extension !== '.jpeg' && extension !== '.png' && extension !== '.gif' && extension !== '.webp') {
-      res.setHeader('Content-Disposition', 'attachment');
-      res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-    }
+app.get('/uploads/:filename', (req, res) => {
+  const filename = req.params.filename;
+  if (!filename || filename !== path.basename(filename) || filename.includes('\\') || filename.length > 255) {
+    return res.status(404).end();
   }
-}));
+
+  const targetPath = path.resolve(uploadsDir, filename);
+  if (!targetPath.startsWith(`${uploadsDir}${path.sep}`)) return res.status(404).end();
+
+  let stat: fs.Stats;
+  let probe: Buffer;
+  try {
+    stat = fs.statSync(targetPath);
+    if (!stat.isFile() || stat.size > 25 * 1024 * 1024) return res.status(404).end();
+    const probeLength = Math.min(stat.size, 64 * 1024);
+    probe = Buffer.alloc(probeLength);
+    const fd = fs.openSync(targetPath, 'r');
+    try { fs.readSync(fd, probe, 0, probeLength, 0); } finally { fs.closeSync(fd); }
+  } catch {
+    return res.status(404).end();
+  }
+
+  const extension = path.extname(filename).toLowerCase();
+  const image = detectImageMagicBytes(probe);
+  const document = detectDocument(probe);
+  const isMatchingImage = Boolean(image && (extension === image.ext || (extension === '.jpeg' && image.ext === '.jpg')));
+  const detected = isMatchingImage ? image : document;
+  if (!detected) return res.status(404).end();
+
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  res.setHeader('Content-Type', detected.mime);
+  if (!isMatchingImage) {
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+  } else {
+    res.setHeader('Content-Disposition', 'inline');
+  }
+  res.setHeader('Content-Length', stat.size);
+  return res.sendFile(targetPath);
+});
 
 // Link Redirector (e.g. /r/:blockId) and analytics routes
 app.use(analyticsRouter);

@@ -7,6 +7,7 @@ import { ViewportPreview } from './ViewportPreview';
 import { QrCodeModal } from './QrCodeModal';
 import { LinktreeImporterModal } from './LinktreeImporterModal';
 import { api, authStorage } from '../services/api';
+import { resolveTheme } from '../utils/colorContrast';
 import { 
   Layers, 
   Palette, 
@@ -107,9 +108,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(initialProfile ? 'ready' : 'loading');
   const [profile, setProfile] = useState<CreatorProfile>(initialProfile || DEMO_PROFILES[0]);
   const [activeTab, setActiveTab] = useState<'content' | 'appearance' | 'settings' | 'analytics'>('content');
-  const [customTheme, setCustomTheme] = useState<ThemeConfig>(
-    profile.customTheme || THEMES.find(t => t.id === profile.themeId) || THEMES[0]
-  );
+  const [customTheme, setCustomTheme] = useState<ThemeConfig>(() => resolveTheme(profile.themeId, profile.customTheme));
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [dataError, setDataError] = useState(false);
@@ -195,7 +194,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         authStorage.setToken(res.token);
         const newLiveProfile = await api.studio.getProfile();
         setProfile(newLiveProfile);
-        const th = newLiveProfile.customTheme || THEMES.find(t => t.id === newLiveProfile.themeId) || THEMES[0];
+        const th = resolveTheme(newLiveProfile.themeId, newLiveProfile.customTheme);
         setCustomTheme(th);
         setGaInput(newLiveProfile.gaMeasurementId || '');
         setMetaPixelInput(newLiveProfile.metaPixelId || '');
@@ -223,7 +222,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         authStorage.setToken(res.token);
         const newLiveProfile = await api.studio.getProfile();
         setProfile(newLiveProfile);
-        const th = newLiveProfile.customTheme || THEMES.find(t => t.id === newLiveProfile.themeId) || THEMES[0];
+        const th = resolveTheme(newLiveProfile.themeId, newLiveProfile.customTheme);
         setCustomTheme(th);
         setShowNewProfileModal(false);
         setNewUsername('');
@@ -346,7 +345,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         setCustomDomainInput(liveProfile.customDomain || '');
         setCustomCssInput(liveProfile.customCss || '');
         setCustomFontUrlInput(liveProfile.customFontUrl || '');
-        const th = liveProfile.customTheme || THEMES.find(t => t.id === liveProfile.themeId) || THEMES[0];
+        const th = resolveTheme(liveProfile.themeId, liveProfile.customTheme);
         setCustomTheme(th);
         if (shouldOpenImporter) {
           setShowImporterModal(true);
@@ -2533,7 +2532,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                   <h3 className="font-bold text-sm text-neutral-900">{ui('Duplicate this profile')}</h3>
                   <p className="text-xs text-neutral-500">{ui('Create another profile with the same content and design, then choose a new handle.')}</p>
-                  <button type="button" onClick={async () => { const username = window.prompt(ui('New username')); if (!username) return; const displayName = window.prompt(ui('Display name'), profile.displayName) || profile.displayName; try { const result = await api.studio.createProfile({ username, displayName, duplicateProfileId: profile.id }); authStorage.setToken(result.token); const next = await api.studio.getProfile(); setProfile(next); setCustomTheme(next.customTheme || THEMES.find(theme => theme.id === next.themeId) || THEMES[0]); loadProfilesList(); } catch (error) { setPageSettingsFeedback(friendlyErrorMessage(error, ui('Could not duplicate profile.'))); } }} className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-bold text-neutral-900 hover:border-neutral-900">{ui('Duplicate Profile')}</button>
+                  <button type="button" onClick={async () => { const username = window.prompt(ui('New username')); if (!username) return; const displayName = window.prompt(ui('Display name'), profile.displayName) || profile.displayName; try { const result = await api.studio.createProfile({ username, displayName, duplicateProfileId: profile.id }); authStorage.setToken(result.token); const next = await api.studio.getProfile(); setProfile(next); setCustomTheme(resolveTheme(next.themeId, next.customTheme)); loadProfilesList(); } catch (error) { setPageSettingsFeedback(friendlyErrorMessage(error, ui('Could not duplicate profile.'))); } }} className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-bold text-neutral-900 hover:border-neutral-900">{ui('Duplicate Profile')}</button>
                 </div>
                 <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
                   <h3 className="font-bold text-sm text-neutral-900">{ui('Form submissions')}</h3>
@@ -2915,7 +2914,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           try {
             const liveProfile = await api.studio.getProfile();
             setProfile(liveProfile);
-            const th = liveProfile.customTheme || THEMES.find(t => t.id === liveProfile.themeId) || THEMES[0];
+            const th = resolveTheme(liveProfile.themeId, liveProfile.customTheme);
             setCustomTheme(th);
           } catch (err) {
             console.error('Failed to reload profile after import', err);

@@ -17,7 +17,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
-import { CreatorProfile } from './types';
+import { CreatorProfile, ThemeConfig } from './types';
 import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
@@ -73,7 +73,18 @@ function HomePage() {
 }
 
 function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?: string }) {
-  return <PublicBioView username={username} pageSlug={pageSlug} onBackToStudio={() => window.location.href = '/studio'} />;
+  const previewTheme = (() => {
+    try {
+      const raw = window.sessionStorage.getItem(`liinx-preview-theme:${username}`);
+      if (!raw) return undefined;
+      const parsed = JSON.parse(raw) as { theme?: ThemeConfig; createdAt?: number };
+      if (!parsed.createdAt || Date.now() - parsed.createdAt > 60_000 || !parsed.theme) return undefined;
+      return parsed.theme;
+    } catch {
+      return undefined;
+    }
+  })();
+  return <PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} onBackToStudio={() => window.location.href = '/studio'} />;
 }
 
 function StudioPage() {
@@ -147,7 +158,8 @@ function StudioPage() {
           </div>
         }>
           <BuilderStudio
-            onViewFullscreen={(profile) => {
+            onViewFullscreen={(profile, theme) => {
+              window.sessionStorage.setItem(`liinx-preview-theme:${profile.username}`, JSON.stringify({ theme, createdAt: Date.now() }));
               setLocation(`/@${profile.username}`);
             }}
           />
