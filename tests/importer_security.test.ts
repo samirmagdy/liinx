@@ -1,4 +1,3 @@
-import dns from 'node:dns';
 import { describe, expect, it, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import { importFromPublicUrl } from '../server/services/importer.js';
@@ -12,34 +11,17 @@ afterEach(() => {
 });
 
 describe('competitor importer boundaries', () => {
-  it('previews a supported public fixture and reports unsupported markup as a warning', async () => {
-    vi.spyOn(dns.promises, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as any);
-    globalThis.fetch = vi.fn().mockResolvedValue(new Response(`
-      <html><head><meta property="og:title" content="Public Fixture" /></head>
-      <body><a href="https://example.com/work">Work</a><a href="javascript:alert(1)">Unsafe</a></body></html>
-    `, { status: 200, headers: { 'content-type': 'text/html' } }));
-
-    const imported = await importFromPublicUrl('https://linktr.ee/public-fixture');
-    expect(imported.displayName).toBe('Public Fixture');
-    expect(imported.links).toEqual([{ title: 'Work', url: 'https://example.com/work' }]);
-    expect(imported.warnings.length).toBeGreaterThan(0);
+  it('does not fetch a provider page without an authorized access method', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    await expect(importFromPublicUrl('https://linktr.ee/public-fixture')).rejects.toThrow(/authorized provider API or export/i);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('revalidates every redirect and rejects long, truncated, or unsupported responses', async () => {
-    vi.spyOn(dns.promises, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as any);
-    globalThis.fetch = vi.fn()
-      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: 'https://example.com/private-hop' } }));
-    await expect(importFromPublicUrl('https://linktr.ee/redirect')).rejects.toThrow(/unsupported profile host/i);
-
-    globalThis.fetch = vi.fn().mockResolvedValue(new Response('small', { status: 200, headers: { 'content-type': 'text/html', 'content-length': String(3 * 1024 * 1024) } }));
-    await expect(importFromPublicUrl('https://linktr.ee/huge')).rejects.toThrow(/too large/i);
-
-    globalThis.fetch = vi.fn().mockResolvedValue(new Response('small', { status: 200, headers: { 'content-type': 'text/html', 'content-length': '100' } }));
-    await expect(importFromPublicUrl('https://linktr.ee/truncated')).rejects.toThrow(/truncated/i);
-
-    globalThis.fetch = vi.fn().mockImplementation(() => new Response(null, { status: 302, headers: { location: 'https://linktr.ee/next' } }));
-    await expect(importFromPublicUrl('https://linktr.ee/loop')).rejects.toThrow(/too many redirects/i);
-    expect(globalThis.fetch).toHaveBeenCalledTimes(6);
+  it('rejects private and unsupported hosts before any network request', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    await expect(importFromPublicUrl('http://127.0.0.1:8080/profile')).rejects.toThrow(/invalid or non-public/i);
+    await expect(importFromPublicUrl('https://example.com/profile')).rejects.toThrow(/supported/i);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('does not duplicate imported destinations and appends to the selected owned page', async () => {

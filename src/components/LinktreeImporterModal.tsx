@@ -163,7 +163,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   />
                 </div>
                 <p className="text-[11px] text-neutral-600 mt-1.5">
-                  {ui("Supports public Linktree, Beacons, and Bio.fm profiles. Preview is read-only until you choose what to import.")}</p>
+                  {ui("Provider import is currently unavailable until an authorized API or export is configured. No source page is fetched.")}</p>
               </div>
 
               {error && (

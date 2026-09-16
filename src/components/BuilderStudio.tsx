@@ -3287,6 +3287,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
             console.error('Failed to reload profile after import', err);
           }
         }}
+        pages={profile.pages || []}
       />
 
       <Modal open={Boolean(deletePageId)} onClose={() => setDeletePageId(null)} label={ui('Confirm page deletion')}>

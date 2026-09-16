@@ -96,7 +96,7 @@ export function isSafePublicUrl(inputUrl: string): boolean {
     const parsed = new URL(inputUrl);
     if (!['http:', 'https:'].includes(parsed.protocol)) return false;
 
-    const hostname = parsed.hostname.toLowerCase();
+    const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
     // Block localhost, local domains, and internal cloud metadata hostnames
     if (
       hostname === 'localhost' ||
@@ -302,6 +302,14 @@ export function parseGenericHtmlBio(html: string, baseUrl: string): Partial<Impo
 export async function importFromPublicUrl(inputUrl: string): Promise<ImportedProfileData> {
   const cleanUrl = normalizeImportUrl(inputUrl);
   if (!cleanUrl) throw new Error('Only public Linktree, Beacons, or Bio.fm profile URLs are supported.');
+
+  // Linktree and Beacons currently prohibit automated extraction in their
+  // public terms. No authorized provider API/export is configured in Liinx,
+  // so never fetch these pages from production. The parser functions above
+  // remain available for a future permitted export/API adapter.
+  if (!isSafePublicUrl(cleanUrl)) throw new Error('Invalid or non-public profile URL provided.');
+  if (!isSupportedImportUrl(cleanUrl)) throw new Error('Only public Linktree, Beacons, or Bio.fm profile URLs are supported.');
+  throw new Error('Import is unavailable until an authorized provider API or export is configured.');
 
   let currentUrl = cleanUrl;
   let redirects = 0;

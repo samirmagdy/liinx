@@ -13,7 +13,7 @@ export const importerRouter = Router();
 const previewSchema = z.object({
   url: z.string().min(1, 'Profile URL is required').max(2048).refine(value => {
     const normalized = value.trim();
-    return isSupportedImportUrl(normalized) || /^(?:https?:\/\/|@?[a-z0-9._-]+$)|^(?:www\.)?(?:linktr\.ee|beacons\.ai|bio\.fm)\/[a-z0-9._-]+$/i.test(normalized);
+    return /^(?:https?):\/\/[^\s]+$/i.test(normalized) || /^(?:@?[a-z0-9._-]+)$|^(?:www\.)?(?:linktr\.ee|beacons\.ai|bio\.fm)\/[a-z0-9._-]+$/i.test(normalized);
   }, 'Only public Linktree, Beacons, or Bio.fm profile URLs are supported.')
 });
 

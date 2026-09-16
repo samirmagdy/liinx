@@ -139,7 +139,7 @@ export const runtimeTranslations: Record<string, string> = {
   'QR target': 'وجهة QR',
   'The QR image provider is unavailable. Please retry later.': 'مزود صورة QR غير متاح. أعد المحاولة لاحقًا.',
   'Supported public profile URL': 'رابط ملف عام مدعوم',
-  'Supports public Linktree, Beacons, and Bio.fm profiles. Preview is read-only until you choose what to import.': 'يدعم ملفات Linktree وBeacons وBio.fm العامة. المعاينة للقراءة فقط حتى تختار ما تريد استيراده.',
+  'Provider import is currently unavailable until an authorized API or export is configured. No source page is fetched.': 'استيراد المزود غير متاح حاليًا حتى يتم إعداد واجهة API أو تصدير مصرح به. لا يتم جلب أي صفحة مصدر.',
   'Import destination page': 'صفحة وجهة الاستيراد',
   'Imported links are appended to this page; existing content is not overwritten.': 'تُضاف الروابط المستوردة إلى هذه الصفحة؛ ولا يتم استبدال المحتوى الحالي.',
   'Some source content could not be imported': 'تعذّر استيراد بعض محتوى المصدر',
