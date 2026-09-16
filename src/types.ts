@@ -154,6 +154,8 @@ export interface CreatorProfile {
   gaMeasurementId?: string | null;
   metaPixelId?: string | null;
   customDomain?: string | null;
+  customDomainVerified?: boolean;
+  customDomainTlsStatus?: 'external_provider_required' | 'unknown';
   customCss?: string | null;
   customFontUrl?: string | null;
   shareTitle?: string | null;

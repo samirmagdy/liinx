@@ -2762,3 +2762,61 @@ Baseline: branch `main`, commit `1d921ae` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `51 — Custom domains and TLS`
+
+## Task 51 — Custom domains and TLS
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `7f8194a` at task start. The worktree was clean; prior task changes were preserved. No repository-level `AGENTS.md` or additional project instruction file was present.
+
+### Scope and changed files
+
+- `server/utils/customDomain.ts`: adds shared hostname normalization and strict DNS-label validation, rejecting IP literals, repeated dots, invalid label boundaries, paths, ports, and oversized names.
+- `server/routes/profiles.ts`: applies the shared domain contract, exposes DNS/TLS status only to Studio, enforces paid entitlement, and clears stale verification when the current DNS check no longer matches.
+- `server/server.ts`: keeps custom-host routing tied to a verified database mapping, enforces the current plan at request time, and preserves the requested subpage when rewriting a custom-domain request to the public profile endpoint.
+- `src/config/brand.ts`, `src/types.ts`, `src/components/BuilderStudio.tsx`: align the target with the configured Fly app, expose DNS verification state, and explain that Fly certificate provisioning is a separate prerequisite.
+- `tests/custom_domain_task51.test.ts`, `tests/custom_domain.test.ts`, `tests/audit_fixes.test.ts`: cover malformed domains, tenant routing, root/subpage selection, unknown/unverified/downgraded domains, stale DNS state, and the hosting target.
+
+### Findings and behavior
+
+- The previous validator accepted malformed hostnames such as repeated dots and did not clear `custom_domain_verified` after a later failed DNS check. Both behaviors are repaired.
+- Public custom-host routing now requires an exact lowercased verified mapping and an eligible paid plan. An arbitrary or unverified `Host` header cannot select a tenant; unknown hosts receive no mapped tenant header or tenant payload.
+- Custom-domain root and one-level page paths resolve through the owning profile and published-page checks. Unknown or unpublished subpages return 404. The rewritten query is made explicit so `/about` cannot silently fall back to Home.
+- The application uses Fly deployment `liinx-app`; the displayed subdomain target is `liinx-app.fly.dev`. The current verifier checks DNS CNAME ownership for subdomains. Apex A/AAAA setup is provider-specific and is not falsely treated as verified by this endpoint.
+- DNS verification is not TLS provisioning. The API returns `tlsStatus: external_provider_required`; the UI instructs operators to attach the hostname with `fly certs add <hostname>` and confirm with `fly certs check <hostname>`. It does not claim a domain is connected solely because a database flag is set.
+- Session cookies remain host-only (`Domain` is not set), HttpOnly, SameSite=Lax, and Secure in production. The custom host is not added to authenticated CORS origins automatically; Studio remains on the configured application origin.
+- Official hosting documentation reviewed: [Fly custom domains](https://fly.io/docs/networking/custom-domain/), [Fly certificates API](https://fly.io/docs/machines/api/certificates-resource/), and [Vercel custom-domain setup](https://vercel.com/docs/domains/set-up-custom-domain). The repository deploys the application runtime on Fly and uses Vercel rewrites for the frontend shell; no Fly/Vercel management credential is configured in the app.
+
+### Acceptance criteria
+
+- PASS — Verified, unverified, malformed, duplicate, and wrong-domain states. Evidence: `tests/custom_domain.test.ts`, `tests/custom_domain_task51.test.ts`, and existing audit tests.
+- PASS — Custom-domain root, published subpage, unknown page, and direct route selection. Evidence: custom-domain task tests; the prior Home fallback defect is covered.
+- PASS — Tenant isolation against arbitrary/unverified hosts and paid-plan downgrade. Evidence: exact mapping lookup, plan check, and focused host tests.
+- PASS — Domain removal and stale DNS changes stop public custom-domain routing. Evidence: normalized update clears verification and failed verification resets the flag.
+- PASS — Profile updates do not copy another profile’s domain and domain uniqueness remains enforced. Evidence: ownership-scoped update and existing collision tests.
+- PASS — DNS and TLS status are distinct and the UI explains pending propagation/certificate setup honestly. Evidence: `dnsVerified`, `tlsStatus: external_provider_required`, updated instructions, and focused response assertions.
+- NOT RUN — Live DNS propagation, domain removal at the edge, HTTPS certificate issuance/renewal, custom-domain CDN/cache behavior, and direct reload through the deployed Vercel/Fly path. No authorized hosting account or production domain was used.
+- NOT RUN — Full browser profile-switch journey on two custom domains. Local profile ownership and route tests passed; browser/deployed evidence is still required.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `7f8194a68f390d45070911486c7d1a71a7804906`.
+- `npm run lint` — PASS: TypeScript check.
+- `testdb=$(mktemp -d /tmp/liinx-task-51-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-51-final-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/custom_domain_task51.test.ts tests/custom_domain.test.ts tests/sharing_metadata.test.ts tests/audit_fixes.test.ts` — PASS: 4 files / 42 tests against disposable SQLite/uploads paths.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `git diff --check` — PASS.
+
+### Implementation commit
+
+Pending commit for Task 51 implementation and this ledger entry.
+
+### Unresolved risks and dependencies
+
+- Fly certificate attachment/provisioning and renewal are not managed by this application. Operations must run the provider’s certificate setup/check flow for every hostname before communicating that HTTPS is live.
+- The hardcoded Fly app hostname is derived from `fly.toml`; if the deployed Fly app or custom-domain architecture changes, the DNS target and verification contract must be updated together.
+- DNS is checked on demand, not continuously at the edge. A domain can change between checks; deployed proxy/TLS configuration remains the authoritative availability gate.
+- Vercel custom-domain attachment is not configured in `vercel.json`; the current architecture assumes custom hosts reach Fly directly. This must be confirmed in the deployment environment.
+
+### Next eligible prompt
+
+`52 — Views, clicks, and reporting`

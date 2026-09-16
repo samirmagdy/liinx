@@ -2647,7 +2647,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <div>
                       <h3 className="font-bold text-sm text-neutral-900">{ui("Custom Domain")}</h3>
                       <p className="text-xs text-neutral-500 mt-0.5">
-                        {ui("Link your own domain or subdomain (e.g.")}<span className="font-mono">links.yourbrand.com</span>{ui(") directly to your bio page.")}</p>
+                        {ui("Link a verified domain or subdomain (e.g.")}<span className="font-mono">links.yourbrand.com</span>{ui(") after your hosting provider provisions HTTPS.")}</p>
                     </div>
                   </div>
                   {profile.plan === 'free' ? (
@@ -2655,7 +2655,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       {ui("PRO / STUDIO")}</span>
                   ) : (
                     <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
-                      {ui("AVAILABLE")}</span>
+                      {profile.customDomainVerified ? ui("DNS VERIFIED") : ui("SETUP REQUIRED")}</span>
                   )}
                 </div>
 
@@ -2675,13 +2675,13 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                   <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl space-y-1 text-xs">
                     <span className="font-semibold text-neutral-800 block">{ui("DNS Configuration Instructions:")}</span>
                     <p className="text-neutral-500 text-[11px]">
-                      {ui("Add a")}<span className="font-mono font-bold text-neutral-900">{ui("CNAME")}</span> {ui("record at your DNS provider pointing to:")}</p>
+                      {ui("The current verifier supports a subdomain")}<span className="font-mono font-bold text-neutral-900">{ui("CNAME")}</span> {ui("record pointing to the Fly app target below. Apex domains need the A/AAAA setup and separate Fly certificate verification.")}</p>
                     <div className="flex items-center justify-between bg-neutral-50 px-3 py-1.5 rounded-lg border border-neutral-200 font-mono text-xs">
-                      <span>{ui("cname.liinx.app")}</span>
+                      <span>{ui("liinx-app.fly.dev")}</span>
                       <button
                         type="button"
                         onClick={() => {
-                          navigator.clipboard?.writeText('cname.liinx.app');
+                          navigator.clipboard?.writeText('liinx-app.fly.dev');
                           setCopiedCname(true);
                           setTimeout(() => setCopiedCname(false), 2000);
                         }}
@@ -2689,6 +2689,11 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       >
                         {copiedCname ? ui("Copied!") : ui("Copy Target")}</button>
                     </div>
+                    <p className="text-[11px] text-neutral-500">
+                      {profile.customDomainVerified
+                        ? ui("DNS is verified. This does not confirm TLS yet: attach the hostname with fly certs add and wait for fly certs check to report a certificate.")
+                        : ui("DNS is not verified. Saving a domain does not make it public; verify DNS, attach the hostname to Fly, and wait for certificate issuance.")}
+                    </p>
                   </div>
 
                   {dnsVerificationResult && (
@@ -2751,7 +2756,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           try {
                             const val = customDomainInput.trim() || null;
                             await api.studio.updateProfile({ customDomain: val });
-                            setProfile(prev => ({ ...prev, customDomain: val }));
+                            setProfile(prev => ({ ...prev, customDomain: val, customDomainVerified: val === prev.customDomain ? prev.customDomainVerified : false, customDomainTlsStatus: val ? 'external_provider_required' : 'unknown' }));
                             setDomainFeedback({
                               type: 'success',
                               message: ui('Custom domain saved successfully!')

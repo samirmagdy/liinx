@@ -26,6 +26,7 @@ import { createId } from './utils/ids.js';
 import { startInstagramSyncScheduler } from './instagramScheduler.js';
 import { detectDocument, detectImageMagicBytes } from './routes/upload.js';
 import { isHttpUrl } from './utils/urlValidation.js';
+import { hasEntitlement } from './entitlements.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -316,7 +317,8 @@ app.use((req, res, next) => {
   const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
 
   if (host && !defaultHosts.includes(host) && !host.endsWith('.liinx.app')) {
-    const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { username: string } | undefined;
+    const profile = db.prepare('SELECT username, plan FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { username: string; plan: string } | undefined;
+    if (profile && !hasEntitlement(profile.plan, 'customDomain')) return res.status(404).send('This custom domain is not available.');
     if (profile) {
       res.setHeader('X-Custom-Domain-User', profile.username);
       const customPageMatch = req.path.match(/^\/([a-z0-9-]+)$/i);
@@ -338,6 +340,10 @@ app.use((req, res, next) => {
           return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page) : res.sendFile(distIndex);
         }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
+        // Express may have cached req.query while evaluating req.path above;
+        // keep the rewritten tenant/page selection authoritative for the
+        // downstream profile route.
+        if (pageSlug) req.query.page = pageSlug;
       }
     }
   }

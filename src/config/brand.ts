@@ -74,7 +74,7 @@ export const brand: BrandConfig = {
   tagline: 'Your entire world. Designed your way.',
   subheadline: 'Create a beautiful mini-site for everything you make, sell and share.',
   domain: 'liinx.app',
-  cnameTarget: 'cname.liinx.app',
+  cnameTarget: 'liinx-app.fly.dev',
   supportEmail: 'support@liinx.app',
   legalName: 'Liinx Studio',
   copyrightName: 'Liinx Studio',

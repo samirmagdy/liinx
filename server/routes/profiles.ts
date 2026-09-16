@@ -9,6 +9,7 @@ import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
 import { createId } from '../utils/ids.js';
 import { isSafeCreatorCss, normalizeBlockExtra, normalizeEditorBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
+import { normalizeCustomDomain } from '../utils/customDomain.js';
 
 export const profilesRouter = Router();
 
@@ -283,6 +284,8 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       gaMeasurementId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
       metaPixelId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
       customDomain: hasEntitlement(profile.plan, 'customDomain') ? (profile.custom_domain || null) : null,
+      customDomainVerified: hasEntitlement(profile.plan, 'customDomain') && Boolean(profile.custom_domain_verified),
+      customDomainTlsStatus: hasEntitlement(profile.plan, 'customDomain') && profile.custom_domain ? 'external_provider_required' : 'unknown',
       customCss: hasEntitlement(profile.plan, 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
       customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
       shareTitle: profile.share_title || null,
@@ -387,12 +390,12 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
         updatedCustomDomain = null;
         customDomainVerified = 0;
       } else {
-        const cleanDomain = customDomain.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+        const cleanDomain = normalizeCustomDomain(customDomain);
+        if (!cleanDomain) {
+          return res.status(400).json({ error: 'Invalid domain format. Use a hostname such as links.yourdomain.com.' });
+        }
         if (!hasEntitlement(existing.plan, 'customDomain')) {
           return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
-        }
-        if (!/^[a-z0-9][a-z0-9.-]+\.[a-z]{2,}$/.test(cleanDomain)) {
-          return res.status(400).json({ error: 'Invalid domain format. Example: links.yourdomain.com' });
         }
         const conflict = db.prepare('SELECT id FROM profiles WHERE lower(custom_domain) = ? AND id != ?').get(cleanDomain, req.user!.profileId);
         if (conflict) {
@@ -501,10 +504,8 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
       return res.status(400).json({ error: 'Domain name is required.' });
     }
 
-    const cleanDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-    if (!/^[a-z0-9][a-z0-9.-]+\.[a-z]{2,}$/.test(cleanDomain)) {
-      return res.status(400).json({ error: 'Invalid domain format. Example: links.yourdomain.com' });
-    }
+    const cleanDomain = normalizeCustomDomain(domain);
+    if (!cleanDomain) return res.status(400).json({ error: 'Invalid domain format. Use a hostname such as links.yourdomain.com.' });
 
     const expectedTarget = brand.cnameTarget;
     let isVerified = false;
@@ -517,27 +518,28 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
       // DNS record may not yet be configured or propagating
     }
 
-    // Update verified status in database upon successful verification
-    const saved = db.prepare('SELECT custom_domain FROM profiles WHERE id = ?').get(req.user!.profileId) as { custom_domain?: string | null } | undefined;
+    // A failed DNS check must revoke the old flag; otherwise a changed DNS
+    // record would remain publicly routable based on stale database state.
+    const saved = db.prepare('SELECT custom_domain, plan FROM profiles WHERE id = ?').get(req.user!.profileId) as { custom_domain?: string | null; plan?: string } | undefined;
     if (!saved?.custom_domain || saved.custom_domain !== cleanDomain) {
       return res.status(409).json({ error: 'Verify the exact custom domain saved on this profile.' });
     }
-    if (isVerified) {
-      db.prepare('UPDATE profiles SET custom_domain_verified = 1, updated_at = ? WHERE id = ? AND custom_domain = ?').run(
-        Date.now(),
-        req.user!.profileId,
-        cleanDomain
-      );
-    }
+    if (!hasEntitlement(saved.plan, 'customDomain')) return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
+    db.prepare('UPDATE profiles SET custom_domain_verified = ?, updated_at = ? WHERE id = ? AND custom_domain = ?').run(
+      isVerified ? 1 : 0, Date.now(), req.user!.profileId, cleanDomain
+    );
 
     res.json({
       domain: cleanDomain,
       verified: isVerified,
+      dnsVerified: isVerified,
+      tlsStatus: 'external_provider_required',
+      tlsProvider: 'fly.io',
       expectedTarget,
       cnameRecords,
       message: isVerified
-        ? 'DNS CNAME verified successfully! Traffic is properly routed.'
-        : `DNS verification pending. Please ensure a CNAME record for "${cleanDomain}" points to "${expectedTarget}". Note that DNS propagation may take a few minutes.`
+        ? 'DNS ownership record verified. Attach this hostname to the Fly app and wait for its TLS certificate before calling the domain connected.'
+        : `DNS verification pending. Please ensure the DNS record for "${cleanDomain}" matches the Fly setup instructions. DNS propagation may take a few minutes.`
     });
   } catch (err: any) {
     console.error('Custom domain verify error:', err);

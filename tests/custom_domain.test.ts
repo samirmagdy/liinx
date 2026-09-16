@@ -133,7 +133,7 @@ describe('Milestone 6: Custom Domain Support & Host-Header Routing Engine (0% Fa
       .expect(200);
 
     expect(res.body.domain).toBe('bio.procreator.studio');
-    expect(res.body.expectedTarget).toBe('cname.liinx.app');
+    expect(res.body.expectedTarget).toBe('liinx-app.fly.dev');
     expect(res.body.message).toBeDefined();
   });
 

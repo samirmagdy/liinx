@@ -212,7 +212,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
         .expect(200);
 
       expect(res.body.domain).toBe('links.customdomain.org');
-      expect(res.body.expectedTarget).toBe('cname.liinx.app');
+      expect(res.body.expectedTarget).toBe('liinx-app.fly.dev');
       expect(res.body.message).toBeDefined();
     });
 
