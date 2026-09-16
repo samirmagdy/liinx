@@ -173,7 +173,7 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   gallery: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
   spacer: extraObject({ height: z.number().int().min(16).max(240).optional() }),
   carousel: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
-  form: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional(), fields: formFieldsSchema.optional() }),
+  form: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional(), consentRequired: z.boolean().default(false), consentText: z.string().trim().max(300).optional(), fields: formFieldsSchema.optional() }),
   download: extraObject({ fileUrl: optionalDownloadUrl, downloadName: z.string().max(150).optional(), sizeBytes: z.number().int().min(0).max(25 * 1024 * 1024).optional(), mimeType: z.enum(['application/pdf', 'application/zip', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4']).optional(), description: z.string().max(1000).optional() }),
   map: extraObject({ location: z.string().max(300).optional() }),
   faq: extraObject({ items: z.array(faqItemSchema).max(50).optional() }),

@@ -366,11 +366,14 @@ export function initDatabase() {
       profile_id TEXT NOT NULL,
       block_id TEXT,
       fields_json TEXT NOT NULL,
+      submission_key TEXT,
       created_at INTEGER NOT NULL,
       FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
     );
     CREATE INDEX IF NOT EXISTS idx_form_submissions_profile ON form_submissions(profile_id, created_at);
   `);
+  try { db.exec('ALTER TABLE form_submissions ADD COLUMN submission_key TEXT'); } catch {}
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_form_submissions_idempotency ON form_submissions(block_id, submission_key) WHERE submission_key IS NOT NULL');
 
   // Every profile has a stable home page. Existing blocks remain visible by
   // assigning them to that page during migration; this is idempotent.

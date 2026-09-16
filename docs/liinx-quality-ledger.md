@@ -2179,3 +2179,60 @@ Baseline: branch `main`, commit `d416ef5` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `40 — Form submission pipeline`
+
+## Task 40 — Form submission pipeline
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `afd3832` at task start. The worktree was clean; prior task changes were preserved.
+
+### Scope and changed files
+
+- `server/routes/forms.ts`: validates submissions against the saved normalized form schema, requiredness, email/phone types, min/max lengths, allowed field names, explicit consent, published-page visibility, and truthful failure states; adds retry-safe submission-key handling.
+- `server/db.ts`: adds the nullable submission idempotency key and an idempotent unique index for `(block_id, submission_key)`, including upgrade handling for existing databases.
+- `server/contracts.ts`: adds explicit `consentRequired` and bounded consent text to the form contract.
+- `src/components/BuilderStudio.tsx`: adds creator opt-in consent configuration and text, with a clear statement that Liinx does not send notifications automatically.
+- `src/components/PublicBioView.tsx`: stops rendering a fabricated fallback field for empty forms, renders consent only when enabled, sends a retry-stable key, preserves entered values on errors, and reports honest success/duplicate/error states.
+- `tests/form_submission_pipeline.test.ts`: covers valid persistence, duplicate requests, malformed and unknown/removed fields, explicit consent, empty forms, and unpublished pages.
+
+### Findings and behavior
+
+- The prior route accepted submissions for blocks on unpublished pages, used independently normalized fields, did not enforce every saved bound, and had no idempotency key. Empty public forms displayed a default message field that the backend could not accept.
+- Published form visibility is required at submission time by joining `blocks` to its published page. Hidden/draft page forms return 404 and are absent from the public profile.
+- Consent is explicit creator configuration. Legacy forms default to no consent checkbox for compatibility; Liinx does not claim consent was collected unless the creator enables the checkbox and the visitor accepts it.
+- Repeated requests carrying the same client-generated submission key return a truthful already-received response and create only one row. Requests without a key remain compatible but are not idempotent across network retries.
+- The existing shared IP rate limiter remains in place for production (20 requests/hour); test mode intentionally bypasses it. No spam scoring, CAPTCHA, or notification provider was invented.
+- Failed API responses preserve browser form state because the client clears values only after a successful or duplicate response. The backend returns a retryable save error for persistence failures.
+
+### Acceptance criteria
+
+- PASS — Valid submissions persist once as intended under repeated submission keys. Evidence: `tests/form_submission_pipeline.test.ts` and unique database index.
+- PASS — Empty forms, required/optional fields, malformed email/phone, unknown fields, removed fields, and configured bounds are rejected cleanly. Evidence: shared pipeline tests and Task 39 tests.
+- PASS — Hidden/unpublished pages cannot receive public submissions. Evidence: unpublished-page submission returns 404 and hidden block is absent from public output.
+- PASS — Duplicate clicks/retries with the same key are idempotent and truthful. Evidence: second request returns 200 with `duplicate: true`; database count remains one.
+- PASS — Consent is explicit and enforced when enabled without inventing consent when disabled. Evidence: consent-required form rejects missing consent and accepts `consent: true`.
+- PASS — Production spam/rate protection remains applied. Evidence: existing `sharedRateLimit` middleware is attached to the submission route; test mode bypass is intentional.
+- PASS — Empty forms do not pretend to collect a default message field. Evidence: public renderer unavailable state and backend 409.
+- NOT RUN — Actual browser timeout/retry journey, preservation of typed values through a browser network interruption, screen-reader consent messaging, and live provider/notification verification. No notification provider is configured or promised.
+
+### Exact commands and outcomes
+
+- `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
+- `task40_tmp=$(mktemp -d); export DATABASE_PATH="$task40_tmp/liinx.sqlite"; export UPLOADS_DIR="$task40_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts` — PASS: typecheck and 2 test files / 7 tests.
+- `task40_tmp=$(mktemp -d); export DATABASE_PATH="$task40_tmp/liinx.sqlite"; export UPLOADS_DIR="$task40_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts tests/concurrency.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 5 test files / 45 tests, production build, 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests used disposable SQLite and uploads paths; no production submissions, email provider, CAPTCHA, or external notification service was used.
+
+### Implementation commit
+
+`TASK40_PENDING` — `feat: harden form submission pipeline` (will be replaced with the implementation commit SHA after commit).
+
+### Unresolved risks and dependencies
+
+- Browser-level timeout/retry and accessibility verification remains required.
+- Forms without `submissionKey` from older/custom clients cannot be deduplicated across retries; the current public client always sends one.
+- There is no configured notification provider, so successful response text intentionally claims storage only, not email delivery or creator notification.
+
+### Next eligible prompt
+
+`41 — Creator form inbox`
