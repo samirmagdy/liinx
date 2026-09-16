@@ -483,3 +483,58 @@ Baseline commit: `3e2c05f45ca0010ce1dced59c1e6846c529eb39a` (`main`, matching `o
 ### Next eligible prompt
 
 `06 — Account recovery and deletion`
+
+## Task 06 — Account recovery and deletion
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline commit: `9f272661b05afcf6b21cb1a79fa12ce0a69a700f` (`main`, matching `origin/main` at task start). No commit was created during this task; changes remain uncommitted. The worktree was clean before Task 06 and earlier work was preserved.
+
+### Scope and changed files
+
+- `server/db.ts`: adds the backward-compatible `users.email_verified_at` column and the indexed, user-owned `account_tokens` table. Legacy databases receive the new column through an idempotent startup alteration.
+- `server/services/email.ts`: sends transactional reset/verification mail through the configured Resend provider; missing configuration is an explicit unavailable state and provider credentials/tokens are not logged.
+- `server/routes/auth.ts`: adds rate-limited password-reset request/confirmation and authenticated email-verification request/confirmation routes. Tokens are random, hashed at rest, single-use, expiring, invalidated after use, and cleaned opportunistically. Reset requests do not disclose account existence when delivery is configured; absent provider configuration returns the same honest unavailable state before account lookup. Password reset increments `session_version`.
+- `server/routes/auth.ts`: requires the literal `DELETE` confirmation before account deletion, cancels external subscriptions before local deletion, retains local data when cancellation fails, explicitly removes pages/tokens and owned profile data, and supports a safe retry after an external failure.
+- `tests/account_recovery.test.ts`: regression coverage for unavailable mail, no-token responses, expiry, reuse, session invalidation, explicit deletion, billing failure, retry, and owned subscriber/submission removal.
+- `tests/api.test.ts`: updates the existing deletion journey to provide explicit confirmation.
+
+### Findings and behavior
+
+- Recovery tokens are only sent in the provider request body; they are never returned in API JSON. Database rows contain only SHA-256 token hashes, purpose, timestamps, and user ownership.
+- Only one unused token per user/purpose remains active; used and expired token rows are purged when a new token is issued. No plaintext token retention is introduced.
+- Missing `RESEND_API_KEY` or `CONTACT_FROM_EMAIL` returns HTTP 503 with a precise unavailable message and removes any tentative token row. Non-2xx provider responses also return 503 without claiming delivery.
+- Password reset rejects invalid, expired, and reused tokens with the same client-safe error and invalidates existing sessions after a successful reset. Verification marks `email_verified_at` only after a valid token.
+- Account deletion is confirmation-gated and authorization-scoped. Stripe cancellation is attempted first; failure returns 500 without success and leaves the account retryable. Successful local deletion removes profiles, pages, blocks, analytics, subscribers, submissions, integrations, API keys, upload records/files, account tokens, and the user; pages and tokens are explicitly removed rather than relying only on cascade behavior.
+- Retention decision for this task: local account-owned records are deleted on confirmed successful account deletion; reset/verification token records are short-lived and opportunistically purged. Backup, email-provider, and billing-provider retention is outside this local implementation and has not been represented as a legal-compliance claim.
+
+### Acceptance criteria
+
+- PASS — Single-use and expiry behavior. Evidence: `tests/account_recovery.test.ts` rejects expired and reused tokens.
+- PASS — Reset session invalidation. Evidence: the pre-reset bearer token receives 401 after reset.
+- PASS — Mail-provider failure/unavailable state. Evidence: missing provider configuration returns 503 and does not claim a sent message; provider calls are mocked only in isolated tests.
+- PASS — Deletion retry. Evidence: missing Stripe provider causes 500 with data preserved; clearing the subscription and retrying deletes the account and owned subscriber/submission records.
+- PASS — Account data ownership. Evidence: deletion queries are scoped to the authenticated user and its profiles; regression test verifies the target account's related data is removed.
+- PASS — No reset token in production API responses. Evidence: request and confirmation response bodies are asserted not to contain a token; tokens exist only in the mocked provider request for local testing.
+- NOT RUN — Live Resend delivery and real email verification link journey; credentials were not available and no fake production delivery was attempted.
+- NOT RUN — Production/deployed HTTPS cookie, browser, provider webhook, backup-restore, and external retention verification.
+
+### Exact commands and outcomes
+
+- `npm run lint` — PASS, `tsc --noEmit` exited 0.
+- `mkdir -p /tmp/liinx-task-06-db /tmp/liinx-task-06-uploads && DATABASE_PATH=/tmp/liinx-task-06-db/liinx.sqlite UPLOADS_DIR=/tmp/liinx-task-06-uploads npm test -- --run tests/account_recovery.test.ts tests/api.test.ts` — PASS, 2 files / 29 tests.
+- `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `DATABASE_PATH=/tmp/liinx-task-06-db/full.sqlite UPLOADS_DIR=/tmp/liinx-task-06-uploads/full npm test -- --run` — PASS, 27 files / 207 tests in 22.23s.
+- `git diff --check` — PASS, no whitespace errors.
+
+### Existing test utilities and remaining risks
+
+- Supertest/Vitest API tests and the global SQLite initializer are the existing local integration utilities. Task-specific tests use unique accounts, a disposable database path, a disposable uploads path, and a mocked `fetch` only for provider-success simulation.
+- The current frontend has no recovery/verification screens or controls; these API routes do not claim a completed browser UX. A future task must add the user-facing journey using the existing translation and design layers.
+- Delivery rate limits are in-process and were not load-tested across multiple instances. Token cleanup is opportunistic rather than a scheduled maintenance job.
+- Filesystem unlink failures during the pre-existing post-transaction cleanup remain a local orphan risk because the database record is already removed; this is not silently claimed as externally verified and should be addressed in the file-lifecycle task.
+- Live transactional email, Stripe cancellation, deployed session behavior, legal retention requirements, and provider-side deletion are external prerequisites and remain unverified.
+
+### Next eligible prompt
+
+`07 — Subscription entitlements`

@@ -9,6 +9,8 @@ import fs from 'fs';
 import path from 'path';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { cancelStripeSubscription } from '../services/billingCancellation.js';
+import { createHash, randomBytes } from 'node:crypto';
+import { EmailDeliveryUnavailable, sendTransactionalEmail } from '../services/email.js';
 
 export const authRouter = Router();
 
@@ -86,6 +88,106 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: z.string().email('Please provide a valid email address').max(255, 'Email cannot exceed 255 characters'),
   password: z.string().min(1, 'Password is required').max(128, 'Password cannot exceed 128 characters')
+});
+
+const resetRequestSchema = z.object({ email: z.string().email().max(255) });
+const resetConfirmSchema = z.object({ token: z.string().min(32).max(200), password: z.string().min(8).max(128).refine(s => s.trim().length >= 8) });
+const deletionSchema = z.object({ confirmation: z.literal('DELETE') });
+
+function hashAccountToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
+
+function accountOrigin(): string {
+  return (process.env.APP_ORIGIN || 'http://localhost:3050').replace(/\/$/, '');
+}
+
+function transactionalEmailConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY && process.env.CONTACT_FROM_EMAIL);
+}
+
+async function issueAccountToken(userId: string, email: string, purpose: 'password_reset' | 'email_verification'): Promise<boolean> {
+  const rawToken = randomBytes(32).toString('base64url');
+  const tokenHash = hashAccountToken(rawToken);
+  const now = Date.now();
+  const expiresAt = now + (purpose === 'password_reset' ? 60 : 24 * 60) * 60 * 1000;
+  db.transaction(() => {
+    db.prepare('DELETE FROM account_tokens WHERE expires_at <= ? OR used_at IS NOT NULL').run(now);
+    db.prepare('UPDATE account_tokens SET used_at = ? WHERE user_id = ? AND purpose = ? AND used_at IS NULL').run(now, userId, purpose);
+    db.prepare('INSERT INTO account_tokens (token_hash, user_id, purpose, expires_at, created_at) VALUES (?, ?, ?, ?, ?)').run(tokenHash, userId, purpose, expiresAt, now);
+  })();
+  const path = purpose === 'password_reset' ? '/reset-password' : '/verify-email';
+  const subject = purpose === 'password_reset' ? 'Reset your LIINX password' : 'Verify your LIINX email address';
+  try {
+    await sendTransactionalEmail({
+      to: email,
+      subject,
+      text: `Use this one-time LIINX link before it expires: ${accountOrigin()}${path}?token=${encodeURIComponent(rawToken)}`
+    });
+    return true;
+  } catch (error) {
+    db.prepare('DELETE FROM account_tokens WHERE token_hash = ?').run(tokenHash);
+    if (error instanceof EmailDeliveryUnavailable) return false;
+    throw error;
+  }
+}
+
+authRouter.post('/password-reset/request', sharedRateLimit({ name: 'password-reset', limit: 5, windowMs: 60 * 60 * 1000 }), async (req, res) => {
+  const parsed = resetRequestSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: 'Enter a valid email address.' });
+  if (!transactionalEmailConfigured()) return res.status(503).json({ error: 'Password reset email is temporarily unavailable. Please try again later.' });
+  const user = db.prepare('SELECT id, email FROM users WHERE email = ?').get(parsed.data.email.toLowerCase().trim()) as { id: string; email: string } | undefined;
+  if (!user) return res.status(202).json({ message: 'If an account exists, reset instructions will be sent.' });
+  try {
+    const available = await issueAccountToken(user.id, user.email, 'password_reset');
+    if (!available) return res.status(503).json({ error: 'Password reset email is temporarily unavailable. Please try again later.' });
+  } catch (error) {
+    console.error('Password reset delivery failed:', error instanceof Error ? error.message : 'unknown provider error');
+    return res.status(503).json({ error: 'Password reset email is temporarily unavailable. Please try again later.' });
+  }
+  return res.status(202).json({ message: 'If an account exists, reset instructions will be sent.' });
+});
+
+authRouter.post('/password-reset/confirm', sharedRateLimit({ name: 'password-reset-confirm', limit: 10, windowMs: 60 * 60 * 1000 }), (req, res) => {
+  const parsed = resetConfirmSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: 'Use a valid, new password and reset token.' });
+  const now = Date.now();
+  const tokenHash = hashAccountToken(parsed.data.token);
+  const token = db.prepare('SELECT user_id FROM account_tokens WHERE token_hash = ? AND purpose = ? AND used_at IS NULL AND expires_at > ?').get(tokenHash, 'password_reset', now) as { user_id: string } | undefined;
+  if (!token) return res.status(400).json({ error: 'This reset link is invalid or expired.' });
+  db.transaction(() => {
+    db.prepare('UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?').run(hashPassword(parsed.data.password), token.user_id);
+    db.prepare('UPDATE account_tokens SET used_at = ? WHERE token_hash = ?').run(now, tokenHash);
+  })();
+  return res.json({ success: true, message: 'Your password was reset. Please sign in again.' });
+});
+
+authRouter.post('/email-verification/request', requireAuth, async (req: AuthenticatedRequest, res) => {
+  const user = db.prepare('SELECT email, email_verified_at FROM users WHERE id = ?').get(req.user!.userId) as { email: string; email_verified_at?: number | null } | undefined;
+  if (!user) return res.status(401).json({ error: 'User account not found.' });
+  if (user.email_verified_at) return res.json({ verified: true, message: 'This email is already verified.' });
+  try {
+    const available = await issueAccountToken(req.user!.userId, user.email, 'email_verification');
+    if (!available) return res.status(503).json({ error: 'Email verification is temporarily unavailable. Please try again later.' });
+  } catch (error) {
+    console.error('Email verification delivery failed:', error instanceof Error ? error.message : 'unknown provider error');
+    return res.status(503).json({ error: 'Email verification is temporarily unavailable. Please try again later.' });
+  }
+  return res.status(202).json({ verified: false, message: 'Verification instructions will be sent.' });
+});
+
+authRouter.post('/email-verification/confirm', sharedRateLimit({ name: 'email-verification-confirm', limit: 10, windowMs: 60 * 60 * 1000 }), (req, res) => {
+  const tokenValue = typeof req.body?.token === 'string' ? req.body.token : '';
+  if (tokenValue.length < 32 || tokenValue.length > 200) return res.status(400).json({ error: 'This verification link is invalid or expired.' });
+  const now = Date.now();
+  const tokenHash = hashAccountToken(tokenValue);
+  const token = db.prepare('SELECT user_id FROM account_tokens WHERE token_hash = ? AND purpose = ? AND used_at IS NULL AND expires_at > ?').get(tokenHash, 'email_verification', now) as { user_id: string } | undefined;
+  if (!token) return res.status(400).json({ error: 'This verification link is invalid or expired.' });
+  db.transaction(() => {
+    db.prepare('UPDATE users SET email_verified_at = ? WHERE id = ?').run(now, token.user_id);
+    db.prepare('UPDATE account_tokens SET used_at = ? WHERE token_hash = ?').run(now, tokenHash);
+  })();
+  return res.json({ success: true, verified: true });
 });
 
 // Check username availability
@@ -319,6 +421,8 @@ authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res) => {
 // Delete account & all associated data permanently (GDPR / Privacy compliance)
 authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
+    const confirmation = deletionSchema.safeParse(req.body);
+    if (!confirmation.success) return res.status(400).json({ error: 'Type DELETE in the confirmation field to permanently delete this account.' });
     const userId = req.user!.userId;
     const subscriptions = db.prepare('SELECT stripe_subscription_id FROM profiles WHERE user_id = ? AND stripe_subscription_id IS NOT NULL').all(userId) as { stripe_subscription_id: string }[];
     // Cancel provider subscriptions first. If Stripe is unavailable, retain the
@@ -343,9 +447,11 @@ authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res
           db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(pId);
         }
         db.prepare('DELETE FROM uploaded_files WHERE owner_user_id = ?').run(userId);
+        db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE user_id = ?)').run(userId);
         db.prepare('DELETE FROM profiles WHERE user_id = ?').run(userId);
       }
 
+      db.prepare('DELETE FROM account_tokens WHERE user_id = ?').run(userId);
       // Delete user
       db.prepare('DELETE FROM users WHERE id = ?').run(userId);
     });

@@ -35,6 +35,7 @@ export function initDatabase() {
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       session_version INTEGER NOT NULL DEFAULT 1,
+      email_verified_at INTEGER,
       created_at INTEGER NOT NULL
     );
 
@@ -42,6 +43,17 @@ export function initDatabase() {
       version TEXT PRIMARY KEY,
       applied_at INTEGER NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS account_tokens (
+      token_hash TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      purpose TEXT NOT NULL,
+      expires_at INTEGER NOT NULL,
+      used_at INTEGER,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_account_tokens_lookup ON account_tokens(user_id, purpose, expires_at);
 
     CREATE TABLE IF NOT EXISTS profiles (
       id TEXT PRIMARY KEY,
@@ -267,6 +279,10 @@ export function initDatabase() {
 
   try {
     db.exec("ALTER TABLE users ADD COLUMN session_version INTEGER NOT NULL DEFAULT 1");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE users ADD COLUMN email_verified_at INTEGER");
   } catch (e) {}
 
   try {

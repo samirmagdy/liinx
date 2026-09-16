@@ -308,7 +308,8 @@ describe('LIINX Production Backend API', () => {
   it('DELETE /api/auth/account should permanently delete user and associated profile', async () => {
     const res = await request(app)
       .delete('/api/auth/account')
-      .set('Authorization', `Bearer ${authToken}`);
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ confirmation: 'DELETE' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
