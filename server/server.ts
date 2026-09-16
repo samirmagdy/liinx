@@ -18,6 +18,7 @@ import { apiV1Router } from './routes/apiV1.js';
 import { billingRouter } from './routes/billing.js';
 import { contactRouter } from './routes/contact.js';
 import { pageTitles } from '../src/config/pages.js';
+import { brand } from '../src/config/brand.js';
 import * as Sentry from '@sentry/node';
 import { log, logError } from './logger.js';
 import { startMaintenanceScheduler } from './maintenance.js';
@@ -164,6 +165,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Search Engine robots.txt
 app.get('/robots.txt', (_req, res) => {
+  const origin = publicOrigin(_req);
   res.setHeader('Content-Type', 'text/plain');
   res.setHeader('Cache-Control', 'public, max-age=86400');
   res.send(`User-agent: *
@@ -181,17 +183,23 @@ Disallow: /dashboard
 Disallow: /api/
 Disallow: /uploads/
 
-Sitemap: https://liinx.app/sitemap.xml
+Sitemap: ${origin}/sitemap.xml
 `);
 });
 
 // Search Engine dynamic sitemap.xml
-app.get('/sitemap.xml', (_req, res) => {
+app.get('/sitemap.xml', (req, res) => {
   try {
     // Sitemap protocol supports up to 50,000 URLs per file. Include all public
     // profiles instead of silently dropping older creators at an arbitrary 500.
-    const profiles = db.prepare('SELECT username, updated_at FROM profiles WHERE username IS NOT NULL ORDER BY updated_at DESC LIMIT 50000').all() as { username: string; updated_at: number }[];
-    const baseUrl = 'https://liinx.app';
+    const pages = db.prepare(`
+      SELECT profiles.username, pages.slug, pages.is_home as isHome, pages.updated_at as updatedAt
+      FROM profiles INNER JOIN pages ON pages.profile_id = profiles.id
+      WHERE profiles.username IS NOT NULL AND pages.published = 1
+      ORDER BY pages.updated_at DESC, pages.created_at ASC
+      LIMIT 50000
+    `).all() as { username: string; slug: string; isHome: number; updatedAt: number }[];
+    const baseUrl = publicOrigin(req);
     const nowIso = new Date().toISOString().split('T')[0];
 
     const staticRoutes = [
@@ -211,9 +219,10 @@ app.get('/sitemap.xml', (_req, res) => {
       xml += `  <url>\n    <loc>${baseUrl}${route.path}</loc>\n    <lastmod>${nowIso}</lastmod>\n    <changefreq>${route.changefreq}</changefreq>\n    <priority>${route.priority}</priority>\n  </url>\n`;
     }
 
-    for (const p of profiles) {
-      const pDate = p.updated_at ? new Date(p.updated_at).toISOString().split('T')[0] : nowIso;
-      xml += `  <url>\n    <loc>${baseUrl}/@${encodeURIComponent(p.username)}</loc>\n    <lastmod>${pDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+    for (const page of pages) {
+      const pDate = page.updatedAt ? new Date(page.updatedAt).toISOString().split('T')[0] : nowIso;
+      const path = `/@${encodeURIComponent(page.username)}${page.isHome ? '' : `/${encodeURIComponent(page.slug)}`}`;
+      xml += `  <url>\n    <loc>${escapeXml(`${baseUrl}${path}`)}</loc>\n    <lastmod>${pDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
     }
 
     xml += `</urlset>`;
@@ -231,6 +240,23 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>'\"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character] || character));
 }
 
+function escapeXml(value: string): string {
+  return escapeHtml(value);
+}
+
+function publicOrigin(req: express.Request): string {
+  const configured = process.env.PUBLIC_ORIGIN || process.env.APP_ORIGIN;
+  if (configured) {
+    try { return new URL(configured).origin; } catch { /* fall through to the deployment host */ }
+  }
+  if (process.env.PUBLIC_DOMAIN) {
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : req.protocol;
+    return `${protocol}://${process.env.PUBLIC_DOMAIN}`.replace(/\/$/, '');
+  }
+  if (process.env.NODE_ENV === 'production') return `https://${brand.domain}`;
+  return `${req.protocol}://${req.get('host')}`;
+}
+
 // JSON is placed inside an HTML script element. Escaping the HTML-significant
 // characters prevents user content such as `</script>` from breaking out of it.
 export function safeJsonForHtml(value: unknown): string {
@@ -242,10 +268,11 @@ export function safeJsonForHtml(value: unknown): string {
     .replace(/\u2029/g, '\\u2029');
 }
 
-function sendProfileShell(res: express.Response, filePath: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null }, canonical: string) {
-  let html = fs.readFileSync(filePath, 'utf8');
-  const title = profile.share_title || `${profile.display_name} (@${profile.username}) | LIINX`;
-  const description = profile.share_description || profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
+export function renderProfileShellHtml(sourceHtml: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null }, canonical: string, page?: { title?: string | null; description?: string | null }): string {
+  let html = sourceHtml;
+  const title = page?.title || profile.share_title || `${profile.display_name} (@${profile.username}) | LIINX`;
+  const description = page?.description || profile.share_description || profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
+  const image = profile.share_image_url || profile.avatar_url || '';
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`)
@@ -255,8 +282,18 @@ function sendProfileShell(res: express.Response, filePath: string, profile: { us
     .replace(/<meta property="og:url" content="[^"]*"\s*\/>/i, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
     .replace(/<meta property="og:title" content="[^"]*"\s*\/>/i, `<meta property="og:title" content="${safeTitle}" />`)
     .replace(/<meta property="og:description" content="[^"]*"\s*\/>/i, `<meta property="og:description" content="${safeDescription}" />`)
-    .replace(/<meta property="og:image" content="[^"]*"\s*\/>/i, `<meta property="og:image" content="${escapeHtml(profile.share_image_url || profile.avatar_url || '')}" />`)
-    .replace('</head>', `<script type="application/ld+json">${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, image: profile.share_image_url || profile.avatar_url || undefined, mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, image: profile.avatar_url || undefined } })}</script></head>`);
+    .replace(/<meta property="og:image" content="[^"]*"\s*\/>/i, image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : '')
+    .replace(/<meta property="og:image:secure_url" content="[^"]*"\s*\/>/i, image ? `<meta property="og:image:secure_url" content="${escapeHtml(image)}" />` : '')
+    .replace(/<meta property="og:image:alt" content="[^"]*"\s*\/>/i, image ? `<meta property="og:image:alt" content="${escapeHtml(profile.display_name)}" />` : '')
+    .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/i, `<meta name="twitter:title" content="${safeTitle}" />`)
+    .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/i, `<meta name="twitter:description" content="${safeDescription}" />`)
+    .replace(/<meta name="twitter:image" content="[^"]*"\s*\/>/i, image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : '')
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/gi, `<script type="application/ld+json">${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, ...(image ? { image } : {}), mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, ...(profile.avatar_url ? { image: profile.avatar_url } : {}) } })}</script>`);
+  return html;
+}
+
+function sendProfileShell(res: express.Response, filePath: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null }, canonical: string, page?: { title?: string | null; description?: string | null }) {
+  const html = renderProfileShellHtml(fs.readFileSync(filePath, 'utf8'), profile, canonical, page);
   res.type('html').send(html);
 }
 
@@ -280,9 +317,7 @@ app.use((req, res, next) => {
           const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE username = ?').get(profile.username) as any;
           const page = pageSlug ? db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE username = ?) AND slug = ? AND published = 1').get(profile.username, pageSlug) as { title?: string; description?: string } | undefined : undefined;
           if (pageSlug && !page) return res.status(404).send('This page is not available.');
-          if (page && !customProfile.share_title) customProfile.share_title = page.title;
-          if (page && !customProfile.share_description) customProfile.share_description = page.description || customProfile.bio;
-          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`) : res.sendFile(distIndex);
+          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page) : res.sendFile(distIndex);
         }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
       }
@@ -436,13 +471,12 @@ export async function startServer() {
       if (profileMatch) {
         const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
           const profileShell = path.join(distDir, 'shell.html');
-        if (publicProfile && fs.existsSync(profileShell)) {
+        if (!publicProfile) return res.status(404).send('This profile is not available.');
+        if (fs.existsSync(profileShell)) {
           const page = db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE lower(username) = ?) AND slug = ? AND published = 1').get(profileMatch[1].toLowerCase(), profileMatch[2] || 'home') as { title?: string; description?: string } | undefined;
           if (!page) return res.status(404).send('This page is not available.');
-          if (page && !publicProfile.share_title) publicProfile.share_title = page.title;
-          if (page && !publicProfile.share_description) publicProfile.share_description = page.description || publicProfile.bio;
-          const canonical = `https://${process.env.PUBLIC_DOMAIN || 'liinx.app'}/@${encodeURIComponent(publicProfile.username)}${profileMatch[2] ? `/${encodeURIComponent(profileMatch[2])}` : ''}`;
-          return sendProfileShell(res, profileShell, publicProfile, canonical);
+          const canonical = `${publicOrigin(req)}/@${encodeURIComponent(publicProfile.username)}${profileMatch[2] ? `/${encodeURIComponent(profileMatch[2])}` : ''}`;
+          return sendProfileShell(res, profileShell, publicProfile, canonical, page);
         }
       }
       const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
