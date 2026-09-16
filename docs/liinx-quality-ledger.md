@@ -2820,3 +2820,62 @@ Baseline: branch `main`, commit `7f8194a` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `52 — Views, clicks, and reporting`
+
+## Task 52 — Views, clicks, and reporting
+
+Status: VERIFIED WITHIN SCOPE
+
+Baseline: branch `main`, commit `b4ab5f0e8e83406c12b2843ca07f480249d2002a` at task start. The worktree was clean; prior task changes were preserved. Implementation commit: `72b8c97f9777e5f45c7f229924c661250e2ffb5d` (`fix: define analytics measurement and reporting`).
+
+### Scope and changed files
+
+- `server/db.ts`: adds idempotent nullable `page_id` and `dedupe_key` columns plus unique deduplication indexes for legacy-compatible analytics records.
+- `server/routes/analytics.ts`: validates page/profile attribution, bounds referrer and UTM values, suppresses same-minute duplicate view/click events, preserves historical clicks for deleted blocks, reports UTC date boundaries, and declares the CTR basis and period in the response.
+- `src/services/api.ts`: sends the selected public page id with view events and types the reporting contract.
+- `src/components/PublicBioView.tsx`: records views for initial and dynamically loaded public profiles only outside preview, preserves bounded UTM parameters on tracked public actions, and keeps actions on `/r/:blockId`.
+- `src/components/BuilderStudio.tsx`: distinguishes reporting definitions, UTC scope, empty/loading data, and a retryable analytics error state.
+- `tests/analytics_task52.test.ts`: covers page attribution, duplicate delivery, click/UTM reconciliation, report totals, and foreign-page rejection.
+
+### Findings and behavior
+
+- Views are accepted public page-load events after bot filtering and abuse limiting. `uniqueVisitors` is the distinct stored anonymous visitor hash within the report window; it is not an account-level identity or a cross-device person count.
+- Clicks are successful public actions routed through `/r/:blockId`; the redirect route validates that the block belongs to a published page and records the resolved destination. Same visitor/block events in the same minute are deduplicated while the redirect still succeeds.
+- CTR is explicitly `total_clicks / total_views`, displayed as a percentage for the last 30 days. It is not unique-visitor conversion or causal attribution.
+- Events now carry `page_id` when the public page is known. Legacy rows remain valid with a null page id. Authenticated stats can be scoped to an owned page; a foreign page is rejected.
+- Referrer and `utm_source`, `utm_medium`, and `utm_campaign` are bounded before storage. Public tracked links retain those UTM values. Previews do not record views or launch tracked actions.
+- Report dates and labels use UTC, and the API declares `timezone: UTC`, `period: last_30_days`, and the CTR basis. No analytics export endpoint is exposed in the current product, so there is no separate export contract to reconcile.
+- Historical clicks remain in totals after a block is deleted and appear as `Deleted link` in top-link reporting. No seeded production statistics were added.
+
+### Acceptance criteria
+
+- PASS — Controlled local views/clicks reconcile with persisted rows and displayed totals. Evidence: `tests/analytics_task52.test.ts`; one repeated view and one repeated click produce one stored event each, and stats return matching totals.
+- PASS — Profile/page attribution and foreign-page isolation. Evidence: page id is validated against the profile and the focused regression rejects a foreign page without recording it.
+- PASS — Public measurement path and bounded UTM/referrer handling. Evidence: tracked click redirect stores the resolved target, page id, and UTM source; public component uses `/r/:blockId` and propagates bounded UTM parameters.
+- PASS — Preview exclusion. Evidence: both initial-profile and dynamic public view effects guard `previewOnly`; existing preview interaction guards remain in place.
+- PASS — Rerender/retry duplicate protection and bot/abuse handling. Evidence: persistent unique dedupe keys and existing bot/rate-limit tests; bots are returned without event rows.
+- PASS — Deleted-link behavior. Evidence: reporting uses a left join and retains historical click totals with a neutral `Deleted link` label; route access still returns 404 after deletion.
+- PASS — Empty, loading, error, retry, and date/timezone reporting states. Evidence: existing loading/empty UI, new retryable analytics error state, UTC API contract, and production build/type checks.
+- PASS — No fake statistics or unsupported export claims. Evidence: all report figures are database aggregates; no export route is exposed and this is documented explicitly.
+- NOT RUN — Browser-level public journey, deployed analytics delivery, cross-device uniqueness, bot classifier accuracy against live crawlers, and production-scale queue behavior. No deployed environment or live traffic was used; local API/component evidence is not equivalent.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `b4ab5f0e8e83406c12b2843ca07f480249d2002a`.
+- `DATABASE_PATH=/tmp/liinx-task52-test-20260917b.db npm test -- --run tests/analytics_task52.test.ts` — PASS: 1 file / 3 tests against disposable SQLite storage.
+- `DATABASE_PATH=/tmp/liinx-task52-test-20260917.db npm test -- --run tests/api.test.ts tests/basic_link.test.ts tests/folders.test.ts` — PASS: 3 files / 31 tests against disposable SQLite storage.
+- `DATABASE_PATH=/tmp/liinx-task52-regression-20260917.db npm test -- --run tests/audit_fixes.test.ts tests/scheduling.test.ts tests/backend-e2e.dynamic.test.ts` — PASS: 3 files / 37 tests against disposable SQLite storage.
+- `npm test -- --run tests/api.test.ts tests/utm_and_pixels.test.ts tests/basic_link.test.ts tests/folders.test.ts` — NOT PASSING in the repository’s shared default database: `tests/utm_and_pixels.test.ts` cleanup hit the pre-existing database invariant `page with blocks must be reassigned before deletion`. This is an environment/fixture isolation conflict from earlier migration work, not a Task 52 assertion failure; the relevant tests pass with isolated databases.
+- `npm run lint` — PASS: TypeScript check.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `git diff --check` — PASS before commit.
+
+### Unresolved risks and dependencies
+
+- Analytics remains best-effort: the current process writes immediately through the existing SQLite-backed path and is not externally verified under multi-instance production traffic. Production horizontal scaling remains separately disabled by the existing configuration guard.
+- Anonymous uniqueness is based on a truncated salted IP hash and cannot identify a person across networks/devices. This limitation is now documented by the UI/API semantics.
+- Current public view recording is driven by the client component; server-rendered/deployed request evidence and browser network inspection remain unverified.
+- Existing shared-database tests should use disposable database setup consistently; no production data was changed by this task.
+
+### Next eligible prompt
+
+`53 — Analytics consent and external pixels`
