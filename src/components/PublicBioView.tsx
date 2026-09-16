@@ -63,16 +63,52 @@ function normalizeFormFields(value: unknown): any[] {
 function advancedRadius(radius: ThemeConfig['cardRadius']): string {
   return radius === 'none' ? 'rounded-none' : radius === 'full' ? 'rounded-3xl' : radius === 'md' ? 'rounded-xl' : 'rounded-2xl';
 }
-function renderRichText(value: string) {
-  return value.split('\n').map((line, index) => {
-    const heading = line.match(/^#{1,3}\s+(.*)$/);
-    const content = heading ? heading[1] : line;
-    const parts = content.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean).map((part, partIndex) => part.startsWith('**') ? <strong key={partIndex}>{part.slice(2, -2)}</strong> : part.startsWith('*') ? <em key={partIndex}>{part.slice(1, -1)}</em> : <React.Fragment key={partIndex}>{part}</React.Fragment>);
-    if (heading?.[0].startsWith('###')) return <h4 key={index} className="mt-3 font-bold">{parts}</h4>;
-    if (heading?.[0].startsWith('##')) return <h3 key={index} className="mt-3 text-lg font-bold">{parts}</h3>;
-    if (heading) return <h2 key={index} className="mt-3 text-xl font-bold">{parts}</h2>;
-    return <p key={index} className="min-h-5">{parts}</p>;
+function renderRichTextInline(value: string) {
+  const pattern = /(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^\s)]+\))/g;
+  return value.split(pattern).filter(Boolean).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) return <strong key={index}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith('*') && part.endsWith('*')) return <em key={index}>{part.slice(1, -1)}</em>;
+    const link = part.match(/^\[([^\]]+)\]\(([^\s)]+)\)$/);
+    if (link) {
+      const href = safePublicHref(link[2]);
+      if (href) return <a key={index} href={href} target={/^(https?:)/i.test(href) ? '_blank' : undefined} rel={/^(https?:)/i.test(href) ? 'noreferrer' : undefined} className="underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{link[1]}</a>;
+    }
+    return <React.Fragment key={index}>{part}</React.Fragment>;
   });
+}
+
+function renderRichText(value: string) {
+  const lines = value.split('\n');
+  const output: React.ReactNode[] = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const unordered = line.match(/^[-*]\s+(.*)$/);
+    const ordered = line.match(/^\d+\.\s+(.*)$/);
+    if (unordered || ordered) {
+      const items: string[] = [];
+      const orderedList = Boolean(ordered);
+      while (index < lines.length) {
+        const item = lines[index].match(orderedList ? /^\d+\.\s+(.*)$/ : /^[-*]\s+(.*)$/);
+        if (!item) break;
+        items.push(item[1]);
+        index += 1;
+      }
+      const List = orderedList ? 'ol' : 'ul';
+      output.push(<List key={`list-${index}`} className={`${orderedList ? 'list-decimal' : 'list-disc'} ps-5 space-y-1`}>
+        {items.map((item, itemIndex) => <li key={itemIndex}>{renderRichTextInline(item)}</li>)}
+      </List>);
+      index -= 1;
+      continue;
+    }
+    const heading = line.match(/^(#{1,3})\s+(.*)$/);
+    if (heading) {
+      const Heading = heading[1].length === 1 ? 'h2' : heading[1].length === 2 ? 'h3' : 'h4';
+      output.push(<Heading key={index} className="mt-3 font-bold">{renderRichTextInline(heading[2])}</Heading>);
+    } else {
+      output.push(<p key={index} className="min-h-5">{renderRichTextInline(line)}</p>);
+    }
+  }
+  return output;
 }
 
 const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: ThemeConfig; previewOnly?: boolean }> = ({ block, profileId, theme, previewOnly = false }) => {
