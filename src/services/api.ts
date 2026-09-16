@@ -171,7 +171,7 @@ export const api = {
         activeProfileId: string;
       }>('/api/studio/profiles');
     },
-    createProfile: async (data: { username: string; displayName: string }) => {
+    createProfile: async (data: { username: string; displayName: string; duplicateProfileId?: string }) => {
       return request<{
         success: boolean;
         profile: { id: string; username: string; displayName: string; plan: string };
@@ -190,6 +190,7 @@ export const api = {
         method: 'POST'
       });
     },
+    getFormSubmissions: async () => request<{ submissions: { id: string; blockId: string; fields: Record<string, string>; createdAt: number }[] }>('/api/studio/form-submissions'),
     verifyCustomDomain: async (domain: string) => {
       return request<{
         domain: string;

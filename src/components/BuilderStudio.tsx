@@ -216,6 +216,17 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   // Custom CSS & Font Engine State (Milestone 7)
   const [customCssInput, setCustomCssInput] = useState(profile.customCss || '');
   const [customFontUrlInput, setCustomFontUrlInput] = useState(profile.customFontUrl || '');
+  const [shareTitleInput, setShareTitleInput] = useState(profile.shareTitle || '');
+  const [shareDescriptionInput, setShareDescriptionInput] = useState(profile.shareDescription || '');
+  const [shareImageUrlInput, setShareImageUrlInput] = useState(profile.shareImageUrl || '');
+  const [footerLogoUrlInput, setFooterLogoUrlInput] = useState(profile.footerLogoUrl || '');
+  const [backgroundMediaUrlInput, setBackgroundMediaUrlInput] = useState(profile.backgroundMediaUrl || '');
+  const [backgroundMediaTypeInput, setBackgroundMediaTypeInput] = useState<'image' | 'video'>((profile.backgroundMediaType as 'image' | 'video') || 'image');
+  const [pageRedirectUrlInput, setPageRedirectUrlInput] = useState(profile.pageRedirectUrl || '');
+  const [pageRedirectUntilInput, setPageRedirectUntilInput] = useState(profile.pageRedirectUntil ? new Date(profile.pageRedirectUntil).toISOString().slice(0, 16) : '');
+  const [isSavingPageSettings, setIsSavingPageSettings] = useState(false);
+  const [pageSettingsFeedback, setPageSettingsFeedback] = useState<string | null>(null);
+  const [formSubmissions, setFormSubmissions] = useState<{ id: string; blockId: string; fields: Record<string, string>; createdAt: number }[]>([]);
   const [isSavingStyling, setIsSavingStyling] = useState(false);
   const [stylingSavedFeedback, setStylingSavedFeedback] = useState(false);
   const [stylingError, setStylingError] = useState<string | null>(null);
@@ -230,6 +241,17 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [copiedKey, setCopiedKey] = useState(false);
   const [confirmRevokeKeyId, setConfirmRevokeKeyId] = useState<string | null>(null);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setShareTitleInput(profile.shareTitle || '');
+    setShareDescriptionInput(profile.shareDescription || '');
+    setShareImageUrlInput(profile.shareImageUrl || '');
+    setFooterLogoUrlInput(profile.footerLogoUrl || '');
+    setBackgroundMediaUrlInput(profile.backgroundMediaUrl || '');
+    setBackgroundMediaTypeInput(profile.backgroundMediaType || 'image');
+    setPageRedirectUrlInput(profile.pageRedirectUrl || '');
+    setPageRedirectUntilInput(profile.pageRedirectUntil ? new Date(profile.pageRedirectUntil).toISOString().slice(0, 16) : '');
+  }, [profile.id]);
 
   // Non-blocking UI Inline Feedback States
   const [avatarError, setAvatarError] = useState<string | null>(null);
@@ -310,6 +332,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         .then(res => {
           if (res && Array.isArray(res.subscribers)) setSubscribers(res.subscribers);
         })
+        .catch(() => setDataError(true));
+      api.studio.getFormSubmissions()
+        .then(res => setFormSubmissions(res.submissions || []))
         .catch(() => setDataError(true));
 
       api.instagram.getStatus()
@@ -2272,6 +2297,41 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                       </button>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Public page controls: sharing, media, redirects, and reusable branding */}
+              <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
+                <div>
+                  <h3 className="font-bold text-sm text-neutral-900">{ui('Public Page Controls')}</h3>
+                  <p className="text-xs text-neutral-500 mt-0.5">{ui('Control how your page appears when shared and what visitors see in the background.')}</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Share title')}<input value={shareTitleInput} onChange={e => setShareTitleInput(e.target.value)} maxLength={160} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" placeholder={profile.displayName} /></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Share image URL')}<input type="url" value={shareImageUrlInput} onChange={e => setShareImageUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" placeholder="https://..." /></label>
+                  <label className="sm:col-span-2 text-xs font-semibold text-neutral-800">{ui('Share description')}<textarea value={shareDescriptionInput} onChange={e => setShareDescriptionInput(e.target.value)} maxLength={300} rows={2} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" /></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Footer logo URL')}<input type="url" disabled={profile.plan === 'free'} value={footerLogoUrlInput} onChange={e => setFooterLogoUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50" placeholder="https://..." /></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Background media URL')}<input type="url" disabled={profile.plan === 'free'} value={backgroundMediaUrlInput} onChange={e => setBackgroundMediaUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50" placeholder="https://..." /></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Background type')}<select disabled={profile.plan === 'free'} value={backgroundMediaTypeInput} onChange={e => setBackgroundMediaTypeInput(e.target.value as 'image' | 'video')} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900 disabled:opacity-50"><option value="image">{ui('Image')}</option><option value="video">{ui('Video')}</option></select></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Temporary page redirect')}<input type="url" value={pageRedirectUrlInput} onChange={e => setPageRedirectUrlInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" placeholder="https://..." /></label>
+                  <label className="text-xs font-semibold text-neutral-800">{ui('Redirect ends')}<input type="datetime-local" value={pageRedirectUntilInput} onChange={e => setPageRedirectUntilInput(e.target.value)} className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900" /></label>
+                </div>
+                {pageSettingsFeedback && <p role="status" className="text-xs text-emerald-700">{pageSettingsFeedback}</p>}
+                <button type="button" disabled={isSavingPageSettings} onClick={async () => { setIsSavingPageSettings(true); setPageSettingsFeedback(null); try { const data = { shareTitle: shareTitleInput.trim() || null, shareDescription: shareDescriptionInput.trim() || null, shareImageUrl: shareImageUrlInput.trim() || null, footerLogoUrl: footerLogoUrlInput.trim() || null, backgroundMediaUrl: backgroundMediaUrlInput.trim() || null, backgroundMediaType: backgroundMediaUrlInput.trim() ? backgroundMediaTypeInput : null, pageRedirectUrl: pageRedirectUrlInput.trim() || null, pageRedirectUntil: pageRedirectUntilInput ? new Date(pageRedirectUntilInput).getTime() : null }; await api.studio.updateProfile(data); setProfile(prev => ({ ...prev, ...data })); setPageSettingsFeedback(ui('Public page settings saved.')); } catch (error) { setPageSettingsFeedback(friendlyErrorMessage(error, ui('Could not save public page settings.'))); } finally { setIsSavingPageSettings(false); } }} className="rounded-xl bg-neutral-900 px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{isSavingPageSettings ? ui('Saving...') : ui('Save Public Page Settings')}</button>
+              </div>
+
+              {/* Duplicate profile and creator submissions */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                  <h3 className="font-bold text-sm text-neutral-900">{ui('Duplicate this profile')}</h3>
+                  <p className="text-xs text-neutral-500">{ui('Create another profile with the same content and design, then choose a new handle.')}</p>
+                  <button type="button" onClick={async () => { const username = window.prompt(ui('New username')); if (!username) return; const displayName = window.prompt(ui('Display name'), profile.displayName) || profile.displayName; try { const result = await api.studio.createProfile({ username, displayName, duplicateProfileId: profile.id }); authStorage.setToken(result.token); const next = await api.studio.getProfile(); setProfile(next); setCustomTheme(next.customTheme || THEMES.find(theme => theme.id === next.themeId) || THEMES[0]); loadProfilesList(); } catch (error) { setPageSettingsFeedback(friendlyErrorMessage(error, ui('Could not duplicate profile.'))); } }} className="rounded-xl border border-neutral-300 px-4 py-2 text-xs font-bold text-neutral-900 hover:border-neutral-900">{ui('Duplicate Profile')}</button>
+                </div>
+                <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                  <h3 className="font-bold text-sm text-neutral-900">{ui('Form submissions')}</h3>
+                  <p className="text-xs text-neutral-500">{formSubmissions.length ? `${formSubmissions.length} ${ui('stored responses')}` : ui('No form responses yet.')}</p>
+                  {formSubmissions.slice(0, 3).map(item => <div key={item.id} className="rounded-xl border border-neutral-200 p-3 text-[11px] text-neutral-700"><span className="font-mono text-neutral-400">{new Date(item.createdAt).toLocaleString()}</span><pre className="mt-1 whitespace-pre-wrap font-sans">{JSON.stringify(item.fields, null, 2)}</pre></div>)}
+                  {formSubmissions.length > 3 && <p className="text-[11px] text-neutral-500">{ui('Showing the three most recent responses.')}</p>}
                 </div>
               </div>
 
