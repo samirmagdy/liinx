@@ -652,6 +652,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     try {
       const result = await api.studio.createPage({ title, slug });
       setPages(previous => [...previous, result.page]);
+      setProfile(previous => ({ ...previous, pages: [...(previous.pages || []), result.page] }));
       setActivePageId(result.page.id);
       setNewPageTitle('');
       setNewPageSlug('');
@@ -844,7 +845,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       gallery: { title: 'Gallery', extra: { items: [{ id: 'item-1', imageUrl: '', alt: '' }] } },
       carousel: { title: 'Highlights', extra: { items: [{ id: 'item-1', imageUrl: '', alt: '' }] } },
       spacer: { title: 'Spacer', extra: { height: 48 } },
-      form: { title: 'Get in touch', subtitle: 'Send me a message.', extra: { fields: [{ name: 'name', label: 'Name', type: 'text' }, { name: 'email', label: 'Email', type: 'email' }, { name: 'message', label: 'Message', type: 'textarea' }] } },
+      form: { title: 'Get in touch', subtitle: 'Send me a message.', extra: { fields: [{ name: 'name', label: 'Name', type: 'text', required: true }, { name: 'email', label: 'Email', type: 'email', required: true }, { name: 'message', label: 'Message', type: 'textarea', required: true }] } },
       download: { title: 'Download', extra: { fileUrl: '', description: 'Download this file.' } },
       map: { title: 'Find me', extra: { location: '' } },
       faq: { title: 'Frequently asked questions', extra: { items: [{ id: 'item-1', question: 'Question', answer: 'Answer' }] } },
@@ -875,7 +876,14 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     try {
       setSaveStatus('saving');
       await api.studio.reorderBlocks(newBlocks.map(b => b.id), activePage?.id);
-      setProfile(prev => ({ ...prev, blocks: newBlocks }));
+      setProfile(prev => {
+        let reorderedIndex = 0;
+        const visibleIds = new Set(visibleBlocks.map(block => block.id));
+        return {
+          ...prev,
+          blocks: prev.blocks.map(block => visibleIds.has(block.id) ? newBlocks[reorderedIndex++] : block)
+        };
+      });
       setSaveStatus('saved');
     } catch (err) {
       setSaveStatus('error');
@@ -1780,8 +1788,19 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     {['rich_text', 'image', 'gallery', 'carousel', 'spacer', 'form', 'download', 'map', 'faq', 'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate'].includes(block.type) && (() => {
                       const advanced = block as any;
                       const updateAdvanced = (key: string, value: unknown) => handleUpdateBlockExtra(block.id, { [key]: value });
+                      const formatRichText = (marker: '**' | '*' | '## ') => {
+                        const textarea = document.getElementById(`rich-text-${block.id}`) as HTMLTextAreaElement | null;
+                        const current = String(advanced.body || '');
+                        if (!textarea) return updateAdvanced('body', `${current}${current ? ' ' : ''}${marker}${marker === '## ' ? 'heading' : marker === '**' ? 'bold' : 'italic'}${marker === '## ' ? '' : marker}`);
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const selected = current.slice(start, end) || (marker === '## ' ? 'heading' : marker === '**' ? 'bold' : 'italic');
+                        const replacement = marker === '## ' ? `${marker}${selected}` : `${marker}${selected}${marker}`;
+                        updateAdvanced('body', `${current.slice(0, start)}${replacement}${current.slice(end)}`);
+                        requestAnimationFrame(() => { textarea.focus(); textarea.setSelectionRange(start + replacement.length, start + replacement.length); });
+                      };
                       return <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-neutral-100 text-xs">
-                        {(['rich_text', 'form', 'download', 'map', 'content_gate'].includes(block.type)) && <div className="sm:col-span-2"><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui(block.type === 'rich_text' || block.type === 'content_gate' ? 'Content' : 'Description')}</label>{block.type === 'rich_text' && <div className="mb-1 flex gap-1"><button type="button" onClick={() => updateAdvanced('body', `${advanced.body || ''} **bold**`)} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">B</button><button type="button" onClick={() => updateAdvanced('body', `${advanced.body || ''} *italic*`)} className="rounded border border-neutral-200 px-2 py-1 text-[10px] italic">I</button><button type="button" onClick={() => updateAdvanced('body', `${advanced.body || ''}\n## heading`)} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">H</button></div>}<textarea value={advanced.body || advanced.description || ''} onChange={e => updateAdvanced(block.type === 'rich_text' || block.type === 'content_gate' ? 'body' : 'description', e.target.value)} className="w-full min-h-20 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
+                        {(['rich_text', 'form', 'download', 'map', 'content_gate'].includes(block.type)) && <div className="sm:col-span-2"><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui(block.type === 'rich_text' || block.type === 'content_gate' ? 'Content' : 'Description')}</label>{block.type === 'rich_text' && <div className="mb-1 flex gap-1"><button type="button" onClick={() => formatRichText('**')} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">B</button><button type="button" onClick={() => formatRichText('*')} className="rounded border border-neutral-200 px-2 py-1 text-[10px] italic">I</button><button type="button" onClick={() => formatRichText('## ')} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">H</button></div>}<textarea id={block.type === 'rich_text' ? `rich-text-${block.id}` : undefined} value={advanced.body || advanced.description || ''} onChange={e => updateAdvanced(block.type === 'rich_text' || block.type === 'content_gate' ? 'body' : 'description', e.target.value)} className="w-full min-h-20 px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
                         {block.type === 'image' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Image URL')}</label><input value={advanced.imageUrl || ''} onChange={e => updateAdvanced('imageUrl', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /><input type="file" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if (file) void handleBlockImageUpload(block.id, file); }} aria-label={ui('Upload image')} className="mt-2 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900" /></div>}
                         {['download', 'event', 'presave', 'product', 'tips', 'form'].includes(block.type) && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Destination URL')}</label><input value={advanced.fileUrl || advanced.url || ''} onChange={e => updateAdvanced(block.type === 'download' ? 'fileUrl' : 'url', e.target.value)} placeholder="https://..." className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" />{block.type === 'download' && <input type="file" onChange={e => { const file = e.target.files?.[0]; if (file) void handleBlockFileUpload(block.id, file); }} aria-label={ui('Upload downloadable file')} className="mt-2 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900" />}</div>}
                         {block.type === 'map' && <div><label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui('Location')}</label><input value={advanced.location || ''} onChange={e => updateAdvanced('location', e.target.value)} placeholder={ui('City or address')} className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900" /></div>}
@@ -2874,7 +2893,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
           </div>
 
           <ViewportPreview
-            profile={profile}
+            profile={{ ...profile, blocks: visibleBlocks, pages: activePage ? [activePage] : profile.pages, page: activePage }}
             customTheme={customTheme}
             deviceMode={previewDevice}
           />

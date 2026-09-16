@@ -19,6 +19,32 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     expect(output).toContain('\\u003c/script\\u003e');
   });
 
+  it('rejects a document upload whose bytes do not match its extension', async () => {
+    const res = await request(app)
+      .post('/api/upload/file')
+      .set('Authorization', `Bearer ${authToken}`)
+      .attach('file', Buffer.from('<!doctype html><script>window.pwned=1</script>'), 'review.pdf');
+    expect(res.status).toBe(400);
+  });
+
+  it('creates, edits, and protects unpublished subpages', async () => {
+    const slug = `portfolio-${Date.now()}`;
+    const created = await request(app)
+      .post('/api/studio/pages')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ title: 'Portfolio', slug })
+      .expect(201);
+    expect(created.body.page.slug).toBe(slug);
+
+    await request(app)
+      .put(`/api/studio/pages/${created.body.page.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ published: false })
+      .expect(200);
+
+    await request(app).get(`/api/profiles/${testUsername}?page=${slug}`).expect(404);
+  });
+
   beforeAll(() => {
     initDatabase();
     const now = Date.now();

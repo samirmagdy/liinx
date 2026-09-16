@@ -6,6 +6,13 @@ import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const formsRouter = Router();
+function normalizeFormFields(value: unknown): any[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(field => field && typeof field === 'object' && typeof field.name === 'string').map(field => ({
+    ...field,
+    required: field.required === undefined ? true : Boolean(field.required)
+  }));
+}
 const submissionSchema = z.object({
   profileId: z.string().min(1).max(100),
   blockId: z.string().min(1).max(100),
@@ -19,7 +26,7 @@ formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', lim
   if (!block) return res.status(404).json({ error: 'This form is no longer available.' });
   const configured = db.prepare('SELECT extra_json FROM blocks WHERE id = ?').get(parsed.data.blockId) as { extra_json?: string | null };
   let fields: any[] = [];
-  try { fields = JSON.parse(configured.extra_json || '{}').fields || []; } catch { return res.status(500).json({ error: 'This form configuration is invalid.' }); }
+  try { fields = normalizeFormFields(JSON.parse(configured.extra_json || '{}').fields); } catch { return res.status(500).json({ error: 'This form configuration is invalid.' }); }
   if (!Array.isArray(fields) || fields.length === 0) return res.status(409).json({ error: 'This form has no configured fields.' });
   const configuredNames = new Set(fields.map(field => field.name).filter((name): name is string => typeof name === 'string' && /^[A-Za-z0-9_-]+$/.test(name)));
   for (const submittedName of Object.keys(parsed.data.fields)) if (!configuredNames.has(submittedName)) return res.status(400).json({ error: 'The form contains an unknown field.' });

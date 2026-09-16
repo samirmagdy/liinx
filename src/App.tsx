@@ -267,6 +267,9 @@ export default function App() {
   const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.liinx.app');
 
   if (isCustomDomain) {
+    const customPageSlug = typeof window !== 'undefined'
+      ? window.location.pathname.split('/').filter(Boolean)[0] || undefined
+      : undefined;
     return (
       <ErrorBoundary>
         <LanguageProvider>
@@ -276,6 +279,7 @@ export default function App() {
               <div className="relative z-10">
                 <PublicBioView
                   customDomain={currentHost}
+                  pageSlug={customPageSlug}
                   onBackToStudio={() => window.location.href = 'https://liinx.app/studio'}
                 />
               </div>

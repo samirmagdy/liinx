@@ -87,6 +87,21 @@ const uploadFields = upload.fields([
 ]);
 const documentUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
+function detectDocument(buffer: Buffer, extension: string): { mime: string; ext: string } | null {
+  const ext = extension.toLowerCase();
+  if (ext === '.pdf' && buffer.subarray(0, 5).toString('ascii') === '%PDF-') return { mime: 'application/pdf', ext };
+  if ((ext === '.zip') && buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4b && [0x03, 0x05, 0x07].includes(buffer[2]) && [0x04, 0x06, 0x08].includes(buffer[3])) return { mime: 'application/zip', ext };
+  if (ext === '.mp3' && (buffer.subarray(0, 3).toString('ascii') === 'ID3' || (buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0))) return { mime: 'audio/mpeg', ext };
+  if (ext === '.wav' && buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WAVE') return { mime: 'audio/wav', ext };
+  if (ext === '.mp4' && buffer.length >= 12 && buffer.subarray(4, 8).toString('ascii') === 'ftyp') return { mime: 'video/mp4', ext };
+  if (ext === '.txt') {
+    const text = buffer.toString('utf8');
+    if (text.includes('\u0000') || /<\/?(?:script|iframe|object|embed|svg|html|body)\b/i.test(text)) return null;
+    return { mime: 'text/plain', ext };
+  }
+  return null;
+}
+
 const uploadAttempts = new Map<string, { count: number; resetAt: number }>();
 function uploadRateLimited(key: string): boolean {
   const now = Date.now();
@@ -160,15 +175,15 @@ uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', 
 
 uploadRouter.post('/api/upload/file', requireAuth, sharedRateLimit({ name: 'file-upload', limit: 20, windowMs: 60 * 60 * 1000 }), documentUpload.single('file'), (req, res) => {
   const file = req.file;
-  const allowed = new Set(['application/pdf', 'application/zip', 'application/x-zip-compressed', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4']);
-  if (!file || !allowed.has(file.mimetype)) return res.status(400).json({ error: 'Unsupported file type. Use PDF, ZIP, TXT, MP3, WAV, or MP4.' });
-  const extension = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '') || '.bin';
+  const extension = path.extname(file?.originalname || '').toLowerCase().replace(/[^.a-z0-9]/g, '');
+  const detected = file && detectDocument(file.buffer, extension);
+  if (!file || !detected) return res.status(400).json({ error: 'The file content does not match a supported PDF, ZIP, TXT, MP3, WAV, or MP4 format.' });
   const safeFilename = `file_${Date.now()}-${crypto.randomBytes(8).toString('hex')}${extension}`;
   try {
     fs.writeFileSync(path.join(uploadsDir, safeFilename), file.buffer);
     const fileUrl = `/uploads/${safeFilename}`;
     db.prepare('INSERT INTO uploaded_files (path, owner_user_id, created_at) VALUES (?, ?, ?)').run(fileUrl, (req as any).user.userId, Date.now());
-    return res.status(201).json({ success: true, url: fileUrl, filename: safeFilename, originalName: file.originalname, size: file.size, mimeType: file.mimetype });
+    return res.status(201).json({ success: true, url: fileUrl, filename: safeFilename, originalName: file.originalname, size: file.size, mimeType: detected.mime });
   } catch (error) {
     console.error('Failed to write uploaded file:', error);
     return res.status(500).json({ error: 'Failed to store uploaded file.' });

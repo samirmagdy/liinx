@@ -258,16 +258,21 @@ app.use((req, res, next) => {
     const profile = db.prepare('SELECT username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { username: string } | undefined;
     if (profile) {
       res.setHeader('X-Custom-Domain-User', profile.username);
-      if (req.path === '/' || req.path === '') {
+      const customPageMatch = req.path.match(/^\/([a-z0-9-]+)$/i);
+      if (req.path === '/' || req.path === '' || customPageMatch) {
+        const pageSlug = customPageMatch?.[1];
         const acceptsHtml = req.headers.accept && req.headers.accept.includes('text/html');
         const shellFile = path.resolve(__dirname, '../dist/shell.html');
         const indexFile = path.resolve(__dirname, '../dist/index.html');
         const distIndex = fs.existsSync(shellFile) ? shellFile : indexFile;
         if (acceptsHtml && fs.existsSync(distIndex)) {
           const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url FROM profiles WHERE username = ?').get(profile.username) as any;
-          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}/`) : res.sendFile(distIndex);
+          const page = pageSlug ? db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE username = ?) AND slug = ? AND published = 1').get(profile.username, pageSlug) as { title?: string; description?: string } | undefined : undefined;
+          if (page && !customProfile.share_title) customProfile.share_title = page.title;
+          if (page && !customProfile.share_description) customProfile.share_description = page.description || customProfile.bio;
+          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`) : res.sendFile(distIndex);
         }
-        req.url = `/api/profiles/${encodeURIComponent(profile.username)}`;
+        req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
       }
     }
   }
@@ -279,7 +284,17 @@ const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
-app.use('/uploads', express.static(uploadsDir, { maxAge: '30d' }));
+app.use('/uploads', express.static(uploadsDir, {
+  maxAge: '30d',
+  setHeaders: (res, filePath) => {
+    const extension = path.extname(filePath).toLowerCase();
+    if (extension !== '.jpg' && extension !== '.jpeg' && extension !== '.png' && extension !== '.gif' && extension !== '.webp') {
+      res.setHeader('Content-Disposition', 'attachment');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    }
+  }
+}));
 
 // Link Redirector (e.g. /r/:blockId) and analytics routes
 app.use(analyticsRouter);

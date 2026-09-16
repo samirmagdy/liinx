@@ -53,6 +53,10 @@ function safePublicHref(value: unknown): string | null {
 }
 
 const advancedBlockTypes = new Set(['rich_text', 'image', 'gallery', 'spacer', 'carousel', 'form', 'download', 'map', 'faq', 'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate']);
+function normalizeFormFields(value: unknown): any[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(field => field && typeof field === 'object' && typeof field.name === 'string').map(field => ({ ...field, required: field.required === undefined ? true : Boolean(field.required) }));
+}
 function advancedRadius(radius: ThemeConfig['cardRadius']): string {
   return radius === 'none' ? 'rounded-none' : radius === 'full' ? 'rounded-3xl' : radius === 'md' ? 'rounded-xl' : 'rounded-2xl';
 }
@@ -77,13 +81,13 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
   if (!advancedBlockTypes.has(block.type)) return null;
   const card = `p-5 shadow-sm ${advancedRadius(theme.cardRadius)}`;
   const cardStyle = { backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText };
-  const fields = Array.isArray(extra.fields) ? extra.fields : [{ name: 'message', label: 'Message', type: 'textarea' }];
+  const fields = normalizeFormFields(extra.fields).length > 0 ? normalizeFormFields(extra.fields) : [{ name: 'message', label: 'Message', type: 'textarea', required: true }];
   const links = Array.isArray(extra.items) ? extra.items : Array.isArray(extra.links) ? extra.links : [];
 
   if (block.type === 'spacer') return <div key={block.id} aria-hidden="true" style={{ height: Math.min(240, Math.max(16, Number(extra.height) || 48)) }} />;
   if (block.type === 'rich_text') return <article className={card} style={cardStyle}><h3 className="font-bold mb-2">{block.title}</h3><div className="text-sm leading-7" style={{ color: theme.subtextColor }}>{renderRichText(extra.body || block.subtitle || '')}</div></article>;
   if (block.type === 'image') return <figure className={`overflow-hidden ${card}`} style={cardStyle}>{extra.imageUrl && <img src={extra.imageUrl} alt={extra.alt || block.title} className="w-full max-h-[520px] object-cover" loading="lazy" />}{extra.caption && <figcaption className="pt-3 text-xs" style={{ color: theme.subtextColor }}>{extra.caption}</figcaption>}</figure>;
-  if (block.type === 'gallery' || block.type === 'carousel') return <div className={`${card} ${block.type === 'carousel' ? 'overflow-x-auto' : ''}`} style={cardStyle}><h3 className="font-bold mb-3">{block.title}</h3><div className={`grid ${block.type === 'carousel' ? 'grid-flow-col auto-cols-[75%] sm:auto-cols-[45%]' : 'grid-cols-2'} gap-2`}>{links.map((item: any, index: number) => <a key={item.id || index} href={safePublicHref(item.url) || '#'} target="_blank" rel="noreferrer" className="block"><img src={item.imageUrl || item.url} alt={item.alt || item.title || block.title} className="aspect-square w-full object-cover rounded-xl" loading="lazy" /></a>)}</div></div>;
+  if (block.type === 'gallery' || block.type === 'carousel') return <div className={`${card} ${block.type === 'carousel' ? 'overflow-x-auto' : ''}`} style={cardStyle}><h3 className="font-bold mb-3">{block.title}</h3><div className={`grid ${block.type === 'carousel' ? 'grid-flow-col auto-cols-[75%] sm:auto-cols-[45%]' : 'grid-cols-2'} gap-2`}>{links.map((item: any, index: number) => <a key={item.id || index} href={safePublicHref(item.url) || '#'} target="_blank" rel="noreferrer" className="block"><img src={item.imageUrl || item.url} alt={item.alt || item.title || block.title} className="aspect-square w-full object-cover rounded-xl" loading="lazy" />{item.caption && <span className="mt-1 block text-xs" style={{ color: theme.subtextColor }}>{item.caption}</span>}</a>)}</div></div>;
   if (block.type === 'form') return <div className={card} style={cardStyle}><h3 className="font-bold mb-1">{block.title}</h3><p className="text-sm mb-4" style={{ color: theme.subtextColor }}>{block.subtitle || extra.description}</p><form className="space-y-3" onSubmit={async event => { event.preventDefault(); setStatus('Sending…'); try { const response = await fetch('/api/forms/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId, blockId: block.id, fields: formValues }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Unable to send'); setStatus(data.message || 'Sent successfully.'); setFormValues({}); } catch (error) { setStatus(error instanceof Error ? error.message : 'Unable to send.'); } }}><div className="grid gap-3">{fields.map((field: any) => <label key={field.name} className="grid gap-1 text-xs font-semibold">{field.label || field.name}{field.type === 'textarea' ? <textarea required={field.required !== false} value={formValues[field.name] || ''} onChange={e => setFormValues(v => ({ ...v, [field.name]: e.target.value }))} className="min-h-24 rounded-xl border bg-transparent p-3 font-normal" /> : <input required={field.required !== false} type={field.type || 'text'} value={formValues[field.name] || ''} onChange={e => setFormValues(v => ({ ...v, [field.name]: e.target.value }))} className="rounded-xl border bg-transparent p-3 font-normal" />}</label>)}</div><button className="rounded-xl px-4 py-2 text-sm font-bold" style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }} disabled={status === 'Sending…'}>{extra.buttonText || 'Send'}</button>{status && <p role="status" className="text-xs" style={{ color: theme.subtextColor }}>{status}</p>}</form></div>;
   if (block.type === 'download') { const href = safePublicHref(extra.fileUrl || block.url); return <a href={href || '#'} download={extra.downloadName} target="_blank" rel="noreferrer" className={`${card} block hover:opacity-90`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.description || 'Download file'}</span></a>; }
   if (block.type === 'map') { const query = encodeURIComponent(extra.location || block.subtitle || ''); return <a href={`https://www.google.com/maps/search/?api=1&query=${query}`} target="_blank" rel="noreferrer" className={`${card} block`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.location || block.subtitle}</span></a>; }
@@ -562,7 +566,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
 
         {/* Content Blocks */}
         {profile.blocks.length > 5 && <label className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,.15)', color: theme.cardText }}><span aria-hidden="true">⌕</span><input value={pageSearch} onChange={event => setPageSearch(event.target.value)} placeholder={ui('Search this page')} aria-label={ui('Search this page')} className="min-w-0 flex-1 bg-transparent outline-none" /></label>}
-        <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4' : 'space-y-4'}`}>
+        <div className={`mb-14 ${profile.blocks.some(block => block.type === 'link' && (block as any).layout === 'grid') ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*:not(.liinx-grid-link)]:sm:col-span-2' : 'space-y-4'}`}>
           {(Array.isArray(profile.blocks) ? profile.blocks : []).filter(block => !pageSearch.trim() || `${block.title} ${block.subtitle || ''}`.toLowerCase().includes(pageSearch.trim().toLowerCase())).map((block) => {
             if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} /></div>;
             if (block.type === 'link') {
@@ -578,7 +582,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
                   href={redirectUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className={`group relative ${isPill ? 'px-6 py-4' : 'p-4'} transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${linkAnimation === 'fade' ? 'animate-fade-in' : ''} ${linkAnimation === 'pulse' ? 'motion-safe:animate-pulse' : ''} ${linkAnimation === 'lift' ? 'hover:-translate-y-0.5' : ''} ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
+                  className={`${linkLayout === 'grid' ? 'liinx-grid-link' : 'sm:col-span-2'} group relative ${isPill ? 'px-6 py-4' : 'p-4'} transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${linkAnimation === 'fade' ? 'animate-fade-in' : ''} ${linkAnimation === 'pulse' ? 'motion-safe:animate-pulse' : ''} ${linkAnimation === 'lift' ? 'hover:-translate-y-0.5' : ''} ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
                   style={{
                     backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
                     border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
@@ -1008,16 +1012,16 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         </div>
 
         {/* Footer Brand Credit - omitted when white-labeled on Pro/Studio plans */}
-        {!(profile.plan && profile.plan !== 'free' && profile.hideBranding) && (
+        {(profile.footerLogoUrl || !(profile.plan && profile.plan !== 'free' && profile.hideBranding)) && (
           <div className="text-center pt-4 pb-12">
-            <button 
+            {profile.footerLogoUrl ? <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-xs" style={{ backgroundColor: theme.cardBg, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}><img src={profile.footerLogoUrl} alt={`${profile.displayName} logo`} className="h-4 max-w-20 object-contain" /></span> : <button
               onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
               style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: theme.cardBorder.split(' ')[2] || 'rgba(0,0,0,0.15)' }}
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              {profile.footerLogoUrl ? <img src={profile.footerLogoUrl} alt="" className="h-4 max-w-20 object-contain" /> : <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>}
-            </button>
+              <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>
+            </button>}
           </div>
         )}
 
