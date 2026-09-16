@@ -165,7 +165,7 @@ export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
   }),
   presave: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
   phone: extraObject({ phone: z.string().max(40).optional(), description: z.string().max(1000).optional() }),
-  product: extraObject({ price: z.string().max(50).optional(), url: optionalSafeUrl, description: z.string().max(1000).optional() }),
+  product: extraObject({ price: z.string().max(50).optional(), priceAmount: z.string().refine(value => value === '' || /^\d{1,8}(?:\.\d{1,2})?$/.test(value), 'Price must be a positive amount with up to two decimals.').optional(), currency: z.string().refine(value => value === '' || /^[A-Z]{3}$/.test(value), 'Currency must be a three-letter ISO code.').optional(), imageUrl: optionalHttpUrl, url: optionalSafeUrl, description: z.string().max(1000).optional() }),
   tips: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
   content_gate: extraObject({ password: z.string().max(128).optional(), passwordHash: z.string().max(200).optional(), description: z.string().max(1000).optional(), body: z.string().max(20000).optional(), locked: z.boolean().optional() })
 };

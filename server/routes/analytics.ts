@@ -176,7 +176,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
         rawTarget = typeof extra?.linkUrl === 'string' ? extra.linkUrl : null;
       } catch { rawTarget = null; }
     }
-    if (!rawTarget && (block.type === 'event' || block.type === 'presave')) {
+    if (!rawTarget && (block.type === 'event' || block.type === 'presave' || block.type === 'product' || block.type === 'tips')) {
       try {
         const extra = block.extra_json ? JSON.parse(block.extra_json) : null;
         rawTarget = typeof extra?.url === 'string' ? extra.url : null;

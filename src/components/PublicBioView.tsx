@@ -229,7 +229,33 @@ const AdvancedPublicBlock: React.FC<{ block: any; profileId: string; theme: Them
       {actionHref ? <a href={actionHref} target="_blank" rel="noreferrer" className="inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{translate('Open release link')}</a> : <p role="status" className="text-sm" style={{ color: theme.subtextColor }}>{href && previewOnly ? translate('Release link is disabled in preview.') : translate('Release link is not configured yet.')}</p>}
     </article>;
   }
-  if (block.type === 'product' || block.type === 'tips' || block.type === 'phone') { const href = safePublicHref(extra.url || block.url || (block.type === 'phone' ? `tel:${extra.phone}` : undefined)); return <a href={href || '#'} target={href?.startsWith('tel:') ? undefined : '_blank'} rel="noreferrer" className={`${card} block`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.description || block.subtitle || extra.price || extra.phone || 'Open'}</span></a>; }
+  if (block.type === 'product') {
+    const href = safePublicHref(extra.url || block.url);
+    const actionHref = href && !previewOnly ? `/r/${block.id}` : null;
+    const description = extra.description || block.subtitle;
+    const image = safePublicHref(extra.imageUrl);
+    const priceAmount = typeof extra.priceAmount === 'string' && /^\d{1,8}(?:\.\d{1,2})?$/.test(extra.priceAmount) ? extra.priceAmount : '';
+    const currency = typeof extra.currency === 'string' && /^[A-Z]{3}$/.test(extra.currency) ? extra.currency : '';
+    const price = priceAmount ? `${currency ? `${currency} ` : ''}${priceAmount}` : (typeof extra.price === 'string' ? extra.price : '');
+    return <article className={`${card} space-y-3`} style={cardStyle}>
+      {image && <img src={image} alt="" loading="lazy" className="max-h-52 w-full rounded-xl object-cover" />}
+      <h3 className="break-words font-bold">{block.title}</h3>
+      {description && <p className="whitespace-pre-wrap break-words text-sm leading-6" style={{ color: theme.subtextColor }}>{description}</p>}
+      {price && <p className="font-semibold" dir="ltr">{price}</p>}
+      {actionHref ? <><a href={actionHref} target="_blank" rel="noreferrer" className="inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{translate('Open external checkout')}</a><p className="text-xs" style={{ color: theme.subtextColor }}>{translate('Checkout happens on another service.')}</p></> : <p role="status" className="text-sm" style={{ color: theme.subtextColor }}>{href && previewOnly ? translate('Checkout link is disabled in preview.') : translate('Checkout link is not configured yet.')}</p>}
+    </article>;
+  }
+  if (block.type === 'tips') {
+    const href = safePublicHref(extra.url || block.url);
+    const actionHref = href && !previewOnly ? `/r/${block.id}` : null;
+    return <article className={`${card} space-y-3`} style={cardStyle}>
+      <h3 className="break-words font-bold">{block.title}</h3>
+      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: theme.subtextColor }}>{translate('External support link')}</p>
+      {(extra.description || block.subtitle) && <p className="whitespace-pre-wrap break-words text-sm leading-6" style={{ color: theme.subtextColor }}>{extra.description || block.subtitle}</p>}
+      {actionHref ? <><a href={actionHref} target="_blank" rel="noreferrer" className="inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{translate('Open support link')}</a><p className="text-xs" style={{ color: theme.subtextColor }}>{translate('Support happens on another service.')}</p></> : <p role="status" className="text-sm" style={{ color: theme.subtextColor }}>{href && previewOnly ? translate('Support link is disabled in preview.') : translate('Support link is not configured yet.')}</p>}
+    </article>;
+  }
+  if (block.type === 'phone') { const href = safePublicHref(extra.url || block.url || (block.type === 'phone' ? `tel:${extra.phone}` : undefined)); return <a href={href || '#'} target={href?.startsWith('tel:') ? undefined : '_blank'} rel="noreferrer" className={`${card} block`} style={cardStyle}><strong>{block.title}</strong><span className="block text-sm mt-1" style={{ color: theme.subtextColor }}>{extra.description || block.subtitle || extra.phone || 'Open'}</span></a>; }
   if (block.type === 'content_gate') return <div className={card} style={cardStyle}>{unlocked ? <div className="whitespace-pre-wrap text-sm">{status}</div> : <form onSubmit={async e => { e.preventDefault(); setStatus('Checking…'); try { const response = await fetch('/api/content-gates/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId, blockId: block.id, password: gateValue }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Unable to unlock'); setStatus(data.body || 'Unlocked.'); setUnlocked(true); } catch (error) { setStatus(error instanceof Error ? error.message : 'Unable to unlock.'); } }}><h3 className="font-bold">{block.title}</h3><p className="text-sm my-3" style={{ color: theme.subtextColor }}>{extra.description || 'Enter the access code to continue.'}</p><input required type="password" value={gateValue} onChange={e => setGateValue(e.target.value)} className="w-full rounded-xl border bg-transparent p-3 mb-2" placeholder="Access code" /><button className="rounded-xl px-4 py-2 text-sm font-bold" style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}>Unlock</button>{status && <p role="alert" className="text-xs mt-2">{status}</p>}</form>}</div>;
   return null;
 };

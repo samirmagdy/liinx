@@ -1961,3 +1961,54 @@ Baseline: branch `main`, commit `2484487` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `36 — Product and support-link cards`
+
+## Task 36 — Product and support-link cards
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `c86d10a` at task start. The worktree was clean; prior task changes were preserved.
+
+### Scope and changed files
+
+- `server/contracts.ts`: adds bounded product image, numeric amount, and three-letter currency fields while retaining legacy price labels and safe external URLs.
+- `server/routes/analytics.ts`: allows product/tip destinations stored in `extra.url` to use the existing tracked redirect path and sanitizer.
+- `src/components/BuilderStudio.tsx`: adds product description/image/price/currency controls and explicit external-commerce/support policy copy; removes fabricated default copy.
+- `src/components/PublicBioView.tsx`: renders separate product checkout and support cards, consistent display-only price labels, external-action labels, honest unavailable states, preview-disabled actions, and no inventory/payment claims.
+- `tests/product_support_cards.test.ts`: covers full field persistence/public data, safe redirects, malformed price/currency rejection, unsafe links, and missing destinations.
+
+### Findings and behavior
+
+- Product and tips previously shared a generic anchor that became `#` without configuration and did not distinguish checkout/support behavior. They now render as separate cards.
+- Product `priceAmount` accepts up to eight integer digits and two decimals; `currency` accepts a three-letter uppercase code. When present, public output consistently renders `CURRENCY amount`; legacy `price` labels remain compatible.
+- Product cards state that checkout happens on another service. Tip cards state that support happens on another service. Liinx does not process payments, taxes, inventory, payouts, memberships, or earnings.
+- Missing product/tip destinations do not render an actionable link and tracked redirects return 404. Preview actions are disabled through the existing preview-only behavior.
+- Product artwork is URL-based only; no new upload or commerce/provider dependency was introduced.
+
+### Acceptance criteria
+
+- PASS — Product and support fields persist and appear in public data after reload. Evidence: `tests/product_support_cards.test.ts`.
+- PASS — Price/currency formatting is bounded and consistent for structured values; legacy labels remain supported. Evidence: shared contract and public renderer.
+- PASS — Missing destinations disable the action and return 404 through the redirect endpoint. Evidence: regression test.
+- PASS — External checkout and support links are accurately labelled and tracked. Evidence: public renderer and redirect assertions.
+- PASS — No fake inventory, purchases, earnings, or payment confirmations are created. Evidence: defaults/policy copy and source inspection.
+- NOT RUN — Actual browser public-page visuals, mobile layout, and live external checkout/support destinations. Browser/provider execution was unavailable.
+
+### Exact commands and outcomes
+
+- `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
+- `task36_tmp=$(mktemp -d); DATABASE_PATH="$task36_tmp/liinx.db" UPLOADS_DIR="$task36_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task36_tmp/liinx.db" UPLOADS_DIR="$task36_tmp/uploads" NODE_ENV=test npm test -- --run tests/product_support_cards.test.ts tests/event_release_cards.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 39 tests, production build with 10 prerendered routes, and diff check.
+- Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
+- Tests used a disposable SQLite database and uploads directory; no production data, payments, inventory, or external provider request was used.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Unresolved risks and dependencies
+
+- Live browser, responsive, and external destination verification remain required.
+- Price labels are informational only; the application does not verify external price availability or checkout completion.
+
+### Next eligible prompt
+
+`37 — Phone and direct-contact blocks`
