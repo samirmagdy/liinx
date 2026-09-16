@@ -905,12 +905,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       setSaveStatus('saving');
       const newBlock = await createBlockForPage({
         type: 'audio',
-        title: 'New Single Track',
-        url: 'https://spotify.com',
+        title: 'Add an audio track',
+        url: '',
         extra: {
           artist: profile.displayName,
-          coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=300&auto=format&fit=crop',
-          audioUrl: 'https://spotify.com',
+          coverUrl: '',
+          audioUrl: '',
           platform: 'spotify'
         }
       });
@@ -1973,6 +1973,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     )}
 
                     {block.type === 'audio' && (
+                      <>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                         <div>
                           <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Album Cover Image URL")}</label>
@@ -1995,6 +1996,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           />
                         </div>
                       </div>
+                      <p className="mt-1 text-[10px] text-neutral-500">{ui('Supported: Spotify track, album, playlist, artist, or episode URLs; Apple Music pages; SoundCloud tracks; or direct HTTPS MP3, WAV, OGG, M4A, or AAC files. Playback never starts automatically.')}</p>
+                      </>
                     )}
 
                     {block.type === 'video' && (

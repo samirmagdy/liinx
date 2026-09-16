@@ -14,13 +14,14 @@ export function getSpotifyEmbedUrl(url?: string): string | null {
   }
 
   // Handle open.spotify.com URL
-  const urlMatch = cleanUrl.match(/open\.spotify\.com\/(track|album|playlist|artist|episode)\/([a-zA-Z0-9]+)/i);
-  if (urlMatch) {
-    return `https://open.spotify.com/embed/${urlMatch[1]}/${urlMatch[2]}?utm_source=generator&theme=0`;
-  }
-
-  if (cleanUrl.includes('open.spotify.com/embed/')) {
-    return cleanUrl;
+  let parsed: URL;
+  try { parsed = new URL(cleanUrl); } catch { return null; }
+  if (!['http:', 'https:'].includes(parsed.protocol) || !['open.spotify.com', 'www.open.spotify.com'].includes(parsed.hostname.toLowerCase())) return null;
+  const pathParts = parsed.pathname.split('/').filter(Boolean);
+  const type = pathParts[0] === 'embed' ? pathParts[1] : pathParts[0];
+  const id = pathParts[0] === 'embed' ? pathParts[2] : pathParts[1];
+  if (type && id && ['track', 'album', 'playlist', 'artist', 'episode'].includes(type) && /^[a-zA-Z0-9]+$/.test(id)) {
+    return `https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`;
   }
 
   return null;
@@ -62,10 +63,10 @@ export function getVimeoEmbedUrl(url?: string): string | null {
 export function getSoundCloudEmbedUrl(url?: string): string | null {
   if (!url) return null;
   const cleanUrl = url.trim();
-
-  if (cleanUrl.includes('soundcloud.com/')) {
-    return `https://w.soundcloud.com/player/?url=${encodeURIComponent(cleanUrl)}&color=%2310b981&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
-  }
+  let parsed: URL;
+  try { parsed = new URL(cleanUrl); } catch { return null; }
+  if (!['http:', 'https:'].includes(parsed.protocol) || !['soundcloud.com', 'www.soundcloud.com'].includes(parsed.hostname.toLowerCase()) || parsed.pathname === '/') return null;
+  return `https://w.soundcloud.com/player/?url=${encodeURIComponent(parsed.toString())}&color=%2310b981&auto_play=false&single_active=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
 
   return null;
 }
@@ -73,17 +74,20 @@ export function getSoundCloudEmbedUrl(url?: string): string | null {
 export function getAppleMusicEmbedUrl(url?: string): string | null {
   if (!url) return null;
   const cleanUrl = url.trim();
-
-  if (cleanUrl.includes('music.apple.com/')) {
-    return cleanUrl.replace('https://music.apple.com/', 'https://embed.music.apple.com/');
-  }
+  let parsed: URL;
+  try { parsed = new URL(cleanUrl); } catch { return null; }
+  if (!['http:', 'https:'].includes(parsed.protocol) || parsed.hostname.toLowerCase() !== 'music.apple.com' || parsed.pathname === '/') return null;
+  return `https://embed.music.apple.com${parsed.pathname}${parsed.search}`;
 
   return null;
 }
 
 export function isDirectAudioFile(url?: string): boolean {
   if (!url) return false;
-  return /\.(mp3|wav|ogg|m4a|aac)(\?.*)?$/i.test(url.trim());
+  try {
+    const parsed = new URL(url.trim());
+    return ['http:', 'https:'].includes(parsed.protocol) && /\.(mp3|wav|ogg|m4a|aac)$/i.test(parsed.pathname);
+  } catch { return false; }
 }
 
 export function isDirectVideoFile(url?: string): boolean {

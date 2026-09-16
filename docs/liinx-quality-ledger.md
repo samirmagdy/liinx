@@ -1758,3 +1758,55 @@ Baseline: branch `main`, commit `9d4efef` at task start. The worktree was clean;
 ### Next eligible prompt
 
 `31 — Audio and music block`
+
+## Task 31 — Audio and music block
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `156710c` at task start. The worktree was clean; Task 30 changes were preserved. Implementation commit is recorded below after verification.
+
+### Scope and changed files
+
+- `src/utils/mediaEmbeds.ts`: tightens Spotify, Apple Music, and SoundCloud URL parsing to exact HTTPS hosts and makes direct audio detection require an HTTP(S) URL/path extension. SoundCloud embeds explicitly use `auto_play=false` and `single_active=true`.
+- `src/components/PublicBioView.tsx`: adds visible titles/artist labels and provider fallback links, lazy/user-initiated provider player loading, direct-file metadata preload, artwork fallback, audio errors, and single-active direct playback.
+- `src/components/BuilderStudio.tsx`: makes new audio blocks explicit empty drafts and documents supported providers/file extensions and hosting limits.
+- `tests/embeds_and_branding.test.ts`: adds spoofed-host and no-autoplay parser regressions.
+- `tests/audio_block.test.ts`: covers supported provider/direct sources, public persistence, and active-scheme rejection.
+
+### Findings and behavior
+
+- Existing audio branches rendered Spotify, SoundCloud, Apple Music, and direct files, but all provider iframes mounted immediately, SoundCloud requested `auto_play=true`, direct audio used one global playing flag, and artwork/fallback states were incomplete.
+- Supported native behavior is Spotify track/album/playlist/artist/episode embeds, Apple Music page embeds, SoundCloud track embeds, and direct HTTPS MP3/WAV/OGG/M4A/AAC files. Liinx does not host remote audio or invent stream/progress metrics.
+- Provider players are initially replaced by an accessible “Load audio player” button. Only one embedded provider iframe is mounted at a time. Direct audio playback pauses other Liinx direct audio elements and tracks the active block by ID.
+- Provider iframes retain `encrypted-media` where needed for Spotify and use the existing CSP origins: `open.spotify.com`, `w.soundcloud.com`, and `embed.music.apple.com`. No broader CSP relaxation was added.
+- Missing artwork uses a neutral fallback. Direct-file load/play errors expose an alert and the validated external audio link. Provider availability/private-track/embed restrictions remain provider-controlled and cannot be certified locally.
+- This behavior is consistent with current provider documentation: [Spotify Embeds](https://developer.spotify.com/documentation/embeds), [Spotify embed troubleshooting](https://developer.spotify.com/documentation/embeds/tutorials/troubleshooting), and [SoundCloud Widget API](https://developers.soundcloud.com/docs/api/html5-widget).
+
+### Acceptance criteria
+
+- PASS — Each currently implemented provider and direct audio source is parsed and persisted. Evidence: `tests/embeds_and_branding.test.ts` and `tests/audio_block.test.ts` cover Spotify, Apple Music, SoundCloud, and direct MP3 sources.
+- PASS — Active schemes and spoofed provider hosts are rejected. Evidence: parser tests reject spoofed hosts; API test returns 400 for `javascript:alert(1)`.
+- PASS — Unexpected concurrent Liinx direct streams are prevented. Evidence: direct `onPlay` pauses all other `audio[data-liinx-audio="true"]` elements; SoundCloud URL uses `single_active=true`; provider iframe mounting is single-active.
+- PASS — No automatic playback is requested. Evidence: provider URLs use no autoplay parameter except SoundCloud’s explicit `auto_play=false`; no direct `autoPlay` is present; iframe loading requires user activation.
+- PASS — Titles, artist labels, responsive width, lazy loading, artwork fallback, and external fallback links are implemented. Evidence: source inspection and API round-trip tests.
+- NOT RUN — Live private/removed/unavailable tracks, provider embed-denial responses, artwork network failure, browser keyboard operation, slow load, and mobile visual sizing. Browser/provider execution was unavailable; source/API evidence is not live-provider evidence.
+
+### Exact commands and outcomes
+
+- `git status --short --branch && git log -3 --oneline` — PASS, baseline `156710c` on `main`; clean worktree before Task 31.
+- `task31_tmp=$(mktemp -d) && DATABASE_PATH="$task31_tmp/liinx.db" UPLOADS_DIR="$task31_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task31_tmp/liinx.db" UPLOADS_DIR="$task31_tmp/uploads" NODE_ENV=test npm test -- --run tests/audio_block.test.ts tests/embeds_and_branding.test.ts tests/acceptance.test.ts tests/e2e-workflow.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 49 tests, production build/prerender of 10 routes, and diff check. Existing non-blocking warning: one generated chunk exceeds 500 kB.
+- Tests used a disposable SQLite database and uploads directory; no production data, provider credentials, or external playback was used.
+
+### Implementation commit
+
+To be recorded after final validation.
+
+### Unresolved risks and dependencies
+
+- Live provider sandbox/browser verification remains required for private, removed, denied, slow, and unavailable media states.
+- External provider iframe controls may have provider-specific playback concurrency behavior beyond the application-controlled mount policy.
+- Apple Music and SoundCloud provider requirements should be rechecked before any future CSP or embed API change.
+
+### Next eligible prompt
+
+`32 — Location block`

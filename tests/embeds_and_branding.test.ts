@@ -45,9 +45,13 @@ describe('Media Embed Utilities (0% Fake Implementation)', () => {
   it('detects SoundCloud and Apple Music embeds', () => {
     const sc = getSoundCloudEmbedUrl('https://soundcloud.com/artist/track');
     expect(sc).toContain('w.soundcloud.com/player');
+    expect(sc).toContain('auto_play=false');
+    expect(sc).toContain('single_active=true');
+    expect(getSoundCloudEmbedUrl('https://soundcloud.com.evil.example/artist/track')).toBeNull();
 
     const apple = getAppleMusicEmbedUrl('https://music.apple.com/us/album/test/123');
     expect(apple).toContain('embed.music.apple.com/us/album/test/123');
+    expect(getAppleMusicEmbedUrl('https://music.apple.com.evil.example/us/album/test/123')).toBeNull();
   });
 
   it('identifies direct audio and video media files', () => {
