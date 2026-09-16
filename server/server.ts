@@ -91,6 +91,16 @@ if (process.env.NODE_ENV === 'production' && configuredOrigins.includes('*')) {
   throw new Error('Production CORS_ORIGIN must list explicit trusted origins; wildcard CORS is not allowed.');
 }
 app.set('trust proxy', 1);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const isMutation = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  const isLocalDevelopmentOrigin = process.env.NODE_ENV !== 'production'
+    && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(origin || '');
+  if (isMutation && origin && !configuredOrigins.includes('*') && !configuredOrigins.includes(origin) && !isLocalDevelopmentOrigin) {
+    return res.status(403).json({ error: 'Request origin is not allowed.' });
+  }
+  next();
+});
 app.use(cors({
   origin: (origin, callback) => {
     const isLocalDevelopmentOrigin = process.env.NODE_ENV !== 'production'

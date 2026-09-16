@@ -430,3 +430,56 @@ Migration tests create temporary databases under `/tmp/liinx-task-04-*` and copy
 ### Next eligible prompt
 
 `05 — Authentication and sessions`
+
+## Task 05 — Authentication and sessions
+
+Status: VERIFIED WITHIN SCOPE
+
+Baseline commit: `3e2c05f45ca0010ce1dced59c1e6846c529eb39a` (`main`, matching `origin/main` at task start). No commit was created during this task; changes remain uncommitted and earlier work was preserved.
+
+### Scope and changed files
+
+- `server/auth.ts`: signs and verifies HS256 JWTs explicitly, validates required claim types, and rejects malformed/forged/expired tokens.
+- `server/routes/auth.ts`: logout now requires a valid session, increments `session_version`, and clears the HttpOnly cookie, invalidating bearer tokens as well.
+- `server/server.ts`: state-changing requests carrying an untrusted `Origin` receive 403 before route execution; configured/local development origins remain supported.
+- Added `tests/auth_sessions.test.ts` covering forged, expired, logout-revoked, cookie, and hostile-origin sessions.
+
+### Findings and behavior
+
+- Registration and login continue to use the existing email/password flow, bcrypt password checks, constant-time missing-user comparison, and rate limits. No social-login method was added.
+- Cookies are `HttpOnly`, `SameSite=Lax`, scoped to `/`, and `Secure` in production. Tokens are held only in frontend module memory; no auth token is written to localStorage/sessionStorage. The existing JSON token response remains for current frontend/API compatibility.
+- `requireAuth` verifies the token, confirms the account exists, checks `session_version`, and confirms the selected profile belongs to that account. Protected studio routes consistently use this middleware, while route-level profile/page/block ownership checks remain in place.
+- Logout revokes the account’s current session version, so both the cookie and previously issued bearer token fail with 401 afterward. Authorization/entitlement failures remain 403.
+- Hostile state-changing Origins are rejected with 403. Same-origin, configured CORS, and local development origins remain accepted. GET/HEAD/OPTIONS are not blocked by this CSRF boundary.
+- `AuthContext` already refreshes `/api/auth/me` on startup, clears in-memory auth state on 401, and updates state after login/register/logout/profile switching; this agrees with the backend session checks.
+
+### Acceptance criteria
+
+- PASS — Successful login and registration. Evidence: existing API tests and full suite.
+- PASS — Invalid credentials return 401. Evidence: API tests and existing constant-time login path.
+- PASS — Expired sessions return 401. Evidence: valid signed token with negative expiry is rejected by `verifyJwt` and `/api/auth/me` rejects invalid sessions.
+- PASS — Logout invalidates cookie and bearer sessions. Evidence: `tests/auth_sessions.test.ts` and `tests/session_cookie.test.ts`.
+- PASS — Forged tokens are rejected. Evidence: forged-signature and malformed-token regression tests.
+- PASS — Cross-account requests are rejected. Evidence: existing security, multiprofile, custom-domain, and API-key tests; `requireAuth` validates profile ownership.
+- PASS — Hostile Origin state-changing requests return 403. Evidence: `tests/auth_sessions.test.ts`.
+- PASS — Session switching is account-scoped. Evidence: existing multiprofile tests and frontend `selectProfile` token/state update path.
+- PASS — Frontend/backend session agreement within local scope. Evidence: cookie `/me` journey, AuthContext 401 clearing, and in-memory-only token storage inspection.
+- NOT RUN — Browser automation against a deployed HTTPS origin, real proxy cookie behavior, and production CORS configuration. Local API evidence is not deployment evidence.
+
+### Exact commands and outcomes
+
+- `npm run lint` — PASS, `tsc --noEmit` exited 0.
+- `DATABASE_PATH=/tmp/liinx-task-05-db/auth-final.sqlite UPLOADS_DIR=/tmp/liinx-task-05-uploads NODE_ENV=test npm test -- tests/auth_sessions.test.ts tests/session_cookie.test.ts` — PASS, 4 tests.
+- `DATABASE_PATH=/tmp/liinx-task-05-db/full.sqlite UPLOADS_DIR=/tmp/liinx-task-05-uploads NODE_ENV=test npm test` — PASS, 26 files / 203 tests in 21.46s.
+- `npm run build` — PASS; Vite build and prerender completed and 10 routes were prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `git diff --check` — PASS, no whitespace errors.
+
+### Remaining risks and dependencies
+
+- The frontend still receives the JWT in the login/register JSON response for compatibility and uses an in-memory bearer token for requests. It is not persistent browser storage, but a future same-origin-only deployment could remove that response/token path after consumer compatibility review.
+- CSRF behavior was tested through Supertest, not a real browser with production `SameSite`/`Secure` handling or deployed reverse proxies.
+- Rate-limit behavior was not load-tested; existing unit/API coverage verifies configured rejection paths. No production traffic or credentials were used.
+
+### Next eligible prompt
+
+`06 — Account recovery and deletion`

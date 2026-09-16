@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { randomBytes } from 'node:crypto';
 import 'dotenv/config';
 
@@ -24,13 +24,18 @@ export function comparePassword(password: string, hash: string): boolean {
   return bcrypt.compareSync(password, hash);
 }
 
-export function signJwt(payload: AuthPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+export function signJwt(payload: AuthPayload, options: Pick<SignOptions, 'expiresIn'> = {}): string {
+  return jwt.sign(payload, JWT_SECRET, { algorithm: 'HS256', expiresIn: options.expiresIn || '7d' });
 }
 
 export function verifyJwt(token: string): AuthPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as AuthPayload;
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+    if (typeof decoded !== 'object' || decoded === null) return null;
+    const payload = decoded as Record<string, unknown>;
+    if (typeof payload.userId !== 'string' || typeof payload.email !== 'string' || typeof payload.profileId !== 'string' || typeof payload.username !== 'string') return null;
+    if (payload.sessionVersion !== undefined && (typeof payload.sessionVersion !== 'number' || !Number.isInteger(payload.sessionVersion))) return null;
+    return payload as unknown as AuthPayload;
   } catch (err) {
     return null;
   }

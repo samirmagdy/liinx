@@ -275,7 +275,8 @@ authRouter.post('/login', sharedRateLimit({ name: 'login', limit: 20, windowMs: 
   }
 });
 
-authRouter.post('/logout', (_req, res) => {
+authRouter.post('/logout', requireAuth, (req: AuthenticatedRequest, res) => {
+  db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(req.user!.userId);
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
   res.setHeader('Set-Cookie', `liinx_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${secure}`);
   res.json({ success: true });
