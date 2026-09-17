@@ -261,16 +261,17 @@
       "lines": 64,
       "functions": []
     },
+    "src/features/builder/components/blocks/AddBlockHeader.tsx": {
+      "lines": 76,
+      "functions": []
+    },
     "src/features/builder/components/blocks/AddBlockMenu.tsx": {
-      "lines": 133,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 117,
-          "complexity": 7,
-          "maxDepth": 1
-        }
-      ]
+      "lines": 119,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/BlockCatalogGrid.tsx": {
+      "lines": 53,
+      "functions": []
     },
     "src/features/builder/components/blocks/BlockEditorItem.tsx": {
       "lines": 1165,
@@ -309,6 +310,10 @@
           "maxDepth": 1
         }
       ]
+    },
+    "src/features/builder/components/blocks/addBlockCatalog.ts": {
+      "lines": 269,
+      "functions": []
     },
     "src/features/builder/components/pages/PageManager.tsx": {
       "lines": 185,

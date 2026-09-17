@@ -52,4 +52,14 @@ describe('social icons and contact links', () => {
     const profile = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     expect(profile.body.socials).toEqual(before.body.socials);
   });
+
+  it('normalizes raw phone and email input correctly', async () => {
+    const { normalizeSocialUrl } = await import('../src/features/builder/hooks/useSocialLinks.js');
+    expect(normalizeSocialUrl('phone', '+966 50 123 4567')).toBe('tel:+966 50 123 4567');
+    expect(normalizeSocialUrl('phone', 'tel:+966 50 123 4567')).toBe('tel:+966 50 123 4567');
+    expect(normalizeSocialUrl('phone', '0501234567')).toBe('tel:0501234567');
+    expect(normalizeSocialUrl('email', 'creator@example.com')).toBe('mailto:creator@example.com');
+    expect(normalizeSocialUrl('email', 'mailto:creator@example.com')).toBe('mailto:creator@example.com');
+    expect(normalizeSocialUrl('instagram', 'https://instagram.com/liinx')).toBe('https://instagram.com/liinx');
+  });
 });

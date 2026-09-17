@@ -18,6 +18,39 @@ const SOCIAL_DOMAINS: Record<string, string[]> = {
   linkedin: ['linkedin.com']
 };
 
+export const normalizeSocialUrl = (platform: SocialLink['platform'], raw: string) => {
+  const value = raw.trim();
+  if (!value) return '';
+  if (platform === 'phone' && !/^tel:/i.test(value)) {
+    return `tel:${value}`;
+  }
+  if (platform === 'email' && !/^mailto:/i.test(value)) {
+    return `mailto:${value}`;
+  }
+  return value;
+};
+
+const checkSocialUrlFormat = (platform: SocialLink['platform'], value: string): 'empty' | 'email' | 'phone' | 'provider' | 'url' | null => {
+  if (!value) return 'empty';
+  if (platform === 'email') {
+    return /^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/i.test(value) ? null : 'email';
+  }
+  if (platform === 'phone') {
+    const digits = value.replace(/\D/g, '');
+    return /^tel:\+?[0-9][0-9 ()-]{3,24}$/i.test(value) && digits.length >= 4 ? null : 'phone';
+  }
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    const validHost = (SOCIAL_DOMAINS[platform] || []).some(
+      domain => host === domain || host.endsWith(`.${domain}`)
+    );
+    return ['http:', 'https:'].includes(parsed.protocol) && validHost ? null : 'provider';
+  } catch {
+    return 'url';
+  }
+};
+
 export function useSocialLinks({
   profile,
   setProfile,
@@ -30,31 +63,14 @@ export function useSocialLinks({
   const [socialDrafts, setSocialDrafts] = useState<Record<number, string>>({});
 
   const validateSocialUrl = (platform: SocialLink['platform'], raw: string) => {
-    const value = raw.trim();
-    if (!value) return ui('Enter a social link.');
-    if (platform === 'email') {
-      return /^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/i.test(value)
-        ? null
-        : ui('Use a valid mailto email address.');
-    }
-    if (platform === 'phone') {
-      const digits = value.replace(/\D/g, '');
-      return /^tel:\+?[0-9][0-9 ()-]{3,24}$/i.test(value) && digits.length >= 4
-        ? null
-        : ui('Use a valid tel phone number.');
-    }
-    try {
-      const parsed = new URL(value);
-      const host = parsed.hostname.toLowerCase();
-      const validHost = (SOCIAL_DOMAINS[platform] || []).some(
-        domain => host === domain || host.endsWith(`.${domain}`)
-      );
-      return ['http:', 'https:'].includes(parsed.protocol) && validHost
-        ? null
-        : ui('Use the selected provider URL.');
-    } catch {
-      return ui('Enter a valid URL.');
-    }
+    const value = normalizeSocialUrl(platform, raw);
+    const issue = checkSocialUrlFormat(platform, value);
+    if (issue === 'empty') return ui('Enter a social link.');
+    if (issue === 'email') return ui('Use a valid mailto email address.');
+    if (issue === 'phone') return ui('Use a valid tel phone number.');
+    if (issue === 'provider') return ui('Use the selected provider URL.');
+    if (issue === 'url') return ui('Enter a valid URL.');
+    return null;
   };
 
   const persistSocials = (updatedSocials: SocialLink[]) => {
@@ -64,7 +80,7 @@ export function useSocialLinks({
   };
 
   const handleAddSocial = () => {
-    const cleanUrl = newSocialUrl.trim();
+    const cleanUrl = normalizeSocialUrl(newSocialPlatform, newSocialUrl);
     const validationError = validateSocialUrl(newSocialPlatform, cleanUrl);
     if (validationError) {
       setSocialError(validationError);
@@ -89,7 +105,8 @@ export function useSocialLinks({
     const currentSocials = profile.socials || [];
     const social = currentSocials[index];
     if (!social) return;
-    const validationError = validateSocialUrl(social.platform, value);
+    const cleanUrl = normalizeSocialUrl(social.platform, value);
+    const validationError = validateSocialUrl(social.platform, cleanUrl);
     if (validationError) {
       setSocialError(validationError);
       return;
@@ -98,7 +115,7 @@ export function useSocialLinks({
       currentSocials.some(
         (candidate, candidateIndex) =>
           candidateIndex !== index &&
-          candidate.url.trim().toLowerCase() === value.trim().toLowerCase()
+          candidate.url.trim().toLowerCase() === cleanUrl.toLowerCase()
       )
     ) {
       setSocialError(ui('That social link is already added.'));
@@ -107,7 +124,7 @@ export function useSocialLinks({
     setSocialError(null);
     persistSocials(
       currentSocials.map((candidate, candidateIndex) =>
-        candidateIndex === index ? { ...candidate, url: value.trim() } : candidate
+        candidateIndex === index ? { ...candidate, url: cleanUrl } : candidate
       )
     );
   };

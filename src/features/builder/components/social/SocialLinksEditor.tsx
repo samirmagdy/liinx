@@ -4,6 +4,86 @@ import { type SocialLink } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useBuilder } from '../../context/BuilderContext';
 
+const SOCIAL_PLACEHOLDERS: Record<string, string> = {
+  phone: '+966 50 123 4567',
+  email: 'creator@example.com',
+  instagram: 'https://instagram.com/yourhandle',
+  twitter: 'https://x.com/yourhandle',
+  youtube: 'https://youtube.com/@channel',
+  spotify: 'https://open.spotify.com/artist/...',
+  github: 'https://github.com/username',
+  linkedin: 'https://linkedin.com/in/username'
+};
+
+interface SocialLinkItemProps {
+  soc: SocialLink;
+  index: number;
+  total: number;
+  draftValue?: string;
+  ui: (text: string) => string;
+  onDraftChange: (value: string) => void;
+  onBlur: (value: string) => void;
+  onMove: (direction: -1 | 1) => void;
+  onRemove: () => void;
+}
+
+const SocialLinkItem: React.FC<SocialLinkItemProps> = ({
+  soc,
+  index,
+  total,
+  draftValue,
+  ui,
+  onDraftChange,
+  onBlur,
+  onMove,
+  onRemove
+}) => (
+  <div className="flex items-center gap-2 p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-xs">
+    <div className="flex items-center gap-2 min-w-0 flex-1">
+      <span className="capitalize font-bold text-neutral-700 font-mono text-[11px] bg-neutral-200 px-2 py-0.5 rounded">
+        {soc.platform}
+      </span>
+      <input
+        id={`social-link-draft-${index}-${soc.platform}`}
+        name={`socialLink_${soc.platform}`}
+        dir="ltr"
+        aria-label={`${ui('Edit social link')} ${soc.platform}`}
+        value={draftValue ?? soc.url}
+        onChange={event => onDraftChange(event.target.value)}
+        onBlur={event => onBlur(event.target.value)}
+        className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-neutral-600 truncate font-mono text-[11px] focus:border-neutral-900 focus:outline-none"
+      />
+    </div>
+    <button
+      type="button"
+      onClick={() => onMove(-1)}
+      disabled={index === 0}
+      aria-label={ui('Move social link up')}
+      className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+    >
+      ↑
+    </button>
+    <button
+      type="button"
+      onClick={() => onMove(1)}
+      disabled={index === total - 1}
+      aria-label={ui('Move social link down')}
+      className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+    >
+      ↓
+    </button>
+    <button
+      type="button"
+      onClick={onRemove}
+      aria-label={`${ui('Remove social link')} ${soc.platform}`}
+      className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/30 rounded"
+      title={ui("Remove social link")}
+    >
+      <Trash2 className="w-3.5 h-3.5" />
+    </button>
+  </div>
+);
+
 export const SocialLinksEditor: React.FC = () => {
   const { tr: ui } = useUiLanguage();
   const {
@@ -21,58 +101,28 @@ export const SocialLinksEditor: React.FC = () => {
     handleRemoveSocial
   } = useBuilder();
 
+  const currentSocials = profile.socials || [];
+
   return (
     <div className="pt-3 border-t border-neutral-100">
       <span className="block text-xs font-bold text-neutral-900 mb-2">{ui("Connected Social Icons")}</span>
 
       {/* Current socials list */}
       <div className="space-y-2 mb-3">
-        {profile.socials && profile.socials.length > 0 ? (
-          profile.socials.map((soc, sIdx) => (
-            <div key={sIdx} className="flex items-center gap-2 p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-xs">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span className="capitalize font-bold text-neutral-700 font-mono text-[11px] bg-neutral-200 px-2 py-0.5 rounded">
-                  {soc.platform}
-                </span>
-                <input
-                  id={`social-link-draft-${sIdx}-${soc.platform}`}
-                  name={`socialLink_${soc.platform}`}
-                  dir="ltr"
-                  aria-label={`${ui('Edit social link')} ${soc.platform}`}
-                  value={socialDrafts[sIdx] ?? soc.url}
-                  onChange={event => setSocialDrafts(previous => ({ ...previous, [sIdx]: event.target.value }))}
-                  onBlur={event => handleEditSocial(sIdx, event.target.value)}
-                  className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-neutral-600 truncate font-mono text-[11px] focus:border-neutral-900 focus:outline-none"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => handleMoveSocial(sIdx, -1)}
-                disabled={sIdx === 0}
-                aria-label={ui('Move social link up')}
-                className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
-              >
-                ↑
-              </button>
-              <button
-                type="button"
-                onClick={() => handleMoveSocial(sIdx, 1)}
-                disabled={sIdx === profile.socials.length - 1}
-                aria-label={ui('Move social link down')}
-                className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
-              >
-                ↓
-              </button>
-              <button
-                type="button"
-                onClick={() => handleRemoveSocial(sIdx)}
-                aria-label={`${ui('Remove social link')} ${soc.platform}`}
-                className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/30 rounded"
-                title={ui("Remove social link")}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
+        {currentSocials.length > 0 ? (
+          currentSocials.map((soc, sIdx) => (
+            <SocialLinkItem
+              key={sIdx}
+              soc={soc}
+              index={sIdx}
+              total={currentSocials.length}
+              draftValue={socialDrafts[sIdx]}
+              ui={ui}
+              onDraftChange={val => setSocialDrafts(prev => ({ ...prev, [sIdx]: val }))}
+              onBlur={val => handleEditSocial(sIdx, val)}
+              onMove={dir => handleMoveSocial(sIdx, dir)}
+              onRemove={() => handleRemoveSocial(sIdx)}
+            />
           ))
         ) : (
           <p className="text-[11px] text-neutral-400">{ui("No social links added yet.")}</p>
@@ -103,10 +153,11 @@ export const SocialLinksEditor: React.FC = () => {
           id="new-social-url"
           name="newSocialUrl"
           aria-label={ui("Connected Social Icons")}
-          type="text"
+          type={newSocialPlatform === 'email' ? 'email' : 'text'}
+          inputMode={newSocialPlatform === 'phone' ? 'tel' : newSocialPlatform === 'email' ? 'email' : 'url'}
           value={newSocialUrl}
           onChange={(e) => setNewSocialUrl(e.target.value)}
-          placeholder="https://instagram.com/yourhandle"
+          placeholder={SOCIAL_PLACEHOLDERS[newSocialPlatform] || 'https://...'}
           dir="ltr"
           className="flex-1 px-3 py-1.5 rounded-xl border border-neutral-200 bg-neutral-50 text-xs outline-none focus:border-neutral-900 font-mono"
         />

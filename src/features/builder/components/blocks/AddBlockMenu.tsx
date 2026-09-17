@@ -1,21 +1,33 @@
-import React from 'react';
-import {
-  Plus,
-  Link as LinkIcon,
-  Sliders,
-  Music,
-  Video,
-  FolderPlus,
-  Mail,
-  Download
-} from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Plus, Download } from 'lucide-react';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useCapabilities } from '../../../../context/CapabilitiesContext';
 import { useBuilder } from '../../context/BuilderContext';
+import { BLOCK_CATALOG, BlockCategory, BlockCatalogItem } from './addBlockCatalog';
+import { BlockCatalogGrid } from './BlockCatalogGrid';
+import { AddBlockHeader } from './AddBlockHeader';
+
+function filterCatalog(catalog: BlockCatalogItem[], category: BlockCategory, query: string, ui: (k: string) => string): BlockCatalogItem[] {
+  const clean = query.trim().toLowerCase();
+  return catalog.filter(item => {
+    if (category !== 'all' && item.category !== category) return false;
+    if (!clean) return true;
+    return (
+      ui(item.titleKey).toLowerCase().includes(clean) ||
+      item.titleKey.toLowerCase().includes(clean) ||
+      ui(item.descKey).toLowerCase().includes(clean) ||
+      item.descKey.toLowerCase().includes(clean) ||
+      item.type.toLowerCase().includes(clean)
+    );
+  });
+}
 
 export const AddBlockMenu: React.FC = () => {
   const { tr: ui } = useUiLanguage();
   const { hasAnyImporter } = useCapabilities();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<BlockCategory>('all');
+
   const {
     showAddMenu,
     setShowAddMenu,
@@ -29,6 +41,29 @@ export const AddBlockMenu: React.FC = () => {
     setShowImporterModal
   } = useBuilder();
 
+  const handleSelectBlock = (item: BlockCatalogItem) => {
+    const actions: Record<string, () => void> = {
+      link: handleAddLink,
+      header: handleAddHeader,
+      audio: handleAddAudio,
+      video: handleAddVideo,
+      folder: handleAddFolder,
+      newsletter: handleAddNewsletter
+    };
+    if (actions[item.handlerKey]) {
+      actions[item.handlerKey]();
+    } else {
+      handleAddAdvancedBlock(item.type);
+    }
+    setShowAddMenu(false);
+    setSearchQuery('');
+  };
+
+  const filteredCatalog = useMemo(
+    () => filterCatalog(BLOCK_CATALOG, selectedCategory, searchQuery, ui),
+    [selectedCategory, searchQuery, ui]
+  );
+
   return (
     <div className="flex flex-col sm:flex-row gap-3">
       <div className="flex-1 relative">
@@ -41,70 +76,21 @@ export const AddBlockMenu: React.FC = () => {
         </button>
 
         {showAddMenu && (
-          <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-neutral-50 rounded-2xl border border-neutral-200 shadow-2xl z-20 grid grid-cols-2 sm:grid-cols-3 gap-2 animate-fade-in">
-            <button
-              onClick={handleAddLink}
-              className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            >
-              <LinkIcon className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-bold text-neutral-900">{ui("Custom Link")}</span>
-            </button>
+          <div className="absolute top-full left-0 right-0 mt-2 p-3.5 bg-neutral-50 rounded-2xl border border-neutral-200 shadow-2xl z-20 flex flex-col gap-3 animate-fade-in max-h-[480px] overflow-hidden">
+            <AddBlockHeader
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+              ui={ui}
+            />
 
-            <button
-              onClick={handleAddHeader}
-              className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            >
-              <Sliders className="w-4 h-4 text-neutral-700" />
-              <span className="text-xs font-bold text-neutral-900">{ui("Section Title")}</span>
-            </button>
-
-            <button
-              onClick={handleAddAudio}
-              className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            >
-              <Music className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-bold text-neutral-900">{ui("Audio Track")}</span>
-            </button>
-
-            <button
-              onClick={handleAddVideo}
-              className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            >
-              <Video className="w-4 h-4 text-red-600" />
-              <span className="text-xs font-bold text-neutral-900">{ui("Video Embed")}</span>
-            </button>
-
-            <button
-              onClick={handleAddFolder}
-              className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            >
-              <FolderPlus className="w-4 h-4 text-amber-600" />
-              <span className="text-xs font-bold text-neutral-900">{ui("Link Folder")}</span>
-            </button>
-
-            <button
-              onClick={handleAddNewsletter}
-              className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            >
-              <Mail className="w-4 h-4 text-purple-600" />
-              <span className="text-xs font-bold text-neutral-900">{ui("Newsletter")}</span>
-            </button>
-
-            {[
-              ['rich_text', 'Rich Text'], ['image', 'Image'], ['gallery', 'Gallery'], ['carousel', 'Carousel'],
-              ['spacer', 'Spacer'], ['form', 'Contact Form'], ['download', 'Download'], ['map', 'Location'],
-              ['faq', 'FAQ'], ['testimonials', 'Testimonials'], ['event', 'Event'], ['presave', 'Pre-save'],
-              ['phone', 'Phone'], ['product', 'Product'], ['tips', 'Tips'], ['content_gate', 'Content Gate']
-            ].map(([type, label]) => (
-              <button
-                key={type}
-                onClick={() => handleAddAdvancedBlock(type)}
-                className="p-3 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 flex flex-col items-center text-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-              >
-                <Plus className="w-4 h-4 text-neutral-600" />
-                <span className="text-xs font-bold text-neutral-900">{ui(label)}</span>
-              </button>
-            ))}
+            <BlockCatalogGrid
+              items={filteredCatalog}
+              searchQuery={searchQuery}
+              ui={ui}
+              onSelect={handleSelectBlock}
+            />
           </div>
         )}
       </div>
