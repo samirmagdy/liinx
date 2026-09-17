@@ -16,6 +16,7 @@
     "lint": "tsc --noEmit",
     "db:backup": "tsx scripts/backup-db.ts",
     "uploads:backup": "tsx scripts/backup-uploads.ts",
+    "backup:verify": "tsx scripts/verify-restore.ts",
     "health:check": "node scripts/check-health.mjs"
   },
   "dependencies": {

@@ -83,10 +83,10 @@ describe('Resilience, Fault Tolerance & Database Integrity Testing', () => {
     expect(integrity[0].integrity_check).toBe('ok');
   });
 
-  it('should create a valid zero-downtime database backup snapshot with verified integrity', () => {
-    const result = createDatabaseBackup(5);
+  it('should create a valid zero-downtime database backup snapshot with verified integrity', async () => {
+    const result = await createDatabaseBackup(5);
     expect(result.sizeBytes).toBeGreaterThan(0);
     expect(result.durationMs).toBeGreaterThan(0);
-    expect(result.backupPath).toMatch(/\.db$/);
+    expect(result.backupPath).toMatch(/\.db(\.enc)?$/);
   });
 });
