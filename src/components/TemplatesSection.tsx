@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { THEMES } from '../config/themes';
 import { TEMPLATES } from '../config/templates';
-import { CreatorProfile } from '../types';
+import { type CreatorProfile } from '../types';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
@@ -21,8 +21,6 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
   const visibleTemplates = maxVisible ? TEMPLATES.slice(0, maxVisible) : TEMPLATES;
 
   useEffect(() => setIsHydrated(true), []);
-
-  const isDarkTheme = (themeId: string) => THEMES.find(t => t.id === themeId)?.isDark ?? false;
 
   return (
     <section id="templates" className="marketing-section py-24 md:py-36 border-b border-neutral-200">

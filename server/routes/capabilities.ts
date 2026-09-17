@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { importerService } from '../services/importer.js';
 import { supportsHorizontalScaling } from '../infrastructure/safeguards.js';
 

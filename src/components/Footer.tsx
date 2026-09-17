@@ -1,9 +1,8 @@
-import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { ResourceModal, ResourceDocType } from './ResourceModal';
+import { ResourceModal, type ResourceDocType } from './ResourceModal';
 import { brand } from '../config/brand';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { Globe } from 'lucide-react';
 
 interface FooterProps {

@@ -2,10 +2,9 @@ import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import fs from 'fs';
 import path from 'path';
-import { app } from '../server/server.js';
+import { app, safeJsonForHtml } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 import { signJwt } from '../server/auth.js';
-import { safeJsonForHtml } from '../server/server.js';
 
 describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)', () => {
   const testUserId = 'usr_audit_test';

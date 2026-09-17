@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { safePublicHref, analyticsHref, getRadiusClass } from '../../utils/publicBio.utils';
 

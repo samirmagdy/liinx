@@ -1,4 +1,4 @@
-import { Language } from './i18n';
+import { type Language } from './i18n';
 import { uiArabic } from './uiArabic';
 
 // UI-only copy. User content, URLs, code samples, provider names, and metrics are

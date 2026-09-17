@@ -1,5 +1,5 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { CreatorProfile, CreatorPage } from '../../../types';
+import { useState, useEffect, useMemo, type Dispatch, type SetStateAction } from 'react';
+import { type CreatorProfile, type CreatorPage } from '../../../types';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
@@ -18,7 +18,7 @@ export function usePages({
   setSaveStatus
 }: UsePagesProps) {
   const { tr: ui } = useUiLanguage();
-  const pages = profile.pages || [];
+  const pages = useMemo(() => profile.pages || [], [profile.pages]);
   const initialPageId = profile.page?.id || pages.find(page => page.isHome)?.id || pages[0]?.id || '';
 
   const [activePageId, setActivePageId] = useState(initialPageId);

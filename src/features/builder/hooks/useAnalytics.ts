@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../../services/api';
-import { AnalyticsData, BuilderTab } from '../types/builder.types';
+import { type AnalyticsData, type BuilderTab } from '../types/builder.types';
 
 interface UseAnalyticsProps {
   activeTab: BuilderTab;

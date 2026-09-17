@@ -9,7 +9,7 @@ import { profilesRouter } from './routes/profiles.js';
 import { blocksRouter } from './routes/blocks.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { newsletterRouter } from './routes/newsletter.js';
-import { uploadRouter } from './routes/upload.js';
+import { uploadRouter, detectDocument, detectImageMagicBytes } from './routes/upload.js';
 import { formsRouter } from './routes/forms.js';
 import { pagesRouter } from './routes/pages.js';
 import { instagramRouter } from './routes/instagram.js';
@@ -25,7 +25,6 @@ import { log, logError } from './logger.js';
 import { startMaintenanceScheduler } from './maintenance.js';
 import { createId } from './utils/ids.js';
 import { startInstagramSyncScheduler } from './instagramScheduler.js';
-import { detectDocument, detectImageMagicBytes } from './routes/upload.js';
 import { isHttpUrl } from './utils/urlValidation.js';
 import { hasEntitlement } from './entitlements.js';
 import { enforceSingleNodeSafeguards } from './infrastructure/safeguards.js';
@@ -239,7 +238,7 @@ app.get('/sitemap.xml', (req, res) => {
 });
 
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>'\"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character] || character));
+  return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character] || character));
 }
 
 function escapeXml(value: string): string {

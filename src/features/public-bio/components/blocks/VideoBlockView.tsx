@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Play } from 'lucide-react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { getYouTubeEmbedUrl, getVimeoEmbedUrl, isDirectVideoFile } from '../../../../utils/mediaEmbeds';
 import { safePublicHref, getRadiusClass } from '../../utils/publicBio.utils';

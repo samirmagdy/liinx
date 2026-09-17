@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Language, translations, Translations } from '../config/i18n';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { type Language, translations, type Translations } from '../config/i18n';
 import { translateRuntime } from '../config/runtimeTranslations';
 
 interface LanguageContextType {

@@ -1,4 +1,4 @@
-import { BackupStorage, BackupMetadata, BackupItem, S3Config } from './types.js';
+import { type BackupStorage, type BackupMetadata, type BackupItem, type S3Config } from './types.js';
 import { S3Client } from './s3Client.js';
 
 export class S3CompatibleBackupStorage implements BackupStorage {

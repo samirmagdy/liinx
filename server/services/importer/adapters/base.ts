@@ -1,4 +1,4 @@
-import { ImporterAdapter, ImporterProvider, ImportedProfileData } from '../types.js';
+import { type ImporterAdapter, type ImporterProvider, type ImportedProfileData } from '../types.js';
 
 export abstract class BaseImporterAdapter implements ImporterAdapter {
   abstract readonly provider: ImporterProvider;

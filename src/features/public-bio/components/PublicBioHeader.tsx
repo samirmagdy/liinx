@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, QrCode, Share2, Check } from 'lucide-react';
 import { useLocation } from 'wouter';
 import confetti from 'canvas-confetti';
-import { ThemeConfig } from '../../../types';
+import { type ThemeConfig } from '../../../types';
 import { getBorderColor } from '../../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 

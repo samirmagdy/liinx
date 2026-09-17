@@ -1,5 +1,5 @@
-import React, { useState, useRef, Dispatch, SetStateAction, MutableRefObject } from 'react';
-import { CreatorProfile } from '../../../types';
+import { useState, useRef, type Dispatch, type SetStateAction, type MutableRefObject, type ChangeEvent } from 'react';
+import { type CreatorProfile } from '../../../types';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
@@ -36,7 +36,7 @@ export function useUploads({
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 

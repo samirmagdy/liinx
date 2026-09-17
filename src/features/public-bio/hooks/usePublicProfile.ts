@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreatorProfile } from '../../../types';
+import { type CreatorProfile } from '../../../types';
 import { api } from '../../../services/api';
 import { isAllowedFontStylesheetUrl } from '../../../utils/fontValidation';
 import { safePublicHref } from '../utils/publicBio.utils';

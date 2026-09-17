@@ -9,17 +9,17 @@ import {
   MousePointerClick
 } from 'lucide-react';
 import {
-  ProfileBlock,
-  LinkBlock,
-  AudioBlock,
-  VideoBlock,
-  NewsletterBlock,
-  FolderBlock
+  type ProfileBlock,
+  type LinkBlock,
+  type AudioBlock,
+  type VideoBlock,
+  type NewsletterBlock,
+  type FolderBlock
 } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useBuilder } from '../../context/BuilderContext';
 import { StructuredItemsEditor } from './StructuredItemsEditor';
-import { StructuredEditorKind } from '../../types/builder.types';
+import { type StructuredEditorKind } from '../../types/builder.types';
 import {
   toDateTimeLocal,
   fromDateTimeLocal,

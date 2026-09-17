@@ -1,12 +1,11 @@
-import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { brand } from '../config/brand';
 import { api } from '../services/api';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
-import { Shield, Lock, FileText, Mail, Send, CheckCircle2, ArrowRight, Info, BookOpen } from 'lucide-react';
+import { Shield, FileText, Mail, Send, CheckCircle2, ArrowRight, BookOpen } from 'lucide-react';
 
 interface InformationPageProps {
   title: string;

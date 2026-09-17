@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockItem, ThemeConfig } from '../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../types';
 import { BookingCard } from '../../../components/BookingCard';
 import { LinkBlockView } from './blocks/LinkBlockView';
 import { HeaderBlockView } from './blocks/HeaderBlockView';

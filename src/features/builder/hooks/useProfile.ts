@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { CreatorProfile, ThemeConfig } from '../../../types';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
+import { type CreatorProfile, type ThemeConfig } from '../../../types';
 import { THEMES } from '../../../config/themes';
 import { api, authStorage } from '../../../services/api';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
-import { ProfileSummary, BuilderLoadState } from '../types/builder.types';
+import { type ProfileSummary, type BuilderLoadState } from '../types/builder.types';
 
 export const EMPTY_BUILDER_PROFILE: CreatorProfile = {
   id: '',
@@ -113,7 +113,7 @@ export function useProfile({
       });
 
     loadProfilesList();
-  }, [initialProfile]);
+  }, [initialProfile, onProfileSwitched]);
 
   const handleProfileChange = (field: keyof CreatorProfile, value: any) => {
     const updated = { ...profile, [field]: value };
@@ -146,7 +146,7 @@ export function useProfile({
     }
   };
 
-  const handleCreateProfileSubmit = async (e: React.FormEvent) => {
+  const handleCreateProfileSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!(await flushQueue())) return;
     if (!newUsername.trim() || !newDisplayName.trim() || isCreatingProfile) return;

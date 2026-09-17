@@ -1,5 +1,5 @@
 import type { Database as BetterSqliteDatabase } from 'better-sqlite3';
-import { DatabaseAdapter, DatabaseHealthResult } from './interfaces.js';
+import { type DatabaseAdapter, type DatabaseHealthResult } from './interfaces.js';
 import { db as defaultDb } from '../db.js';
 
 export class SqliteDatabaseAdapter implements DatabaseAdapter {

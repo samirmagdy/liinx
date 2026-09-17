@@ -1,8 +1,8 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import crypto from 'crypto';
 import { z } from 'zod';
 import { db } from '../db.js';
-import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { parseBlockContract } from '../contracts.js';
 import { createId } from '../utils/ids.js';
 import { invalidatePublicProfileCache } from './profiles.js';

@@ -1,4 +1,4 @@
-import { CacheStore } from './interfaces.js';
+import { type CacheStore } from './interfaces.js';
 
 interface CacheEntry<T> {
   value: T;

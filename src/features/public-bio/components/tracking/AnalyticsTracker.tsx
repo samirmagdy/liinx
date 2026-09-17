@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { CreatorProfile } from '../../../../types';
+import { useEffect, type FC } from 'react';
+import { type CreatorProfile } from '../../../../types';
 import { api } from '../../../../services/api';
 
 interface AnalyticsTrackerProps {
@@ -9,7 +9,7 @@ interface AnalyticsTrackerProps {
   renderNow?: number;
 }
 
-export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
+export const AnalyticsTracker: FC<AnalyticsTrackerProps> = ({
   profile,
   previewOnly = false,
   onBoundaryRefresh,
@@ -19,7 +19,7 @@ export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
   useEffect(() => {
     if (!profile || previewOnly) return;
     api.analytics.recordView(profile.id, undefined, profile.page?.id).catch(() => {});
-  }, [profile?.id, profile?.page?.id, previewOnly]);
+  }, [profile, previewOnly]);
 
   // Scheduled blocks auto-refresh timer
   useEffect(() => {

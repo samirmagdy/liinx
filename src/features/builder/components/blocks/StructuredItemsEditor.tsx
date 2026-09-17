@@ -1,5 +1,5 @@
 import React from 'react';
-import { StructuredEditorKind } from '../../types/builder.types';
+import { type StructuredEditorKind } from '../../types/builder.types';
 
 export interface StructuredItemsEditorProps {
   kind: StructuredEditorKind;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { CreatorProfile, ThemeConfig } from '../../../types';
+import { type CreatorProfile, type ThemeConfig } from '../../../types';
 import { brand } from '../../../config/brand';
 import { getAccessibleTextColor, getBorderColor } from '../../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';

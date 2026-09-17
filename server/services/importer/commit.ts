@@ -1,7 +1,7 @@
 import { db } from '../../db.js';
 import { createId } from '../../utils/ids.js';
 import { invalidatePublicProfileCache } from '../../routes/profiles.js';
-import { CommitImportedLinksPayload, CommitImportedLinksResult } from './types.js';
+import { type CommitImportedLinksPayload, type CommitImportedLinksResult } from './types.js';
 
 export function commitImportedLinks(profileId: string, payload: CommitImportedLinksPayload): CommitImportedLinksResult {
   const { links, pageId, updateProfileInfo, displayName, bio, avatarUrl } = payload;

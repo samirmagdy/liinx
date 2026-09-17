@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { getAccessibleTextColor } from '../../../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { advancedRadius } from '../../utils/publicBio.utils';

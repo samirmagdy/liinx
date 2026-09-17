@@ -1,5 +1,5 @@
 import { formatUiDate } from '../../../utils/localization';
-import { Language } from '../../../config/i18n';
+import { type Language } from '../../../config/i18n';
 
 export const toDateTimeLocal = (ts?: number | null): string => {
   if (!ts) return '';

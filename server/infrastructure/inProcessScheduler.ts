@@ -1,4 +1,4 @@
-import { JobScheduler, ScheduledJob } from './interfaces.js';
+import { type JobScheduler, type ScheduledJob } from './interfaces.js';
 import { log, logError } from '../logger.js';
 
 export class InProcessJobScheduler implements JobScheduler {

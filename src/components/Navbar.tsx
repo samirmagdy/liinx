@@ -1,9 +1,8 @@
-import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { 
   ArrowRight, 
   Menu, 

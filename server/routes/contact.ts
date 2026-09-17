@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { db } from '../db.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
-import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { logError } from '../logger.js';
 
 export const contactRouter = Router();

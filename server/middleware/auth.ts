@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { verifyJwt, AuthPayload } from '../auth.js';
+import { type Request, type Response, type NextFunction } from 'express';
+import { verifyJwt, type AuthPayload } from '../auth.js';
 import { db } from '../db.js';
 
 export interface AuthenticatedRequest extends Request {

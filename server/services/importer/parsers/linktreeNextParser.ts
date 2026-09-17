@@ -1,4 +1,4 @@
-import { ImportedProfileData } from '../types.js';
+import { type ImportedProfileData } from '../types.js';
 
 export function parseLinktreeNextData(html: string): Partial<ImportedProfileData> | null {
   const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);

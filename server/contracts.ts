@@ -208,8 +208,6 @@ const blockCreateEnvelope = z.object({
   extra: z.record(z.string(), z.unknown()).optional()
 }).strict();
 
-const blockUpdateEnvelope = blockCreateEnvelope.omit({ type: true, pageId: true }).strict();
-
 function validatePurposefulUrl(type: ContractBlockType, value: string | null | undefined, context: z.RefinementCtx) {
   if (value == null || value === '') return;
   const valid = type === 'booking' ? Boolean(bookingUrl(value)) : isSafeLinkUrl(value);

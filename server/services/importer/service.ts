@@ -1,4 +1,4 @@
-import { ImporterAdapter, ImporterCapabilities, ImportedProfileData, ImporterProvider } from './types.js';
+import { type ImporterAdapter, type ImporterCapabilities, type ImportedProfileData, type ImporterProvider } from './types.js';
 import { LinktreeImporterAdapter } from './adapters/linktreeAdapter.js';
 import { BeaconsImporterAdapter } from './adapters/beaconsAdapter.js';
 import { BioFmImporterAdapter } from './adapters/biofmAdapter.js';

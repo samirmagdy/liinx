@@ -28,6 +28,9 @@ jobs:
         run: npm rebuild better-sqlite3
 
       - name: Static Type Check (tsc)
+        run: npm run typecheck
+
+      - name: Static Code Quality & Linting (ESLint)
         run: npm run lint
 
       - name: Build Production Frontend Bundle

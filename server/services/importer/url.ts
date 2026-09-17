@@ -1,4 +1,4 @@
-import { ImporterProvider } from './types.js';
+import { type ImporterProvider } from './types.js';
 
 export const supportedSourceHosts = ['linktr.ee', 'beacons.ai', 'bio.fm'];
 

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, MutableRefObject, Dispatch, SetStateAction } from 'react';
-import { CreatorProfile, ProfileBlock } from '../../../types';
+import { useState, useEffect, useRef, type MutableRefObject, type Dispatch, type SetStateAction } from 'react';
+import { type CreatorProfile, type ProfileBlock } from '../../../types';
 import { api } from '../../../services/api';
 import { SaveQueue } from '../../../utils/saveQueue';
 

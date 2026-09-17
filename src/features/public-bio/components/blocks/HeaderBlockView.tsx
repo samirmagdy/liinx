@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockItem } from '../../../../types';
+import { type BlockItem } from '../../../../types';
 
 interface HeaderBlockViewProps {
   block: BlockItem;

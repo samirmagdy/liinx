@@ -1,20 +1,20 @@
-import React, { createContext, useContext, useState, useRef, ReactNode, Dispatch, SetStateAction } from 'react';
-import { CreatorProfile, ThemeConfig, ProfileBlock, CreatorPage, SocialLink } from '../../../types';
+import React, { createContext, useContext, useState, useRef, type ReactNode, type Dispatch, type SetStateAction } from 'react';
+import { type CreatorProfile, type ThemeConfig, type ProfileBlock, type CreatorPage, type SocialLink } from '../../../types';
 import { resolveTheme } from '../../../utils/colorContrast';
-import { api, authStorage } from '../../../services/api';
+import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import confetti from 'canvas-confetti';
 import {
-  BuilderTab,
-  PreviewDevice,
-  AnalyticsData,
-  SubscriberItem,
-  InstagramStatus,
-  ProfileSummary,
-  ApiKeyItem,
-  FormSubmissionItem,
-  BuilderLoadState
+  type BuilderTab,
+  type PreviewDevice,
+  type AnalyticsData,
+  type SubscriberItem,
+  type InstagramStatus,
+  type ProfileSummary,
+  type ApiKeyItem,
+  type FormSubmissionItem,
+  type BuilderLoadState
 } from '../types/builder.types';
 import { useAutosave } from '../hooks/useAutosave';
 import { useProfile, EMPTY_BUILDER_PROFILE } from '../hooks/useProfile';

@@ -1,5 +1,5 @@
-import { useState, Dispatch, SetStateAction, MutableRefObject } from 'react';
-import { CreatorProfile, CreatorPage, ProfileBlock, FolderBlock } from '../../../types';
+import { useState, type Dispatch, type SetStateAction, type MutableRefObject } from 'react';
+import { type CreatorProfile, type CreatorPage, type ProfileBlock, type FolderBlock } from '../../../types';
 import { api } from '../../../services/api';
 
 interface UseBlocksProps {
@@ -15,7 +15,7 @@ interface UseBlocksProps {
 
 export function useBlocks({
   profile,
-  profileRef,
+  profileRef: _profileRef,
   setProfile,
   activePage,
   enqueueBlockSave,

@@ -1,4 +1,4 @@
-import { Language } from '../config/i18n';
+import { type Language } from '../config/i18n';
 
 export function getUiLocale(lang: Language): string {
   return lang === 'ar' ? 'ar-SA' : 'en-US';

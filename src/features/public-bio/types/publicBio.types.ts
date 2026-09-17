@@ -1,4 +1,4 @@
-import { CreatorProfile, ThemeConfig, BlockItem } from '../../../types';
+import { type CreatorProfile, type ThemeConfig, type BlockItem } from '../../../types';
 
 export interface PublicBioViewProps {
   previewOnly?: boolean;

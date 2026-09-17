@@ -1,4 +1,4 @@
-import { ImportedProfileData } from '../types.js';
+import { type ImportedProfileData } from '../types.js';
 
 export function parseGenericHtmlBio(html: string, baseUrl: string): Partial<ImportedProfileData> {
   // Extract OpenGraph meta tags

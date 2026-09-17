@@ -1,11 +1,10 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
-import { CreatorProfile, ThemeConfig } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { LoadingScreen } from './LoadingScreen';
 import { BuilderProvider, useBuilder } from '../features/builder/context/BuilderContext';
 import { BuilderShell } from '../features/builder/components/BuilderShell';
-import { BuilderStudioProps } from '../features/builder/types/builder.types';
+import { type BuilderStudioProps } from '../features/builder/types/builder.types';
 
 export type { BuilderStudioProps };
 

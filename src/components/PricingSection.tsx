@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { paidPlans, BillingInterval } from '../config/plans';
+import { paidPlans, type BillingInterval } from '../config/plans';
 import { CheckCircle2, Sparkles, ArrowRight, Zap, Crown } from 'lucide-react';
 import { Reveal } from './motion/Reveal';
 

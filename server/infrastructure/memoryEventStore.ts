@@ -1,4 +1,4 @@
-import { EventStore, ClickEvent, ViewEvent } from './interfaces.js';
+import { type EventStore, type ClickEvent, type ViewEvent } from './interfaces.js';
 import { db } from '../db.js';
 
 export class MemoryBufferedEventStore implements EventStore {

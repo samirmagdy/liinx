@@ -1,5 +1,5 @@
-import { useState, Dispatch, SetStateAction } from 'react';
-import { CreatorProfile, SocialLink } from '../../../types';
+import { useState, type Dispatch, type SetStateAction } from 'react';
+import { type CreatorProfile, type SocialLink } from '../../../types';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 
 interface UseSocialLinksProps {

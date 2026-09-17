@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PublicBioView } from './PublicBioView';
-import { CreatorProfile, ThemeConfig } from '../types';
+import { type CreatorProfile, type ThemeConfig } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
 /** A real iframe viewport: media queries use the selected device width. */

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import { db } from '../db.js';
-import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { createId } from '../utils/ids.js';
 import { isSafeLinkUrl } from '../utils/urlValidation.js';
@@ -337,7 +337,6 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
     const scope = pageId ? ' AND page_id = ?' : '';
     const scopeArgs = pageId ? [profileId, pageId] : [profileId];
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
     // Total Views (30 days)
     const viewsRow = db.prepare(`

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ObjectStorage, StorageUploadOptions, StoredObject } from './interfaces.js';
+import { type ObjectStorage, type StorageUploadOptions, type StoredObject } from './interfaces.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

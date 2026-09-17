@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api, authStorage } from '../services/api';
-import { CreatorProfile } from '../types';
+import { type CreatorProfile } from '../types';
 
 interface AuthContextType {
   user: { id: string; email: string; username: string } | null;

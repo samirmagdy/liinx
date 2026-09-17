@@ -1,8 +1,8 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { CreatorProfile } from '../../../types';
+import { useState, useEffect, type Dispatch, type SetStateAction } from 'react';
+import { type CreatorProfile } from '../../../types';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
-import { InstagramStatus, BuilderTab } from '../types/builder.types';
+import { type InstagramStatus, type BuilderTab } from '../types/builder.types';
 
 interface UseInstagramIntegrationProps {
   activeTab: BuilderTab;
@@ -39,7 +39,7 @@ export function useInstagramIntegration({
         })
         .catch(() => setDataError(true));
     }
-  }, [activeTab, profile.id]);
+  }, [activeTab, profile.id, setDataError]);
 
   const handleConnectInstagram = async () => {
     try {

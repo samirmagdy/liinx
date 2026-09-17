@@ -6,10 +6,10 @@ import { db, initDatabase } from '../../db.js';
 import { log, logError } from '../../logger.js';
 import { createId } from '../../utils/ids.js';
 import {
-  BackupMetadata,
-  BackupResult,
-  BackupStorage,
-  S3Config
+  type BackupMetadata,
+  type BackupResult,
+  type BackupStorage,
+  type S3Config
 } from './types.js';
 import { computeSha256, derive32ByteKey, encryptBackupData } from './crypto.js';
 import { LocalBackupStorage } from './localStorage.js';
@@ -91,9 +91,8 @@ export class BackupService {
       }
 
       // 3. Read raw database snapshot and compute checksum
-      let rawData = await fs.promises.readFile(tempDbPath);
+      const rawData = await fs.promises.readFile(tempDbPath);
       const rawChecksum = computeSha256(rawData);
-      const rawSizeBytes = rawData.length;
 
       // 4. Handle optional encryption
       let finalData = rawData;

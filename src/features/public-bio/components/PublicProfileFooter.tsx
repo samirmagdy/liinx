@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { CreatorProfile, ThemeConfig } from '../../../types';
+import { type CreatorProfile, type ThemeConfig } from '../../../types';
 import { getBorderColor } from '../../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { safePublicHref } from '../utils/publicBio.utils';

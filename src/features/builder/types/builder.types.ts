@@ -1,4 +1,4 @@
-import { CreatorProfile, ThemeConfig, ProfileBlock, SocialLink } from '../../../types';
+import { type CreatorProfile, type ThemeConfig } from '../../../types';
 
 export type BuilderTab = 'content' | 'appearance' | 'settings' | 'analytics';
 

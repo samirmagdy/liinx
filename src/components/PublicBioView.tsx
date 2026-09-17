@@ -6,7 +6,7 @@ import { resolveTheme } from '../utils/colorContrast';
 import { BioSkeletonLoader } from './LoadingScreen';
 import { usePublicProfile } from '../features/public-bio/hooks/usePublicProfile';
 import { PublicBioShell } from '../features/public-bio/components/PublicBioShell';
-import { PublicBioViewProps } from '../features/public-bio/types/publicBio.types';
+import { type PublicBioViewProps } from '../features/public-bio/types/publicBio.types';
 
 export { type PublicBioViewProps } from '../features/public-bio/types/publicBio.types';
 

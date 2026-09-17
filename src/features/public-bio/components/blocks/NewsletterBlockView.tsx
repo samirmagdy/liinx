@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, CheckCircle2, Send, Loader2 } from 'lucide-react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { api } from '../../../../services/api';
 import { getAccessibleTextColor, getBorderColor } from '../../../../utils/colorContrast';
 import { friendlyErrorMessage } from '../../../../utils/errors';

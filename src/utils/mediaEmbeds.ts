@@ -67,8 +67,6 @@ export function getSoundCloudEmbedUrl(url?: string): string | null {
   try { parsed = new URL(cleanUrl); } catch { return null; }
   if (!['http:', 'https:'].includes(parsed.protocol) || !['soundcloud.com', 'www.soundcloud.com'].includes(parsed.hostname.toLowerCase()) || parsed.pathname === '/') return null;
   return `https://w.soundcloud.com/player/?url=${encodeURIComponent(parsed.toString())}&color=%2310b981&auto_play=false&single_active=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
-
-  return null;
 }
 
 export function getAppleMusicEmbedUrl(url?: string): string | null {
@@ -78,8 +76,6 @@ export function getAppleMusicEmbedUrl(url?: string): string | null {
   try { parsed = new URL(cleanUrl); } catch { return null; }
   if (!['http:', 'https:'].includes(parsed.protocol) || parsed.hostname.toLowerCase() !== 'music.apple.com' || parsed.pathname === '/') return null;
   return `https://embed.music.apple.com${parsed.pathname}${parsed.search}`;
-
-  return null;
 }
 
 export function isDirectAudioFile(url?: string): boolean {

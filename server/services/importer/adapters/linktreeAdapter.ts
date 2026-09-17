@@ -1,5 +1,5 @@
 import { BaseImporterAdapter } from './base.js';
-import { ImportedProfileData } from '../types.js';
+import { type ImportedProfileData } from '../types.js';
 
 export class LinktreeImporterAdapter extends BaseImporterAdapter {
   readonly provider = 'linktree' as const;

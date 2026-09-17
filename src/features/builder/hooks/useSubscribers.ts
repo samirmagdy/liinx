@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
-import { SubscriberItem, BuilderTab } from '../types/builder.types';
+import { type SubscriberItem, type BuilderTab } from '../types/builder.types';
 
 interface UseSubscribersProps {
   activeTab: BuilderTab;
@@ -39,7 +39,7 @@ export function useSubscribers({ activeTab, profileId, username }: UseSubscriber
     return () => {
       cancelled = true;
     };
-  }, [activeTab, profileId]);
+  }, [activeTab, profileId, ui]);
 
   const handleExportCsv = async () => {
     if (subscribers.length === 0) return;

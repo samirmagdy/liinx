@@ -3,9 +3,9 @@ import { z } from 'zod';
 import dns from 'dns';
 import { db } from '../db.js';
 import { signJwt } from '../auth.js';
-import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
-import { isHttpUrl, isSafeLinkUrl } from '../utils/urlValidation.js';
+import { isHttpUrl } from '../utils/urlValidation.js';
 import { createId } from '../utils/ids.js';
 import { isSafeCreatorCss, normalizeBlockExtra, normalizeEditorBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
@@ -57,12 +57,6 @@ export function isAllowedFontStylesheetUrl(value: string | null | undefined): bo
     return parsed.protocol === 'https:' && (parsed.hostname === 'fonts.googleapis.com' || parsed.hostname.endsWith('.fonts.googleapis.com'));
   } catch { return false; }
 }
-
-const avatarUrlSchema = z.string().refine(value => {
-  // Uploaded avatars are intentionally stored as same-origin relative paths.
-  if (/^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)) return true;
-  return isHttpUrl(value);
-}, 'Avatar must use HTTP(S) or a valid same-origin upload path.');
 
 // Public: Get profile by username
 profilesRouter.get('/profiles/:username', (req, res) => {

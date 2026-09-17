@@ -8,9 +8,7 @@ import {
   Check, 
   AlertCircle, 
   Loader2, 
-  ExternalLink, 
   Sparkles, 
-  ArrowRight,
   X,
   Plus
 } from 'lucide-react';
@@ -34,7 +32,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   onAddManual
 }) => {
   const { tr: ui } = useUiLanguage();
-  const { capabilities, hasAnyImporter } = useCapabilities();
+  const { hasAnyImporter } = useCapabilities();
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

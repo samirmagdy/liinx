@@ -8,8 +8,7 @@ import {
   backupService,
   computeSha256,
   decryptBackupData,
-  derive32ByteKey,
-  BackupMetadata
+  derive32ByteKey
 } from '../server/services/backup/index.js';
 
 export interface RestoreVerificationResult {

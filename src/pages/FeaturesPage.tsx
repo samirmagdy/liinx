@@ -1,11 +1,9 @@
-import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React from 'react';
 import { useLocation } from 'wouter';
-import { brand } from '../config/brand';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ComparisonSection } from '../components/ComparisonSection';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { 
   Sparkles, 
   Layers, 

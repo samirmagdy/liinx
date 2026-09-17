@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { advancedRadius, renderRichText } from '../../utils/publicBio.utils';
 
 interface RichTextBlockViewProps {

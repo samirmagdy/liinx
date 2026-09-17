@@ -2,7 +2,7 @@ import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Lock, Mail, AlertCircle, Loader2, User } from 'lucide-react';
+import { ArrowRight, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 import { friendlyErrorMessage } from '../utils/errors';
 
 export const LoginPage: React.FC = () => {

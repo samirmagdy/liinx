@@ -10,7 +10,6 @@ import { IntegrationsPanel } from './IntegrationsPanel';
 import { SubscribersPanel } from './SubscribersPanel';
 import { api, authStorage } from '../../../../services/api';
 import { resolveTheme } from '../../../../utils/colorContrast';
-import { friendlyErrorMessage } from '../../../../utils/errors';
 
 export const SettingsPanel: React.FC = () => {
   const { tr: ui } = useUiLanguage();

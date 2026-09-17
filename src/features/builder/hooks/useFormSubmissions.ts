@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
-import { FormSubmissionItem, BuilderTab } from '../types/builder.types';
+import { type FormSubmissionItem, type BuilderTab } from '../types/builder.types';
 
 interface UseFormSubmissionsProps {
   activeTab: BuilderTab;
@@ -56,7 +56,7 @@ export function useFormSubmissions({ activeTab, profileId }: UseFormSubmissionsP
     return () => {
       cancelled = true;
     };
-  }, [activeTab, profileId, formSubmissionPage, formSubmissionFilter, formSubmissionRetry]);
+  }, [activeTab, profileId, formSubmissionPage, formSubmissionFilter, formSubmissionRetry, ui]);
 
   const handleExportFormResponses = async () => {
     try {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { getAccessibleTextColor } from '../../../../utils/colorContrast';
 import { analyticsHref, safePublicHref, getRadiusClass } from '../../utils/publicBio.utils';
 

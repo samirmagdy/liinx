@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { S3Config } from './types.js';
+import { type S3Config } from './types.js';
 
 function sha256Hex(data: Buffer | string): string {
   return crypto.createHash('sha256').update(data).digest('hex');

@@ -20,10 +20,7 @@ import {
   Music,
   Code,
   Heart,
-  Briefcase,
-  User,
-  Palette,
-  Check
+  Briefcase
 } from 'lucide-react';
 import { friendlyErrorMessage } from '../utils/errors';
 

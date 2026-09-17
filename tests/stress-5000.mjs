@@ -60,8 +60,7 @@ function sendRequest(path, method = 'GET', body = null) {
       agent,
       timeout: 12000
     }, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
+      res.on('data', () => {});
       res.on('end', () => {
         const duration = Date.now() - reqStart;
         stats.totalRequests++;

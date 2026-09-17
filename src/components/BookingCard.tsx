@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { bookingUrl } from '../utils/booking';
-import { BookingBlock, ThemeConfig } from '../types';
+import { type BookingBlock, type ThemeConfig } from '../types';
 
 export function BookingCard({ block, theme, previewOnly = false }: { block: BookingBlock; theme: ThemeConfig; previewOnly?: boolean }) {
   const { lang } = useLanguage();

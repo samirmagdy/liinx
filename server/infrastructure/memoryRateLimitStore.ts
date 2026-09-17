@@ -1,4 +1,4 @@
-import { RateLimitStore, RateLimitResult } from './interfaces.js';
+import { type RateLimitStore, type RateLimitResult } from './interfaces.js';
 import { db } from '../db.js';
 
 interface MemoryBucket {

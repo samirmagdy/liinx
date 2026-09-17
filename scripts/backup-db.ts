@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { backupService } from '../server/services/backup/index.js';
 
-export async function createDatabaseBackup(maxBackupsToRetain?: number): Promise<{ backupPath: string; sizeBytes: number; durationMs: number }> {
+export async function createDatabaseBackup(_maxBackupsToRetain?: number): Promise<{ backupPath: string; sizeBytes: number; durationMs: number }> {
   const result = await backupService.backupDatabase();
   return {
     backupPath: result.localPath,

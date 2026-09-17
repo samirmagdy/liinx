@@ -1,7 +1,6 @@
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
-import { CreatorProfile, ThemeConfig, ProfileBlock } from '../types';
-import { THEMES } from '../config/themes';
+import { type CreatorProfile, type ThemeConfig, type ProfileBlock } from '../types';
 import { brand } from '../config/brand';
 import { 
   CheckCircle2, 
@@ -61,7 +60,6 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
     'b3': true
   });
   const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [previewNotice, setPreviewNotice] = useState<string | null>(null);
   const [footerLogoFailed, setFooterLogoFailed] = useState(false);
@@ -663,13 +661,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     {block.description}
                   </p>
 
-                  {newsletterSuccess ? (
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[11px] font-medium flex items-center gap-1.5 justify-center" dir="auto">
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      <span>{ui("You're on the list! Welcome.")}</span>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleSubscribe} className="space-y-2">
+                  <form onSubmit={handleSubscribe} className="space-y-2">
                       <input aria-label={ui('Email address')}
                         type="email"
                         value={newsletterEmail}
@@ -690,7 +682,6 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                         <Send className="w-3 h-3 shrink-0" />
                       </button>
                     </form>
-                  )}
                 </div>
               );
             }

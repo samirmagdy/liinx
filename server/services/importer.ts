@@ -5,7 +5,7 @@
  * and profile import entrypoints. Core logic is modularized under `./importer/`.
  */
 import { importerService } from './importer/service.js';
-import { ImportedProfileData } from './importer/types.js';
+import { type ImportedProfileData } from './importer/types.js';
 
 export * from './importer/index.js';
 

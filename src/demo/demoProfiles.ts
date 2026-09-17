@@ -1,4 +1,4 @@
-import { CreatorProfile } from '../types';
+import { type CreatorProfile } from '../types';
 
 export const DEMO_PROFILES: CreatorProfile[] = [
   {

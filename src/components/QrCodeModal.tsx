@@ -1,9 +1,8 @@
-import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
-import { X, Download, Copy, Check, QrCode, Share2 } from 'lucide-react';
+import { X, Download, Copy, Check, QrCode } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Modal } from './Modal';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import type { CreatorPage } from '../types';
 import { buildQrTargetUrl } from '../utils/qr';
 

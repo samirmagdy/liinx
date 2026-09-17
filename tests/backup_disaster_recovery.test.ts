@@ -12,7 +12,7 @@ import {
   encryptBackupData,
   decryptBackupData,
   evaluateRetention,
-  BackupItem,
+  type BackupItem,
   BackupService,
   backupService
 } from '../server/services/backup/index.js';

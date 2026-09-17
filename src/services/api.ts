@@ -1,4 +1,4 @@
-import { CreatorProfile, CreatorPage, ThemeConfig, ProfileBlock } from '../types';
+import { type CreatorProfile, type CreatorPage, type ProfileBlock } from '../types';
 import { friendlyErrorMessage } from '../utils/errors';
 
 let sessionToken: string | null = null;

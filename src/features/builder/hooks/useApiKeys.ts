@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
-import { ApiKeyItem, BuilderTab } from '../types/builder.types';
+import { type ApiKeyItem, type BuilderTab } from '../types/builder.types';
 
 interface UseApiKeysProps {
   activeTab: BuilderTab;
@@ -37,7 +37,7 @@ export function useApiKeys({ activeTab, plan }: UseApiKeysProps) {
     }
   }, [activeTab, plan]);
 
-  const handleGenerateApiKeySubmit = async (e: React.FormEvent) => {
+  const handleGenerateApiKeySubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!newKeyName.trim() || isGeneratingKey) return;
     setIsGeneratingKey(true);

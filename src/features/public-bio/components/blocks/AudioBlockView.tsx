@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Play, Pause, Music2 } from 'lucide-react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import {
   getSpotifyEmbedUrl,

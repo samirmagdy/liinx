@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { CreatorProfile, ThemeConfig } from '../../../types';
-import { getAccessibleTextColor, getBorderColor, getThemeBackground } from '../../../utils/colorContrast';
+import { type CreatorProfile, type ThemeConfig } from '../../../types';
+import { getBorderColor, getThemeBackground } from '../../../utils/colorContrast';
 import { matchesPublicPageSearch } from '../../../utils/publicSearch';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { QrCodeModal } from '../../../components/QrCodeModal';

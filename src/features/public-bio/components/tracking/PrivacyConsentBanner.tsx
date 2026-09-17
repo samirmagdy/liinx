@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreatorProfile } from '../../../../types';
+import { type CreatorProfile } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 
 interface PrivacyConsentBannerProps {

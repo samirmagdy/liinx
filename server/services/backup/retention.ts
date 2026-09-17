@@ -1,4 +1,4 @@
-import { BackupItem, RetentionConfig } from './types.js';
+import { type BackupItem, type RetentionConfig } from './types.js';
 
 export function getRetentionConfig(): RetentionConfig {
   return {

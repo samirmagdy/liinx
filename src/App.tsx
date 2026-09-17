@@ -1,8 +1,7 @@
 import React, { Component, lazy, Suspense } from 'react';
 import { Switch, Route, useLocation } from 'wouter';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { useLanguage } from './context/LanguageContext';
-import { LanguageProvider } from './context/LanguageContext';
+import { useLanguage, LanguageProvider } from './context/LanguageContext';
 import { CapabilitiesProvider } from './context/CapabilitiesContext';
 const Navbar = lazy(() => import('./components/Navbar').then(module => ({ default: module.Navbar })));
 const Hero = lazy(() => import('./components/Hero').then(module => ({ default: module.Hero })));
@@ -18,7 +17,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
-import { CreatorProfile, ThemeConfig } from './types';
+import { type CreatorProfile, type ThemeConfig } from './types';
 import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
@@ -75,7 +74,6 @@ function HomePage() {
 }
 
 function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?: string }) {
-  const { tr } = useLanguage();
   const previewKey = `liinx-fullscreen-preview:${username.toLowerCase()}`;
   const fullscreenPreview = window.sessionStorage.getItem(previewKey) === '1';
   if (fullscreenPreview) window.sessionStorage.removeItem(previewKey);

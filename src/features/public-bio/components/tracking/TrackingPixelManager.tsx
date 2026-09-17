@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { CreatorProfile } from '../../../../types';
+import { useEffect, type FC } from 'react';
+import { type CreatorProfile } from '../../../../types';
 
 interface TrackingPixelManagerProps {
   profile: CreatorProfile | null;
@@ -7,7 +7,7 @@ interface TrackingPixelManagerProps {
   previewOnly?: boolean;
 }
 
-export const TrackingPixelManager: React.FC<TrackingPixelManagerProps> = ({
+export const TrackingPixelManager: FC<TrackingPixelManagerProps> = ({
   profile,
   analyticsConsent,
   previewOnly = false

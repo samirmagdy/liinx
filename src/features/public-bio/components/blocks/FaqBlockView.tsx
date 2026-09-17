@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { normalizeFaqItems, advancedRadius } from '../../utils/publicBio.utils';
 

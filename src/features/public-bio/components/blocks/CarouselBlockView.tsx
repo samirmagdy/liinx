@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BlockItem, ThemeConfig } from '../../../../types';
+import { type BlockItem, type ThemeConfig } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { safePublicHref, analyticsHref, advancedRadius } from '../../utils/publicBio.utils';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeConfig } from '../../../types';
+import { type ThemeConfig } from '../../../types';
 
 export function safePublicHref(value: unknown): string | null {
   if (typeof value !== 'string') return null;

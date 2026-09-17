@@ -1,4 +1,4 @@
-import { TemplateItem } from '../types';
+import { type TemplateItem } from '../types';
 import { DEMO_PROFILES } from '../demo/demoProfiles';
 
 export const TEMPLATES: TemplateItem[] = [
