@@ -23,7 +23,7 @@ import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
 import { BackgroundAnimation } from './components/BackgroundAnimation';
 import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
-import { Lock, ArrowRight, Loader2, AlertTriangle, RotateCw } from 'lucide-react';
+import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 
 function chooseTemplate(profile: CreatorProfile, navigate: (path: string) => void) {
