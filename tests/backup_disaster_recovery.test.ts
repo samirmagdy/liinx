@@ -216,6 +216,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
     it('exercises S3CompatibleBackupStorage lifecycle (save, get, list, exists, delete)', async () => {
       const storage = new S3CompatibleBackupStorage({
         bucket: 'storage-bucket',
+        region: 'us-east-1',
         accessKeyId: 'key',
         secretAccessKey: 'secret',
         prefix: 'daily-backups'
