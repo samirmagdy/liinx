@@ -28,6 +28,7 @@ import { startInstagramSyncScheduler } from './instagramScheduler.js';
 import { detectDocument, detectImageMagicBytes } from './routes/upload.js';
 import { isHttpUrl } from './utils/urlValidation.js';
 import { hasEntitlement } from './entitlements.js';
+import { enforceSingleNodeSafeguards } from './infrastructure/safeguards.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,9 +80,7 @@ function validateProductionConfig() {
     }
   }
 
-  if (process.env.CLUSTER === 'true' || process.env.HORIZONTAL_SCALING_ENABLED === 'true') {
-    throw new Error('Production horizontal scaling is disabled until a shared rate-limit, analytics queue, and event store are configured.');
-  }
+  enforceSingleNodeSafeguards();
 }
 
 validateProductionConfig();

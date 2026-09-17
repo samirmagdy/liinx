@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { importerService } from '../services/importer.js';
+import { supportsHorizontalScaling } from '../infrastructure/safeguards.js';
 
 export const capabilitiesRouter = Router();
 
@@ -11,6 +12,7 @@ export interface SystemCapabilities {
   };
   instagram: boolean;
   billing: boolean;
+  supportsHorizontalScaling: boolean;
 }
 
 export function getSystemCapabilities(): SystemCapabilities {
@@ -29,7 +31,8 @@ export function getSystemCapabilities(): SystemCapabilities {
   return {
     importers: importerService.getCapabilities(),
     instagram: instagramConfigured,
-    billing: billingConfigured
+    billing: billingConfigured,
+    supportsHorizontalScaling
   };
 }
 

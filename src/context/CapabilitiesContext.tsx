@@ -9,6 +9,7 @@ export interface SystemCapabilities {
   };
   instagram: boolean;
   billing: boolean;
+  supportsHorizontalScaling: boolean;
 }
 
 export const DEFAULT_CAPABILITIES: SystemCapabilities = {
@@ -18,7 +19,8 @@ export const DEFAULT_CAPABILITIES: SystemCapabilities = {
     biofm: false
   },
   instagram: false,
-  billing: false
+  billing: false,
+  supportsHorizontalScaling: false
 };
 
 interface CapabilitiesContextType {
