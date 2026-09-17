@@ -23,6 +23,9 @@ export interface LinkBlock {
   clicks?: number;
   startAt?: number;
   endAt?: number;
+  layout?: 'classic' | 'grid';
+  animation?: 'none' | 'pulse' | 'bounce' | 'glow';
+  extra?: Record<string, unknown>;
 }
 
 export interface HeaderBlock {
@@ -95,9 +98,17 @@ export interface AdvancedBlock {
   subtitle?: string;
   url?: string;
   extra?: Record<string, unknown>;
+  extraData?: Record<string, unknown>;
 }
 
-export type ProfileBlock = { revision?: number } & (
+export type ProfileBlock = {
+  revision?: number;
+  pageId?: string;
+  visible?: boolean;
+  sortOrder?: number;
+  createdAt?: number;
+  updatedAt?: number;
+} & (
   | BookingBlock
   | LinkBlock 
   | HeaderBlock 
@@ -108,6 +119,8 @@ export type ProfileBlock = { revision?: number } & (
   | InstagramGridBlock
   | AdvancedBlock);
 
+export type BlockItem = ProfileBlock;
+
 export interface BookingBlock {
   id: string;
   type: 'booking';
@@ -116,6 +129,7 @@ export interface BookingBlock {
 }
 
 export interface SocialLink {
+  id?: string;
   platform: 'instagram' | 'tiktok' | 'youtube' | 'spotify' | 'twitter' | 'github' | 'email' | 'linkedin' | 'phone';
   url: string;
 }
