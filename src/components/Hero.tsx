@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { PhonePreview } from './PhonePreview';
-import { DEMO_PROFILES, THEMES } from '../data/mockData';
+import { THEMES } from '../config/themes';
+import { DEMO_PROFILES } from '../demo/demoProfiles';
 import { CreatorProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useCapabilities } from '../context/CapabilitiesContext';

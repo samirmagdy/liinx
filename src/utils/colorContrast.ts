@@ -1,5 +1,5 @@
 import type { ThemeConfig } from '../types';
-import { THEMES } from '../data/mockData';
+import { THEMES } from '../config/themes';
 
 const DARK_TEXT = '#181817';
 const LIGHT_TEXT = '#FFFFFF';

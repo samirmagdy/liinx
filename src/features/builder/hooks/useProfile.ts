@@ -1,11 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CreatorProfile, ThemeConfig } from '../../../types';
-import { DEMO_PROFILES, THEMES } from '../../../data/mockData';
+import { THEMES } from '../../../config/themes';
 import { api, authStorage } from '../../../services/api';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
-import { ProfileSummary } from '../types/builder.types';
+import { ProfileSummary, BuilderLoadState } from '../types/builder.types';
+
+export const EMPTY_BUILDER_PROFILE: CreatorProfile = {
+  id: '',
+  username: '',
+  displayName: '',
+  bio: '',
+  avatarUrl: '',
+  category: '',
+  verified: false,
+  themeId: 'editorial-stone',
+  socials: [],
+  pages: [],
+  blocks: []
+};
 
 interface UseProfileProps {
   initialProfile?: CreatorProfile;
@@ -21,9 +35,11 @@ export function useProfile({
   onProfileSwitched
 }: UseProfileProps) {
   const { tr: ui } = useUiLanguage();
-  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(initialProfile ? 'ready' : 'loading');
-  const [profile, setProfile] = useState<CreatorProfile>(initialProfile || DEMO_PROFILES[0]);
-  const [customTheme, setCustomTheme] = useState<ThemeConfig>(() => resolveTheme(profile.themeId, profile.customTheme));
+  const [loadState, setLoadState] = useState<BuilderLoadState>(initialProfile ? 'ready' : 'loading');
+  const [profile, setProfile] = useState<CreatorProfile>(initialProfile || EMPTY_BUILDER_PROFILE);
+  const [customTheme, setCustomTheme] = useState<ThemeConfig>(() =>
+    resolveTheme(profile.themeId, profile.customTheme)
+  );
 
   const [profileList, setProfileList] = useState<ProfileSummary[]>([]);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -54,9 +70,17 @@ export function useProfile({
 
   // Initial load
   useEffect(() => {
+    if (initialProfile) {
+      setLoadState('ready');
+      return;
+    }
+
     api.studio.getProfile()
       .then(async liveProfile => {
-        if (!liveProfile || !liveProfile.id) throw new Error('Invalid profile response');
+        if (!liveProfile || !liveProfile.id) {
+          setLoadState('empty');
+          return;
+        }
         const params = new URLSearchParams(window.location.search);
         const template = params.get('template');
         const shouldOpenImporter = params.get('import') === '1';
@@ -79,12 +103,17 @@ export function useProfile({
           window.history.replaceState(null, '', '/studio');
         }
       })
-      .catch(() => {
-        setLoadState('error');
+      .catch((err: any) => {
+        const is404 = err?.status === 404 || err?.statusCode === 404 || err?.message?.toLowerCase().includes('not found');
+        if (is404) {
+          setLoadState('empty');
+        } else {
+          setLoadState('error');
+        }
       });
 
     loadProfilesList();
-  }, []);
+  }, [initialProfile]);
 
   const handleProfileChange = (field: keyof CreatorProfile, value: any) => {
     const updated = { ...profile, [field]: value };

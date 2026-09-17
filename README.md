@@ -41,7 +41,7 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 ```bash
 git clone <repo-url> liinx
 cd liinx
-npm install
+npm ci # or npm install
 ```
 
 ### 2. Environment Configuration

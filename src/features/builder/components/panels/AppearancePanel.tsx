@@ -1,5 +1,5 @@
 import React from 'react';
-import { THEMES } from '../../../../data/mockData';
+import { THEMES } from '../../../../config/themes';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useBuilder } from '../../context/BuilderContext';
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { TEMPLATES, THEMES } from '../data/mockData';
+import { THEMES } from '../config/themes';
+import { TEMPLATES } from '../config/templates';
 import { CreatorProfile } from '../types';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';

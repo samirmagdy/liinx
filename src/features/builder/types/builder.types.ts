@@ -2,6 +2,8 @@ import { CreatorProfile, ThemeConfig, ProfileBlock, SocialLink } from '../../../
 
 export type BuilderTab = 'content' | 'appearance' | 'settings' | 'analytics';
 
+export type BuilderLoadState = 'loading' | 'empty' | 'ready' | 'error';
+
 export type PreviewDevice = 'mobile' | 'tablet' | 'desktop';
 
 export type StructuredEditorKind = 'gallery' | 'carousel' | 'faq' | 'testimonials' | 'form';

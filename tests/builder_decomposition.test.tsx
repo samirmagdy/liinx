@@ -17,7 +17,7 @@ import { PreviewControls } from '../src/features/builder/components/PreviewContr
 import { BuilderProvider } from '../src/features/builder/context/BuilderContext';
 import { LanguageProvider } from '../src/context/LanguageContext';
 import { CapabilitiesProvider } from '../src/context/CapabilitiesContext';
-import { DEMO_PROFILES } from '../src/data/mockData';
+import { TEST_CREATOR_PROFILE } from './fixtures/testProfiles';
 import type { CreatorProfile } from '../src/types';
 
 // Polyfill window in Node test environment for server-side rendering tests
@@ -34,7 +34,7 @@ if (typeof window === 'undefined') {
 
 describe('Builder Decomposition & Architectural Integrity', () => {
   const mockProfile: CreatorProfile = {
-    ...DEMO_PROFILES[0],
+    ...TEST_CREATOR_PROFILE,
     id: 'prof_test_decomposition',
     username: 'testcreator',
     displayName: 'Test Creator',

@@ -21,7 +21,7 @@ import { GalleryBlockView } from '../src/features/public-bio/components/blocks/G
 import { MapBlockView } from '../src/features/public-bio/components/blocks/MapBlockView';
 import { ContentGateBlockView } from '../src/features/public-bio/components/blocks/ContentGateBlockView';
 import { LanguageProvider } from '../src/context/LanguageContext';
-import { DEMO_PROFILES } from '../src/data/mockData';
+import { TEST_CREATOR_PROFILE } from './fixtures/testProfiles';
 import { resolveTheme } from '../src/utils/colorContrast';
 import type { CreatorProfile, ThemeConfig } from '../src/types';
 
@@ -56,7 +56,7 @@ describe('PublicBioView Decomposition & Domain Regression Tests', () => {
   const defaultTheme: ThemeConfig = resolveTheme('midnight', undefined);
 
   const mockProfile: CreatorProfile = {
-    ...DEMO_PROFILES[0],
+    ...TEST_CREATOR_PROFILE,
     id: 'prof_public_decomp',
     username: 'creator_decomp',
     displayName: 'Decomp Creator',

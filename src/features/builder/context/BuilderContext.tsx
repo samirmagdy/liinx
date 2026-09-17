@@ -13,10 +13,11 @@ import {
   InstagramStatus,
   ProfileSummary,
   ApiKeyItem,
-  FormSubmissionItem
+  FormSubmissionItem,
+  BuilderLoadState
 } from '../types/builder.types';
 import { useAutosave } from '../hooks/useAutosave';
-import { useProfile } from '../hooks/useProfile';
+import { useProfile, EMPTY_BUILDER_PROFILE } from '../hooks/useProfile';
 import { usePages } from '../hooks/usePages';
 import { useBlocks } from '../hooks/useBlocks';
 import { useUploads } from '../hooks/useUploads';
@@ -44,7 +45,7 @@ export interface BuilderContextType {
   profileRef: React.MutableRefObject<CreatorProfile>;
   customTheme: ThemeConfig;
   setCustomTheme: (theme: ThemeConfig) => void;
-  loadState: 'loading' | 'ready' | 'error';
+  loadState: BuilderLoadState;
   profileList: ProfileSummary[];
   profileDropdownOpen: boolean;
   setProfileDropdownOpen: (open: boolean) => void;
@@ -297,7 +298,7 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Profile ref bridge
-  const profileRef = useRef<CreatorProfile>(initialProfile || ({} as CreatorProfile));
+  const profileRef = useRef<CreatorProfile>(initialProfile || EMPTY_BUILDER_PROFILE);
 
   // Settings inputs state
   const [gaInput, setGaInput] = useState('');

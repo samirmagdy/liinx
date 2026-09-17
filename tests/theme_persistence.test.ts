@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { db } from '../server/db.js';
-import { THEMES } from '../src/data/mockData.js';
+import { THEMES } from '../src/config/themes.js';
 import { resolveTheme } from '../src/utils/colorContrast.js';
 
 describe('theme selection and persistence', () => {

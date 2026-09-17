@@ -1,7 +1,7 @@
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { CreatorProfile, ThemeConfig, ProfileBlock } from '../types';
-import { THEMES } from '../data/mockData';
+import { THEMES } from '../config/themes';
 import { brand } from '../config/brand';
 import { 
   CheckCircle2, 

@@ -4,7 +4,7 @@ import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { brand } from '../config/brand';
-import { THEMES } from '../data/mockData';
+import { THEMES } from '../config/themes';
 import confetti from 'canvas-confetti';
 import {
   ArrowRight, 
