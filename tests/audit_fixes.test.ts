@@ -12,6 +12,31 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
   const testUsername = 'audituser';
   let authToken = '';
 
+  beforeAll(() => {
+    initDatabase();
+    const now = Date.now();
+
+    db.prepare('DELETE FROM users WHERE id = ?').run(testUserId);
+    db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
+      testUserId, 'audit@liinx.test', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012', now
+    );
+
+    db.prepare('DELETE FROM blocks WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);
+    db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);
+    db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(testProfileId, testUsername);
+    db.prepare(`
+      INSERT INTO profiles (id, user_id, username, display_name, plan, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(testProfileId, testUserId, testUsername, 'Audit User', 'pro', now, now);
+
+    authToken = signJwt({
+      userId: testUserId,
+      email: 'audit@liinx.test',
+      profileId: testProfileId,
+      username: testUsername
+    });
+  });
+
   it('escapes JSON-LD HTML breakout characters', () => {
     const output = safeJsonForHtml({ bio: '</script><script>window.pwned=1</script>' });
     expect(output).not.toContain('</script>');
@@ -42,31 +67,6 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
       .expect(200);
 
     await request(app).get(`/api/profiles/${testUsername}?page=${slug}`).expect(404);
-  });
-
-  beforeAll(() => {
-    initDatabase();
-    const now = Date.now();
-
-    db.prepare('DELETE FROM users WHERE id = ?').run(testUserId);
-    db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
-      testUserId, 'audit@liinx.test', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012', now
-    );
-
-    db.prepare('DELETE FROM blocks WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);
-    db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);
-    db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(testProfileId, testUsername);
-    db.prepare(`
-      INSERT INTO profiles (id, user_id, username, display_name, plan, created_at, updated_at)
-      VALUES (?, ?, ?, 'Audit Remediation User', 'pro', ?, ?)
-    `).run(testProfileId, testUserId, testUsername, now, now);
-
-    authToken = signJwt({
-      userId: testUserId,
-      email: 'audit@liinx.test',
-      profileId: testProfileId,
-      username: testUsername
-    });
   });
 
   // Point 1: Registration / Login Security

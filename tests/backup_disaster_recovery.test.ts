@@ -126,6 +126,138 @@ describe('Disaster Recovery & Remote Backup System', () => {
       const { url: r2Url } = (r2Client as any).getEndpointUrl('backups/test.sqlite');
       expect(r2Url.toString()).toBe('https://testaccount.r2.cloudflarestorage.com/my-r2-bucket/backups/test.sqlite');
     });
+
+    it('executes S3Client putObject, getObject, headObject, deleteObject, listObjects with mocked fetch', async () => {
+      const client = new S3Client({
+        bucket: 'mock-bucket',
+        accessKeyId: 'mock-key',
+        secretAccessKey: 'mock-secret',
+        region: 'us-east-1'
+      });
+
+      const originalFetch = globalThis.fetch;
+      try {
+        // Mock fetch for putObject (success)
+        globalThis.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          status: 200,
+          text: async () => ''
+        } as any);
+        await expect(client.putObject('test.txt', Buffer.from('hello'))).resolves.toBeUndefined();
+
+        // Mock fetch for getObject (success)
+        globalThis.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          status: 200,
+          arrayBuffer: async () => Buffer.from('fetched payload')
+        } as any);
+        const fetched = await client.getObject('test.txt');
+        expect(fetched?.toString()).toBe('fetched payload');
+
+        // Mock fetch for getObject (404)
+        globalThis.fetch = vi.fn().mockResolvedValue({
+          ok: false,
+          status: 404
+        } as any);
+        expect(await client.getObject('missing.txt')).toBeNull();
+
+        // Mock fetch for headObject
+        globalThis.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          status: 200,
+          headers: new Headers({ 'content-length': '123', etag: '"mock-etag"' })
+        } as any);
+        const head = await client.headObject('test.txt');
+        expect(head?.size).toBe(123);
+        expect(head?.etag).toBe('mock-etag');
+
+        // Mock fetch for headObject (404)
+        globalThis.fetch = vi.fn().mockResolvedValue({
+          ok: false,
+          status: 404
+        } as any);
+        expect(await client.headObject('missing.txt')).toBeNull();
+
+        // Mock fetch for deleteObject
+        globalThis.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          status: 204
+        } as any);
+        expect(await client.deleteObject('test.txt')).toBe(true);
+
+        // Mock fetch for listObjects
+        const mockXml = `<?xml version="1.0" encoding="UTF-8"?>
+<ListBucketResult>
+  <Contents>
+    <Key>backup-1.sqlite</Key>
+    <Size>1024</Size>
+    <LastModified>2026-09-17T12:00:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>backup-2.sqlite</Key>
+    <Size>2048</Size>
+    <LastModified>2026-09-17T13:00:00.000Z</LastModified>
+  </Contents>
+</ListBucketResult>`;
+        globalThis.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          status: 200,
+          text: async () => mockXml
+        } as any);
+        const items = await client.listObjects('backup-');
+        expect(items.length).toBe(2);
+        expect(items[0].key).toBe('backup-1.sqlite');
+        expect(items[0].size).toBe(1024);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it('exercises S3CompatibleBackupStorage lifecycle (save, get, list, exists, delete)', async () => {
+      const storage = new S3CompatibleBackupStorage({
+        bucket: 'storage-bucket',
+        accessKeyId: 'key',
+        secretAccessKey: 'secret',
+        prefix: 'daily-backups'
+      });
+
+      const mockClient = (storage as any).client;
+      vi.spyOn(mockClient, 'putObject').mockResolvedValue(undefined);
+      vi.spyOn(mockClient, 'getObject').mockImplementation(async (key: string) => {
+        if (key.endsWith('.meta.json')) {
+          return Buffer.from(JSON.stringify({ id: 'mock-meta', version: 1 }));
+        }
+        return Buffer.from('mock binary data');
+      });
+      vi.spyOn(mockClient, 'headObject').mockResolvedValue({ size: 16 });
+      vi.spyOn(mockClient, 'deleteObject').mockResolvedValue(true);
+      vi.spyOn(mockClient, 'listObjects').mockResolvedValue([
+        { key: 'daily-backups/b1.sqlite', size: 100, lastModified: 1000 },
+        { key: 'daily-backups/b1.sqlite.meta.json', size: 50, lastModified: 1000 }
+      ]);
+
+      // Save
+      await storage.save('b1.sqlite', Buffer.from('data'), {
+        id: 'meta-1', type: 'database', filename: 'b1.sqlite', sizeBytes: 4, timestamp: 'now', version: 1, checksumSha256: 'sha', encrypted: false
+      });
+      expect(mockClient.putObject).toHaveBeenCalledTimes(2);
+
+      // Get
+      const res = await storage.get('b1.sqlite');
+      expect(res?.data.toString()).toBe('mock binary data');
+      expect(res?.metadata?.id).toBe('mock-meta');
+
+      // Exists
+      expect(await storage.exists('b1.sqlite')).toBe(true);
+
+      // List
+      const listed = await storage.list();
+      expect(listed.length).toBe(1);
+      expect(listed[0].key).toBe('b1.sqlite');
+
+      // Delete
+      expect(await storage.delete('b1.sqlite')).toBe(true);
+    });
   });
 
   describe('Retention Policy (GFS)', () => {

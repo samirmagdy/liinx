@@ -36,13 +36,13 @@ jobs:
       - name: Build Production Frontend Bundle
         run: npm run build
 
-      - name: Execute Full Test Suite (Vitest)
+      - name: Execute Full Test Suite & Enforce Coverage (Vitest)
         env:
           NODE_ENV: test
           JWT_SECRET: test_jwt_secret_ci_key_32_characters_minimum
           INTEGRATION_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
           STRIPE_WEBHOOK_SECRET: whsec_test_secret_for_ci_suite
-        run: npm test
+        run: npm run test:coverage
 
       - name: Verify Bundle Integrity
         run: |
