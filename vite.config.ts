@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'node',
+      setupFiles: ['./tests/setup.ts'],
       globalSetup: ['./tests/global-setup.ts'],
       fileParallelism: false,
       maxWorkers: 1,

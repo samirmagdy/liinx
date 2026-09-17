@@ -3542,3 +3542,35 @@ NO-GO for release. The core isolated API creator journey passes and no high-impa
 ### Next eligible prompt
 
 No next numbered prompt. Release approval remains blocked pending the remediation above and owner-authorized external verification.
+
+## Independent audit remediation follow-up — 2026-09-17
+
+Status: IMPLEMENTED LOCALLY / EXTERNAL CHECK BLOCKED
+
+Candidate baseline: branch `main`, current working tree based on commit `2290cadcb8b688b75c96772329ee20cbe5dcbe37`; changes below are uncommitted and have not been merged or deployed.
+
+### Changed files and behavior
+
+- `vite.config.ts`, `tests/setup.ts`: reset process-local login/registration throttles after each test. This prevents source-IP rate-limit state leaking between tests without weakening production limits.
+- `server/server.ts`: production startup now fails unless `MEDIA_STORAGE=s3`; local filesystem storage remains available for development/test. S3-compatible credentials remain server-only.
+- `shared/contracts/profiles.ts`, `tests/custom_css_font.test.ts`: custom CSS rejects markup/style breakout characters, unbalanced braces, and the existing unsafe constructs; scoped public-page selectors and media/supports rules remain supported.
+- `server/routes/auth.ts`, `server/routes/profiles.ts`, `src/services/api.ts`: production authentication/profile JSON no longer contains JWTs. Browser authentication uses the HttpOnly session cookie; test mode retains a compatibility token solely for the existing bearer-oriented test fixtures.
+- `tests/audit_fixes.test.ts`: exercises image/document orphan cleanup when persistence fails and cleanup itself rejects, raising the upload route function coverage with meaningful failure tests.
+- `README.md`: corrected authentication and backup-retention documentation.
+
+### Evidence and acceptance status
+
+- PASS — Auth rate-limit isolation: targeted auth/security suites passed 35 tests; the full-suite registration failure from shared process state did not recur in the targeted run after `tests/setup.ts` was added.
+- PASS — Backup/restore disposable verification: `tests/backup_disaster_recovery.test.ts` and `tests/operations_task63.test.ts` passed 16 tests against temporary storage; integrity, metadata, corruption handling, retention, and restore checks were exercised. No production path was used.
+- PASS — Custom CSS security regressions: `tests/custom_css_font.test.ts` passed 4 tests, including markup breakout, unbalanced braces, scoped nesting, and unsafe directive cases.
+- PASS — Upload failure cleanup regressions: `tests/audit_fixes.test.ts` passed its targeted suite including image/document persistence and cleanup failures.
+- PARTIAL — Coverage: the upload-specific function threshold was met after the added tests; the latest retried full coverage run reached 71.97% branches against a 72% global threshold. The remaining gap is 1 branch, and the non-retried run also exposed one existing auth-session test flake. Coverage is not a green release gate yet; the threshold was not lowered.
+- NOT RUN — Live S3/R2 object storage, DNS/TLS, Stripe webhook, Instagram OAuth/sync, deployed backup/restore, and external alerting evidence. These require owner-authorized credentials/infrastructure and were not simulated as passing.
+- PARTIAL — Importer: source adapters are explicitly unavailable unless an authorized provider configuration exists; UI labels it paused/unavailable and routes fail closed. No production scraping or fabricated import is claimed. A sanctioned provider API/export is still required before enabling it.
+
+### Remaining risks / next work
+
+- Resolve the remaining suite-level E2E flakiness and raise global branch coverage above 72% with additional behavior tests; do not lower thresholds.
+- Run a sanctioned S3-compatible smoke test and a disposable backup/restore drill using matching database/media artifacts in the deployment environment.
+- Obtain live DNS/TLS, Stripe test-mode, Instagram authorized-account, and object-storage evidence before release approval.
+- Decide whether to remove the test-only bearer-token compatibility response after migrating all legacy test fixtures to cookie/agent authentication.

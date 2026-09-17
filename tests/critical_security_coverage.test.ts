@@ -6,7 +6,7 @@ import { hashPassword, comparePassword, signJwt, verifyJwt } from '../server/aut
 import { requireAuth } from '../server/middleware/auth.js';
 import { encryptSecret, decryptSecret } from '../server/secretStore.js';
 import { normalizePlan, hasEntitlement, entitlementsFor } from '../server/entitlements.js';
-import { detectImageMagicBytes, detectDocument } from '../server/routes/upload.js';
+import { detectImageMagicBytes, detectDocument, getImageDimensions } from '../server/routes/upload.js';
 import { isLoginRateLimited, isRegisterRateLimited, resetAuthRateLimits } from '../server/routes/auth.js';
 import { isAllowedFontStylesheetUrl } from '../src/utils/fontValidation.js';
 import { friendlyErrorMessage } from '../src/utils/errors.js';
@@ -431,6 +431,31 @@ describe('Critical Security & Coverage Modules', () => {
       expect(detectImageMagicBytes(Buffer.from([]))).toBeNull();
     });
 
+    it('reads supported image dimensions without trusting filenames', () => {
+      const png = Buffer.alloc(24);
+      png.writeUInt32BE(640, 16);
+      png.writeUInt32BE(480, 20);
+      expect(getImageDimensions(png, '.png')).toEqual({ width: 640, height: 480 });
+
+      const gif = Buffer.alloc(10);
+      gif.writeUInt16LE(320, 6);
+      gif.writeUInt16LE(200, 8);
+      expect(getImageDimensions(gif, '.gif')).toEqual({ width: 320, height: 200 });
+
+      const webp = Buffer.alloc(30);
+      webp.write('VP8X', 12, 'ascii');
+      webp[24] = 99;
+      webp[27] = 49;
+      expect(getImageDimensions(webp, '.webp')).toEqual({ width: 100, height: 50 });
+
+      const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x01, 0x40, 0x02, 0x80, 0x00]);
+      expect(getImageDimensions(jpeg, '.jpg')).toEqual({ width: 640, height: 320 });
+      const jpegWithMetadata = Buffer.from([0xff, 0xd8, 0xff, 0xe1, 0x00, 0x04, 0x00, 0x00, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x01, 0x40, 0x02, 0x80]);
+      expect(getImageDimensions(jpegWithMetadata, '.jpg')).toEqual({ width: 640, height: 320 });
+      expect(getImageDimensions(Buffer.alloc(2), '.png')).toBeNull();
+      expect(getImageDimensions(Buffer.from([0xff, 0xd8, 0xff, 0x00]), '.jpg')).toBeNull();
+    });
+
     it('accurately detects documents and blocks dangerous text/scripts', () => {
       const pdf = Buffer.from('%PDF-1.7 header');
       expect(detectDocument(pdf)).toEqual({ mime: 'application/pdf', ext: '.pdf' });
@@ -769,4 +794,3 @@ describe('Critical Security & Coverage Modules', () => {
     });
   });
 });
-

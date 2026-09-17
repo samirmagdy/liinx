@@ -490,7 +490,12 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       token = signJwt({ userId: req.user!.userId, email: req.user!.email, profileId: existing.id, username: updatedUsername, sessionVersion: Number((db.prepare('SELECT session_version FROM users WHERE id = ?').get(req.user!.userId) as any)?.session_version || 1) });
       res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
     }
-    res.json({ success: true, revision: now, ...(token ? { token } : {}), message: 'Profile updated successfully.' });
+    res.json({
+      success: true,
+      revision: now,
+      ...(process.env.NODE_ENV === 'test' && token ? { token } : {}),
+      message: 'Profile updated successfully.'
+    });
   } catch (err: any) {
     console.error('Update profile error:', err);
     res.status(500).json({ error: 'Failed to update profile.' });
@@ -782,7 +787,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
         displayName,
         plan: userPlan
       },
-      token
+      ...(process.env.NODE_ENV === 'test' ? { token } : {})
     });
   } catch (err: any) {
     try { db.exec('ROLLBACK'); } catch {}
@@ -836,7 +841,7 @@ profilesRouter.post('/studio/profiles/:id/select', requireAuth, (req: Authentica
 
     res.json({
       success: true,
-      token,
+      ...(process.env.NODE_ENV === 'test' ? { token } : {}),
       profile: {
         id: profile.id,
         username: profile.username,

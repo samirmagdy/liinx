@@ -5,6 +5,7 @@ import { db, initDatabase } from '../server/db';
 import { signJwt } from '../server/auth';
 import { profilesRouter } from '../server/routes/profiles';
 import { app as serverApp } from '../server/server';
+import { isSafeCreatorCss } from '../shared/contracts/profiles';
 
 describe('Milestone 7: Custom CSS & Custom Font Engine (0% Fake Implementation)', () => {
   const app = express();
@@ -77,11 +78,40 @@ describe('Milestone 7: Custom CSS & Custom Font Engine (0% Fake Implementation)'
     await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customCss: '.public-header { display: none; }' }).expect(400);
     await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customCss: '#public-bio-view .x { position: fixed; z-index: 9999; }' }).expect(400);
     await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customFontUrl: 'https://fonts.example.test/font.css' }).expect(400);
+    await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customCss: '#public-bio-view .x { color: red; </style><script>alert(1)</script> }' }).expect(400);
+    await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ customCss: '#public-bio-view .x { color: red;' }).expect(400);
   });
 
   it('keeps the CSP aligned with the supported Google Fonts source', async () => {
     const response = await request(serverApp).get('/api/health').expect(200);
     expect(response.headers['content-security-policy']).toContain("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
     expect(response.headers['content-security-policy']).toContain("font-src 'self' https://fonts.gstatic.com data:");
+  });
+
+  it('keeps the CSS boundary scoped and structurally closed', () => {
+    expect(isSafeCreatorCss(undefined)).toBe(true);
+    expect(isSafeCreatorCss('')).toBe(true);
+    expect(isSafeCreatorCss('#public-bio-view .x { color: red; }')).toBe(true);
+    expect(isSafeCreatorCss('@media (max-width: 640px) { #public-bio-view .x { color: red; } }')).toBe(true);
+    expect(isSafeCreatorCss('@supports (display: grid) { #public-bio-view .x { display: grid; } }')).toBe(true);
+    expect(isSafeCreatorCss('#public-bio-view .x { color: red; } .other { color: blue; }')).toBe(false);
+    expect(isSafeCreatorCss('#public-bio-view .x { color: red; }}')).toBe(false);
+    for (const unsafe of [
+      '@import "https://example.com/a.css";',
+      '#public-bio-view .x { width: expression(alert(1)); }',
+      '#public-bio-view .x { behavior: url(xss.htc); }',
+      '#public-bio-view .x { background: javascript:alert(1); }',
+      '@keyframes flash { from { opacity: 1; } to { opacity: 0; } }',
+      '@font-face { font-family: evil; src: url(evil.woff); }',
+      '#public-bio-view .x { position: fixed; }',
+      '#public-bio-view .x { z-index: 3; }',
+      '#public-bio-view .x { pointer-events: none; }',
+      '#public-bio-view .x { display: none; }',
+      '#public-bio-view .x { visibility: hidden; }',
+      '#public-bio-view .x { opacity: 0; }',
+      'x'.repeat(10001)
+    ]) {
+      expect(isSafeCreatorCss(unsafe)).toBe(false);
+    }
   });
 });

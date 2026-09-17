@@ -9,7 +9,7 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 - **Frontend**: React 19, TypeScript, Tailwind CSS v4, GSAP, Lucide Icons, Wouter router.
 - **Backend API**: Node.js & Express compiled with `esbuild` (`dist-server/server.js`), TypeScript in development, Zod schema validation, Multer multipart uploads.
 - **Database Engine**: `better-sqlite3` configured with **Write-Ahead Logging (WAL)**, foreign key constraints, synchronous normal writes, and a 64MB memory page cache.
-- **Security & Auth**: `bcryptjs` password hashing with salts, stateless JSON Web Tokens (JWT), BOLA/IDOR protection, and URL scheme sanitization.
+- **Security & Auth**: `bcryptjs` password hashing with salts, HttpOnly cookie sessions, BOLA/IDOR protection, and URL scheme sanitization.
 - **Concurrency & Performance**: High socket backlog (4096), non-blocking asynchronous click/view batch queue with bulk transaction commits, and multi-core Node.js cluster mode.
 - **Testing**: Comprehensive Vitest suite with **175 real tests across 20 suites** covering OWASP Top 10 Security, concurrency race conditions, E2E creator journeys, SQLite disk integrity, and acceptance tests for every advertised feature.
 
@@ -19,7 +19,7 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 
 | Feature Area | Production Implementation Details |
 | :--- | :--- |
-| **Authentication** | Real `bcrypt` password hashing, stateless JWT session tokens, username availability verification, protected routes. |
+| **Authentication** | Real `bcrypt` password hashing, HttpOnly cookie sessions backed by signed JWTs, username availability verification, protected routes. |
 | **Block Types** | **Custom Links**, **Headers**, **Audio Players** (audio URL, artist, cover art), **Video Players** (embed URL, thumbnail), **Collapsible Link Folders** (nested items), and **Newsletters**. |
 | **Live Drag/Reorder** | Reorder blocks with atomic batch updates to database positions (`0, 1, 2, ...`). |
 | **Dynamic Themes** | 7 pre-built designer themes + real-time custom palette JSON generator. |
@@ -125,7 +125,7 @@ npm run db:backup
 
 - Uses SQLite's non-blocking `VACUUM INTO` command.
 - Runs `PRAGMA integrity_check` on the resulting backup to guarantee validity.
-- Automatically prunes older backups, retaining the 10 most recent snapshots in `data/backups/`.
+- Prunes older backups according to the configured retention policy (`BACKUP_RETENTION_DAILY` / `BACKUP_RETENTION_WEEKLY` / `BACKUP_RETENTION_MONTHLY`); it does not use a fixed archive count.
 
 Upload media is backed up separately with `npm run uploads:backup`. Schedule both backup commands daily and copy their output to encrypted off-host storage. See [OPERATIONS.md](OPERATIONS.md) for retention, restore, monitoring, Stripe alerts, and rollback procedures.
 
@@ -141,7 +141,7 @@ Analytics writes use a bounded `AnalyticsEventStore` buffer with SQLite as the c
 | `GET` | `/api/ready` | None | Readiness: database connected and configured media storage available |
 | `GET` | `/api/auth/check-username/:username` | None | Check availability of username |
 | `POST`| `/api/auth/register` | None | Register new creator user and initial profile |
-| `POST`| `/api/auth/login` | None | Authenticate user and receive JWT bearer token |
+| `POST`| `/api/auth/login` | None | Authenticate user and receive an HttpOnly session cookie |
 | `GET` | `/api/auth/me` | Bearer | Inspect current user session and profile data |
 | `GET` | `/api/profiles/:username` | None | Public creator profile, bio, socials, and blocks |
 | `PUT` | `/api/studio/profile` | Bearer | Update profile identity, theme, socials, and bio |

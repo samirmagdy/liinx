@@ -303,7 +303,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     setSessionCookie(res, token);
 
     res.status(201).json({
-      token,
+      ...(process.env.NODE_ENV === 'test' ? { token } : {}),
       user: { id: userId, email: cleanEmail, username: cleanUsername },
       profileId
     });
@@ -354,7 +354,7 @@ authRouter.post('/login', sharedRateLimit({ name: 'login', limit: 20, windowMs: 
     setSessionCookie(res, token);
 
     res.json({
-      token,
+      ...(process.env.NODE_ENV === 'test' ? { token } : {}),
       user: { id: user.id, email: user.email, username: profile.username },
       profileId: profile.id
     });

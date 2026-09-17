@@ -51,7 +51,7 @@ export function detectImageMagicBytes(buffer: Buffer): { ext: string; mime: stri
   return null;
 }
 
-function getImageDimensions(buffer: Buffer, ext: string): { width: number; height: number } | null {
+export function getImageDimensions(buffer: Buffer, ext: string): { width: number; height: number } | null {
   if (ext === '.png' && buffer.length >= 24) return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
   if (ext === '.gif' && buffer.length >= 10) return { width: buffer.readUInt16LE(6), height: buffer.readUInt16LE(8) };
   if (ext === '.webp' && buffer.length >= 30 && buffer.toString('ascii', 12, 16) === 'VP8X') return { width: 1 + buffer.readUIntLE(24, 3), height: 1 + buffer.readUIntLE(27, 3) };

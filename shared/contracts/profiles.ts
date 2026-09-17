@@ -19,8 +19,15 @@ const mediaUrl = z.union([uploadPath, z.string().max(500).refine(isHttpUrl, 'Bac
 
 export function isSafeCreatorCss(value: string | null | undefined): boolean {
   if (!value) return true;
-  if (value.length > 10000 || /(?:@import|expression\s*\(|behavior\s*:|javascript\s*:|url\s*\(|@(?:keyframes|font-face)|position\s*:\s*(?:fixed|absolute|sticky)|z-index\s*:|pointer-events\s*:|display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0)/i.test(value)) return false;
+  if (value.length > 10000 || /[<>]|(?:<\/?(?:style|script|html|body)\b)|(?:@import|expression\s*\(|behavior\s*:|javascript\s*:|url\s*\(|@(?:keyframes|font-face)|position\s*:\s*(?:fixed|absolute|sticky)|z-index\s*:|pointer-events\s*:|display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0)/i.test(value)) return false;
   const withoutComments = value.replace(/\/\*[\s\S]*?\*\//g, '');
+  let depth = 0;
+  for (const character of withoutComments) {
+    if (character === '{') depth += 1;
+    if (character === '}') depth -= 1;
+    if (depth < 0) return false;
+  }
+  if (depth !== 0) return false;
   return withoutComments.split('{').slice(0, -1).every(selector => {
     const trimmed = selector.trim();
     return !trimmed || trimmed.startsWith('@media') || trimmed.startsWith('@supports') || trimmed.split(',').every(part => part.trim().startsWith('#public-bio-view'));

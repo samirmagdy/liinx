@@ -61,19 +61,19 @@ export const api = {
       return request<{ available: boolean; reason?: string }>(`/api/auth/check-username/${encodeURIComponent(username)}`);
     },
     register: async (email: string, password: string, username: string) => {
-      const data = await request<{ token: string; user: any; profileId: string }>('/api/auth/register', {
+      const data = await request<{ token?: string; user: any; profileId: string }>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password, username })
       });
-      authStorage.setToken(data.token);
+      if (data.token) authStorage.setToken(data.token);
       return data;
     },
     login: async (email: string, password: string) => {
-      const data = await request<{ token: string; user: any; profileId: string }>('/api/auth/login', {
+      const data = await request<{ token?: string; user: any; profileId: string }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      authStorage.setToken(data.token);
+      if (data.token) authStorage.setToken(data.token);
       return data;
     },
     me: async () => {
@@ -214,7 +214,7 @@ export const api = {
       return request<{
         success: boolean;
         profile: { id: string; username: string; displayName: string; plan: string };
-        token: string;
+        token?: string;
       }>('/api/studio/profiles', {
         method: 'POST',
         body: JSON.stringify(data)
@@ -224,7 +224,7 @@ export const api = {
     selectProfile: async (profileId: string) => {
       return request<{
         success: boolean;
-        token: string;
+        token?: string;
         profile: { id: string; username: string; displayName: string; plan: string };
       }>(`/api/studio/profiles/${profileId}/select`, {
         method: 'POST'

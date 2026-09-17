@@ -5,6 +5,7 @@ import path from 'path';
 import { app, safeJsonForHtml } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 import { signJwt } from '../server/auth.js';
+import { uploadStorage } from '../server/services/uploadStorage.js';
 
 describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)', () => {
   const testUserId = 'usr_audit_test';
@@ -325,6 +326,46 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
       }
 
       expect(fs.readdirSync(root).sort()).toEqual(before);
+    });
+
+    it('does not mask document persistence failure when remote cleanup also fails', async () => {
+      const originalPrepare = db.prepare.bind(db);
+      const prepareSpy = vi.spyOn(db, 'prepare').mockImplementation(((sql: string) => {
+        if (sql.includes('INSERT INTO uploaded_files')) throw new Error('simulated persistence failure');
+        return originalPrepare(sql) as any;
+      }) as any);
+      const deleteSpy = vi.spyOn(uploadStorage, 'delete').mockRejectedValue(new Error('simulated cleanup failure'));
+
+      try {
+        await request(app)
+          .post('/api/upload/file')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('file', Buffer.from('%PDF-1.7\nfixture'), 'fixture.pdf')
+          .expect(500);
+      } finally {
+        deleteSpy.mockRestore();
+        prepareSpy.mockRestore();
+      }
+    });
+
+    it('attempts image cleanup when persistence fails even if deletion rejects', async () => {
+      const originalPrepare = db.prepare.bind(db);
+      const prepareSpy = vi.spyOn(db, 'prepare').mockImplementation(((sql: string) => {
+        if (sql.includes('INSERT INTO uploaded_files')) throw new Error('simulated persistence failure');
+        return originalPrepare(sql) as any;
+      }) as any);
+      const deleteSpy = vi.spyOn(uploadStorage, 'delete').mockRejectedValue(new Error('simulated cleanup failure'));
+
+      try {
+        await request(app)
+          .post('/api/upload')
+          .set('Authorization', `Bearer ${authToken}`)
+          .attach('image', Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'), 'cleanup.png')
+          .expect(500);
+      } finally {
+        deleteSpy.mockRestore();
+        prepareSpy.mockRestore();
+      }
     });
 
     it('rejects oversized and unauthenticated image uploads cleanly', async () => {

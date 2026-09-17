@@ -48,6 +48,10 @@ const PORT = Number(process.env.PORT) || 3050;
 function validateProductionConfig() {
   if (process.env.NODE_ENV !== 'production') return;
 
+  if ((process.env.MEDIA_STORAGE || '').toLowerCase() !== 's3') {
+    throw new Error('Production requires MEDIA_STORAGE=s3 with a configured S3-compatible bucket. Local media storage is development/test only.');
+  }
+
   for (const variable of ['APP_ORIGIN', 'CORS_ORIGIN', 'INTEGRATION_ENCRYPTION_KEY']) {
     const value = process.env[variable];
     if (!value || value.includes('replace_with_') || value.includes('your_') || value.includes('YOUR_') || value.includes('REPLACE_WITH_')) {
