@@ -9,6 +9,7 @@ import {
   Instagram
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { Reveal } from './motion/Reveal';
 
 interface FeaturesSectionProps {
   onOpenStudio: () => void;
@@ -29,7 +30,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="max-w-3xl mb-16 text-start">
+        <Reveal distance="md" className="max-w-3xl mb-16 text-start"><div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-4 tracking-wider">
             <span>{b.badge}</span>
           </div>
@@ -39,10 +40,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           <p className="text-lg text-neutral-600 max-w-2xl text-pretty">
             {b.subtitle}
           </p>
-        </div>
+        </div></Reveal>
 
         {/* Feature Cards Grid with staggered animation */}
-<motion.div
+<Reveal delay={80} distance="md"><motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"
           variants={cardVariants}
           animate="visible"
@@ -55,7 +56,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
         >
           
           {/* Feature 1: Accordion Folders */}
-          <div animate="visible" className="md:col-span-2 p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
+          <div animate="visible" className="motion-card md:col-span-2 p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 text-start">
             <div className="mb-6">
               <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mb-4">
                 <FolderPlus className="w-6 h-6 text-amber-800" />
@@ -99,7 +100,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 2: Custom Domains */}
-          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
+          <div animate="visible" className="motion-card p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-900 flex items-center justify-center mb-4">
                 <Globe2 className="w-6 h-6 text-blue-800" />
@@ -117,7 +118,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 3: Playable Media Embeds */}
-          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
+          <div animate="visible" className="motion-card p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-900 flex items-center justify-center mb-4">
                 <Music className="w-6 h-6 text-emerald-800" />
@@ -145,7 +146,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 4: Instagram Caption Sync */}
-          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
+          <div animate="visible" className="motion-card p-8 rounded-3xl bg-neutral-50 border border-neutral-200 hover:border-neutral-400 text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-900 flex items-center justify-center mb-4">
                 <Instagram className="w-6 h-6 text-rose-800" />
@@ -166,7 +167,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           </div>
 
           {/* Feature 5: Privacy-Friendly Analytics */}
-          <div animate="visible" className="p-8 rounded-3xl bg-neutral-50 border border-neutral-400 hover:border-neutral-400 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-start">
+          <div animate="visible" className="motion-card p-8 rounded-3xl bg-neutral-50 border border-neutral-400 hover:border-neutral-400 text-start">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-900 flex items-center justify-center mb-4">
                 <BarChart2 className="w-6 h-6 text-purple-800" />
@@ -185,7 +186,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
             </div>
           </div>
 
-        </motion.div>
+        </motion.div></Reveal>
 
         <div className="mb-16 rounded-3xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8">
           <div className="mb-6">

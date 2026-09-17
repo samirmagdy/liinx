@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { paidPlans, BillingInterval } from '../config/plans';
 import { CheckCircle2, Sparkles, ArrowRight, Zap, Crown } from 'lucide-react';
+import { Reveal } from './motion/Reveal';
 
 export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPlan: (plan: string, interval: BillingInterval) => void | Promise<void>; headingLevel?: 1 | 2 }) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
@@ -52,7 +53,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
     <section id="pricing" className="marketing-section py-24 md:py-36 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <Reveal distance="md" className="text-center mb-12"><div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             <span>{ar ? 'الأسعار' : 'Pricing'}</span>
@@ -63,10 +64,10 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
           <p className="text-base text-neutral-600 max-w-lg mx-auto text-pretty">
             {ar ? 'ابدأ بالخطة المجانية. الاشتراكات المدفوعة تُحصّل عبر Stripe.' : 'Start with the free plan. Paid subscriptions are billed through Stripe.'}
           </p>
-        </div>
+        </div></Reveal>
 
         {/* Interval Toggle */}
-        <div className="flex justify-center mb-10">
+        <Reveal delay={80} distance="sm"><div className="flex justify-center mb-10">
           <div className="inline-flex items-center gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
             {(['month', 'year'] as const).map(value => (
               <button
@@ -83,7 +84,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               </button>
             ))}
           </div>
-        </div>
+        </div></Reveal>
 
         {error && (
           <p role="alert" className="text-sm text-red-700 text-center mb-6 p-3 rounded-xl bg-red-50 border border-red-200 max-w-md mx-auto">
@@ -92,11 +93,11 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         )}
 
 {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <Reveal delay={140} distance="md"><div className="grid md:grid-cols-3 gap-6">
           {plans.map(plan => (
             <article
               key={plan.id}
-              className={`rounded-3xl p-7 flex flex-col gap-6 transition-all hover:scale-[1.02] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              className={`motion-card rounded-3xl p-7 flex flex-col gap-6 ${
                 plan.highlight
                   ? 'bg-neutral-900 text-white border-2 border-neutral-800 shadow-lg relative'
                   : 'bg-neutral-50 border border-neutral-200 hover:border-neutral-300'
@@ -147,7 +148,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               {/* CTA Button */}
               <button
                 disabled={pending !== null}
-                className={`w-full min-h-[44px] rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                className={`w-full min-h-[44px] rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   plan.highlight
                     ? 'bg-neutral-50 text-neutral-900 hover:bg-neutral-100 focus-visible:ring-neutral-900/20'
                     : 'bg-neutral-900 text-white hover:bg-black focus-visible:ring-neutral-900/20'
@@ -169,7 +170,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               </button>
             </article>
           ))}
-        </div>
+        </div></Reveal>
 
         {/* Disclaimer */}
         <p className="mt-8 text-xs text-center text-neutral-600 max-w-lg mx-auto">

@@ -54,7 +54,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
             return (
               <div
                 key={template.id}
-                className="rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between transition-colors hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
+                className="motion-card rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
               >
                 {/* Render the real profile component as a non-interactive theme example. */}
                 <div className="relative h-[300px] overflow-hidden border-b" aria-label={`${loc.name} illustrative template preview`}>

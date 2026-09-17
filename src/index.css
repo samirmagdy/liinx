@@ -71,6 +71,15 @@
 /* === Design Tokens === */
 
 :root {
+  /* Motion system: purposeful, interruptible, and shared by marketing surfaces. */
+  --motion-duration-fast: 140ms;
+  --motion-duration-standard: 220ms;
+  --motion-duration-section: 320ms;
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-in-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-distance-sm: 6px;
+  --motion-distance-md: 14px;
+  --motion-distance-lg: 24px;
   /* Neutral scale */
   --color-neutral-50:  #FAF9F6;
   --color-neutral-100: #F5F5F5;
@@ -112,6 +121,56 @@
   --radius-3xl: 1.75rem;
   --shadow-soft: 0 12px 36px rgba(24, 24, 23, 0.08);
   --shadow-lift: 0 24px 70px rgba(24, 24, 23, 0.14);
+}
+
+/* Scroll reveals are progressive enhancement: content is visible until JS opts
+   into the animated state, so failed animation code cannot hide the page. */
+.motion-reveal[data-motion-state="ready"] {
+  opacity: 0;
+  transform: translateY(var(--motion-distance-md));
+  transition: opacity var(--motion-duration-section) var(--motion-ease-out),
+    transform var(--motion-duration-section) var(--motion-ease-out);
+  transition-delay: var(--motion-delay, 0ms);
+}
+.motion-reveal-sm[data-motion-state="ready"] { transform: translateY(var(--motion-distance-sm)); }
+.motion-reveal-lg[data-motion-state="ready"] { transform: translateY(var(--motion-distance-lg)); }
+.motion-reveal[data-motion-state="visible"] { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-reveal[data-motion-state="ready"] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Marketing interaction feedback stays on compositor-friendly properties. */
+.marketing-shell button,
+.marketing-shell a,
+.marketing-home button,
+.marketing-home a {
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-out);
+}
+.marketing-shell button:active,
+.marketing-shell a:active,
+.marketing-home button:active,
+.marketing-home a:active { transform: scale(0.985); }
+.marketing-shell .motion-card,
+.marketing-home .motion-card {
+  transition: transform var(--motion-duration-standard) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    box-shadow var(--motion-duration-standard) var(--motion-ease-out);
+}
+.marketing-shell .motion-card:hover,
+.marketing-home .motion-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+@media (prefers-reduced-motion: reduce) {
+  .marketing-shell button:active,
+  .marketing-shell a:active,
+  .marketing-home button:active,
+  .marketing-home a:active,
+  .marketing-shell .motion-card:hover,
+  .marketing-home .motion-card:hover { transform: none; }
 }
 
 .hero-section {
