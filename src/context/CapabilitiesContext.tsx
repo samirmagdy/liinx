@@ -1,27 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
+import {
+  type SystemCapabilities,
+  DEFAULT_CAPABILITIES
+} from '../../shared/index.js';
 
-export interface SystemCapabilities {
-  importers: {
-    linktree: boolean;
-    beacons: boolean;
-    biofm: boolean;
-  };
-  instagram: boolean;
-  billing: boolean;
-  supportsHorizontalScaling: boolean;
-}
-
-export const DEFAULT_CAPABILITIES: SystemCapabilities = {
-  importers: {
-    linktree: false,
-    beacons: false,
-    biofm: false
-  },
-  instagram: false,
-  billing: false,
-  supportsHorizontalScaling: false
-};
+export type { SystemCapabilities };
+export { DEFAULT_CAPABILITIES };
 
 interface CapabilitiesContextType {
   capabilities: SystemCapabilities;

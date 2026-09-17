@@ -29,6 +29,7 @@ export default defineConfig(({ mode }) => {
         all: true,
         include: [
           'server/**/*.ts',
+          'shared/**/*.ts',
           'src/config/**/*.ts',
           'src/utils/**/*.ts'
         ],

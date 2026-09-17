@@ -4,10 +4,17 @@ import dns from 'dns';
 import { db } from '../db.js';
 import { signJwt } from '../auth.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
-import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
-import { isHttpUrl } from '../utils/urlValidation.js';
+import {
+  RESERVED_USERNAMES,
+  brand,
+  isHttpUrl,
+  isSafeCreatorCss,
+  normalizeBlockExtra,
+  normalizeEditorBlockExtra,
+  normalizePublicSocials,
+  profileUpdateContract
+} from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
-import { isSafeCreatorCss, normalizeBlockExtra, normalizeEditorBlockExtra, normalizePublicSocials, profileUpdateContract } from '../contracts.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
 import { normalizeCustomDomain } from '../utils/customDomain.js';
 

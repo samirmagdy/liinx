@@ -4,17 +4,15 @@ import { db } from '../db.js';
 import { createId } from '../utils/ids.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
-import { normalizeFormFields, type FormFieldContract } from '../contracts.js';
-import { getPhoneHref } from '../../src/utils/contactLinks.js';
+import {
+  formSubmissionSchema,
+  normalizeFormFields,
+  getPhoneHref,
+  type FormFieldContract
+} from '../../shared/index.js';
 
 export const formsRouter = Router();
-const submissionSchema = z.object({
-  profileId: z.string().min(1).max(100),
-  blockId: z.string().min(1).max(100),
-  submissionKey: z.string().regex(/^[A-Za-z0-9_-]{16,100}$/).optional(),
-  consent: z.boolean().optional(),
-  fields: z.record(z.string().regex(/^[A-Za-z0-9_-]{1,64}$/), z.string().trim().max(2000)).refine(value => Object.keys(value).length <= 20)
-});
+const submissionSchema = formSubmissionSchema;
 
 formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', limit: 20, windowMs: 60 * 60 * 1000 }), (req, res) => {
   try {

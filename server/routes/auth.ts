@@ -3,7 +3,15 @@ import { z } from 'zod';
 import { db } from '../db.js';
 import { hashPassword, comparePassword, signJwt } from '../auth.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
-import { RESERVED_USERNAMES, brand } from '../../src/config/brand.js';
+import {
+  RESERVED_USERNAMES,
+  brand,
+  registerSchema,
+  loginSchema,
+  resetRequestSchema,
+  resetConfirmSchema,
+  deletionSchema
+} from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
 import fs from 'fs';
 import path from 'path';
@@ -73,26 +81,7 @@ function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   }
 }
 
-const registerSchema = z.object({
-  email: z.string().email('Please provide a valid email address').max(255, 'Email cannot exceed 255 characters'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters long')
-    .max(128, 'Password cannot exceed 128 characters')
-    .refine(s => s.trim().length >= 8, 'Password cannot consist only of whitespace'),
-  username: z.string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(30, 'Username cannot exceed 30 characters')
-    .regex(/^[a-z0-9_]+$/, 'Username may only contain lowercase letters, numbers, and underscores')
-});
 
-const loginSchema = z.object({
-  email: z.string().email('Please provide a valid email address').max(255, 'Email cannot exceed 255 characters'),
-  password: z.string().min(1, 'Password is required').max(128, 'Password cannot exceed 128 characters')
-});
-
-const resetRequestSchema = z.object({ email: z.string().email().max(255) });
-const resetConfirmSchema = z.object({ token: z.string().min(32).max(200), password: z.string().min(8).max(128).refine(s => s.trim().length >= 8) });
-const deletionSchema = z.object({ confirmation: z.literal('DELETE') });
 
 function hashAccountToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');

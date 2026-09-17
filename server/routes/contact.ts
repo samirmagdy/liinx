@@ -5,14 +5,10 @@ import { db } from '../db.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { logError } from '../logger.js';
+import { contactSchema } from '../../shared/index.js';
 
 export const contactRouter = Router();
-const schema = z.object({
-  name: z.string().trim().min(1).max(120).refine(value => !/[\r\n]/.test(value), 'Name contains unsupported control characters.'),
-  email: z.email().max(254),
-  message: z.string().trim().min(1).max(5000),
-  website: z.string().max(200).optional()
-});
+const schema = contactSchema;
 contactRouter.post('/contact', sharedRateLimit({ name: 'contact', limit: 10, windowMs: 60 * 60 * 1000 }), (req, res) => {
   const input = schema.safeParse(req.body);
   if (!input.success) return res.status(400).json({ error: 'Enter a name, valid email, and message (up to 5000 characters).' });

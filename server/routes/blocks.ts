@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { bookingUrl } from '../../src/utils/booking.js';
+import { bookingUrl } from '../../shared/index.js';
 import { blockExtraSchemas, normalizeFormFields, parseBlockContract, type ContractBlockType } from '../contracts.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { invalidatePublicProfileCache } from './profiles.js';

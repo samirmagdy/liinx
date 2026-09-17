@@ -1,19 +1,11 @@
 import { Router, type Request, type Response } from 'express';
 import { importerService } from '../services/importer.js';
 import { supportsHorizontalScaling } from '../infrastructure/safeguards.js';
+import { type SystemCapabilities } from '../../shared/index.js';
 
 export const capabilitiesRouter = Router();
 
-export interface SystemCapabilities {
-  importers: {
-    linktree: boolean;
-    beacons: boolean;
-    biofm: boolean;
-  };
-  instagram: boolean;
-  billing: boolean;
-  supportsHorizontalScaling: boolean;
-}
+export type { SystemCapabilities };
 
 export function getSystemCapabilities(): SystemCapabilities {
   const instagramConfigured = Boolean(

@@ -1,0 +1,300 @@
+import { z } from 'zod';
+import { isHttpUrl, isSafeLinkUrl, bookingUrl, getMailtoHref, getPhoneHref } from './urlValidation.js';
+
+/** Versioned wire/storage boundary for creator-owned content. */
+export const CONTRACT_VERSION = 1 as const;
+
+export const MAX_URL = 2048;
+export const MAX_EXTRA_BYTES = 64 * 1024;
+export const RESERVED_KEYS = new Set([
+  'id', 'type', 'profileid', 'profile_id', 'pageid', 'page_id',
+  'owneruserid', 'owner_user_id', 'profileownership', 'pageownership',
+  'position', 'createdat', 'updatedat', 'created_at', 'updated_at'
+]);
+
+function rejectReservedKeys(value: Record<string, unknown>, context: z.RefinementCtx) {
+  for (const key of Object.keys(value)) {
+    if (RESERVED_KEYS.has(key.toLowerCase())) {
+      context.addIssue({ code: 'custom', path: [key], message: `The field ${key} is reserved.` });
+    }
+  }
+}
+
+export const extraObject = (shape: z.ZodRawShape = {}) => z.object(shape).catchall(z.unknown()).superRefine(rejectReservedKeys);
+export const optionalHttpUrl = z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value), 'Must be an HTTP(S) URL.').optional().nullable();
+export const optionalSafeUrl = z.string().max(MAX_URL).refine(value => value === '' || isSafeLinkUrl(value), 'Must use HTTP(S), mailto, or tel.').optional().nullable();
+export const optionalDownloadUrl = z.string().max(MAX_URL).refine(value => value === '' || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value) || isHttpUrl(value), 'Must be an uploaded file or HTTP(S) URL.').optional().nullable();
+export const shortText = z.string().max(500);
+export const itemId = z.string().min(1).max(100).optional();
+
+export const socialDomains: Record<string, string[]> = {
+  instagram: ['instagram.com'], tiktok: ['tiktok.com'], youtube: ['youtube.com', 'youtu.be'],
+  spotify: ['spotify.com'], twitter: ['twitter.com', 'x.com'], github: ['github.com'], linkedin: ['linkedin.com']
+};
+
+function hostnameMatches(hostname: string, domain: string) {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
+function validateSocialLink(value: { platform: string; url: string }, context: z.RefinementCtx) {
+  const url = value.url.trim();
+  if (value.platform === 'email') {
+    if (!/^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/i.test(url)) {
+      context.addIssue({ code: 'custom', path: ['url'], message: 'Email links must use a valid mailto address.' });
+    }
+    return;
+  }
+  if (value.platform === 'phone') {
+    const digits = url.replace(/\D/g, '');
+    if (!/^tel:\+?[0-9][0-9 ()-]{3,24}$/i.test(url) || digits.length < 4) {
+      context.addIssue({ code: 'custom', path: ['url'], message: 'Phone links must use a valid tel number.' });
+    }
+    return;
+  }
+  try {
+    const parsed = new URL(url);
+    const domains = socialDomains[value.platform] || [];
+    if (!['http:', 'https:'].includes(parsed.protocol) || !domains.some(domain => hostnameMatches(parsed.hostname.toLowerCase(), domain))) {
+      context.addIssue({ code: 'custom', path: ['url'], message: 'The URL does not match the selected social provider.' });
+    }
+  } catch {
+    context.addIssue({ code: 'custom', path: ['url'], message: 'Enter a valid URL for the selected social provider.' });
+  }
+}
+
+export const socialLinkSchema = z.object({
+  platform: z.enum(['instagram', 'tiktok', 'youtube', 'spotify', 'twitter', 'github', 'email', 'linkedin', 'phone']),
+  url: z.string().trim().min(1).max(MAX_URL).refine(isSafeLinkUrl, 'Social links must use HTTP(S), mailto, or tel.')
+}).strict().superRefine(validateSocialLink);
+
+export const socialsSchema = z.array(socialLinkSchema).max(20).superRefine((socials, context) => {
+  const seen = new Set<string>();
+  socials.forEach((social, index) => {
+    const key = social.url.trim().toLowerCase();
+    if (seen.has(key)) context.addIssue({ code: 'custom', path: [index, 'url'], message: 'Duplicate social links are not allowed.' });
+    seen.add(key);
+  });
+});
+
+/** Keep legacy malformed entries out of public output without deleting stored creator data. */
+export function normalizePublicSocials(input: unknown): Array<{ platform: string; url: string }> {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  return input.flatMap(candidate => {
+    const parsed = socialLinkSchema.safeParse(candidate);
+    if (!parsed.success) return [];
+    const key = parsed.data.url.toLowerCase();
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [parsed.data];
+  });
+}
+
+export const folderItemSchema = z.object({
+  id: itemId,
+  title: z.string().min(1).max(150),
+  url: z.string().max(MAX_URL).refine(value => value === '' || isSafeLinkUrl(value), 'Folder links must use HTTP(S), mailto, or tel.'),
+  subtitle: z.string().max(250).optional().nullable()
+}).strict();
+
+export const formFieldSchema = z.object({
+  id: z.string().trim().regex(/^[A-Za-z0-9_-]{1,100}$/, 'Field IDs may use letters, numbers, underscores, and hyphens.').optional(),
+  name: z.string().trim().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Field names may use letters, numbers, underscores, and hyphens.'),
+  label: z.string().trim().min(1).max(120),
+  type: z.enum(['text', 'email', 'tel', 'textarea']),
+  required: z.boolean().default(true),
+  maxLength: z.number().int().min(1).max(2000).optional(),
+  minLength: z.number().int().min(0).max(2000).optional(),
+  helpText: z.string().trim().max(300).optional()
+}).strict();
+
+export const formFieldsSchema = z.array(formFieldSchema).max(20, 'Forms can contain at most 20 fields.').superRefine((fields, context) => {
+  const names = new Set<string>();
+  fields.forEach((field, index) => {
+    const normalizedName = field.name.toLowerCase();
+    if (names.has(normalizedName)) context.addIssue({ code: 'custom', path: [index, 'name'], message: 'Field names must be unique.' });
+    names.add(normalizedName);
+    if (field.minLength !== undefined && field.maxLength !== undefined && field.minLength > field.maxLength) context.addIssue({ code: 'custom', path: [index, 'minLength'], message: 'Minimum length cannot exceed maximum length.' });
+  });
+});
+
+export interface FormFieldContract {
+  id?: string;
+  name: string;
+  label: string;
+  type: 'text' | 'email' | 'tel' | 'textarea';
+  required: boolean;
+  maxLength?: number;
+  minLength?: number;
+  helpText?: string;
+}
+
+export function normalizeFormFields(value: unknown): FormFieldContract[] {
+  const parsed = formFieldsSchema.safeParse(value);
+  if (!parsed.success) return [];
+  return parsed.data.map(field => ({ ...field, id: field.id || `field_${field.name}` }));
+}
+
+export const galleryItemSchema = z.object({
+  id: itemId,
+  imageUrl: z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value) || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value), 'Images must use HTTP(S) or a valid upload path.'),
+  linkUrl: optionalSafeUrl,
+  alt: z.string().max(300).optional(),
+  caption: z.string().max(500).optional(),
+  title: z.string().max(150).optional()
+}).strict();
+
+export const faqItemSchema = z.object({ id: itemId, question: z.string().trim().min(1).max(300), answer: z.string().max(5000) }).strict();
+export const testimonialItemSchema = z.object({ id: itemId, quote: z.string().min(1).max(2000), name: z.string().max(150) }).strict();
+
+export const blockTypeSchema = z.enum([
+  'booking', 'link', 'header', 'audio', 'video', 'folder', 'newsletter', 'instagram_grid',
+  'rich_text', 'image', 'gallery', 'spacer', 'carousel', 'form', 'download', 'map', 'faq',
+  'testimonials', 'event', 'presave', 'phone', 'product', 'tips', 'content_gate'
+]);
+export type ContractBlockType = z.infer<typeof blockTypeSchema>;
+
+export const blockExtraSchemas: Record<ContractBlockType, z.ZodTypeAny> = {
+  booking: extraObject(),
+  link: extraObject({
+    layout: z.enum(['list', 'grid', 'featured']).optional(),
+    animation: z.enum(['none', 'fade', 'lift', 'pulse']).optional()
+  }),
+  header: extraObject(),
+  audio: extraObject({ artist: shortText.optional(), coverUrl: optionalHttpUrl, audioUrl: optionalHttpUrl, platform: z.enum(['spotify', 'soundcloud', 'apple']).optional() }),
+  video: extraObject({ videoUrl: optionalHttpUrl, thumbnailUrl: optionalHttpUrl, platform: z.enum(['youtube', 'vimeo', 'tiktok']).optional() }),
+  folder: extraObject({ subtitle: shortText.optional(), items: z.array(folderItemSchema).max(50).optional() }),
+  newsletter: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional() }),
+  instagram_grid: extraObject({ handle: z.string().max(100).optional(), posts: z.array(extraObject({ id: itemId, imageUrl: optionalHttpUrl, likes: z.string().max(50).optional(), linkUrl: optionalSafeUrl })).max(50).optional() }),
+  rich_text: extraObject({ body: z.string().max(20000).optional() }),
+  image: extraObject({
+    imageUrl: z.string().max(MAX_URL).refine(value => value === '' || isHttpUrl(value) || /^\/uploads\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value), 'Images must use HTTP(S) or a valid upload path.').optional(),
+    linkUrl: optionalSafeUrl,
+    alt: z.string().max(300).optional(),
+    decorative: z.boolean().optional(),
+    caption: z.string().max(500).optional(),
+    fit: z.enum(['cover', 'contain']).optional(),
+    aspect: z.enum(['auto', 'square', 'portrait', 'landscape']).optional(),
+    cropPosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).optional()
+  }),
+  gallery: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
+  spacer: extraObject({ height: z.number().int().min(16).max(240).optional() }),
+  carousel: extraObject({ items: z.array(galleryItemSchema).max(50).optional() }),
+  form: extraObject({ description: z.string().max(1000).optional(), buttonText: z.string().max(100).optional(), consentRequired: z.boolean().default(false), consentText: z.string().trim().max(300).optional(), fields: formFieldsSchema.optional() }),
+  download: extraObject({ fileUrl: optionalDownloadUrl, downloadName: z.string().max(150).optional(), sizeBytes: z.number().int().min(0).max(25 * 1024 * 1024).optional(), mimeType: z.enum(['application/pdf', 'application/zip', 'text/plain', 'audio/mpeg', 'audio/wav', 'video/mp4']).optional(), description: z.string().max(1000).optional() }),
+  map: extraObject({ location: z.string().max(300).optional() }),
+  faq: extraObject({ items: z.array(faqItemSchema).max(50).optional() }),
+  testimonials: extraObject({ items: z.array(testimonialItemSchema).max(50).optional() }),
+  event: extraObject({
+    date: z.string().max(100).optional(),
+    time: z.string().max(50).optional(),
+    timezone: z.string().max(80).optional(),
+    location: z.string().max(300).optional(),
+    artworkUrl: optionalHttpUrl,
+    description: z.string().max(1000).optional(),
+    url: optionalSafeUrl
+  }),
+  presave: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
+  phone: extraObject({ contactType: z.enum(['phone', 'email']).optional(), phone: z.string().max(40).refine(value => value === '' || getPhoneHref(value) !== null, 'Enter a valid phone number with 4–15 digits.').optional(), email: z.string().max(254).refine(value => value === '' || getMailtoHref(value) !== null, 'Enter a valid email address.').optional(), subject: z.string().max(200).optional(), body: z.string().max(1000).optional(), description: z.string().max(1000).optional(), availability: z.string().max(200).optional() }),
+  product: extraObject({ price: z.string().max(50).optional(), priceAmount: z.string().refine(value => value === '' || /^\d{1,8}(?:\.\d{1,2})?$/.test(value), 'Price must be a positive amount with up to two decimals.').optional(), currency: z.string().refine(value => value === '' || /^[A-Z]{3}$/.test(value), 'Currency must be a three-letter ISO code.').optional(), imageUrl: optionalHttpUrl, url: optionalSafeUrl, description: z.string().max(1000).optional() }),
+  tips: extraObject({ url: optionalSafeUrl, description: z.string().max(1000).optional() }),
+  content_gate: z.object({ password: z.string().max(128).optional(), passwordHash: z.string().max(200).optional(), description: z.string().max(1000).optional(), body: z.string().max(20000).optional(), locked: z.boolean().optional() }).strict().superRefine(rejectReservedKeys)
+};
+
+export const blockCreateEnvelope = z.object({
+  type: blockTypeSchema,
+  title: z.string().min(1, 'Title is required').max(150),
+  url: z.string().max(MAX_URL).optional().nullable(),
+  subtitle: z.string().max(250).optional().nullable(),
+  badge: z.string().max(30).optional().nullable(),
+  icon: z.string().max(50).optional().nullable(),
+  highlighted: z.boolean().optional(),
+  startAt: z.number().finite().int().min(0).nullable().optional(),
+  endAt: z.number().finite().int().min(0).nullable().optional(),
+  pageId: z.string().min(1).max(100).optional(),
+  extra: z.record(z.string(), z.unknown()).optional()
+}).strict();
+
+function validatePurposefulUrl(type: ContractBlockType, value: string | null | undefined, context: z.RefinementCtx) {
+  if (value == null || value === '') return;
+  const valid = type === 'booking' ? Boolean(bookingUrl(value)) : isSafeLinkUrl(value);
+  if (!valid) context.addIssue({ code: 'custom', path: ['url'], message: type === 'booking' ? 'A valid Calendly event URL is required.' : 'URL must use HTTP(S), mailto, or tel.' });
+}
+
+export const createBlockContract = blockCreateEnvelope.superRefine((value, context) => {
+  validatePurposefulUrl(value.type, value.url, context);
+  if (value.extra !== undefined) {
+    const parsed = blockExtraSchemas[value.type].safeParse(value.extra);
+    if (!parsed.success) context.addIssue({ code: 'custom', path: ['extra'], message: parsed.error.issues[0]?.message || 'Invalid block data.' });
+  }
+  if (value.startAt != null && value.endAt != null && value.endAt < value.startAt) context.addIssue({ code: 'custom', path: ['endAt'], message: 'End time must be after start time.' });
+});
+
+export const updateBlockEnvelope = blockCreateEnvelope.omit({ type: true, pageId: true }).partial().extend({ revision: z.number().int().nonnegative().optional() }).strict();
+
+function invalidContract(message: string, path: (string | number)[]) {
+  return { success: false as const, error: new z.ZodError([{ code: 'custom', path, message }]) };
+}
+
+export function parseBlockContract(input: unknown, existingType?: ContractBlockType) {
+  const raw = typeof input === 'object' && input !== null ? input as Record<string, unknown> : {};
+  const parsed = existingType
+    ? updateBlockEnvelope.safeParse(input)
+    : createBlockContract.safeParse(input);
+  if (!parsed.success) return parsed;
+  const type = existingType || (raw.type as ContractBlockType);
+  const extra = raw.extra === undefined ? undefined : blockExtraSchemas[type].safeParse(raw.extra);
+  if (extra && !extra.success) return extra;
+  if (existingType && raw.url !== undefined) {
+    const url = typeof raw.url === 'string' || raw.url === null ? raw.url : undefined;
+    if (url !== undefined && url !== null && url !== '' && (existingType === 'booking' ? !bookingUrl(url) : !isSafeLinkUrl(url))) {
+      return invalidContract(existingType === 'booking' ? 'A valid Calendly event URL is required.' : 'URL must use HTTP(S), mailto, or tel.', ['url']);
+    }
+  }
+  if (existingType && raw.startAt != null && raw.endAt != null && typeof raw.startAt === 'number' && typeof raw.endAt === 'number' && raw.endAt < raw.startAt) {
+    return invalidContract('End time must be after start time.', ['endAt']);
+  }
+  return { success: true as const, data: { ...parsed.data, ...(extra ? { extra: extra.data } : {}), contractVersion: CONTRACT_VERSION, type } };
+}
+
+export function normalizeBlockExtra(type: string, input: unknown): Record<string, unknown> {
+  const schema = blockExtraSchemas[type as ContractBlockType];
+  if (!schema) return {};
+  const parsed = schema.safeParse(input || {});
+  if (!parsed.success) return {};
+  const value = Object.fromEntries(Object.entries(parsed.data));
+  if (JSON.stringify(value).length > MAX_EXTRA_BYTES) return {};
+  if (type === 'form' && Array.isArray(value.fields)) value.fields = normalizeFormFields(value.fields);
+  delete value.id;
+  delete value.type;
+  delete value.profileId;
+  delete value.profile_id;
+  delete value.pageId;
+  delete value.page_id;
+  delete value.position;
+  if (type === 'content_gate') {
+    const configured =
+      (typeof value.passwordHash === 'string' && value.passwordHash.length > 0) ||
+      (typeof value.password === 'string' && value.password.length > 0);
+    delete value.body;
+    delete value.password;
+    delete value.passwordHash;
+    value.locked = configured;
+  }
+  return value;
+}
+
+/** Authenticated studio normalization may expose the creator's text, never its code/hash. */
+export function normalizeEditorBlockExtra(type: string, input: unknown): Record<string, unknown> {
+  if (type !== 'content_gate') return normalizeBlockExtra(type, input);
+  const parsed = blockExtraSchemas.content_gate.safeParse(input || {});
+  if (!parsed.success) return {};
+  const value = Object.fromEntries(Object.entries(parsed.data));
+  const configured =
+    (typeof value.passwordHash === 'string' && value.passwordHash.length > 0) ||
+    (typeof value.password === 'string' && value.password.length > 0);
+  delete value.password;
+  delete value.passwordHash;
+  value.locked = configured;
+  return value;
+}

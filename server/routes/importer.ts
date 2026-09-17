@@ -4,28 +4,12 @@ import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { importFromPublicUrl, commitImportedLinks } from '../services/importer.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { isHttpUrl } from '../utils/urlValidation.js';
+import { importerPreviewSchema, importerCommitSchema } from '../../shared/index.js';
 
 export const importerRouter = Router();
 
-const previewSchema = z.object({
-  url: z.string().min(1, 'Profile URL is required').max(2048).refine(value => {
-    const normalized = value.trim();
-    return /^(?:https?):\/\/[^\s]+$/i.test(normalized) || /^(?:@?[a-z0-9._-]+)$|^(?:www\.)?(?:linktr\.ee|beacons\.ai|bio\.fm)\/[a-z0-9._-]+$/i.test(normalized);
-  }, 'Only public Linktree, Beacons, or Bio.fm profile URLs are supported.')
-});
-
-const commitSchema = z.object({
-  pageId: z.string().min(1).max(100).optional(),
-  links: z.array(z.object({
-    title: z.string().min(1).max(150),
-    url: z.string().refine(isHttpUrl, 'Only HTTP(S) links are allowed.'),
-    subtitle: z.string().max(250).optional()
-  })).max(100),
-  updateProfileInfo: z.boolean().optional(),
-  displayName: z.string().max(120).optional(),
-  bio: z.string().max(500).optional(),
-  avatarUrl: z.string().refine(isHttpUrl, 'Only HTTP(S) avatar URLs are allowed.').optional()
-});
+const previewSchema = importerPreviewSchema;
+const commitSchema = importerCommitSchema;
 
 // Authenticated: Preview imported links from public URL
 importerRouter.post('/studio/import/preview', requireAuth, sharedRateLimit({ name: 'import-preview', limit: 10, windowMs: 60 * 60 * 1000 }), async (req: AuthenticatedRequest, res) => {

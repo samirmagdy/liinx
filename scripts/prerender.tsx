@@ -5,8 +5,7 @@ import { Router } from 'wouter';
 import fs from 'node:fs';
 import path from 'node:path';
 import App from '../src/App';
-import { pageTitles } from '../src/config/pages';
-import { brand } from '../src/config/brand';
+import { pageTitles, brand } from '../shared/index.js';
 
 const template = fs.readFileSync('dist/index.html', 'utf8');
 fs.writeFileSync('dist/shell.html', template);

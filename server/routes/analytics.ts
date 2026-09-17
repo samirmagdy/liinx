@@ -5,7 +5,7 @@ import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { createId } from '../utils/ids.js';
 import { isSafeLinkUrl } from '../utils/urlValidation.js';
-import { getMailtoHref, getPhoneHref } from '../../src/utils/contactLinks.js';
+import { getMailtoHref, getPhoneHref } from '../../shared/index.js';
 
 export const analyticsRouter = Router();
 

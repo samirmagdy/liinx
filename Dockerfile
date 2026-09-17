@@ -19,6 +19,7 @@ COPY src/ ./src/
 COPY public/ ./public/
 COPY server/ ./server/
 COPY scripts/ ./scripts/
+COPY shared/ ./shared/
 
 # Build client SPA assets into dist/ and compiled server into dist-server/
 RUN npm run build

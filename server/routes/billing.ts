@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import Stripe from 'stripe';
 import { db } from '../db.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
-import { paidPlans } from '../../src/config/plans.js';
+import { paidPlans } from '../../shared/index.js';
 import * as Sentry from '@sentry/node';
 import { logError } from '../logger.js';
 import { hasEntitlement, normalizePlan } from '../entitlements.js';

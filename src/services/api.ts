@@ -1,4 +1,9 @@
-import { type CreatorProfile, type CreatorPage, type ProfileBlock } from '../types';
+import {
+  type CreatorProfile,
+  type CreatorPage,
+  type ContactInput,
+  type ContactResponse
+} from '../../shared/index.js';
 import { friendlyErrorMessage } from '../utils/errors';
 
 let sessionToken: string | null = null;
@@ -49,7 +54,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
-  contact: (data: { name: string; email: string; message: string; website?: string }) => request<{ success: boolean; id: string; notification: 'sent' | 'not_configured' | 'failed' }>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
+  contact: (data: ContactInput) => request<ContactResponse>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
   auth: {
     checkUsername: async (username: string): Promise<{ available: boolean; reason?: string }> => {
       return request<{ available: boolean; reason?: string }>(`/api/auth/check-username/${encodeURIComponent(username)}`);

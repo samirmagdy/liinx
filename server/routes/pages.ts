@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { pageContract, pageUpdateContract } from '../contracts.js';
+import { pageContract, pageUpdateContract, RESERVED_USERNAMES } from '../../shared/index.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { createId } from '../utils/ids.js';
 import { invalidatePublicProfileCache } from './profiles.js';
-import { RESERVED_USERNAMES } from '../../src/config/brand.js';
 
 export const pagesRouter = Router();
 
