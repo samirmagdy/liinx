@@ -25,7 +25,7 @@ import * as Sentry from '@sentry/node';
 import { log, logError } from './logger.js';
 import { sharedRateLimit } from './middleware/rateLimit.js';
 import { startMaintenanceScheduler } from './maintenance.js';
-import { createId } from './utils/ids.js';
+import { normalizeRequestId } from './utils/ids.js';
 import { startInstagramSyncScheduler } from './instagramScheduler.js';
 import { isHttpUrl } from './utils/urlValidation.js';
 import { hasEntitlement } from './entitlements.js';
@@ -122,7 +122,7 @@ app.use(cors({
 // Correlation ID & Response Time Observability Middleware
 app.use((req, res, next) => {
   const startHrTime = process.hrtime();
-  const requestId = (req.headers['x-request-id'] as string) || createId('req');
+  const requestId = normalizeRequestId(req.headers['x-request-id']);
   res.setHeader('X-Request-Id', requestId);
 
   const originalEnd = res.end;

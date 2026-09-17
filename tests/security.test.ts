@@ -3,6 +3,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
+import { normalizeRequestId } from '../server/utils/ids.js';
 
 describe('Security & Penetration Testing (OWASP Top 10)', () => {
   beforeAll(() => {
@@ -379,6 +380,106 @@ describe('Security & Penetration Testing (OWASP Top 10)', () => {
         .send(violationPayload);
 
       expect(res.status).toBe(204);
+    });
+  });
+
+  // 8. Request Correlation ID Normalization & Header Hardening
+  describe('Request Correlation ID Normalization & Header Hardening', () => {
+    it('normalizes valid request IDs correctly', () => {
+      expect(normalizeRequestId('valid-id-123')).toBe('valid-id-123');
+      expect(normalizeRequestId('req_a1b2.c3-d4_99')).toBe('req_a1b2.c3-d4_99');
+      expect(normalizeRequestId('A'.repeat(64))).toBe('A'.repeat(64));
+    });
+
+    it('generates a fresh ID when input is empty or whitespace', () => {
+      const empty = normalizeRequestId('');
+      expect(empty).toMatch(/^req_[a-f0-9-]+$/i);
+
+      const whitespace = normalizeRequestId('   ');
+      expect(whitespace).toMatch(/^req_[a-f0-9-]+$/i);
+
+      const nullish = normalizeRequestId(null);
+      expect(nullish).toMatch(/^req_[a-f0-9-]+$/i);
+
+      const undefinedVal = normalizeRequestId(undefined);
+      expect(undefinedVal).toMatch(/^req_[a-f0-9-]+$/i);
+    });
+
+    it('rejects oversized 10KB request IDs and replaces with a secure ID', () => {
+      const hugeId = 'x'.repeat(10 * 1024);
+      const result = normalizeRequestId(hugeId);
+      expect(result).not.toBe(hugeId);
+      expect(result).toMatch(/^req_[a-f0-9-]+$/i);
+    });
+
+    it('rejects request IDs containing newlines or control characters', () => {
+      const crlfId = 'req-123\r\nInjected-Header: evil';
+      const resultCrlf = normalizeRequestId(crlfId);
+      expect(resultCrlf).not.toContain('\r');
+      expect(resultCrlf).not.toContain('\n');
+      expect(resultCrlf).toMatch(/^req_[a-f0-9-]+$/i);
+
+      const tabId = 'req\t123';
+      const resultTab = normalizeRequestId(tabId);
+      expect(resultTab).toMatch(/^req_[a-f0-9-]+$/i);
+    });
+
+    it('rejects unicode edge cases and malformed characters', () => {
+      const unicodeId = 'req_🔥_test';
+      const resultUnicode = normalizeRequestId(unicodeId);
+      expect(resultUnicode).toMatch(/^req_[a-f0-9-]+$/i);
+
+      const xssId = '<script>alert(1)</script>';
+      const resultXss = normalizeRequestId(xssId);
+      expect(resultXss).toMatch(/^req_[a-f0-9-]+$/i);
+
+      const quoteId = 'req" OR 1=1 --';
+      const resultQuote = normalizeRequestId(quoteId);
+      expect(resultQuote).toMatch(/^req_[a-f0-9-]+$/i);
+    });
+
+    it('handles header array values safely', () => {
+      const validArray = ['safe-array-id-123'];
+      expect(normalizeRequestId(validArray)).toBe('safe-array-id-123');
+
+      const invalidArray = ['<script>evil</script>'];
+      expect(normalizeRequestId(invalidArray)).toMatch(/^req_[a-f0-9-]+$/i);
+
+      const emptyArray: string[] = [];
+      expect(normalizeRequestId(emptyArray)).toMatch(/^req_[a-f0-9-]+$/i);
+    });
+
+    it('middleware rejects malicious X-Request-Id and outputs a sanitized req ID', async () => {
+      const maliciousId = '<script>alert(1)</script>';
+      const res = await request(app)
+        .get('/api/health')
+        .set('X-Request-Id', maliciousId);
+
+      const headerVal = res.headers['x-request-id'];
+      expect(headerVal).toBeDefined();
+      expect(headerVal).not.toContain('<script>');
+      expect(headerVal).toMatch(/^req_[a-f0-9-]+$/i);
+    });
+
+    it('middleware echoes valid X-Request-Id for distributed tracing', async () => {
+      const validTraceId = 'trace.12345-abcde_v1';
+      const res = await request(app)
+        .get('/api/health')
+        .set('X-Request-Id', validTraceId);
+
+      expect(res.headers['x-request-id']).toBe(validTraceId);
+    });
+
+    it('middleware generates safe ID when X-Request-Id is 10KB long', async () => {
+      const hugeId = 'A'.repeat(10240);
+      const res = await request(app)
+        .get('/api/health')
+        .set('X-Request-Id', hugeId);
+
+      const headerVal = res.headers['x-request-id'];
+      expect(headerVal).toBeDefined();
+      expect(headerVal.length).toBeLessThan(100);
+      expect(headerVal).toMatch(/^req_[a-f0-9-]+$/i);
     });
   });
 });
