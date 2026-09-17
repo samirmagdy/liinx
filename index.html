@@ -4,16 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google" content="notranslate" />
-    
-    <!-- Shield against third-party extension crashes (e.g. frame_start.js, IDM, adblockers) -->
-    <script>
-      window.addEventListener('error', function(e) {
-        if (e.filename && (e.filename.includes('frame_start.js') || e.filename.includes('extension://'))) {
-          e.stopImmediatePropagation();
-          e.preventDefault();
-        }
-      }, true);
-    </script>
     <title>Liinx — Create your page for links, media, and bookings</title>
     <meta name="description" content="Build a customizable page for your links, media, bookings, and newsletter. Start free with Liinx." />
     <meta name="keywords" content="micro-site builder, creator website, link in bio, portfolio builder, custom domain, linktree alternative" />

@@ -29,23 +29,28 @@ export const TrackingPixelManager: FC<TrackingPixelManagerProps> = ({
       script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
       script.async = true;
       script.id = 'liinx-ga4-script';
+      const nonce = (window as Window & { __CSP_NONCE__?: string }).__CSP_NONCE__;
+      if (nonce) {
+        script.nonce = nonce;
+      }
       document.head.appendChild(script);
     }
-    if (!document.getElementById('liinx-ga4-inline')) {
-      const inlineScript = document.createElement('script');
-      inlineScript.id = 'liinx-ga4-inline';
-      inlineScript.innerHTML = `
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${gaId}');
-    `;
-      document.head.appendChild(inlineScript);
+
+    const win = window as Window & {
+      dataLayer?: unknown[];
+      gtag?: (...args: unknown[]) => void;
+    };
+    win.dataLayer = win.dataLayer || [];
+    if (!win.gtag) {
+      win.gtag = function (...args: unknown[]) {
+        win.dataLayer?.push(args);
+      };
     }
+    win.gtag('js', new Date());
+    win.gtag('config', gaId);
 
     return () => {
       document.getElementById('liinx-ga4-script')?.remove();
-      document.getElementById('liinx-ga4-inline')?.remove();
       if (typeof window !== 'undefined') {
         delete (window as Window & { gtag?: unknown }).gtag;
         delete (window as Window & { dataLayer?: unknown }).dataLayer;
@@ -65,26 +70,55 @@ export const TrackingPixelManager: FC<TrackingPixelManagerProps> = ({
     const pixelId = profile.metaPixelId.trim();
     if (!pixelId || !/^[0-9]+$/.test(pixelId)) return;
 
-    if (!document.getElementById('liinx-meta-pixel')) {
+    const win = window as Window & {
+      fbq?: {
+        (...args: unknown[]): void;
+        callMethod?: (...args: unknown[]) => void;
+        queue?: unknown[];
+        loaded?: boolean;
+        version?: string;
+      };
+      _fbq?: unknown;
+    };
+
+    if (!win.fbq) {
+      const fbqFunction: {
+        (...args: unknown[]): void;
+        callMethod?: (...args: unknown[]) => void;
+        queue?: unknown[];
+        loaded?: boolean;
+        version?: string;
+      } = function (...args: unknown[]) {
+        if (fbqFunction.callMethod) {
+          fbqFunction.callMethod(...args);
+        } else {
+          fbqFunction.queue?.push(args);
+        }
+      };
+      fbqFunction.queue = [] as unknown[];
+      fbqFunction.loaded = true;
+      fbqFunction.version = '2.0';
+      win.fbq = fbqFunction;
+      win._fbq = fbqFunction;
+    }
+
+    if (!document.getElementById('liinx-meta-pixel-script')) {
       const script = document.createElement('script');
-      script.id = 'liinx-meta-pixel';
-      script.innerHTML = `
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '${pixelId}');
-      fbq('track', 'PageView');
-    `;
+      script.id = 'liinx-meta-pixel-script';
+      script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+      script.async = true;
+      const nonce = (window as Window & { __CSP_NONCE__?: string }).__CSP_NONCE__;
+      if (nonce) {
+        script.nonce = nonce;
+      }
       document.head.appendChild(script);
     }
 
+    win.fbq('init', pixelId);
+    win.fbq('track', 'PageView');
+
     return () => {
-      document.getElementById('liinx-meta-pixel')?.remove();
+      document.getElementById('liinx-meta-pixel-script')?.remove();
       if (typeof window !== 'undefined') {
         delete (window as Window & { fbq?: unknown }).fbq;
         delete (window as Window & { _fbq?: unknown })._fbq;

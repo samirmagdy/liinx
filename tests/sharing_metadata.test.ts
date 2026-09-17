@@ -37,6 +37,17 @@ describe('server-rendered sharing metadata', () => {
     expect(html).not.toContain('{"generic":true}');
   });
 
+  it('injects CSP nonce into head and ld+json script tags when provided', () => {
+    const source = '<!doctype html><html><head><title>Test</title><script type="application/ld+json">{}</script><script src="/main.js"></script></head><body></body></html>';
+    const html = renderProfileShellHtml(source, {
+      username: 'quoted', display_name: 'Creator', bio: 'Bio'
+    }, 'https://configured.example/@quoted', undefined, 'testNonce12345');
+
+    expect(html).toContain('<script nonce="testNonce12345">window.__CSP_NONCE__="testNonce12345";</script>');
+    expect(html).toContain('<script type="application/ld+json" nonce="testNonce12345">');
+    expect(html).toContain('<script nonce="testNonce12345" src="/main.js"></script>');
+  });
+
   it('sitemap includes published pages only and unknown profiles are not successful', async () => {
     const sitemap = await request(app).get('/sitemap.xml').expect(200);
     expect(sitemap.text).toContain(`/@${username}/${publishedSlug}`);

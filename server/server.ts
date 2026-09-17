@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'url';
 import { db, initDatabase } from './db.js';
 import { authRouter } from './routes/auth.js';
@@ -22,6 +23,7 @@ import { pageTitles } from '../src/config/pages.js';
 import { brand } from '../src/config/brand.js';
 import * as Sentry from '@sentry/node';
 import { log, logError } from './logger.js';
+import { sharedRateLimit } from './middleware/rateLimit.js';
 import { startMaintenanceScheduler } from './maintenance.js';
 import { createId } from './utils/ids.js';
 import { startInstagramSyncScheduler } from './instagramScheduler.js';
@@ -142,6 +144,9 @@ app.use((req, res, next) => {
 
 // Security Headers Middleware (OWASP / Production Hardening)
 app.use((_req, res, next) => {
+  const nonce = crypto.randomBytes(16).toString('base64');
+  res.locals.cspNonce = nonce;
+
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -149,7 +154,7 @@ app.use((_req, res, next) => {
   res.setHeader('X-DNS-Prefetch-Control', 'off');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https://api.qrserver.com https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com https://embed.music.apple.com;");
+  res.setHeader('Content-Security-Policy', `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https://api.qrserver.com https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com https://embed.music.apple.com; report-uri /api/csp-report;`);
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
@@ -281,7 +286,27 @@ export function safeJsonForHtml(value: unknown): string {
     .replace(/\u2029/g, '\\u2029');
 }
 
-export function renderProfileShellHtml(sourceHtml: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null }, canonical: string, page?: { title?: string | null; description?: string | null }): string {
+export function injectNonceIntoHtml(sourceHtml: string, nonce?: string): string {
+  if (!nonce) return sourceHtml;
+  let html = sourceHtml;
+  const nonceGlobalScript = `<script nonce="${escapeHtml(nonce)}">window.__CSP_NONCE__="${escapeHtml(nonce)}";</script>`;
+  if (/<head[^>]*>/i.test(html)) {
+    html = html.replace(/(<head[^>]*>)/i, `$1${nonceGlobalScript}`);
+  } else {
+    html = `${nonceGlobalScript}${html}`;
+  }
+  // Add nonce attribute to script tags that do not already have one
+  html = html.replace(/<script\b(?![^>]*\bnonce=)([^>]*)>/gi, `<script nonce="${escapeHtml(nonce)}"$1>`);
+  return html;
+}
+
+export function renderProfileShellHtml(
+  sourceHtml: string,
+  profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null },
+  canonical: string,
+  page?: { title?: string | null; description?: string | null },
+  nonce?: string
+): string {
   let html = sourceHtml;
   const title = page?.title || profile.share_title || `${profile.display_name} (@${profile.username}) | LIINX`;
   const description = page?.description || profile.share_description || profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
@@ -301,13 +326,38 @@ export function renderProfileShellHtml(sourceHtml: string, profile: { username: 
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/i, `<meta name="twitter:title" content="${safeTitle}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/i, `<meta name="twitter:description" content="${safeDescription}" />`)
     .replace(/<meta name="twitter:image" content="[^"]*"\s*\/>/i, image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : '')
-    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/gi, `<script type="application/ld+json">${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, ...(image ? { image } : {}), mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, ...(profile.avatar_url ? { image: profile.avatar_url } : {}) } })}</script>`);
+    .replace(/<script\b[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, `<script type="application/ld+json"${nonce ? ` nonce="${escapeHtml(nonce)}"` : ''}>${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, ...(image ? { image } : {}), mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, ...(profile.avatar_url ? { image: profile.avatar_url } : {}) } })}</script>`);
+
+  if (nonce) {
+    html = injectNonceIntoHtml(html, nonce);
+  }
   return html;
 }
 
-function sendProfileShell(res: express.Response, filePath: string, profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null }, canonical: string, page?: { title?: string | null; description?: string | null }) {
-  const html = renderProfileShellHtml(fs.readFileSync(filePath, 'utf8'), profile, canonical, page);
+function sendProfileShell(
+  res: express.Response,
+  filePath: string,
+  profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null },
+  canonical: string,
+  page?: { title?: string | null; description?: string | null }
+) {
+  const nonce = res.locals?.cspNonce;
+  const html = renderProfileShellHtml(fs.readFileSync(filePath, 'utf8'), profile, canonical, page, nonce);
   res.type('html').send(html);
+}
+
+function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
+  const nonce = res.locals?.cspNonce;
+  if (!nonce) {
+    return res.sendFile(filePath);
+  }
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const modified = injectNonceIntoHtml(raw, nonce);
+    return res.type('html').send(modified);
+  } catch {
+    return res.sendFile(filePath);
+  }
 }
 
 // Custom Domain Host-Header Routing Engine (Milestone 6)
@@ -336,7 +386,7 @@ app.use((req, res, next) => {
             res.setHeader('Cache-Control', 'no-store');
             return res.redirect(302, redirect);
           }
-          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page) : res.sendFile(distIndex);
+          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page) : sendHtmlFileWithNonce(res, distIndex);
         }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
         // Express may have cached req.query while evaluating req.path above;
@@ -415,6 +465,24 @@ app.use('/api', capabilitiesRouter);
 app.use('/api', apiV1Router);
 app.use('/api', billingRouter);
 app.use('/api', contactRouter);
+
+// CSP Violation Reporting Endpoint
+app.post('/api/csp-report', sharedRateLimit({ name: 'csp-report', limit: 60, windowMs: 60000 }), (req, res) => {
+  const report = req.body?.['csp-report'] || req.body;
+  if (report) {
+    const documentUri = typeof report['document-uri'] === 'string' ? report['document-uri'].slice(0, 500) : undefined;
+    const blockedUri = typeof report['blocked-uri'] === 'string' ? report['blocked-uri'].slice(0, 500) : undefined;
+    const violatedDirective = typeof report['violated-directive'] === 'string' ? report['violated-directive'].slice(0, 200) : undefined;
+    const effectiveDirective = typeof report['effective-directive'] === 'string' ? report['effective-directive'].slice(0, 200) : undefined;
+    log('info', 'CSP violation report received', {
+      documentUri,
+      blockedUri,
+      violatedDirective,
+      effectiveDirective
+    });
+  }
+  res.status(204).end();
+});
 
 if (process.env.SENTRY_DSN) Sentry.setupExpressErrorHandler(app);
 
@@ -528,7 +596,8 @@ export async function startServer() {
       const fallbackFile = fs.existsSync(path.join(distDir, 'shell.html'))
         ? path.join(distDir, 'shell.html')
         : path.join(distDir, 'index.html');
-      res.sendFile(routeFile && fs.existsSync(routeFile) ? routeFile : fallbackFile);
+      const targetFile = routeFile && fs.existsSync(routeFile) ? routeFile : fallbackFile;
+      sendHtmlFileWithNonce(res, targetFile);
   });
 }
 

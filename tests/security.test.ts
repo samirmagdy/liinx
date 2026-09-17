@@ -283,4 +283,102 @@ describe('Security & Penetration Testing (OWASP Top 10)', () => {
       expect(res.status).toBe(413);
     });
   });
+
+  // 7. Content Security Policy (CSP) & Browser Security Hardening
+  describe('Content Security Policy & Browser Security Hardening', () => {
+    it('should include cryptographic per-request nonce in script-src and disallow unsafe-inline for scripts', async () => {
+      const res1 = await request(app).get('/api/health');
+      const res2 = await request(app).get('/api/health');
+
+      const csp1 = res1.headers['content-security-policy'];
+      const csp2 = res2.headers['content-security-policy'];
+
+      expect(csp1).toBeDefined();
+      expect(csp2).toBeDefined();
+
+      // Extract nonces
+      const match1 = csp1.match(/script-src 'self' 'nonce-([A-Za-z0-9+/=]+)'/);
+      const match2 = csp2.match(/script-src 'self' 'nonce-([A-Za-z0-9+/=]+)'/);
+
+      expect(match1).not.toBeNull();
+      expect(match2).not.toBeNull();
+      expect(match1![1]).toBeTypeOf('string');
+      expect(match1![1].length).toBeGreaterThan(16);
+
+      // Verify each request gets a fresh, unique cryptographic nonce
+      expect(match1![1]).not.toBe(match2![1]);
+
+      // Ensure script-src NEVER allows unsafe-inline
+      const scriptSrcDirective = csp1.split(';').find((d: string) => d.trim().startsWith('script-src'));
+      expect(scriptSrcDirective).toBeDefined();
+      expect(scriptSrcDirective).not.toContain("'unsafe-inline'");
+
+      // Verify required third-party services in script-src
+      expect(scriptSrcDirective).toContain('https://www.googletagmanager.com');
+      expect(scriptSrcDirective).toContain('https://connect.facebook.net');
+    });
+
+    it('should maintain frame-src and connect-src for legitimate integrations without wildcards', async () => {
+      const res = await request(app).get('/api/health');
+      const csp = res.headers['content-security-policy'];
+
+      // frame-src
+      const frameSrcDirective = csp.split(';').find((d: string) => d.trim().startsWith('frame-src'));
+      expect(frameSrcDirective).toBeDefined();
+      expect(frameSrcDirective).toContain('https://www.youtube.com');
+      expect(frameSrcDirective).toContain('https://www.youtube-nocookie.com');
+      expect(frameSrcDirective).toContain('https://open.spotify.com');
+      expect(frameSrcDirective).toContain('https://player.vimeo.com');
+      expect(frameSrcDirective).toContain('https://w.soundcloud.com');
+      expect(frameSrcDirective).toContain('https://calendly.com');
+      expect(frameSrcDirective).toContain('https://embed.music.apple.com');
+      expect(frameSrcDirective).not.toContain('*');
+
+      // connect-src
+      const connectSrcDirective = csp.split(';').find((d: string) => d.trim().startsWith('connect-src'));
+      expect(connectSrcDirective).toBeDefined();
+      expect(connectSrcDirective).toContain('https://api.qrserver.com');
+      expect(connectSrcDirective).toContain('https://www.google-analytics.com');
+      expect(connectSrcDirective).toContain('https://graph.instagram.com');
+      expect(connectSrcDirective).toContain('https://api.instagram.com');
+      expect(connectSrcDirective).not.toContain('*');
+
+      // report-uri
+      expect(csp).toContain('report-uri /api/csp-report');
+    });
+
+    it('should verify standard browser security headers are present', async () => {
+      const res = await request(app).get('/api/health');
+      expect(res.headers['x-content-type-options']).toBe('nosniff');
+      expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
+      expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+      expect(res.headers['x-dns-prefetch-control']).toBe('off');
+      expect(res.headers['cross-origin-opener-policy']).toBe('same-origin-allow-popups');
+      expect(res.headers['cross-origin-resource-policy']).toBe('same-site');
+    });
+
+    it('should accept and log CSP violation reports at /api/csp-report', async () => {
+      const violationPayload = {
+        'csp-report': {
+          'document-uri': 'https://liinx.app/@creator',
+          'referrer': '',
+          'violated-directive': 'script-src',
+          'effective-directive': 'script-src',
+          'original-policy': "default-src 'self'",
+          'disposition': 'enforce',
+          'blocked-uri': 'inline',
+          'line-number': 1,
+          'source-file': 'https://liinx.app/@creator',
+          'status-code': 200,
+          'script-sample': ''
+        }
+      };
+
+      const res = await request(app)
+        .post('/api/csp-report')
+        .send(violationPayload);
+
+      expect(res.status).toBe(204);
+    });
+  });
 });

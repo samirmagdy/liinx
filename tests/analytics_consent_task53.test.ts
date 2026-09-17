@@ -52,5 +52,7 @@ describe('Task 53 analytics consent and external pixels', () => {
     expect(csp).toContain('https://connect.facebook.net');
     expect(csp).toContain('https://www.google-analytics.com');
     expect(csp).not.toContain("script-src *");
+    expect(csp).toMatch(/script-src 'self' 'nonce-[A-Za-z0-9+/=]+'/);
+    expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
   });
 });
