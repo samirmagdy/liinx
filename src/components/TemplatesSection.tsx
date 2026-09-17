@@ -3,6 +3,7 @@ import { TEMPLATES, THEMES } from '../data/mockData';
 import { CreatorProfile } from '../types';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { Reveal } from './motion/Reveal';
 import { PhonePreview } from './PhonePreview';
 
 interface TemplatesSectionProps {
@@ -43,7 +44,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
         </div>
 
         {/* Templates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Reveal stagger><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {visibleTemplates.map((template) => {
             const loc = t.templatesSection.templates[template.id] || {
               name: template.name,
@@ -101,7 +102,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
             </div>
           );
         })}
-        </div>
+        </div></Reveal>
 
         {maxVisible && TEMPLATES.length > maxVisible && (
           <div className="mt-8 text-center">

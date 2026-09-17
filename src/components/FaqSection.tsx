@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AccordionPanel } from './motion/AccordionPanel';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -66,11 +67,9 @@ export const FaqSection: React.FC = () => {
                   </div>
                 </button>
 
-                {isOpen && (
-                  <div id={`faq-answer-${idx}`} role="region" aria-labelledby={`faq-question-${idx}`} className="px-5 pb-5 pt-3 text-sm sm:text-base text-neutral-700 leading-relaxed border-t border-neutral-100 animate-fade-in text-pretty text-start">
+                <AccordionPanel open={isOpen} id={`faq-answer-${idx}`} labelledBy={`faq-question-${idx}`}>
                     {faq.answer}
-                  </div>
-                )}
+                </AccordionPanel>
               </div>
             );
           })}

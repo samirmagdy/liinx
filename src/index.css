@@ -123,27 +123,6 @@
   --shadow-lift: 0 24px 70px rgba(24, 24, 23, 0.14);
 }
 
-/* Scroll reveals are progressive enhancement: content is visible until JS opts
-   into the animated state, so failed animation code cannot hide the page. */
-.motion-reveal[data-motion-state="ready"] {
-  opacity: 0;
-  transform: translateY(var(--motion-distance-md));
-  transition: opacity var(--motion-duration-section) var(--motion-ease-out),
-    transform var(--motion-duration-section) var(--motion-ease-out);
-  transition-delay: var(--motion-delay, 0ms);
-}
-.motion-reveal-sm[data-motion-state="ready"] { transform: translateY(var(--motion-distance-sm)); }
-.motion-reveal-lg[data-motion-state="ready"] { transform: translateY(var(--motion-distance-lg)); }
-.motion-reveal[data-motion-state="visible"] { opacity: 1; transform: none; }
-
-@media (prefers-reduced-motion: reduce) {
-  .motion-reveal[data-motion-state="ready"] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
 /* Marketing interaction feedback stays on compositor-friendly properties. */
 .marketing-shell button,
 .marketing-shell a,
@@ -162,8 +141,10 @@
     border-color var(--motion-duration-fast) var(--motion-ease-out),
     box-shadow var(--motion-duration-standard) var(--motion-ease-out);
 }
-.marketing-shell .motion-card:hover,
-.marketing-home .motion-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+@media (hover: hover) and (pointer: fine) {
+  .marketing-shell .motion-card:hover,
+  .marketing-home .motion-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+}
 @media (prefers-reduced-motion: reduce) {
   .marketing-shell button:active,
   .marketing-shell a:active,
@@ -265,15 +246,6 @@
 @keyframes liinx-bg-breathe { from { opacity: 0.65; } to { opacity: 1; } }
 @keyframes liinx-bg-orbit { from { transform: rotate(-7deg) scale(0.96); } to { transform: rotate(7deg) scale(1.04); } }
 @media (prefers-reduced-motion: reduce) { .liinx-motion-background *, .liinx-motion-background { animation: none !important; } }
-
-@media (prefers-reduced-motion: no-preference) {
-  .hero-section .phone-shell { animation: float-preview 7s ease-in-out infinite; }
-}
-
-@keyframes float-preview {
-  0%, 100% { transform: translateY(0) rotate(1deg); }
-  50% { transform: translateY(-8px) rotate(0deg); }
-}
 
 /* Responsive safeguards for narrow phones and small tablets. These rules complement
    the component breakpoints and protect long editor controls from creating overflow. */

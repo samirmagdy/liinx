@@ -93,7 +93,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         )}
 
 {/* Plans Grid */}
-        <Reveal delay={140} distance="md"><div className="grid md:grid-cols-3 gap-6">
+        <Reveal stagger><div className="grid md:grid-cols-3 gap-6">
           {plans.map(plan => (
             <article
               key={plan.id}

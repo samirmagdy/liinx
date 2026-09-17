@@ -38,7 +38,8 @@ export default defineConfig(({ mode }) => {
             react: ['react', 'react-dom'],
             routing: ['wouter'],
             icons: ['lucide-react'],
-            motion: ['motion', 'canvas-confetti']
+            gsap: ['gsap', '@gsap/react', 'gsap/ScrollTrigger', 'gsap/SplitText'],
+            confetti: ['canvas-confetti']
           }
         }
       }

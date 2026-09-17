@@ -1,5 +1,5 @@
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '../context/AuthContext';
@@ -14,6 +14,7 @@ import {
   Check,
   Globe
 } from 'lucide-react';
+import { usePanelMotion } from '../animations/usePanelMotion';
 import { brand } from '../config/brand';
 
 interface NavbarProps {
@@ -31,6 +32,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { user, logout } = useAuth();
   const { lang, setLanguage, t, isRtl } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  usePanelMotion(headerRef, mobileMenuOpen, '#mobile-navigation a, #mobile-navigation button');
   const [quickHandle, setQuickHandle] = useState('');
   const [handleStatus, setHandleStatus] = useState<'idle' | 'available'>('idle');
 
@@ -76,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200/70 bg-neutral-100/90 backdrop-blur-md">
+    <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-neutral-200/70 bg-neutral-100/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
         
         {/* Brand Logo & Tag */}

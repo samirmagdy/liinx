@@ -1,45 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
+import { conditions, gsap, revealGroup, useGSAP } from '../../animations/gsap';
 
 interface RevealProps {
   children: React.ReactNode;
   className?: string;
   delay?: number;
   distance?: 'sm' | 'md' | 'lg';
+  stagger?: boolean;
 }
 
-/** Progressive enhancement: without JS the content remains visible. */
-export const Reveal: React.FC<RevealProps> = ({ children, className = '', delay = 0, distance = 'md' }) => {
+/** Server HTML and disabled JS stay visible; GSAP owns temporary styles. */
+export function Reveal({ children, className = '', delay = 0, distance = 'md', stagger = false }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<'idle' | 'ready' | 'visible'>('idle');
-
-  useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced || !('IntersectionObserver' in window)) {
-      setState('visible');
-      return;
-    }
-
-    setState('ready');
-    const node = ref.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry?.isIntersecting) return;
-      setState('visible');
-      observer.disconnect();
-    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`motion-reveal motion-reveal-${distance} ${className}`}
-      data-motion-state={state === 'idle' ? undefined : state}
-      style={{ '--motion-delay': `${delay}ms` } as React.CSSProperties}
-    >
-      {children}
-    </div>
-  );
-};
-
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add(conditions, context => {
+      const root = ref.current;
+      if (!root || context.conditions?.reduce) return;
+      const targets = stagger ? Array.from(root.querySelectorAll<HTMLElement>('.motion-card')) : [root];
+      return revealGroup(root, targets, context.conditions?.desktop ? { sm: 6, md: 14, lg: 24 }[distance] : 6, Math.min(delay / 1000, 0.16));
+    });
+    return () => mm.revert();
+  }, { scope: ref, dependencies: [delay, distance, stagger], revertOnUpdate: true });
+  return <div ref={ref} className={className}>{children}</div>;
+}
