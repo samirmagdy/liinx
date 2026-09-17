@@ -66,6 +66,20 @@ export default tseslint.config(
     }
   },
 
+  // Architectural guardrails are warnings here so the existing baseline can
+  // be reviewed without forcing meaningless splits. CI runs the baseline-aware
+  // architecture check, which blocks new or worsening violations.
+  {
+    files: ['src/**/*.{ts,tsx}', 'server/**/*.ts'],
+    ignores: ['src/config/**', 'src/demo/**', 'server/db.ts'],
+    rules: {
+      'max-lines': ['warn', { max: 800, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 100, skipBlankLines: true, skipComments: true, IIFEs: true }],
+      complexity: ['warn', { max: 25 }],
+      'max-depth': ['warn', 4]
+    }
+  },
+
   // React & React Hooks specific rules for frontend files
   {
     files: ['src/**/*.{ts,tsx}'],

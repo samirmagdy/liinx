@@ -29,7 +29,7 @@ import { startInstagramSyncScheduler } from './instagramScheduler.js';
 import { isHttpUrl } from './utils/urlValidation.js';
 import { hasEntitlement } from './entitlements.js';
 import { enforceSingleNodeSafeguards } from './infrastructure/safeguards.js';
-import { uploadStorage, uploadStorageProvider } from './services/uploadStorage.js';
+import { uploadStorage } from './services/uploadStorage.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -513,7 +513,7 @@ app.get('/api/ready', async (_req, res) => {
     db.prepare('SELECT 1').get();
     const storageReady = uploadStorage.healthCheck ? await uploadStorage.healthCheck() : true;
     if (!storageReady) return res.status(503).json({ status: 'not_ready', service: 'liinx-api', error: 'Required storage is unavailable.' });
-    res.json({ status: 'ready', service: 'liinx-api', database: 'connected', uploads: 'configured', storageProvider: uploadStorageProvider });
+    res.json({ status: 'ready', service: 'liinx-api', database: 'connected', uploads: 'writable' });
   } catch {
     res.status(503).json({ status: 'not_ready', service: 'liinx-api', error: 'Required storage is unavailable.' });
   }

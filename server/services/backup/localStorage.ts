@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { type BackupStorage, type BackupMetadata, type BackupItem } from './types.js';
+import { computeSha256 } from './crypto.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,11 +76,22 @@ export class LocalBackupStorage implements BackupStorage {
         }
       }
 
+      let valid = true;
+      if (metadata) {
+        try {
+          const data = await fs.promises.readFile(fullPath);
+          valid = metadata.sizeBytes === stat.size && metadata.checksumSha256 === computeSha256(data);
+        } catch {
+          valid = false;
+        }
+      }
+
       items.push({
         key: f,
         sizeBytes: stat.size,
         lastModified: stat.mtimeMs,
-        metadata
+        metadata,
+        valid
       });
     }
 

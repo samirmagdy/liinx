@@ -18,6 +18,8 @@ export interface BackupItem {
   sizeBytes: number;
   lastModified: number;
   metadata?: BackupMetadata;
+  /** False only when the storage adapter verified the payload is corrupt. */
+  valid?: boolean;
 }
 
 export interface BackupStorage {
@@ -40,9 +42,10 @@ export interface S3Config {
 }
 
 export interface RetentionConfig {
-  daily: number;    // Number of daily backups to keep (default: 7)
-  weekly: number;   // Number of weekly backups to keep (default: 4)
-  monthly: number;  // Number of monthly backups to keep (default: 3)
+  daily: number;    // Number of daily slots to keep (default: 7)
+  weekly: number;   // Number of weekly slots to keep (default: 4)
+  monthly: number;  // Number of monthly slots to keep (default: 3)
+  minimumKnownGood?: number; // Minimum valid backups to retain when available (default: 2)
 }
 
 export interface BackupResult {

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { db } from './db.js';
 import { log, logError } from './logger.js';
+import { getUploadBackupRetentionCount } from './services/backup/retention.js';
 
 const dayMs = 24 * 60 * 60 * 1000;
 
@@ -42,10 +43,17 @@ export function backupUploads(): { archivePath: string; sizeBytes: number } {
   execFileSync('tar', ['-czf', archivePath, '-C', uploadsDir, '.'], { stdio: 'pipe' });
   const sizeBytes = fs.statSync(archivePath).size;
   log('info', 'Upload backup completed', { archivePath, sizeBytes });
+  const retentionCount = getUploadBackupRetentionCount();
   const backups = fs.readdirSync(backupDir)
     .filter(file => file.startsWith('liinx-uploads-') && file.endsWith('.tar.gz'))
     .map(file => ({ file, mtime: fs.statSync(path.join(backupDir, file)).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime);
-  for (const stale of backups.slice(10)) fs.unlinkSync(path.join(backupDir, stale.file));
+  for (const stale of backups.slice(retentionCount)) {
+    fs.unlinkSync(path.join(backupDir, stale.file));
+    log('info', 'Deleted upload backup by count retention policy', {
+      archivePath: path.join(backupDir, stale.file),
+      reason: `older than configured UPLOAD_BACKUP_RETENTION_COUNT=${retentionCount}`
+    });
+  }
   return { archivePath, sizeBytes };
 }

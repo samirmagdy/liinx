@@ -31,7 +31,9 @@ BackupService
    - Performs post-upload HEAD check and SHA-256 integrity verification.
    - **Fail-Closed Rule**: Backup success is never logged until remote persistence and integrity verification succeed when remote backup is enabled.
 4. **Lifecycle Retention (GFS)**:
-   - Evaluates a Grandfather-Father-Son retention policy (`BACKUP_RETENTION_DAILY`, `BACKUP_RETENTION_WEEKLY`, `BACKUP_RETENTION_MONTHLY`).
+   - Evaluates the explicit Grandfather-Father-Son retention policy (`BACKUP_RETENTION_DAILY`, `BACKUP_RETENTION_WEEKLY`, `BACKUP_RETENTION_MONTHLY`) and always preserves `BACKUP_RETENTION_MINIMUM_KNOWN_GOOD` valid backups when available.
+   - The legacy local upload archive helper uses `UPLOAD_BACKUP_RETENTION_COUNT`; its default is 30 and it no longer contains a source-code retention count.
+   - Retention configuration is validated as a non-negative integer. Invalid values fall back to safe defaults and emit a warning. Corrupt local backups are never selected as known-good and are logged/skipped rather than silently deleted.
    - Automatically prunes obsolete backups from local and remote storage.
 
 ### Backup schedule
@@ -59,6 +61,12 @@ Example crontab configuration:
 > If `BACKUP_ENCRYPTION_KEY` is configured, backups are encrypted using AES-256-GCM before remote upload.
 > You **MUST** store this key in an external secret manager (e.g., AWS Secrets Manager, 1Password, Vault).
 > **If the production disk is lost along with `.env`, backups CANNOT be recovered without this key.**
+
+For remote S3-compatible storage, keep bucket versioning/object lock and lifecycle
+rules managed by the provider as a second operational control. Set their expiry
+longer than the Liinx application policy so a mistaken application prune cannot
+be the only recoverability boundary. Liinx still verifies and prunes its own
+current-version objects, and logs each deletion with its retention reason.
 
 1. Store `BACKUP_ENCRYPTION_KEY` separately from the application host.
 2. In disaster recovery scenarios where the original host is destroyed, provision the new environment with the saved `BACKUP_ENCRYPTION_KEY` before attempting a restore.

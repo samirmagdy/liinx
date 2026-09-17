@@ -294,8 +294,22 @@ export class BackupService {
       const retentionConfig = getRetentionConfig();
       const { prune } = evaluateRetention(items, retentionConfig);
 
+      for (const item of items.filter(candidate => candidate.valid === false)) {
+        log('warn', 'Skipped corrupt backup during retention pruning', {
+          storage: storage.name,
+          key: item.key,
+          reason: 'payload failed checksum or metadata validation'
+        });
+      }
+
       for (const key of prune) {
-        await storage.delete(key);
+        const deleted = await storage.delete(key);
+        log('info', deleted ? 'Deleted backup by retention policy' : 'Backup retention deletion skipped', {
+          storage: storage.name,
+          key,
+          reason: 'outside configured GFS retention window',
+          deleted
+        });
       }
     } catch (err) {
       logError(`Failed to prune old backups in storage '${storage.name}'`, err);

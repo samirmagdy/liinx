@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "thresholds": {
+    "fileLines": 800,
+    "functionLines": 100,
+    "complexity": 25,
+    "maxDepth": 4
+  },
+  "ignored": [
+    "src/config/**",
+    "src/demo/**",
+    "server/db.ts",
+    "dist/**",
+    "dist-server/**",
+    "coverage/**",
+    "data/**"
+  ],
+  "files": {}
+}

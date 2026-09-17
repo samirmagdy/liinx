@@ -12,6 +12,7 @@ import {
   encryptBackupData,
   decryptBackupData,
   evaluateRetention,
+  getRetentionConfig,
   type BackupItem,
   BackupService,
   backupService
@@ -68,6 +69,17 @@ describe('Disaster Recovery & Remote Backup System', () => {
       await storage.delete('liinx-db-2026-09-17.sqlite');
       expect(fs.existsSync(path.join(tempDir, 'liinx-db-2026-09-17.sqlite'))).toBe(false);
       expect(fs.existsSync(path.join(tempDir, 'liinx-db-2026-09-17.sqlite.meta.json'))).toBe(false);
+    });
+
+    it('marks a checksum-corrupted archive invalid for retention decisions', async () => {
+      const storage = new LocalBackupStorage(tempDir);
+      await storage.save('liinx-db-corrupt.sqlite', Buffer.from('actual'), {
+        id: 'corrupt-backup', type: 'database', filename: 'liinx-db-corrupt.sqlite',
+        sizeBytes: 6, timestamp: new Date().toISOString(), version: 1,
+        checksumSha256: computeSha256(Buffer.from('different')), encrypted: false
+      });
+      const listed = await storage.list('liinx-db-');
+      expect(listed.find(item => item.key === 'liinx-db-corrupt.sqlite')?.valid).toBe(false);
     });
   });
 
@@ -262,6 +274,45 @@ describe('Disaster Recovery & Remote Backup System', () => {
   });
 
   describe('Retention Policy (GFS)', () => {
+    const retentionItem = (key: string, lastModified: number, valid = true): BackupItem => ({ key, sizeBytes: 10, lastModified, valid });
+
+    it('handles empty, undersized, exact-size, and over-capacity backup sets', () => {
+      const now = Date.parse('2026-09-17T12:00:00Z');
+      const config = { daily: 3, weekly: 0, monthly: 0, minimumKnownGood: 2 };
+      expect(evaluateRetention([], config, new Date(now))).toMatchObject({ keep: new Set(), prune: [] });
+
+      const fewer = [retentionItem('b2', now - 2), retentionItem('b1', now - 1)];
+      expect(evaluateRetention(fewer, config, new Date(now)).prune).toEqual([]);
+
+      const exact = [1, 2, 3].map(index => retentionItem(`exact-${index}`, now - index * 24 * 60 * 60 * 1000));
+      expect(evaluateRetention(exact, config, new Date(now)).prune).toEqual([]);
+
+      const more = [1, 2, 3, 4, 5].map(index => retentionItem(`more-${index}`, now - index * 24 * 60 * 60 * 1000));
+      expect(evaluateRetention(more, config, new Date(now)).prune.length).toBeGreaterThan(0);
+    });
+
+    it('does not use or delete a corrupted backup, and preserves the newest valid backups', () => {
+      const now = Date.parse('2026-09-17T12:00:00Z');
+      const items = [
+        retentionItem('corrupt-newest', now, false),
+        retentionItem('valid-newest', now - 1),
+        retentionItem('valid-older', now - 2),
+        retentionItem('valid-oldest', now - 3)
+      ];
+      const result = evaluateRetention(items, { daily: 0, weekly: 0, monthly: 0, minimumKnownGood: 2 }, new Date(now));
+      expect(result.keep).toEqual(new Set(['valid-newest', 'valid-older']));
+      expect(result.prune).toEqual(['valid-oldest']);
+      expect(result.prune).not.toContain('corrupt-newest');
+    });
+
+    it('validates environment retention values and uses safe defaults', () => {
+      const previous = process.env.BACKUP_RETENTION_DAILY;
+      process.env.BACKUP_RETENTION_DAILY = '-4';
+      expect(getRetentionConfig().daily).toBe(7);
+      if (previous === undefined) delete process.env.BACKUP_RETENTION_DAILY;
+      else process.env.BACKUP_RETENTION_DAILY = previous;
+    });
+
     it('evaluates daily, weekly, and monthly slots and determines pruning list', () => {
       const now = new Date('2026-09-17T12:00:00Z');
       const oneDay = 24 * 60 * 60 * 1000;
