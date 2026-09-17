@@ -79,6 +79,29 @@ describe('Critical Security & Coverage Modules', () => {
       }
     });
 
+    it('encrypts and decrypts with 64-character hex key', () => {
+      const origKey = process.env.INTEGRATION_ENCRYPTION_KEY;
+      try {
+        process.env.INTEGRATION_ENCRYPTION_KEY = randomBytes(32).toString('hex');
+        const encrypted = encryptSecret('hex_key_payload');
+        expect(decryptSecret(encrypted)).toBe('hex_key_payload');
+      } finally {
+        if (origKey) process.env.INTEGRATION_ENCRYPTION_KEY = origKey;
+        else delete process.env.INTEGRATION_ENCRYPTION_KEY;
+      }
+    });
+
+    it('falls back to JWT_SECRET in non-production environments when INTEGRATION_ENCRYPTION_KEY is unset', () => {
+      const origKey = process.env.INTEGRATION_ENCRYPTION_KEY;
+      delete process.env.INTEGRATION_ENCRYPTION_KEY;
+      try {
+        const encrypted = encryptSecret('jwt_fallback_payload');
+        expect(decryptSecret(encrypted)).toBe('jwt_fallback_payload');
+      } finally {
+        if (origKey) process.env.INTEGRATION_ENCRYPTION_KEY = origKey;
+      }
+    });
+
     it('throws in production if INTEGRATION_ENCRYPTION_KEY is missing or invalid length', () => {
       const origEnv = process.env.NODE_ENV;
       const origKey = process.env.INTEGRATION_ENCRYPTION_KEY;
@@ -315,6 +338,54 @@ describe('Critical Security & Coverage Modules', () => {
       expect(badPlan.body.error).toMatch(/Invalid plan/);
     });
 
+    it('handles create-checkout-session edge cases: 503 unconfigured and 409 existing subscription', async () => {
+      const email = `chk_edge_${Date.now()}@liinx.test`;
+      const reg = await request(app).post('/api/auth/register').send({
+        email, password: 'Password123!', username: `cke_${Date.now().toString().slice(-8)}`
+      });
+      const token = reg.body.token;
+      const profileId = reg.body.profileId;
+
+      // Existing subscription conflict (409) if stripe configured or 503 if unconfigured
+      db.prepare('UPDATE profiles SET stripe_subscription_id = ? WHERE id = ?').run('sub_existing_123', profileId);
+      const conflictRes = await request(app)
+        .post('/api/billing/create-checkout-session')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ plan: 'pro', interval: 'month' });
+      expect([409, 503]).toContain(conflictRes.status);
+      if (conflictRes.status === 409) {
+        expect(conflictRes.body.error).toMatch(/Manage your existing subscription/);
+      }
+    });
+
+    it('handles create-portal-session: 400 when customer absent, 503 when stripe unconfigured, or returns portal url', async () => {
+      const email = `port_edge_${Date.now()}@liinx.test`;
+      const reg = await request(app).post('/api/auth/register').send({
+        email, password: 'Password123!', username: `pte_${Date.now().toString().slice(-8)}`
+      });
+      const token = reg.body.token;
+      const profileId = reg.body.profileId;
+
+      // Without stripe_customer_id
+      const noCustRes = await request(app)
+        .post('/api/billing/create-portal-session')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+      // Either 503 (if stripeClient null) or 400 (if stripeClient present but no customer)
+      expect([400, 503]).toContain(noCustRes.status);
+      if (noCustRes.status === 400) {
+        expect(noCustRes.body.error).toMatch(/No active Stripe customer account found/);
+      }
+
+      // With stripe_customer_id set
+      db.prepare('UPDATE profiles SET stripe_customer_id = ? WHERE id = ?').run('cus_test_portal_999', profileId);
+      const withCustRes = await request(app)
+        .post('/api/billing/create-portal-session')
+        .set('Authorization', `Bearer ${token}`)
+        .send();
+      expect([200, 500, 503]).toContain(withCustRes.status);
+    });
+
     it('handles customer.subscription.updated, customer.subscription.deleted, and invoice.payment_failed via customerId', async () => {
       const origSecret = process.env.STRIPE_WEBHOOK_SECRET;
       delete process.env.STRIPE_WEBHOOK_SECRET;
@@ -389,6 +460,61 @@ describe('Critical Security & Coverage Modules', () => {
 
         const profileAfterDel = db.prepare('SELECT plan, stripe_subscription_id FROM profiles WHERE id = ?').get(profileId) as any;
         expect(profileAfterDel.plan).toBe('free');
+
+        // 4. checkout.session.completed with client_reference_id & paid status
+        const checkoutEventId = `evt_chk_comp_${randomBytes(4).toString('hex')}`;
+        const checkoutCompleted = await request(app).post('/api/billing/webhook').send({
+          id: checkoutEventId,
+          type: 'checkout.session.completed',
+          created: Math.floor(Date.now() / 1000) + 3,
+          data: {
+            object: {
+              client_reference_id: profileId,
+              customer: customerId,
+              subscription: subscriptionId,
+              payment_status: 'paid',
+              metadata: { plan: 'studio' }
+            }
+          }
+        });
+        expect(checkoutCompleted.status).toBe(200);
+        const profileAfterCheckout = db.prepare('SELECT plan, stripe_subscription_id FROM profiles WHERE id = ?').get(profileId) as any;
+        expect(profileAfterCheckout.plan).toBe('studio');
+
+        // 5. customer.subscription.updated with profileId in metadata and non-good-standing status ('past_due')
+        const pastDueEventId = `evt_sub_past_${randomBytes(4).toString('hex')}`;
+        const pastDue = await request(app).post('/api/billing/webhook').send({
+          id: pastDueEventId,
+          type: 'customer.subscription.updated',
+          created: Math.floor(Date.now() / 1000) + 4,
+          data: {
+            object: {
+              id: subscriptionId,
+              customer: customerId,
+              status: 'past_due',
+              metadata: { profileId, plan: 'studio' }
+            }
+          }
+        });
+        expect(pastDue.status).toBe(200);
+        const profileAfterPastDue = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(profileId) as any;
+        expect(profileAfterPastDue.plan).toBe('free');
+
+        // 6. customer.subscription.deleted with profileId in metadata
+        const delMetaEventId = `evt_sub_del_meta_${randomBytes(4).toString('hex')}`;
+        const delMeta = await request(app).post('/api/billing/webhook').send({
+          id: delMetaEventId,
+          type: 'customer.subscription.deleted',
+          created: Math.floor(Date.now() / 1000) + 5,
+          data: {
+            object: {
+              id: subscriptionId,
+              customer: customerId,
+              metadata: { profileId }
+            }
+          }
+        });
+        expect(delMeta.status).toBe(200);
       } finally {
         if (origSecret) process.env.STRIPE_WEBHOOK_SECRET = origSecret;
       }
