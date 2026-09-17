@@ -2,6 +2,7 @@ import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { type CreatorProfile, type ThemeConfig, type ProfileBlock } from '../types';
 import { brand } from '../config/brand';
+import { LoadingLogo } from '../components/LoadingLogo';
 import { 
   CheckCircle2, 
   ExternalLink, 
@@ -63,6 +64,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [previewNotice, setPreviewNotice] = useState<string | null>(null);
   const [footerLogoFailed, setFooterLogoFailed] = useState(false);
+  const [footerLogoLoading, setFooterLogoLoading] = useState(false);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => ({
@@ -705,7 +707,13 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
         {profile.footerLogoUrl && (
           <div className="pt-2 text-center">
-            {footerLogoFailed ? <span role="img" aria-label={profile.footerLogoAlt || ui('Creator logo')} className="text-xs font-semibold" dir="auto">{profile.footerLogoAlt || ui('Creator logo')}</span> : <img src={profile.footerLogoUrl} alt={profile.footerLogoAlt || ui('Creator logo')} onError={() => setFooterLogoFailed(true)} className="mx-auto h-4 max-w-20 object-contain" />}
+            {footerLogoFailed ? <span role="img" aria-label={profile.footerLogoAlt || ui('Creator logo')} className="text-xs font-semibold" dir="auto">{profile.footerLogoAlt || ui('Creator logo')}</span> : (
+              <LoadingLogo
+                loading={footerLogoLoading}
+                size="sm"
+                className="mx-auto h-4 max-w-20 object-contain"
+              />
+            )}
           </div>
         )}
 

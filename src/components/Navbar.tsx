@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { usePanelMotion } from '../animations/usePanelMotion';
 import { brand } from '../config/brand';
+import { LoadingLogo } from '../components/LoadingLogo';
 import { UserMenuDropdown } from './UserMenuDropdown';
 
 interface NavbarProps {
@@ -199,13 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             href="/"
             className="flex items-center gap-2.5 text-left group focus:outline-none focus:ring-2 focus:ring-neutral-900/20 rounded-lg cursor-pointer"
           >
-            <div className="relative w-9 h-9 rounded-xl bg-neutral-50 text-neutral-900 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
-              <div className="flex items-center gap-0.5">
-                <span className="w-1.5 h-4.5 bg-neutral-50 rounded-full" />
-                <span className="w-1.5 h-3 bg-amber-400 rounded-full" />
-                <span className="w-1.5 h-4.5 bg-neutral-50 rounded-full" />
-              </div>
-            </div>
+            <LoadingLogo loading={false} className="relative w-9 h-9 rounded-xl bg-neutral-50 text-neutral-900 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform" />
             
             <div className="flex flex-col">
               <span className="font-brand font-extrabold text-lg tracking-tight text-neutral-900 leading-none">

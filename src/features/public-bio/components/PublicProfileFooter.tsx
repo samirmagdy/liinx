@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation } from 'wouter';
 import { type CreatorProfile, type ThemeConfig } from '../../../types';
+import { LoadingLogo } from '../../../components/LoadingLogo';
 import { getBorderColor } from '../../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { safePublicHref } from '../utils/publicBio.utils';
@@ -10,6 +11,8 @@ interface PublicProfileFooterProps {
   theme: ThemeConfig;
   footerLogoFailed: boolean;
   setFooterLogoFailed: (failed: boolean) => void;
+  footerLogoLoading: boolean;
+  setFooterLogoLoading: (loading: boolean) => void;
   onBackToStudio?: () => void;
 }
 
@@ -18,6 +21,8 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
   theme,
   footerLogoFailed,
   setFooterLogoFailed,
+  footerLogoLoading,
+  setFooterLogoLoading,
   onBackToStudio
 }) => {
   const { tr: ui } = useUiLanguage();
@@ -37,10 +42,9 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
               {logoLabel}
             </span>
           ) : (
-            <img
-              src={profile.footerLogoUrl}
-              alt={logoLabel}
-              onError={() => setFooterLogoFailed(true)}
+            <LoadingLogo
+              loading={footerLogoLoading}
+              size="sm"
               className="h-4 max-w-20 object-contain"
             />
           );

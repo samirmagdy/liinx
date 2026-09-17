@@ -4,6 +4,7 @@ import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { brand } from '../config/brand';
+import { LoadingLogo } from '../components/LoadingLogo';
 import { THEMES } from '../config/themes';
 import confetti from 'canvas-confetti';
 import {
@@ -146,9 +147,7 @@ export const RegisterPage: React.FC = () => {
     <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
-          <div className="w-9 h-9 rounded-xl bg-neutral-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-            {brand.logoMark}
-          </div>
+          <LoadingLogo loading={false} size="md" className="w-9 h-9 rounded-xl bg-neutral-900 flex items-center justify-center text-white font-bold text-lg shadow-sm" />
           <span className="font-bold text-xl tracking-tight text-neutral-900">{brand.productShortName}</span>
         </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">

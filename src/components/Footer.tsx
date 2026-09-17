@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { ResourceModal, type ResourceDocType } from './ResourceModal';
 import { brand } from '../config/brand';
+import { LoadingLogo } from '../components/LoadingLogo';
 import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { Globe } from 'lucide-react';
 
@@ -28,13 +29,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
             {/* Brand Column (2 cols) */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-neutral-50 text-neutral-900 flex items-center justify-center font-bold shadow-sm">
-                  <div className="flex items-center gap-0.5">
-                    <span className="w-1.5 h-4 bg-[#111315] rounded-full" />
-                    <span className="w-1.5 h-2.5 bg-amber-500 rounded-full" />
-                    <span className="w-1.5 h-4 bg-[#111315] rounded-full" />
-                  </div>
-                </div>
+                <LoadingLogo loading={false} size="sm" className="flex items-center justify-center" />
                 <span className="font-brand font-extrabold text-xl tracking-tight text-white">
                   {brand.productShortName}
                 </span>
