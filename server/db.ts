@@ -376,12 +376,23 @@ export function initDatabase() {
       key_hash TEXT NOT NULL,
       prefix TEXT NOT NULL,
       name TEXT NOT NULL,
+      expires_at INTEGER,
       created_at INTEGER NOT NULL,
       FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
     );
 
     CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
     CREATE INDEX IF NOT EXISTS idx_api_keys_profile ON api_keys(profile_id);
+
+    CREATE TABLE IF NOT EXISTS api_idempotency_keys (
+      request_key TEXT NOT NULL,
+      profile_id TEXT NOT NULL,
+      response_json TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY (request_key, profile_id),
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_api_idempotency_created ON api_idempotency_keys(created_at);
 
     CREATE TABLE IF NOT EXISTS processed_webhook_events (
       event_id TEXT PRIMARY KEY,
@@ -412,6 +423,8 @@ export function initDatabase() {
     );
     CREATE INDEX IF NOT EXISTS idx_form_submissions_profile ON form_submissions(profile_id, created_at);
   `);
+  try { db.exec('ALTER TABLE api_keys ADD COLUMN expires_at INTEGER'); } catch {}
+  db.prepare('UPDATE api_keys SET expires_at = created_at + ? WHERE expires_at IS NULL').run(90 * 24 * 60 * 60 * 1000);
   try { db.exec('ALTER TABLE form_submissions ADD COLUMN submission_key TEXT'); } catch {}
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_form_submissions_idempotency ON form_submissions(block_id, submission_key) WHERE submission_key IS NOT NULL');
 

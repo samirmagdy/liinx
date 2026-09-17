@@ -250,13 +250,13 @@ export const api = {
     },
     getApiKeys: async () => {
       return request<{
-        keys: { id: string; prefix: string; name: string; createdAt: number }[];
+        keys: { id: string; prefix: string; name: string; createdAt: number; expiresAt?: number | null }[];
       }>('/api/studio/api-keys');
     },
     createApiKey: async (name: string) => {
       return request<{
         success: boolean;
-        key: { id: string; name: string; prefix: string; createdAt: number };
+        key: { id: string; name: string; prefix: string; createdAt: number; expiresAt?: number | null };
         apiKey: string;
         warning: string;
       }>('/api/studio/api-keys', {

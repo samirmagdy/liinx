@@ -326,7 +326,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   const [stylingError, setStylingError] = useState<string | null>(null);
 
   // REST API Keys State (Milestone 8)
-  const [apiKeyList, setApiKeyList] = useState<{ id: string; prefix: string; name: string; createdAt: number }[]>([]);
+  const [apiKeyList, setApiKeyList] = useState<{ id: string; prefix: string; name: string; createdAt: number; expiresAt?: number | null }[]>([]);
   const [showNewKeyModal, setShowNewKeyModal] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [createdApiKey, setCreatedApiKey] = useState<string | null>(null);
@@ -2972,6 +2972,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                             <div className="flex flex-col">
                               <span className="font-bold text-neutral-900">{k.name}</span>
                               <span className="font-mono text-[11px] text-neutral-400">{k.prefix}</span>
+                              {k.expiresAt && <span className="text-[10px] text-neutral-500">{ui('Expires')} {new Date(k.expiresAt).toLocaleDateString()}</span>}
                             </div>
                             {confirmRevokeKeyId === k.id ? (
                               <div className="flex items-center gap-1.5">
