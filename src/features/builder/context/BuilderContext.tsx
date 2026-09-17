@@ -16,6 +16,7 @@ import {
   type FormSubmissionItem,
   type BuilderLoadState
 } from '../types/builder.types';
+import { initialBuilderTab } from '../utils/builder.utils';
 import { useAutosave } from '../hooks/useAutosave';
 import { useProfile, EMPTY_BUILDER_PROFILE } from '../hooks/useProfile';
 import { usePages } from '../hooks/usePages';
@@ -292,7 +293,7 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
   children
 }) => {
   const { tr: ui } = useUiLanguage();
-  const [activeTab, setActiveTab] = useState<BuilderTab>('content');
+  const [activeTab, setActiveTab] = useState<BuilderTab>(initialBuilderTab);
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('mobile');
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);

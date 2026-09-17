@@ -8,19 +8,131 @@ import {
   Menu, 
   X, 
   Smartphone, 
-  LogOut,
-  User,
-  Check,
-  Globe
+  LogOut, 
+  Check, 
+  Globe,
+  ExternalLink,
+  Settings
 } from 'lucide-react';
 import { usePanelMotion } from '../animations/usePanelMotion';
 import { brand } from '../config/brand';
+import { UserMenuDropdown } from './UserMenuDropdown';
 
 interface NavbarProps {
   activeView?: 'home' | 'builder' | 'templates' | 'pricing' | 'features' | 'about' | 'contact' | 'privacy' | 'terms';
   onSelectView?: (view: any) => void;
   onClaimClick?: (username: string) => void;
 }
+
+interface MobileMenuProps {
+  user: any;
+  lang: string;
+  t: any;
+  ui: (key: string) => string;
+  onClose: () => void;
+  onLogout: () => void;
+}
+
+const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onLogout }) => (
+  <div id="mobile-navigation" className="xl:hidden border-t border-neutral-200/60 bg-neutral-50 px-4 pt-3 pb-6 space-y-3">
+    <div className="grid grid-cols-2 gap-2">
+      <Link
+        href="/"
+        onClick={onClose}
+        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
+      >
+        {lang === 'ar' ? 'الرئيسية' : 'Overview'}
+      </Link>
+      <Link
+        href="/features"
+        onClick={onClose}
+        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
+      >
+        {t.nav.features}
+      </Link>
+      <Link
+        href="/templates"
+        onClick={onClose}
+        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
+      >
+        {t.nav.templates}
+      </Link>
+      <Link
+        href="/pricing"
+        onClick={onClose}
+        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
+      >
+        {t.nav.pricing}
+      </Link>
+    </div>
+
+    <div className="pt-2">
+      {user ? (
+        <div className="p-3 bg-white rounded-2xl border border-neutral-200 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] text-neutral-400 block">{ui("Logged in")}</span>
+              <span className="text-xs font-bold font-mono text-neutral-900">@{user.username}</span>
+            </div>
+            <button
+              onClick={() => {
+                onClose();
+                onLogout();
+              }}
+              className="text-xs text-rose-600 font-semibold cursor-pointer hover:text-rose-700 flex items-center gap-1"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>{ui("Log out")}</span>
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-neutral-100">
+            <Link
+              href={`/@${user.username}`}
+              onClick={onClose}
+              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
+              <span>{ui("View Live Bio")}</span>
+            </Link>
+            <Link
+              href="/studio"
+              onClick={onClose}
+              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-amber-600" />
+              <span>{ui("Studio Builder")}</span>
+            </Link>
+            <Link
+              href="/studio?tab=settings"
+              onClick={onClose}
+              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
+            >
+              <Settings className="w-3.5 h-3.5 text-neutral-500" />
+              <span>{ui("Account Settings")}</span>
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            href="/login"
+            onClick={onClose}
+            className="py-2.5 text-center text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-xl"
+          >
+            {t.nav.login}
+          </Link>
+          <Link
+            href="/register"
+            onClick={onClose}
+            className="py-2.5 text-center text-xs font-semibold bg-neutral-900 text-white rounded-xl"
+          >
+            {t.nav.register}
+          </Link>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeView = 'home',
@@ -171,22 +283,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {user ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/studio"
-                className="px-3.5 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-900 text-xs font-semibold flex items-center gap-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>@{user.username}</span>
-              </Link>
-              <button
-                onClick={logout}
-                title={ui("Log out")}
-                className="p-2 rounded-full hover:bg-neutral-100 text-neutral-600 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
+            <UserMenuDropdown user={user} onLogout={logout} />
           ) : (
             <div className="flex items-center gap-2">
               <Link
@@ -234,65 +331,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div id="mobile-navigation" className="xl:hidden border-t border-neutral-200/60 bg-neutral-50 px-4 pt-3 pb-6 space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
-            >
-              {lang === 'ar' ? 'الرئيسية' : 'Overview'}
-            </Link>
-            <Link
-              href="/features"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
-            >
-              {t.nav.features}
-            </Link>
-            <Link
-              href="/templates"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
-            >
-              {t.nav.templates}
-            </Link>
-            <Link
-              href="/pricing"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
-            >
-              {t.nav.pricing}
-            </Link>
-          </div>
-
-          <div className="pt-2">
-            {user ? (
-              <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl border border-neutral-200">
-                <span className="text-xs font-semibold">{ui("Logged in as @")}{user.username}</span>
-                <button onClick={logout} className="text-xs text-rose-600 font-semibold cursor-pointer hover:text-rose-700">
-                  {ui("Log Out")}</button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="py-2.5 text-center text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-xl"
-                >
-                  {t.nav.login}
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="py-2.5 text-center text-xs font-semibold bg-neutral-900 text-white rounded-xl"
-                >
-                  {t.nav.register}
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
+        <MobileMenu
+          user={user}
+          lang={lang}
+          t={t}
+          ui={ui}
+          onClose={() => setMobileMenuOpen(false)}
+          onLogout={logout}
+        />
       )}
     </header>
   );

@@ -46,3 +46,12 @@ export const getScheduleStatus = (
 export const initialPageId = (nextProfile: { pages?: Array<{ id: string; isHome?: boolean }> }): string =>
   nextProfile.pages?.find(page => page.isHome)?.id || nextProfile.pages?.[0]?.id || '';
 
+export const initialBuilderTab = (): 'content' | 'appearance' | 'settings' | 'analytics' => {
+  if (typeof window === 'undefined') return 'content';
+  const param = new URLSearchParams(window.location.search).get('tab');
+  if (param === 'settings' || param === 'appearance' || param === 'analytics' || param === 'content') {
+    return param;
+  }
+  return 'content';
+};
+

@@ -173,6 +173,10 @@ export const runtimeTranslations: Record<string, string> = {
   'Paused': 'متوقف',
   'Profile importing is currently unavailable': 'استيراد الملفات غير متاح حالياً',
   'Profile importing is currently unavailable.': 'استيراد الملفات غير متاح حالياً.',
+  'Studio Builder': 'استوديو التصميم',
+  'Account Settings': 'إعدادات الحساب',
+  'View Live Bio': 'عرض الصفحة الحية',
+  'Logged in': 'تسجيل الدخول كـ',
 };
 
 export function translateRuntime(value: string, lang: Language): string {
