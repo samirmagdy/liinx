@@ -33,7 +33,7 @@ jobs:
       - name: Static Code Quality & Linting (ESLint)
         run: npm run lint
 
-      - name: Build Production Frontend Bundle
+      - name: Build Production Frontend & Server Bundles
         run: npm run build
 
       - name: Execute Full Test Suite & Enforce Coverage (Vitest)
@@ -47,4 +47,5 @@ jobs:
       - name: Verify Bundle Integrity
         run: |
           test -f dist/index.html || (echo "dist/index.html is missing!" && exit 1)
-          echo "Production assets successfully compiled and validated."
+          test -f dist-server/server.js || (echo "dist-server/server.js is missing!" && exit 1)
+          echo "Production frontend and server assets successfully compiled and validated."

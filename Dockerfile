@@ -20,7 +20,7 @@ COPY public/ ./public/
 COPY server/ ./server/
 COPY scripts/ ./scripts/
 
-# Build client SPA assets into dist/
+# Build client SPA assets into dist/ and compiled server into dist-server/
 RUN npm run build
 
 # Prune devDependencies to keep image lean
@@ -37,15 +37,12 @@ RUN apk add --no-cache tini curl
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copy node_modules from builder (including compiled native SQLite bindings)
+# Copy production node_modules from builder (including compiled native SQLite bindings)
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist-server ./dist-server
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/server ./server
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/tsconfig.json ./
 
 # Create data and uploads directories
 RUN mkdir -p /app/data /app/public/uploads

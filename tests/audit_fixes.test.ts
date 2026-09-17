@@ -454,22 +454,24 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 10: Production Docker Deployment
+  // Point 10: Production Docker Deployment & Compiled Server Build
   describe('Point 10: Production Dockerfile & Runtime Dependency Integrity', () => {
-    it('verifies Dockerfile copies src/ into production container', () => {
+    it('verifies Dockerfile copies compiled dist-server/ and excludes raw src/ from runtime container', () => {
       const dockerfilePath = path.resolve(__dirname, '../Dockerfile');
       expect(fs.existsSync(dockerfilePath)).toBe(true);
 
       const content = fs.readFileSync(dockerfilePath, 'utf-8');
-      expect(content).toMatch(/COPY --from=builder \/app\/src \.\/src/);
+      expect(content).toMatch(/COPY --from=builder \/app\/dist-server \.\/dist-server/);
+      expect(content).not.toMatch(/COPY --from=builder \/app\/src \.\/src/);
     });
 
-    it('verifies package.json maintains tsx in production dependencies', () => {
+    it('verifies package.json maintains production dependencies and compiled node start command', () => {
       const pkgPath = path.resolve(__dirname, '../package.json');
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
 
-      expect(pkg.dependencies.tsx).toBeDefined();
+      expect(pkg.scripts.start).toMatch(/node dist-server\/server\.js/);
       expect(pkg.dependencies.stripe).toBeDefined();
+      expect(pkg.dependencies['better-sqlite3']).toBeDefined();
     });
   });
 });

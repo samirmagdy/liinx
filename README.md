@@ -7,7 +7,7 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 ## Architecture & Tech Stack
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS v4, Motion (Framer Motion), Lucide Icons, Wouter router.
-- **Backend API**: Node.js & Express with TypeScript (`tsx`), Zod schema validation, Multer multipart uploads.
+- **Backend API**: Node.js & Express compiled with `esbuild` (`dist-server/server.js`), TypeScript in development, Zod schema validation, Multer multipart uploads.
 - **Database Engine**: `better-sqlite3` configured with **Write-Ahead Logging (WAL)**, foreign key constraints, synchronous normal writes, and a 64MB memory page cache.
 - **Security & Auth**: `bcryptjs` password hashing with salts, stateless JSON Web Tokens (JWT), BOLA/IDOR protection, and URL scheme sanitization.
 - **Concurrency & Performance**: High socket backlog (4096), non-blocking asynchronous click/view batch queue with bulk transaction commits, and multi-core Node.js cluster mode.
@@ -68,11 +68,11 @@ Open [http://localhost:3050](http://localhost:3050) in your browser when `PORT` 
 
 ### 4. Running in Production
 ```bash
-npm run build
-npm start
+npm run build   # Compiles frontend (dist/) and backend (dist-server/)
+npm start       # Executes compiled JavaScript with Node (node dist-server/server.js)
 ```
 
-Production startup rejects missing or placeholder security, HTTPS origin,
+Production executes compiled JavaScript directly under Node (no `tsx` in production runtime). Production startup rejects missing or placeholder security, HTTPS origin,
 encryption, and billing configuration. To launch without paid plans, set
 `BILLING_ENABLED=false` explicitly.
 
