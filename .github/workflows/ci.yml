@@ -33,6 +33,9 @@ jobs:
       - name: Static Code Quality & Linting (ESLint)
         run: npm run lint
 
+      - name: Architectural guardrails
+        run: npm run architecture:check
+
       - name: Build Production Frontend & Server Bundles
         run: npm run build
 

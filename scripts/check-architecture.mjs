@@ -99,8 +99,11 @@ for (const [file, metrics] of Object.entries(files)) {
   if (fileReview && (!previous || !previousFileReview || metrics.lines > previous.lines)) {
     violations.push(`${file}: ${metrics.lines} lines (threshold ${thresholds.fileLines}; architectural review required)`);
   }
-  for (const fn of metrics.functions) {
-    const old = previous?.functions?.find(candidate => candidate.name === fn.name);
+  for (const [index, fn] of metrics.functions.entries()) {
+    // Anonymous route/component callbacks are common; compare by stable source
+    // order rather than name so duplicate '<anonymous>' functions are not
+    // mistaken for a regression.
+    const old = previous?.functions?.[index];
     const isNewOrWorse = !old || fn.lines > old.lines || fn.complexity > old.complexity || fn.maxDepth > old.maxDepth;
     if (isNewOrWorse) violations.push(`${file} :: ${fn.name}: ${fn.lines} lines, complexity ${fn.complexity}, depth ${fn.maxDepth}`);
   }

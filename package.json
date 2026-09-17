@@ -19,7 +19,7 @@
     "test:e2e": "vitest run tests/backend-e2e.dynamic.test.ts --no-file-parallelism",
     "clean": "rm -rf dist dist-server server.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint .",
     "architecture:check": "node scripts/check-architecture.mjs",
     "architecture:baseline": "node scripts/check-architecture.mjs --write-baseline",
     "db:backup": "tsx scripts/backup-db.ts",

@@ -86,14 +86,11 @@ export function evaluateRetention(
 
     const monthKey = `${year}-${month}`;
 
-    let retained = false;
-
     // Daily retention candidate
     if (ageMs <= maxDailyAgeMs && dailySlots.size < effectiveConfig.daily) {
       if (!dailySlots.has(dayKey)) {
         dailySlots.set(dayKey, item.key);
         keep.add(item.key);
-        retained = true;
       }
     }
 
@@ -102,7 +99,6 @@ export function evaluateRetention(
       if (!weeklySlots.has(weekKey)) {
         weeklySlots.set(weekKey, item.key);
         keep.add(item.key);
-        retained = true;
       }
     }
 
@@ -111,7 +107,6 @@ export function evaluateRetention(
       if (!monthlySlots.has(monthKey)) {
         monthlySlots.set(monthKey, item.key);
         keep.add(item.key);
-        retained = true;
       }
     }
 
