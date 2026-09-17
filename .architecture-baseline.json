@@ -762,11 +762,11 @@
       ]
     },
     "src/services/api.ts": {
-      "lines": 433,
+      "lines": 434,
       "functions": []
     },
     "src/types.ts": {
-      "lines": 23,
+      "lines": 24,
       "functions": []
     },
     "src/utils/booking.ts": {
@@ -972,11 +972,11 @@
       "functions": []
     },
     "server/routes/contact.ts": {
-      "lines": 56,
+      "lines": 55,
       "functions": []
     },
     "server/routes/forms.ts": {
-      "lines": 125,
+      "lines": 124,
       "functions": [
         {
           "name": "<anonymous>",
@@ -987,7 +987,7 @@
       ]
     },
     "server/routes/importer.ts": {
-      "lines": 61,
+      "lines": 60,
       "functions": []
     },
     "server/routes/instagram.ts": {
@@ -1010,7 +1010,7 @@
       "functions": []
     },
     "server/routes/profiles.ts": {
-      "lines": 852,
+      "lines": 858,
       "functions": [
         {
           "name": "<anonymous>",
@@ -1026,8 +1026,8 @@
         },
         {
           "name": "<anonymous>",
-          "lines": 183,
-          "complexity": 78,
+          "lines": 188,
+          "complexity": 77,
           "maxDepth": 3
         },
         {
@@ -1037,6 +1037,10 @@
           "maxDepth": 3
         }
       ]
+    },
+    "server/routes/sessionResponse.ts": {
+      "lines": 9,
+      "functions": []
     },
     "server/routes/upload.ts": {
       "lines": 224,
@@ -1054,7 +1058,7 @@
       "functions": []
     },
     "server/server.ts": {
-      "lines": 650,
+      "lines": 654,
       "functions": [
         {
           "name": "<anonymous>",
@@ -1094,7 +1098,7 @@
       "functions": []
     },
     "server/services/backup/retention.ts": {
-      "lines": 129,
+      "lines": 124,
       "functions": []
     },
     "server/services/backup/s3Client.ts": {

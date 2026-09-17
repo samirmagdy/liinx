@@ -17,6 +17,7 @@ import { cancelStripeSubscription } from '../services/billingCancellation.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { EmailDeliveryUnavailable, sendTransactionalEmail } from '../services/email.js';
 import { storageKeyFromUrl, uploadStorage } from '../services/uploadStorage.js';
+import { testOnlySessionToken } from './sessionResponse.js';
 
 export const authRouter = Router();
 
@@ -303,7 +304,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     setSessionCookie(res, token);
 
     res.status(201).json({
-      ...(process.env.NODE_ENV === 'test' ? { token } : {}),
+      ...testOnlySessionToken(token),
       user: { id: userId, email: cleanEmail, username: cleanUsername },
       profileId
     });
@@ -354,7 +355,7 @@ authRouter.post('/login', sharedRateLimit({ name: 'login', limit: 20, windowMs: 
     setSessionCookie(res, token);
 
     res.json({
-      ...(process.env.NODE_ENV === 'test' ? { token } : {}),
+      ...testOnlySessionToken(token),
       user: { id: user.id, email: user.email, username: profile.username },
       profileId: profile.id
     });

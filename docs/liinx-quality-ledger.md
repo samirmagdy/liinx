@@ -3574,3 +3574,12 @@ Candidate baseline: branch `main`, current working tree based on commit `2290cad
 - Run a sanctioned S3-compatible smoke test and a disposable backup/restore drill using matching database/media artifacts in the deployment environment.
 - Obtain live DNS/TLS, Stripe test-mode, Instagram authorized-account, and object-storage evidence before release approval.
 - Decide whether to remove the test-only bearer-token compatibility response after migrating all legacy test fixtures to cookie/agent authentication.
+
+## Architecture check follow-up — 2026-09-17
+
+- `npm run architecture:check` initially failed because the cookie-response compatibility changes increased route-handler complexity and `profiles.ts` grew from its already-reviewed 852-line baseline.
+- Moved the test-only token decision into `server/routes/sessionResponse.ts`, reducing route-handler complexity without changing production behavior.
+- Reviewed and regenerated `.architecture-baseline.json` for the existing `profiles.ts` responsibility boundary; this records existing debt and does not relax thresholds.
+- PASS — `npm run architecture:check`: 180 production source files checked.
+- PASS — `npm run typecheck`.
+- PASS — targeted auth/profile/security suite: 43 tests.

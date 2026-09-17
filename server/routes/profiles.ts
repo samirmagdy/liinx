@@ -17,6 +17,7 @@ import {
 import { createId } from '../utils/ids.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
 import { normalizeCustomDomain } from '../utils/customDomain.js';
+import { testOnlySessionToken } from './sessionResponse.js';
 
 export const profilesRouter = Router();
 
@@ -493,7 +494,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     res.json({
       success: true,
       revision: now,
-      ...(process.env.NODE_ENV === 'test' && token ? { token } : {}),
+      ...testOnlySessionToken(token),
       message: 'Profile updated successfully.'
     });
   } catch (err: any) {
@@ -787,7 +788,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
         displayName,
         plan: userPlan
       },
-      ...(process.env.NODE_ENV === 'test' ? { token } : {})
+      ...testOnlySessionToken(token)
     });
   } catch (err: any) {
     try { db.exec('ROLLBACK'); } catch {}
@@ -841,7 +842,7 @@ profilesRouter.post('/studio/profiles/:id/select', requireAuth, (req: Authentica
 
     res.json({
       success: true,
-      ...(process.env.NODE_ENV === 'test' ? { token } : {}),
+      ...testOnlySessionToken(token),
       profile: {
         id: profile.id,
         username: profile.username,
