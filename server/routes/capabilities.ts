@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isImporterProviderConfigured } from '../services/importer.js';
+import { importerService } from '../services/importer.js';
 
 export const capabilitiesRouter = Router();
 
@@ -27,11 +27,7 @@ export function getSystemCapabilities(): SystemCapabilities {
   );
 
   return {
-    importers: {
-      linktree: isImporterProviderConfigured('linktree'),
-      beacons: isImporterProviderConfigured('beacons'),
-      biofm: isImporterProviderConfigured('biofm')
-    },
+    importers: importerService.getCapabilities(),
     instagram: instagramConfigured,
     billing: billingConfigured
   };
