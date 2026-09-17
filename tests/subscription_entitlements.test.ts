@@ -18,7 +18,7 @@ describe('subscription entitlements', () => {
     delete process.env.STRIPE_WEBHOOK_SECRET;
     try {
     const email = `${unique('billing')}@liinx.test`;
-    const username = unique('billing_user').slice(0, 30);
+    const username = unique('bu').slice(0, 24);
     const registered = await request(app).post('/api/auth/register').send({ email, password: 'Password123!', username });
     expect(registered.status).toBe(201);
     const originalToken = registered.body.token as string;
@@ -34,8 +34,9 @@ describe('subscription entitlements', () => {
     expect(upgraded.status).toBe(200);
     expect((db.prepare('SELECT plan FROM profiles WHERE id = ?').get(original.id) as { plan: string }).plan).toBe('pro');
 
+    const duplicateUsername = `${username.slice(0, 20)}_cp_${randomBytes(2).toString('hex')}`;
     const duplicate = await request(app).post('/api/studio/profiles').set('Authorization', `Bearer ${originalToken}`).send({
-      username: username.slice(0, 20) + '_copy', displayName: 'Copied profile', duplicateProfileId: original.id
+      username: duplicateUsername, displayName: 'Copied profile', duplicateProfileId: original.id
     });
     expect(duplicate.status).toBe(201);
     expect(duplicate.body.profile.plan).toBe('pro');
@@ -80,13 +81,16 @@ describe('subscription entitlements', () => {
 
   it('rejects unauthenticated signed-webhook mode requests and exposes configured plan limits', async () => {
     const original = process.env.NODE_ENV;
+    const originalWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     process.env.NODE_ENV = 'production';
+    process.env.STRIPE_WEBHOOK_SECRET = originalWebhookSecret || 'whsec_test_secret_for_signed_mode';
     try {
       const response = await request(app).post('/api/billing/webhook').send({ id: 'forged', type: 'customer.subscription.deleted', data: { object: {} } });
       expect(response.status).toBe(400);
       expect(response.body.error).toMatch(/stripe-signature/i);
     } finally {
       process.env.NODE_ENV = original;
+      if (originalWebhookSecret === undefined) delete process.env.STRIPE_WEBHOOK_SECRET; else process.env.STRIPE_WEBHOOK_SECRET = originalWebhookSecret;
     }
     expect((await request(app).get('/api/health')).status).toBe(200);
   });

@@ -36,15 +36,14 @@ describe('Milestone 4: UTM Tracking & Tracking Pixels (0% Fake Implementation)',
       VALUES (?, ?, ?, ?)
     `).run(testUserId, 'pixel@liinx.test', 'hashed_pw', now);
 
+    db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(testProfileId);
+    db.prepare('DELETE FROM pages WHERE profile_id = ?').run(testProfileId);
     db.prepare('DELETE FROM profiles WHERE id = ?').run(testProfileId);
     db.prepare(`
       INSERT INTO profiles (
         id, user_id, username, display_name, plan, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(testProfileId, testUserId, testUsername, 'Pixel Creator', 'pro', now, now);
-
-    // Create a link block
-    db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(testProfileId);
     db.prepare(`
       INSERT INTO blocks (id, profile_id, type, title, url, position, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)

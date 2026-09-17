@@ -4,7 +4,12 @@ function getKey(): Buffer {
   const raw = process.env.INTEGRATION_ENCRYPTION_KEY || (process.env.NODE_ENV === 'production' ? '' : process.env.JWT_SECRET);
   if (!raw) throw new Error('INTEGRATION_ENCRYPTION_KEY is required for integrations.');
   const key = Buffer.from(raw, /^[0-9a-f]{64}$/i.test(raw) ? 'hex' : 'base64');
-  if (key.length !== 32) throw new Error('INTEGRATION_ENCRYPTION_KEY must decode to exactly 32 bytes.');
+  if (key.length !== 32) {
+    if (process.env.NODE_ENV !== 'production') {
+      return crypto.createHash('sha256').update(raw).digest();
+    }
+    throw new Error('INTEGRATION_ENCRYPTION_KEY must decode to exactly 32 bytes.');
+  }
   return key;
 }
 

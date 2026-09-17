@@ -54,6 +54,8 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
       testUserId, 'audit@liinx.test', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012', now
     );
 
+    db.prepare('DELETE FROM blocks WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);
+    db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(testProfileId, testUsername);
     db.prepare(`
       INSERT INTO profiles (id, user_id, username, display_name, plan, created_at, updated_at)

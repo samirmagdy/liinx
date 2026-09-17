@@ -34,6 +34,8 @@ describe('Milestone 5: Multi-Profile Management (One Login) (0% Fake Implementat
       testUserId, testEmail, 'hashed_pw', now
     );
 
+    db.prepare('DELETE FROM blocks WHERE profile_id IN (SELECT id FROM profiles WHERE user_id = ? OR id = ? OR username = ?)').run(testUserId, freeProfileId, freeUsername);
+    db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE user_id = ? OR id = ? OR username = ?)').run(testUserId, freeProfileId, freeUsername);
     db.prepare('DELETE FROM profiles WHERE user_id = ? OR id = ? OR username = ?').run(testUserId, freeProfileId, freeUsername);
     db.prepare(`
       INSERT INTO profiles (id, user_id, username, display_name, plan, created_at, updated_at)
@@ -53,6 +55,8 @@ describe('Milestone 5: Multi-Profile Management (One Login) (0% Fake Implementat
       proUserId, proEmail, 'hashed_pw', now
     );
 
+    db.prepare('DELETE FROM blocks WHERE profile_id IN (SELECT id FROM profiles WHERE user_id = ? OR id = ? OR username = ? OR username = ?)').run(proUserId, proProfileId, proUsername, 'brand2pro');
+    db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE user_id = ? OR id = ? OR username = ? OR username = ?)').run(proUserId, proProfileId, proUsername, 'brand2pro');
     db.prepare('DELETE FROM profiles WHERE user_id = ? OR id = ? OR username = ? OR username = ?').run(proUserId, proProfileId, proUsername, 'brand2pro');
     db.prepare(`
       INSERT INTO profiles (id, user_id, username, display_name, plan, created_at, updated_at)
