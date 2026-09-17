@@ -409,5 +409,19 @@ export const api = {
         method: 'POST'
       });
     }
+  },
+
+  capabilities: {
+    get: async () => {
+      return request<{
+        importers: {
+          linktree: boolean;
+          beacons: boolean;
+          biofm: boolean;
+        };
+        instagram: boolean;
+        billing: boolean;
+      }>('/api/capabilities');
+    }
   }
 };

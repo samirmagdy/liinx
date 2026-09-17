@@ -3,6 +3,7 @@ import { Switch, Route, useLocation } from 'wouter';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useLanguage } from './context/LanguageContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { CapabilitiesProvider } from './context/CapabilitiesContext';
 const Navbar = lazy(() => import('./components/Navbar').then(module => ({ default: module.Navbar })));
 const Hero = lazy(() => import('./components/Hero').then(module => ({ default: module.Hero })));
 const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(module => ({ default: module.FeaturesSection })));
@@ -296,7 +297,8 @@ export default function App() {
   return (
     <ErrorBoundary>
       <LanguageProvider>
-        <AuthProvider>
+        <CapabilitiesProvider>
+          <AuthProvider>
           <div className="relative min-h-screen">
             <BackgroundAnimation />
             <div className="relative z-10">
@@ -347,7 +349,8 @@ export default function App() {
             </div>
           </div>
         </AuthProvider>
-      </LanguageProvider>
+      </CapabilitiesProvider>
+    </LanguageProvider>
     </ErrorBoundary>
   );
 };

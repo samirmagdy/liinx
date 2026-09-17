@@ -20,6 +20,19 @@ export interface ImportedProfileData {
   warnings: string[];
 }
 
+export function isImporterProviderConfigured(provider: 'linktree' | 'beacons' | 'biofm'): boolean {
+  if (provider === 'linktree') {
+    return process.env.LINKTREE_IMPORT_ENABLED === 'true' && Boolean(process.env.LINKTREE_API_KEY);
+  }
+  if (provider === 'beacons') {
+    return process.env.BEACONS_IMPORT_ENABLED === 'true' && Boolean(process.env.BEACONS_API_KEY);
+  }
+  if (provider === 'biofm') {
+    return process.env.BIOFM_IMPORT_ENABLED === 'true' && Boolean(process.env.BIOFM_API_KEY);
+  }
+  return false;
+}
+
 import dns from 'dns';
 import net from 'net';
 

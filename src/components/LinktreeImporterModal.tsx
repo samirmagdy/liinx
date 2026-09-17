@@ -1,4 +1,5 @@
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
+import { useCapabilities } from '../context/CapabilitiesContext';
 import { Modal } from './Modal';
 import React, { useRef, useState } from 'react';
 import { api } from '../services/api';
@@ -10,7 +11,8 @@ import {
   ExternalLink, 
   Sparkles, 
   ArrowRight,
-  X
+  X,
+  Plus
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { friendlyErrorMessage } from '../utils/errors';
@@ -21,15 +23,18 @@ interface LinktreeImporterModalProps {
   onClose: () => void;
   onImportComplete: () => void;
   pages: CreatorPage[];
+  onAddManual?: () => void;
 }
 
 export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
   isOpen,
   onClose,
   onImportComplete,
-  pages
+  pages,
+  onAddManual
 }) => {
   const { tr: ui } = useUiLanguage();
+  const { capabilities, hasAnyImporter } = useCapabilities();
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,14 +130,14 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
         {/* Header */}
         <div className="p-6 border-b border-neutral-100 dark:border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${hasAnyImporter ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
               <Download className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-neutral-900 dark:text-white">
                 {ui("Import links")}</h2>
               <p className="text-xs text-neutral-500">
-                {ui("Preview and choose links before importing")}</p>
+                {hasAnyImporter ? ui("Preview and choose links before importing") : ui("Direct profile importing is currently paused")}</p>
             </div>
           </div>
           <button 
@@ -146,7 +151,53 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
 
         {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
-          {!previewData ? (
+          {!hasAnyImporter ? (
+            <div className="space-y-4 py-1" data-testid="importer-unavailable-state">
+              <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h3 className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                    {ui("Automated import is currently unavailable")}
+                  </h3>
+                  <p className="text-xs text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                    {ui("Direct profile importing from Linktree, Beacons, and Bio.fm is paused until authorized provider API partnerships or official export adapters are configured. In compliance with provider terms of service, scraping public profiles is not permitted.")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-neutral-700/50 space-y-2">
+                <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
+                  {ui("How to add your links to LIINX:")}
+                </p>
+                <ul className="text-xs text-neutral-600 dark:text-neutral-400 space-y-1.5 list-disc pl-4">
+                  <li>{ui("Create customized link, music, video, or booking blocks in seconds.")}</li>
+                  <li>{ui("Reorder blocks with drag-and-drop to design your unique layout.")}</li>
+                  <li>{ui("Enjoy full design freedom with custom themes and zero platform commissions.")}</li>
+                </ul>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="py-2.5 px-4 rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-900/10 cursor-pointer"
+                >
+                  {ui("Close")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleCancel();
+                    onAddManual?.();
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-neutral-900 dark:bg-neutral-50 text-white dark:text-neutral-900 text-xs font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{ui("Add links manually")}</span>
+                </button>
+              </div>
+            </div>
+          ) : !previewData ? (
             <form onSubmit={handlePreview} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
@@ -162,8 +213,6 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     required
                   />
                 </div>
-                <p className="text-[11px] text-neutral-600 mt-1.5">
-                  {ui("Provider import is currently unavailable until an authorized API or export is configured. No source page is fetched.")}</p>
               </div>
 
               {error && (

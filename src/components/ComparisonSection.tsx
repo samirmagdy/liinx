@@ -1,10 +1,12 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useCapabilities } from '../context/CapabilitiesContext';
 import { Link2, CalendarCheck, Mail, BarChart3, Globe2, Layers, ArrowRight, Download } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 export function ComparisonSection() {
   const { lang } = useLanguage();
+  const { hasAnyImporter } = useCapabilities();
   const ar = lang === 'ar';
   const [, setLocation] = useLocation();
 
@@ -61,11 +63,18 @@ export function ComparisonSection() {
             </div>
             <div>
               <h3 className="font-bold text-sm text-neutral-900">{ar ? 'هل تنتقل من Linktree؟' : 'Coming from Linktree or Beacons?'}</h3>
-              <p className="text-sm text-neutral-600 leading-relaxed mt-1">{ar ? 'عاين الروابط العامة المدعومة واختر ما تريد استيراده قبل الحفظ.' : 'Preview links from a supported public profile and choose what to import before saving.'}</p>
+              <p className="text-sm text-neutral-600 leading-relaxed mt-1">
+                {hasAnyImporter
+                  ? (ar ? 'عاين الروابط العامة المدعومة واختر ما تريد استيراده قبل الحفظ.' : 'Preview links from a supported public profile and choose what to import before saving.')
+                  : (ar ? 'أنشئ صفحتك في دقائق مع سمات مخصصة، عمولة 0%، وتحكم كامل في التصميم.' : 'Build your profile in minutes with custom themes, zero transaction commissions, and complete layout control.')}
+              </p>
             </div>
           </div>
-          <button onClick={() => setLocation('/register?after=import')} className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-bold hover:bg-black cursor-pointer">
-            {ar ? 'ابدأ الاستيراد' : 'Start importing'}
+          <button
+            onClick={() => setLocation(hasAnyImporter ? '/register?after=import' : '/register')}
+            className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-bold hover:bg-black cursor-pointer"
+          >
+            {hasAnyImporter ? (ar ? 'ابدأ الاستيراد' : 'Start importing') : (ar ? 'ابدأ مجاناً' : 'Get started free')}
             <ArrowRight className={`w-3.5 h-3.5 ${ar ? 'rotate-180' : ''}`} />
           </button>
         </div>

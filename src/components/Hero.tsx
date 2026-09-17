@@ -4,6 +4,7 @@ import { PhonePreview } from './PhonePreview';
 import { DEMO_PROFILES, THEMES } from '../data/mockData';
 import { CreatorProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { useCapabilities } from '../context/CapabilitiesContext';
 import { 
   ArrowRight, 
   Palette, 
@@ -25,6 +26,7 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => {
   const [, setLocation] = useLocation();
   const { t, isRtl, tr } = useLanguage();
+  const { hasAnyImporter } = useCapabilities();
   const [handle, setHandle] = useState('');
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);
@@ -139,10 +141,10 @@ return (
                   <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
                 <button
-                  onClick={() => setLocation('/register?after=import')}
+                  onClick={() => setLocation(hasAnyImporter ? '/register?after=import' : '/register')}
                   className="text-neutral-600 font-semibold hover:text-neutral-900 hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  <span>{tr('Moving from Linktree? Import your links')}</span>
+                  <span>{hasAnyImporter ? tr('Moving from Linktree? Import your links') : tr('Moving from Linktree? Easy setup in minutes')}</span>
                   <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
               </div>

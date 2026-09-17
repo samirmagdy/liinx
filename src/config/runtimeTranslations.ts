@@ -159,6 +159,20 @@ export const runtimeTranslations: Record<string, string> = {
   'This protected text is not configured yet.': 'لم يتم إعداد هذا النص المحمي بعد.', 'Checking…': 'جارٍ التحقق…', 'Unable to unlock': 'تعذّر فتح المحتوى',
   'Unlocked.': 'تم فتح المحتوى.', 'Enter the access code to continue.': 'أدخل رمز الوصول للمتابعة.', 'Access code': 'رمز الوصول', 'Unlock': 'فتح المحتوى',
   'Service title': 'عنوان الخدمة', 'Calendly event URL': 'رابط فعالية Calendly', 'Add Calendly booking': 'إضافة حجز عبر Calendly',
+  'Direct profile importing is currently paused': 'استيراد الملفات متوقف حالياً',
+  'Automated import is currently unavailable': 'الاستيراد التلقائي غير متاح حالياً',
+  'Direct profile importing from Linktree, Beacons, and Bio.fm is paused until authorized provider API partnerships or official export adapters are configured. In compliance with provider terms of service, scraping public profiles is not permitted.': 'تم إيقاف استيراد الملفات مباشرة من Linktree وBeacons وBio.fm لحين إتاحة تكاملات API الرسمية مع المزودين. امتثالاً لشروط الخدمة، لا يُسمح بعمليات الاستخراج غير المصرح بها.',
+  'How to add your links to LIINX:': 'كيفية إضافة روابطك إلى LIINX:',
+  'Create customized link, music, video, or booking blocks in seconds.': 'أنشئ روابطك ومقاطع الموسيقى والفيديو وحجوزات المواعيد في ثوانٍ.',
+  'Reorder blocks with drag-and-drop to design your unique layout.': 'أعد ترتيب الكتل بالسحب والإفلات لتصميم مظهرك الخاص.',
+  'Enjoy full design freedom with custom themes and zero platform commissions.': 'تمتّع بحرية كاملة في التصميم مع سمات مخصصة وبدون أي عمولة للمنصة.',
+  'Add links manually': 'إضافة الروابط يدوياً',
+  'Moving from Linktree? Easy setup in minutes': 'تنتقل من Linktree؟ إعداد سهل في دقائق',
+  'Moving from Linktree? Import your links': 'تنتقل من Linktree؟ استورد روابطك',
+  'Import (Paused)': 'استيراد (متوقف)',
+  'Paused': 'متوقف',
+  'Profile importing is currently unavailable': 'استيراد الملفات غير متاح حالياً',
+  'Profile importing is currently unavailable.': 'استيراد الملفات غير متاح حالياً.',
 };
 
 export function translateRuntime(value: string, lang: Language): string {
