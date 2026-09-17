@@ -146,7 +146,32 @@
     </script>
   </head>
   <body class="bg-white text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white">
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loader" style="position:fixed;inset:0;background-color:#FAF9F6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none;z-index:9999;">
+        <style>
+          @keyframes lx-bar{0%,100%{transform:scaleY(0.7);opacity:0.7}50%{transform:scaleY(1.15);opacity:1}}
+          @keyframes lx-bar-amber{0%,100%{transform:scaleY(0.7);opacity:0.7}50%{transform:scaleY(1.2);opacity:1}}
+          @keyframes lx-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+          .lx-b1{animation:lx-bar 1.3s ease-in-out infinite;transform-origin:center}
+          .lx-b2{animation:lx-bar-amber 1.3s ease-in-out 0.2s infinite;transform-origin:center}
+          .lx-b3{animation:lx-bar 1.3s ease-in-out 0.4s infinite;transform-origin:center}
+          .lx-shim{animation:lx-shimmer 1.8s cubic-bezier(0.4,0,0.2,1) infinite}
+        </style>
+        <div style="position:relative;margin-bottom:16px;">
+          <div style="width:56px;height:56px;border-radius:16px;background:#111315;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.1);">
+            <div style="display:flex;align-items:center;gap:6px;height:24px;">
+              <span class="lx-b1" style="width:6px;height:20px;background:#fff;border-radius:999px;display:inline-block;"></span>
+              <span class="lx-b2" style="width:6px;height:16px;background:#F59E0B;border-radius:999px;display:inline-block;box-shadow:0 0 8px rgba(245,158,11,0.6);"></span>
+              <span class="lx-b3" style="width:6px;height:20px;background:#fff;border-radius:999px;display:inline-block;"></span>
+            </div>
+          </div>
+        </div>
+        <span style="font-weight:800;font-size:18px;letter-spacing:-0.02em;color:#181817;margin-bottom:6px;">Liinx</span>
+        <div style="width:120px;height:3px;background:rgba(0,0,0,0.06);border-radius:999px;overflow:hidden;position:relative;margin-top:4px;">
+          <div class="lx-shim" style="position:absolute;inset:0;width:50%;background:linear-gradient(90deg,transparent,#F59E0B,#111315);border-radius:999px;"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -22,6 +22,7 @@ import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
 import { BackgroundAnimation } from './components/BackgroundAnimation';
+import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, Loader2, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 
@@ -88,7 +89,7 @@ function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?
       return undefined;
     }
   })();
-  return <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-sm text-neutral-500" role="status">{tr('Loading creator page...')}</div>}><PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} previewOnly={fullscreenPreview} onBackToStudio={() => window.location.href = '/studio'} /></Suspense>;
+  return <Suspense fallback={<BioSkeletonLoader />}><PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} previewOnly={fullscreenPreview} onBackToStudio={() => window.location.href = '/studio'} /></Suspense>;
 }
 
 function StudioPage() {
@@ -104,16 +105,7 @@ function StudioPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-white text-neutral-900">
-        <Navbar activeView="builder" />
-        <main className="flex-1 flex flex-col items-center justify-center p-6 text-center" role="status">
-          <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
-          <p className="text-sm font-mono text-neutral-500">{tr('Loading your profile…')}</p>
-        </main>
-        <Footer onSelectView={handleFooterNavigation} />
-      </div>
-    );
+    return <LoadingScreen message={tr('Loading your profile…')} submessage="Preparing your creative studio" />;
   }
 
   if (!user) {
@@ -155,12 +147,7 @@ function StudioPage() {
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="builder" />
       <main className="flex-1">
-        <Suspense fallback={
-          <div className="min-h-[calc(100vh-72px)] bg-neutral-50 flex flex-col items-center justify-center p-6 text-center" role="status">
-            <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
-            <p className="text-sm font-mono text-neutral-500">{tr('Loading your profile…')}</p>
-          </div>
-        }>
+        <Suspense fallback={<LoadingScreen message={tr('Loading your profile…')} submessage="Preparing your creative studio" fullscreen={false} />}>
           <BuilderStudio
             onViewFullscreen={(profile, theme) => {
               window.sessionStorage.setItem(`liinx-preview-theme:${profile.username}`, JSON.stringify({ theme, createdAt: Date.now() }));
@@ -293,7 +280,7 @@ export default function App() {
             <div className="relative min-h-screen">
               <BackgroundAnimation />
               <div className="relative z-10">
-                <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-sm text-neutral-500" role="status">Loading creator page…</div>}><PublicBioView
+                <Suspense fallback={<BioSkeletonLoader />}><PublicBioView
                   customDomain={currentHost}
                   pageSlug={customPageSlug}
                   onBackToStudio={() => window.location.href = 'https://liinx.app/studio'}
@@ -314,7 +301,7 @@ export default function App() {
             <BackgroundAnimation />
             <div className="relative z-10">
               <PageMetadata />
-              <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-sm text-neutral-500" role="status">Loading page…</div>}><Switch>
+              <Suspense fallback={<LoadingScreen message="Loading..." submessage="Liinx Studio" />}><Switch>
             {/* Core application routes */}
             <Route path="/" component={HomePage} />
             <Route path="/features" component={FeaturesPage} />

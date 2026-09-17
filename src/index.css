@@ -245,7 +245,21 @@
 .liinx-motion-orbit-c { stroke-width: 1.8; stroke-opacity: 0.23; animation: liinx-bg-orbit 12s ease-in-out infinite alternate; transform-origin: center; }
 @keyframes liinx-bg-breathe { from { opacity: 0.65; } to { opacity: 1; } }
 @keyframes liinx-bg-orbit { from { transform: rotate(-7deg) scale(0.96); } to { transform: rotate(7deg) scale(1.04); } }
-@media (prefers-reduced-motion: reduce) { .liinx-motion-background *, .liinx-motion-background { animation: none !important; } }
+@keyframes liinx-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+@keyframes liinx-bar-pulse { 0%, 100% { transform: scaleY(0.7); opacity: 0.7; } 50% { transform: scaleY(1.15); opacity: 1; } }
+@keyframes liinx-glow-pulse { 0%, 100% { transform: scale(0.92); opacity: 0.35; } 50% { transform: scale(1.08); opacity: 0.75; } }
+.animate-liinx-shimmer { animation: liinx-shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.animate-liinx-bar-1 { animation: liinx-bar-pulse 1.3s ease-in-out infinite; }
+.animate-liinx-bar-2 { animation: liinx-bar-pulse 1.3s ease-in-out 0.2s infinite; }
+.animate-liinx-bar-3 { animation: liinx-bar-pulse 1.3s ease-in-out 0.4s infinite; }
+.animate-liinx-glow { animation: liinx-glow-pulse 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .liinx-motion-background *, .liinx-motion-background,
+  .animate-liinx-shimmer, .animate-liinx-bar-1, .animate-liinx-bar-2, .animate-liinx-bar-3, .animate-liinx-glow {
+    animation: none !important;
+  }
+}
+
 
 /* Responsive safeguards for narrow phones and small tablets. These rules complement
    the component breakpoints and protect long editor controls from creating overflow. */

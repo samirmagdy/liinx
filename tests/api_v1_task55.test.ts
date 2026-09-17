@@ -31,8 +31,9 @@ describe('Task 55 API key and page-aware REST boundaries', () => {
 
   it('creates exactly one block when a page-aware request is retried with the same idempotency key', async () => {
     const body = { title: 'Page-scoped API link', url: 'https://example.com/page-scoped', pageId };
-    const first = await request(app).post('/api/v1/blocks').set('Authorization', `Bearer ${apiKey}`).set('Idempotency-Key', 'task55-retry-1').send(body);
-    const retry = await request(app).post('/api/v1/blocks').set('Authorization', `Bearer ${apiKey}`).set('Idempotency-Key', 'task55-retry-1').send(body);
+    const idempotencyKey = `task55-retry-${suffix}`;
+    const first = await request(app).post('/api/v1/blocks').set('Authorization', `Bearer ${apiKey}`).set('Idempotency-Key', idempotencyKey).send(body);
+    const retry = await request(app).post('/api/v1/blocks').set('Authorization', `Bearer ${apiKey}`).set('Idempotency-Key', idempotencyKey).send(body);
     expect(first.status).toBe(201);
     expect(retry.status).toBe(200);
     expect(retry.body.idempotentReplay).toBe(true);

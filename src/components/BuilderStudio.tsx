@@ -6,6 +6,7 @@ import { PhonePreview } from './PhonePreview';
 import { ViewportPreview } from './ViewportPreview';
 import { QrCodeModal } from './QrCodeModal';
 import { LinktreeImporterModal } from './LinktreeImporterModal';
+import { LoadingScreen } from './LoadingScreen';
 import { api, authStorage } from '../services/api';
 import { resolveTheme } from '../utils/colorContrast';
 import { 
@@ -1293,10 +1294,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     return (
       <div className="min-h-[calc(100vh-72px)] bg-neutral-50 flex flex-col items-center justify-center p-6 text-center" role="status">
         {loadState === 'loading' ? (
-          <>
-            <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mb-4" />
-            <p className="text-sm font-mono text-neutral-500">{tr('Loading your profile…')}</p>
-          </>
+          <LoadingScreen message={tr('Loading your profile…')} submessage="Preparing your creative studio" fullscreen={false} />
         ) : (
           <div className="max-w-md bg-neutral-50 p-8 rounded-3xl border border-neutral-200 shadow-sm flex flex-col items-center animate-fade-in">
             <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mb-4 text-rose-600">

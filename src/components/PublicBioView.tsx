@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QrCodeModal } from './QrCodeModal';
+import { BioSkeletonLoader } from './LoadingScreen';
 import { BookingCard } from './BookingCard';
 import { 
   getSpotifyEmbedUrl, 
@@ -547,12 +548,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
   }, [profile?.customFontUrl]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-8 h-8 animate-spin text-neutral-600 mb-4" />
-        <p className="text-sm font-mono text-neutral-500">{ui("Loading creator page...")}</p>
-      </div>
-    );
+    return <BioSkeletonLoader />;
   }
 
   if (serverError) {
