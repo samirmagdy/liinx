@@ -72,7 +72,7 @@ export const AppearancePanel: React.FC = () => {
         </div>
 
         <div className="pt-2">
-          <label className="block text-xs font-semibold text-[#71717A] mb-2">{ui("Brand Accent Color")}</label>
+          <span className="block text-xs font-semibold text-[#71717A] mb-2">{ui("Brand Accent Color")}</span>
           <div className="flex items-center gap-2.5">
             {['#B45309', '#3B82F6', '#EC4899', '#10B981', '#18181B', '#8B5CF6'].map((col) => (
               <button
@@ -90,9 +90,11 @@ export const AppearancePanel: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-3 border-t border-neutral-200 pt-3 sm:grid-cols-2">
-          <label className="flex items-center justify-between gap-3 text-xs font-semibold text-neutral-700">
+          <label htmlFor="appearance-card-surface" className="flex items-center justify-between gap-3 text-xs font-semibold text-neutral-700">
             <span>{ui("Card surface")}</span>
             <input
+              id="appearance-card-surface"
+              name="cardSurface"
               type="color"
               aria-label={ui("Card surface")}
               value={/^#[\da-f]{6}$/i.test(customTheme.cardBg) ? customTheme.cardBg : '#FFFFFF'}
@@ -100,9 +102,11 @@ export const AppearancePanel: React.FC = () => {
               className="h-8 w-12 cursor-pointer rounded border border-neutral-300"
             />
           </label>
-          <label className="flex items-center justify-between gap-3 text-xs font-semibold text-neutral-700">
+          <label htmlFor="appearance-card-border" className="flex items-center justify-between gap-3 text-xs font-semibold text-neutral-700">
             <span>{ui("Card border")}</span>
             <select
+              id="appearance-card-border"
+              name="cardBorder"
               aria-label={ui("Card border")}
               value={customTheme.cardBorder}
               onChange={event => updateThemeOverride({ cardBorder: event.target.value })}

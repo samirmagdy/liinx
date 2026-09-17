@@ -122,9 +122,11 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
         </div>
 
         {publishedPages.length > 1 && (
-          <label className="block mb-4 text-xs font-semibold text-neutral-700">
+          <label htmlFor="qr-target-page" className="block mb-4 text-xs font-semibold text-neutral-700">
             {ui("QR target")}
             <select
+              id="qr-target-page"
+              name="targetPage"
               value={targetPage ? (targetPage.isHome ? 'home' : targetPage.slug) : 'home'}
               onChange={event => setSelectedPageSlug(event.target.value)}
               className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-normal text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"

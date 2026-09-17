@@ -198,10 +198,13 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
           ) : !previewData ? (
             <form onSubmit={handlePreview} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                <label htmlFor="linktree-profile-url" className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
                   {ui("Supported public profile URL")}</label>
                 <div className="relative">
-                  <input aria-label={ui("Linktree or Beacons Profile URL")}
+                  <input
+                    id="linktree-profile-url"
+                    name="profileUrl"
+                    aria-label={ui("Linktree or Beacons Profile URL")}
                     type="text"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
@@ -239,33 +242,41 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
               </button>
             </form>
           ) : (
+            /* Step 2: Confirmation & Select Links */
             <div className="space-y-4">
               {/* Profile Preview Card */}
-              <div className="p-3.5 bg-neutral-100 dark:bg-neutral-900/10 rounded-2xl border border-neutral-200 dark:border-neutral-800 flex items-center gap-3">
-                {previewData.avatarUrl && (
+              <div className="p-3.5 rounded-2xl bg-neutral-100/60 dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800 flex items-center gap-3">
+                {previewData.avatarUrl ? (
                   <img
                     src={previewData.avatarUrl}
-                    alt={previewData.displayName || 'Avatar'}
-                    className="w-12 h-12 rounded-xl object-cover"
+                    alt={previewData.displayName || "Avatar"}
+                    className="w-10 h-10 rounded-full object-cover border border-neutral-200 dark:border-neutral-700"
                   />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 font-bold text-sm">
+                    {previewData.displayName?.[0] || 'U'}
+                  </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-neutral-900 dark:text-white truncate">
-                    {previewData.displayName || 'Profile Preview'}
-                  </p>
+                  <h4 className="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                    {previewData.displayName || previewData.username}
+                  </h4>
                   {previewData.bio && (
-                    <p className="text-[11px] text-neutral-500 line-clamp-2 mt-0.5">
+                    <p className="text-[11px] text-neutral-500 truncate mt-0.5">
                       {previewData.bio}
                     </p>
                   )}
-                  <span className="inline-block mt-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
-                    {previewData.links.length} {ui("links discovered")}</span>
+                  <span className="inline-block mt-1 text-[10px] text-neutral-600 dark:text-neutral-300 font-medium">
+                    {previewData.links.length} {ui("links found")}
+                  </span>
                 </div>
               </div>
 
               {/* Update Profile Toggle */}
-              <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer select-none">
+              <label htmlFor="importer-update-profile-info" className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer select-none">
                 <input
+                  id="importer-update-profile-info"
+                  name="updateProfileInfo"
                   type="checkbox"
                   checked={updateProfileInfo}
                   onChange={(e) => setUpdateProfileInfo(e.target.checked)}
@@ -274,9 +285,16 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                 <span>{ui("Also import avatar and bio info into profile")}</span>
               </label>
 
-              <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+              <label htmlFor="importer-page-destination" className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300">
                 {ui("Import destination page")}
-                <select value={pageId} onChange={event => setPageId(event.target.value)} className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-normal text-neutral-900" aria-label={ui("Import destination page")}>
+                <select
+                  id="importer-page-destination"
+                  name="importPageId"
+                  value={pageId}
+                  onChange={event => setPageId(event.target.value)}
+                  className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-normal text-neutral-900"
+                  aria-label={ui("Import destination page")}
+                >
                   {availablePages.map(page => <option key={page.id} value={page.id}>{page.isHome ? ui('Home') : `${page.title}${page.published ? '' : ' (draft)'}`}</option>)}
                 </select>
                 <span className="mt-1 block text-[10px] font-normal text-neutral-500">{ui("Imported links are appended to this page; existing content is not overwritten.")}</span>

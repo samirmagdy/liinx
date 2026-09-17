@@ -92,6 +92,8 @@ export const FormBlockView: React.FC<FormBlockViewProps> = ({
               )}
               {field.type === 'textarea' ? (
                 <textarea
+                  id={`form-field-${block.id}-${field.name}`}
+                  name={field.name}
                   required={field.required !== false}
                   minLength={field.minLength}
                   maxLength={field.maxLength}
@@ -101,10 +103,13 @@ export const FormBlockView: React.FC<FormBlockViewProps> = ({
                 />
               ) : (
                 <input
+                  id={`form-field-${block.id}-${field.name}`}
+                  name={field.name}
                   required={field.required !== false}
                   minLength={field.minLength}
                   maxLength={field.maxLength}
                   type={field.type || 'text'}
+                  autoComplete={field.name === 'email' ? 'email' : field.name === 'name' ? 'name' : undefined}
                   value={formValues[field.name] || ''}
                   onChange={e => setFormValues(v => ({ ...v, [field.name]: e.target.value }))}
                   className="rounded-xl border bg-transparent p-3 font-normal"
@@ -117,6 +122,8 @@ export const FormBlockView: React.FC<FormBlockViewProps> = ({
         {consentRequired && (
           <label className="flex items-start gap-2 text-xs" style={{ color: theme.subtextColor }}>
             <input
+              id={`form-consent-${block.id}`}
+              name="consent"
               type="checkbox"
               checked={formConsent}
               onChange={event => setFormConsent(event.target.checked)}

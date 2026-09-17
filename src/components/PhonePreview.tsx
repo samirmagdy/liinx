@@ -662,7 +662,11 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                   </p>
 
                   <form onSubmit={handleSubscribe} className="space-y-2">
-                      <input aria-label={ui('Email address')}
+                      <input
+                        id={`phone-preview-newsletter-email-${block.id}`}
+                        name="email"
+                        autoComplete="email"
+                        aria-label={ui('Email address')}
                         type="email"
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}

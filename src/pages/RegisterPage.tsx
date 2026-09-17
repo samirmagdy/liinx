@@ -179,11 +179,15 @@ export const RegisterPage: React.FC = () => {
           {step === 1 ? (
             <form className="space-y-4" onSubmit={handleNextStep}>
               <div>
-                <label className="block text-xs font-bold text-neutral-700 mb-1.5">
+                <label htmlFor="register-username" className="block text-xs font-bold text-neutral-700 mb-1.5">
                   {ui("Choose your handle")}</label>
                 <div className="relative">
                   <AtSign className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
-                  <input aria-label={ui("Choose your handle")}
+                  <input
+                    id="register-username"
+                    name="username"
+                    autoComplete="username"
+                    aria-label={ui("Choose your handle")}
                     type="text"
                     required
                     value={username}
@@ -207,11 +211,12 @@ export const RegisterPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-700 mb-1.5">
+                <label htmlFor="register-email" className="block text-xs font-bold text-neutral-700 mb-1.5">
                   {ui("Email address")}</label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
                   <input
+                    id="register-email"
                     type="email"
                     aria-label={ui('Email address')} name="email" autoComplete="email" dir="ltr"
                     required
@@ -224,11 +229,12 @@ export const RegisterPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-700 mb-1.5">
+                <label htmlFor="register-password" className="block text-xs font-bold text-neutral-700 mb-1.5">
                   {ui("Choose password")}</label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
                   <input
+                    id="register-password"
                     type="password"
                     aria-label={ui('Choose password')} name="password" autoComplete="new-password" minLength={8} maxLength={128}
                     required
@@ -252,8 +258,8 @@ export const RegisterPage: React.FC = () => {
           ) : (
             <form className="space-y-5" onSubmit={handleFinalSubmit}>
               <div>
-                <label className="block text-xs font-bold text-neutral-700 mb-2">
-                  {ui("What are you building?")}</label>
+                <span className="block text-xs font-bold text-neutral-700 mb-2">
+                  {ui("What are you building?")}</span>
                 <div className="grid grid-cols-2 gap-2">
                   {INTENT_OPTIONS.map((item) => {
                     const Icon = item.icon;
@@ -278,8 +284,8 @@ export const RegisterPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-700 mb-2">
-                  {ui("Choose starting design theme")}</label>
+                <span className="block text-xs font-bold text-neutral-700 mb-2">
+                  {ui("Choose starting design theme")}</span>
                 <div className="grid grid-cols-3 gap-2">
                   {THEMES.slice(0, 6).map((theme) => {
                     const isSelected = selectedThemeId === theme.id;

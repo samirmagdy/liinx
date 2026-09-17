@@ -23,7 +23,7 @@ export const SocialLinksEditor: React.FC = () => {
 
   return (
     <div className="pt-3 border-t border-neutral-100">
-      <label className="block text-xs font-bold text-neutral-900 mb-2">{ui("Connected Social Icons")}</label>
+      <span className="block text-xs font-bold text-neutral-900 mb-2">{ui("Connected Social Icons")}</span>
 
       {/* Current socials list */}
       <div className="space-y-2 mb-3">
@@ -35,6 +35,8 @@ export const SocialLinksEditor: React.FC = () => {
                   {soc.platform}
                 </span>
                 <input
+                  id={`social-link-draft-${sIdx}-${soc.platform}`}
+                  name={`socialLink_${soc.platform}`}
                   dir="ltr"
                   aria-label={`${ui('Edit social link')} ${soc.platform}`}
                   value={socialDrafts[sIdx] ?? soc.url}
@@ -80,6 +82,8 @@ export const SocialLinksEditor: React.FC = () => {
       {/* Add social link form */}
       <div className="flex items-center gap-2">
         <select
+          id="new-social-platform"
+          name="newSocialPlatform"
           aria-label={ui("Connected Social Icons")}
           value={newSocialPlatform}
           onChange={(e) => setNewSocialPlatform(e.target.value as SocialLink['platform'])}
@@ -96,6 +100,8 @@ export const SocialLinksEditor: React.FC = () => {
         </select>
 
         <input
+          id="new-social-url"
+          name="newSocialUrl"
           aria-label={ui("Connected Social Icons")}
           type="text"
           value={newSocialUrl}

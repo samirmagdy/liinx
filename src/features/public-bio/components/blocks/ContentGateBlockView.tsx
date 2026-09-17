@@ -68,6 +68,9 @@ export const ContentGateBlockView: React.FC<ContentGateBlockViewProps> = ({
             {extra.description || ui('Enter the access code to continue.')}
           </p>
           <input
+            id={`gate-code-${block.id}`}
+            name="gateCode"
+            autoComplete="current-password"
             required
             type="password"
             value={gateValue}

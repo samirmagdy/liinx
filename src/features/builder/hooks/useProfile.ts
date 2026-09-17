@@ -55,8 +55,10 @@ export function useProfile({
   const [showImporterModal, setShowImporterModal] = useState(false);
 
   const profileRef = useRef(profile);
-  profileRef.current = profile;
   const savedUsernameRef = useRef(profile.username);
+  const onProfileSwitchedRef = useRef(onProfileSwitched);
+  profileRef.current = profile;
+  onProfileSwitchedRef.current = onProfileSwitched;
 
   const loadProfilesList = () => {
     api.studio.getProfiles()
@@ -96,7 +98,7 @@ export function useProfile({
         setProfile(liveProfile);
         const th = resolveTheme(liveProfile.themeId, liveProfile.customTheme);
         setCustomTheme(th);
-        onProfileSwitched?.(liveProfile);
+        onProfileSwitchedRef.current?.(liveProfile);
 
         if (shouldOpenImporter) {
           setShowImporterModal(true);
@@ -105,15 +107,11 @@ export function useProfile({
       })
       .catch((err: any) => {
         const is404 = err?.status === 404 || err?.statusCode === 404 || err?.message?.toLowerCase().includes('not found');
-        if (is404) {
-          setLoadState('empty');
-        } else {
-          setLoadState('error');
-        }
+        setLoadState(is404 ? 'empty' : 'error');
       });
 
     loadProfilesList();
-  }, [initialProfile, onProfileSwitched]);
+  }, [initialProfile]);
 
   const handleProfileChange = (field: keyof CreatorProfile, value: any) => {
     const updated = { ...profile, [field]: value };

@@ -143,6 +143,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center bg-neutral-50 border border-neutral-300 rounded-full pl-3 pr-1.5 py-1 text-xs shadow-xs focus-within:ring-2 focus-within:ring-neutral-900/20 focus-within:border-neutral-900 transition-colors">
                 <span className="text-neutral-500 font-mono text-[11px] select-none pr-0.5">liinx.app/@</span>
                 <input
+                  id="navbar-quick-handle"
+                  name="quickHandle"
+                  autoComplete="username"
                   aria-label={t.hero.claimPlaceholder} dir="ltr"
                   type="text"
                   value={quickHandle}

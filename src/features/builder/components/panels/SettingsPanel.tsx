@@ -232,8 +232,10 @@ export const SettingsPanel: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-neutral-800">{ui("Google Analytics 4 Measurement ID")}</label>
+            <label htmlFor="settings-ga-id" className="text-xs font-semibold text-neutral-800">{ui("Google Analytics 4 Measurement ID")}</label>
             <input
+              id="settings-ga-id"
+              name="googleAnalyticsId"
               aria-label={ui("Google Analytics 4 Measurement ID")}
               type="text"
               disabled={profile.plan === 'free'}
@@ -246,8 +248,10 @@ export const SettingsPanel: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-neutral-800">{ui("Meta (Facebook) Pixel ID")}</label>
+            <label htmlFor="settings-meta-pixel-id" className="text-xs font-semibold text-neutral-800">{ui("Meta (Facebook) Pixel ID")}</label>
             <input
+              id="settings-meta-pixel-id"
+              name="metaPixelId"
               aria-label={ui("Meta (Facebook) Pixel ID")}
               type="text"
               disabled={profile.plan === 'free'}
@@ -305,8 +309,10 @@ export const SettingsPanel: React.FC = () => {
 
         <div className="space-y-3 pt-1">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-neutral-800">{ui("Domain / Subdomain Name")}</label>
+            <label htmlFor="settings-custom-domain" className="text-xs font-semibold text-neutral-800">{ui("Domain / Subdomain Name")}</label>
             <input
+              id="settings-custom-domain"
+              name="customDomain"
               aria-label={ui("Domain / Subdomain Name")}
               type="text"
               disabled={profile.plan === 'free'}
@@ -413,8 +419,10 @@ export const SettingsPanel: React.FC = () => {
 
         <div className="space-y-3 pt-1">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-neutral-800">{ui("Google Fonts / Webfont Stylesheet URL")}</label>
+            <label htmlFor="settings-custom-font-url" className="text-xs font-semibold text-neutral-800">{ui("Google Fonts / Webfont Stylesheet URL")}</label>
             <input
+              id="settings-custom-font-url"
+              name="customFontUrl"
               aria-label={ui("Google Fonts / Webfont Stylesheet URL")}
               type="url"
               disabled={profile.plan === 'free'}
@@ -430,10 +438,12 @@ export const SettingsPanel: React.FC = () => {
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-neutral-800">{ui("Custom CSS Overrides")}</label>
+              <label htmlFor="settings-custom-css" className="text-xs font-semibold text-neutral-800">{ui("Custom CSS Overrides")}</label>
               <span className="text-[10px] font-mono text-neutral-400">{ui("Scoped to #public-bio-view")}</span>
             </div>
             <textarea
+              id="settings-custom-css"
+              name="customCss"
               aria-label={ui("/* Custom CSS overrides */\n#public-bio-view .custom-card { border-width: 2px; }")}
               rows={4}
               disabled={profile.plan === 'free'}
@@ -470,9 +480,11 @@ export const SettingsPanel: React.FC = () => {
           <p className="text-xs text-neutral-500 mt-0.5">{ui('Control how your page appears when shared and what visitors see in the background.')}</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-share-title" className="text-xs font-semibold text-neutral-800">
             {ui('Share title')}
             <input
+              id="settings-share-title"
+              name="shareTitle"
               value={shareTitleInput}
               onChange={e => setShareTitleInput(e.target.value)}
               maxLength={160}
@@ -480,9 +492,11 @@ export const SettingsPanel: React.FC = () => {
               placeholder={profile.displayName}
             />
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-share-image-url" className="text-xs font-semibold text-neutral-800">
             {ui('Share image URL')}
             <input
+              id="settings-share-image-url"
+              name="shareImageUrl"
               type="url"
               value={shareImageUrlInput}
               onChange={e => setShareImageUrlInput(e.target.value)}
@@ -490,9 +504,11 @@ export const SettingsPanel: React.FC = () => {
               placeholder="https://..."
             />
           </label>
-          <label className="sm:col-span-2 text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-share-description" className="sm:col-span-2 text-xs font-semibold text-neutral-800">
             {ui('Share description')}
             <textarea
+              id="settings-share-description"
+              name="shareDescription"
               value={shareDescriptionInput}
               onChange={e => setShareDescriptionInput(e.target.value)}
               maxLength={300}
@@ -500,9 +516,11 @@ export const SettingsPanel: React.FC = () => {
               className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900"
             />
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-footer-logo-url" className="text-xs font-semibold text-neutral-800">
             {ui('Footer logo URL')}
             <input
+              id="settings-footer-logo-url"
+              name="footerLogoUrl"
               type="url"
               disabled={profile.plan === 'free'}
               value={footerLogoUrlInput}
@@ -511,9 +529,11 @@ export const SettingsPanel: React.FC = () => {
               placeholder="https://..."
             />
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-footer-logo-destination" className="text-xs font-semibold text-neutral-800">
             {ui('Footer logo destination')}
             <input
+              id="settings-footer-logo-destination"
+              name="footerLogoDestination"
               type="url"
               disabled={profile.plan === 'free'}
               value={footerLogoLinkInput}
@@ -522,9 +542,11 @@ export const SettingsPanel: React.FC = () => {
               placeholder="https://..."
             />
           </label>
-          <label className="sm:col-span-2 text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-footer-logo-alt" className="sm:col-span-2 text-xs font-semibold text-neutral-800">
             {ui('Footer logo accessible name')}
             <input
+              id="settings-footer-logo-alt"
+              name="footerLogoAlt"
               type="text"
               disabled={profile.plan === 'free'}
               value={footerLogoAltInput}
@@ -534,9 +556,11 @@ export const SettingsPanel: React.FC = () => {
               placeholder={profile.displayName}
             />
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-background-media-url" className="text-xs font-semibold text-neutral-800">
             {ui('Background media URL')}
             <input
+              id="settings-background-media-url"
+              name="backgroundMediaUrl"
               type="url"
               disabled={profile.plan === 'free'}
               value={backgroundMediaUrlInput}
@@ -545,9 +569,11 @@ export const SettingsPanel: React.FC = () => {
               placeholder="https://..."
             />
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-upload-bg-image" className="text-xs font-semibold text-neutral-800">
             {ui('Upload background image')}
             <input
+              id="settings-upload-bg-image"
+              name="uploadBackgroundImage"
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
               disabled={profile.plan === 'free' || uploadingImage}
@@ -564,9 +590,11 @@ export const SettingsPanel: React.FC = () => {
               </span>
             )}
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-background-media-type" className="text-xs font-semibold text-neutral-800">
             {ui('Background type')}
             <select
+              id="settings-background-media-type"
+              name="backgroundMediaType"
               disabled={profile.plan === 'free'}
               value={backgroundMediaTypeInput}
               onChange={e => setBackgroundMediaTypeInput(e.target.value as 'image' | 'video')}
@@ -576,9 +604,11 @@ export const SettingsPanel: React.FC = () => {
               <option value="video">{ui('Video')}</option>
             </select>
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-page-redirect-url" className="text-xs font-semibold text-neutral-800">
             {ui('Temporary page redirect')}
             <input
+              id="settings-page-redirect-url"
+              name="pageRedirectUrl"
               type="url"
               value={pageRedirectUrlInput}
               onChange={e => setPageRedirectUrlInput(e.target.value)}
@@ -586,9 +616,11 @@ export const SettingsPanel: React.FC = () => {
               placeholder="https://..."
             />
           </label>
-          <label className="text-xs font-semibold text-neutral-800">
+          <label htmlFor="settings-page-redirect-until" className="text-xs font-semibold text-neutral-800">
             {ui('Redirect ends')}
             <input
+              id="settings-page-redirect-until"
+              name="pageRedirectUntil"
               type="datetime-local"
               value={pageRedirectUntilInput}
               onChange={e => setPageRedirectUntilInput(e.target.value)}
@@ -661,9 +693,11 @@ export const SettingsPanel: React.FC = () => {
             </button>
           </div>
 
-          <label className="block text-[11px] font-semibold text-neutral-700">
+          <label htmlFor="settings-form-submission-filter" className="block text-[11px] font-semibold text-neutral-700">
             {ui('Filter by form')}
             <select
+              id="settings-form-submission-filter"
+              name="formSubmissionFilter"
               value={formSubmissionFilter}
               onChange={event => {
                 setFormSubmissionFilter(event.target.value);

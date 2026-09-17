@@ -184,6 +184,9 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
         >
           <span aria-hidden="true">⌕</span>
           <input
+            id="public-page-search"
+            name="pageSearch"
+            type="search"
             value={pageSearch}
             onChange={event => setPageSearch(event.target.value)}
             placeholder={ui('Search this page')}

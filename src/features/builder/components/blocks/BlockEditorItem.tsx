@@ -103,6 +103,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
             <ArrowDown className="w-3.5 h-3.5" />
           </button>
           <select
+            id={`move-block-page-${block.id}`}
+            name="blockPageId"
             aria-label={ui('Move block to page')}
             value={(block as any).pageId || activePage?.id || ''}
             onChange={event => void handleMoveBlockToPage(block.id, event.target.value)}
@@ -152,8 +154,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
       {/* Form Fields per Block Type */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
         <div>
-          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Title")}</label>
+          <label htmlFor={`block-title-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Title")}</label>
           <input
+            id={`block-title-${block.id}`}
+            name="blockTitle"
             aria-label={ui("Title")}
             type="text"
             value={block.title}
@@ -164,8 +168,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
         {(block.type === 'link' || block.type === 'booking') && (
           <div>
-            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Destination URL")}</label>
+            <label htmlFor={`block-url-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Destination URL")}</label>
             <input
+              id={`block-url-${block.id}`}
+              name="blockUrl"
               aria-label={ui("Destination URL")}
               type="text"
               value={(block as LinkBlock).url || ''}
@@ -178,8 +184,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
         {block.type === 'audio' && (
           <div>
-            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Artist Name")}</label>
+            <label htmlFor={`block-artist-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Artist Name")}</label>
             <input
+              id={`block-artist-${block.id}`}
+              name="blockArtist"
               aria-label={ui("Artist Name")}
               type="text"
               value={(block as AudioBlock).artist || ''}
@@ -192,8 +200,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
         {block.type === 'video' && (
           <div>
-            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Video Stream URL")}</label>
+            <label htmlFor={`block-video-url-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Video Stream URL")}</label>
             <input
+              id={`block-video-url-${block.id}`}
+              name="blockVideoUrl"
               aria-label={ui("Video Stream URL")}
               type="text"
               value={(block as VideoBlock).videoUrl || ''}
@@ -209,8 +219,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
         {block.type === 'newsletter' && (
           <div>
-            <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Button CTA Text")}</label>
+            <label htmlFor={`block-button-text-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Button CTA Text")}</label>
             <input
+              id={`block-button-text-${block.id}`}
+              name="blockButtonText"
               aria-label={ui("Button CTA Text")}
               type="text"
               value={(block as NewsletterBlock).buttonText || 'Subscribe'}
@@ -226,8 +238,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
             <div>
-              <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Subtitle Note")}</label>
+              <label htmlFor={`block-subtitle-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Subtitle Note")}</label>
               <input
+                id={`block-subtitle-${block.id}`}
+                name="blockSubtitle"
                 aria-label={ui("Subtitle Note")}
                 type="text"
                 value={(block as LinkBlock).subtitle || ''}
@@ -237,8 +251,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Icon or emoji")}</label>
+              <label htmlFor={`block-icon-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Icon or emoji")}</label>
               <input
+                id={`block-icon-${block.id}`}
+                name="blockIcon"
                 aria-label={ui("Icon or emoji")}
                 type="text"
                 value={(block as LinkBlock).icon || ''}
@@ -249,8 +265,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Badge Tag")}</label>
+              <label htmlFor={`block-badge-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Badge Tag")}</label>
               <input
+                id={`block-badge-${block.id}`}
+                name="blockBadge"
                 aria-label={ui("Badge Tag")}
                 type="text"
                 value={(block as LinkBlock).badge || ''}
@@ -265,6 +283,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
             <label className="text-[11px] font-semibold text-neutral-600">
               {ui('Link layout')}
               <select
+                id={`block-layout-${block.id}`}
+                name="blockLayout"
                 value={(block as any).layout || 'list'}
                 onChange={e => handleUpdateBlockExtra(block.id, { layout: e.target.value })}
                 className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900"
@@ -277,6 +297,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
             <label className="text-[11px] font-semibold text-neutral-600">
               {ui('Link animation')}
               <select
+                id={`block-animation-${block.id}`}
+                name="blockAnimation"
                 value={(block as any).animation || 'none'}
                 onChange={e => handleUpdateBlockExtra(block.id, { animation: e.target.value })}
                 className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-[11px] text-neutral-900"
@@ -292,10 +314,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
           {/* Link Scheduling (Time-Release) */}
           <div className="pt-2 border-t border-neutral-100 space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-semibold text-neutral-600 flex items-center gap-1.5">
+              <span className="text-[11px] font-semibold text-neutral-600 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-neutral-500" />
                 <span>{ui("Link Scheduling & Time-Release")}</span>
-              </label>
+              </span>
               {profile.plan === 'free' ? (
                 <span className="text-[9px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
                   {ui("PRO FEATURE")}
@@ -317,6 +339,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <div>
                     <span className="text-neutral-400 block mb-1">{ui("Publish (Start Date/Time):")}</span>
                     <input
+                      id={`block-start-date-${block.id}`}
+                      name="blockStartDate"
                       type="datetime-local"
                       value={toDateTimeLocal((block as LinkBlock).startAt)}
                       onChange={(e) => handleUpdateBlockField(block.id, 'startAt', fromDateTimeLocal(e.target.value))}
@@ -326,6 +350,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <div>
                     <span className="text-neutral-400 block mb-1">{ui("Unpublish (End Date/Time):")}</span>
                     <input
+                      id={`block-end-date-${block.id}`}
+                      name="blockEndDate"
                       type="datetime-local"
                       value={toDateTimeLocal((block as LinkBlock).endAt)}
                       onChange={(e) => handleUpdateBlockField(block.id, 'endAt', fromDateTimeLocal(e.target.value))}
@@ -350,8 +376,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
             <div>
-              <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Album Cover Image URL")}</label>
+              <label htmlFor={`block-cover-url-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Album Cover Image URL")}</label>
               <input
+                id={`block-cover-url-${block.id}`}
+                name="blockCoverUrl"
                 aria-label={ui("Album Cover Image URL")}
                 type="text"
                 value={(block as AudioBlock).coverUrl || ''}
@@ -361,8 +389,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Streaming Link")}</label>
+              <label htmlFor={`block-audio-url-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Streaming Link")}</label>
               <input
+                id={`block-audio-url-${block.id}`}
+                name="blockAudioUrl"
                 aria-label={ui("Streaming Link")}
                 type="text"
                 value={(block as AudioBlock).audioUrl || ''}
@@ -380,8 +410,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
       {block.type === 'video' && (
         <div>
-          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Thumbnail Preview Image URL")}</label>
+          <label htmlFor={`block-video-thumb-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Thumbnail Preview Image URL")}</label>
           <input
+            id={`block-video-thumb-${block.id}`}
+            name="blockThumbnailUrl"
             aria-label={ui("Thumbnail Preview Image URL")}
             type="text"
             value={(block as VideoBlock).thumbnailUrl || ''}
@@ -397,8 +429,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
       {block.type === 'newsletter' && (
         <div>
-          <label className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Newsletter Description")}</label>
+          <label htmlFor={`block-newsletter-desc-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">{ui("Newsletter Description")}</label>
           <input
+            id={`block-newsletter-desc-${block.id}`}
+            name="blockNewsletterDesc"
             aria-label={ui("Newsletter Description")}
             type="text"
             value={(block as NewsletterBlock).description || ''}
@@ -435,7 +469,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-neutral-100 text-xs">
             {(['rich_text', 'form', 'download', 'map', 'content_gate'].includes(block.type)) && (
               <div className="sm:col-span-2">
-                <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+                <label htmlFor={block.type === 'rich_text' ? `rich-text-${block.id}` : `block-body-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">
                   {ui(block.type === 'rich_text' || block.type === 'content_gate' ? 'Content' : 'Description')}
                 </label>
                 {block.type === 'rich_text' && (
@@ -449,6 +483,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                     </div>
                     <div className="mb-1 flex gap-1">
                       <input
+                        id={`block-rich-text-url-${block.id}`}
+                        name="richTextLinkUrl"
                         aria-label={ui('Safe link URL')}
                         value={richTextLinkUrl}
                         onChange={e => setRichTextLinkUrl(e.target.value)}
@@ -491,7 +527,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   </>
                 )}
                 <textarea
-                  id={block.type === 'rich_text' ? `rich-text-${block.id}` : undefined}
+                  id={block.type === 'rich_text' ? `rich-text-${block.id}` : `block-body-${block.id}`}
+                  name="blockContent"
                   aria-label={ui(block.type === 'rich_text' ? 'Rich text content' : 'Content')}
                   value={advanced.body || advanced.description || ''}
                   onChange={e => updateAdvanced(block.type === 'rich_text' || block.type === 'content_gate' ? 'body' : 'description', e.target.value)}
@@ -505,6 +542,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
                   {ui('Image URL')}
                   <input
+                    id={`image-url-${block.id}`}
+                    name="imageUrl"
                     value={advanced.imageUrl || ''}
                     onChange={e => updateAdvanced('imageUrl', e.target.value)}
                     placeholder="https://..."
@@ -512,6 +551,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   />
                 </label>
                 <input
+                  id={`image-file-upload-${block.id}`}
+                  name="imageFile"
                   type="file"
                   accept="image/*"
                   onChange={e => {
@@ -526,6 +567,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Alt text')}
                     <input
+                      id={`image-alt-${block.id}`}
+                      name="imageAlt"
                       value={advanced.alt || ''}
                       onChange={e => updateAdvanced('alt', e.target.value)}
                       maxLength={300}
@@ -535,6 +578,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   </label>
                   <label className="flex items-end gap-2 pb-1 text-[11px] font-semibold text-neutral-500">
                     <input
+                      id={`image-decorative-${block.id}`}
+                      name="imageDecorative"
                       type="checkbox"
                       checked={Boolean(advanced.decorative)}
                       onChange={e => updateAdvanced('decorative', e.target.checked)}
@@ -544,6 +589,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Caption')}
                     <input
+                      id={`image-caption-${block.id}`}
+                      name="imageCaption"
                       value={advanced.caption || ''}
                       onChange={e => updateAdvanced('caption', e.target.value)}
                       maxLength={500}
@@ -554,6 +601,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Destination URL')}
                     <input
+                      id={`image-link-url-${block.id}`}
+                      name="imageLinkUrl"
                       value={advanced.linkUrl || ''}
                       onChange={e => updateAdvanced('linkUrl', e.target.value)}
                       placeholder="https://..."
@@ -563,6 +612,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Image fit')}
                     <select
+                      id={`image-fit-${block.id}`}
+                      name="imageFit"
                       value={advanced.fit || 'cover'}
                       onChange={e => updateAdvanced('fit', e.target.value)}
                       className="mt-1 w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
@@ -574,6 +625,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Image shape')}
                     <select
+                      id={`image-aspect-${block.id}`}
+                      name="imageAspect"
                       value={advanced.aspect || 'auto'}
                       onChange={e => updateAdvanced('aspect', e.target.value)}
                       className="mt-1 w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
@@ -587,6 +640,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Crop position')}
                     <select
+                      id={`image-crop-${block.id}`}
+                      name="imageCropPosition"
                       value={advanced.cropPosition || 'center'}
                       onChange={e => updateAdvanced('cropPosition', e.target.value)}
                       className="mt-1 w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
@@ -607,10 +662,12 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
             {['download', 'event', 'presave', 'product', 'tips'].includes(block.type) && (
               <div>
-                <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+                <label htmlFor={`block-url-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">
                   {ui('Destination URL')}
                 </label>
                 <input
+                  id={`block-url-${block.id}`}
+                  name="url"
                   value={advanced.fileUrl || advanced.url || ''}
                   onChange={e => updateAdvanced(block.type === 'download' ? 'fileUrl' : 'url', e.target.value)}
                   placeholder="https://..."
@@ -618,6 +675,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 />
                 {block.type === 'download' && (
                   <input
+                    id={`block-download-file-${block.id}`}
+                    name="downloadFile"
                     type="file"
                     onChange={e => {
                       const file = e.target.files?.[0];
@@ -635,6 +694,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Event description')}
                   <textarea
+                    id={`block-event-desc-${block.id}`}
+                    name="eventDescription"
                     value={advanced.description || ''}
                     onChange={e => updateAdvanced('description', e.target.value)}
                     maxLength={1000}
@@ -644,6 +705,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Artwork URL')}
                   <input
+                    id={`block-event-artwork-${block.id}`}
+                    name="artworkUrl"
                     value={advanced.artworkUrl || ''}
                     onChange={e => updateAdvanced('artworkUrl', e.target.value)}
                     placeholder="https://..."
@@ -653,6 +716,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Date')}
                   <input
+                    id={`block-event-date-${block.id}`}
+                    name="eventDate"
                     value={advanced.date || ''}
                     onChange={e => updateAdvanced('date', e.target.value)}
                     maxLength={100}
@@ -663,6 +728,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Time')}
                   <input
+                    id={`block-event-time-${block.id}`}
+                    name="eventTime"
                     value={advanced.time || ''}
                     onChange={e => updateAdvanced('time', e.target.value)}
                     maxLength={50}
@@ -673,6 +740,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Timezone')}
                   <input
+                    id={`block-event-timezone-${block.id}`}
+                    name="eventTimezone"
                     value={advanced.timezone || ''}
                     onChange={e => updateAdvanced('timezone', e.target.value)}
                     maxLength={80}
@@ -683,6 +752,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Location')}
                   <input
+                    id={`block-event-location-${block.id}`}
+                    name="eventLocation"
                     value={advanced.location || ''}
                     onChange={e => updateAdvanced('location', e.target.value)}
                     maxLength={300}
@@ -700,6 +771,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Release description')}
                   <textarea
+                    id={`block-presave-desc-${block.id}`}
+                    name="presaveDescription"
                     value={advanced.description || ''}
                     onChange={e => updateAdvanced('description', e.target.value)}
                     maxLength={1000}
@@ -717,6 +790,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Product description')}
                   <textarea
+                    id={`block-product-desc-${block.id}`}
+                    name="productDescription"
                     value={advanced.description || ''}
                     onChange={e => updateAdvanced('description', e.target.value)}
                     maxLength={1000}
@@ -726,6 +801,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Product image URL')}
                   <input
+                    id={`block-product-image-${block.id}`}
+                    name="productImage"
                     value={advanced.imageUrl || ''}
                     onChange={e => updateAdvanced('imageUrl', e.target.value)}
                     placeholder="https://..."
@@ -735,6 +812,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Price amount')}
                   <input
+                    id={`block-product-price-${block.id}`}
+                    name="priceAmount"
                     value={advanced.priceAmount || ''}
                     onChange={e => updateAdvanced('priceAmount', e.target.value)}
                     inputMode="decimal"
@@ -746,6 +825,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Currency code')}
                   <input
+                    id={`block-product-currency-${block.id}`}
+                    name="currency"
                     value={advanced.currency || ''}
                     onChange={e => updateAdvanced('currency', e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3))}
                     maxLength={3}
@@ -764,6 +845,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Support description')}
                   <textarea
+                    id={`block-tips-desc-${block.id}`}
+                    name="tipsDescription"
                     value={advanced.description || ''}
                     onChange={e => updateAdvanced('description', e.target.value)}
                     maxLength={1000}
@@ -781,6 +864,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
                   {ui('Address or place to find')}
                   <input
+                    id={`block-map-location-${block.id}`}
+                    name="mapLocation"
                     value={advanced.location || ''}
                     onChange={e => updateAdvanced('location', e.target.value)}
                     maxLength={300}
@@ -799,6 +884,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Contact action')}
                   <select
+                    id={`block-contact-type-${block.id}`}
+                    name="contactType"
                     value={advanced.contactType || 'phone'}
                     onChange={e => updateAdvanced('contactType', e.target.value)}
                     className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
@@ -811,9 +898,12 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Email address')}
                     <input
+                      id={`block-contact-email-${block.id}`}
+                      name="contactEmail"
                       value={advanced.email || ''}
                       onChange={e => updateAdvanced('email', e.target.value)}
                       type="email"
+                      autoComplete="email"
                       dir="ltr"
                       placeholder="hello@example.com"
                       className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
@@ -823,10 +913,13 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                   <label className="block text-[11px] font-semibold text-neutral-500">
                     {ui('Phone number')}
                     <input
+                      id={`block-contact-phone-${block.id}`}
+                      name="contactPhone"
                       value={advanced.phone || ''}
                       onChange={e => updateAdvanced('phone', e.target.value)}
                       dir="ltr"
                       inputMode="tel"
+                      autoComplete="tel"
                       placeholder="+966 50 123 4567"
                       className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                     />
@@ -838,6 +931,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Availability')}
                   <input
+                    id={`block-contact-avail-${block.id}`}
+                    name="contactAvailability"
                     value={advanced.availability || ''}
                     onChange={e => updateAdvanced('availability', e.target.value)}
                     maxLength={200}
@@ -848,6 +943,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 <label className="block text-[11px] font-semibold text-neutral-500">
                   {ui('Contact description')}
                   <textarea
+                    id={`block-contact-desc-${block.id}`}
+                    name="contactDescription"
                     value={advanced.description || ''}
                     onChange={e => updateAdvanced('description', e.target.value)}
                     maxLength={1000}
@@ -859,6 +956,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                     <label className="block text-[11px] font-semibold text-neutral-500">
                       {ui('Email subject')}
                       <input
+                        id={`block-contact-subj-${block.id}`}
+                        name="contactSubject"
                         value={advanced.subject || ''}
                         onChange={e => updateAdvanced('subject', e.target.value)}
                         maxLength={200}
@@ -868,6 +967,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                     <label className="block text-[11px] font-semibold text-neutral-500">
                       {ui('Email message')}
                       <textarea
+                        id={`block-contact-body-${block.id}`}
+                        name="contactBody"
                         value={advanced.body || ''}
                         onChange={e => updateAdvanced('body', e.target.value)}
                         maxLength={1000}
@@ -886,6 +987,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
               <div className="sm:col-span-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-900">
                 <label className="flex items-start gap-2 font-semibold">
                   <input
+                    id={`block-form-consentreq-${block.id}`}
+                    name="consentRequired"
                     type="checkbox"
                     checked={advanced.consentRequired === true}
                     onChange={e => updateAdvanced('consentRequired', e.target.checked)}
@@ -898,6 +1001,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 </p>
                 {advanced.consentRequired === true && (
                   <input
+                    id={`block-form-consenttxt-${block.id}`}
+                    name="consentText"
                     value={advanced.consentText || ''}
                     onChange={e => updateAdvanced('consentText', e.target.value)}
                     maxLength={300}
@@ -950,11 +1055,14 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
 
             {block.type === 'content_gate' && (
               <div>
-                <label className="block text-[11px] font-semibold text-neutral-500 mb-1">
+                <label htmlFor={`block-gate-password-${block.id}`} className="block text-[11px] font-semibold text-neutral-500 mb-1">
                   {ui('Access code')}
                 </label>
                 <input
+                  id={`block-gate-password-${block.id}`}
+                  name="gatePassword"
                   type="password"
+                  autoComplete="current-password"
                   value={advanced.password || ''}
                   onChange={e => updateAdvanced('password', e.target.value)}
                   placeholder={advanced.locked ? ui('Leave blank to keep the current code; enter a new code to replace it.') : ui('Set a code to protect this text.')}
@@ -975,6 +1083,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
           <label className="block text-[11px] font-semibold text-neutral-500">
             {ui('Folder description')}
             <input
+              id={`folder-subtitle-${block.id}`}
+              name="folderSubtitle"
               value={(block as FolderBlock).subtitle || ''}
               onChange={e => handleUpdateBlockField(block.id, 'subtitle', e.target.value)}
               maxLength={250}
@@ -1001,6 +1111,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
           {((block as FolderBlock).items || []).map((item, itemIndex) => (
             <div key={item.id} className="flex items-center gap-2">
               <input
+                id={`folder-item-title-${block.id}-${item.id}`}
+                name="folderItemTitle"
                 aria-label={ui("Title")}
                 type="text"
                 value={item.title}
@@ -1009,6 +1121,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
                 className="w-1/3 px-2 py-1 rounded border border-neutral-200 text-[11px] bg-neutral-50 text-neutral-900"
               />
               <input
+                id={`folder-item-url-${block.id}-${item.id}`}
+                name="folderItemUrl"
                 aria-label={ui("Destination URL")}
                 type="text"
                 value={item.url}

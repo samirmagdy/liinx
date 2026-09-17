@@ -79,8 +79,11 @@ export const ContentPanel: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
           <div>
-            <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui('Username / Handle')}</label>
+            <label htmlFor="builder-profile-username" className="block text-xs font-semibold text-neutral-500 mb-1">{ui('Username / Handle')}</label>
             <input
+              id="builder-profile-username"
+              name="username"
+              autoComplete="username"
               aria-label={ui('Username / Handle')}
               type="text"
               value={profile.username}
@@ -95,8 +98,11 @@ export const ContentPanel: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Display Name")}</label>
+            <label htmlFor="builder-profile-displayName" className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Display Name")}</label>
             <input
+              id="builder-profile-displayName"
+              name="displayName"
+              autoComplete="name"
               aria-label={ui("Display Name")}
               type="text"
               maxLength={100}
@@ -107,8 +113,10 @@ export const ContentPanel: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Category / Tag")}</label>
+            <label htmlFor="builder-profile-category" className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Category / Tag")}</label>
             <input
+              id="builder-profile-category"
+              name="category"
               aria-label={ui("Category / Tag")}
               type="text"
               maxLength={50}
@@ -120,8 +128,10 @@ export const ContentPanel: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Short Bio")}</label>
+          <label htmlFor="builder-profile-bio" className="block text-xs font-semibold text-neutral-500 mb-1">{ui("Short Bio")}</label>
           <textarea
+            id="builder-profile-bio"
+            name="bio"
             aria-label={ui("Short Bio")}
             rows={2}
             maxLength={500}

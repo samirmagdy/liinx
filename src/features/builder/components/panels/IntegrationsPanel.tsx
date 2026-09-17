@@ -280,7 +280,7 @@ export const IntegrationsPanel: React.FC = () => {
         {/* Instant Caption Ingest & Parser Tester */}
         <div className="pt-2 border-t border-neutral-100 space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-neutral-800 flex items-center gap-1.5">
+            <label htmlFor="instagram-caption-input" className="text-xs font-bold text-neutral-800 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>{ui("Live Caption Parser & Post Ingest")}</span>
             </label>
@@ -293,6 +293,8 @@ export const IntegrationsPanel: React.FC = () => {
             </button>
           </div>
           <textarea
+            id="instagram-caption-input"
+            name="instagramCaption"
             aria-label={ui("Destination URL")}
             rows={2}
             value={instagramCaptionInput}

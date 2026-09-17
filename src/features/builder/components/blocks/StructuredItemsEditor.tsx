@@ -87,6 +87,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
             {kind === 'form' && (
               <>
                 <input
+                  id={`field-label-${item.id || index}`}
+                  name={`field_label_${item.id || index}`}
                   value={item.label || ''}
                   onChange={e => update(index, 'label', e.target.value)}
                   placeholder={ui('Label')}
@@ -95,6 +97,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                 />
                 <input
+                  id={`field-name-${item.id || index}`}
+                  name={`field_name_${item.id || index}`}
                   value={item.name || ''}
                   onChange={e =>
                     update(
@@ -109,6 +113,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 font-mono text-[11px] text-neutral-900"
                 />
                 <select
+                  id={`field-type-${item.id || index}`}
+                  name={`field_type_${item.id || index}`}
                   value={item.type || 'text'}
                   onChange={e => update(index, 'type', e.target.value)}
                   aria-label={ui('Field type')}
@@ -119,8 +125,10 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   <option value="tel">{ui('Phone')}</option>
                   <option value="textarea">{ui('Long text')}</option>
                 </select>
-                <label className="flex items-center gap-2 text-[11px] text-neutral-700">
+                <label htmlFor={`field-required-${item.id || index}`} className="flex items-center gap-2 text-[11px] text-neutral-700">
                   <input
+                    id={`field-required-${item.id || index}`}
+                    name={`field_required_${item.id || index}`}
                     type="checkbox"
                     checked={item.required !== false}
                     onChange={e => update(index, 'required', e.target.checked)}
@@ -128,6 +136,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   {ui('Required')}
                 </label>
                 <input
+                  id={`field-help-${item.id || index}`}
+                  name={`field_help_${item.id || index}`}
                   value={item.helpText || ''}
                   onChange={e => update(index, 'helpText', e.target.value)}
                   placeholder={ui('Help text (optional)')}
@@ -135,9 +145,11 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   maxLength={300}
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900 sm:col-span-2"
                 />
-                <label className="flex items-center gap-1 text-[11px] text-neutral-700">
+                <label htmlFor={`field-min-len-${item.id || index}`} className="flex items-center gap-1 text-[11px] text-neutral-700">
                   {ui('Minimum')}
                   <input
+                    id={`field-min-len-${item.id || index}`}
+                    name={`field_min_len_${item.id || index}`}
                     type="number"
                     min="0"
                     max="2000"
@@ -153,9 +165,11 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                     className="w-20 rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                   />
                 </label>
-                <label className="flex items-center gap-1 text-[11px] text-neutral-700">
+                <label htmlFor={`field-max-len-${item.id || index}`} className="flex items-center gap-1 text-[11px] text-neutral-700">
                   {ui('Maximum')}
                   <input
+                    id={`field-max-len-${item.id || index}`}
+                    name={`field_max_len_${item.id || index}`}
                     type="number"
                     min="1"
                     max="2000"
@@ -177,6 +191,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
             {(kind === 'gallery' || kind === 'carousel') && (
               <>
                 <input
+                  id={`gallery-img-url-${item.id || index}`}
+                  name={`gallery_img_url_${item.id || index}`}
                   value={item.imageUrl || ''}
                   onChange={e => update(index, 'imageUrl', e.target.value)}
                   placeholder={ui('Image URL')}
@@ -184,6 +200,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900 sm:col-span-2"
                 />
                 <input
+                  id={`gallery-upload-${item.id || index}`}
+                  name={`gallery_upload_${item.id || index}`}
                   type="file"
                   accept="image/*"
                   onChange={e => {
@@ -194,6 +212,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                 />
                 <input
+                  id={`gallery-alt-${item.id || index}`}
+                  name={`gallery_alt_${item.id || index}`}
                   value={item.alt || ''}
                   onChange={e => update(index, 'alt', e.target.value)}
                   placeholder={ui('Alt text')}
@@ -201,6 +221,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                 />
                 <input
+                  id={`gallery-caption-${item.id || index}`}
+                  name={`gallery_caption_${item.id || index}`}
                   value={item.caption || ''}
                   onChange={e => update(index, 'caption', e.target.value)}
                   placeholder={ui('Caption')}
@@ -208,6 +230,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                 />
                 <input
+                  id={`gallery-link-${item.id || index}`}
+                  name={`gallery_link_${item.id || index}`}
                   value={item.linkUrl || ''}
                   onChange={e => update(index, 'linkUrl', e.target.value)}
                   placeholder={ui('Optional link URL')}
@@ -220,6 +244,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
             {kind === 'faq' && (
               <>
                 <input
+                  id={`faq-question-${item.id || index}`}
+                  name={`faq_question_${item.id || index}`}
                   value={item.question || ''}
                   onChange={e => update(index, 'question', e.target.value)}
                   placeholder={ui('Question')}
@@ -228,6 +254,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                 />
                 <textarea
+                  id={`faq-answer-${item.id || index}`}
+                  name={`faq_answer_${item.id || index}`}
                   value={item.answer || ''}
                   onChange={e => update(index, 'answer', e.target.value)}
                   placeholder={ui('Answer')}
@@ -244,6 +272,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
             {kind === 'testimonials' && (
               <>
                 <textarea
+                  id={`testimonial-quote-${item.id || index}`}
+                  name={`testimonial_quote_${item.id || index}`}
                   value={item.quote || ''}
                   onChange={e => update(index, 'quote', e.target.value)}
                   placeholder={ui('Quote')}
@@ -251,6 +281,8 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   className="rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                 />
                 <input
+                  id={`testimonial-name-${item.id || index}`}
+                  name={`testimonial_name_${item.id || index}`}
                   value={item.name || ''}
                   onChange={e => update(index, 'name', e.target.value)}
                   placeholder={ui('Name')}

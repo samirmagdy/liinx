@@ -97,12 +97,12 @@
       ]
     },
     "src/components/LinktreeImporterModal.tsx": {
-      "lines": 379,
+      "lines": 397,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 352,
-          "complexity": 37,
+          "lines": 370,
+          "complexity": 38,
           "maxDepth": 4
         }
       ]
@@ -116,11 +116,11 @@
       "functions": []
     },
     "src/components/Navbar.tsx": {
-      "lines": 297,
+      "lines": 300,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 272,
+          "lines": 275,
           "complexity": 23,
           "maxDepth": 2
         }
@@ -131,23 +131,23 @@
       "functions": []
     },
     "src/components/PhonePreview.tsx": {
-      "lines": 726,
+      "lines": 730,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 680,
+          "lines": 684,
           "complexity": 89,
           "maxDepth": 5
         },
         {
           "name": "renderProfileContent",
-          "lines": 563,
+          "lines": 567,
           "complexity": 59,
           "maxDepth": 5
         },
         {
           "name": "<anonymous>",
-          "lines": 445,
+          "lines": 449,
           "complexity": 45,
           "maxDepth": 5
         }
@@ -182,11 +182,11 @@
       ]
     },
     "src/components/QrCodeModal.tsx": {
-      "lines": 211,
+      "lines": 213,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 192,
+          "lines": 194,
           "complexity": 22,
           "maxDepth": 2
         }
@@ -232,11 +232,11 @@
       "functions": []
     },
     "src/features/builder/components/BuilderShell.tsx": {
-      "lines": 384,
+      "lines": 396,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 365,
+          "lines": 377,
           "complexity": 24,
           "maxDepth": 2
         }
@@ -273,18 +273,18 @@
       ]
     },
     "src/features/builder/components/blocks/BlockEditorItem.tsx": {
-      "lines": 1051,
+      "lines": 1165,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 1017,
-          "complexity": 120,
+          "lines": 1131,
+          "complexity": 121,
           "maxDepth": 2
         },
         {
           "name": "<anonymous>",
-          "lines": 560,
-          "complexity": 82,
+          "lines": 634,
+          "complexity": 83,
           "maxDepth": 2
         }
       ]
@@ -294,28 +294,28 @@
       "functions": []
     },
     "src/features/builder/components/blocks/StructuredItemsEditor.tsx": {
-      "lines": 325,
+      "lines": 357,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 313,
-          "complexity": 43,
+          "lines": 345,
+          "complexity": 78,
           "maxDepth": 3
         },
         {
           "name": "<anonymous>",
-          "lines": 241,
-          "complexity": 31,
+          "lines": 273,
+          "complexity": 66,
           "maxDepth": 1
         }
       ]
     },
     "src/features/builder/components/pages/PageManager.tsx": {
-      "lines": 173,
+      "lines": 185,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 168,
+          "lines": 180,
           "complexity": 11,
           "maxDepth": 1
         }
@@ -333,44 +333,44 @@
       ]
     },
     "src/features/builder/components/panels/AppearancePanel.tsx": {
-      "lines": 121,
+      "lines": 125,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 115,
+          "lines": 119,
           "complexity": 10,
           "maxDepth": 2
         }
       ]
     },
     "src/features/builder/components/panels/ContentPanel.tsx": {
-      "lines": 152,
+      "lines": 162,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 141,
+          "lines": 151,
           "complexity": 6,
           "maxDepth": 1
         }
       ]
     },
     "src/features/builder/components/panels/IntegrationsPanel.tsx": {
-      "lines": 326,
+      "lines": 328,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 312,
+          "lines": 314,
           "complexity": 23,
           "maxDepth": 3
         }
       ]
     },
     "src/features/builder/components/panels/SettingsPanel.tsx": {
-      "lines": 759,
+      "lines": 793,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 745,
+          "lines": 779,
           "complexity": 60,
           "maxDepth": 4
         }
@@ -381,11 +381,11 @@
       "functions": []
     },
     "src/features/builder/components/social/SocialLinksEditor.tsx": {
-      "lines": 120,
+      "lines": 126,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 113,
+          "lines": 119,
           "complexity": 5,
           "maxDepth": 1
         }
@@ -459,11 +459,11 @@
       ]
     },
     "src/features/builder/hooks/useProfile.ts": {
-      "lines": 281,
+      "lines": 279,
       "functions": [
         {
           "name": "useProfile",
-          "lines": 250,
+          "lines": 248,
           "complexity": 36,
           "maxDepth": 1
         }
@@ -508,11 +508,11 @@
       "functions": []
     },
     "src/features/public-bio/components/PublicBioShell.tsx": {
-      "lines": 281,
+      "lines": 284,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 252,
+          "lines": 255,
           "complexity": 38,
           "maxDepth": 2
         }
@@ -564,7 +564,7 @@
       ]
     },
     "src/features/public-bio/components/blocks/ContentGateBlockView.tsx": {
-      "lines": 98,
+      "lines": 101,
       "functions": []
     },
     "src/features/public-bio/components/blocks/DownloadBlockView.tsx": {
@@ -591,13 +591,13 @@
       ]
     },
     "src/features/public-bio/components/blocks/FormBlockView.tsx": {
-      "lines": 152,
+      "lines": 159,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 139,
-          "complexity": 23,
-          "maxDepth": 2
+          "lines": 146,
+          "complexity": 25,
+          "maxDepth": 3
         }
       ]
     },
@@ -751,11 +751,11 @@
       ]
     },
     "src/pages/RegisterPage.tsx": {
-      "lines": 349,
+      "lines": 355,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 313,
+          "lines": 319,
           "complexity": 33,
           "maxDepth": 3
         }

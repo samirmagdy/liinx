@@ -66,6 +66,8 @@ export const BuilderShell: React.FC = () => {
     <div className="studio-shell min-h-[calc(100vh-72px)] bg-neutral-50 border-t border-neutral-200 flex flex-col">
       {/* Hidden File Input for Avatar Upload */}
       <input
+        id="builder-avatar-file-input"
+        name="avatarFile"
         type="file"
         ref={fileInputRef}
         onChange={handleAvatarFileSelect}
@@ -209,10 +211,13 @@ export const BuilderShell: React.FC = () => {
 
           <form onSubmit={handleCreateProfileSubmit} className="space-y-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-neutral-800">{ui("Handle (Username)")}</label>
+              <label htmlFor="create-profile-username" className="text-xs font-semibold text-neutral-800">{ui("Handle (Username)")}</label>
               <div className="flex items-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 focus-within:bg-neutral-50 focus-within:border-neutral-900">
                 <span className="text-xs font-mono text-neutral-400">@</span>
                 <input
+                  id="create-profile-username"
+                  name="username"
+                  autoComplete="username"
                   aria-label={ui("Handle (Username)")}
                   type="text"
                   required
@@ -225,8 +230,11 @@ export const BuilderShell: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-neutral-800">{ui("Display Name")}</label>
+              <label htmlFor="create-profile-display-name" className="text-xs font-semibold text-neutral-800">{ui("Display Name")}</label>
               <input
+                id="create-profile-display-name"
+                name="displayName"
+                autoComplete="name"
                 aria-label={ui("Display Name")}
                 type="text"
                 required
@@ -300,9 +308,11 @@ export const BuilderShell: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-800">{ui("Your Live Secret Key")}</label>
+                <label htmlFor="created-live-api-key" className="text-xs font-semibold text-neutral-800">{ui("Your Live Secret Key")}</label>
                 <div className="flex items-center gap-2">
                   <input
+                    id="created-live-api-key"
+                    name="createdApiKey"
                     aria-label={ui("Your Live Secret Key")}
                     type="text"
                     readOnly
@@ -343,8 +353,10 @@ export const BuilderShell: React.FC = () => {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-800">{ui("Key Name / Description")}</label>
+                <label htmlFor="new-api-key-name" className="text-xs font-semibold text-neutral-800">{ui("Key Name / Description")}</label>
                 <input
+                  id="new-api-key-name"
+                  name="newKeyName"
                   aria-label={ui("Key Name / Description")}
                   type="text"
                   required
