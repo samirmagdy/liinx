@@ -520,6 +520,62 @@ describe('Critical Security & Coverage Modules', () => {
       }
     });
 
+    it('exercises webhook signature verification failures and duplicate event deduplication', async () => {
+      const origSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      const origEnv = process.env.NODE_ENV;
+      try {
+        process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret_for_branch_test';
+        // 1. Missing signature header
+        const missingSig = await request(app)
+          .post('/api/billing/webhook')
+          .send({ type: 'checkout.session.completed' });
+        expect(missingSig.status).toBe(400);
+        expect(missingSig.body.error).toMatch(/Missing stripe-signature header/);
+
+        // 2. Invalid signature header
+        const invalidSig = await request(app)
+          .post('/api/billing/webhook')
+          .set('stripe-signature', 't=123,v1=invalid_sig')
+          .send({ type: 'checkout.session.completed' });
+        expect(invalidSig.status).toBe(400);
+        expect(invalidSig.body.error).toMatch(/Webhook signature verification failed/);
+
+        // 3. Duplicate event handling
+        delete process.env.STRIPE_WEBHOOK_SECRET;
+        const dupEventId = `evt_dup_test_${randomBytes(4).toString('hex')}`;
+        const first = await request(app).post('/api/billing/webhook').send({
+          id: dupEventId,
+          type: 'checkout.session.completed',
+          created: Math.floor(Date.now() / 1000),
+          data: { object: { payment_status: 'unpaid' } }
+        });
+        expect(first.status).toBe(200);
+
+        const duplicate = await request(app).post('/api/billing/webhook').send({
+          id: dupEventId,
+          type: 'checkout.session.completed',
+          created: Math.floor(Date.now() / 1000),
+          data: { object: { payment_status: 'unpaid' } }
+        });
+        expect(duplicate.status).toBe(200);
+        expect(duplicate.body.duplicate).toBe(true);
+
+        // 4. Default switch case: unhandled event type
+        const unhandled = await request(app).post('/api/billing/webhook').send({
+          id: `evt_unhandled_${randomBytes(4).toString('hex')}`,
+          type: 'payment_intent.created',
+          created: Math.floor(Date.now() / 1000),
+          data: { object: { id: 'pi_test' } }
+        });
+        expect(unhandled.status).toBe(200);
+        expect(unhandled.body.received).toBe(true);
+      } finally {
+        if (origSecret) process.env.STRIPE_WEBHOOK_SECRET = origSecret;
+        else delete process.env.STRIPE_WEBHOOK_SECRET;
+        process.env.NODE_ENV = origEnv;
+      }
+    });
+
     it('rejects invalid or missing stripe event payloads', async () => {
       const origSecret = process.env.STRIPE_WEBHOOK_SECRET;
       delete process.env.STRIPE_WEBHOOK_SECRET;
