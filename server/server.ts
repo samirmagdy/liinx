@@ -29,6 +29,7 @@ import { startInstagramSyncScheduler } from './instagramScheduler.js';
 import { isHttpUrl } from './utils/urlValidation.js';
 import { hasEntitlement } from './entitlements.js';
 import { enforceSingleNodeSafeguards } from './infrastructure/safeguards.js';
+import { uploadStorage, uploadStorageProvider } from './services/uploadStorage.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -401,35 +402,22 @@ app.use((req, res, next) => {
 // Serve only content that can be classified from its bytes. In particular,
 // never let a legacy or manually placed .html/.svg file execute on the app
 // origin just because it lives below the uploads directory.
-const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../public/uploads'));
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-app.get('/uploads/:filename', (req, res) => {
+app.get('/uploads/:filename', async (req, res) => {
   const filename = req.params.filename;
   if (!filename || filename !== path.basename(filename) || filename.includes('\\') || filename.length > 255) {
     return res.status(404).end();
   }
-
-  const targetPath = path.resolve(uploadsDir, filename);
-  if (!targetPath.startsWith(`${uploadsDir}${path.sep}`)) return res.status(404).end();
-
-  let stat: fs.Stats;
-  let probe: Buffer;
+  let content: Buffer | null;
   try {
-    stat = fs.statSync(targetPath);
-    if (!stat.isFile() || stat.size > 25 * 1024 * 1024) return res.status(404).end();
-    const probeLength = Math.min(stat.size, 64 * 1024);
-    probe = Buffer.alloc(probeLength);
-    const fd = fs.openSync(targetPath, 'r');
-    try { fs.readSync(fd, probe, 0, probeLength, 0); } finally { fs.closeSync(fd); }
+    content = await uploadStorage.get(filename);
   } catch {
     return res.status(404).end();
   }
+  if (!content || content.length > 25 * 1024 * 1024) return res.status(404).end();
 
   const extension = path.extname(filename).toLowerCase();
-  const image = detectImageMagicBytes(probe);
-  const document = detectDocument(probe);
+  const image = detectImageMagicBytes(content);
+  const document = detectDocument(content);
   const isMatchingImage = Boolean(image && (extension === image.ext || (extension === '.jpeg' && image.ext === '.jpg')));
   const detected = isMatchingImage ? image : document;
   if (!detected) return res.status(404).end();
@@ -443,8 +431,8 @@ app.get('/uploads/:filename', (req, res) => {
   } else {
     res.setHeader('Content-Disposition', 'inline');
   }
-  res.setHeader('Content-Length', stat.size);
-  return res.sendFile(targetPath);
+  res.setHeader('Content-Length', content.length);
+  return res.send(content);
 });
 
 // Link Redirector (e.g. /r/:blockId) and analytics routes
@@ -520,12 +508,12 @@ app.get('/api/health', (_req, res) => {
 // Readiness includes the writable media volume used by upload persistence.
 // Keep this separate from liveness so a process can be alive while the
 // instance is not safe to receive creator writes.
-app.get('/api/ready', (_req, res) => {
+app.get('/api/ready', async (_req, res) => {
   try {
     db.prepare('SELECT 1').get();
-    const readinessUploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../public/uploads'));
-    fs.accessSync(readinessUploadsDir, fs.constants.W_OK);
-    res.json({ status: 'ready', service: 'liinx-api', database: 'connected', uploads: 'writable' });
+    const storageReady = uploadStorage.healthCheck ? await uploadStorage.healthCheck() : true;
+    if (!storageReady) return res.status(503).json({ status: 'not_ready', service: 'liinx-api', error: 'Required storage is unavailable.' });
+    res.json({ status: 'ready', service: 'liinx-api', database: 'connected', uploads: 'configured', storageProvider: uploadStorageProvider });
   } catch {
     res.status(503).json({ status: 'not_ready', service: 'liinx-api', error: 'Required storage is unavailable.' });
   }

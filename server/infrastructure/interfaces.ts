@@ -42,6 +42,8 @@ export interface StorageUploadOptions {
   mimeType: string;
   originalFilename?: string;
   visibility?: 'public' | 'private';
+  contentDisposition?: 'inline' | 'attachment';
+  cacheControl?: string;
 }
 
 export interface StoredObject {
@@ -58,6 +60,7 @@ export interface ObjectStorage {
   delete(key: string): Promise<boolean>;
   exists(key: string): Promise<boolean>;
   getUrl(key: string): string;
+  healthCheck?(): Promise<boolean>;
 }
 
 export interface ClickEvent {
@@ -90,12 +93,15 @@ export interface ViewEvent {
   createdAt: number;
 }
 
-export interface EventStore {
+export interface AnalyticsEventStore {
   readonly name: string;
   recordClick(click: ClickEvent): Promise<void> | void;
   recordView(view: ViewEvent): Promise<void> | void;
   flush(): Promise<void> | void;
 }
+
+/** @deprecated Use AnalyticsEventStore for new integrations. */
+export type EventStore = AnalyticsEventStore;
 
 export interface ScheduledJob {
   name: string;

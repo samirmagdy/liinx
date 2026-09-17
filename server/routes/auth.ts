@@ -13,12 +13,11 @@ import {
   deletionSchema
 } from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
-import fs from 'fs';
-import path from 'path';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { cancelStripeSubscription } from '../services/billingCancellation.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { EmailDeliveryUnavailable, sendTransactionalEmail } from '../services/email.js';
+import { storageKeyFromUrl, uploadStorage } from '../services/uploadStorage.js';
 
 export const authRouter = Router();
 
@@ -420,6 +419,15 @@ authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res
     const uploadRows = db.prepare('SELECT path FROM uploaded_files WHERE owner_user_id = ?').all(userId) as { path: string }[];
     const uploadPaths = new Set(uploadRows.map(row => row.path));
 
+    // Remove media before deleting its ownership rows. A provider failure must
+    // leave the account intact so deletion can be retried honestly.
+    for (const uploadPath of uploadPaths) {
+      const key = storageKeyFromUrl(uploadPath);
+      if (key && !(await uploadStorage.delete(key))) {
+        return res.status(503).json({ error: 'Account deletion is temporarily unavailable because uploaded media could not be removed. Please retry.' });
+      }
+    }
+
     const deleteAccountTx = db.transaction(() => {
       // Find all profiles for this user
       const userProfiles = db.prepare('SELECT id FROM profiles WHERE user_id = ?').all(userId) as { id: string }[];
@@ -446,12 +454,6 @@ authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res
     });
 
     deleteAccountTx();
-
-    // Remove locally stored media after the transaction succeeds. Missing files are harmless.
-    const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), 'public/uploads'));
-    for (const uploadPath of uploadPaths) {
-      try { fs.unlinkSync(path.join(uploadsDir, path.basename(uploadPath))); } catch { /* already absent */ }
-    }
 
     res.json({ success: true, message: 'Your account and all associated profile data have been permanently deleted.' });
   } catch (err: any) {

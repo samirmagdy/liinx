@@ -6,6 +6,7 @@ import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { createId } from '../utils/ids.js';
 import { isSafeLinkUrl } from '../utils/urlValidation.js';
 import { getMailtoHref, getPhoneHref } from '../../shared/index.js';
+import { sqliteAnalyticsEventStore } from '../infrastructure/sqliteAnalyticsEventStore.js';
 
 export const analyticsRouter = Router();
 
@@ -27,79 +28,8 @@ function sanitizeUrl(rawUrl?: string | null): string | null {
   return null;
 }
 
-interface ClickRecord {
-  id: string;
-  block_id: string;
-  profile_id: string;
-  target_url: string;
-  ip_hash: string;
-  referrer: string;
-  user_agent: string;
-  utm_source?: string | null;
-  utm_medium?: string | null;
-  utm_campaign?: string | null;
-  page_id?: string | null;
-  dedupe_key?: string | null;
-  created_at: number;
-}
-
-interface ViewRecord {
-  id: string;
-  profile_id: string;
-  ip_hash: string;
-  referrer: string;
-  user_agent: string;
-  utm_source?: string | null;
-  utm_medium?: string | null;
-  utm_campaign?: string | null;
-  page_id?: string | null;
-  dedupe_key?: string | null;
-  created_at: number;
-}
-
-let clickBuffer: ClickRecord[] = [];
-let viewBuffer: ViewRecord[] = [];
-
-const insertClicksBatch = db.transaction((clicks: ClickRecord[]) => {
-  const stmt = db.prepare(`
-    INSERT OR IGNORE INTO link_clicks (id, block_id, profile_id, target_url, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, page_id, dedupe_key, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  for (const c of clicks) {
-    stmt.run(c.id, c.block_id, c.profile_id, c.target_url, c.ip_hash, c.referrer, c.user_agent, c.utm_source || null, c.utm_medium || null, c.utm_campaign || null, c.page_id || null, c.dedupe_key || null, c.created_at);
-  }
-});
-
-const insertViewsBatch = db.transaction((views: ViewRecord[]) => {
-  const stmt = db.prepare(`
-    INSERT OR IGNORE INTO profile_views (id, profile_id, ip_hash, referrer, user_agent, utm_source, utm_medium, utm_campaign, page_id, dedupe_key, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  for (const v of views) {
-    stmt.run(v.id, v.profile_id, v.ip_hash, v.referrer, v.user_agent, v.utm_source || null, v.utm_medium || null, v.utm_campaign || null, v.page_id || null, v.dedupe_key || null, v.created_at);
-  }
-});
-
 export function flushAnalyticsBuffers() {
-  if (clickBuffer.length > 0) {
-    const toFlush = clickBuffer;
-    try {
-      insertClicksBatch(toFlush);
-      clickBuffer = clickBuffer.slice(toFlush.length);
-    } catch (e) {
-      console.error('Error flushing click batch:', e);
-    }
-  }
-
-  if (viewBuffer.length > 0) {
-    const toFlush = viewBuffer;
-    try {
-      insertViewsBatch(toFlush);
-      viewBuffer = viewBuffer.slice(toFlush.length);
-    } catch (e) {
-      console.error('Error flushing view batch:', e);
-    }
-  }
+  sqliteAnalyticsEventStore.flush();
 }
 
 // In-memory sliding-window abuse rate limiter for view & click events
@@ -258,7 +188,25 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
         dedupe_key: analyticsDedupeKey('click', [ipHash, block.id, targetUrl, utmSource || '', utmMedium || '', utmCampaign || ''], now),
         created_at: now
       };
-      insertClicksBatch([clickRecord]);
+      try {
+        sqliteAnalyticsEventStore.recordClick({
+          id: clickRecord.id,
+          blockId: clickRecord.block_id,
+          profileId: clickRecord.profile_id,
+          targetUrl: clickRecord.target_url,
+          ipHash: clickRecord.ip_hash,
+          referrer: clickRecord.referrer,
+          userAgent: clickRecord.user_agent,
+          utmSource: clickRecord.utm_source,
+          utmMedium: clickRecord.utm_medium,
+          utmCampaign: clickRecord.utm_campaign,
+          pageId: clickRecord.page_id,
+          dedupeKey: clickRecord.dedupe_key,
+          createdAt: clickRecord.created_at
+        });
+      } catch (error) {
+        console.error('Analytics click event was not queued:', error);
+      }
     }
 
     // Fast 302 Found redirect
@@ -313,9 +261,25 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
       dedupe_key: analyticsDedupeKey('view', [ipHash, profileId, pageId || 'profile', boundedQueryValue(referrer) || 'direct', boundedQueryValue(utmSource) || '', boundedQueryValue(utmMedium) || '', boundedQueryValue(utmCampaign) || ''], now),
       created_at: now
     };
-    insertViewsBatch([viewRecord]);
+    try {
+      sqliteAnalyticsEventStore.recordView({
+        id: viewRecord.id,
+        profileId: viewRecord.profile_id,
+        ipHash: viewRecord.ip_hash,
+        referrer: viewRecord.referrer,
+        userAgent: viewRecord.user_agent,
+        utmSource: viewRecord.utm_source,
+        utmMedium: viewRecord.utm_medium,
+        utmCampaign: viewRecord.utm_campaign,
+        pageId: viewRecord.page_id,
+        dedupeKey: viewRecord.dedupe_key,
+        createdAt: viewRecord.created_at
+      });
+    } catch (error) {
+      console.error('Analytics view event was not queued:', error);
+    }
 
-    res.json({ success: true });
+    res.json({ success: true, recorded: true });
   } catch (err: any) {
     console.error('Log view error:', err);
     res.status(500).json({ error: 'Failed to record view' });

@@ -792,7 +792,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
 });
 
 // Authenticated: Delete a non-active profile owned by the current account.
-profilesRouter.delete('/studio/profiles/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+profilesRouter.delete('/studio/profiles/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const target = db.prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?').get(req.params.id, req.user!.userId) as { id: string } | undefined;
     if (!target) return res.status(404).json({ error: 'Profile not found or does not belong to your account.' });
@@ -800,7 +800,9 @@ profilesRouter.delete('/studio/profiles/:id', requireAuth, (req: AuthenticatedRe
     const count = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(req.user!.userId) as { count: number };
     if (count.count <= 1) return res.status(400).json({ error: 'Your account must keep at least one profile.' });
     db.transaction(() => {
-      for (const table of ['link_clicks', 'profile_views', 'newsletter_subscribers', 'form_submissions', 'instagram_sync', 'api_keys', 'uploaded_files', 'blocks', 'pages']) {
+      // uploaded_files are account-owned and can be referenced by another
+      // profile; account deletion handles their final cleanup.
+      for (const table of ['link_clicks', 'profile_views', 'newsletter_subscribers', 'form_submissions', 'instagram_sync', 'api_keys', 'blocks', 'pages']) {
         try { db.prepare(`DELETE FROM ${table} WHERE profile_id = ?`).run(target.id); } catch {}
       }
       db.prepare('DELETE FROM profiles WHERE id = ? AND user_id = ?').run(target.id, req.user!.userId);

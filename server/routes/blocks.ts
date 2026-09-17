@@ -252,7 +252,7 @@ blocksRouter.post('/studio/blocks/:id/duplicate', requireAuth, (req: Authenticat
 });
 
 // Update block
-blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+blocksRouter.put('/studio/blocks/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const blockId = req.params.id;
     const profileId = req.user!.profileId;
@@ -326,7 +326,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
 
     if (saved.changes === 0) return res.status(409).json({ error: 'This block changed in another tab. Reload it before retrying your changes.' });
     const nextFileUrl = existing.type === 'download' && typeof (mergedExtra as any).fileUrl === 'string' ? (mergedExtra as any).fileUrl : null;
-    if (previousFileUrl && previousFileUrl !== nextFileUrl) cleanupUploadedFileIfUnreferenced(previousFileUrl, req.user!.userId);
+    if (previousFileUrl && previousFileUrl !== nextFileUrl) await cleanupUploadedFileIfUnreferenced(previousFileUrl, req.user!.userId);
     res.json({ success: true, revision: now, message: 'Block updated successfully.' });
     invalidatePublicProfileCache(profileId);
   } catch (err: any) {
@@ -336,7 +336,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, 
 });
 
 // Delete block
-blocksRouter.delete('/studio/blocks/:id', requireAuth, (req: AuthenticatedRequest, res) => {
+blocksRouter.delete('/studio/blocks/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const blockId = req.params.id;
     const profileId = req.user!.profileId;
@@ -351,7 +351,7 @@ blocksRouter.delete('/studio/blocks/:id', requireAuth, (req: AuthenticatedReques
       return res.status(404).json({ error: 'Block not found or unauthorized.' });
     }
 
-    if (previousFileUrl) cleanupUploadedFileIfUnreferenced(previousFileUrl, req.user!.userId);
+    if (previousFileUrl) await cleanupUploadedFileIfUnreferenced(previousFileUrl, req.user!.userId);
 
     res.json({ success: true, message: 'Block deleted successfully.' });
     invalidatePublicProfileCache(profileId);

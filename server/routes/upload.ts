@@ -1,27 +1,18 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
 import crypto from 'node:crypto';
 import { requireAuth } from '../middleware/auth.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { db } from '../db.js';
 import { cleanupUploadedFileIfUnreferenced } from '../services/uploadLifecycle.js';
+import { uploadStorage } from '../services/uploadStorage.js';
 
 export const uploadRouter = Router();
 
 function safeDisplayFilename(value: string): string {
   const name = path.basename(value).replace(/[\u0000-\u001f\u007f\\/<>:"|?*]+/g, '_').trim();
   return (name || 'download').slice(0, 150);
-}
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../../public/uploads'));
-
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 // Inspect binary header bytes to verify authentic image payload (anti-MIME spoofing)
@@ -125,7 +116,7 @@ uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', 
   if (uploadRateLimited((req as any).user?.userId || req.ip)) {
     return res.status(429).json({ error: 'Too many uploads. Please try again later.' });
   }
-  uploadFields(req, res, (err: any) => {
+  uploadFields(req, res, async (err: any) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ error: 'Image file size exceeds the 5MB limit.' });
@@ -158,25 +149,33 @@ uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', 
     // Securely write file with normalized extension based on detected magic bytes
     const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
     const safeFilename = `upload_${uniqueSuffix}${detected.ext}`;
-    const targetPath = path.join(uploadsDir, safeFilename);
+    let stored: { key: string; url: string; sizeBytes: number; mimeType: string } | undefined;
 
     try {
-      fs.writeFileSync(targetPath, uploadedFile.buffer, { flag: 'wx' });
-      const fileUrl = `/uploads/${safeFilename}`;
+      stored = await uploadStorage.put(safeFilename, uploadedFile.buffer, {
+        mimeType: detected.mime,
+        originalFilename: safeFilename,
+        visibility: 'public',
+        contentDisposition: 'inline',
+        cacheControl: 'public, max-age=31536000, immutable'
+      });
+      const fileUrl = stored.url;
       db.prepare('INSERT INTO uploaded_files (path, owner_user_id, created_at) VALUES (?, ?, ?)')
         .run(fileUrl, (req as any).user.userId, Date.now());
     } catch (writeErr: any) {
-      try { fs.unlinkSync(targetPath); } catch { /* no file was persisted, or cleanup already completed */ }
+      // If the database insert failed after a remote PUT, remove the object so
+      // retries cannot accumulate orphaned media.
+      if (stored) await uploadStorage.delete(stored.key).catch(() => {});
       console.error('Failed to write uploaded file:', writeErr);
       return res.status(500).json({ error: 'Failed to store uploaded image.' });
     }
 
-    const fileUrl = `/uploads/${safeFilename}`;
+    const fileUrl = stored.url;
     res.status(201).json({
       success: true,
       url: fileUrl,
       filename: safeFilename,
-      size: uploadedFile.size,
+      size: stored.sizeBytes,
       mimeType: detected.mime
     });
   });
@@ -191,28 +190,34 @@ uploadRouter.post('/api/upload/file', requireAuth, sharedRateLimit({ name: 'file
     if (err) return res.status(400).json({ error: 'The file upload could not be read.' });
     next();
   });
-}, (req, res) => {
+}, async (req, res) => {
   const file = req.file;
   const detected = file && !(file as any).truncated ? detectDocument(file.buffer) : null;
   if (!file || !detected) return res.status(400).json({ error: 'The file content does not match a supported PDF, ZIP, TXT, MP3, WAV, or MP4 format.' });
   const safeFilename = `file_${Date.now()}-${crypto.randomBytes(8).toString('hex')}${detected.ext}`;
-  const targetPath = path.join(uploadsDir, safeFilename);
+  let stored: { key: string; url: string; sizeBytes: number; mimeType: string } | undefined;
   try {
-    fs.writeFileSync(targetPath, file.buffer, { flag: 'wx' });
-    const fileUrl = `/uploads/${safeFilename}`;
+    stored = await uploadStorage.put(safeFilename, file.buffer, {
+      mimeType: detected.mime,
+      originalFilename: safeDisplayFilename(file.originalname),
+      visibility: 'public',
+      contentDisposition: 'attachment',
+      cacheControl: 'public, max-age=31536000, immutable'
+    });
+    const fileUrl = stored.url;
     db.prepare('INSERT INTO uploaded_files (path, owner_user_id, created_at) VALUES (?, ?, ?)').run(fileUrl, (req as any).user.userId, Date.now());
-    return res.status(201).json({ success: true, url: fileUrl, filename: safeFilename, originalName: safeDisplayFilename(file.originalname), size: file.size, mimeType: detected.mime });
+    return res.status(201).json({ success: true, url: fileUrl, filename: stored.key, originalName: safeDisplayFilename(file.originalname), size: stored.sizeBytes, mimeType: detected.mime });
   } catch (error) {
-    try { fs.unlinkSync(targetPath); } catch { /* no file was persisted, or cleanup already completed */ }
+    if (stored) await uploadStorage.delete(stored.key).catch(() => {});
     console.error('Failed to write uploaded file:', error);
     return res.status(500).json({ error: 'Failed to store uploaded file.' });
   }
 });
 
-uploadRouter.delete('/api/upload/file', requireAuth, (req, res) => {
+uploadRouter.delete('/api/upload/file', requireAuth, async (req, res) => {
   const fileUrl = typeof req.body?.url === 'string' ? req.body.url : null;
   const row = fileUrl ? db.prepare('SELECT path FROM uploaded_files WHERE path = ? AND owner_user_id = ?').get(fileUrl, (req as any).user.userId) : undefined;
   if (!row) return res.status(404).json({ error: 'Uploaded file not found.' });
-  if (!cleanupUploadedFileIfUnreferenced(fileUrl, (req as any).user.userId)) return res.status(409).json({ error: 'The file is still in use or could not be removed.' });
+  if (!await cleanupUploadedFileIfUnreferenced(fileUrl, (req as any).user.userId)) return res.status(409).json({ error: 'The file is still in use or could not be removed.' });
   return res.json({ success: true });
 });

@@ -6,7 +6,7 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 
 ## Architecture & Tech Stack
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Motion (Framer Motion), Lucide Icons, Wouter router.
+- **Frontend**: React 19, TypeScript, Tailwind CSS v4, GSAP, Lucide Icons, Wouter router.
 - **Backend API**: Node.js & Express compiled with `esbuild` (`dist-server/server.js`), TypeScript in development, Zod schema validation, Multer multipart uploads.
 - **Database Engine**: `better-sqlite3` configured with **Write-Ahead Logging (WAL)**, foreign key constraints, synchronous normal writes, and a 64MB memory page cache.
 - **Security & Auth**: `bcryptjs` password hashing with salts, stateless JSON Web Tokens (JWT), BOLA/IDOR protection, and URL scheme sanitization.
@@ -26,7 +26,7 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 | **Click & View Engine** | `GET /r/:blockId` 302 redirector with URL scheme sanitization, IP hashing (privacy-preserving SHA-256), and referrers. |
 | **Live Analytics** | Real computed 30-day views, unique visitors, total clicks, CTR, top performing links, and an interactive 7-day timeline. |
 | **Lead Capture & Export**| Instant newsletter subscription with duplicate handling and **1-click CSV export**. |
-| **Media Uploads** | File upload endpoint with MIME-type verification, 5MB size limits, and disk storage. |
+| **Media Uploads** | File upload endpoint with content verification, bounded memory uploads, local development storage, or S3-compatible production object storage. |
 | **Observability** | Request correlation IDs (`X-Request-Id`), execution duration (`X-Response-Time`), and detailed `/api/health` diagnostics. |
 
 ---
@@ -109,7 +109,9 @@ fly secrets set \
   STRIPE_WEBHOOK_SECRET="REPLACE_WITH_STRIPE_LIVE_WEBHOOK_SECRET"
 ```
 
-Do not deploy SQLite or local uploads as the primary data store on a serverless-only host.
+Set `MEDIA_STORAGE=s3` and configure `MEDIA_S3_*` for user media in production. AWS S3, Cloudflare R2, Backblaze B2, and MinIO-compatible endpoints are supported. `MEDIA_PUBLIC_URL` is optional: when set, public image/file URLs point directly to the bucket/CDN; when omitted, the Express `/uploads/:key` route reads the object server-side. S3 credentials stay in the backend environment and are never sent to the browser. Keep `MEDIA_S3_PREFIX` dedicated to Liinx media.
+
+Local `UPLOADS_DIR` storage remains supported for development, tests, and explicitly single-node deployments. Do not deploy local uploads as the primary production media store when multiple instances or ephemeral disks are possible.
 
 ---
 
@@ -127,6 +129,8 @@ npm run db:backup
 
 Upload media is backed up separately with `npm run uploads:backup`. Schedule both backup commands daily and copy their output to encrypted off-host storage. See [OPERATIONS.md](OPERATIONS.md) for retention, restore, monitoring, Stripe alerts, and rollback procedures.
 
+Analytics writes use a bounded `AnalyticsEventStore` buffer with SQLite as the current sink; public page serving and link redirects do not wait for analytics persistence. Delivery is best effort with idempotent minute-bucket deduplication. See [docs/analytics-architecture.md](docs/analytics-architecture.md) for the replacement boundary and scaling path.
+
 ---
 
 ## REST API Reference
@@ -134,7 +138,7 @@ Upload media is backed up separately with `npm run uploads:backup`. Schedule bot
 | Method | Endpoint | Auth | Description |
 | :--- | :--- | :---: | :--- |
 | `GET` | `/api/health` | None | Service liveness, uptime, memory, and database status |
-| `GET` | `/api/ready` | None | Readiness: database connected and uploads volume writable |
+| `GET` | `/api/ready` | None | Readiness: database connected and configured media storage available |
 | `GET` | `/api/auth/check-username/:username` | None | Check availability of username |
 | `POST`| `/api/auth/register` | None | Register new creator user and initial profile |
 | `POST`| `/api/auth/login` | None | Authenticate user and receive JWT bearer token |

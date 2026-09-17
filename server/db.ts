@@ -13,11 +13,6 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-const uploadsDir = path.resolve(__dirname, '../public/uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'liinx.db');
 export const db = new Database(dbPath);
 
@@ -133,6 +128,9 @@ export function initDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_clicks_profile_time ON link_clicks(profile_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_clicks_block ON link_clicks(block_id);
+    CREATE INDEX IF NOT EXISTS idx_clicks_profile_page_time ON link_clicks(profile_id, page_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_clicks_block_time ON link_clicks(block_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_clicks_referrer_time ON link_clicks(referrer, created_at);
 
     CREATE TABLE IF NOT EXISTS profile_views (
       id TEXT PRIMARY KEY,
@@ -149,6 +147,8 @@ export function initDatabase() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_views_profile_time ON profile_views(profile_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_views_profile_page_time ON profile_views(profile_id, page_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_views_referrer_time ON profile_views(referrer, created_at);
 
     CREATE TABLE IF NOT EXISTS newsletter_subscribers (
       id TEXT PRIMARY KEY,

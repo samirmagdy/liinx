@@ -58,7 +58,8 @@ export class S3Client {
     url: URL,
     hostHeader: string,
     payload: Buffer,
-    contentType = 'application/octet-stream'
+    contentType = 'application/octet-stream',
+    extraHeaders: Record<string, string> = {}
   ): Record<string, string> {
     const now = new Date();
     const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '');
@@ -74,6 +75,7 @@ export class S3Client {
     if (contentType) {
       headers['content-type'] = contentType;
     }
+    for (const [key, value] of Object.entries(extraHeaders)) headers[key.toLowerCase()] = value;
 
     const sortedHeaderKeys = Object.keys(headers).sort();
     const canonicalHeaders = sortedHeaderKeys.map(k => `${k}:${headers[k]}\n`).join('');
@@ -113,9 +115,9 @@ export class S3Client {
     };
   }
 
-  async putObject(key: string, data: Buffer, contentType = 'application/octet-stream'): Promise<void> {
+  async putObject(key: string, data: Buffer, contentType = 'application/octet-stream', extraHeaders: Record<string, string> = {}): Promise<void> {
     const { url, hostHeader } = this.getEndpointUrl(key);
-    const headers = this.signRequest('PUT', url, hostHeader, data, contentType);
+    const headers = this.signRequest('PUT', url, hostHeader, data, contentType, extraHeaders);
 
     const res = await fetch(url.toString(), {
       method: 'PUT',
