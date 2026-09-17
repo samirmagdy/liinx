@@ -134,6 +134,7 @@ Upload media is backed up separately with `npm run uploads:backup`. Schedule bot
 | Method | Endpoint | Auth | Description |
 | :--- | :--- | :---: | :--- |
 | `GET` | `/api/health` | None | Service liveness, uptime, memory, and database status |
+| `GET` | `/api/ready` | None | Readiness: database connected and uploads volume writable |
 | `GET` | `/api/auth/check-username/:username` | None | Check availability of username |
 | `POST`| `/api/auth/register` | None | Register new creator user and initial profile |
 | `POST`| `/api/auth/login` | None | Authenticate user and receive JWT bearer token |

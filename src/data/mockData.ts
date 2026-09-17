@@ -812,18 +812,18 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'starter',
     name: 'Free',
     tagline: 'A simple place to publish your work and links.',
-    monthlyPrice: 5,
-    yearlyPrice: 48, // $4/mo billed annually
+    monthlyPrice: 0,
+    yearlyPrice: 0,
     features: [
       'Personalized liinx.app/@username',
-      'Unlimited link blocks & social icons',
-      'Audio & Video auto-embeds (Spotify, YouTube)',
+      'Links, social icons, and supported blocks',
+      'Supported audio and video embeds',
       'Expandable accordion folders',
       'Curated typography & theme studio',
       'Built-in newsletter capture form',
-      'Dynamic QR codes with logo export',
+      'Profile QR code with downloadable export',
       'Basic analytics (views & click counts)',
-      'Zero platform transaction fees'
+      'Liinx does not process payments'
     ],
     ctaText: 'Start free'
   },
@@ -832,7 +832,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     name: 'Pro',
     tagline: 'More control for growing creator businesses.',
     monthlyPrice: 12,
-    yearlyPrice: 120, // $10/mo billed annually
+    yearlyPrice: 120,
     popular: true,
     features: [
       'Everything in Free, plus:',
@@ -852,15 +852,11 @@ export const PRICING_PLANS: PricingPlan[] = [
     name: 'Studio / Agency',
     tagline: 'Engineered for talent agencies, record labels, and multi-brand rosters.',
     monthlyPrice: 29,
-    yearlyPrice: 288, // $24/mo billed annually
+    yearlyPrice: 288,
     features: [
       'Everything in Pro, plus:',
       'Up to 25 managed creator profiles',
-      'Team collaboration & client view permissions',
-      'Public REST API access for automated link sync',
-      'Custom favicons & open graph social cards per link',
-      'Consolidated agency billing & invoice exports',
-      'Dedicated account manager & migration assistance'
+      'Page-aware REST API keys for programmatic access'
     ],
     ctaText: 'Contact Studio Team'
   }
@@ -868,14 +864,14 @@ export const PRICING_PLANS: PricingPlan[] = [
 
 export const COMPARISON_FEATURES = [
   { feature: 'Clean, Ad-Free Design', liinx: true, linktree: false, beacons: false },
-  { feature: 'Custom Domain (e.g. bio.yoursite.com)', liinx: true, linktree: 'Paid $24+/mo', beacons: 'Paid' },
-  { feature: 'Embedded Spotify & YouTube Media', liinx: true, linktree: true, beacons: true },
-  { feature: 'Accordion Folders for Clean Profiles', liinx: true, linktree: false, beacons: false },
-  { feature: 'Instagram Caption Auto-Sync', liinx: true, linktree: false, beacons: false },
-  { feature: 'Zero Commission on Sales/Donations', liinx: true, linktree: 'Takes 0.5-9%', beacons: 'Takes 9%' },
-  { feature: 'Sub-100ms Ultra-Fast Page Load', liinx: true, linktree: false, beacons: false },
-  { feature: 'Curated design themes', liinx: true, linktree: 'Generic templates', beacons: 'Limited' },
-  { feature: 'Multi-Profile Management (One Login)', liinx: true, linktree: 'Enterprise only', beacons: false }
+  { feature: 'Custom Domain (e.g. bio.yoursite.com)', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+  { feature: 'Supported Spotify & YouTube embeds', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+  { feature: 'Accordion folders for clean profiles', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+  { feature: 'Instagram caption link extraction when authorized', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+  { feature: 'External checkout and support links', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+  { feature: 'Public page performance depends on content and hosting', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+  { feature: 'Curated design themes', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+  { feature: 'Multiple profiles on eligible plans', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' }
 ];
 
 export const FAQS = [
@@ -888,7 +884,7 @@ export const FAQS = [
     answer: 'Yes. Paid plans support custom domains and subdomains. You must add the required DNS record and configure hosting and TLS.'
   },
   {
-    question: 'How does the Instagram Auto-Sync feature work?',
+    question: 'How does Instagram caption link extraction work?',
     answer: 'When enabled, LIINX connects to your Instagram account and automatically creates clickable links whenever you include a link or mention in your latest Instagram post caption or carousel. Your bio page always stays in sync without manual updates.'
   },
   {

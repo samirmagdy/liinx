@@ -94,6 +94,11 @@ export const runtimeTranslations: Record<string, string> = {
   'Terms of Service': 'شروط الاستخدام',
   'Get in Touch': 'تواصل معنا',
   'Message Received!': 'تم استلام الرسالة!',
+  'Enter your name, email address, and message.': 'أدخل اسمك وعنوان بريدك ورسالتك.',
+  'We could not confirm that your message was saved. Please retry.': 'تعذّر تأكيد حفظ رسالتك. أعد المحاولة.',
+  'Your message was saved and the support notification was sent.': 'حُفظت رسالتك وأُرسل إشعار إلى فريق الدعم.',
+  'Your message was saved, but the support notification could not be sent.': 'حُفظت رسالتك، لكن تعذّر إرسال إشعار الدعم.',
+  'Your message was saved. Email notification is not configured; no response time is guaranteed.': 'حُفظت رسالتك. إشعارات البريد غير مهيأة؛ ولا يوجد وقت استجابة مضمون.',
   'Your Name': 'اسمك',
   'Email Address': 'البريد الإلكتروني',
   'How can we help?': 'كيف يمكننا مساعدتك؟',
@@ -150,6 +155,10 @@ export const runtimeTranslations: Record<string, string> = {
   'Create an account': 'إنشاء حساب',
   'Access your bio builder, customize your theme, and manage your links and live analytics.': 'ادخل إلى استوديو بناء صفحتك، وخصّص مظهرك، وأدر روابطك وإحصاءاتك في الوقت الفعلي.',
   'Could not load your profile': 'تعذّر تحميل ملفك',
+  'Scheduled': 'مجدولة', 'Live scheduled': 'مجدولة ونشطة', 'Pause track': 'إيقاف المقطع مؤقتاً', 'Creator logo': 'شعار صانع المحتوى',
+  'This protected text is not configured yet.': 'لم يتم إعداد هذا النص المحمي بعد.', 'Checking…': 'جارٍ التحقق…', 'Unable to unlock': 'تعذّر فتح المحتوى',
+  'Unlocked.': 'تم فتح المحتوى.', 'Enter the access code to continue.': 'أدخل رمز الوصول للمتابعة.', 'Access code': 'رمز الوصول', 'Unlock': 'فتح المحتوى',
+  'Service title': 'عنوان الخدمة', 'Calendly event URL': 'رابط فعالية Calendly', 'Add Calendly booking': 'إضافة حجز عبر Calendly',
 };
 
 export function translateRuntime(value: string, lang: Language): string {

@@ -64,6 +64,7 @@ import { BookingEditor } from './BookingEditor';
 import { SaveQueue } from '../utils/saveQueue';
 import { useLanguage } from '../context/LanguageContext';
 import { friendlyErrorMessage } from '../utils/errors';
+import { formatUiDate, formatUiDateTime } from '../utils/localization';
 import { Modal } from './Modal';
 
 interface BuilderStudioProps {
@@ -104,7 +105,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
   initialProfile,
   onViewFullscreen
 }) => {
-  const { tr: ui } = useUiLanguage();
+  const { tr: ui, lang } = useUiLanguage();
   const { tr } = useLanguage();
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(initialProfile ? 'ready' : 'loading');
   const [profile, setProfile] = useState<CreatorProfile>(initialProfile || DEMO_PROFILES[0]);
@@ -1212,12 +1213,12 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
     if (!startAt && !endAt) return null;
     const now = Date.now();
     if (startAt && now < startAt) {
-      return { label: `SCHEDULED (${new Date(startAt).toLocaleDateString()})`, color: 'bg-amber-100 text-amber-800' };
+      return { label: `${ui('Scheduled')} (${formatUiDate(startAt, lang)})`, color: 'bg-amber-100 text-amber-800' };
     }
     if (endAt && now >= endAt) {
       return { label: 'EXPIRED', color: 'bg-neutral-100 text-neutral-600' };
     }
-    return { label: 'LIVE SCHEDULED', color: 'bg-emerald-100 text-emerald-800' };
+    return { label: ui('Live scheduled'), color: 'bg-emerald-100 text-emerald-800' };
   };
 
   const handleThemeSelect = (theme: ThemeConfig) => {
@@ -1413,7 +1414,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
         </div>
 
         {/* Right Action Tools */}
-        <div className="flex items-center gap-2">
+        <div className="studio-toolbar-actions flex items-center gap-2">
           <button
             onClick={() => setQrModalOpen(true)}
             aria-label={ui('QR Code')}
@@ -1688,9 +1689,9 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <h2 id="pages-heading" className="text-sm font-bold text-neutral-900">{ui('Pages')}</h2>
                     <p className="mt-1 text-[11px] text-neutral-500">{ui('Create separate pages and publish them from your profile navigation.')}</p>
                   </div>
-                  <div className="flex flex-wrap gap-2" role="tablist" aria-label={ui('Profile pages')}>
-                    {pages.map(page => <button key={page.id} type="button" role="tab" aria-selected={page.id === activePage?.id} onClick={() => setActivePageId(page.id)} className={`rounded-xl border px-3 py-1.5 text-xs font-semibold ${page.id === activePage?.id ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-700 hover:border-neutral-500'}`}>{page.title}{page.isHome ? ` (${ui('Home')})` : ''}</button>)}
-                  </div>
+                  <nav className="flex flex-wrap gap-2" aria-label={ui('Profile pages')}>
+                    {pages.map(page => <button key={page.id} type="button" aria-current={page.id === activePage?.id ? 'page' : undefined} onClick={() => setActivePageId(page.id)} className={`rounded-xl border px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30 ${page.id === activePage?.id ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-700 hover:border-neutral-500'}`}>{page.title}{page.isHome ? ` (${ui('Home')})` : ''}</button>)}
+                  </nav>
                 </div>
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
                   <input value={newPageTitle} onChange={event => setNewPageTitle(event.target.value)} placeholder={ui('New page title')} aria-label={ui('New page title')} className="rounded-xl border border-neutral-200 px-3 py-2 text-xs text-neutral-900" />
@@ -2308,7 +2309,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
                   <span className="text-xs text-neutral-500">{ui("30-Day Views")}</span>
                   <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
-                    {analyticsData ? analyticsData.totalViews.toLocaleString() : '...'}
+                    {analyticsData ? analyticsData.totalViews.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US') : '...'}
                   </p>
                   <span className="text-[10px] text-neutral-500 font-mono tabular-nums">
                     {analyticsData ? `${analyticsData.uniqueVisitors} unique` : ui("loading")}
@@ -2326,7 +2327,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                 <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
                   <span className="text-xs text-neutral-500">{ui("Total Clicks")}</span>
                   <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
-                    {analyticsData ? analyticsData.totalClicks.toLocaleString() : '...'}
+                    {analyticsData ? analyticsData.totalClicks.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US') : '...'}
                   </p>
                   <span className="text-[10px] text-neutral-500 font-mono">{ui("Live logged")}</span>
                 </div>
@@ -2971,8 +2972,8 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                           <div key={k.id} className="p-3 flex items-center justify-between gap-3">
                             <div className="flex flex-col">
                               <span className="font-bold text-neutral-900">{k.name}</span>
-                              <span className="font-mono text-[11px] text-neutral-400">{k.prefix}</span>
-                              {k.expiresAt && <span className="text-[10px] text-neutral-500">{ui('Expires')} {new Date(k.expiresAt).toLocaleDateString()}</span>}
+                              <span className="font-mono text-[11px] text-neutral-400" dir="ltr">{k.prefix}</span>
+                              {k.expiresAt && <span className="text-[10px] text-neutral-500" dir="auto">{ui('Expires')} <span dir="ltr">{formatUiDate(k.expiresAt, lang)}</span></span>}
                             </div>
                             {confirmRevokeKeyId === k.id ? (
                               <div className="flex items-center gap-1.5">
@@ -3019,7 +3020,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
                     <div className="p-3 bg-neutral-900 text-neutral-200 rounded-xl space-y-1 text-xs font-mono">
                       <span className="text-neutral-400 text-[10px] uppercase font-bold tracking-wider block">{ui("Sample API Request")}</span>
                       <p className="text-[11px] select-all overflow-x-auto whitespace-nowrap">
-                        curl https://liinx.app/api/v1/profile \<br />
+                        <span dir="ltr">curl https://liinx.app/api/v1/profile</span><br />
                         {'  -H "Authorization: Bearer liinx_live_your_key_here"'}
                       </p>
                     </div>
@@ -3337,8 +3338,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
       </Modal>
 
       {/* New Profile Creation Modal */}
-      {showNewProfileModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <Modal open={showNewProfileModal} onClose={() => setShowNewProfileModal(false)} label={ui('Create New Bio Profile')}>
           <div className="bg-neutral-50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-scale-in border border-neutral-200">
             <div className="flex items-center justify-between">
               <div>
@@ -3405,12 +3405,10 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </div>
             </form>
           </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Generate API Key Modal (Milestone 8) */}
-      {showNewKeyModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <Modal open={showNewKeyModal} onClose={() => { setShowNewKeyModal(false); setCreatedApiKey(null); setNewKeyName(''); setCopiedKey(false); }} label={createdApiKey ? ui('API Key Generated') : ui('Generate Studio API Key')}>
           <div className="bg-neutral-50 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-neutral-100 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
@@ -3521,8 +3519,7 @@ export const BuilderStudio: React.FC<BuilderStudioProps> = ({
               </form>
             )}
           </div>
-        </div>
-      )}
+      </Modal>
 
     </div>
   );

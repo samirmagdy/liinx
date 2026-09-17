@@ -57,7 +57,13 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 className="rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between transition-colors hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
               >
                 {/* Render the real profile component as a non-interactive theme example. */}
-                <div className="relative h-[300px] overflow-hidden border-b" aria-label={`${loc.name} template preview`}>
+                <div className="relative h-[300px] overflow-hidden border-b" aria-label={`${loc.name} illustrative template preview`}>
+                  <span className="absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/85 px-2.5 py-1 text-[10px] font-semibold text-neutral-700 shadow-sm">
+                    {isRtl ? 'معاينة توضيحية' : 'Illustrative preview'}
+                  </span>
+                  <span className="absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/85 px-2.5 py-1 text-[10px] font-semibold text-neutral-700 shadow-sm">
+                    {isRtl ? 'معاينة توضيحية' : 'Illustrative preview'}
+                  </span>
                   {isHydrated ? (
                     <div className="absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none" aria-hidden="true" inert>
                       <PhonePreview profile={template.profile} customTheme={THEMES.find(theme => theme.id === template.profile.themeId)} compact interactive={false} />

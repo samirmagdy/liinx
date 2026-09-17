@@ -146,10 +146,10 @@ export const translations: Record<Language, Translations> = {
       claimPlaceholder: 'yourname',
       claimButton: 'Build your page',
       exploreTemplates: 'Explore templates',
-      previewSubtitle: 'Interactive page preview',
+      previewSubtitle: 'Interactive template preview',
       noCreditCard: 'Start with a free account',
       customDomainIncluded: 'Custom domains on paid plans',
-      zeroCommission: 'No Liinx payment processing fee',
+      zeroCommission: 'Liinx does not process payments',
       microProof1: 'Preview your page as you build',
       microProof2: 'Templates for creators, studios, and brands',
       themeLabel: 'Theme:',
@@ -159,12 +159,12 @@ export const translations: Record<Language, Translations> = {
       badge: 'Intuitive Studio',
       title: 'A page that looks like you.',
       subtitle: 'Shape your content, preview every change, and publish when it feels right.',
-      feature1Title: 'Accordion Folders & Multi-Level Lists',
+      feature1Title: 'Accordion Folders & Link Lists',
       feature1Desc: 'Keep your page clean and uncluttered. Collapse presets, press kits, tour dates, and archived projects into sleek expandable drawers.',
       feature2Title: 'True Custom Domain',
       feature2Desc: 'Connect links.yourdomain.com after DNS verification and hosting TLS setup.',
-      feature3Title: 'Playable Audio & Video',
-      feature3Desc: 'Embed playable Spotify audio tracks, Soundcloud snippets, YouTube streams, and TikTok clips directly on your page.',
+      feature3Title: 'Supported Audio & Video Embeds',
+      feature3Desc: 'Embed supported provider media and direct files where the configured player allows it.',
       feature4Title: 'Instagram link extraction',
       feature4Desc: 'When the integration is configured and authorized, extract eligible links from supported captions.',
       feature5Title: 'Know what your audience opens.',
@@ -226,7 +226,7 @@ export const translations: Record<Language, Translations> = {
     },
     comparisonSection: {
       badge: 'THE HONEST COMPARISON',
-      title: 'Why design-conscious creators switch to LIINX',
+      title: 'Compare Liinx capabilities',
       subtitle: 'See exactly what Liinx currently supports, what is handled by another provider, and what requires a paid plan.',
       featuresCol: 'Features & Standards',
       liinxCol: 'LIINX',
@@ -235,14 +235,14 @@ export const translations: Record<Language, Translations> = {
       included: 'Included',
       rows: [
         { feature: 'Clean, Ad-Free Design', liinx: true, linktree: false, beacons: false },
-        { feature: 'Custom Domain (e.g. bio.yoursite.com)', liinx: true, linktree: 'Paid $24+/mo', beacons: 'Paid' },
-        { feature: 'Embedded Spotify & YouTube Media', liinx: true, linktree: true, beacons: true },
-        { feature: 'Accordion Folders for Clean Profiles', liinx: true, linktree: false, beacons: false },
-        { feature: 'Instagram Caption Auto-Sync', liinx: true, linktree: false, beacons: false },
-        { feature: 'Zero Commission on Sales/Donations', liinx: true, linktree: 'Takes 0.5-9%', beacons: 'Takes 9%' },
-        { feature: 'Fast, focused public pages', liinx: true, linktree: false, beacons: false },
-        { feature: 'Curated design themes', liinx: true, linktree: 'Generic templates', beacons: 'Limited' },
-        { feature: 'Multi-Profile Management (One Login)', liinx: true, linktree: 'Enterprise only', beacons: false }
+        { feature: 'Custom Domain (e.g. bio.yoursite.com)', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Supported Spotify & YouTube embeds', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Accordion folders for clean profiles', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Instagram caption link extraction when authorized', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'External checkout and support links', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Public page performance depends on content and hosting', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Curated design themes', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Multiple profiles on eligible plans', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' }
       ]
     },
     pricingSection: {
@@ -261,14 +261,14 @@ export const translations: Record<Language, Translations> = {
           tagline: 'A simple place to publish your work and links.',
           features: [
             'Personalized liinx.app/@username',
-            'Unlimited link blocks & social icons',
-            'Audio & Video auto-embeds (Spotify, YouTube)',
+            'Links, social icons, and supported blocks',
+            'Supported audio and video embeds',
             'Expandable accordion folders',
             'Curated typography & theme studio',
             'Built-in newsletter capture form',
-            'Dynamic QR codes with logo export',
+            'Profile QR code with downloadable export',
             'Basic analytics (views & click counts)',
-            'Zero platform transaction fees'
+            'Liinx does not process payments'
           ],
           ctaText: 'Start free',
           billedAnnuallyText: (p) => `billed $${p}/yr`
@@ -296,11 +296,7 @@ export const translations: Record<Language, Translations> = {
           features: [
             'Everything in Pro, plus:',
             'Up to 25 managed creator profiles',
-            'Team collaboration & client view permissions',
-            'Public REST API access for automated link sync',
-            'Custom favicons & open graph social cards per link',
-            'Consolidated agency billing & invoice exports',
-            'Dedicated account manager & migration assistance'
+            'Page-aware REST API keys for programmatic access'
           ],
           ctaText: 'Contact Studio Team',
           billedAnnuallyText: (p) => `billed $${p}/yr`
@@ -322,7 +318,7 @@ export const translations: Record<Language, Translations> = {
           answer: 'Yes. Paid plans support custom domains and subdomains. You must add the required DNS record and configure hosting and TLS.'
         },
         {
-          question: 'How does the Instagram Auto-Sync feature work?',
+          question: 'How does Instagram caption link extraction work?',
           answer: 'Where the Instagram integration is configured and authorized, Liinx can extract eligible links from supported captions. Availability depends on account access and permissions.'
         },
         {
@@ -370,7 +366,7 @@ export const translations: Record<Language, Translations> = {
       claimPlaceholder: 'اسمك',
       claimButton: 'أنشئ صفحتك مجاناً',
       exploreTemplates: 'استكشف القوالب',
-      previewSubtitle: 'معاينة تفاعلية للصفحة',
+      previewSubtitle: 'معاينة تفاعلية لقالب',
       noCreditCard: 'ابدأ بحساب مجاني',
       customDomainIncluded: 'النطاقات المخصصة في الخطط المدفوعة',
       zeroCommission: 'لا تعالج Liinx المدفوعات نيابةً عنك',
@@ -450,8 +446,8 @@ export const translations: Record<Language, Translations> = {
     },
     comparisonSection: {
       badge: 'المقارنة الشفافة',
-      title: 'لماذا يختار صناع المحتوى المتميزون منصة LIINX',
-      subtitle: 'اكتشف الفرق الحقيقي بين LIINX وأدوات الروابط التقليدية التي تفرض إعلانات وتقتطع عمولات باهظة.',
+      title: 'قارن إمكانات Liinx',
+      subtitle: 'راجع ما تدعمه Liinx حالياً، وما يتطلب مزوّداً خارجياً أو خطة مدفوعة.',
       featuresCol: 'المعايير والمميزات',
       liinxCol: 'LIINX',
       linktreeCol: 'Linktree',
@@ -459,14 +455,14 @@ export const translations: Record<Language, Translations> = {
       included: 'مشمول',
       rows: [
         { feature: 'تصميم نظيف وخالٍ تماماً من الإعلانات', liinx: true, linktree: false, beacons: false },
-        { feature: 'دومين مخصص (مثل bio.yoursite.com)', liinx: true, linktree: 'مدفوع ٢٤$+/شهرياً', beacons: 'مدفوع' },
-        { feature: 'تضمين مشغلات سبوتيفاي ويوتيوب التفاعلية', liinx: true, linktree: true, beacons: true },
-        { feature: 'مجلدات قابلة للطي لتقليل التمرير', liinx: true, linktree: false, beacons: false },
-        { feature: 'استخراج الروابط من نصوص إنستغرام', liinx: true, linktree: false, beacons: false },
-        { feature: 'حجوزات عبر Calendly والتبرعات', liinx: true, linktree: 'يقتطع ٠.٥ - ٩٪', beacons: 'يقتطع ٩٪' },
-        { feature: 'سرعة تحميل فائقة أقل من ١٠٠ مللي ثانية', liinx: true, linktree: false, beacons: false },
-        { feature: 'سمات تصميم فاخرة ومختارة بعناية', liinx: true, linktree: 'قوالب بلاستيكية مكررة', beacons: 'محدود' },
-        { feature: 'إدارة ملفات متعددة بنفس الحساب', liinx: true, linktree: 'للشركات الكبرى فقط', beacons: false }
+        { feature: 'دومين مخصص (مثل bio.yoursite.com)', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'تضمينات Spotify وYouTube المدعومة', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'مجلدات قابلة للطي لتقليل التمرير', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'استخراج روابط Instagram عند التفويض', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'روابط دفع ودعم خارجية', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'أداء الصفحة يعتمد على المحتوى والاستضافة', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'سمات تصميم مختارة بعناية', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'إدارة ملفات متعددة في الخطط المؤهلة', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' }
       ]
     },
     pricingSection: {
@@ -485,14 +481,14 @@ export const translations: Record<Language, Translations> = {
           tagline: 'مساحة بسيطة لنشر أعمالك وروابطك.',
           features: [
             'رابط صفحتك liinx.app/@username',
-            'عناصر وروابط وأيقونات تواصل غير محدودة',
-            'تضمين تلقائي للصوت والفيديو (سبوتيفاي، يوتيوب)',
+            'روابط وأيقونات تواصل وكتل مدعومة',
+            'تضمين وسائط صوتية ومرئية مدعومة',
             'مجلدات مجمعة وقابلة للطي',
             'استوديو خطوط ومظهر مصمم بعناية',
             'نموذج اشتراك في النشرة البريدية مدمج',
-            'رموز QR ديناميكية مع تصدير الشعار',
+            'رمز QR للصفحة مع إمكانية التنزيل',
             'تحليلات أساسية (المشاهدات والنقرات)',
-            '٠٪ رسوم معاملات على المنصة'
+            'لا تعالج Liinx المدفوعات نيابةً عنك'
           ],
           ctaText: 'ابدأ مجاناً',
           billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
@@ -520,11 +516,7 @@ export const translations: Record<Language, Translations> = {
           features: [
             'كل مميزات باقة المحترف، بالإضافة إلى:',
             'إدارة حتى 25 ملفاً شخصياً لصناع المحتوى',
-            'صلاحيات التعاون الجماعي وعرض العملاء',
-            'واجهة برمجة تطبيقات REST API للمزامنة الآلية',
-            'أيقونات Favicon وبطاقات مشاركة مخصصة لكل رابط',
-            'فواتير موحدة للوكالات مع إمكانية التصدير',
-            'مدير حساب مخصص ومساعدة كاملة في النقل والاستيراد'
+            'مفاتيح REST API مرتبطة بالصفحات للوصول البرمجي'
           ],
           ctaText: 'تواصل مع فريق الاستوديو',
           billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
@@ -546,7 +538,7 @@ export const translations: Record<Language, Translations> = {
           answer: 'نعم. تدعم الخطط المدفوعة النطاقات والنطاقات الفرعية المخصصة. يجب إضافة سجل DNS المطلوب وإعداد الاستضافة وTLS.'
         },
         {
-          question: 'كيف تعمل ميزة المزامنة التلقائية مع إنستغرام؟',
+          question: 'كيف يعمل استخراج الروابط من نصوص إنستغرام؟',
           answer: 'عند إعداد تكامل إنستغرام ومنحه الصلاحيات اللازمة، يمكن لـ Liinx استخراج الروابط المؤهلة من نصوص المنشورات المدعومة. يعتمد ذلك على الوصول إلى الحساب والصلاحيات.'
         },
         {

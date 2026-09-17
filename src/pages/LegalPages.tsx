@@ -77,12 +77,14 @@ export function PrivacyPage() {
         ['بيانات الحساب والمحتوى', 'نخزّن البريد الإلكتروني وكلمة المرور بعد تجزئتها باستخدام bcrypt، ومحتوى الملف والروابط والمظهر الذي تختاره. تظهر المعلومات المنشورة لزوار صفحتك.'],
         ['الزيارات والاشتراكات', 'نسجّل زيارات الصفحة ونقرات الروابط ومصادر الإحالة ووسوم الحملات. تستخدم الإحصاءات معرّفات مشتقة من عنوان IP وتُستخدم لأغراض مجمعة ومكافحة الإساءة. تُحفظ عناوين المشتركين في القائمة الخاصة بصاحب الصفحة مع وقت الموافقة عندما يوافق المشترك.'],
         ['الخدمات الخارجية والوسائط', 'قد تحمّل الوسائط والحجوزات خدمات خارجية مثل YouTube وSpotify وCalendly. قد تُستخدم Stripe للفوترة، وInstagram OAuth للمزامنة، وGoogle Analytics أو Meta Pixel إذا فعّلها صاحب الصفحة. هذه الخدمات قد تعالج بيانات الزائر وفق سياساتها.'],
+        ['رسائل الدعم', 'تُحفظ الرسائل المرسلة من نموذج الدعم مع الاسم والبريد والرسالة ووقت الإرسال. يطّلع عليها حساب المشغّل المصرّح به فقط. قد يُحاول النظام إرسال إشعار إلى صندوق الدعم عند تهيئة مزوّد البريد؛ حفظ الرسالة لا يعني تسليم البريد. لا توجد حالياً مدة احتفاظ تلقائية محددة لرسائل الدعم.'],
         ['الاحتفاظ والحذف', 'يمكن لصاحب الحساب حذف حسابه ومحتواه من الخدمة، مع إزالة سجلات الحساب والاشتراكات والتكاملات المرتبطة. قد تبقى نسخ احتياطية آمنة حتى انتهاء فترة الاحتفاظ التشغيلية. يمكن إزالة المشترك من قائمة صاحب الصفحة عند طلبه منه.'],
         ['طلبات البيانات', 'استخدم نموذج التواصل لطلبات الوصول إلى بياناتك أو حذفها أو الانسحاب من قائمة بريدية. لا يوجد ادعاء اعتماد امتثال أو مدة تنفيذ مضمونة.']
       ] : [
         ['Account data and content', 'We store your email, bcrypt-hashed password, profile content, links and selected appearance. Published information is visible to page visitors.'],
         ['Visits and subscriptions', 'We record page views, link clicks, referrers and campaign tags. Analytics uses identifiers derived from IP addresses for aggregate reporting and abuse prevention. Subscriber emails are stored in the page owner\'s private list, with consent time recorded when consent is provided.'],
         ['Third-party services and media', 'Media and booking embeds may load YouTube, Spotify and Calendly. Stripe may process billing, Instagram OAuth may process synchronization, and Google Analytics or Meta Pixel may load when enabled by a creator. Those providers process data under their own policies.'],
+        ['Support messages', 'Support messages store the sender name, email, message, and submission time. Access is limited to the configured support operator account. The service may attempt an email notification when a mail provider is configured; saving a message does not mean that email was delivered. No automatic retention period is currently configured for support messages.'],
         ['Retention and deletion', 'Account owners can delete their account and associated content, subscriptions and integrations. Secure backups may retain deleted records for an operational retention period. Subscribers can ask the creator to remove their address from the creator\'s list.'],
         ['Data requests', 'Use the contact form to request access, deletion, or removal from a creator\'s newsletter list. No compliance certification or guaranteed processing time is claimed.']
       ]}
@@ -121,15 +123,24 @@ export function ContactPage() {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [notification, setNotification] = useState<'sent' | 'not_configured' | 'failed' | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !message) return;
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setError(ui('Enter your name, email address, and message.'));
+      return;
+    }
     if (sending) return;
     setSending(true);
     setError('');
-    try { await api.contact({ name, email, message }); setSubmitted(true); }
-    catch { setError('Your message was not saved. Please retry.'); }
+    try {
+      const website = (document.getElementById('contact-website') as HTMLInputElement | null)?.value || '';
+      const result = await api.contact({ name: name.trim(), email: email.trim(), message: message.trim(), website });
+      setSubmitted(true);
+      setNotification(result.notification);
+    }
+    catch { setError(ui('We could not confirm that your message was saved. Please retry.')); }
     finally { setSending(false); }
   };
 
@@ -152,7 +163,11 @@ export function ContactPage() {
             <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
             <h2 className="text-lg font-bold text-neutral-900">{ui("Message Received!")}</h2>
             <p className="text-xs text-neutral-600">
-              {ui("Your message has been saved. No response time is guaranteed.")}</p>
+              {notification === 'sent'
+                ? ui('Your message was saved and the support notification was sent.')
+                : notification === 'failed'
+                  ? ui('Your message was saved, but the support notification could not be sent.')
+                  : ui('Your message was saved. Email notification is not configured; no response time is guaranteed.')}</p>
             <button
               onClick={() => setLocation('/')}
               className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer flex items-center gap-2 mx-auto"
@@ -164,6 +179,10 @@ export function ContactPage() {
         ) : (
           <form onSubmit={handleSubmit} className="p-8 rounded-3xl bg-neutral-50/70 border border-neutral-200 space-y-5 shadow-xs">
             {error && <p role="alert" className="text-sm text-red-700 p-3 rounded-xl bg-red-50 border border-red-200">{error}</p>}
+            <div className="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true">
+              <label htmlFor="contact-website">Website</label>
+              <input id="contact-website" name="website" tabIndex={-1} autoComplete="off" />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="contact-name" className="block text-xs font-bold text-neutral-700 mb-1.5">{ui("Your Name")}</label>

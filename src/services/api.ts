@@ -49,7 +49,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
-  contact: (data: { name: string; email: string; message: string }) => request<{ success: boolean; id: string }>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
+  contact: (data: { name: string; email: string; message: string; website?: string }) => request<{ success: boolean; id: string; notification: 'sent' | 'not_configured' | 'failed' }>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
   auth: {
     checkUsername: async (username: string): Promise<{ available: boolean; reason?: string }> => {
       return request<{ available: boolean; reason?: string }>(`/api/auth/check-username/${encodeURIComponent(username)}`);

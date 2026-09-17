@@ -1,5 +1,5 @@
 /**
- * Media Embed Utilities for 100% genuine inline media playback.
+ * Media Embed Utilities for supported provider and direct-file playback.
  * Supports Spotify, YouTube, Vimeo, SoundCloud, and Apple Music.
  */
 

@@ -450,6 +450,20 @@ app.get('/api/health', (_req, res) => {
   }
 });
 
+// Readiness includes the writable media volume used by upload persistence.
+// Keep this separate from liveness so a process can be alive while the
+// instance is not safe to receive creator writes.
+app.get('/api/ready', (_req, res) => {
+  try {
+    db.prepare('SELECT 1').get();
+    const readinessUploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, '../public/uploads'));
+    fs.accessSync(readinessUploadsDir, fs.constants.W_OK);
+    res.json({ status: 'ready', service: 'liinx-api', database: 'connected', uploads: 'writable' });
+  } catch {
+    res.status(503).json({ status: 'not_ready', service: 'liinx-api', error: 'Required storage is unavailable.' });
+  }
+});
+
 // Centralized error handler middleware
 app.use('/api', (_req, res) => res.status(404).json({ error: 'API endpoint not found.' }));
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -491,7 +505,8 @@ export async function startServer() {
     }));
     app.get('*', (req, res) => {
       res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
-      const profileMatch = req.path.match(/^\/@([a-z0-9_]+)(?:\/([a-z0-9-]+))?$/i);
+      const profileMatch = req.path.match(/^\/@([a-z0-9_-]+)(?:\/([a-z0-9-]+))?$/i);
+      if (req.path.startsWith('/@') && !profileMatch) return res.status(404).send('This profile is not available.');
       if (profileMatch) {
         const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
           const profileShell = path.join(distDir, 'shell.html');
@@ -527,6 +542,17 @@ startInstagramSyncScheduler();
   // Keep-alive tuning for reverse proxies (Cloudflare, AWS ALB, Nginx)
   server.keepAliveTimeout = 65000;
   server.headersTimeout = 66000;
+
+  const shutdown = (signal: string) => {
+    log('info', 'Shutdown requested', { signal });
+    server.close(() => {
+      try { db.close(); } catch (error) { logError('Database close failed during shutdown', error); }
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 10000).unref();
+  };
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.once('SIGINT', () => shutdown('SIGINT'));
 
   return server;
 }

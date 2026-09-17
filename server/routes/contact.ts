@@ -7,30 +7,41 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { logError } from '../logger.js';
 
 export const contactRouter = Router();
-const schema = z.object({ name: z.string().trim().min(1).max(120), email: z.email().max(254), message: z.string().trim().min(1).max(5000) });
+const schema = z.object({
+  name: z.string().trim().min(1).max(120).refine(value => !/[\r\n]/.test(value), 'Name contains unsupported control characters.'),
+  email: z.email().max(254),
+  message: z.string().trim().min(1).max(5000),
+  website: z.string().max(200).optional()
+});
 contactRouter.post('/contact', sharedRateLimit({ name: 'contact', limit: 10, windowMs: 60 * 60 * 1000 }), (req, res) => {
   const input = schema.safeParse(req.body);
   if (!input.success) return res.status(400).json({ error: 'Enter a name, valid email, and message (up to 5000 characters).' });
-  db.exec(`CREATE TABLE IF NOT EXISTS contact_messages (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, message TEXT NOT NULL, created_at INTEGER NOT NULL)`);
+  if (input.data.website?.trim()) return res.status(400).json({ error: 'Unable to accept this request. Please try again.' });
   const recent = db.prepare('SELECT count(*) AS count FROM contact_messages WHERE email = ? AND created_at > ?').get(input.data.email, Date.now() - 3600000) as { count: number };
   if (recent.count >= 5) return res.status(429).json({ error: 'Too many messages. Please try again later.' });
   const id = randomUUID();
-  db.prepare('INSERT INTO contact_messages VALUES (?, ?, ?, ?, ?)').run(id, input.data.name, input.data.email, input.data.message, Date.now());
-  void notifySupport(input.data).catch(error => logError('Contact notification failed', error));
-  res.status(201).json({ success: true, id });
+  const message = { name: input.data.name, email: input.data.email, message: input.data.message };
+  db.prepare('INSERT INTO contact_messages VALUES (?, ?, ?, ?, ?)').run(id, message.name, message.email, message.message, Date.now());
+  void notifySupport(message).then(notification => {
+    res.status(201).json({ success: true, id, notification });
+  }).catch(error => {
+    logError('Contact notification failed', error);
+    res.status(201).json({ success: true, id, notification: 'failed' });
+  });
 });
 
-async function notifySupport(message: { name: string; email: string; message: string }) {
+async function notifySupport(message: { name: string; email: string; message: string }): Promise<'sent' | 'not_configured'> {
   const apiKey = process.env.RESEND_API_KEY;
   const recipient = process.env.CONTACT_NOTIFICATION_EMAIL;
   const sender = process.env.CONTACT_FROM_EMAIL;
-  if (!apiKey || !recipient || !sender) return;
+  if (!apiKey || !recipient || !sender) return 'not_configured';
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ from: sender, to: [recipient], subject: `LIINX support message from ${message.name}`, text: `From: ${message.name} <${message.email}>\n\n${message.message}` })
   });
   if (!response.ok) throw new Error(`Notification provider returned HTTP ${response.status}`);
+  return 'sent';
 }
 
 contactRouter.get('/support/inbox', requireAuth, (req: AuthenticatedRequest, res) => {
@@ -39,7 +50,6 @@ contactRouter.get('/support/inbox', requireAuth, (req: AuthenticatedRequest, res
     return res.status(403).json({ error: 'Support inbox access is not enabled for this account.' });
   }
   try {
-    db.exec(`CREATE TABLE IF NOT EXISTS contact_messages (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, message TEXT NOT NULL, created_at INTEGER NOT NULL)`);
     const messages = db.prepare('SELECT id, name, email, message, created_at AS createdAt FROM contact_messages ORDER BY created_at DESC LIMIT 200').all();
     return res.json({ messages });
   } catch (error) {

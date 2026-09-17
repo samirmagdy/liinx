@@ -3,16 +3,16 @@ import { Switch, Route, useLocation } from 'wouter';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useLanguage } from './context/LanguageContext';
 import { LanguageProvider } from './context/LanguageContext';
-import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
-import { FeaturesSection } from './components/FeaturesSection';
-import { ComparisonSection } from './components/ComparisonSection';
-import { TemplatesSection } from './components/TemplatesSection';
-import { PricingSection } from './components/PricingSection';
-import { FaqSection } from './components/FaqSection';
-import { Footer } from './components/Footer';
+const Navbar = lazy(() => import('./components/Navbar').then(module => ({ default: module.Navbar })));
+const Hero = lazy(() => import('./components/Hero').then(module => ({ default: module.Hero })));
+const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(module => ({ default: module.FeaturesSection })));
+const ComparisonSection = lazy(() => import('./components/ComparisonSection').then(module => ({ default: module.ComparisonSection })));
+const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
+const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
+const FaqSection = lazy(() => import('./components/FaqSection').then(module => ({ default: module.FaqSection })));
+const Footer = lazy(() => import('./components/Footer').then(module => ({ default: module.Footer })));
 const BuilderStudio = lazy(() => import('./components/BuilderStudio').then(module => ({ default: module.BuilderStudio })));
-import { PublicBioView } from './components/PublicBioView';
+const PublicBioView = lazy(() => import('./components/PublicBioView').then(module => ({ default: module.PublicBioView })));
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { FeaturesPage } from './pages/FeaturesPage';
@@ -73,6 +73,7 @@ function HomePage() {
 }
 
 function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?: string }) {
+  const { tr } = useLanguage();
   const previewKey = `liinx-fullscreen-preview:${username.toLowerCase()}`;
   const fullscreenPreview = window.sessionStorage.getItem(previewKey) === '1';
   if (fullscreenPreview) window.sessionStorage.removeItem(previewKey);
@@ -87,7 +88,7 @@ function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?
       return undefined;
     }
   })();
-  return <PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} previewOnly={fullscreenPreview} onBackToStudio={() => window.location.href = '/studio'} />;
+  return <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-sm text-neutral-500" role="status">{tr('Loading creator page...')}</div>}><PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} previewOnly={fullscreenPreview} onBackToStudio={() => window.location.href = '/studio'} /></Suspense>;
 }
 
 function StudioPage() {
@@ -292,11 +293,11 @@ export default function App() {
             <div className="relative min-h-screen">
               <BackgroundAnimation />
               <div className="relative z-10">
-                <PublicBioView
+                <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-sm text-neutral-500" role="status">Loading creator page…</div>}><PublicBioView
                   customDomain={currentHost}
                   pageSlug={customPageSlug}
                   onBackToStudio={() => window.location.href = 'https://liinx.app/studio'}
-                />
+                /></Suspense>
               </div>
             </div>
           </AuthProvider>
@@ -313,7 +314,7 @@ export default function App() {
             <BackgroundAnimation />
             <div className="relative z-10">
               <PageMetadata />
-              <Switch>
+              <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-sm text-neutral-500" role="status">Loading page…</div>}><Switch>
             {/* Core application routes */}
             <Route path="/" component={HomePage} />
             <Route path="/features" component={FeaturesPage} />
@@ -341,7 +342,7 @@ export default function App() {
               {(params) => {
                 const clean = params.username.toLowerCase();
                 if (RESERVED_USERNAMES.includes(clean as any)) return <HomePage />;
-                return <PublicBioView username={params.username} pageSlug={params.pageSlug} onBackToStudio={() => window.location.href = '/studio'} />;
+                return <PublicProfilePage username={params.username} pageSlug={params.pageSlug} />;
               }}
             </Route>
 
@@ -352,15 +353,10 @@ export default function App() {
                 if (RESERVED_USERNAMES.includes(clean as any)) {
                   return <HomePage />;
                 }
-                return (
-                  <PublicBioView
-                    username={params.username}
-                    onBackToStudio={() => window.location.href = '/studio'}
-                  />
-                );
+                return <PublicProfilePage username={params.username} />;
               }}
             </Route>
-              </Switch>
+              </Switch></Suspense>
             </div>
           </div>
         </AuthProvider>

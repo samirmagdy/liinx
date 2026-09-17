@@ -232,6 +232,11 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 
   .studio-toolbar { top: 4.5rem; padding: 0.7rem 0.75rem; flex-wrap: wrap; }
   .studio-toolbar > div { min-width: 0; }
+  .studio-toolbar > div:first-child { flex: 1 1 auto; flex-wrap: wrap; }
+  .studio-toolbar > div:first-child > .relative { min-width: 0; max-width: 100%; }
+  .studio-toolbar > div:first-child > .relative > button { max-width: 100%; }
+  .studio-toolbar > div:first-child > .relative > button > .font-mono:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .studio-toolbar-actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-end; }
   .studio-toolbar .save-status { max-width: 8.5rem; }
   .studio-toolbar .save-status span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .studio-shell > .flex-1 { padding: 0.75rem; gap: 1.25rem; }
@@ -248,6 +253,7 @@ input, textarea, select { max-width: 100%; min-width: 0; }
   .public-header { align-items: flex-start; gap: 0.5rem; }
   .public-header-actions { flex-wrap: wrap; justify-content: flex-end; }
   .public-header-actions button { padding-inline: 0.6rem; }
+  .public-header-actions { min-width: 0; }
   .resource-modal-dialog { max-height: 96svh; border-radius: 1.25rem; }
   .resource-modal-dialog > div:first-child { padding-inline: 1rem; }
   .resource-modal-dialog > div:last-child { padding-inline: 1rem; }

@@ -164,7 +164,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
                 type="button"
                 key={c}
                 onClick={() => setQrColor(c)}
-                className={`w-5 h-5 rounded-full border transition-transform cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+                className={`w-8 h-8 rounded-full border transition-transform cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
                   qrColor === c ? 'ring-2 ring-neutral-900 ring-offset-1 scale-110' : 'opacity-70 hover:opacity-100'
                 }`}
                 style={{ backgroundColor: c }}

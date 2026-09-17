@@ -2,7 +2,7 @@
 
 ## Monitoring
 
-- Fly's health check polls `GET /api/health` every 15 seconds.
+- Fly's health check polls `GET /api/health` every 15 seconds. Use `GET /api/ready` for rollout gating: it also verifies that the uploads volume is writable.
 - A second external monitor should poll `https://YOUR_PUBLIC_DOMAIN.example/api/health` every 1 minute and alert after 3 failures. Set `HEALTHCHECK_URL` and run `npm run health:check` from a scheduler when using a separate monitoring host.
 - Set `SENTRY_DSN` for server errors and `VITE_SENTRY_DSN` for browser errors. Both integrations disable default PII collection. Start with a 5% trace sample rate and increase only when needed.
 - Logs are newline-delimited JSON with request ID, method, path, status, and duration. Do not log request bodies, authorization headers, emails, IP addresses, or subscriber data.
@@ -30,8 +30,8 @@ Configure Stripe Dashboard notifications for failed payments, webhook delivery f
 
 1. Stop writes or put the service in maintenance mode.
 2. Copy the selected database snapshot to a new `DATABASE_PATH` and run `PRAGMA integrity_check`.
-3. Extract the matching upload archive into a separate `UPLOADS_DIR`.
-4. Start a staging instance against those paths and verify `/api/health`, login, a public profile, an uploaded avatar, and a tracked link.
+3. Extract the matching upload archive into a separate `UPLOADS_DIR` (for example, `tar -xzf liinx-uploads-<matching-timestamp>.tar.gz -C <UPLOADS_DIR>`).
+4. Start a staging instance against those paths and verify `/api/health`, `/api/ready`, login, a public profile, an uploaded avatar, and a tracked link.
 5. Promote only after the checks pass; preserve the original volumes until verification is complete.
 
 ## Rollback procedure

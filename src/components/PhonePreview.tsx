@@ -423,7 +423,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                             }
                           }}
                           className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          aria-label={isPlayingAudio ? 'Pause track' : 'Play track'}
+                          aria-label={isPlayingAudio ? ui('Pause track') : ui('Play track')}
                         >
                           {isPlayingAudio ? (
                             <Pause className="w-4 h-4 fill-white text-white" />
@@ -587,7 +587,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                           }
                         }}
                         className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
-                        aria-label={`Play ${block.title}`}
+                        aria-label={`${ui('Play track')} ${block.title}`}
                       >
                         <img 
                           src={block.thumbnailUrl} 
@@ -670,7 +670,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                     </div>
                   ) : (
                     <form onSubmit={handleSubscribe} className="space-y-2">
-                      <input aria-label="your@email.com…" 
+                      <input aria-label={ui('Email address')}
                         type="email"
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
@@ -679,7 +679,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                         style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)'), color: theme.cardText }}
                         required
                         spellCheck={false}
-                        dir="auto"
+                        dir="ltr"
                       />
                       <button
                         type="submit"
@@ -710,7 +710,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
         {profile.footerLogoUrl && (
           <div className="pt-2 text-center">
-            {footerLogoFailed ? <span role="img" aria-label={profile.footerLogoAlt || `${profile.displayName} logo`} className="text-xs font-semibold">{profile.footerLogoAlt || `${profile.displayName} logo`}</span> : <img src={profile.footerLogoUrl} alt={profile.footerLogoAlt || `${profile.displayName} logo`} onError={() => setFooterLogoFailed(true)} className="mx-auto h-4 max-w-20 object-contain" />}
+            {footerLogoFailed ? <span role="img" aria-label={profile.footerLogoAlt || ui('Creator logo')} className="text-xs font-semibold" dir="auto">{profile.footerLogoAlt || ui('Creator logo')}</span> : <img src={profile.footerLogoUrl} alt={profile.footerLogoAlt || ui('Creator logo')} onError={() => setFooterLogoFailed(true)} className="mx-auto h-4 max-w-20 object-contain" />}
           </div>
         )}
 

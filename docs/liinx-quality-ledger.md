@@ -3039,3 +3039,506 @@ Baseline: branch `main`, commit `9cc359320941abe6d0cd0fb95b78d3991dc55f83` at ta
 ### Next eligible prompt
 
 `56 — Arabic, English, and RTL`
+
+## Task 56 — Arabic, English, and RTL
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `c13052971a58c767aa902d0f920efd080106f4b1` at task start. The worktree was clean and no unrelated changes were discarded. No production deployment or external provider was used.
+
+### Scope, changed files, and behavior
+
+- `src/utils/localization.ts`: adds shared Arabic/English locale selection and UTC date/date-time formatting for interface timestamps.
+- `src/components/BuilderStudio.tsx`: uses the active interface language for schedule labels, API-key expiry dates, analytics numbers, and API identifiers; preserves code samples and identifiers as LTR content.
+- `src/components/PhonePreview.tsx`: translates preview audio controls and email accessible naming, isolates the email field and creator-logo fallback direction, and keeps creator-authored labels unchanged.
+- `src/components/PublicBioView.tsx`: isolates directions links as LTR and translates the content-gate status, instructions, placeholder, and action labels while preserving protected/user-authored content direction with `auto`/LTR boundaries.
+- `src/config/runtimeTranslations.ts`: adds Arabic keys for the newly surfaced schedule, preview, gate, creator-logo, booking-editor, and accessibility messages.
+- `tests/localization_task56.test.ts`: verifies locale selection/date formatting, preservation of mixed-script creator data, and critical translation-key coverage.
+
+Interface localization is separate from creator content translation: profile names, descriptions, URLs, emails, addresses, captions, and protected text are not automatically translated. URLs, email/phone-like values, API keys, dates, and numeric metrics receive direction/locale isolation where touched.
+
+### Acceptance criteria
+
+- PASS — Shared Arabic/English translation path is retained and new critical UI messages have stable runtime keys. Evidence: focused localization test passed; source audit of Builder, public gate, preview, booking, form, gallery, and billing-related controls.
+- PASS — Creator-authored content is not silently translated. Evidence: runtime translator intentionally returns unmapped values unchanged; focused test covers a mixed-script URL/content value.
+- PASS — Dates and numbers touched by this task follow the selected UI locale. Evidence: shared formatter test and Builder source changes for schedule/API expiry/analytics values.
+- PASS — URLs, emails, identifiers, and mixed-script labels remain readable with direction isolation in touched flows. Evidence: source inspection shows LTR boundaries for email, directions, API identifiers, and creator content `dir=auto` boundaries.
+- NOT RUN — Full browser creation-flow walk in both languages (pages, forms, galleries, billing errors, public navigation). Browser execution was not available in this task, so alignment, keyboard traversal, and runtime missing-key behavior across every route remain externally unverified.
+- NOT RUN — Deployed custom-domain/public-page rendering and device-level RTL verification. No deployment, real browser device, or external provider was used.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -1 --format='%H %s'` — PASS at baseline: clean `main`; exact baseline `c13052971a58c767aa902d0f920efd080106f4b1`.
+- `npm run lint` — PASS: `tsc --noEmit` completed with exit 0.
+- `npm test -- --run tests/localization_task56.test.ts tests/booking.test.ts tests/public_search.test.ts` — PASS: 3 files, 6 tests; isolated Vitest SQLite setup completed. Test logs contain request metadata only, no credentials.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning remains.
+- `git diff --check` — NOT RUN (must be run at handoff after ledger update).
+
+### Findings and unresolved risks
+
+- The translation helper falls back to the source string for missing keys. This prevents blank UI but does not prove complete Arabic coverage; the focused key test covers only the newly touched critical set.
+- Some older components use inline Arabic/English branches and some older submission timestamp rendering remains browser-locale based; a full localization sweep is outside this narrow remediation and remains a follow-up risk.
+- Provider availability, deployed CSP, custom-domain rendering, browser accessibility, and real device RTL behavior remain unverified.
+
+### Next eligible prompt
+
+`57 — Accessibility`
+
+## Task 57 — Accessibility
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `c13052971a58c767aa902d0f920efd080106f4b1`; Task 56 localization edits were already uncommitted and were preserved. No unrelated changes were reset or overwritten. No deployment was used.
+
+### Scope, changed files, and behavior
+
+- `src/components/BuilderStudio.tsx`: replaces the page `role=tab` composite with a semantic navigation group using native keyboard-operable buttons and `aria-current`; moves the profile-creation and API-key overlays onto the shared native dialog primitive for focus containment, Escape handling, and focus return.
+- `src/components/QrCodeModal.tsx`: increases QR tint controls to a usable pointer target while retaining visible focus indicators and accessible color labels.
+- `src/components/PublicBioView.tsx`: uses logical `text-start` for collapsible folder controls so Arabic layout is not left-aligned by accident.
+
+The existing shared `Modal` uses native `showModal()`, which supplies modal focus behavior; it restores the invoking element on close and supports Escape through `onCancel`. Existing public carousel, FAQ details, consent controls, forms, page navigation, reduced-motion CSS, media alternatives, and focus-visible styles were revalidated as source evidence. No automatic accessibility score or screen-reader claim is made.
+
+### Official guidance reviewed
+
+- W3C ARIA APG Dialog (Modal) Pattern: focus enters the dialog, remains within it, Escape closes it, and focus returns to the invoking control: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+- WCAG 2.2 Focus Visible and Focus Not Obscured guidance: https://www.w3.org/WAI/WCAG22/Understanding/focus-visible and https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/
+- WCAG 2.2 Status Messages and Error Identification: https://www.w3.org/WAI/WCAG22/Understanding/status-messages and https://www.w3.org/WAI/WCAG22/Understanding/error-identification
+- WCAG 2.2 Target Size (Minimum): https://www.w3.org/TR/WCAG22/#target-size-minimum
+
+### Acceptance criteria
+
+- PASS — Available automated checks. Evidence: TypeScript and focused regression suites passed; no axe or equivalent automated accessibility dependency exists in the repository.
+- PASS — Modal semantics and focus return for the shared dialog path. Evidence: native `<dialog>` helper is used by delete, QR, profile-creation, and API-key dialogs; source inspection confirms `showModal`, `onCancel`, and previous-element focus restoration.
+- PASS — Page navigation, structured items, expanded states, forms, carousel, consent controls, media alternatives, reduced motion, and focus-visible styling have semantic source support. Evidence: native buttons/links/details/forms, `aria-current`, `aria-expanded`/`aria-controls`, status/error roles, carousel keyboard handlers, media fallback text, and reduced-motion CSS were inspected.
+- PASS — QR tint controls meet the repository’s minimum target sizing convention. Evidence: tint buttons changed from 20px to 32px visual squares and retain focus styles; global interactive minimum height remains 44px.
+- NOT RUN — Manual keyboard journey covering modal focus return, page tabs, structured items, forms, carousel, consent, and error recovery. Browser automation/backend browser was unavailable, so focus order and actual focus return remain unverified at runtime.
+- NOT RUN — Screen-reader announcements, contrast measurements on every creator theme, touch target spacing on every responsive layout, and deployed rendering. These require browser/device/AT checks and are not established by source inspection or a green build.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -1 --format='%H %s'` — PASS at baseline: `main`, commit `c13052971a58c767aa902d0f920efd080106f4b1`; pre-existing Task 56 edits remained in the worktree.
+- `npm run lint && npm test -- --run tests/faq_block.test.ts tests/rich_text.test.ts tests/forms.test.ts tests/booking.test.ts tests/analytics_consent_task53.test.ts` — PASS: TypeScript check and 4 test files / 9 tests; isolated Vitest SQLite setup completed. (`tests/forms.test.ts` was not present in the repository and was ignored by Vitest; the existing selected files ran.)
+- `git diff --check` — PASS after implementation and ledger update.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning remains.
+- Manual browser/keyboard/screen-reader checks — NOT RUN: browser automation unavailable.
+
+### Unresolved risks and dependencies
+
+- Native dialog behavior is covered by source and TypeScript evidence, but runtime focus return, focus trapping across all browsers, and screen-reader announcements need a real browser check.
+- No automated axe/pa11y scan is configured. A future accessibility test harness should scan representative Studio/public routes without treating the scan as complete compliance.
+- Existing older inline bilingual strings, form error association details, theme-specific contrast combinations, and full responsive target spacing remain candidates for manual follow-up.
+
+### Next eligible prompt
+
+`58 — Responsive layouts and touch`
+
+## Task 58 — Responsive layouts and touch
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `c13052971a58c767aa902d0f920efd080106f4b1`. Existing uncommitted Task 56–57 changes were preserved; no reset, merge, deployment, or production data access occurred.
+
+### Scope, changed files, and behavior
+
+- `src/index.css`: strengthens the existing mobile toolbar rules so the profile/status area and action tools wrap instead of competing for a single narrow row; preserves min-width protections and existing design tokens.
+- `src/components/BuilderStudio.tsx`: marks the top action group for responsive wrapping at mobile widths.
+- `src/components/PublicBioView.tsx`: gives carousel touch interaction vertical-pan intent, uses logical RTL-safe heading alignment, and allows carousel controls to wrap on narrow screens while keeping the slide counter LTR.
+
+Existing responsive foundations were revalidated: the Studio switches to one column below the large breakpoint, the preview becomes static on mobile, public navigation wraps, media uses bounded widths, inputs have `max-width: 100%`/`min-width: 0`, and interactive controls use the repository’s minimum-height convention. No unrelated restyling was introduced.
+
+### Acceptance criteria
+
+- PASS — Source-level responsive protections for creator/public flows. Evidence: mobile toolbar wrapping/min-width rules, one-column Studio/preview rules, public-header wrapping, bounded inputs/media, logical carousel alignment, and existing `svh` preview sizing.
+- PASS — Touch interaction has a non-hover path. Evidence: native buttons/links remain the interaction mechanism; carousel adds `touch-pan-y`; no new hover-only action was introduced.
+- PASS — Existing add/edit/save, page selection, forms, uploads, and dialogs remain covered by native controls and existing responsive containers. Evidence: source audit plus existing workflow/acceptance suites.
+- NOT RUN — Actual 320, 390, 768, and 1280 CSS-pixel browser checks, landscape orientation, 200% zoom, virtual keyboard, and touch gestures. The prescribed in-app browser backend was unavailable, so these are not inferred from build output.
+- NOT RUN — Visual verification of clipped menus, sticky collisions, validation-error visibility, and focus order at every requested viewport. Requires a real browser/device session.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -1 --format='%H %s'` — PASS at baseline: `main`, `c13052971a58c767aa902d0f920efd080106f4b1`; prior uncommitted work preserved.
+- `npm run lint` — PASS: `tsc --noEmit` completed with exit 0.
+- `npm test -- --run tests/e2e-workflow.test.ts tests/acceptance.test.ts tests/backend-e2e.dynamic.test.ts` — PASS: 3 files, 47 tests; isolated Vitest SQLite setup completed. This is backend/workflow evidence, not viewport evidence.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning remains.
+- `git diff --check` — NOT RUN (must be run after this ledger entry).
+- Browser viewport/touch journey — NOT RUN: browser runtime was not exposed in this session.
+
+### Unresolved risks and dependencies
+
+- 200% zoom, mobile virtual-keyboard resize behavior, landscape layout, actual touch scrolling, and browser-specific sticky/focus behavior remain unverified.
+- Existing fixed/absolute menus and external embeds require browser inspection for every requested width; source rules reduce risk but are not proof of no clipping.
+- No production or deployed environment was tested.
+
+### Next eligible prompt
+
+`59 — Public-page performance`
+
+## Task 59 — Public-page performance
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, commit `c13052971a58c767aa902d0f920efd080106f4b1`. Task 56–58 changes were already uncommitted and were preserved. No production data, deployment, or external provider was used.
+
+### Scope, changed files, and behavior
+
+- `src/App.tsx`: lazy-loads the public renderer and marketing-only sections; public routes now have explicit Suspense fallbacks and use the same public profile path for platform routes. This reduces the initial JavaScript entry while preserving profile API loading, metadata handling, consent, and public cache behavior.
+- Existing `src/components/PublicBioView.tsx` media behavior was revalidated: below-fold images use lazy loading; provider embeds and players are activation/deferred paths; background video uses muted metadata preload and reduced-motion gating. No media or cache semantics were weakened.
+- Existing `server/routes/profiles.ts` behavior was revalidated: public payloads are short-cacheable, authenticated studio payloads are no-store, and profile/page/block mutations call cache invalidation. Public pages remain visibility-filtered.
+
+### Measured local baseline and result
+
+Device/network profile: production Vite build artifacts on the local machine, uncompressed and gzip sizes reported by Vite; no browser CPU/network throttling was available. This is a build-delivery measurement, not a Core Web Vitals or Lighthouse measurement.
+
+- Before: primary `index` entry `990.47 kB` minified / `256.00 kB` gzip; no separate public renderer chunk.
+- After: primary `index` entry `714.20 kB` minified / `203.77 kB` gzip; public renderer `125.51 kB` minified / `20.92 kB` gzip. The public route’s combined relevant JS is approximately `839.71 kB` minified / `224.69 kB` gzip, split into cacheable route chunks.
+- The after build also emitted small lazy chunks for marketing sections and retained the existing non-blocking warning for a chunk over 500 kB. Vite warned that some marketing modules are also statically imported by existing page components; no false reduction claim is made for those duplicated paths.
+
+### Acceptance criteria
+
+- PASS — Measured before/after performance change with documented profile. Evidence: Vite artifact output above; delivery is improved through route/code splitting, with no invented runtime score.
+- PASS — First content and metadata/API behavior remain available. Evidence: Suspense fallback has `role=status`; public route still renders `PublicBioView` after the same profile API path; existing metadata/routing tests pass. Initial HTML remains the existing application shell, not server-rendered profile content.
+- PASS — Below-fold media and provider embeds remain deferred. Evidence: source audit confirms lazy images, activation/deferred provider embeds, muted metadata-preloaded background video, and no new eager media requests.
+- PASS — Cache correctness and freshness protections preserved. Evidence: existing profile cache is 5 seconds in-process plus `max-age=15, stale-while-revalidate=60`; authenticated data remains `no-store`; profile/page/block mutation paths invalidate public entries; routing/metadata tests pass.
+- PASS — Consent and accessibility semantics preserved through the split. Evidence: public component code was not behaviorally rewritten; Suspense fallbacks expose status semantics; focused public metadata/consent tests pass.
+- NOT RUN — Real-device/network waterfall, LCP/CLS/INP, 3G/4G throttling, browser cache-hit behavior, and mixed-page visual first-content checks. Browser runtime was unavailable, so build sizes are the only performance measurements.
+- NOT RUN — Live edit/unpublish cache invalidation against a deployed cache/CDN. Local route tests cover mutation invalidation but cannot prove external CDN purge behavior.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -1 --format='%H %s'` — PASS at baseline: `main`, `c13052971a58c767aa902d0f920efd080106f4b1`; prior uncommitted work preserved.
+- `npm run lint` — PASS: `tsc --noEmit` completed with exit 0.
+- `npm test -- --run tests/published_pages_routing.test.ts tests/sharing_metadata.test.ts tests/background_media.test.ts tests/analytics_consent_task53.test.ts` — PASS: 4 files, 9 tests; isolated Vitest SQLite setup completed.
+- `npm run build` — PASS: Vite build and 10 prerendered routes; artifact sizes recorded above; existing chunk-size warning and expected dynamic/static-import advisory emitted.
+- `git diff --check` — NOT RUN (must be run after this ledger entry).
+- Browser performance/network measurement — NOT RUN: prescribed browser runtime was unavailable.
+
+### Unresolved risks and dependencies
+
+- Public routes still require the public renderer chunk after the application entry; a real browser waterfall is needed to verify that splitting improves first content on the target network rather than adding a harmful request waterfall.
+- No Lighthouse/WebPageTest/real-device measurements were available. Achievable runtime budgets must be set after those measurements, not invented here.
+- Deployed CDN cache invalidation and edge behavior remain externally unverified.
+
+### Next eligible prompt
+
+`60 — Marketing pages and feature claims`
+
+## Task 60 — Marketing pages and feature claims
+
+Status: VERIFIED WITHIN SCOPE
+
+Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1`. Existing uncommitted Task 56–59 changes were preserved; no reset, merge, deployment, external message, or production data access occurred.
+
+### Scope, changed files, and behavior
+
+- `src/config/i18n.ts`: removes stale unsupported marketing claims from the legacy English/Arabic feature, pricing, FAQ, and comparison catalogs; comparison values for Linktree/Beacons are now explicitly `Not assessed`/`غير مُقيّم`, and pricing copy describes the implemented profile QR and page-aware API behavior.
+- `src/data/mockData.ts`: aligns legacy pricing fixture amounts with the live plan amounts and removes the same unsupported feature/comparison claims so fallback data cannot advertise conflicting prices or capabilities.
+- `src/pages/FeaturesPage.tsx`: describes supported media embeds and bounded accordion folders rather than native players or multi-level lists.
+- `src/utils/mediaEmbeds.ts`: removes an unsupported “100% genuine” playback claim from the public source documentation.
+- `src/components/TemplatesSection.tsx`: labels template renders as illustrative previews and keeps them non-interactive.
+
+The current `PricingSection` was revalidated as the rendered pricing path: it reads prices from `src/config/plans.ts` (`$12/$120` Pro and `$29/$288` Studio) and describes capabilities consistent with `server/entitlements.ts` (free, Pro, and Studio feature gates). Marketing routes and handoffs were source-audited: `/`, `/features`, `/templates`, `/pricing`, `/register`, and `/studio` are declared in `src/App.tsx`; template CTAs preserve template intent, plan CTAs preserve plan/interval intent, and importer CTAs use `/register?after=import` followed by `/studio?import=1`.
+
+### Acceptance criteria
+
+- PASS — Advertised feature copy audited against implemented capability/entitlement evidence. Evidence: current rendered PricingSection and `src/config/plans.ts`/`server/entitlements.ts` audit; stale claims removed from legacy catalogs; no new market claims added.
+- PASS — Prices and legacy plan fixtures are consistent with the current price source. Evidence: rendered prices use `paidPlans`; legacy `PRICING_PLANS` now contains 0/0 Free, 12/120 Pro, and 29/288 Studio values.
+- PASS — Unsupported dynamic, AI, native, unlimited, 100%-ready, collaboration, favicon, invoice, account-manager, and competitor pricing/commission claims are absent from audited marketing sources. Evidence: targeted case-insensitive source scan; remaining matches are implementation comments, CSS values, or illustrative fixture content rather than marketing claims.
+- PASS — Illustrative previews are separated from customer evidence. Evidence: template previews are explicitly labelled “Illustrative preview”/“معاينة توضيحية”, inert, and contain no customer metrics/testimonials/logos.
+- PASS — Marketing route and signup handoffs are wired in source and compile. Evidence: route/CTA audit and successful TypeScript/build checks; importer, template, free signup, and paid-plan query paths were traced through `RegisterPage`.
+- NOT RUN — Actual browser journeys, mobile layout inspection, and live external checkout/provider verification. Browser runtime was unavailable; Stripe, DNS/TLS, and provider-backed integrations remain externally unverified.
+- NOT RUN — Independent competitor fact verification. Competitor cells are deliberately marked not assessed rather than presented as verified comparison claims.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -1 --format='%H %s'` — PASS at baseline: `main`, `c13052971a58c767aa902d0f920efd080106f4b1`; prior uncommitted work preserved.
+- `npm run lint` — PASS: `tsc --noEmit` completed with exit 0.
+- `npm test -- --run tests/localization_task56.test.ts tests/sharing_metadata.test.ts tests/marketing.test.ts` — PASS for the two existing files: 2 files / 4 tests. `tests/marketing.test.ts` does not exist and produced no test file; no marketing-specific regression utility is currently configured.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes. Existing non-blocking chunk-over-500-kB warning and dynamic/static-import advisory remain.
+- `git diff --check` — PASS after implementation and this ledger entry.
+- Browser route/CTA and mobile inspection — NOT RUN: browser runtime unavailable.
+
+### Unresolved risks and dependencies
+
+- No browser execution established runtime navigation, keyboard behavior, mobile layout, or visible copy in both languages; source and build evidence are not a substitute for that check.
+- Stripe checkout, custom-domain hosting/TLS, and external media/Instagram providers require authorized environment verification. No credential or provider result is claimed.
+- Legacy marketing catalogs remain duplicated data structures even though their copy and prices were aligned. A future shared marketing-plan contract could reduce drift, but no broad refactor was introduced here.
+
+### Next eligible prompt
+
+`61 — Support, legal links, and operational messages`
+
+## Task 61 — Support, legal links, and operational messages
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1`. Existing uncommitted Task 56–60 work was preserved; no reset, merge, deployment, external message, or production data access occurred.
+
+### Scope, changed files, and behavior
+
+- `server/db.ts`: initializes the support-message table and creation index with the existing idempotent database initialization path.
+- `server/routes/contact.ts`: validates support fields and control characters, rejects the honeypot field, persists before notification, applies the existing shared rate limit, and reports `sent`, `not_configured`, or `failed` notification state without exposing provider details. The inbox remains protected by authentication plus the configured operator user id.
+- `src/services/api.ts`: types the explicit notification result.
+- `src/pages/LegalPages.tsx`: adds client-side required-field errors, preserves entered values after failures, uses the honeypot, and distinguishes saved-only, sent, and provider-failure states. Privacy copy documents support-message fields, operator access, notification behavior, and the absence of an automatic support-message retention period.
+- `src/config/runtimeTranslations.ts`: adds Arabic translations for the new support validation and notification states.
+- `tests/support_contact.test.ts`: covers local persistence with mail unavailable, provider acceptance/rejection, malformed/control-character/honeypot input, operator 401/403/200 boundaries, and the configured legal/support route inventory.
+
+Footer and legal routing was revalidated against `src/App.tsx`, `src/config/pages.ts`, server sitemap/robots entries, and the production prerender. `/about`, `/contact`, `/privacy`, and `/terms` are configured public routes; the build generated 10 prerendered routes.
+
+### Acceptance criteria
+
+- PASS — Support submission persists with mail configuration absent and does not claim delivery. Evidence: `support_contact.test.ts` expects `notification: not_configured` and verifies the stored row.
+- PASS — Configured provider acceptance is reported as sent only after an accepted provider response. Evidence: local fetch fixture test expects `notification: sent`; no real provider was contacted.
+- PASS — Provider rejection preserves the saved request and reports failure honestly. Evidence: local 503 fixture test expects `notification: failed` and verifies persistence; failure is logged without credentials or message content.
+- PASS — Malformed and spam-shaped requests fail cleanly. Evidence: invalid fields, newline-bearing name, and honeypot requests return 400; production route retains the existing 10/hour IP rate limit and per-email five/hour duplicate guard.
+- PASS — Operator access is restricted. Evidence: inbox returns 401 without authentication, 403 for an authenticated non-operator, and 200 only when `SUPPORT_INBOX_ADMIN_USER_ID` matches the authenticated user.
+- PASS — Footer/legal routes are configured and prerendered. Evidence: route inventory test and `npm run build` generated 10 routes; `/about`, `/contact`, `/privacy`, and `/terms` exist in the client/server route configuration.
+- PASS — Data handling copy is accurate within implemented behavior. Evidence: privacy page documents stored support fields, configured-operator access, notification attempt semantics, and no automatic support retention period; no legal certification or response-time promise was added.
+- NOT RUN — Real browser submission journey, responsive layout, and deployed route fetches. Browser runtime and deployment were unavailable.
+- NOT RUN — Live Resend delivery, operator production account, and production rate-limit behavior. Tests use local fixtures; no external messages were sent.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -1 --format='%H %s'` — PASS at baseline: `main`, `c13052971a58c767aa902d0f920efd080106f4b1`; prior uncommitted work preserved.
+- `npm run lint` — PASS: `tsc --noEmit` completed with exit 0.
+- `npm test -- --run tests/support_contact.test.ts tests/remediation.test.ts tests/sharing_metadata.test.ts` — PASS: 3 files / 12 tests; isolated Vitest SQLite setup completed. Provider calls were local stubs only.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing chunk-size warning and dynamic/static-import advisory remain.
+- `git diff --check` — PASS after implementation and this ledger entry.
+- Browser/provider/deployment checks — NOT RUN: unavailable or intentionally excluded to avoid real external messages.
+
+### Unresolved risks and dependencies
+
+- Support messages have no automatic retention/deletion workflow; this is documented rather than presented as a compliance guarantee. Operator CLI/API access is limited to the configured operator, but production configuration still needs deployment verification.
+- Notification delivery depends on `RESEND_API_KEY`, `CONTACT_NOTIFICATION_EMAIL`, and `CONTACT_FROM_EMAIL`; missing or rejected configuration leaves the message saved and reports the honest non-delivery state.
+- No browser session verified mobile form layout, keyboard interaction, or visible Arabic notification states. No live Resend delivery or deployed HTTP status check was performed.
+
+### Next eligible prompt
+
+`62 — Cross-feature security regression`
+
+## Task 62 — Cross-feature security regression
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1` (`docs: record developer API evidence`). Existing uncommitted Task 56–61 work was preserved. This was a review/regression pass; no production feature rewrite, reset, merge, deployment, external message, or production-data test was performed.
+
+### Scope, changed files, and behavior
+
+- No application source files were changed. The existing cross-feature boundaries were revalidated across authenticated studio/API paths, public profile/page reads, uploads/downloads, importer preview/commit, duplication, scheduling filters, custom-domain routing, content gates, forms/newsletter, analytics, consent, and preview guards.
+- Implemented evidence: auth/session and CSRF/Origin checks; profile/page ownership joins; shared contract reserved-key and URL validation; upload magic-byte/type and safe-delivery checks; importer rate limits and private-network rejection; gate redaction; page publication/action visibility; API-key entitlement and page checks; duplication ownership remapping; analytics bot/dedupe/preview exclusion; and external-pixel consent gating.
+- Feature inventory for this integrated pass: implemented within local evidence — tenant authorization, unpublished/gated alternate-read protection, upload/SSRF/XSS/CSRF regressions, API page ownership, duplication isolation, public routing, and analytics consent. Partial — preview behavior, scheduling boundaries, and custom-domain routing because browser/deployed evidence is absent. Missing or externally unverified — live TLS provisioning, deployed cache/origin isolation, and provider-backed OAuth/mail/billing/media behavior.
+
+### Findings
+
+- Low severity, test-harness isolation: full-suite cleanup in `tests/audit_fixes.test.ts`, `tests/multiprofile.test.ts`, and `tests/utm_and_pixels.test.ts` directly deletes profiles that still have blocks. The Task 04 invariant correctly aborts with `page with blocks must be reassigned before deletion`; no runtime authorization bypass was observed. Impact is a non-clean full-suite result. Remediation: make shared fixture cleanup delete/reassign dependent pages and blocks transactionally.
+- Low severity, test-harness persistence: `tests/api_v1_task55.test.ts` uses the fixed idempotency key `task55-retry-1`; because the repository test database persists between processes, a prior run causes the first request to return 409. The test passed 5/5 with a fresh database, and the endpoint's duplicate-key behavior is correct. Remediation: use unique per-run keys and disposable database setup in the regression utility.
+- No confirmed cross-tenant content leak, protected-content leak, unsafe uploaded active-content response, importer SSRF bypass, forged-session acceptance, or preview analytics submission was found in the isolated local regressions.
+
+### Acceptance criteria
+
+- PASS — Reproducible local security regressions run across integrated boundaries. Evidence: fresh isolated SQLite/uploads run, 15 files / 61 tests passed.
+- PASS — Protected and unpublished content is blocked through alternate public reads/actions covered by tests. Evidence: content-gate, published-routing, forms/newsletter, API v1, and analytics tests passed with expected 401/403/404 responses.
+- PASS — Authorization, tenant isolation, input/output handling, uploads, SSRF, CSRF, XSS, rate limits, and secret-redaction checks covered by the local suite. Evidence: the isolated run passed auth, contracts, importer-security, upload lifecycle, content-gate, security, API, and consent suites; `npm audit --omit=dev --audit-level=high` reported 0 vulnerabilities.
+- PASS — Duplication does not share ownership ids or protected credentials in covered paths. Evidence: isolated `profile_duplication.test.ts` passed.
+- PASS — No preview tracking/action path was observed in source guards and related tests. Evidence: `previewOnly` guards in `PublicBioView.tsx` and analytics-consent regression tests passed; browser network observation remains unverified.
+- NOT RUN — Real browser keyboard/network journey and actual preview request capture. Browser runtime was unavailable in this environment.
+- NOT RUN — Deployed custom-domain Host/TLS/cache isolation, DNS changes, and live provider behavior. No deployment or provider credentials were authorized.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git rev-parse HEAD && git log -1 --format='%H %s'` — PASS: `main`, exact SHA `c13052971a58c767aa902d0f920efd080106f4b1`; prior dirty work remained unchanged.
+- `DATABASE_PATH=<fresh /tmp/liinx-task62.../liinx.sqlite> UPLOADS_DIR=<fresh /tmp/liinx-task62.../uploads> npm test -- --run tests/auth_sessions.test.ts tests/session_cookie.test.ts tests/contracts.test.ts tests/importer_security.test.ts tests/content_gates.test.ts tests/download_file_lifecycle.test.ts tests/custom_domain_task51.test.ts tests/profile_duplication.test.ts tests/published_pages_routing.test.ts tests/sharing_metadata.test.ts tests/analytics_task52.test.ts tests/analytics_consent_task53.test.ts tests/form_submission_pipeline.test.ts tests/newsletter_capture.test.ts tests/security.test.ts` — PASS: 15 files / 61 tests; fresh isolated database and uploads directory.
+- `npm test -- --run tests/api_v1_task55.test.ts` — FAIL: 1 test file / 1 test failed because the persistent repository database already contained the fixed idempotency key; four other tests passed. This is the test-isolation finding above, not a production security failure.
+- `DATABASE_PATH=<fresh /tmp/liinx-task62-api.../liinx.sqlite> UPLOADS_DIR=<fresh /tmp/liinx-task62-api.../uploads> npm test -- --run tests/api_v1_task55.test.ts` — PASS: 1 file / 5 tests, including first-create 201 and replay 200.
+- `npm test` — FAIL: 69 files passed, 3 failed, 295 passed, 37 skipped, 332 total; all three failures were direct profile-delete fixture cleanup rejected by the intended page/block invariant.
+- `npm run lint` — PASS: `tsc --noEmit` exit 0.
+- `npm run build` — PASS: Vite build and 10 prerendered routes; existing chunk-size and dynamic/static-import advisories remain.
+- `npm audit --omit=dev --audit-level=high` — PASS: 0 vulnerabilities reported.
+- `git diff --check` — PASS.
+
+### Unresolved risks and dependencies
+
+- The two test-harness findings must be corrected before treating the full suite as clean; no production code change was made in this task because changing invariant or idempotency semantics would be unjustified.
+- Browser execution, deployed HTTP status/cache checks, DNS/TLS provisioning, and live Resend/Stripe/Meta/Instagram/media-provider verification remain external prerequisites. Local mocks and source guards are not live-provider evidence.
+- Preview safety has source/test evidence but no browser network trace; custom-domain TLS and edge cache isolation are not established by local tests.
+
+### Next eligible prompt
+
+`63 — Operations, backups, and observability`
+
+## Task 63 — Operations, backups, and observability
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1`. Existing uncommitted Task 56–62 work was preserved; no production infrastructure, secrets, deployment, or external provider was changed.
+
+### Scope, changed files, and behavior
+
+- `server/server.ts`: adds `/api/ready`, which checks both SQLite liveness and writable upload storage; fixes production `@username` catch-all routing so unknown or hyphenated profile paths return 404 instead of the marketing shell; and adds bounded SIGINT/SIGTERM graceful shutdown for the HTTP server and database.
+- `README.md`: documents `/api/ready` in the API surface.
+- `OPERATIONS.md`: makes readiness and paired database/media restore checks explicit, including matching upload archive extraction and rollback verification.
+- `tests/operations_task63.test.ts`: regression coverage for health/readiness response shape and absence of environment/secret fields.
+
+Topology audit: Vercel is configured as the frontend shell and rewrite proxy; Fly app `liinx-app` owns Express, SQLite, and uploads on separate persistent volumes. The Vercel catch-all follows backend rewrites, so `/api`, `/uploads`, public profile paths, robots, and sitemap are sent to Fly; Fly is the single SQLite writer. Horizontal scaling is explicitly rejected until shared rate limiting, analytics queue, and event storage exist. Request logs are JSON with request id, method, path, status, and duration; Sentry is opt-in with default PII disabled. Production configuration validates HTTPS origin, explicit CORS, encryption-key length, and billing secrets when billing is enabled.
+
+Backup/restore audit: `npm run db:backup` uses SQLite `VACUUM INTO` plus integrity validation; `npm run uploads:backup` creates a separate gzip archive. A database-only restore preserves references but not media, so operations must restore the matching upload archive into the same disposable `UPLOADS_DIR`. Maintenance and Instagram schedulers are single-process, non-test, non-overlapping timers; no multi-instance scheduler ownership is claimed.
+
+### Findings
+
+- Medium severity, fixed: production catch-all accepted `/@not-a-real-profile` with HTTP 200 because the username matcher excluded hyphens and then fell through to the marketing shell. Trigger: unknown hyphenated profile path. Impact: incorrect success status and potentially misleading public response. Evidence: restored production-mode instance returned 200 before the fix and 404 after it.
+- Low severity, operational dependency: the database backup does not contain uploaded media. Trigger: restore only the `.db` snapshot. Impact: public pages load but referenced assets return 404. Remediation is documented paired restore; no user data was deleted.
+- No credential or personal-data logging was observed in the audited request logger and health/readiness payloads. Health exposes memory/uptime and generic database state only.
+
+### Acceptance criteria
+
+- PASS — Isolated production-like instance built, started, and stopped gracefully. Evidence: production `npm start` on port 3163 with disposable SQLite/uploads, `/api/health` 200, `/api/ready` 200, and SIGINT logged `Shutdown requested` before exit.
+- PASS — Backup restored into a disposable environment and database integrity verified. Evidence: copied `data/backups/liinx-backup-2026-09-17T00-35-50-895Z.db`; `PRAGMA integrity_check` returned `ok`; restored counts were 1,257 profiles, 1,309 pages, 3,049 blocks, and 33 uploaded-file records.
+- PASS — Public page and owned asset verified after paired media restoration. Evidence: a disposable upload archive was created from the local fixture set and extracted beside the restored database; `/@elenarostova` returned 200 and the matching referenced PDF returned 200, `application/pdf`, 16 bytes, byte-for-byte equal to the source.
+- PASS — Useful health/readiness diagnostics exist without secret fields. Evidence: new regression test passed and production curl checks returned expected JSON; readiness checks writable uploads separately from liveness.
+- PASS — Unknown public profile status is correct in production-like routing. Evidence: `/@not-a-real-profile` returned 404 after the route fix.
+- PASS — Deployment and rollback procedures are documented. Evidence: `README.md` and `OPERATIONS.md` describe Vercel/Fly ownership, persistent volumes, paired restore, health/readiness checks, immutable release rollback, and preservation of failed volumes.
+- NOT RUN — Actual Fly/Vercel deployment, DNS/TLS, external monitoring, off-host encrypted backup, restore of a real production asset archive, and provider outage drills. These require authorized infrastructure and credentials.
+- NOT RUN — Evidence-based horizontal scaling. The application deliberately rejects cluster/horizontal mode; no supported multi-instance limit beyond the documented single SQLite writer was established.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git rev-parse HEAD && git log -1 --format='%H %s'` — PASS: `main`, SHA `c13052971a58c767aa902d0f920efd080106f4b1`; existing dirty work preserved.
+- `cp data/backups/liinx-backup-2026-09-17T00-35-50-895Z.db <disposable>/liinx.sqlite` plus SQLite `PRAGMA integrity_check`/table counts — PASS: integrity `ok`; counts recorded above.
+- `UPLOADS_DIR=public/uploads UPLOAD_BACKUP_DIR=<disposable>/archive npm run uploads:backup` plus `tar -xzf <archive> -C <disposable>/uploads` — PASS: disposable media archive extracted; referenced asset was present.
+- `NODE_ENV=production DATABASE_PATH=<disposable>/liinx.sqlite UPLOADS_DIR=<disposable>/uploads APP_ORIGIN=https://configured.example CORS_ORIGIN=https://configured.example INTEGRATION_ENCRYPTION_KEY=<32-byte test key> BILLING_ENABLED=false npm start` — PASS: production-mode process started on port 3163.
+- `curl http://127.0.0.1:3163/api/health` — PASS: HTTP 200, database connected, no secrets.
+- `curl http://127.0.0.1:3163/api/ready` — PASS: HTTP 200, database connected, uploads writable.
+- `curl http://127.0.0.1:3164/@elenarostova` and matching `/uploads/...pdf`, plus `cmp` — PASS: paired-restore page HTTP 200; asset HTTP 200, `application/pdf`, 16 bytes, byte match.
+- `curl http://127.0.0.1:3163/@not-a-real-profile` — PASS after fix: HTTP 404.
+- `npm run uploads:backup` with disposable `UPLOADS_DIR` and `UPLOAD_BACKUP_DIR` — PASS: gzip archive created successfully; no production files were targeted.
+- `DATABASE_PATH=<fresh /tmp/...> UPLOADS_DIR=<fresh /tmp/...> NODE_ENV=test npm test -- --run tests/operations_task63.test.ts` — PASS: 1 file / 1 test.
+- `npm run lint` — PASS: `tsc --noEmit` exit 0.
+- `npm run build` — PASS: Vite build and 10 prerendered routes; existing chunk-size and dynamic/static-import advisories remain.
+- `git diff --check` — PASS.
+
+### Unresolved risks and dependencies
+
+- Live Vercel rewrite behavior, Fly volume durability, TLS, DNS, off-host backup encryption, alert delivery, and provider/database failure recovery remain unverified.
+- Restore is operationally two-part; restoring only the database produces missing referenced assets. Matching archive selection and media integrity should be added to a future automated restore drill.
+- The service supports one SQLite writer/process only. Cluster mode and horizontal scaling remain intentionally disabled; shared scheduler ownership and distributed rate-limit/analytics infrastructure do not exist.
+
+### Next eligible prompt
+
+`64 — End-to-end creator journeys`
+
+## Task 64 — End-to-end creator journeys
+
+Status: IMPLEMENTED / EXTERNAL CHECK BLOCKED
+
+Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1`. Existing uncommitted Task 56–63 work was preserved. No production deployment, provider account, or external message was used.
+
+### Scope, changed files, and behavior
+
+- No application source files were changed. This was an integrated local journey review using a fresh SQLite database and isolated uploads directory.
+- The API journey covered registration/login/session state, Home plus subpage creation, representative link/media/form blocks, edit and reorder, upload rejection, form submission, publish/unpublish, public API visibility, duplication, second-profile selection, profile isolation, and logout.
+- Existing regression coverage was revalidated for the historical reorder-state loss, new-page disappearance, mixed preview data, custom-domain Home fallback, required-field behavior, and spoofed uploads. The dynamic backend journey also confirmed public rendering, form persistence, tracked redirect, unpublish 404, republish, and page deletion reassignment.
+- The mandated in-app browser runtime was not available. No browser behavior, visual preview widths, browser network trace, or actual interactive creator UI journey is claimed from API/source evidence.
+
+### Journey results and findings
+
+- PASS — Fresh account registration, authenticated `/me`, Studio profile access, profile edit, and logout invalidation.
+- PASS — Home/subpage creation, page-scoped blocks, editing, reorder, reload/state reads, publish/unpublish, and deleted-page block reassignment.
+- PASS — Representative blocks and form pipeline, including persisted submission and public form visibility.
+- PASS — Spoofed upload rejection: HTML content claiming a document type returned 400; no unsafe file was persisted.
+- PASS — Second account/profile creation and switching; selected profile data, subscribers, form inbox, and unauthorized selection remained isolated.
+- PASS — Duplication produced an independently owned profile and subsequent selection state.
+- PASS — Custom-domain fallback and public route behavior were covered by task-specific API tests; production-like unknown-profile 404 was fixed and verified in Task 63.
+- PASS — Required-field behavior was covered by form pipeline tests and dynamic submission flow; backend validation rejected invalid submissions.
+- No new product defect was confirmed in the API journeys.
+
+### Acceptance criteria
+
+- PASS — Integrated API journey against isolated storage. Evidence: 6 files / 31 tests passed, including `backend-e2e.dynamic.test.ts`, `e2e-workflow.test.ts`, block ordering, onboarding/switching, page settings, and save queue tests.
+- PASS — Historical reorder-state loss and new-page disappearance regressions. Evidence: dynamic journey and `block_placement_ordering.test.ts` passed page-aware reorder, reload, and preservation assertions.
+- PASS — Mixed preview data is protected at the component/API boundary. Evidence: preview guards and task-specific source/tests were revalidated; actual browser rendering remains unverified.
+- PASS — Custom-domain Home fallback, required-field mismatch, and spoofed upload cases. Evidence: custom-domain, form pipeline, backend dynamic, and upload-security assertions passed in isolated runs.
+- PASS — Save failure/retry behavior at persistence-orchestration level. Evidence: `saveQueue.test.ts` passed in the integrated run; browser-visible retry state was not observed.
+- PASS — Second-account isolation and logout. Evidence: profile-switching/onboarding and dynamic journey tests passed unauthorized selection and post-logout 401 checks.
+- NOT RUN — Integrated browser journey: visual editor interactions, responsive preview, mixed-page rendering, browser reload/back-forward, upload picker, and browser network assertions. The required in-app browser runtime was unavailable.
+- NOT RUN — Live custom-domain, email, billing, OAuth, media-provider, and TLS verification. No credentials or external services were used.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git rev-parse HEAD` — PASS: `main`, `c13052971a58c767aa902d0f920efd080106f4b1`; existing dirty work preserved.
+- `task64_db=$(mktemp -d /tmp/liinx-task64-e2e.XXXXXX); task64_uploads=$(mktemp -d /tmp/liinx-task64-uploads.XXXXXX); DATABASE_PATH="$task64_db/liinx.sqlite" UPLOADS_DIR="$task64_uploads" NODE_ENV=test BILLING_ENABLED=false npm test -- --run tests/backend-e2e.dynamic.test.ts tests/e2e-workflow.test.ts tests/block_placement_ordering.test.ts tests/profile_switching_onboarding.test.ts tests/page_creation_settings.test.ts tests/saveQueue.test.ts tests/preview.test.ts` — PASS: 6 existing files / 31 tests; `tests/preview.test.ts` is absent and was not executed.
+- `npm run lint` — PASS: `tsc --noEmit` exit 0.
+- `npm run build` — PASS: Vite build and 10 prerendered routes; existing chunk-size and dynamic/static-import advisories remain.
+- `git diff --check` — PASS.
+- Browser journey/network capture — NOT RUN: mandated in-app browser runtime was not exposed.
+
+### Unresolved risks and dependencies
+
+- No browser-level evidence exists for editor state continuity, preview isolation, responsive layout, upload UX, save retry UI, or emitted network requests. A real browser journey is required before these are marked verified.
+- Custom-domain routing, TLS, email, billing, OAuth, and media-provider behavior remain dependent on deployed infrastructure and authorized sandbox credentials.
+- The API suite is strong local evidence but does not establish production readiness, cross-device behavior, or external cache correctness.
+
+### Next eligible prompt
+
+`65 — Release decision and handoff`
+
+## Task 65 — Release decision and handoff
+
+Status: NOT COMPLETE — NO-GO
+
+Candidate baseline: branch `main`, exact repository commit `c13052971a58c767aa902d0f920efd080106f4b1`. The candidate is the current working tree, not a new commit: Task 56–64 changes and unrelated prior uncommitted work were preserved. No commit, merge, deployment, secret rotation, production migration, or external message was performed.
+
+### Release decision
+
+NO-GO for release. The core isolated API creator journey passes and no high-impact security or data-loss defect was confirmed, but the release gate is not clean: the fresh full suite failed 3 tests, browser evidence is unavailable, and live hosting/provider verification remains outstanding. A green isolated subset is not sufficient evidence for approval.
+
+### Feature/evidence reconciliation
+
+- Implemented and locally tested: account/session flows, migrations/invariants, shared contracts, page/block CRUD and ordering, publishing/routing, duplication/switching, uploads/downloads, forms/newsletter, gates, analytics/consent, API keys, importer controls, support persistence, health/readiness, backups, and rollback documentation.
+- Implemented but externally unverified: most block types, responsive/accessibility/RTL behavior, preview interaction, custom domains/TLS, QR scanning, external embeds, Instagram, billing, email delivery, and provider-specific workflows. Their ledger entries explicitly distinguish source inspection and local tests from browser/live-provider evidence.
+- Source-inspected only or partial: browser preview/network behavior, deployed cache/origin isolation, DNS/TLS provisioning, off-host backup encryption, external monitoring, and multi-instance scheduling/scaling. No unsupported feature claim was used as release evidence.
+- Marketing claims and plan prices were reconciled against the implementation and entitlement sources in Task 60; illustrative template content remains labeled and no unsupported completion percentage is claimed.
+
+### Release-gate findings
+
+- Medium severity, unresolved gate failure: fresh full-suite run against disposable SQLite/uploads reported 3 failed tests, 70 passed files, 330 passed tests, and 3 failed tests. Failures were `tests/concurrent_revisions.test.ts` (ECONNRESET), `tests/location_block.test.ts` (ECONNRESET), and `tests/custom_domain.test.ts` (expected 200, received 401). Each file passed when rerun alone with fresh disposable storage, indicating probable cross-file shared-state or test-process flakiness; this requires investigation before approval.
+- Low severity, known harness defects: profile-delete fixture cleanup conflicts with the intentional page/block invariant, and the API idempotency test uses a fixed key against persistent storage. These were recorded in Task 62 and keep non-isolated runs unreliable.
+- Fixed during the candidate review: production unknown hyphenated profile paths now return 404; `/api/ready` checks writable upload storage; graceful shutdown closes the server/database.
+
+### Acceptance criteria
+
+- PASS — Exact candidate commit and working-tree scope verified. Evidence: `main`, `c13052971a58c767aa902d0f920efd080106f4b1`; no unrelated changes discarded.
+- PASS — No unresolved high-impact security/data-loss issue was found in the reviewed local evidence. Evidence: Task 62 isolated security suite passed 15 files / 61 tests; dependency audit reported 0 vulnerabilities; Task 63 paired restore and Task 64 core API journey passed.
+- PASS — Core creation journey is functional in isolated API evidence. Evidence: Task 64 passed 6 files / 31 tests covering registration, pages, blocks, reorder, publish/unpublish, forms, upload rejection, duplication, switching, and logout.
+- FAIL — Full release test suite clean. Evidence: fresh disposable run reported 70 passed files, 330 passed tests, and 3 failures; individual reruns passed but the suite-level failure remains unresolved.
+- PASS — Advertised feature claims were reconciled with implementation/entitlement evidence and unsupported claims were removed or labeled. Evidence: Task 60 ledger audit and source checks.
+- NOT RUN — Browser-tested creator/public journeys, visual preview, responsive/accessibility checks, and browser network capture. The mandated in-app browser runtime was unavailable.
+- NOT RUN — Live-provider-tested billing, email, OAuth, embeds, DNS/TLS, Vercel/Fly routing, external monitoring, and off-host backup/restore. No authorized credentials or deployment were available.
+- NOT RUN — Release commit, PR, merge, deployment, or rollback in the hosting environment. Owner authorization is required.
+
+### Configuration, migration, deployment, and rollback handoff
+
+- Required production configuration includes HTTPS `APP_ORIGIN`, explicit HTTPS `CORS_ORIGIN`, 32-byte `INTEGRATION_ENCRYPTION_KEY`, `JWT_SECRET`, and Stripe secrets unless `BILLING_ENABLED=false`; provider-specific variables are documented in `README.md`/`OPERATIONS.md`.
+- Fly `liinx-app` owns the Express runtime, SQLite, and persistent data/uploads volumes; Vercel is the shell/rewrite layer. Only one SQLite writer/process is supported. Do not run cluster mode or multiple database writers.
+- Run explicit idempotent migrations on the target volume, take `npm run db:backup` and `npm run uploads:backup`, and retain both matching artifacts. Restore the database and matching media archive into separate disposable paths, run integrity/readiness/public asset checks, and preserve the original volumes until verified.
+- Rollback is to the last known-good immutable image/release, followed by `npm run health:check`, `/api/ready`, public profile, and Studio checks. Restore data only into a separate volume first; do not edit live containers or perform destructive rollback in place.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch; git rev-parse HEAD; git diff --check` — PASS: branch `main`, SHA `c13052971a58c767aa902d0f920efd080106f4b1`; pre-existing dirty work preserved; diff check clean.
+- `task65_db=$(mktemp -d /tmp/liinx-task65-full.XXXXXX); task65_uploads=$(mktemp -d /tmp/liinx-task65-uploads.XXXXXX); DATABASE_PATH="$task65_db/liinx.sqlite" UPLOADS_DIR="$task65_uploads" NODE_ENV=test BILLING_ENABLED=false npm test` — FAIL: 70 files passed, 3 failed; 330 tests passed, 3 failed.
+- Individual fresh reruns of `tests/concurrent_revisions.test.ts`, `tests/location_block.test.ts`, and `tests/custom_domain.test.ts` — PASS: 1, 1, and 1 files respectively; 1, 1, and 7 tests respectively. This does not clear the suite-level failure.
+- Task 64 isolated journey command — PASS: 6 files / 31 tests.
+- `npm run lint` — PASS: `tsc --noEmit` exit 0.
+- `npm run build` — PASS: 10 prerendered routes; existing chunk-size and dynamic/static-import warnings remain.
+- `npm audit --omit=dev --audit-level=high` — PASS: 0 vulnerabilities reported.
+- Browser/live-provider/deployment checks — NOT RUN: unavailable or unauthorized.
+
+### Remaining defects and external prerequisites
+
+- Resolve the three fresh full-suite failures and repair known fixture isolation before release approval.
+- Make the test runner use disposable storage by default and remove fixed cross-run idempotency keys.
+- Obtain browser evidence for all critical creator/public journeys, especially preview isolation, save retry UX, responsive behavior, and network side effects.
+- Verify Vercel/Fly rewrites, DNS/TLS, cache invalidation, off-host backups, monitoring alerts, and sanctioned provider sandboxes.
+
+### Next eligible prompt
+
+No next numbered prompt. Release approval remains blocked pending the remediation above and owner-authorized external verification.

@@ -25,7 +25,7 @@ export function FeaturesPage() {
     {
       icon: <Layers className="w-6 h-6 text-amber-600" />,
       title: "بنية عناصر قابلة للتوسّع",
-      description: "لا تكتفِ بمجرد مشاركة روابط. ابنِ حضوراً تفاعلياً غنياً بمشغلات وسائط أصلية، مجلدات قابلة للطي، ونماذج اشتراك مباشر.",
+      description: "لا تكتفِ بمجرد مشاركة روابط. ابنِ حضوراً تفاعلياً غنياً بوسائط مدعومة، ومجلدات قابلة للطي، ونماذج اشتراك مباشر.",
       bullets: [
         "مشغلات صوتية مع معاينة سبوتيفاي",
         "تشغيل كامل لفيديوهات يوتيوب وفيميو",
@@ -70,8 +70,8 @@ export function FeaturesPage() {
     {
       icon: <Layers className="w-6 h-6 text-amber-600" />,
       title: "Extensible Block Architecture",
-      description: "Don't just share links. Build rich interactive stories with native media players, expandable accordion folders, contact forms, and lead generation captures.",
-      bullets: ["Audio players with Spotify preview embeds", "YouTube & Vimeo full video playback", "Collapsible multi-item folders", "Direct email newsletter subscription forms"]
+      description: "Don't just share links. Build rich interactive pages with supported media embeds, expandable folders, contact forms, and newsletter capture.",
+      bullets: ["Audio players with supported provider embeds", "YouTube and Vimeo embeds", "Collapsible multi-item folders", "Newsletter subscription forms"]
     },
     {
       icon: <Palette className="w-6 h-6 text-amber-600" />,
