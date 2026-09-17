@@ -1,4 +1,5 @@
 export * from '../shared/types/index.js';
+import type { CreatorProfile } from '../shared/types/index.js';
 
 
 export interface TemplateItem {

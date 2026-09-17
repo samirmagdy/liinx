@@ -1,6 +1,7 @@
 import {
   type CreatorProfile,
   type CreatorPage,
+  type ProfileBlock,
   type ContactInput,
   type ContactResponse
 } from '../../shared/index.js';

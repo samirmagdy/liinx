@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import { db } from '../db.js';
 import { hashPassword, comparePassword, signJwt } from '../auth.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';

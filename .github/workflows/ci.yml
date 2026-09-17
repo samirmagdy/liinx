@@ -2,53 +2,133 @@ name: CI / Production Quality Gate
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate-and-test:
-    name: Lint, Build & Comprehensive Tests
+  validate:
+    name: Validate, test, build, and inspect
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
-      - name: Checkout repository
+      - name: Clean checkout
         uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 0
 
-      - name: Setup Node.js 22
+      - name: Setup Node.js 22 with lockfile cache
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: npm
+          cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install exact dependencies
         run: npm ci
 
-      - name: Rebuild native dependencies for Linux runner
+      - name: Rebuild native dependencies for Linux
         run: npm rebuild better-sqlite3
 
-      - name: Static Type Check (tsc)
+      - name: Typecheck
         run: npm run typecheck
 
-      - name: Static Code Quality & Linting (ESLint)
+      - name: ESLint
         run: npm run lint
 
       - name: Architectural guardrails
         run: npm run architecture:check
 
-      - name: Build Production Frontend & Server Bundles
-        run: npm run build
-
-      - name: Execute Full Test Suite & Enforce Coverage (Vitest)
+      - name: Unit and integration tests
         env:
           NODE_ENV: test
-          JWT_SECRET: test_jwt_secret_ci_key_32_characters_minimum
-          INTEGRATION_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-          STRIPE_WEBHOOK_SECRET: whsec_test_secret_for_ci_suite
+          JWT_SECRET: ci-only-jwt-secret-not-for-production-2026
+          INTEGRATION_ENCRYPTION_KEY: ci-only-encryption-key-not-for-production-2026
+          STRIPE_WEBHOOK_SECRET: ci-only-webhook-secret-not-for-production-2026
+        run: npm test
+
+      - name: Coverage gate
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci-only-jwt-secret-not-for-production-2026
+          INTEGRATION_ENCRYPTION_KEY: ci-only-encryption-key-not-for-production-2026
+          STRIPE_WEBHOOK_SECRET: ci-only-webhook-secret-not-for-production-2026
         run: npm run test:coverage
 
-      - name: Verify Bundle Integrity
+      - name: Build production frontend
+        run: npm run build:client
+
+      - name: Build production server
+        run: npm run build:server
+
+      - name: Dependency vulnerability audit
+        run: npm audit --audit-level=high
+
+      - name: Bundle sanity and artifact validation
+        run: npm run verify:artifacts
+
+      - name: Build production Docker image
+        run: docker build --pull --tag liinx:ci .
+
+      - name: Verify production Docker image metadata
         run: |
-          test -f dist/index.html || (echo "dist/index.html is missing!" && exit 1)
-          test -f dist-server/server.js || (echo "dist-server/server.js is missing!" && exit 1)
-          echo "Production frontend and server assets successfully compiled and validated."
+          docker image inspect liinx:ci >/dev/null
+          test "$(docker image inspect liinx:ci --format '{{.Config.User}}')" = "" \
+            || test "$(docker image inspect liinx:ci --format '{{.Config.User}}')" = "node"
+
+  codeql:
+    name: CodeQL security analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  secret-scan:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan repository history for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import { db } from '../db.js';
 import { createId } from '../utils/ids.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
