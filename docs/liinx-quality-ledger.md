@@ -2987,3 +2987,55 @@ Baseline: branch `main`, commit `d913eec99f9abd0994c7868644c039c9d2e1d11a` at ta
 ### Next eligible prompt
 
 `55 — Developer API and key management`
+
+## Task 55 — Developer API and key management
+
+Status: VERIFIED WITHIN SCOPE
+
+Baseline: branch `main`, commit `9cc359320941abe6d0cd0fb95b78d3991dc55f83` at task start. The worktree was clean; prior Task 54 changes were preserved. Implementation commit: `40944cddc33509fa7bbf298e423b76f8a610a301` (`fix: harden developer API key lifecycle`).
+
+### Scope and changed files
+
+- `server/db.ts`: adds 90-day `expires_at` handling for API keys, upgrades legacy null-expiry rows, and adds transactional idempotency storage for API-created blocks.
+- `server/routes/apiV1.ts`: adds explicit API request rate limiting, expiry-aware key authentication/listing, page-aware block creation, paginated profile reads, idempotent retries, strict link-only v1 creation, and consistent safe error responses.
+- `src/services/api.ts`, `src/components/BuilderStudio.tsx`: expose key expiry dates in the Studio key list and API client types.
+- `tests/api_v1_task55.test.ts`: covers expiry, downgrade, foreign-profile/page boundaries, unpublished-page visibility, malformed pagination, and duplicate retries.
+
+### Findings and behavior
+
+- API keys continue to be generated once, returned once, and stored only as SHA-256 hashes. The ledger and application logs contain no generated credentials; examples use `liinx_live_your_key_here`.
+- New keys expire after 90 days. Existing null-expiry rows are assigned a 90-day expiry from their original creation time during initialization; expired keys are excluded from active-key listings and return the same safe 401 as revoked/unknown keys.
+- Revocation remains profile-scoped and deletes the key record. A key cannot delete or read another profile’s content. Downgrading the associated profile below Studio immediately returns 403 even while the key record exists.
+- API v1 scope is intentionally limited: `GET /api/v1/profile` and `POST/DELETE /api/v1/blocks`. Profile reads now include page metadata and bounded `limit`/`offset` pagination. No full REST parity with Studio pages, settings, forms, subscribers, uploads, analytics, or integrations is claimed.
+- `POST /api/v1/blocks` supports link blocks only and accepts an optional owned `pageId`. It can write to an owned unpublished page for creator workflows, but public profile routing still hides that page. Foreign pages fail without creating a block.
+- `Idempotency-Key` makes repeated block-create delivery return the original block without duplicating it. Keys are profile-bound and limited to safe 1–100 character values. The storage write and block creation occur in one SQLite transaction.
+- The public API has an operational quota of 120 requests per minute per source IP. This is an abuse boundary, not a usage or billing metric, and remains subject to the repository’s single-process SQLite deployment constraint.
+
+### Acceptance criteria
+
+- PASS — Expired, revoked, and malformed keys. Evidence: focused Task 55 tests and existing API v1 tests; expired/revoked requests return 401 with a generic safe message.
+- PASS — Wrong-profile key boundaries. Evidence: focused test cannot delete another profile’s block and foreign-page creation returns 404 without leaking ownership details.
+- PASS — Plan downgrade enforcement. Evidence: focused test downgrades a Studio profile and receives 403 on an existing otherwise-valid key.
+- PASS — Hashed storage and safe credential handling. Evidence: key hashes remain the lookup material; only the one-time creation response contains the generated key; dummy key example remains in Studio UI.
+- PASS — Malformed payloads and pagination validation. Evidence: strict link-only creation and limit/offset bounds return 400; existing shared contracts reject unsafe/unknown fields.
+- PASS — Page-aware creation and public visibility. Evidence: returned block has the selected page id; unpublished selected-page content is not returned by the public profile route.
+- PASS — Duplicate retries where relevant. Evidence: repeated `POST /api/v1/blocks` with the same `Idempotency-Key` returns 200 replay and leaves one database row.
+- PASS — Error formats and endpoint scope. Evidence: focused tests assert JSON error bodies/statuses; documentation/UI describe only implemented v1 endpoints.
+- NOT RUN — Production quota/load behavior across multiple instances, external SDK/client compatibility, and deployed API gateway enforcement. No production traffic or external client was used.
+
+### Exact validation commands and outcomes
+
+- `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `9cc359320941abe6d0cd0fb95b78d3991dc55f83`.
+- `npm run lint && DATABASE_PATH=/tmp/liinx-task55-final2-20260917.db npm test -- --run tests/api_v1_task55.test.ts tests/api_v1.test.ts tests/contracts.test.ts && git diff --check` — PASS: TypeScript check; 3 files / 15 tests against disposable SQLite storage; diff check clean.
+- `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+
+### Unresolved risks and dependencies
+
+- The 90-day expiry policy is implemented locally but is not a customer-configurable rotation policy; operators should communicate the expiry and provide a rotation path before keys lapse.
+- The rate limit is source-IP based and process/database backed. Multi-instance API scaling remains unsupported by the existing startup guard.
+- No OpenAPI document, SDK, webhook surface, page-management endpoint, or parity with all Studio mutations exists. These are intentionally outside this task.
+- Existing shared-database test fixtures can conflict with earlier ownership invariants; this task’s evidence uses disposable SQLite storage.
+
+### Next eligible prompt
+
+`56 — Arabic, English, and RTL`
