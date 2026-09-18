@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { 
-  ShieldCheck, 
   ExternalLink, 
   Lock, 
   Coins, 
