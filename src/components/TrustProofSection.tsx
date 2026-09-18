@@ -57,10 +57,10 @@ export const TrustProofSection: React.FC = () => {
     },
     {
       icon: <Lock className="w-5 h-5 text-amber-600" />,
-      title: ar ? 'أمان HTTPS تلقائي مشفر' : 'Instant Automated HTTPS',
+      title: ar ? 'ربط النطاق مع توجيه DNS' : 'Custom Domains & Guided DNS',
       description: ar
-        ? 'كل نطاق مخصص يربطه المستخدم يحصل على شهادة SSL مشفرة تلقائياً بدون أي تعقيد تقني.'
-        : 'Every custom domain connected to Liinx receives automatic, managed TLS encryption out of the box.'
+        ? 'اربط نطاقك المخصص عبر إرشادات DNS دقيقة خطوة بخطوة، مع دعم تشفير HTTPS الآمن بعد إعداد الاستضافة.'
+        : 'Connect your custom domain with guided DNS verification and secure HTTPS after hosting configuration.'
     }
   ];
 

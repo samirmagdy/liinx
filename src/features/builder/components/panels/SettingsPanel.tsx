@@ -347,8 +347,8 @@ export const SettingsPanel: React.FC = () => {
             </div>
             <p className="text-[11px] leading-relaxed text-neutral-500 pt-1">
               {profile.customDomainVerified
-                ? ui("✓ Domain connected successfully. Secure HTTPS is active and visitors will be routed to your Liinx page.")
-                : ui("3. Click 'Verify DNS' below once your record is created. Secure HTTPS is configured automatically by Liinx.")}
+                ? ui("✓ Domain connected successfully. Secure HTTPS becomes active once your hosting provider completes TLS certificate provisioning.")
+                : ui("3. Click 'Verify DNS' below once your record is created. Connect your custom domain with guided DNS verification.")}
             </p>
           </div>
 

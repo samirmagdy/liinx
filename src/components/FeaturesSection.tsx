@@ -75,11 +75,11 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
       title: isRtl ? 'ملكية رقمية تامة' : 'Own Everything',
       desc: isRtl 
         ? 'نطاقك الخاص، بياناتك في يدك، وواجهة برمجية REST تضمن استقلالك.'
-        : 'Your personal custom domain, automated SSL, raw CSV exports, and a developer REST API.',
+        : 'Your personal custom domain with guided DNS, raw CSV exports, and a developer REST API.',
       icon: ShieldCheck,
       badgeColor: 'bg-purple-100 text-purple-900 border-purple-200',
       highlights: [
-        isRtl ? 'ربط نطاق خاص (links.yourname.com) مع شهادة SSL تلقائية' : 'Custom domain with zero-downtime automated SSL',
+        isRtl ? 'ربط نطاق خاص (links.yourname.com) مع توجيه DNS وتشفير HTTPS بعد إعداد الاستضافة' : 'Custom domain support with secure HTTPS after hosting configuration',
         isRtl ? 'تصدير كامل لبيانات الروابط والزيارات بنقرة واحدة (CSV)' : 'One-click raw CSV data export with zero lock-in',
         isRtl ? 'واجهة برمجية مفتوحة (Public REST API v1)' : 'Public REST API v1 for automated builds and pipelines',
         isRtl ? 'حرية تامة في نقل المحتوى متى أردت دون عوائق' : 'Guaranteed platform portability with open schemas'

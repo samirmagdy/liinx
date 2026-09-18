@@ -545,7 +545,7 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
       expectedTarget,
       cnameRecords,
       message: isVerified
-        ? 'DNS record verified! Your custom domain is connected and secure HTTPS is active.'
+        ? `DNS record verified! Your CNAME points to ${expectedTarget}. Secure HTTPS becomes active once your hosting provider completes TLS certificate provisioning.`
         : `DNS verification pending. Point your CNAME record to ${expectedTarget} and verify again. DNS changes can take a few minutes to propagate.`
     });
   } catch (err: any) {

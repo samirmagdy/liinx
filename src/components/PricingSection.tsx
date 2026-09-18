@@ -49,7 +49,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         ? [
             'كل ما تتضمنه الخطة المجانية',
             'حتى 5 ملفات شخصية ومواقع مصغرة',
-            'نطاق مخصص مع تشفير HTTPS تلقائي',
+            'دعم النطاق المخصص مع تشفير HTTPS بعد إعداد الاستضافة',
             'إزالة شارة ليينكس بالكامل',
             'تخصيص CSS وخطوط ويب إضافية',
             'جدولة الروابط وتتبع حملات UTM',
@@ -58,7 +58,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         : [
             'Everything in Free',
             'Up to 5 profiles / mini-sites under 1 account',
-            'Custom domain with automatic HTTPS',
+            'Custom domain support with secure HTTPS after hosting configuration',
             'Remove all Liinx branding',
             'Custom CSS styling & web font injection',
             'Link scheduling & UTM campaign tracking',

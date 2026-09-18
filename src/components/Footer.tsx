@@ -52,7 +52,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <div className="flex flex-wrap items-center gap-4 pt-1">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="text-[11px] text-neutral-400">{ui("99.9% Uptime • Global Edge CDN")}</span>
+                  <span className="text-[11px] text-neutral-400">{ui("Global availability monitoring")}</span>
                 </div>
 
                 <button

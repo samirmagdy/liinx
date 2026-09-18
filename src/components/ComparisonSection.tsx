@@ -192,7 +192,7 @@ export function ComparisonSection() {
                       </div>
                     </div>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">
-                      SSL Active
+                      DNS Verified
                     </span>
                   </div>
 
@@ -240,7 +240,7 @@ export function ComparisonSection() {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{ar ? 'نطاق مخصص مع HTTPS تلقائي' : 'Custom domain with auto HTTPS'}:</strong> {ar ? 'استخدم نطاقك الخاص بالكامل (مثل links.yourdomain.com)' : 'Publish on your own domain with instant SSL verification'}</span>
+                    <span><strong>{ar ? 'نطاق مخصص مع توجيه DNS' : 'Custom domain with guided DNS'}:</strong> {ar ? 'استخدم نطاقك الخاص بالكامل (مثل links.yourdomain.com) مع دعم تشفير HTTPS بعد إعداد الاستضافة' : 'Publish on your own domain with guided DNS verification and secure HTTPS after hosting configuration'}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
