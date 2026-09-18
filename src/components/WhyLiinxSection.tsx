@@ -53,11 +53,11 @@ export const WhyLiinxSection: React.FC = () => {
   ];
 
   return (
-    <section id="why-liinx" className="marketing-section py-24 md:py-36 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-white">
+    <section id="why-liinx" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-white">
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header */}
-        <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-16">
+        <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-8">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
@@ -76,11 +76,11 @@ export const WhyLiinxSection: React.FC = () => {
 
         {/* 4 Pillars Grid */}
         <Reveal stagger>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-8">
             {engineeringCapabilities.map((item, idx) => (
               <div
                 key={idx}
-                className="motion-card p-8 rounded-3xl bg-neutral-50/80 border border-neutral-200 hover:border-neutral-300 transition-all flex flex-col justify-between"
+                className="motion-card p-6 sm:p-7 rounded-3xl bg-neutral-50/80 border border-neutral-200 hover:border-neutral-300 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
@@ -104,7 +104,7 @@ export const WhyLiinxSection: React.FC = () => {
         </Reveal>
 
         {/* Ownership Commitment Card (Issue #25) */}
-        <div className="rounded-3xl bg-[#111315] text-white p-8 sm:p-12 border border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-8 text-start">
+        <div className="rounded-3xl bg-[#111315] text-white p-6 sm:p-8 border border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6 text-start">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-800 text-amber-400 text-xs font-mono font-semibold">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />

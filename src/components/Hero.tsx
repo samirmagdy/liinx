@@ -53,16 +53,16 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
   };
 
 return (
-    <section ref={heroRef} className="hero-section marketing-hero pt-10 pb-16 md:pt-14 md:pb-20 lg:pt-16 lg:pb-24 border-b border-neutral-200 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.05),transparent)]">
+    <section ref={heroRef} className="hero-section marketing-hero pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 border-b border-neutral-200 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.05),transparent)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-14 items-start">
           
           {/* Left Column: Brand Copy & Claimer */}
-          <div className="lg:col-span-7 flex flex-col items-start text-start lg:pt-2 xl:pt-4">
+          <div className="lg:col-span-7 flex flex-col items-start text-start lg:pt-1">
             
             {/* Top Badge */}
             <div data-hero="eyebrow" className="inline-flex">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100/90 border border-neutral-200/90 text-xs font-semibold text-neutral-800 mb-5 shadow-2xs">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100/90 border border-neutral-200/90 text-xs font-semibold text-neutral-800 mb-3.5 shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                 <span>{isRtl ? 'موقع مصغر يركز على التصميم، وليس مجرد قائمة روابط' : 'A design-first mini website, not a list of links'}</span>
               </div>
@@ -70,14 +70,14 @@ return (
 
             {/* Main Headline */}
             <div>
-              <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-6 text-balance">
+              <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-4 text-balance">
                 {t.hero.headline} <span className="text-neutral-500 font-medium">{t.hero.headlineHighlight}</span>
               </h1>
             </div>
 
             {/* Subtitle - One concise benefit statement */}
             <div data-hero="copy">
-              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl lg:max-w-2xl mb-8 text-pretty">
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl lg:max-w-2xl mb-6 text-pretty">
                 {isRtl 
                   ? 'أنشئ موقعاً مصغراً فائق الأناقة لكل ما تصنعه وتشاركه وتبيعه. مع مشغلات صوت وفيديو وجدولة مواعيد ونطاق مخصص خاص بك.'
                   : 'Build a high-craft mini website for everything you make, share, and sell. Featuring inline audio players, video embeds, scheduling, and your own custom domain.'}
@@ -85,7 +85,7 @@ return (
             </div>
 
             {/* Primary Action: Claim Handle Form */}
-            <div data-hero="action" className="w-full max-w-xl lg:max-w-2xl mb-6">
+            <div data-hero="action" className="w-full max-w-xl lg:max-w-2xl mb-4">
               <form 
                 onSubmit={handleClaim}
                 className="p-1.5 bg-neutral-50 rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(24,24,23,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
@@ -223,7 +223,7 @@ return (
 
               <div 
                 dir={isProfileRtl ? 'rtl' : 'ltr'}
-                className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
+                className="relative w-full h-[590px] rounded-[36px] overflow-y-auto no-scrollbar pt-10 pb-6 px-4 sm:px-5 transition-colors duration-300"
                 style={{
                   background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
                   color: theme.textColor,

@@ -97,10 +97,10 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
   ];
 
   return (
-    <section id="pricing" className="marketing-section py-24 md:py-36 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
+    <section id="pricing" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        <Reveal distance="md" className="text-center mb-12"><div>
+        <Reveal distance="md" className="text-center mb-6"><div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             <span>{ar ? 'الأسعار' : 'Pricing'}</span>
@@ -114,7 +114,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         </div></Reveal>
 
         {/* Interval Toggle */}
-        <Reveal delay={80} distance="sm"><div className="flex justify-center mb-10">
+        <Reveal delay={80} distance="sm"><div className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
             {(['month', 'year'] as const).map(value => (
               <button
@@ -227,7 +227,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         </div></Reveal>
 
         {/* Disclaimer */}
-        <p className="mt-8 text-xs text-center text-neutral-600 max-w-lg mx-auto">
+        <p className="mt-6 text-xs text-center text-neutral-600 max-w-lg mx-auto">
           {ar ? 'تُحصّل الخطط السنوية دفعة واحدة. لا توجد تجربة مدفوعة مجانية. تُدار الاشتراكات والإلغاءات عبر Stripe.' : 'Annual plans are charged once. Paid plans have no free trial. Subscriptions and cancellations are handled through Stripe.'}
         </p>
       </div>

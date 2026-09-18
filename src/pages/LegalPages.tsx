@@ -21,7 +21,7 @@ function InformationPage({ title, icon, badge, sections }: InformationPageProps)
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar />
-      <main className="flex-1 w-full max-w-3xl mx-auto px-5 py-16 sm:py-20">
+      <main className="flex-1 w-full max-w-3xl mx-auto px-5 py-10 sm:py-12">
 
         {/* Page Header */}
         <div className="text-center mb-12">
@@ -146,7 +146,7 @@ export function ContactPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="contact" />
-      <main className="flex-1 max-w-3xl mx-auto px-6 py-16 sm:py-20">
+      <main className="flex-1 max-w-3xl mx-auto px-6 py-10 sm:py-12">
         <div className="text-center space-y-4 mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-700">
             <Mail className="w-3.5 h-3.5 text-amber-600" />

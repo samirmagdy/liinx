@@ -65,11 +65,11 @@ export const TrustProofSection: React.FC = () => {
   ];
 
   return (
-    <section id="proof" className="marketing-section py-24 md:py-36 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-neutral-50">
+    <section id="proof" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-neutral-50">
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header */}
-        <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-16">
+        <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-8">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
@@ -88,7 +88,7 @@ export const TrustProofSection: React.FC = () => {
 
         {/* Live Published Showcases (Issue #5 & #11) */}
         <Reveal stagger>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {liveShowcases.map((showcase) => (
               <div
                 key={showcase.username}
@@ -143,7 +143,7 @@ export const TrustProofSection: React.FC = () => {
         </Reveal>
 
         {/* 3 Concrete Platform Commitments (Issue #5) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {trustGuarantees.map((item, idx) => (
             <div
               key={idx}
@@ -165,7 +165,7 @@ export const TrustProofSection: React.FC = () => {
         </div>
 
         {/* Founder & Philosophy Statement */}
-        <div className="rounded-3xl bg-white border border-neutral-200 p-8 sm:p-10 max-w-4xl mx-auto shadow-xs text-start">
+        <div className="rounded-3xl bg-white border border-neutral-200 p-6 sm:p-8 max-w-4xl mx-auto shadow-xs text-start">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold font-mono">
               LX

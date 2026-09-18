@@ -116,7 +116,7 @@ function StudioPage() {
     return (
       <div className="min-h-screen flex flex-col bg-white text-neutral-900">
         <Navbar activeView="builder" />
-        <main className="flex-1 flex flex-col items-center justify-center px-4 py-16 sm:py-24 text-center animate-fade-in">
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 text-center animate-fade-in">
           <div className="w-16 h-16 rounded-3xl bg-neutral-100 border border-neutral-200/80 flex items-center justify-center mb-6 shadow-xs text-neutral-900">
             <Lock className="w-7 h-7 text-neutral-800" />
           </div>
@@ -171,7 +171,7 @@ function TemplatesPage() {
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="templates" />
-      <main className="flex-1 pt-8">
+      <main className="flex-1">
         <TemplatesSection headingLevel={1} onSelectTemplate={(p) => chooseTemplate(p, setLocation)} />
         <ComparisonSection />
       </main>
@@ -198,7 +198,7 @@ function PricingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="pricing" />
-      <main className="flex-1 pt-8">
+      <main className="flex-1">
         <PricingSection headingLevel={1} onSelectPlan={handleSelectPlan} />
         <ComparisonSection />
         <FaqSection />

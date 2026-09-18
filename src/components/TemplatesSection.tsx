@@ -23,11 +23,11 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
   useEffect(() => setIsHydrated(true), []);
 
   return (
-    <section id="templates" className="marketing-section py-24 md:py-36 border-b border-neutral-200">
+    <section id="templates" className="marketing-section py-12 md:py-16 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="mb-12">
+        <div className="mb-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
             <span>{t.templatesSection.badge}</span>

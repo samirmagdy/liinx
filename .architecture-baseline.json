@@ -756,11 +756,11 @@
       "functions": []
     },
     "src/pages/FeaturesPage.tsx": {
-      "lines": 179,
+      "lines": 177,
       "functions": [
         {
           "name": "FeaturesPage",
-          "lines": 162,
+          "lines": 160,
           "complexity": 12,
           "maxDepth": 4
         }

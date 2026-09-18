@@ -21,10 +21,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
 
   return (
     <>
-      <footer className="bg-[#111315] text-[#A1A1AA] pt-16 pb-12 text-xs border-t border-neutral-800">
+      <footer className="bg-[#111315] text-[#A1A1AA] pt-12 pb-8 text-xs border-t border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-10 pb-12 border-b border-neutral-800">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-8 pb-8 border-b border-neutral-800">
             
             {/* Brand Column (2 cols) */}
             <div className="md:col-span-2 space-y-4">
@@ -196,7 +196,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
           </div>
 
           {/* Bottom copyright row */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
             <p>© {new Date().getFullYear()} {brand.legalName}. {t.footer.rightsReserved}</p>
             <div className="flex items-center gap-4">
               <Link href="/privacy" className="hover:text-white underline-offset-2 hover:underline">{ui("Privacy controls")}</Link>

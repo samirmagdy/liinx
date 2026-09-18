@@ -96,7 +96,7 @@ export function FeaturesPage() {
       <Navbar activeView="features" />
       <main className="flex-1">
         {/* Hero Header */}
-        <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center space-y-6">
+        <section className="max-w-5xl mx-auto px-6 pt-10 pb-8 text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-800">
             <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             <span>{isRtl ? 'صفحة واحدة لكل ما تشاركه' : 'One page for everything you share'}</span>
@@ -137,7 +137,7 @@ export function FeaturesPage() {
         </section>
 
         {/* Feature Grid */}
-        <section className="max-w-6xl mx-auto px-6 py-16">
+        <section className="max-w-6xl mx-auto px-6 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {featurePillars.map((feature, idx) => (
               <div
@@ -163,9 +163,7 @@ export function FeaturesPage() {
         </section>
 
         {/* Direct Comparison Matrix */}
-        <section className="py-12 border-t border-neutral-100">
-          <ComparisonSection />
-        </section>
+        <ComparisonSection />
       </main>
       <Footer onSelectView={(v) => {
         if (v === 'home') setLocation('/');

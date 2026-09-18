@@ -23,11 +23,11 @@ export function ComparisonSection() {
   const [activeTab, setActiveTab] = useState<'both' | 'liinx' | 'generic'>('both');
 
   return (
-    <section id="comparison" className="marketing-section py-24 md:py-36 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-neutral-50/50">
+    <section id="comparison" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-neutral-50/50">
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header */}
-        <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-16">
+        <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-8">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
@@ -68,11 +68,11 @@ export function ComparisonSection() {
 
         {/* Side-by-Side Visual Comparison Grid */}
         <Reveal stagger>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start mb-8">
             
             {/* Left: Generic Link-in-Bio */}
             <div
-              className={`rounded-3xl border border-neutral-300 bg-white p-6 sm:p-8 shadow-xs flex flex-col justify-between transition-all ${
+              className={`rounded-3xl border border-neutral-300 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between transition-all ${
                 activeTab === 'liinx' ? 'hidden md:flex' : 'flex'
               }`}
             >
@@ -145,7 +145,7 @@ export function ComparisonSection() {
 
             {/* Right: Liinx Mini-Website */}
             <div
-              className={`rounded-3xl border-2 border-neutral-900 bg-white p-6 sm:p-8 shadow-xl flex flex-col justify-between relative transition-all ${
+              className={`rounded-3xl border-2 border-neutral-900 bg-white p-5 sm:p-6 shadow-xl flex flex-col justify-between relative transition-all ${
                 activeTab === 'generic' ? 'hidden md:flex' : 'flex'
               }`}
             >
@@ -254,7 +254,7 @@ export function ComparisonSection() {
         </Reveal>
 
         {/* Switch from Linktree Migration Banner */}
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-white border border-amber-300 flex items-center justify-center shrink-0 shadow-xs">
               <Download className="w-5 h-5 text-amber-700" />

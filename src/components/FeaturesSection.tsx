@@ -88,11 +88,11 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
   ];
 
   return (
-    <section id="features" className="marketing-section py-24 md:py-32 bg-neutral-50/50 border-t border-b border-neutral-100">
+    <section id="features" className="marketing-section py-12 md:py-16 bg-neutral-50/50 border-t border-b border-neutral-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <Reveal distance="md" className="max-w-3xl mb-16 text-start">
+        <Reveal distance="md" className="max-w-3xl mb-8 text-start">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-4 tracking-wider">
               <span>{isRtl ? 'الأعمدة الأربعة لنظام لينكس' : 'THE 4 PILLARS OF LIINX'}</span>
@@ -109,7 +109,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
         </Reveal>
 
         {/* 4 Pillars Interactive Tabs / Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           {pillars.map((p) => {
             const Icon = p.icon;
             const isSelected = activePillar === p.id;
@@ -146,7 +146,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           const CurrentIcon = current.icon;
 
           return (
-            <div className="mb-20 rounded-3xl bg-white border border-neutral-200/80 p-8 sm:p-10 shadow-sm">
+            <div className="mb-10 rounded-3xl bg-white border border-neutral-200/80 p-6 sm:p-8 shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                 
                 <div className="lg:col-span-7 space-y-6 text-start">
@@ -276,7 +276,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
         })()}
 
         {/* 3 Steps: From account to published page */}
-        <div className="mb-16 rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8">
+        <div className="mb-10 rounded-3xl border border-neutral-200 bg-white p-5 sm:p-6">
           <div className="mb-6 text-start">
             <p className="text-xs font-mono font-bold uppercase tracking-wider text-amber-700">{isRtl ? 'كيف تبدأ' : 'Fast onboarding'}</p>
             <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-neutral-900">{isRtl ? 'من الحساب إلى الصفحة المنشورة في ثلاث خطوات.' : 'From account to published mini website in three steps.'}</h3>
@@ -297,7 +297,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
         </div>
 
         {/* Bottom CTA bar */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-neutral-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 text-start">
+        <div className="p-6 sm:p-8 rounded-3xl bg-neutral-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6 text-start">
           <div>
             <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-balance">
               {isRtl ? 'جاهز لامتلاك واجهتك الرقمية الحقيقية؟' : 'Ready to upgrade from a plain link list?'}

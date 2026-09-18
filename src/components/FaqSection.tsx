@@ -41,11 +41,11 @@ export const FaqSection: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="marketing-section py-24 md:py-36 border-b border-neutral-200">
+    <section id="faq" className="marketing-section py-12 md:py-16 border-b border-neutral-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="text-center mb-14">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
             <span>{t.faqSection.badge}</span>
           </div>
