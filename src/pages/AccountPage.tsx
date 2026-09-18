@@ -86,8 +86,7 @@ export function AccountPage() {
         .finally(() => setProfilesLoading(false));
       // Fetch API keys if on Studio plan
       if (profile?.plan === 'studio') {
-        fetch('/api/studio/api-keys', { credentials: 'include' })
-          .then(r => r.json())
+        api.studio.getApiKeys()
           .then(data => { if (data.keys) setApiKeys(data.keys); })
           .catch(() => {});
       }
@@ -136,19 +135,12 @@ export function AccountPage() {
     if (!newKeyName.trim()) return;
     setKeyLoading(true);
     try {
-      const res = await fetch('/api/studio/api-keys', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ name: newKeyName.trim() })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create API key');
+      const data = await api.studio.createApiKey(newKeyName.trim());
       setGeneratedKey(data.apiKey);
       setApiKeys(prev => [data.key, ...prev]);
       setNewKeyName('');
     } catch (err: any) {
-      alert(err.message);
+      alert(err.message || 'Failed to create API key');
     } finally {
       setKeyLoading(false);
     }
@@ -157,13 +149,8 @@ export function AccountPage() {
   const handleRevokeApiKey = async (keyId: string) => {
     if (!confirm(ar ? 'هل أنت متأكد من إلغاء هذا المفتاح؟' : 'Are you sure you want to revoke this API key?')) return;
     try {
-      const res = await fetch(`/api/studio/api-keys/${keyId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      if (res.ok) {
-        setApiKeys(prev => prev.filter(k => k.id !== keyId));
-      }
+      await api.studio.revokeApiKey(keyId);
+      setApiKeys(prev => prev.filter(k => k.id !== keyId));
     } catch {
       alert(ar ? 'تعذر إلغاء المفتاح' : 'Failed to revoke API key');
     }
