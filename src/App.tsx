@@ -32,6 +32,7 @@ import * as Sentry from '@sentry/react';
 
 function HomePage() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   const handleClaimUsername = (handle: string) => {
     setLocation(`/register?username=${encodeURIComponent(handle)}`);
@@ -40,8 +41,6 @@ function HomePage() {
   const handleOpenStudio = () => {
     setLocation('/studio');
   };
-
-  const { user } = useAuth();
 
   const handleSelectTemplate = (profile: CreatorProfile) => {
     const theme = encodeURIComponent(profile.themeId);

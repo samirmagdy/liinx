@@ -17,7 +17,7 @@
   ],
   "files": {
     "src/App.tsx": {
-      "lines": 367,
+      "lines": 369,
       "functions": []
     },
     "src/animations/gsap.ts": {
@@ -99,18 +99,22 @@
       ]
     },
     "src/components/Hero.tsx": {
-      "lines": 267,
+      "lines": 257,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 242,
-          "complexity": 21,
+          "lines": 231,
+          "complexity": 26,
           "maxDepth": 2
         }
       ]
     },
     "src/components/HeroFeatureShowcase.tsx": {
       "lines": 125,
+      "functions": []
+    },
+    "src/components/HeroPreviewControls.tsx": {
+      "lines": 82,
       "functions": []
     },
     "src/components/LiinxLogo.tsx": {
@@ -141,12 +145,12 @@
       "functions": []
     },
     "src/components/Navbar.tsx": {
-      "lines": 292,
+      "lines": 286,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 163,
-          "complexity": 15,
+          "lines": 157,
+          "complexity": 14,
           "maxDepth": 2
         }
       ]
@@ -156,25 +160,19 @@
       "functions": []
     },
     "src/components/PhonePreview.tsx": {
-      "lines": 754,
+      "lines": 203,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 707,
-          "complexity": 91,
-          "maxDepth": 5
+          "lines": 178,
+          "complexity": 29,
+          "maxDepth": 4
         },
         {
           "name": "renderProfileContent",
-          "lines": 589,
-          "complexity": 61,
-          "maxDepth": 5
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 449,
-          "complexity": 45,
-          "maxDepth": 5
+          "lines": 103,
+          "complexity": 13,
+          "maxDepth": 2
         }
       ]
     },
@@ -261,6 +259,31 @@
     },
     "src/components/motion/Reveal.tsx": {
       "lines": 27,
+      "functions": []
+    },
+    "src/components/phone-preview/PhoneBlocksList.tsx": {
+      "lines": 516,
+      "functions": [
+        {
+          "name": "<anonymous>",
+          "lines": 481,
+          "complexity": 59,
+          "maxDepth": 5
+        },
+        {
+          "name": "<anonymous>",
+          "lines": 440,
+          "complexity": 51,
+          "maxDepth": 5
+        }
+      ]
+    },
+    "src/components/phone-preview/PhoneProfileHeader.tsx": {
+      "lines": 68,
+      "functions": []
+    },
+    "src/components/phone-preview/PhoneSocialsRow.tsx": {
+      "lines": 60,
       "functions": []
     },
     "src/context/AuthContext.tsx": {
@@ -760,12 +783,12 @@
       "functions": []
     },
     "src/pages/AccountPage.tsx": {
-      "lines": 673,
+      "lines": 660,
       "functions": [
         {
           "name": "AccountPage",
-          "lines": 646,
-          "complexity": 136,
+          "lines": 633,
+          "complexity": 134,
           "maxDepth": 4
         }
       ]

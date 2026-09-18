@@ -1,37 +1,15 @@
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { type CreatorProfile, type ThemeConfig, type ProfileBlock } from '../types';
-import { brand } from '../config/brand';
 import { LoadingLogo } from '../components/LoadingLogo';
 import { 
   CheckCircle2, 
-  ExternalLink, 
-  Play, 
-  Pause, 
-  ChevronDown, 
-  ChevronUp, 
-  Send, 
-  Instagram, 
-  Twitter, 
-  Github, 
-  Mail, 
-  Youtube, 
-  Linkedin,
-  Disc,
-  Share2,
-  Music2,
-  MessageCircle
+  Share2
 } from 'lucide-react';
-import { 
-  getSpotifyEmbedUrl, 
-  getYouTubeEmbedUrl, 
-  getVimeoEmbedUrl, 
-  getSoundCloudEmbedUrl, 
-  getAppleMusicEmbedUrl, 
-  isDirectAudioFile, 
-  isDirectVideoFile 
-} from '../utils/mediaEmbeds';
-import { getAccessibleTextColor, getBorderColor, getThemeBackground, resolveTheme } from '../utils/colorContrast';
+import { getBorderColor, getThemeBackground, resolveTheme } from '../utils/colorContrast';
+import { PhoneProfileHeader } from './phone-preview/PhoneProfileHeader';
+import { PhoneSocialsRow } from './phone-preview/PhoneSocialsRow';
+import { PhoneBlocksList } from './phone-preview/PhoneBlocksList';
 
 interface PhonePreviewProps {
   profile: CreatorProfile;
@@ -57,60 +35,16 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   const { tr: ui } = useUiLanguage();
   const theme = resolveTheme(profile.themeId, customTheme);
   const themeBackground = getThemeBackground(theme);
-  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
-    'b3': true
-  });
-  const [newsletterEmail, setNewsletterEmail] = useState('');
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [previewNotice, setPreviewNotice] = useState<string | null>(null);
   const [footerLogoFailed, setFooterLogoFailed] = useState(false);
   const [footerLogoLoading, setFooterLogoLoading] = useState(false);
-
-  const toggleFolder = (folderId: string) => {
-    setOpenFolders(prev => ({
-      ...prev,
-      [folderId]: !prev[folderId]
-    }));
-  };
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail.trim()) return;
-    setPreviewNotice(ui('Interactive preview only. Open the live page to subscribe.'));
-    setTimeout(() => setPreviewNotice(null), 2500);
-  };
 
   const handleShare = async () => {
     try { await navigator.clipboard.writeText(window.location.origin + '/@' + profile.username); }
     catch { return; }
     setCopiedNotification(true);
     setTimeout(() => setCopiedNotification(false), 2000);
-  };
-
-  const getRadiusClass = (radius: ThemeConfig['cardRadius'], isComplex: boolean = false) => {
-    switch (radius) {
-      case 'none': return 'rounded-none';
-      case 'md': return 'rounded-xl';
-      case 'xl': return 'rounded-2xl';
-      case 'full': return isComplex ? 'rounded-2xl' : 'rounded-full';
-      default: return 'rounded-2xl';
-    }
-  };
-
-  const renderSocialIcon = (platform: string) => {
-    switch (platform) {
-      case 'instagram': return <Instagram className="w-4 h-4" />;
-      case 'twitter': return <Twitter className="w-4 h-4" />;
-      case 'youtube': return <Youtube className="w-4 h-4" />;
-      case 'spotify': return <Disc className="w-4 h-4" />;
-      case 'github': return <Github className="w-4 h-4" />;
-      case 'linkedin': return <Linkedin className="w-4 h-4" />;
-      case 'email': return <Mail className="w-4 h-4" />;
-      case 'whatsapp': return <MessageCircle className="w-4 h-4 text-emerald-500" />;
-      default: return <ExternalLink className="w-4 h-4" />;
-    }
   };
 
   const isArabicText = (text?: string) => /[\u0600-\u06FF]/.test(text || '');
@@ -196,542 +130,30 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
         )}
 
         {/* Header Profile Section */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative mb-3">
-            <img 
-              src={profile.avatarUrl} 
-              alt={profile.displayName}
-              className="w-20 h-20 rounded-full object-cover shadow-sm ring-2 ring-white/20"
-              referrerPolicy="no-referrer"
-            />
-            {profile.verified && (
-              <div 
-                className="absolute bottom-0 end-0 p-1 rounded-full text-white shadow-sm"
-                style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
-                title={ui("Verified Creator")}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 fill-current" style={{ color: getAccessibleTextColor(theme.accentColor) }} />
-              </div>
-            )}
-          </div>
+        <PhoneProfileHeader
+          profile={profile}
+          theme={theme}
+          highlightedFeatureId={highlightedFeatureId}
+        />
 
-          <h2 className="text-xl font-bold tracking-tight mb-1 flex items-center justify-center gap-1.5 text-balance">
-            <span>{profile.displayName}</span>
-          </h2>
-          
-          <p 
-            data-feature="domain"
-            className={`text-[11px] font-mono mb-2.5 px-2.5 py-1 rounded-full transition-all duration-300 ${
-              highlightedFeatureId === 'domain'
-                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-2 ring-amber-500 font-bold scale-105 shadow-sm'
-                : ''
-            }`}
-            style={{ color: highlightedFeatureId === 'domain' ? undefined : theme.subtextColor }}
-          >
-            {brand.domain}/@{profile.username}
-          </p>
-
-          <p 
-            className="text-xs max-w-[280px] leading-relaxed mb-4 text-pretty"
-            style={{ color: theme.subtextColor }}
-          >
-            {profile.bio}
-          </p>
-
-          {/* Social Icons Row */}
-          {Array.isArray(profile.socials) && profile.socials.length > 0 && (
-            <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
-              {profile.socials.map((social, idx) => (
-                <a
-                  key={idx}
-                  href={social.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-2 rounded-full transition-transform hover:scale-110 active:scale-95 border focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
-                  style={{
-                    backgroundColor: theme.cardBg,
-                    borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.06)'),
-                    color: theme.cardText
-                  }}
-                  title={social.platform}
-                >
-                  {renderSocialIcon(social.platform)}
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Social Icons Row */}
+        <PhoneSocialsRow
+          socials={profile.socials}
+          theme={theme}
+        />
 
         {/* Profile Blocks */}
-        <div className="space-y-3 mb-8">
-          {(Array.isArray(profile.blocks) ? profile.blocks : []).map((block) => {
-            const isBlockHighlighted = (
-              (block.type === 'booking' && highlightedFeatureId === 'booking') ||
-              (block.type === 'audio' && highlightedFeatureId === 'audio') ||
-              (block.type === 'folder' && highlightedFeatureId === 'folders')
-            );
-            const highlightClass = isBlockHighlighted 
-              ? 'ring-2 ring-amber-500 shadow-lg shadow-amber-500/20 scale-[1.02] transition-all duration-300' 
-              : 'transition-all duration-300';
-
-            if (block.type === 'booking') {
-              return (
-                <div key={block.id} data-feature="booking" className={highlightClass}>
-                  <BookingCard block={block} theme={theme} previewOnly={!interactive} />
-                </div>
-              );
-            }
-            if (block.type === 'link') {
-              const isComplexLink = Boolean(block.subtitle);
-              const isPill = theme.cardRadius === 'full' && !isComplexLink;
-              return (
-                <div
-                  key={block.id}
-                  onClick={() => onLinkClick?.(block)}
-                  className={`group relative ${isPill ? 'px-5 py-3.5' : 'p-3.5'} transition-shadow duration-200 cursor-pointer flex items-center justify-between gap-3 shadow-xs hover:shadow-md hover:-translate-y-0.5 ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
-                  style={{
-                    backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
-                    border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
-                    color: theme.cardText
-                  }}
-                >
-                  <div className="flex-1 min-w-0" dir="auto">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-semibold text-xs tracking-tight truncate" dir="auto">
-                        {block.title}
-                      </span>
-                      {block.badge && (
-                        <span 
-                          className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase shrink-0"
-                          style={{ 
-                            backgroundColor: theme.accentColor, 
-                            color: getAccessibleTextColor(theme.accentColor)
-                          }}
-                        >
-                          {block.badge}
-                        </span>
-                      )}
-                    </div>
-                    {block.subtitle && (
-                      <p className="text-[11px] truncate" style={{ color: theme.subtextColor }} dir="auto">
-                        {block.subtitle}
-                      </p>
-                    )}
-                  </div>
-                  <div className="p-1 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform shrink-0">
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              );
-            }
-
-            if (block.type === 'header') {
-              return (
-                <div key={block.id} className="pt-3 pb-1 text-center" dir="auto">
-                  <h3 className="text-xs font-bold uppercase tracking-widest" dir="auto">
-                    {block.title}
-                  </h3>
-                </div>
-              );
-            }
-
-            if (block.type === 'audio') {
-              const spotifyEmbed = getSpotifyEmbedUrl(block.audioUrl);
-              const soundCloudEmbed = getSoundCloudEmbedUrl(block.audioUrl);
-              const appleMusicEmbed = getAppleMusicEmbedUrl(block.audioUrl);
-              const directAudio = isDirectAudioFile(block.audioUrl);
-
-              if (spotifyEmbed) {
-                return (
-                  <div
-                    key={block.id}
-                    data-feature="audio"
-                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
-                    style={{
-                      backgroundColor: theme.cardBg,
-                      border: theme.cardBorder,
-                      color: theme.cardText
-                    }}
-                  >
-                    <iframe
-                      src={spotifyEmbed}
-                      width="100%"
-                      height="152"
-                      frameBorder="0"
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      loading="lazy"
-                      className="w-full border-0 block"
-                      title={block.title}
-                    />
-                  </div>
-                );
-              }
-
-              if (soundCloudEmbed) {
-                return (
-                  <div
-                    key={block.id}
-                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
-                    style={{
-                      backgroundColor: theme.cardBg,
-                      border: theme.cardBorder,
-                      color: theme.cardText
-                    }}
-                  >
-                    <iframe
-                      width="100%"
-                      height="120"
-                      scrolling="no"
-                      frameBorder="no"
-                      allow="autoplay"
-                      src={soundCloudEmbed}
-                      className="w-full border-0 block"
-                      title={block.title}
-                    />
-                  </div>
-                );
-              }
-
-              if (appleMusicEmbed) {
-                return (
-                  <div
-                    key={block.id}
-                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
-                    style={{
-                      backgroundColor: theme.cardBg,
-                      border: theme.cardBorder,
-                      color: theme.cardText
-                    }}
-                  >
-                    <iframe
-                      allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-                      frameBorder="0"
-                      height="150"
-                      className="w-full border-0 block"
-                      sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-                      src={appleMusicEmbed}
-                      title={block.title}
-                    />
-                  </div>
-                );
-              }
-
-              return (
-                <div
-                  key={block.id}
-                  data-feature="audio"
-                  className={`p-3.5 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
-                  style={{
-                    backgroundColor: theme.cardBg,
-                    border: theme.cardBorder,
-                    color: theme.cardText
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 shadow-xs">
-                      <img 
-                        src={block.coverUrl} 
-                        alt={block.title}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                      {directAudio ? (
-                        <button
-                          onClick={() => {
-                            const audioEl = document.getElementById(`phone-audio-${block.id}`) as HTMLAudioElement;
-                            if (audioEl) {
-                              if (audioEl.paused) {
-                                audioEl.play();
-                                setIsPlayingAudio(true);
-                              } else {
-                                audioEl.pause();
-                                setIsPlayingAudio(false);
-                              }
-                            }
-                          }}
-                          className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          aria-label={isPlayingAudio ? ui('Pause track') : ui('Play track')}
-                        >
-                          {isPlayingAudio ? (
-                            <Pause className="w-4 h-4 fill-white text-white" />
-                          ) : (
-                            <Play className="w-4 h-4 fill-white text-white ml-0.5" />
-                          )}
-                        </button>
-                      ) : (
-                        <a
-                          href={block.audioUrl || `/r/${block.id}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          aria-label={ui("Listen track")}
-                        >
-                          <Play className="w-4 h-4 fill-white text-white ml-0.5" />
-                        </a>
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0" dir="auto">
-                      <div className="flex items-center gap-1.5 text-[10px] mb-0.5" style={{ color: theme.subtextColor }}>
-                        <Music2 className="w-3 h-3 text-emerald-500 shrink-0" />
-                        <span className="uppercase font-mono tracking-wider font-semibold">{ui("Audio Track")}</span>
-                      </div>
-                      <p className="text-xs font-bold truncate" dir="auto">{block.title}</p>
-                      <p className="text-[11px] truncate" style={{ color: theme.subtextColor }} dir="auto">{block.artist}</p>
-                    </div>
-
-                    {isPlayingAudio && (
-                      <div className="flex items-end gap-0.5 h-5 px-1 shrink-0">
-                        <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_100ms] h-4" />
-                        <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_300ms] h-5" />
-                        <span className="w-1 bg-emerald-500 rounded-full animate-[bounce_1s_infinite_200ms] h-3" />
-                      </div>
-                    )}
-                  </div>
-
-                  {directAudio && (
-                    <audio
-                      id={`phone-audio-${block.id}`}
-                      src={block.audioUrl}
-                      controls
-                      className="w-full mt-2.5 h-7"
-                      onPlay={() => setIsPlayingAudio(true)}
-                      onPause={() => setIsPlayingAudio(false)}
-                      onEnded={() => setIsPlayingAudio(false)}
-                    />
-                  )}
-                </div>
-              );
-            }
-
-            if (block.type === 'folder') {
-              const isOpen = openFolders[block.id];
-              return (
-                <div
-                  key={block.id}
-                  data-feature="folders"
-                  className={`overflow-hidden transition-shadow duration-200 border shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
-                  style={{
-                    backgroundColor: theme.cardBg,
-                    border: theme.cardBorder,
-                    color: theme.cardText
-                  }}
-                >
-                  <button
-                    onClick={() => toggleFolder(block.id)}
-                    className="w-full p-3.5 flex items-center justify-between text-left transition-opacity hover:opacity-90 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 gap-2"
-                  >
-                    <div className="min-w-0 flex-1" dir="auto">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-xs truncate" dir="auto">{block.title}</span>
-                        <span
-                          className="text-[9px] px-1.5 py-0.5 rounded-full font-mono shrink-0"
-                          style={{ backgroundColor: theme.isDark ? 'rgba(255,255,255,0.12)' : '#F5F5F5', color: theme.cardText }}
-                        >
-                          {block.items.length} {ui("items")}</span>
-                      </div>
-                      {block.subtitle && (
-                        <p className="text-[10px] truncate mt-0.5 text-pretty" style={{ color: theme.subtextColor }} dir="auto">{block.subtitle}</p>
-                      )}
-                    </div>
-                    <div className="p-1 rounded-full opacity-60 shrink-0">
-                      {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </div>
-                  </button>
-
-                  {isOpen && (
-                    <div className="px-3 pb-3 pt-1 space-y-1.5 border-t border-neutral-200 dark:border-white/10">
-                      {block.items.map((item) => (
-                        <a
-                          key={item.id}
-                          href={item.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="p-2.5 rounded-xl block transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-[11px] font-medium group-hover:underline truncate" dir="auto">{item.title}</span>
-                            <ExternalLink className="w-3 h-3 opacity-40 group-hover:opacity-100 shrink-0" />
-                          </div>
-                          {item.subtitle && (
-                            <p className="text-[10px] truncate mt-0.5" style={{ color: theme.subtextColor }} dir="auto">{item.subtitle}</p>
-                          )}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            if (block.type === 'video') {
-              const ytEmbed = getYouTubeEmbedUrl(block.videoUrl);
-              const vimeoEmbed = getVimeoEmbedUrl(block.videoUrl);
-              const directVideo = isDirectVideoFile(block.videoUrl);
-              const isPlaying = activeVideoId === block.id;
-
-              return (
-                <div
-                  key={block.id}
-                  className={`overflow-hidden transition-shadow shadow-xs group ${getRadiusClass(theme.cardRadius, true)}`}
-                  style={{
-                    backgroundColor: theme.cardBg,
-                    border: theme.cardBorder,
-                    color: theme.cardText
-                  }}
-                >
-                  <div className="relative aspect-video w-full overflow-hidden bg-black">
-                    {isPlaying && ytEmbed ? (
-                      <iframe
-                        src={ytEmbed}
-                        title={block.title}
-                        className="w-full h-full border-0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
-                    ) : isPlaying && vimeoEmbed ? (
-                      <iframe
-                        src={vimeoEmbed}
-                        title={block.title}
-                        className="w-full h-full border-0"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : isPlaying && directVideo ? (
-                      <video
-                        src={block.videoUrl}
-                        controls
-                        autoPlay
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (ytEmbed || vimeoEmbed || directVideo) {
-                            setActiveVideoId(block.id);
-                          } else {
-                            window.open(block.videoUrl || `/r/${block.id}`, '_blank', 'noreferrer');
-                          }
-                        }}
-                        className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
-                        aria-label={`${ui('Play track')} ${block.title}`}
-                      >
-                        <img 
-                          src={block.thumbnailUrl} 
-                          alt={block.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="w-10 h-10 rounded-full bg-red-700 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <Play className="w-4 h-4 fill-white ml-0.5" />
-                          </div>
-                        </div>
-                      </button>
-                    )}
-                  </div>
-                  <div className="p-3" dir="auto">
-                    <p className="text-xs font-semibold line-clamp-1" dir="auto">{block.title}</p>
-                  </div>
-                </div>
-              );
-            }
-
-            if (block.type === 'instagram_grid') {
-              return (
-                <div
-                  key={block.id}
-                  className={`p-3 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
-                  style={{
-                    backgroundColor: theme.cardBg,
-                    border: theme.cardBorder,
-                    color: theme.cardText
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-2" dir="auto">
-                    <span className="text-xs font-semibold" dir="auto">{block.title}</span>
-                    <span className="text-[10px] font-mono opacity-60 shrink-0">{block.handle}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {block.posts.map(post => (
-                      <div key={post.id} className="relative aspect-square rounded-lg overflow-hidden group">
-                        <img 
-                          src={post.imageUrl} 
-                          alt={ui("Post")} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-mono">
-                          ♥ {post.likes}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-
-            if (block.type === 'newsletter') {
-              return (
-                <div
-                  key={block.id}
-                  className={`p-4 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
-                  style={{
-                    backgroundColor: theme.cardBg,
-                    border: theme.cardBorder,
-                    color: theme.cardText
-                  }}
-                >
-                  <h3 className="text-xs font-bold mb-1 flex items-center gap-1.5" dir="auto">
-                    <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: theme.accentColor }} />
-                    <span dir="auto">{block.title}</span>
-                  </h3>
-                  <p className="text-[11px] mb-3 leading-relaxed text-pretty" style={{ color: theme.subtextColor }} dir="auto">
-                    {block.description}
-                  </p>
-
-                  <form onSubmit={handleSubscribe} className="space-y-2">
-                      <input
-                        id={`phone-preview-newsletter-email-${block.id}`}
-                        name="email"
-                        autoComplete="email"
-                        aria-label={ui('Email address')}
-                        type="email"
-                        value={newsletterEmail}
-                        onChange={(e) => setNewsletterEmail(e.target.value)}
-                        placeholder="your@email.com…"
-                        className="w-full px-3 py-2 text-xs rounded-xl border outline-none transition-colors focus:ring-1 focus:ring-neutral-900/10"
-                        style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)'), color: theme.cardText }}
-                        required
-                        spellCheck={false}
-                        dir="ltr"
-                      />
-                      <button
-                        type="submit"
-                        className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                        style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
-                      >
-                        <span dir="auto">{block.buttonText}</span>
-                        <Send className="w-3 h-3 shrink-0" />
-                      </button>
-                    </form>
-                </div>
-              );
-            }
-
-            if (block.type === 'content_gate') {
-              const gate = block as ProfileBlock & { body?: string; locked?: boolean };
-              return <div key={block.id} className={`p-3.5 shadow-xs ${getRadiusClass(theme.cardRadius, true)}`} style={{ backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText }}>
-                <p className="text-xs font-bold" dir="auto">{block.title}</p>
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.subtextColor }}>{ui('Protected text preview')}</p>
-                {gate.locked ? <p className="mt-2 whitespace-pre-wrap break-words text-xs" dir="auto">{gate.body || ui('Protected text is empty.')}</p> : <p className="mt-2 text-xs" style={{ color: theme.subtextColor }}>{ui('This gate is not configured yet.')}</p>}
-              </div>;
-            }
-
-            return null;
-          })}
-        </div>
+        <PhoneBlocksList
+          blocks={profile.blocks}
+          theme={theme}
+          interactive={interactive}
+          onLinkClick={onLinkClick}
+          highlightedFeatureId={highlightedFeatureId}
+          onSubscribeNotice={(msg) => {
+            setPreviewNotice(msg);
+            setTimeout(() => setPreviewNotice(null), 2500);
+          }}
+        />
 
         {profile.footerLogoUrl && (
           <div className="pt-2 text-center">
@@ -761,7 +183,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           </div>
         )}
 
-        {/* LIINX Branding Footer Badge - omitted when white-labeled on Pro/Studio plans */}
+        {/* LIINX Branding Footer Badge */}
         {!(profile.plan && profile.plan !== 'free' && profile.hideBranding) && (
           <div className="pt-2 pb-6 text-center">
             <a 
@@ -778,4 +200,3 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
     );
   }
 };
-import { BookingCard } from './BookingCard';
