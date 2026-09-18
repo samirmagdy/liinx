@@ -75,22 +75,22 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
       price: paidPlans.studio[interval],
       features: ar
         ? [
-            'كل ميزات خطة Pro المتقدمة',
-            'إدارة حتى 25 ملفاً شخصياً مستقلاً',
-            'مفاتيح واجهة برمجية كاملة (REST API v1)',
-            'نطاق مخصص لكل ملف وموقع مصغر',
-            'تصدير غير محدود لبيانات المشتركين (CSV)',
-            'مساحة عمل مجهزة لفرق العمل المتعددة',
-            'أولوية الدعم الفني والويبهوكس'
+            'كل ميزات خطة Pro',
+            'إدارة حتى 25 ملفاً شخصياً وموقعاً مصغراً',
+            'الوصول الكامل لواجهة REST API v1',
+            'إدارة مفاتيح API',
+            'دعم النطاق المخصص لكل ملف',
+            'تصدير بيانات المشتركين (CSV)',
+            'تصدير ردود النماذج (CSV)'
           ]
         : [
             'Everything in Pro',
-            'Up to 25 distinct profiles & mini-sites',
-            'Public REST API keys (/api/v1 access)',
-            'Custom domain support on every profile',
-            'Unlimited CSV export for subscribers & leads',
-            'Team-ready multi-brand workspace',
-            'Priority technical support & webhooks'
+            'Up to 25 profiles & mini-sites',
+            'REST API v1 access',
+            'API-key management',
+            'Custom domain support per profile',
+            'Subscriber CSV export',
+            'Form-response CSV export'
           ],
       highlight: false,
     },

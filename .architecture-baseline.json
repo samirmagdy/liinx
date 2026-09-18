@@ -71,18 +71,18 @@
       "functions": []
     },
     "src/components/FeaturesSection.tsx": {
-      "lines": 322,
+      "lines": 323,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 303,
-          "complexity": 49,
+          "lines": 304,
+          "complexity": 52,
           "maxDepth": 1
         },
         {
           "name": "<anonymous>",
-          "lines": 133,
-          "complexity": 8,
+          "lines": 134,
+          "complexity": 11,
           "maxDepth": 1
         }
       ]

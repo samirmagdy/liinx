@@ -230,7 +230,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                     <div className="space-y-4">
                       <div className="flex items-center justify-between pb-2 border-b border-neutral-800 text-neutral-400 font-mono text-[11px]">
                         <span>traffic_intel</span>
-                        <span className="text-emerald-400 text-[10px]">100% Private</span>
+                        <span className="text-emerald-400 text-[10px]">{isRtl ? 'تحليلات الطرف الأول' : 'First-Party Only'}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="p-3 bg-neutral-800/90 rounded-xl">
@@ -244,8 +244,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                           <p className="text-[10px] text-neutral-400 font-mono mt-1">100% creator cut</p>
                         </div>
                       </div>
-                      <div className="p-2.5 bg-neutral-800/60 rounded-xl text-[10px] text-neutral-400 font-mono">
-                        No trackers • No cross-site profiling • GDPR compliant
+                      <div className="p-2.5 bg-neutral-800/60 rounded-xl text-[10px] text-neutral-400 font-mono space-y-1">
+                        <p>{isRtl ? 'تحليلات Liinx للطرف الأول خالية تماماً من ملفات تعريف الارتباط' : 'Liinx first-party analytics are cookie-free'}</p>
+                        <p className="text-neutral-500">{isRtl ? 'يمكن لصاحب الصفحة تفعيل تحليلات اختيارية من أطراف ثالثة مثل GA4 و Meta Pixel' : 'Optional third-party analytics such as GA4 and Meta Pixel can be enabled by the creator.'}</p>
                       </div>
                     </div>
                   )}
