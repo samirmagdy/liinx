@@ -53,16 +53,16 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
   };
 
 return (
-    <section ref={heroRef} className="hero-section marketing-hero py-16 md:py-24 lg:py-32 border-b border-neutral-200">
+    <section ref={heroRef} className="hero-section marketing-hero pt-10 pb-16 md:pt-14 md:pb-20 lg:pt-16 lg:pb-24 border-b border-neutral-200 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.05),transparent)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-start">
           
           {/* Left Column: Brand Copy & Claimer */}
-          <div className="lg:col-span-7 flex flex-col items-start text-start">
+          <div className="lg:col-span-7 flex flex-col items-start text-start lg:pt-2 xl:pt-4">
             
             {/* Top Badge */}
             <div data-hero="eyebrow" className="inline-flex">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-800 mb-5">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100/90 border border-neutral-200/90 text-xs font-semibold text-neutral-800 mb-5 shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                 <span>{isRtl ? 'موقع مصغر يركز على التصميم، وليس مجرد قائمة روابط' : 'A design-first mini website, not a list of links'}</span>
               </div>
@@ -77,7 +77,7 @@ return (
 
             {/* Subtitle - One concise benefit statement */}
             <div data-hero="copy">
-              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl mb-8 text-pretty">
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl lg:max-w-2xl mb-8 text-pretty">
                 {isRtl 
                   ? 'أنشئ موقعاً مصغراً فائق الأناقة لكل ما تصنعه وتشاركه وتبيعه. مع مشغلات صوت وفيديو وجدولة مواعيد ونطاق مخصص خاص بك.'
                   : 'Build a high-craft mini website for everything you make, share, and sell. Featuring inline audio players, video embeds, scheduling, and your own custom domain.'}
@@ -85,7 +85,7 @@ return (
             </div>
 
             {/* Primary Action: Claim Handle Form */}
-            <div data-hero="action" className="w-full max-w-xl mb-6">
+            <div data-hero="action" className="w-full max-w-xl lg:max-w-2xl mb-6">
               <form 
                 onSubmit={handleClaim}
                 className="p-1.5 bg-neutral-50 rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(24,24,23,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
@@ -156,7 +156,7 @@ return (
           <div className="lg:col-span-5 flex flex-col items-center">
             
             {/* Interactive Selector Bar */}
-            <div data-hero="controls" className="w-full max-w-[380px] mb-6"><div className="space-y-3">
+            <div data-hero="controls" className="w-full max-w-[380px] mb-3.5"><div className="space-y-2.5">
               <p className="text-xs font-semibold text-neutral-600 text-center">{t.hero.previewSubtitle}</p>
               {/* Profile switcher tabs */}
               <div className="flex items-center justify-between gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
