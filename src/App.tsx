@@ -24,7 +24,6 @@ import { type CreatorProfile, type ThemeConfig } from './types';
 import { api, authStorage } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
-import { BackgroundAnimation } from './components/BackgroundAnimation';
 import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
@@ -283,7 +282,6 @@ export default function App() {
         <LanguageProvider>
           <AuthProvider>
             <div className="relative min-h-screen">
-              <BackgroundAnimation />
               <div className="relative z-10">
                 <Suspense fallback={<BioSkeletonLoader />}><PublicBioView
                   customDomain={currentHost}
@@ -304,7 +302,6 @@ export default function App() {
         <CapabilitiesProvider>
           <AuthProvider>
           <div className="relative min-h-screen">
-            <BackgroundAnimation />
             <div className="relative z-10">
               <PageMetadata />
               <Suspense fallback={<LoadingScreen message="Loading..." submessage="Liinx Studio" />}><Switch>
