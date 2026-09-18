@@ -14,6 +14,7 @@ import {
 
 import { useHeroMotion } from '../animations/useHeroMotion';
 import { brand } from '../config/brand';
+import { HeroFeatureShowcase } from './HeroFeatureShowcase';
 
 
 interface HeroProps {
@@ -148,6 +149,13 @@ return (
                   </span>
                 </div>
               </div>
+
+              {/* Native Building Blocks Showcase - Balances Left Column Whitespace */}
+              <HeroFeatureShowcase
+                isRtl={isRtl}
+                selectedProfileIndex={selectedProfileIndex}
+                onSelectProfile={handleProfileSelect}
+              />
             </div>
 
           </div>

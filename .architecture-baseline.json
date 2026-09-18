@@ -99,15 +99,19 @@
       ]
     },
     "src/components/Hero.tsx": {
-      "lines": 259,
+      "lines": 267,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 235,
+          "lines": 242,
           "complexity": 21,
           "maxDepth": 2
         }
       ]
+    },
+    "src/components/HeroFeatureShowcase.tsx": {
+      "lines": 125,
+      "functions": []
     },
     "src/components/LiinxLogo.tsx": {
       "lines": 100,
