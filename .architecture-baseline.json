@@ -17,7 +17,7 @@
   ],
   "files": {
     "src/App.tsx": {
-      "lines": 360,
+      "lines": 365,
       "functions": []
     },
     "src/animations/gsap.ts": {
@@ -56,12 +56,12 @@
       "functions": []
     },
     "src/components/ComparisonSection.tsx": {
-      "lines": 286,
+      "lines": 294,
       "functions": [
         {
           "name": "ComparisonSection",
-          "lines": 268,
-          "complexity": 42,
+          "lines": 276,
+          "complexity": 50,
           "maxDepth": 2
         }
       ]
@@ -71,18 +71,18 @@
       "functions": []
     },
     "src/components/FeaturesSection.tsx": {
-      "lines": 323,
+      "lines": 328,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 304,
-          "complexity": 52,
+          "lines": 309,
+          "complexity": 54,
           "maxDepth": 1
         },
         {
           "name": "<anonymous>",
-          "lines": 134,
-          "complexity": 11,
+          "lines": 139,
+          "complexity": 13,
           "maxDepth": 1
         }
       ]
@@ -137,12 +137,12 @@
       "functions": []
     },
     "src/components/Navbar.tsx": {
-      "lines": 283,
+      "lines": 292,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 154,
-          "complexity": 13,
+          "lines": 163,
+          "complexity": 15,
           "maxDepth": 2
         }
       ]
@@ -222,12 +222,12 @@
       "functions": []
     },
     "src/components/TrustProofSection.tsx": {
-      "lines": 197,
+      "lines": 192,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 185,
-          "complexity": 23,
+          "lines": 181,
+          "complexity": 22,
           "maxDepth": 1
         }
       ]
@@ -729,12 +729,12 @@
       ]
     },
     "src/features/public-bio/hooks/usePublicProfile.ts": {
-      "lines": 158,
+      "lines": 159,
       "functions": [
         {
           "name": "usePublicProfile",
           "lines": 142,
-          "complexity": 41,
+          "complexity": 43,
           "maxDepth": 3
         }
       ]
@@ -1048,12 +1048,12 @@
       "functions": []
     },
     "server/routes/profiles.ts": {
-      "lines": 858,
+      "lines": 889,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 130,
-          "complexity": 57,
+          "lines": 160,
+          "complexity": 60,
           "maxDepth": 3
         },
         {
@@ -1096,13 +1096,19 @@
       "functions": []
     },
     "server/server.ts": {
-      "lines": 654,
+      "lines": 673,
       "functions": [
         {
           "name": "<anonymous>",
           "lines": 37,
           "complexity": 25,
           "maxDepth": 6
+        },
+        {
+          "name": "startServer",
+          "lines": 97,
+          "complexity": 29,
+          "maxDepth": 4
         }
       ]
     },

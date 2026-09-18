@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, X } from 'lucide-react';
-import { BlockCategory } from './addBlockCatalog';
+import { type BlockCategory } from './addBlockCatalog';
 
 interface AddBlockHeaderProps {
   searchQuery: string;

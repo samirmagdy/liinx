@@ -3,7 +3,7 @@ import { Plus, Download } from 'lucide-react';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useCapabilities } from '../../../../context/CapabilitiesContext';
 import { useBuilder } from '../../context/BuilderContext';
-import { BLOCK_CATALOG, BlockCategory, BlockCatalogItem } from './addBlockCatalog';
+import { BLOCK_CATALOG, type BlockCategory, type BlockCatalogItem } from './addBlockCatalog';
 import { BlockCatalogGrid } from './BlockCatalogGrid';
 import { AddBlockHeader } from './AddBlockHeader';
 

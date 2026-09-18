@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockCatalogItem } from './addBlockCatalog';
+import { type BlockCatalogItem } from './addBlockCatalog';
 
 interface BlockCatalogGridProps {
   items: BlockCatalogItem[];
