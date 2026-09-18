@@ -182,12 +182,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Link href="/pricing" className={navLinkClass(activeView === 'pricing')}>
               {t.nav.pricing}
             </Link>
-            {user && (
-              <Link href="/studio" className={`flex items-center gap-1.5 ${navLinkClass(activeView === 'builder')}`}>
-                <Smartphone className="w-3.5 h-3.5 text-amber-600" />
-                <span>{t.nav.studio}</span>
-              </Link>
-            )}
           </nav>
         </div>
 
