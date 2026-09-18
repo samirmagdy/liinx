@@ -206,7 +206,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             />
             {profile.verified && (
               <div 
-                className="absolute bottom-0 right-0 p-1 rounded-full text-white shadow-sm"
+                className="absolute bottom-0 end-0 p-1 rounded-full text-white shadow-sm"
                 style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
                 title={ui("Verified Creator")}
               >
@@ -318,7 +318,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                       </p>
                     )}
                   </div>
-                  <div className="p-1 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform shrink-0">
+                  <div className="p-1 rounded-full opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform shrink-0">
                     <ExternalLink className="w-3.5 h-3.5" />
                   </div>
                 </div>

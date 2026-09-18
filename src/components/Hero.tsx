@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { PhonePreview } from './PhonePreview';
 import { THEMES } from '../config/themes';
 import { DEMO_PROFILES } from '../demo/demoProfiles';
+import { ARABIC_DEMO_PROFILES } from '../demo/arabicDemoProfiles';
 import { type CreatorProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { 
@@ -24,7 +25,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => {
   const [, setLocation] = useLocation();
-  const { t, isRtl } = useLanguage();
+  const { t, isRtl, tr: ui } = useLanguage();
   const [handle, setHandle] = useState('');
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);
@@ -33,8 +34,9 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
   const phoneScrollRef = useRef<HTMLDivElement>(null);
   useHeroMotion(heroRef, isRtl ? 'ar' : 'en', `${selectedProfileIndex}:${selectedThemeId}`);
 
-  const activeProfile = DEMO_PROFILES[selectedProfileIndex];
-  const activeTheme = THEMES.find(t => t.id === selectedThemeId) || THEMES[0];
+  const currentProfiles = isRtl ? ARABIC_DEMO_PROFILES : DEMO_PROFILES;
+  const activeProfile = currentProfiles[selectedProfileIndex] || currentProfiles[0];
+  const activeTheme = THEMES.find(th => th.id === selectedThemeId) || THEMES[0];
 
   const isArabicText = (text?: string) => /[\u0600-\u06FF]/.test(text || '');
   const isProfileRtl = isArabicText(activeProfile.displayName) || isArabicText(activeProfile.bio);
@@ -53,7 +55,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
 
   const handleProfileSelect = (index: number) => {
     setSelectedProfileIndex(index);
-    setSelectedThemeId(DEMO_PROFILES[index].themeId);
+    setSelectedThemeId(currentProfiles[index]?.themeId || DEMO_PROFILES[index].themeId);
     setSelectedFeatureId(null);
   };
 
@@ -61,7 +63,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
     setSelectedFeatureId(featureId);
     if (selectedProfileIndex !== profileIndex) {
       setSelectedProfileIndex(profileIndex);
-      setSelectedThemeId(DEMO_PROFILES[profileIndex].themeId);
+      setSelectedThemeId(currentProfiles[profileIndex]?.themeId || DEMO_PROFILES[profileIndex].themeId);
       // Wait for re-render with the new profile blocks before scrolling
       setTimeout(() => {
         scrollToFeature(featureId);
@@ -98,7 +100,7 @@ return (
 
             {/* Main Headline */}
             <div>
-              <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-4 text-balance">
+              <h1 key={isRtl ? 'ar' : 'en'} className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-4 text-balance">
                 {t.hero.headline} <span className="text-neutral-500 font-medium">{t.hero.headlineHighlight}</span>
               </h1>
             </div>
@@ -195,7 +197,7 @@ return (
               <p className="text-xs font-semibold text-neutral-600 text-center">{t.hero.previewSubtitle}</p>
               {/* Profile switcher tabs */}
               <div className="flex items-center justify-between gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
-                {DEMO_PROFILES.slice(0, 4).map((prof, idx) => (
+                {currentProfiles.slice(0, 4).map((prof, idx) => (
                   <button
                     key={prof.id}
                     aria-pressed={selectedProfileIndex === idx}
@@ -216,7 +218,7 @@ return (
                 <span className="text-[11px] font-medium text-neutral-500 flex items-center gap-1.5">
                   <Palette className="w-3.5 h-3.5" />
                   <span>{t.hero.themeLabel}</span>
-                  <strong className="text-neutral-900">{activeTheme.name}</strong>
+                  <strong className="text-neutral-900">{ui(activeTheme.name)}</strong>
                 </span>
                 
                 <div className="flex items-center gap-1.5">

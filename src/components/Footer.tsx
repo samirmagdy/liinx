@@ -70,22 +70,22 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.product}</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/features" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/features" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.nav.features}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/studio" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/studio" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.nav.studio}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/templates" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/templates" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.nav.templates}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pricing" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/pricing" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.nav.pricing}
                   </Link>
                 </li>
@@ -93,7 +93,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('dns-guide')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                    className="hover:text-white transition-colors cursor-pointer text-start block"
                   >
                     {ui("Custom Domains")}
                   </button>
@@ -109,7 +109,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('creator-handbook')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                    className="hover:text-white transition-colors cursor-pointer text-start block"
                   >
                     {ui("Creator Handbook")}
                   </button>
@@ -118,7 +118,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('switch-linktree')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                    className="hover:text-white transition-colors cursor-pointer text-start block"
                   >
                     {ui("Switch from Linktree")}
                   </button>
@@ -127,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('api-docs')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                    className="hover:text-white transition-colors cursor-pointer text-start block"
                   >
                     {ui("Public REST API")}
                   </button>
@@ -136,7 +136,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('security')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                    className="hover:text-white transition-colors cursor-pointer text-start block"
                   >
                     {ui("Security & Privacy")}
                   </button>
@@ -149,12 +149,12 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.company}</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/about" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/about" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {ui("About")}{' '}{brand.productShortName}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.nav.contact}
                   </Link>
                 </li>
@@ -163,7 +163,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     href="/@elenarostova" 
                     target="_blank" 
                     rel="noreferrer"
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                    className="hover:text-white transition-colors cursor-pointer text-start block"
                   >
                     {ui("Live Demo")} ↗
                   </a>
@@ -176,17 +176,17 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.legal}</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/privacy" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/privacy" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.footer.privacy}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/terms" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.footer.terms}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-left block">
+                  <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-start block">
                     {t.footer.contact}
                   </Link>
                 </li>

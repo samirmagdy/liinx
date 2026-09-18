@@ -87,6 +87,18 @@ export const uiArabic: Record<string, string> = {
   'Or': 'أو', 'claim a new handle and create your page': 'احجز اسماً جديداً وأنشئ صفحتك', 'Email address': 'البريد الإلكتروني', 'Password': 'كلمة المرور',
   'Already have an account?': 'لديك حساب بالفعل؟', 'Sign in here': 'سجّل الدخول هنا', 'Choose your handle': 'اختر اسم المستخدم', 'yourname': 'اسم المستخدم',
   'Your live link will be': 'سيكون رابط صفحتك', 'Choose password': 'اختر كلمة المرور', 'At least 8 characters': '٨ أحرف على الأقل', 'What are you building?': 'ما نوع صفحتك؟',
-  'Choose starting design theme': 'اختر المظهر الأولي', 'Sending…': 'جارٍ الإرسال…', 'Saving...': 'جارٍ الحفظ…', 'Save failed': 'تعذّر الحفظ', 'Saved to database': 'تم الحفظ',
-  'Preview only. Open the live page to subscribe.': 'هذه معاينة فقط. افتح الصفحة المنشورة للاشتراك.'
+  'Preview only. Open the live page to subscribe.': 'هذه معاينة فقط. افتح الصفحة المنشورة للاشتراك.',
+  'View page': 'معاينة الصفحة',
+  'Design-first mini-sites': 'مواقع مصغرة تركز على التصميم',
+  'Editorial Stone': 'حجر تحريري',
+  'Obsidian Noir': 'أوبسيديان داكن',
+  'Tokyo Neon': 'طوكيو نيون',
+  'Nordic Clean': 'نورديك نقي',
+  'Amber Hour': 'ساعة العنبر',
+  'Velvet Atelier': 'أتيليه مخملي',
+  'Neo Brutalist': 'نيو بروتاليست',
+  'Forest Canopy': 'مظلة الغابة',
+  'Coral Reef': 'شعب مرجانية',
+  'Midnight Ink': 'حبر منتصف الليل',
+  'Sahara Dune': 'كثبان الصحراء'
 };

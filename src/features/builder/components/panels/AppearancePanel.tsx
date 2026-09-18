@@ -25,7 +25,7 @@ export const AppearancePanel: React.FC = () => {
             <button
               key={th.id}
               onClick={() => handleThemeSelect(th)}
-              className={`p-3.5 rounded-xl border text-left flex items-center justify-between transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`p-3.5 rounded-xl border text-start flex items-center justify-between transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
                 customTheme.id === th.id 
                   ? 'border-neutral-900 ring-2 ring-neutral-900/10 shadow-sm bg-neutral-50' 
                   : 'border-neutral-200 hover:border-neutral-400'

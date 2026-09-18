@@ -365,7 +365,8 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 
 [dir="rtl"] .text-left { text-align: right; }
 [dir="rtl"] .text-right { text-align: left; }
-[dir="rtl"] input, [dir="rtl"] textarea { text-align: right; }
+[dir="rtl"] input:not([dir="ltr"]), [dir="rtl"] textarea:not([dir="ltr"]) { text-align: right; }
+[dir="rtl"] input[dir="ltr"], [dir="rtl"] textarea[dir="ltr"] { text-align: left; }
 [dir="rtl"] code { direction: ltr; unicode-bidi: plaintext; }
 [dir="rtl"] .font-mono:not(code):not(input) { letter-spacing: normal; }
 [dir="rtl"] .save-status { letter-spacing: normal; }

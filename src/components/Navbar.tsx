@@ -155,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-8">
           <Link 
             href="/"
-            className="flex items-center gap-2.5 text-left group focus:outline-none focus:ring-2 focus:ring-neutral-900/20 rounded-lg cursor-pointer"
+            className="flex items-center gap-2.5 text-start group focus:outline-none focus:ring-2 focus:ring-neutral-900/20 rounded-lg cursor-pointer"
           >
             <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center group-hover:scale-105 transition-transform">
               <LiinxLogo variant="light" size="sm" />
@@ -186,29 +186,29 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Right Action Bar */}
-        <div className="hidden xl:flex items-center gap-3">
+        <div className="hidden xl:flex items-center gap-2.5">
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
             title={lang === 'en' ? 'Switch to Arabic (العربية)' : 'Switch to English'}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-200/60 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-neutral-200 bg-white/50 hover:bg-neutral-200/60 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
             <Globe className="w-3.5 h-3.5 text-neutral-500" />
             <span>{lang === 'en' ? 'العربية' : 'English'}</span>
           </button>
 
           {user ? (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <Link
                 href={`/@${user.username}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-200/60 text-xs font-semibold text-neutral-700 transition-colors"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-neutral-200 bg-white/50 hover:bg-neutral-200/60 text-xs font-semibold text-neutral-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
                 <span>{ui("View page")}</span>
               </Link>
               <Link
                 href="/studio"
-                className="px-4 py-2 rounded-full bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-all shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-1"
               >
                 <span>{t.nav.studio}</span>
               </Link>
@@ -218,13 +218,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-3.5 py-2 text-xs font-semibold text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200/60 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 cursor-pointer"
+                className="inline-flex items-center justify-center h-9 px-3.5 text-xs font-semibold text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200/60 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 cursor-pointer"
               >
                 {lang === 'ar' ? 'تسجيل الدخول' : 'Sign in'}
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 rounded-full bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-all shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
               >
                 <span>{lang === 'ar' ? 'أنشئ صفحتك' : 'Create your page'}</span>
                 <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />

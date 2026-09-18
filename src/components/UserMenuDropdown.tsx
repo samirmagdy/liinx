@@ -136,10 +136,10 @@ export const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label={`${ui('Logged in')}: @${user.username}`}
-        className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+        className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-neutral-200/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
           isOpen
-            ? 'bg-neutral-900 text-white shadow-xs'
-            : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-900'
+            ? 'bg-neutral-900 text-white shadow-xs border-neutral-900'
+            : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-900'
         }`}
       >
         <User className="w-3.5 h-3.5" />

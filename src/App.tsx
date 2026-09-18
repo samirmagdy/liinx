@@ -21,17 +21,14 @@ import { FeaturesPage } from './pages/FeaturesPage';
 import { AccountPage } from './pages/AccountPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
 import { type CreatorProfile, type ThemeConfig } from './types';
-import { api, authStorage } from './services/api';
+import { api } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
 import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 
-function chooseTemplate(profile: CreatorProfile, navigate: (path: string) => void) {
-  const theme = encodeURIComponent(profile.themeId);
-  navigate(authStorage.getToken() ? `/studio?template=${theme}` : `/register?template=${theme}`);
-}
+
 
 function HomePage() {
   const [, setLocation] = useLocation();
@@ -44,8 +41,11 @@ function HomePage() {
     setLocation('/studio');
   };
 
+  const { user } = useAuth();
+
   const handleSelectTemplate = (profile: CreatorProfile) => {
-    chooseTemplate(profile, setLocation);
+    const theme = encodeURIComponent(profile.themeId);
+    setLocation(user ? `/studio?template=${theme}` : `/register?template=${theme}`);
   };
 
   const handleSelectPlan = (plan: string, interval: 'month' | 'year') => {
@@ -167,12 +167,18 @@ function StudioPage() {
 
 function TemplatesPage() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+
+  const handleSelectTemplate = (profile: CreatorProfile) => {
+    const theme = encodeURIComponent(profile.themeId);
+    setLocation(user ? `/studio?template=${theme}` : `/register?template=${theme}`);
+  };
 
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="templates" />
       <main className="flex-1">
-        <TemplatesSection headingLevel={1} onSelectTemplate={(p) => chooseTemplate(p, setLocation)} />
+        <TemplatesSection headingLevel={1} onSelectTemplate={handleSelectTemplate} />
         <ComparisonSection />
       </main>
       <Footer onSelectView={(v) => {

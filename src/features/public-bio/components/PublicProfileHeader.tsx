@@ -30,7 +30,7 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
         />
         {profile.verified && (
           <div
-            className="absolute bottom-1 right-1 p-1.5 rounded-full text-white shadow-md"
+            className="absolute bottom-1 end-1 p-1.5 rounded-full text-white shadow-md"
             style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
             title={ui('Verified Profile')}
           >

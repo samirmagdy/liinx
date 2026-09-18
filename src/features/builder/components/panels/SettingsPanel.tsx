@@ -197,7 +197,7 @@ export const SettingsPanel: React.FC = () => {
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-neutral-50 shadow-lg ring-0 transition duration-200 ease-in-out ${
-                  profile.hideBranding ? 'translate-x-5' : 'translate-x-0'
+                  profile.hideBranding ? 'translate-x-5 rtl:-translate-x-5' : 'translate-x-0'
                 }`}
               />
             </button>

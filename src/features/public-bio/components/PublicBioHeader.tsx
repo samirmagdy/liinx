@@ -54,7 +54,7 @@ export const PublicBioHeader: React.FC<PublicBioHeaderProps> = ({
             borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)')
           }}
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
           <span>{ui('Back to Studio')}</span>
         </button>
       ) : (
@@ -67,7 +67,7 @@ export const PublicBioHeader: React.FC<PublicBioHeaderProps> = ({
             borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)')
           }}
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
           <span>{ui('LIINX')}</span>
         </button>
       )}

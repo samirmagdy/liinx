@@ -54,7 +54,7 @@ export const BuilderToolbar: React.FC = () => {
           </button>
 
           {profileDropdownOpen && (
-            <div className="absolute left-0 mt-2 w-64 bg-neutral-100 rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
+            <div className="absolute start-0 mt-2 w-64 bg-neutral-100 rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
               {profileSwitchError && (
                 <div role="alert" className="mx-2 mb-2 p-2 rounded-lg bg-rose-50 border border-rose-200 text-[11px] text-rose-700 font-medium">
                   {profileSwitchError}
@@ -67,11 +67,11 @@ export const BuilderToolbar: React.FC = () => {
                 {profileList.map(p => (
                   <div
                     key={p.id}
-                    className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs hover:bg-neutral-50 transition-colors cursor-pointer ${
+                    className={`w-full px-3 py-2 text-start flex items-center justify-between text-xs hover:bg-neutral-50 transition-colors cursor-pointer ${
                       p.id === profile.id ? 'bg-neutral-50 font-bold text-neutral-900' : 'text-neutral-700'
                     }`}
                   >
-                    <button type="button" onClick={() => handleSelectProfile(p.id)} className="flex min-w-0 flex-1 flex-col truncate text-left">
+                    <button type="button" onClick={() => handleSelectProfile(p.id)} className="flex min-w-0 flex-1 flex-col truncate text-start">
                       <span className="truncate">{p.displayName || p.username}</span>
                       <span className="text-[10px] font-mono text-neutral-400">@{p.username}</span>
                     </button>
