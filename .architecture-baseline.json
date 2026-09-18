@@ -729,13 +729,13 @@
       ]
     },
     "src/features/public-bio/hooks/usePublicProfile.ts": {
-      "lines": 139,
+      "lines": 158,
       "functions": [
         {
           "name": "usePublicProfile",
-          "lines": 124,
-          "complexity": 35,
-          "maxDepth": 2
+          "lines": 142,
+          "complexity": 41,
+          "maxDepth": 3
         }
       ]
     },

@@ -73,20 +73,20 @@ export const TrustProofSection: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{ar ? 'أدلة واقعية وثقة مثبتة' : 'Transparent Real-World Proof'}</span>
+              <span>{ar ? 'استكشف ليينكس عملياً' : 'Explore Liinx in Action'}</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
-              {ar ? 'صفحات حية يمكنك تصفحها الآن' : 'Real published pages you can explore right now'}
+              {ar ? 'صفحات تجريبية تفاعلية يمكنك استكشافها الآن' : 'Interactive demo pages you can explore right now'}
             </h2>
             <p className="text-base sm:text-lg text-neutral-600 leading-relaxed text-pretty">
               {ar
-                ? 'لا نعتمد على أرقام وهمية أو مراجعات مصطنعة؛ تفقد نماذج حقيقية منشورة واختبر بنفسك سرعة وسلاسة ليينكس.'
-                : 'Zero fabricated metrics or synthetic testimonials. Open published live demo pages to test speed, responsive layout, and media embeds firsthand.'}
+                ? 'استكشف صفحات تجريبية تفاعلية لاختبار السرعة، والتصميم المتجاوب، وتضمين الوسائط مباشرة دون أي ادعاءات مضللة.'
+                : 'Explore interactive demo pages to test speed, responsive layouts, and rich media embeds firsthand.'}
             </p>
           </div>
         </Reveal>
 
-        {/* Live Published Showcases (Issue #5 & #11) */}
+        {/* Live Published Showcases (Interactive Demos) */}
         <Reveal stagger>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {liveShowcases.map((showcase) => (
@@ -97,7 +97,7 @@ export const TrustProofSection: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-4">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
-                      {ar ? 'نموذج حي' : 'Live Showcase'}
+                      {ar ? 'عرض تجريبي حي' : 'Live Demo'}
                     </span>
                     <span className="text-[11px] font-mono text-neutral-400">
                       @{showcase.username}
@@ -134,7 +134,7 @@ export const TrustProofSection: React.FC = () => {
                   rel="noreferrer"
                   className="w-full py-2.5 px-4 rounded-xl border border-neutral-300 hover:bg-neutral-50 text-xs font-bold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <span>{ar ? 'فتح الصفحة الحية' : 'Open Live Page'}</span>
+                  <span>{ar ? 'فتح العرض التجريبي' : 'Open Live Demo'}</span>
                   <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
                 </a>
               </div>
@@ -186,7 +186,7 @@ export const TrustProofSection: React.FC = () => {
           </p>
           <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-2 border-t border-neutral-100">
             <span>Liinx Studio Team</span>
-            <span>{ar ? 'بيانات توضيحية خالية من التضليل' : 'Verified Transparent Standards'}</span>
+            <span>{ar ? 'نماذج تجريبية ومعايير شفافة' : 'Interactive Demos & Craft Standards'}</span>
           </div>
         </div>
 

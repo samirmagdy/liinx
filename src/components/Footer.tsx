@@ -165,7 +165,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     rel="noreferrer"
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    {ui("Live Showcase")} ↗
+                    {ui("Live Demo")} ↗
                   </a>
                 </li>
               </ul>

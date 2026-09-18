@@ -3,6 +3,7 @@ import { type CreatorProfile } from '../../../types';
 import { api } from '../../../services/api';
 import { isAllowedFontStylesheetUrl } from '../../../utils/fontValidation';
 import { safePublicHref } from '../utils/publicBio.utils';
+import { DEMO_PROFILES } from '../../../demo/demoProfiles';
 
 interface UsePublicProfileProps {
   initialProfile?: CreatorProfile;
@@ -65,13 +66,23 @@ export function usePublicProfile({
     setNotFound(false);
     setServerError(null);
 
+    const cleanUsername = routeUsername?.replace(/^@/, '').toLowerCase().trim();
+
     const fetchPromise = customDomain
       ? api.profiles.getByCustomDomain(customDomain, pageSlug)
-      : api.profiles.getByUsername(routeUsername!.replace(/^@/, ''), pageSlug);
+      : api.profiles.getByUsername(cleanUsername!, pageSlug);
 
     fetchPromise
       .then(fetchedProfile => {
         if (!fetchedProfile || !fetchedProfile.id) {
+          const demo = cleanUsername ? DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername) : undefined;
+          if (demo) {
+            setProfile(demo);
+            if (typeof document !== 'undefined') {
+              document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
+            }
+            return;
+          }
           setNotFound(true);
           return;
         }
@@ -81,6 +92,14 @@ export function usePublicProfile({
         }
       })
       .catch((err: any) => {
+        const demo = cleanUsername ? DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername) : undefined;
+        if (demo) {
+          setProfile(demo);
+          if (typeof document !== 'undefined') {
+            document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
+          }
+          return;
+        }
         const is404 = err?.status === 404 || err?.statusCode === 404 || err?.message?.toLowerCase().includes('not found');
         if (is404) {
           setNotFound(true);
