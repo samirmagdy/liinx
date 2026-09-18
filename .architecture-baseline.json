@@ -56,7 +56,7 @@
       "functions": []
     },
     "src/components/ComparisonSection.tsx": {
-      "lines": 289,
+      "lines": 286,
       "functions": [
         {
           "name": "ComparisonSection",
@@ -71,7 +71,7 @@
       "functions": []
     },
     "src/components/FeaturesSection.tsx": {
-      "lines": 327,
+      "lines": 322,
       "functions": [
         {
           "name": "<anonymous>",
@@ -99,11 +99,11 @@
       ]
     },
     "src/components/Hero.tsx": {
-      "lines": 263,
+      "lines": 259,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 236,
+          "lines": 235,
           "complexity": 21,
           "maxDepth": 2
         }
@@ -137,11 +137,11 @@
       "functions": []
     },
     "src/components/Navbar.tsx": {
-      "lines": 284,
+      "lines": 283,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 155,
+          "lines": 154,
           "complexity": 13,
           "maxDepth": 2
         }
@@ -152,18 +152,18 @@
       "functions": []
     },
     "src/components/PhonePreview.tsx": {
-      "lines": 738,
+      "lines": 754,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 691,
-          "complexity": 88,
+          "lines": 707,
+          "complexity": 91,
           "maxDepth": 5
         },
         {
           "name": "renderProfileContent",
-          "lines": 573,
-          "complexity": 58,
+          "lines": 589,
+          "complexity": 61,
           "maxDepth": 5
         },
         {
@@ -222,7 +222,7 @@
       "functions": []
     },
     "src/components/TrustProofSection.tsx": {
-      "lines": 199,
+      "lines": 197,
       "functions": [
         {
           "name": "<anonymous>",

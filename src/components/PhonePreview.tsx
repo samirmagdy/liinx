@@ -707,12 +707,28 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
         {profile.footerLogoUrl && (
           <div className="pt-2 text-center">
-            {footerLogoFailed ? <span role="img" aria-label={profile.footerLogoAlt || ui('Creator logo')} className="text-xs font-semibold" dir="auto">{profile.footerLogoAlt || ui('Creator logo')}</span> : (
-              <LoadingLogo
-                loading={footerLogoLoading}
-                size="sm"
-                className="mx-auto h-4 max-w-20 object-contain"
-              />
+            {footerLogoFailed ? (
+              <span role="img" aria-label={profile.footerLogoAlt || ui('Creator logo')} className="text-xs font-semibold" dir="auto">{profile.footerLogoAlt || ui('Creator logo')}</span>
+            ) : (
+              <>
+                {footerLogoLoading && (
+                  <LoadingLogo
+                    loading={true}
+                    size="sm"
+                    className="mx-auto h-4 max-w-20 object-contain"
+                  />
+                )}
+                <img
+                  src={profile.footerLogoUrl}
+                  alt={profile.footerLogoAlt || ui('Creator logo')}
+                  onLoad={() => setFooterLogoLoading(false)}
+                  onError={() => {
+                    setFooterLogoFailed(true);
+                    setFooterLogoLoading(false);
+                  }}
+                  className={`mx-auto h-4 max-w-20 object-contain ${footerLogoLoading ? 'hidden' : 'inline'}`}
+                />
+              </>
             )}
           </div>
         )}

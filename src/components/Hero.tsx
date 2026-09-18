@@ -5,14 +5,11 @@ import { THEMES } from '../config/themes';
 import { DEMO_PROFILES } from '../demo/demoProfiles';
 import { type CreatorProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { useCapabilities } from '../context/CapabilitiesContext';
 import { 
   ArrowRight, 
   Palette, 
   Check, 
-  Sparkles,
-  MousePointer2,
-  LayoutTemplate
+  Sparkles
 } from 'lucide-react';
 
 import { useHeroMotion } from '../animations/useHeroMotion';
@@ -26,8 +23,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => {
   const [, setLocation] = useLocation();
-  const { t, isRtl, tr } = useLanguage();
-  const { hasAnyImporter } = useCapabilities();
+  const { t, isRtl } = useLanguage();
   const [handle, setHandle] = useState('');
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);

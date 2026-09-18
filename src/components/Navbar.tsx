@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { 
@@ -130,7 +130,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeView = 'home'
 }) => {
   const { tr: ui } = useUiLanguage();
-  const [, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { lang, setLanguage, t, isRtl } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

@@ -4,12 +4,7 @@ import {
   Layers,
   TrendingUp,
   ShieldCheck,
-  FolderPlus, 
-  Music, 
-  Globe2, 
-  BarChart2, 
   ArrowRight,
-  Code2,
   Calendar,
   Download,
   CheckCircle2
@@ -22,7 +17,7 @@ interface FeaturesSectionProps {
 }
 
 export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }) => {
-  const { isRtl, tr } = useLanguage();
+  const { isRtl } = useLanguage();
   const [activePillar, setActivePillar] = useState<'design' | 'publish' | 'grow' | 'own'>('design');
 
   const pillars = [

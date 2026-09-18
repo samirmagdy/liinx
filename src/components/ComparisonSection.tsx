@@ -10,16 +10,13 @@ import {
   Calendar, 
   Check, 
   X, 
-  Sparkles,
-  Globe2,
-  Mail,
-  SlidersHorizontal
+  Sparkles
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Reveal } from './motion/Reveal';
 
 export function ComparisonSection() {
-  const { lang, isRtl } = useLanguage();
+  const { lang } = useLanguage();
   const { hasAnyImporter } = useCapabilities();
   const ar = lang === 'ar';
   const [, setLocation] = useLocation();

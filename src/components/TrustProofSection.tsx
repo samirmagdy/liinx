@@ -3,16 +3,14 @@ import { useLanguage } from '../context/LanguageContext';
 import { 
   ShieldCheck, 
   ExternalLink, 
-  Sparkles, 
   Lock, 
   Coins, 
-  FileText,
-  UserCheck
+  FileText
 } from 'lucide-react';
 import { Reveal } from './motion/Reveal';
 
 export const TrustProofSection: React.FC = () => {
-  const { lang, isRtl } = useLanguage();
+  const { lang } = useLanguage();
   const ar = lang === 'ar';
 
   const liveShowcases = [
