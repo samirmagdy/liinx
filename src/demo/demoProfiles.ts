@@ -240,11 +240,9 @@ export const DEMO_PROFILES: CreatorProfile[] = [
       },
       {
         id: 'at3',
-        type: 'link',
-        title: 'Book a Keynote Speech (Q3/Q4 2025)',
-        subtitle: 'Inquiries via United Talent Agency',
-        url: 'https://example.com/booking',
-        clicks: 1840
+        type: 'booking',
+        title: 'Book a Keynote Speech / Consultation',
+        url: 'https://calendly.com/dr-aris-thorne/consultation'
       },
       {
         id: 'at4',

@@ -58,14 +58,14 @@ export const HERO_FEATURE_BADGES: HeroFeatureBadge[] = [
 
 interface HeroFeatureShowcaseProps {
   isRtl: boolean;
-  selectedProfileIndex: number;
-  onSelectProfile: (index: number) => void;
+  selectedFeatureId: string | null;
+  onSelectFeature: (featureId: string, profileIndex: number) => void;
 }
 
 export const HeroFeatureShowcase: React.FC<HeroFeatureShowcaseProps> = ({
   isRtl,
-  selectedProfileIndex,
-  onSelectProfile
+  selectedFeatureId,
+  onSelectFeature
 }) => {
   return (
     <div className="w-full max-w-xl lg:max-w-2xl mt-8 pt-6 border-t border-neutral-200/70">
@@ -82,13 +82,13 @@ export const HeroFeatureShowcase: React.FC<HeroFeatureShowcaseProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {HERO_FEATURE_BADGES.map((badge) => {
           const Icon = badge.icon;
-          const isActive = selectedProfileIndex === badge.profileIndex;
+          const isActive = selectedFeatureId === badge.id;
 
           return (
             <button
               key={badge.id}
               type="button"
-              onClick={() => onSelectProfile(badge.profileIndex)}
+              onClick={() => onSelectFeature(badge.id, badge.profileIndex)}
               className={`group text-start p-2.5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
                 isActive
                   ? 'bg-white border-neutral-900 shadow-xs ring-1 ring-neutral-900/10'

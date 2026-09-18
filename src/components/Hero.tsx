@@ -28,7 +28,9 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
   const [handle, setHandle] = useState('');
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);
+  const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>('audio');
   const heroRef = useRef<HTMLElement>(null);
+  const phoneScrollRef = useRef<HTMLDivElement>(null);
   useHeroMotion(heroRef, isRtl ? 'ar' : 'en', `${selectedProfileIndex}:${selectedThemeId}`);
 
   const activeProfile = DEMO_PROFILES[selectedProfileIndex];
@@ -39,9 +41,34 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
 
   const theme = activeTheme;
 
+  const scrollToFeature = (featureId: string) => {
+    const scrollContainer = phoneScrollRef.current;
+    if (!scrollContainer) return;
+
+    const targetEl = scrollContainer.querySelector(`[data-feature="${featureId}"]`) as HTMLElement | null;
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   const handleProfileSelect = (index: number) => {
     setSelectedProfileIndex(index);
     setSelectedThemeId(DEMO_PROFILES[index].themeId);
+    setSelectedFeatureId(null);
+  };
+
+  const handleFeatureSelect = (featureId: string, profileIndex: number) => {
+    setSelectedFeatureId(featureId);
+    if (selectedProfileIndex !== profileIndex) {
+      setSelectedProfileIndex(profileIndex);
+      setSelectedThemeId(DEMO_PROFILES[profileIndex].themeId);
+      // Wait for re-render with the new profile blocks before scrolling
+      setTimeout(() => {
+        scrollToFeature(featureId);
+      }, 120);
+    } else {
+      scrollToFeature(featureId);
+    }
   };
 
   const handleClaim = (e: React.FormEvent) => {
@@ -153,8 +180,8 @@ return (
               {/* Native Building Blocks Showcase - Balances Left Column Whitespace */}
               <HeroFeatureShowcase
                 isRtl={isRtl}
-                selectedProfileIndex={selectedProfileIndex}
-                onSelectProfile={handleProfileSelect}
+                selectedFeatureId={selectedFeatureId}
+                onSelectFeature={handleFeatureSelect}
               />
             </div>
 
@@ -230,8 +257,10 @@ return (
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
               <div 
+                ref={phoneScrollRef}
+                id="hero-phone-scroll-container"
                 dir={isProfileRtl ? 'rtl' : 'ltr'}
-                className="relative w-full h-[590px] rounded-[36px] overflow-y-auto no-scrollbar pt-10 pb-6 px-4 sm:px-5 transition-colors duration-300"
+                className="relative w-full h-[590px] rounded-[36px] overflow-y-auto no-scrollbar pt-10 pb-6 px-4 sm:px-5 transition-colors duration-300 scroll-smooth"
                 style={{
                   background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
                   color: theme.textColor,
@@ -242,6 +271,7 @@ return (
                   customTheme={activeTheme}
                   compact
                   interactive={false}
+                  highlightedFeatureId={selectedFeatureId}
                 /></div>
               </div>
             </div></div>

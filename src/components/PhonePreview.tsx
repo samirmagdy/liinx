@@ -41,6 +41,7 @@ interface PhonePreviewProps {
   scale?: 'normal' | 'compact' | 'responsive' | 'editor';
   compact?: boolean;
   deviceMode?: 'mobile' | 'tablet' | 'desktop';
+  highlightedFeatureId?: string | null;
 }
 
 export const PhonePreview: React.FC<PhonePreviewProps> = ({
@@ -51,6 +52,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   scale = 'normal',
   compact = false,
   deviceMode = 'mobile',
+  highlightedFeatureId = null,
 }) => {
   const { tr: ui } = useUiLanguage();
   const theme = resolveTheme(profile.themeId, customTheme);
@@ -217,7 +219,15 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             <span>{profile.displayName}</span>
           </h2>
           
-          <p className="text-[11px] font-mono mb-2.5" style={{ color: theme.subtextColor }}>
+          <p 
+            data-feature="domain"
+            className={`text-[11px] font-mono mb-2.5 px-2.5 py-1 rounded-full transition-all duration-300 ${
+              highlightedFeatureId === 'domain'
+                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-2 ring-amber-500 font-bold scale-105 shadow-sm'
+                : ''
+            }`}
+            style={{ color: highlightedFeatureId === 'domain' ? undefined : theme.subtextColor }}
+          >
             {brand.domain}/@{profile.username}
           </p>
 
@@ -255,7 +265,22 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
         {/* Profile Blocks */}
         <div className="space-y-3 mb-8">
           {(Array.isArray(profile.blocks) ? profile.blocks : []).map((block) => {
-            if (block.type === 'booking') return <div key={block.id}><BookingCard block={block} theme={theme} previewOnly={!interactive} /></div>;
+            const isBlockHighlighted = (
+              (block.type === 'booking' && highlightedFeatureId === 'booking') ||
+              (block.type === 'audio' && highlightedFeatureId === 'audio') ||
+              (block.type === 'folder' && highlightedFeatureId === 'folders')
+            );
+            const highlightClass = isBlockHighlighted 
+              ? 'ring-2 ring-amber-500 shadow-lg shadow-amber-500/20 scale-[1.02] transition-all duration-300' 
+              : 'transition-all duration-300';
+
+            if (block.type === 'booking') {
+              return (
+                <div key={block.id} data-feature="booking" className={highlightClass}>
+                  <BookingCard block={block} theme={theme} previewOnly={!interactive} />
+                </div>
+              );
+            }
             if (block.type === 'link') {
               const isComplexLink = Boolean(block.subtitle);
               const isPill = theme.cardRadius === 'full' && !isComplexLink;
@@ -320,7 +345,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
                 return (
                   <div
                     key={block.id}
-                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
+                    data-feature="audio"
+                    className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
                     style={{
                       backgroundColor: theme.cardBg,
                       border: theme.cardBorder,
@@ -393,7 +419,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`p-3.5 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
+                  data-feature="audio"
+                  className={`p-3.5 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
@@ -482,7 +509,8 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               return (
                 <div
                   key={block.id}
-                  className={`overflow-hidden transition-shadow duration-200 border shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
+                  data-feature="folders"
+                  className={`overflow-hidden transition-shadow duration-200 border shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
                   style={{
                     backgroundColor: theme.cardBg,
                     border: theme.cardBorder,
