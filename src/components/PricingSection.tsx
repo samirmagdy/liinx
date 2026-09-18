@@ -17,34 +17,81 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
     {
       id: 'free' as const,
       name: ar ? 'مجاني' : 'Free',
+      audience: ar ? 'للمبدعين في بداية طريقهم' : 'For creators just getting started',
       icon: <Zap className="w-5 h-5 text-neutral-600" />,
-      tagline: ar ? 'مكان بسيط لنشر صفحتك وروابطك.' : 'A simple place to publish your page and links.',
+      tagline: ar ? 'صفحة مصغرة أساسية لنشر روابطك ووسائطك.' : 'A focused mini-site to publish your links and media.',
       price: 0,
       features: ar
-        ? ['صفحة شخصية وروابط ووسائط', 'تخصيص المظهر', 'جمع اشتراكات البريد وإحصاءات الزيارات']
-        : ['Published liinx.app/@username page', 'Links, social icons and supported media blocks', 'Theme customization', 'Newsletter capture form', 'Views, clicks and referrer analytics'],
+        ? [
+            'ملف شخصي واحد (liinx.app/@اسمك)',
+            'روابط ووسائط متعددة وأيقونات تواصل',
+            'تخصيص القوالب والألوان',
+            'نموذج اشتراك في النشرة البريدية',
+            'إحصاءات أساسية للزيارات والنقرات ومصادر الإحالة'
+          ]
+        : [
+            '1 published profile (liinx.app/@username)',
+            'Links, social icons and rich media blocks',
+            'Theme and aesthetic customization',
+            'Built-in newsletter capture form',
+            'Visits, clicks, and referrer analytics'
+          ],
       highlight: false,
     },
     {
       id: 'pro' as const,
       name: paidPlans.pro.name,
+      audience: ar ? 'للمحترفين والمبدعين المستقلين' : 'For serious creators & visual artists',
       icon: <Sparkles className="w-5 h-5 text-amber-600" />,
-      tagline: ar ? 'تحكم أكبر مع نمو حضورك.' : 'More control as your creator presence grows.',
+      tagline: ar ? 'نطاق خاص وتحكم كامل بدون أي شارات للمنصة.' : 'Custom domain, advanced styling, and zero branding.',
       price: paidPlans.pro[interval],
       features: ar
-        ? ['ميزات الخطة المجانية', 'نطاق مخصص بعد التحقق والإعداد', 'إزالة شارة المنصة وتخصيص CSS', 'جدولة الروابط وتتبع الحملات']
-        : ['Everything in Free', 'Custom domain after DNS verification and hosting/TLS setup', 'Custom CSS and custom font URL settings', 'Link scheduling and UTM campaign tracking', 'Google Analytics and Meta Pixel settings', 'Remove Liinx branding'],
+        ? [
+            'كل ما تتضمنه الخطة المجانية',
+            'حتى 5 ملفات شخصية ومواقع مصغرة',
+            'نطاق مخصص مع تشفير HTTPS تلقائي',
+            'إزالة شارة ليينكس بالكامل',
+            'تخصيص CSS وخطوط ويب إضافية',
+            'جدولة الروابط وتتبع حملات UTM',
+            'ربط Google Analytics وبيكسل ميتا'
+          ]
+        : [
+            'Everything in Free',
+            'Up to 5 profiles / mini-sites under 1 account',
+            'Custom domain with automatic HTTPS',
+            'Remove all Liinx branding',
+            'Custom CSS styling & web font injection',
+            'Link scheduling & UTM campaign tracking',
+            'Google Analytics 4 & Meta Pixel integration'
+          ],
       highlight: true,
     },
     {
       id: 'studio' as const,
       name: paidPlans.studio.name,
+      audience: ar ? 'للوكالات والاستوديوهات والفرق' : 'For agencies, studios & multi-brand managers',
       icon: <Crown className="w-5 h-5 text-purple-600" />,
-      tagline: ar ? 'لإدارة عدة صفحات من حساب واحد.' : 'Manage multiple pages from one account.',
+      tagline: ar ? 'لإدارة حتى 25 صفحة مع واجهة برمجية كاملة.' : 'Scale across 25 micro-sites with public REST API.',
       price: paidPlans.studio[interval],
       features: ar
-        ? ['ميزات Pro', 'إدارة ملفات متعددة', 'مفاتيح REST API']
-        : ['Everything in Pro', 'Multiple profile management', 'REST API keys'],
+        ? [
+            'كل ميزات خطة Pro المتقدمة',
+            'إدارة حتى 25 ملفاً شخصياً مستقلاً',
+            'مفاتيح واجهة برمجية كاملة (REST API v1)',
+            'نطاق مخصص لكل ملف وموقع مصغر',
+            'تصدير غير محدود لبيانات المشتركين (CSV)',
+            'مساحة عمل مجهزة لفرق العمل المتعددة',
+            'أولوية الدعم الفني والويبهوكس'
+          ]
+        : [
+            'Everything in Pro',
+            'Up to 25 distinct profiles & mini-sites',
+            'Public REST API keys (/api/v1 access)',
+            'Custom domain support on every profile',
+            'Unlimited CSV export for subscribers & leads',
+            'Team-ready multi-brand workspace',
+            'Priority technical support & webhooks'
+          ],
       highlight: false,
     },
   ];
@@ -59,10 +106,10 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
             <span>{ar ? 'الأسعار' : 'Pricing'}</span>
           </div>
           <Heading className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-3 text-balance">
-            {ar ? 'اختر خطتك' : 'Choose your plan'}
+            {ar ? 'اختر خطتك المناسبة' : 'Transparent pricing for every scale'}
           </Heading>
           <p className="text-base text-neutral-600 max-w-lg mx-auto text-pretty">
-            {ar ? 'ابدأ بالخطة المجانية. الاشتراكات المدفوعة تُحصّل عبر Stripe.' : 'Start with the free plan. Paid subscriptions are billed through Stripe.'}
+            {ar ? 'ابدأ مجاناً وقم بالترقية عند الحاجة. لا توجد عمولات خفية على مبيعاتك.' : 'Start free and scale as your brand grows. Zero transaction commissions.'}
           </p>
         </div></Reveal>
 
@@ -88,11 +135,11 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
 
         {error && (
           <p role="alert" className="text-sm text-red-700 text-center mb-6 p-3 rounded-xl bg-red-50 border border-red-200 max-w-md mx-auto">
-            {ar ? 'تعذّر فتح صفحة الدفع. سجّل الدخول وحاول مجدداً. قد تكون خدمة الدفع غير مهيأة.' : 'Could not open checkout. Sign in and retry. Billing may not be configured.'}
+            {ar ? 'خدمة الدفع غير متاحة مؤقتاً. يُرجى تسجيل الدخول والمحاولة لاحقاً أو التواصل مع الدعم.' : 'Checkout is temporarily unavailable. Please try again or contact support.'}
           </p>
         )}
 
-{/* Plans Grid */}
+        {/* Plans Grid */}
         <Reveal stagger><div className="grid md:grid-cols-3 gap-6">
           {plans.map(plan => (
             <article
@@ -104,8 +151,8 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               }`}
             >
               {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-amber-400 text-neutral-900 text-[10px] font-bold uppercase tracking-wider">
-                  {ar ? 'الأكثر شعبية' : 'Most Popular'}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-amber-400 text-neutral-900 text-[10px] font-bold uppercase tracking-wider shadow-xs">
+                  {ar ? 'موصى به' : 'Recommended'}
                 </div>
               )}
 
@@ -118,7 +165,14 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                   {plan.name}
                 </h3>
               </div>
-              <p className={`text-sm leading-relaxed -mt-3 ${plan.highlight ? 'text-neutral-300' : 'text-neutral-600'}`}>{plan.tagline}</p>
+              <div className="space-y-1 -mt-3">
+                <p className={`text-xs font-semibold ${plan.highlight ? 'text-amber-400' : 'text-amber-700'}`}>
+                  {plan.audience}
+                </p>
+                <p className={`text-sm leading-relaxed ${plan.highlight ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                  {plan.tagline}
+                </p>
+              </div>
 
               {/* Price */}
               <div>

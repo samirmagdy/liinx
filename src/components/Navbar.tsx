@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { api } from '../services/api';
+import React, { useState, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
@@ -9,14 +8,13 @@ import {
   X, 
   Smartphone, 
   LogOut, 
-  Check, 
   Globe,
   ExternalLink,
   Settings
 } from 'lucide-react';
 import { usePanelMotion } from '../animations/usePanelMotion';
 import { brand } from '../config/brand';
-import { LoadingLogo } from '../components/LoadingLogo';
+import { LiinxLogo } from './LiinxLogo';
 import { UserMenuDropdown } from './UserMenuDropdown';
 
 interface NavbarProps {
@@ -36,32 +34,25 @@ interface MobileMenuProps {
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onLogout }) => (
   <div id="mobile-navigation" className="xl:hidden border-t border-neutral-200/60 bg-neutral-50 px-4 pt-3 pb-6 space-y-3">
-    <div className="grid grid-cols-2 gap-2">
-      <Link
-        href="/"
-        onClick={onClose}
-        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
-      >
-        {lang === 'ar' ? 'الرئيسية' : 'Overview'}
-      </Link>
+    <div className="grid grid-cols-3 gap-2">
       <Link
         href="/features"
         onClick={onClose}
-        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
+        className="p-3 rounded-xl bg-white border border-neutral-200 text-center text-xs font-semibold block hover:border-neutral-300"
       >
         {t.nav.features}
       </Link>
       <Link
         href="/templates"
         onClick={onClose}
-        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
+        className="p-3 rounded-xl bg-white border border-neutral-200 text-center text-xs font-semibold block hover:border-neutral-300"
       >
         {t.nav.templates}
       </Link>
       <Link
         href="/pricing"
         onClick={onClose}
-        className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 text-left text-xs font-semibold block"
+        className="p-3 rounded-xl bg-white border border-neutral-200 text-center text-xs font-semibold block hover:border-neutral-300"
       >
         {t.nav.pricing}
       </Link>
@@ -93,7 +84,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
               className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
               <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
-              <span>{ui("View Live Bio")}</span>
+              <span>{ui("View page")}</span>
             </Link>
             <Link
               href="/studio"
@@ -101,7 +92,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
               className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
               <Smartphone className="w-3.5 h-3.5 text-amber-600" />
-              <span>{ui("Studio Builder")}</span>
+              <span>{t.nav.studio}</span>
             </Link>
             <Link
               href="/studio?tab=settings"
@@ -109,7 +100,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
               className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
               <Settings className="w-3.5 h-3.5 text-neutral-500" />
-              <span>{ui("Account Settings")}</span>
+              <span>{ui("Settings")}</span>
             </Link>
           </div>
         </div>
@@ -118,16 +109,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
           <Link
             href="/login"
             onClick={onClose}
-            className="py-2.5 text-center text-xs font-semibold bg-neutral-50 border border-neutral-200 rounded-xl"
+            className="py-2.5 text-center text-xs font-semibold bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50"
           >
-            {t.nav.login}
+            {lang === 'ar' ? 'تسجيل الدخول' : 'Sign in'}
           </Link>
           <Link
             href="/register"
             onClick={onClose}
-            className="py-2.5 text-center text-xs font-semibold bg-neutral-900 text-white rounded-xl"
+            className="py-2.5 text-center text-xs font-semibold bg-neutral-900 text-white rounded-xl hover:bg-black"
           >
-            {t.nav.register}
+            {lang === 'ar' ? 'أنشئ صفحتك' : 'Create your page'}
           </Link>
         </div>
       )}
@@ -136,8 +127,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
 );
 
 export const Navbar: React.FC<NavbarProps> = ({
-  activeView = 'home',
-  onClaimClick
+  activeView = 'home'
 }) => {
   const { tr: ui } = useUiLanguage();
   const [, setLocation] = useLocation();
@@ -146,44 +136,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   usePanelMotion(headerRef, mobileMenuOpen, '#mobile-navigation a, #mobile-navigation button');
-  const [quickHandle, setQuickHandle] = useState('');
-  const [handleStatus, setHandleStatus] = useState<'idle' | 'available'>('idle');
-
-  const handleHandleChange = (val: string) => {
-    const clean = val.toLowerCase().replace(/[^a-z0-9_]/g, '');
-    setQuickHandle(clean);
-    setHandleStatus('idle');
-  };
-
-  useEffect(() => {
-    let active = true;
-    if (quickHandle.length < 3) return;
-    const timer = setTimeout(() => {
-      api.auth.checkUsername(quickHandle).then(result => {
-        if (active) setHandleStatus(result.available ? 'available' : 'idle');
-      }).catch(() => { if (active) setHandleStatus('idle'); });
-    }, 300);
-    return () => { active = false; clearTimeout(timer); };
-  }, [quickHandle]);
-
-  const handleClaim = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (quickHandle) {
-      if (onClaimClick) {
-        onClaimClick(quickHandle);
-      } else {
-        setLocation(`/register?username=${quickHandle}`);
-      }
-    } else {
-      setLocation('/register');
-    }
-  };
 
   const navLinkClass = (active: boolean) =>
     `px-3 py-1.5 rounded-full text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
       active
-        ? 'text-neutral-900 bg-neutral-100 font-bold'
-        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/70'
+        ? 'text-neutral-900 bg-neutral-200/80 font-bold'
+        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
     }`;
 
   const toggleLanguage = () => {
@@ -194,28 +152,28 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-neutral-200/70 bg-neutral-100/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
         
-        {/* Brand Logo & Tag */}
-        <div className="flex items-center gap-7">
+        {/* Brand Logo & Navigation */}
+        <div className="flex items-center gap-8">
           <Link 
             href="/"
             className="flex items-center gap-2.5 text-left group focus:outline-none focus:ring-2 focus:ring-neutral-900/20 rounded-lg cursor-pointer"
           >
-            <LoadingLogo loading={false} className="relative w-9 h-9 rounded-xl bg-neutral-50 text-neutral-900 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform" />
+            <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center group-hover:scale-105 transition-transform">
+              <LiinxLogo variant="light" size="sm" />
+            </div>
             
             <div className="flex flex-col">
               <span className="font-brand font-extrabold text-lg tracking-tight text-neutral-900 leading-none">
                 {brand.productShortName}
               </span>
               <span className="text-[10px] text-neutral-500 font-medium tracking-wide">
-                {ui("Micro-site builder")}</span>
+                {ui("Design-first mini-sites")}
+              </span>
             </div>
           </Link>
 
           {/* Desktop Nav Links */}
           <nav className="hidden xl:flex items-center gap-1">
-            <Link href="/" className={navLinkClass(activeView === 'home')}>
-              {lang === 'ar' ? 'الرئيسية' : 'Overview'}
-            </Link>
             <Link href="/features" className={navLinkClass(activeView === 'features')}>
               {t.nav.features}
             </Link>
@@ -225,10 +183,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Link href="/pricing" className={navLinkClass(activeView === 'pricing')}>
               {t.nav.pricing}
             </Link>
-            <Link href="/studio" className={`flex items-center gap-1.5 ${navLinkClass(activeView === 'builder')}`}>
-              <Smartphone className="w-3.5 h-3.5 text-amber-600" />
-              <span>{t.nav.studio}</span>
-            </Link>
+            {user && (
+              <Link href="/studio" className={`flex items-center gap-1.5 ${navLinkClass(activeView === 'builder')}`}>
+                <Smartphone className="w-3.5 h-3.5 text-amber-600" />
+                <span>{t.nav.studio}</span>
+              </Link>
+            )}
           </nav>
         </div>
 
@@ -238,65 +198,48 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={toggleLanguage}
             title={lang === 'en' ? 'Switch to Arabic (العربية)' : 'Switch to English'}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-200/60 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer"
           >
             <Globe className="w-3.5 h-3.5 text-neutral-500" />
             <span>{lang === 'en' ? 'العربية' : 'English'}</span>
           </button>
 
-          {/* Quick claim handle if not logged in */}
-          {!user && (
-            <form onSubmit={handleClaim} className="relative flex items-center">
-              <div className="flex items-center bg-neutral-50 border border-neutral-300 rounded-full pl-3 pr-1.5 py-1 text-xs shadow-xs focus-within:ring-2 focus-within:ring-neutral-900/20 focus-within:border-neutral-900 transition-colors">
-                <span className="text-neutral-500 font-mono text-[11px] select-none pr-0.5">liinx.app/@</span>
-                <input
-                  id="navbar-quick-handle"
-                  name="quickHandle"
-                  autoComplete="username"
-                  aria-label={t.hero.claimPlaceholder} dir="ltr"
-                  type="text"
-                  value={quickHandle}
-                  onChange={(e) => handleHandleChange(e.target.value)}
-                  placeholder={t.hero.claimPlaceholder}
-                  className="w-24 outline-none font-mono text-xs text-neutral-900 bg-transparent"
-                  spellCheck={false}
-                />
-                {handleStatus === 'available' && (
-                  <span className="mr-1 text-emerald-600 flex items-center" title={ui("Available")}>
-                    <Check className="w-3 h-3 stroke-[3]" />
-                  </span>
-                )}
-                <button
-                  type="submit"
-                  className="bg-neutral-900 hover:bg-neutral-800 text-white px-2.5 py-1 rounded-full text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                >
-                  <span>{lang === 'ar' ? 'احجز' : 'Claim'}</span>
-                  <ArrowRight className={`w-2.5 h-2.5 ${isRtl ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
-            </form>
-          )}
-
           {user ? (
-            <UserMenuDropdown user={user} onLogout={logout} />
+            <div className="flex items-center gap-2.5">
+              <Link
+                href={`/@${user.username}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-200 hover:bg-neutral-200/60 text-xs font-semibold text-neutral-700 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
+                <span>{ui("View page")}</span>
+              </Link>
+              <Link
+                href="/studio"
+                className="px-4 py-2 rounded-full bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>{t.nav.studio}</span>
+              </Link>
+              <UserMenuDropdown user={user} onLogout={logout} />
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-3.5 py-2 text-xs font-semibold text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 cursor-pointer"
+                className="px-3.5 py-2 text-xs font-semibold text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200/60 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 cursor-pointer"
               >
-                {t.nav.login}
+                {lang === 'ar' ? 'تسجيل الدخول' : 'Sign in'}
               </Link>
               <Link
                 href="/register"
                 className="px-4 py-2 rounded-full bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
               >
-                <span>{t.nav.register}</span>
+                <span>{lang === 'ar' ? 'أنشئ صفحتك' : 'Create your page'}</span>
                 <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
               </Link>
             </div>
           )}
         </div>
+
 
         {/* Mobile menu trigger */}
         <div className="flex xl:hidden items-center gap-2">

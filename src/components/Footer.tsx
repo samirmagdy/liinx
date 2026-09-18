@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { ResourceModal, type ResourceDocType } from './ResourceModal';
 import { brand } from '../config/brand';
-import { LoadingLogo } from '../components/LoadingLogo';
+import { LiinxLogo } from './LiinxLogo';
 import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
-import { Globe } from 'lucide-react';
+import { Globe, ShieldCheck } from 'lucide-react';
 
 interface FooterProps {
   onSelectView?: (view: 'home' | 'builder' | 'templates' | 'pricing' | 'features' | 'about' | 'contact') => void;
@@ -24,12 +24,12 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
       <footer className="bg-[#111315] text-[#A1A1AA] pt-16 pb-12 text-xs border-t border-neutral-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-10 pb-12 border-b border-neutral-800">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-10 pb-12 border-b border-neutral-800">
             
             {/* Brand Column (2 cols) */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
-                <LoadingLogo loading={false} size="sm" className="flex items-center justify-center" />
+                <LiinxLogo variant="dark" size="sm" />
                 <span className="font-brand font-extrabold text-xl tracking-tight text-white">
                   {brand.productShortName}
                 </span>
@@ -39,15 +39,25 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                 {t.footer.tagline}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 max-w-sm">
+                <div className="flex items-center gap-2 text-neutral-300 font-mono text-[11px] font-semibold mb-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
+                  <span>{ui("Creator Ownership Guarantee")}</span>
+                </div>
+                <p className="text-[11px] text-neutral-400 leading-normal">
+                  {ui("Your audience, your domain, your data. Zero commission on sales and instant CSV export at any time.")}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-1">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="text-[11px] text-neutral-400">{ui("Creator pages & booking")}</span>
+                  <span className="text-[11px] text-neutral-400">{ui("99.9% Uptime • Global Edge CDN")}</span>
                 </div>
 
                 <button
                   onClick={toggleLanguage}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-[11px] text-neutral-300 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-[11px] text-neutral-300 transition-colors cursor-pointer"
                 >
                   <Globe className="w-3 h-3 text-amber-500" />
                   <span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span>
@@ -85,12 +95,56 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                     onClick={() => setActiveModalDoc('dns-guide')}
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    {ui("Custom Domains")}</button>
+                    {ui("Custom Domains")}
+                  </button>
                 </li>
               </ul>
             </div>
 
-            {/* Nav Column 2: Company & Resources */}
+            {/* Nav Column 2: Resources */}
+            <div className="space-y-3">
+              <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{ui("Resources")}</h4>
+              <ul className="space-y-2">
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => setActiveModalDoc('creator-handbook')}
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                  >
+                    {ui("Creator Handbook")}
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => setActiveModalDoc('switch-linktree')}
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                  >
+                    {ui("Switch from Linktree")}
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => setActiveModalDoc('api-docs')}
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                  >
+                    {ui("Public REST API")}
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    type="button"
+                    onClick={() => setActiveModalDoc('security')}
+                    className="hover:text-white transition-colors cursor-pointer text-left block"
+                  >
+                    {ui("Security & Privacy")}
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Nav Column 3: Company */}
             <div className="space-y-3">
               <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.company}</h4>
               <ul className="space-y-2">
@@ -105,33 +159,19 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   </Link>
                 </li>
                 <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('creator-handbook')}
+                  <a 
+                    href="/@elenarostova" 
+                    target="_blank" 
+                    rel="noreferrer"
                     className="hover:text-white transition-colors cursor-pointer text-left block"
                   >
-                    {ui("Creator Handbook")}</button>
-                </li>
-                <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('switch-linktree')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
-                  >
-                    {ui("Switch from Linktree")}</button>
-                </li>
-                <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('api-docs')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
-                  >
-                    {ui("Public REST API")}</button>
+                    {ui("Live Showcase")} ↗
+                  </a>
                 </li>
               </ul>
             </div>
 
-            {/* Nav Column 3: Legal & Trust */}
+            {/* Nav Column 4: Legal */}
             <div className="space-y-3">
               <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{t.footer.legal}</h4>
               <ul className="space-y-2">
@@ -144,14 +184,6 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <Link href="/terms" className="hover:text-white transition-colors cursor-pointer text-left block">
                     {t.footer.terms}
                   </Link>
-                </li>
-                <li>
-                  <button 
-                    type="button"
-                    onClick={() => setActiveModalDoc('security')}
-                    className="hover:text-white transition-colors cursor-pointer text-left block"
-                  >
-                    {ui("Security")}</button>
                 </li>
                 <li>
                   <Link href="/contact" className="hover:text-white transition-colors cursor-pointer text-left block">
@@ -170,6 +202,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <Link href="/privacy" className="hover:text-white underline-offset-2 hover:underline">{ui("Privacy controls")}</Link>
               <span>•</span>
               <span>{ui("Account-owned content")}</span>
+              <span>•</span>
+              <span>{ui("0% transaction cut")}</span>
             </div>
           </div>
 

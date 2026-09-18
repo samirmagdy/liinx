@@ -66,27 +66,30 @@ return (
             
             {/* Top Badge */}
             <div data-hero="eyebrow" className="inline-flex">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-800 mb-5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>{t.hero.badge}</span>
-            </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-800 mb-5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>{isRtl ? 'موقع مصغر يركز على التصميم، وليس مجرد قائمة روابط' : 'A design-first mini website, not a list of links'}</span>
+              </div>
             </div>
 
             {/* Main Headline */}
-            <div><h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-6 text-balance">
-              {t.hero.headline} <span className="text-neutral-500 font-medium">{t.hero.headlineHighlight}</span>
-            </h1></div>
+            <div>
+              <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-6 text-balance">
+                {t.hero.headline} <span className="text-neutral-500 font-medium">{t.hero.headlineHighlight}</span>
+              </h1>
+            </div>
 
-            {/* Subtitle */}
-              <div data-hero="copy"><p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl mb-5 text-pretty">
-                {t.hero.subheadline}
-              </p></div>
-              <div data-hero="copy"><p className="text-sm text-neutral-500 max-w-xl mb-8 text-pretty">
-                {tr('One designed page for links, supported media, newsletter capture, and Calendly bookings — with your own domain on paid plans.')}
-              </p></div>
+            {/* Subtitle - One concise benefit statement */}
+            <div data-hero="copy">
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl mb-8 text-pretty">
+                {isRtl 
+                  ? 'أنشئ موقعاً مصغراً فائق الأناقة لكل ما تصنعه وتشاركه وتبيعه. مع مشغلات صوت وفيديو وجدولة مواعيد ونطاق مخصص خاص بك.'
+                  : 'Build a high-craft mini website for everything you make, share, and sell. Featuring inline audio players, video embeds, scheduling, and your own custom domain.'}
+              </p>
+            </div>
 
-            {/* Claim Handle Hero Form */}
-            <div data-hero="action" className="w-full max-w-xl mb-8"><div className="space-y-4">
+            {/* Primary Action: Claim Handle Form */}
+            <div data-hero="action" className="w-full max-w-xl mb-6">
               <form 
                 onSubmit={handleClaim}
                 className="p-1.5 bg-neutral-50 rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(24,24,23,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
@@ -112,56 +115,44 @@ return (
                   type="submit"
                   className="px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-full bg-neutral-900 hover:bg-black text-white text-sm font-bold tracking-tight transition-colors active:scale-[0.985] flex items-center justify-center gap-2 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
                 >
-                  <span>{t.hero.claimButton}</span>
+                  <span>{isRtl ? 'أنشئ صفحتك' : 'Create your page'}</span>
                   <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
                 </button>
               </form>
 
-              {/* Secondary CTA & Assurance */}
-              <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-500 px-2">
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              {/* Secondary CTAs & Concise Guarantees */}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs px-2">
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setLocation('/@elenarostova')}
+                    className="font-bold text-neutral-900 hover:text-amber-600 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>{isRtl ? 'معاينة صفحة حية ↗' : 'View live example ↗'}</span>
+                  </button>
+                  <span className="text-neutral-300">•</span>
+                  <button
+                    type="button"
+                    onClick={() => setLocation('/templates')}
+                    className="font-semibold text-neutral-600 hover:text-neutral-900 flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <span>{t.hero.exploreTemplates}</span>
+                    <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 text-neutral-500">
                   <span className="flex items-center gap-1">
                     <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
                     <span>{t.hero.noCreditCard}</span>
                   </span>
                   <span className="flex items-center gap-1">
                     <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                    <span>{t.hero.customDomainIncluded}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
                     <span>{t.hero.zeroCommission}</span>
                   </span>
                 </div>
-
-                <button
-                  onClick={() => setLocation('/templates')}
-                  className="text-neutral-900 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t.hero.exploreTemplates}</span>
-                  <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
-                </button>
-                <button
-                  onClick={() => setLocation(hasAnyImporter ? '/register?after=import' : '/register')}
-                  className="text-neutral-600 font-semibold hover:text-neutral-900 hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{hasAnyImporter ? tr('Moving from Linktree? Import your links') : tr('Moving from Linktree? Easy setup in minutes')}</span>
-                  <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
-                </button>
               </div>
-            </div></div>
-
-            {/* Micro-proof indicators */}
-            <div className="pt-4 border-t border-neutral-200 w-full flex flex-wrap gap-x-6 gap-y-2 text-xs text-neutral-500"><div>
-              <span className="inline-flex items-center gap-1.5 font-medium">
-                <MousePointer2 className="w-3.5 h-3.5 text-amber-600" />
-                <span>{t.hero.microProof1}</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 font-medium">
-                <LayoutTemplate className="w-3.5 h-3.5 text-amber-600" />
-                <span>{t.hero.microProof2}</span>
-              </span>
-            </div></div>
+            </div>
 
           </div>
 
@@ -221,9 +212,17 @@ return (
             </div></div>
 
             {/* Live Interactive Device Preview with Apple-style motion */}
-            <div data-hero="visual" className="w-full max-w-[380px]"><div
-              className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800"
-            >
+            <div data-hero="visual" className="w-full max-w-[380px]">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-[11px] font-mono font-medium text-neutral-500 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  {isRtl ? 'نموذج توضيحي' : 'Demo Profile'}
+                </span>
+                <span className="text-[10px] font-mono text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200">
+                  {isRtl ? 'بيانات تجريبية' : 'Sample Data'}
+                </span>
+              </div>
+              <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
               <div 

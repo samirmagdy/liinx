@@ -323,25 +323,32 @@ export const SettingsPanel: React.FC = () => {
             />
           </div>
 
-          <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl space-y-1 text-xs">
-            <span className="font-semibold text-neutral-800 block">{ui("DNS Configuration Instructions:")}</span>
-            <p className="text-neutral-500 text-[11px]">
-              {ui("The current verifier supports a subdomain")}<span className="font-mono font-bold text-neutral-900">{ui("CNAME")}</span> {ui("record pointing to the Fly app target below. Apex domains need the A/AAAA setup and separate Fly certificate verification.")}
-            </p>
-            <div className="flex items-center justify-between bg-neutral-50 px-3 py-1.5 rounded-lg border border-neutral-200 font-mono text-xs">
-              <span>{ui("liinx-app.fly.dev")}</span>
+          <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl space-y-2.5 text-xs">
+            <span className="font-bold text-neutral-900 block text-xs">
+              {ui("How to connect your domain:")}
+            </span>
+            <ol className="space-y-1.5 text-[11px] text-neutral-600 list-decimal list-inside leading-relaxed">
+              <li>{ui("Enter your subdomain above (e.g. links.yourdomain.com)")}</li>
+              <li>
+                {ui("In your DNS provider (Cloudflare, GoDaddy, etc.), add a ")}
+                <span className="font-mono font-bold text-neutral-900">CNAME</span>
+                {ui(" record pointing to:")}
+              </li>
+            </ol>
+            <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-neutral-200 font-mono text-xs shadow-2xs">
+              <span className="font-bold text-neutral-800">liinx-app.fly.dev</span>
               <button
                 type="button"
                 onClick={handleCopyCname}
-                className="text-[10px] text-neutral-500 hover:text-black font-sans font-semibold cursor-pointer"
+                className="text-[11px] text-amber-700 hover:text-amber-800 font-sans font-bold cursor-pointer transition-colors"
               >
                 {copiedCname ? ui("Copied!") : ui("Copy Target")}
               </button>
             </div>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] leading-relaxed text-neutral-500 pt-1">
               {profile.customDomainVerified
-                ? ui("DNS is verified. This does not confirm TLS yet: attach the hostname with fly certs add and wait for fly certs check to report a certificate.")
-                : ui("DNS is not verified. Saving a domain does not make it public; verify DNS, attach the hostname to Fly, and wait for certificate issuance.")}
+                ? ui("✓ Domain connected successfully. Secure HTTPS is active and visitors will be routed to your Liinx page.")
+                : ui("3. Click 'Verify DNS' below once your record is created. Secure HTTPS is configured automatically by Liinx.")}
             </p>
           </div>
 

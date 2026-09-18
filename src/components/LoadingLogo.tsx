@@ -1,23 +1,25 @@
 import React from 'react';
 import { brand } from '../config/brand';
+import { LiinxLogo } from './LiinxLogo';
 
 interface LoadingLogoProps {
   loading?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'light' | 'dark' | 'auto';
   className?: string;
 }
 
 /**
  * Reusable animated logo component that shows a premium branded loading
- * spinner with pulsating bars when loading, or the regular logo mark otherwise.
+ * spinner with pulsating bars when loading, or the regular LiinxLogo mark otherwise.
  */
 export const LoadingLogo: React.FC<LoadingLogoProps> = ({
   loading = false,
   size = 'md',
+  variant = 'light',
   className = ''
 }) => {
   const sizeClasses = { sm: 'w-8 h-8', md: 'w-9 h-9', lg: 'w-14 h-14' };
-  const textClass = { sm: 'text-sm', md: 'text-lg', lg: 'text-xl' };
 
   if (loading) {
     return (
@@ -36,10 +38,12 @@ export const LoadingLogo: React.FC<LoadingLogoProps> = ({
   }
 
   return (
-    <div className={`${sizeClasses[size]} rounded-xl bg-neutral-50 text-${brand.colors.ink} flex items-center justify-center ${className} transition-transform`}>
-      <span className={`font-brand font-extrabold ${textClass[size]} tracking-tight`}>
-        {brand.logoMark}
-      </span>
+    <div
+      className={`${sizeClasses[size]} rounded-xl ${
+        variant === 'dark' ? 'bg-neutral-900 border border-neutral-800' : 'bg-neutral-100/80 border border-neutral-200/80'
+      } flex items-center justify-center ${className} transition-transform`}
+    >
+      <LiinxLogo variant={variant} size={size === 'lg' ? 'md' : 'sm'} />
     </div>
   );
 };

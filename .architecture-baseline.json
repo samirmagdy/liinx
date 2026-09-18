@@ -17,7 +17,7 @@
   ],
   "files": {
     "src/App.tsx": {
-      "lines": 355,
+      "lines": 360,
       "functions": []
     },
     "src/animations/gsap.ts": {
@@ -56,45 +56,62 @@
       "functions": []
     },
     "src/components/ComparisonSection.tsx": {
-      "lines": 85,
-      "functions": []
+      "lines": 289,
+      "functions": [
+        {
+          "name": "ComparisonSection",
+          "lines": 268,
+          "complexity": 42,
+          "maxDepth": 2
+        }
+      ]
     },
     "src/components/FaqSection.tsx": {
       "lines": 94,
       "functions": []
     },
     "src/components/FeaturesSection.tsx": {
-      "lines": 218,
+      "lines": 327,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 201,
-          "complexity": 21,
+          "lines": 303,
+          "complexity": 49,
+          "maxDepth": 1
+        },
+        {
+          "name": "<anonymous>",
+          "lines": 133,
+          "complexity": 8,
           "maxDepth": 1
         }
       ]
     },
     "src/components/Footer.tsx": {
-      "lines": 194,
+      "lines": 223,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 182,
+          "lines": 210,
           "complexity": 4,
           "maxDepth": 1
         }
       ]
     },
     "src/components/Hero.tsx": {
-      "lines": 264,
+      "lines": 263,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 237,
-          "complexity": 18,
+          "lines": 236,
+          "complexity": 21,
           "maxDepth": 2
         }
       ]
+    },
+    "src/components/LiinxLogo.tsx": {
+      "lines": 100,
+      "functions": []
     },
     "src/components/LinktreeImporterModal.tsx": {
       "lines": 397,
@@ -107,6 +124,10 @@
         }
       ]
     },
+    "src/components/LoadingLogo.tsx": {
+      "lines": 49,
+      "functions": []
+    },
     "src/components/LoadingScreen.tsx": {
       "lines": 167,
       "functions": []
@@ -116,12 +137,12 @@
       "functions": []
     },
     "src/components/Navbar.tsx": {
-      "lines": 300,
+      "lines": 284,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 275,
-          "complexity": 23,
+          "lines": 155,
+          "complexity": 13,
           "maxDepth": 2
         }
       ]
@@ -131,18 +152,18 @@
       "functions": []
     },
     "src/components/PhonePreview.tsx": {
-      "lines": 730,
+      "lines": 738,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 684,
-          "complexity": 89,
+          "lines": 691,
+          "complexity": 88,
           "maxDepth": 5
         },
         {
           "name": "renderProfileContent",
-          "lines": 567,
-          "complexity": 59,
+          "lines": 573,
+          "complexity": 58,
           "maxDepth": 5
         },
         {
@@ -154,18 +175,18 @@
       ]
     },
     "src/components/PricingSection.tsx": {
-      "lines": 183,
+      "lines": 237,
       "functions": [
         {
           "name": "PricingSection",
-          "lines": 176,
-          "complexity": 47,
+          "lines": 230,
+          "complexity": 51,
           "maxDepth": 3
         },
         {
           "name": "<anonymous>",
-          "lines": 76,
-          "complexity": 27,
+          "lines": 83,
+          "complexity": 28,
           "maxDepth": 3
         }
       ]
@@ -197,19 +218,38 @@
       "functions": []
     },
     "src/components/TemplatesSection.tsx": {
-      "lines": 119,
+      "lines": 115,
+      "functions": []
+    },
+    "src/components/TrustProofSection.tsx": {
+      "lines": 199,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 103,
-          "complexity": 13,
-          "maxDepth": 2
+          "lines": 185,
+          "complexity": 23,
+          "maxDepth": 1
         }
       ]
+    },
+    "src/components/UserMenuDropdown.tsx": {
+      "lines": 165,
+      "functions": []
     },
     "src/components/ViewportPreview.tsx": {
       "lines": 36,
       "functions": []
+    },
+    "src/components/WhyLiinxSection.tsx": {
+      "lines": 135,
+      "functions": [
+        {
+          "name": "<anonymous>",
+          "lines": 120,
+          "complexity": 21,
+          "maxDepth": 1
+        }
+      ]
     },
     "src/components/motion/AccordionPanel.tsx": {
       "lines": 26,
@@ -371,11 +411,11 @@
       ]
     },
     "src/features/builder/components/panels/SettingsPanel.tsx": {
-      "lines": 793,
+      "lines": 800,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 779,
+          "lines": 786,
           "complexity": 60,
           "maxDepth": 4
         }
@@ -386,18 +426,11 @@
       "functions": []
     },
     "src/features/builder/components/social/SocialLinksEditor.tsx": {
-      "lines": 126,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 119,
-          "complexity": 5,
-          "maxDepth": 1
-        }
-      ]
+      "lines": 177,
+      "functions": []
     },
     "src/features/builder/context/BuilderContext.tsx": {
-      "lines": 690,
+      "lines": 691,
       "functions": [
         {
           "name": "<anonymous>",
@@ -475,13 +508,13 @@
       ]
     },
     "src/features/builder/hooks/useSocialLinks.ts": {
-      "lines": 151,
+      "lines": 168,
       "functions": [
         {
           "name": "useSocialLinks",
-          "lines": 130,
-          "complexity": 25,
-          "maxDepth": 2
+          "lines": 114,
+          "complexity": 19,
+          "maxDepth": 1
         }
       ]
     },
@@ -505,7 +538,7 @@
       "functions": []
     },
     "src/features/builder/utils/builder.utils.ts": {
-      "lines": 49,
+      "lines": 58,
       "functions": []
     },
     "src/features/public-bio/components/PublicBioHeader.tsx": {
@@ -539,7 +572,7 @@
       "functions": []
     },
     "src/features/public-bio/components/PublicProfileFooter.tsx": {
-      "lines": 93,
+      "lines": 111,
       "functions": []
     },
     "src/features/public-bio/components/PublicProfileHeader.tsx": {
@@ -745,22 +778,22 @@
       ]
     },
     "src/pages/LoginPage.tsx": {
-      "lines": 117,
+      "lines": 120,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 109,
+          "lines": 110,
           "complexity": 5,
           "maxDepth": 1
         }
       ]
     },
     "src/pages/RegisterPage.tsx": {
-      "lines": 355,
+      "lines": 361,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 319,
+          "lines": 324,
           "complexity": 33,
           "maxDepth": 3
         }
@@ -771,7 +804,7 @@
       "functions": []
     },
     "src/types.ts": {
-      "lines": 24,
+      "lines": 30,
       "functions": []
     },
     "src/utils/booking.ts": {

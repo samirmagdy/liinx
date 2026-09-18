@@ -42,11 +42,25 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
               {logoLabel}
             </span>
           ) : (
-            <LoadingLogo
-              loading={footerLogoLoading}
-              size="sm"
-              className="h-4 max-w-20 object-contain"
-            />
+            <>
+              {footerLogoLoading && (
+                <LoadingLogo
+                  loading={true}
+                  size="sm"
+                  className="h-4 max-w-20 object-contain"
+                />
+              )}
+              <img
+                src={profile.footerLogoUrl}
+                alt={logoLabel}
+                onLoad={() => setFooterLogoLoading(false)}
+                onError={() => {
+                  setFooterLogoFailed(true);
+                  setFooterLogoLoading(false);
+                }}
+                className={`h-4 max-w-20 object-contain ${footerLogoLoading ? 'hidden' : 'inline'}`}
+              />
+            </>
           );
           const logo = (
             <span

@@ -4,7 +4,7 @@ import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { brand } from '../config/brand';
-import { LoadingLogo } from '../components/LoadingLogo';
+import { LiinxLogo } from '../components/LiinxLogo';
 import { THEMES } from '../config/themes';
 import confetti from 'canvas-confetti';
 import {
@@ -146,8 +146,10 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
-          <LoadingLogo loading={false} size="md" className="w-9 h-9 rounded-xl bg-neutral-900 flex items-center justify-center text-white font-bold text-lg shadow-sm" />
+        <Link href="/" className="inline-flex items-center gap-2.5 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
+          <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center">
+            <LiinxLogo variant="light" size="sm" />
+          </div>
           <span className="font-bold text-xl tracking-tight text-neutral-900">{brand.productShortName}</span>
         </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">
@@ -310,39 +312,44 @@ export const RegisterPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="px-3.5 py-3 rounded-xl border border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleFinalSubmit}
-                  disabled={isSubmitting}
-                  className="px-3.5 py-3 rounded-xl border border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {ui('Skip for now')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>{ui("Creating your Studio...")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>{ui("Launch My Micro-Site")}</span>
-                      <Sparkles className="w-4 h-4 text-amber-400" />
-                    </>
-                  )}
-                </button>
+              <div className="space-y-3 pt-2">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="px-3.5 py-3 rounded-xl border border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+                    title={ui("Back to account details")}
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 py-3.5 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>{ui("Creating your Studio...")}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>{ui("Launch My Page")}</span>
+                        <Sparkles className="w-4 h-4 text-amber-400" />
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleFinalSubmit}
+                    disabled={isSubmitting}
+                    className="text-xs text-neutral-500 hover:text-neutral-900 hover:underline cursor-pointer disabled:opacity-50 transition-colors"
+                  >
+                    {ui("Skip customization (use default theme)")}
+                  </button>
+                </div>
               </div>
             </form>
           )}

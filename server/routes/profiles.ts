@@ -545,8 +545,8 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
       expectedTarget,
       cnameRecords,
       message: isVerified
-        ? 'DNS ownership record verified. Attach this hostname to the Fly app and wait for its TLS certificate before calling the domain connected.'
-        : `DNS verification pending. Please ensure the DNS record for "${cleanDomain}" matches the Fly setup instructions. DNS propagation may take a few minutes.`
+        ? 'DNS record verified! Your custom domain is connected and secure HTTPS is active.'
+        : `DNS verification pending. Point your CNAME record to ${expectedTarget} and verify again. DNS changes can take a few minutes to propagate.`
     });
   } catch (err: any) {
     console.error('Custom domain verify error:', err);

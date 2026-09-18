@@ -7,6 +7,8 @@ const Navbar = lazy(() => import('./components/Navbar').then(module => ({ defaul
 const Hero = lazy(() => import('./components/Hero').then(module => ({ default: module.Hero })));
 const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(module => ({ default: module.FeaturesSection })));
 const ComparisonSection = lazy(() => import('./components/ComparisonSection').then(module => ({ default: module.ComparisonSection })));
+const WhyLiinxSection = lazy(() => import('./components/WhyLiinxSection').then(module => ({ default: module.WhyLiinxSection })));
+const TrustProofSection = lazy(() => import('./components/TrustProofSection').then(module => ({ default: module.TrustProofSection })));
 const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
 const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
 const FaqSection = lazy(() => import('./components/FaqSection').then(module => ({ default: module.FaqSection })));
@@ -58,8 +60,11 @@ function HomePage() {
           onClaimUsername={handleClaimUsername}
           onOpenStudio={handleOpenStudio}
         />
-        <FeaturesSection onOpenStudio={handleOpenStudio} />
+        <ComparisonSection />
         <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
+        <FeaturesSection onOpenStudio={handleOpenStudio} />
+        <WhyLiinxSection />
+        <TrustProofSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
       </main>
