@@ -36,5 +36,9 @@ export const RESERVED_USERNAMES = [
   'webhooks',
   'sitemap',
   'robots',
-  'health'
+  'health',
+  'demo',
+  'elenarostova',
+  'marcusvance',
+  'sarahchen'
 ] as const;

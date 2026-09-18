@@ -71,17 +71,13 @@ export const TrustProofSection: React.FC = () => {
         {/* Section Header */}
         <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{ar ? 'استكشف ليينكس عملياً' : 'Explore Liinx in Action'}</span>
-            </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
               {ar ? 'صفحات تجريبية تفاعلية يمكنك استكشافها الآن' : 'Interactive demo pages you can explore right now'}
             </h2>
             <p className="text-base sm:text-lg text-neutral-600 leading-relaxed text-pretty">
               {ar
-                ? 'استكشف صفحات تجريبية تفاعلية لاختبار السرعة، والتصميم المتجاوب، وتضمين الوسائط مباشرة دون أي ادعاءات مضللة.'
-                : 'Explore interactive demo pages to test speed, responsive layouts, and rich media embeds firsthand.'}
+                ? 'استكشف صفحات تجريبية تفاعلية واكتشف ما يمكن لـ Liinx تقديمه ونشره.'
+                : 'Explore interactive demo pages and see exactly what Liinx can publish.'}
             </p>
           </div>
         </Reveal>
@@ -175,18 +171,18 @@ export const TrustProofSection: React.FC = () => {
                 {ar ? 'لماذا بنينا ليينكس' : 'The Philosophy Behind Liinx'}
               </h4>
               <p className="text-xs text-neutral-500">
-                {ar ? 'رسالة من فريق التصميم والهندسة' : 'A note on craft, aesthetics, and creator dignity'}
+                {ar ? 'رسالة من فريق التصميم والهندسة' : 'A note on craft, aesthetics, and creator ownership'}
               </p>
             </div>
           </div>
           <p className="text-sm text-neutral-700 leading-relaxed italic mb-4">
             {ar
-              ? '«لقد تحولت أدوات الروابط الحيوية إلى مصفوفات متشابهة من الأزرار المسطحة والمشتتة. بنينا ليينكس لنعيد الهيبة إلى هويتك الرقمية: صفحة مصغرة عالية الحرفية، وسائط تعمل مباشرة، نطاق خاص بك، وملكية كاملة لبياناتك دون عمولات خفية.»'
-              : '"Bio link tools gradually degenerated into cluttered, identical stacks of dull rectangular buttons. We built Liinx to bring craft and dignity back to your digital front door: a fast, high-aesthetic mini-website with playable media, custom typography, zero transaction commissions, and complete data ownership."'}
+              ? '«معظم أدوات الروابط الحيوية تركز فقط على وضع الروابط. بنينا ليينكس ليكون منصة متكاملة للعرض والهوية والملكية: صفحة مصغرة عالية الحرفية، وسائط تعمل مباشرة، نطاق خاص بك، وتصدير كامل لبياناتك دون عمولات خفية.»'
+              : '"Most bio tools optimize for links. Liinx is built for presentation, identity, and ownership: a fast, high-aesthetic mini-website with playable media, custom typography, zero transaction commissions, and complete data portability."'}
           </p>
           <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-2 border-t border-neutral-100">
             <span>Liinx Studio Team</span>
-            <span>{ar ? 'نماذج تجريبية ومعايير شفافة' : 'Interactive Demos & Craft Standards'}</span>
+            <span>{ar ? 'نماذج تجريبية ومعايير الحرفية' : 'Interactive Demos & Craft Standards'}</span>
           </div>
         </div>
 

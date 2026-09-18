@@ -7,6 +7,7 @@ import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import {
   RESERVED_USERNAMES,
   brand,
+  findSystemDemoProfile,
   isHttpUrl,
   isSafeCreatorCss,
   normalizeBlockExtra,
@@ -84,6 +85,36 @@ profilesRouter.get('/profiles/:username', (req, res) => {
     const profile = db.prepare('SELECT * FROM profiles WHERE lower(username) = ?').get(cleanUsername) as any;
 
     if (!profile) {
+      const systemDemo = findSystemDemoProfile(cleanUsername);
+      if (systemDemo) {
+        const demoPayload = {
+          ...systemDemo,
+          plan: 'pro',
+          hideBranding: false,
+          gaMeasurementId: null,
+          metaPixelId: null,
+          customDomain: null,
+          customCss: null,
+          customFontUrl: null,
+          shareTitle: `${systemDemo.displayName} (@${systemDemo.username}) | ${brand.productName}`,
+          shareDescription: systemDemo.bio,
+          shareImageUrl: null,
+          footerLogoUrl: null,
+          footerLogoLink: null,
+          footerLogoAlt: null,
+          backgroundMediaUrl: null,
+          backgroundMediaType: null,
+          pageRedirectUrl: null,
+          pageRedirectUntil: null,
+          customTheme: null,
+          socials: systemDemo.socials || [],
+          pages: [{ id: `page_${systemDemo.id}_home`, slug: 'home', title: 'Home', sortOrder: 0, isHome: true, published: true }],
+          page: { id: `page_${systemDemo.id}_home`, slug: 'home', title: 'Home', sortOrder: 0, isHome: true, published: true },
+          blocks: systemDemo.blocks || []
+        };
+        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+        return res.json(demoPayload);
+      }
       return res.status(404).json({ error: `Creator profile @${cleanUsername} was not found.` });
     }
 

@@ -23,6 +23,7 @@
     "architecture:check": "node scripts/check-architecture.mjs",
     "architecture:baseline": "node scripts/check-architecture.mjs --write-baseline",
     "verify:artifacts": "node scripts/verify-production-artifacts.mjs",
+    "verify:demos": "tsx scripts/verify-deployment-demos.mjs",
     "db:backup": "tsx scripts/backup-db.ts",
     "uploads:backup": "tsx scripts/backup-uploads.ts",
     "backup:verify": "tsx scripts/verify-restore.ts",

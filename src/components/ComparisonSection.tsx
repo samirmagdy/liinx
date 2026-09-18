@@ -38,8 +38,8 @@ export function ComparisonSection() {
             </h2>
             <p className="text-base sm:text-lg text-neutral-600 leading-relaxed text-pretty">
               {ar
-                ? 'شاهد الفرق بين القوائم المستطيلة المكررة وموقع ليينكس المصمم ليعكس هويتك الإبداعية بالكامل.'
-                : 'See why creators and studios choose Liinx over rigid, repetitive button aggregators.'}
+                ? 'شاهد الفرق بين قائمة روابط بسيطة وموقع مصغر مصمم بعناية يعكس هويتك الإبداعية.'
+                : 'See the difference between a link list and a design-first mini-site.'}
             </p>
           </div>
         </Reveal>
@@ -53,7 +53,7 @@ export function ComparisonSection() {
                 activeTab === 'generic' ? 'bg-white text-neutral-900 shadow-xs font-bold' : 'text-neutral-600'
               }`}
             >
-              {ar ? 'قائمة الروابط التقليدية' : 'Generic Link-List'}
+              {ar ? 'قائمة الروابط البسيطة' : 'Basic link list'}
             </button>
             <button
               onClick={() => setActiveTab('liinx')}
@@ -70,7 +70,7 @@ export function ComparisonSection() {
         <Reveal stagger>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start mb-8">
             
-            {/* Left: Generic Link-in-Bio */}
+            {/* Left: Basic Link List */}
             <div
               className={`rounded-3xl border border-neutral-300 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between transition-all ${
                 activeTab === 'liinx' ? 'hidden md:flex' : 'flex'
@@ -84,19 +84,19 @@ export function ComparisonSection() {
                     </div>
                     <div>
                       <h3 className="text-base font-bold text-neutral-800">
-                        {ar ? 'أدوات الروابط التقليدية' : 'Typical Link In Bio'}
+                        {ar ? 'قائمة الروابط البسيطة' : 'Basic link list'}
                       </h3>
                       <p className="text-xs text-neutral-500">
-                        {ar ? 'قائمة مستطيلات مكررة بدون هوية' : 'Rigid rectangle list, no media depth'}
+                        {ar ? 'قائمة أزرار مسطحة بصفحة واحدة وتحديث يدوي' : 'Flat button list, single scroll, manual updates'}
                       </p>
                     </div>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-600 text-[11px] font-mono">
-                    {ar ? 'محدود' : 'Generic'}
+                    {ar ? 'بسيط' : 'Basic'}
                   </span>
                 </div>
 
-                {/* Mockup Preview: Plain Linktree style */}
+                {/* Mockup Preview: Plain link list style */}
                 <div className="rounded-2xl border border-neutral-200 bg-neutral-100/60 p-5 space-y-3 mb-6 max-w-sm mx-auto">
                   <div className="text-center pb-2">
                     <div className="w-14 h-14 rounded-full bg-neutral-300 mx-auto mb-2" />
@@ -105,39 +105,43 @@ export function ComparisonSection() {
                   </div>
 
                   <div className="p-3 bg-white border border-neutral-200 rounded-xl text-center text-xs font-medium text-neutral-700 shadow-xs opacity-80">
-                    {ar ? 'الرابط الأول (يفتح في تطبيق آخر)' : 'Link 1 (Opens external browser)'}
+                    {ar ? 'أزرار توجيه مسطحة' : 'Flat destination buttons'}
                   </div>
                   <div className="p-3 bg-white border border-neutral-200 rounded-xl text-center text-xs font-medium text-neutral-700 shadow-xs opacity-80">
-                    {ar ? 'الرابط الثاني (مستطيل مكرر)' : 'Link 2 (Identical flat button)'}
+                    {ar ? 'صفحة تمرير واحدة' : 'Single scrolling page'}
                   </div>
                   <div className="p-3 bg-white border border-neutral-200 rounded-xl text-center text-xs font-medium text-neutral-700 shadow-xs opacity-80">
-                    {ar ? 'الرابط الثالث (قائمة لانهائية)' : 'Link 3 (Monotonous link stack)'}
+                    {ar ? 'رابط نطاق فرعي للمنصة' : 'Platform URL (subdomain)'}
                   </div>
 
                   <div className="text-center pt-2">
                     <span className="text-[10px] text-neutral-400 font-mono">
-                      {ar ? 'شعار المنصة يظهر في الأسفل' : 'Platform branding permanently visible'}
+                      {ar ? 'تخصيص بصري أساسي وتحديثات يدوية' : 'Basic visual styling • Manual content updates'}
                     </span>
                   </div>
                 </div>
 
-                {/* Drawbacks List */}
+                {/* Characteristics List */}
                 <ul className="space-y-2.5 text-xs text-neutral-600">
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                    <span>{ar ? 'لا يمكن تشغيل الصوت أو الفيديو مباشرة داخل الصفحة' : 'Cannot play audio or video inline; sends visitors away to third-party apps'}</span>
+                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <span><strong>{ar ? 'أزرار توجيه مسطحة' : 'Flat destination buttons'}:</strong> {ar ? 'روابط نصية تنقل الزائر خارج الصفحة دون تفاعل' : 'Simple text buttons redirecting visitors elsewhere'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                    <span>{ar ? 'لا مجلدات لتنظيم المشاريع مما يؤدي إلى تراكم الروابط' : 'No accordion folders to organize projects; produces endless scrolling clutter'}</span>
+                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <span><strong>{ar ? 'صفحة تمرير واحدة' : 'Single scrolling page'}:</strong> {ar ? 'تكدس طولي للروابط بدون صفحات فرعية أو مجلدات' : 'Single continuous scroll with no sub-pages or folder grouping'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                    <span>{ar ? 'نطاق مجاني مشترك تحت اسم المنصة، واشتراكات باهظة للنطاق الخاص' : 'Locked into third-party subdomains unless paying expensive enterprise fees'}</span>
+                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <span><strong>{ar ? 'رابط المنصة الافتراضي' : 'Platform URL'}:</strong> {ar ? 'الاعتماد على رابط فرعي تابع للمنصة' : 'Runs on standard shared platform link URLs'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                    <span>{ar ? 'صعوبة تصدير المشتركين والبيانات في أي وقت' : 'Audience data trapped in proprietary silos with transaction cut deductions'}</span>
+                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <span><strong>{ar ? 'تخصيص بصري أساسي' : 'Basic visual customization'}:</strong> {ar ? 'خيارات محدودة لتعديل الألوان والخطوط' : 'Basic preset styling and limited typography controls'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <span><strong>{ar ? 'تحديثات محتوى يدوية' : 'Manual content updates'}:</strong> {ar ? 'تعديل يدوي مستمر للروابط دون أتمتة عبر API' : 'Manual block maintenance with no API automation'}</span>
                   </li>
                 </ul>
               </div>
@@ -232,19 +236,23 @@ export function ComparisonSection() {
                 <ul className="space-y-2.5 text-xs text-neutral-700">
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{ar ? 'تشغيل وسائط مباشر' : 'Playable media embeds'}:</strong> {ar ? 'تشغيل سبوتيفاي ويوتيوب ومقاطع الصوت دون مغادرة الصفحة' : 'Play Spotify, YouTube, SoundCloud and audio directly in your page'}</span>
+                    <span><strong>{ar ? 'كتل تفاعلية ثرية' : 'Rich interactive blocks'}:</strong> {ar ? 'تشغيل وسائط مدمجة (Spotify، YouTube)، نماذج حجز، وتجميع مشتركين' : 'Inline audio, video, newsletters, booking embeds, and folders'}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{ar ? 'مجلدات قابلة للتوسيع' : 'Accordion folders & sub-pages'}:</strong> {ar ? 'تنظيم العشرات من الروابط والمشاريع داخل مجلدات مرتبة' : 'Organize deep content into clean folders and multiple linked pages'}</span>
+                    <span><strong>{ar ? 'صفحات متعددة ومجلدات' : 'Pages + folders'}:</strong> {ar ? 'تنظيم المشاريع في صفحات فرعية ومجلدات قابلة للتوسيع' : 'Organize deep content into subpages and collapsible accordion folders'}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{ar ? 'نطاق مخصص مع توجيه DNS' : 'Custom domain with guided DNS'}:</strong> {ar ? 'استخدم نطاقك الخاص بالكامل (مثل links.yourdomain.com) مع دعم تشفير HTTPS بعد إعداد الاستضافة' : 'Publish on your own domain with guided DNS verification and secure HTTPS after hosting configuration'}</span>
+                    <span><strong>{ar ? 'دعم النطاق الخاص' : 'Custom-domain support'}:</strong> {ar ? 'نشر على نطاقك الخاص (links.yourname.com) مع توجيه DNS وتشفير HTTPS بعد إعداد الاستضافة' : 'Publish on your custom domain with guided DNS verification and secure HTTPS after hosting setup'}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{ar ? 'ملكية تامة وعمولة 0%' : '100% Data ownership & 0% commission'}:</strong> {ar ? 'تصدير المشتركين إلى CSV في أي وقت وعمولة 0% على مبيعاتك' : 'Export your newsletter subscribers anytime with zero platform transaction cuts'}</span>
+                    <span><strong>{ar ? 'تخصيص معماري متقدم' : 'CSS/fonts/themes'}:</strong> {ar ? 'خطوط عربية ولاتينية منسقة، سمات معمارية دقيقة، وتحكم كامل بالهوية' : 'Curated typography, architectural dark/light themes, and custom layout styling'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
+                    <span><strong>{ar ? 'أتمتة عبر REST API' : 'REST API automation'}:</strong> {ar ? 'تحديث الروابط والملفات تلقائياً من أنظمتك عبر واجهة برمجية مفتوحة' : 'Programmatic profile updates and pipeline integration via REST API v1'}</span>
                   </li>
                 </ul>
               </div>

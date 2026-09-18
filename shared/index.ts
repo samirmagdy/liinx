@@ -1,5 +1,6 @@
 // Constants
 export * from './constants/brand.js';
+export * from './constants/systemDemos.js';
 
 // Config
 export * from './config/brand.js';

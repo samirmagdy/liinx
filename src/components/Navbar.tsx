@@ -248,12 +248,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             {lang === 'en' ? 'عربي' : 'EN'}
           </button>
-          <Link
-            href="/studio"
-            className="px-3 py-1.5 rounded-full bg-neutral-900 text-white text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-          >
-            {t.nav.studio}
-          </Link>
+          {user ? (
+            <Link
+              href="/studio"
+              className="px-3 py-1.5 rounded-full bg-neutral-900 text-white text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+            >
+              {t.nav.studio}
+            </Link>
+          ) : (
+            <Link
+              href="/register"
+              className="px-3 py-1.5 rounded-full bg-neutral-900 text-white text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+            >
+              {lang === 'ar' ? 'أنشئ صفحتك' : 'Create your page'}
+            </Link>
+          )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"

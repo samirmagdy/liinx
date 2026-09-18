@@ -74,15 +74,15 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
       tag: '04',
       title: isRtl ? 'ملكية رقمية تامة' : 'Own Everything',
       desc: isRtl 
-        ? 'نطاقك الخاص، بياناتك في يدك، وواجهة برمجية REST تضمن استقلالك.'
-        : 'Your personal custom domain with guided DNS, raw CSV exports, and a developer REST API.',
+        ? 'نطاقك الخاص، تصدير المشتركين والردود، وواجهة برمجية REST تضمن استقلالك.'
+        : 'Your personal custom domain with guided DNS, CSV exports for subscribers and forms, and a developer REST API.',
       icon: ShieldCheck,
       badgeColor: 'bg-purple-100 text-purple-900 border-purple-200',
       highlights: [
         isRtl ? 'ربط نطاق خاص (links.yourname.com) مع توجيه DNS وتشفير HTTPS بعد إعداد الاستضافة' : 'Custom domain support with secure HTTPS after hosting configuration',
-        isRtl ? 'تصدير كامل لبيانات الروابط والزيارات بنقرة واحدة (CSV)' : 'One-click raw CSV data export with zero lock-in',
+        isRtl ? 'تصدير المشتركين وردود النماذج إلى CSV بنقرة واحدة' : 'Export subscribers and form responses to CSV',
         isRtl ? 'واجهة برمجية مفتوحة (Public REST API v1)' : 'Public REST API v1 for automated builds and pipelines',
-        isRtl ? 'حرية تامة في نقل المحتوى متى أردت دون عوائق' : 'Guaranteed platform portability with open schemas'
+        isRtl ? 'مصمم لقابلية نقل البيانات: واجهة برمجية مفتوحة وتصدير بيانات الجمهور' : 'Built for data portability: Open API + exportable audience data'
       ]
     }
   ];
@@ -196,7 +196,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                       </div>
                       <div className="p-3 bg-neutral-800/80 rounded-xl text-[11px] text-neutral-300 font-sans flex items-center justify-between">
                         <span>Elena Rostova • Portfolio Theme</span>
-                        <span className="text-xs text-amber-400 font-mono">Live</span>
+                        <span className="text-[10px] text-amber-400 font-mono px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">{isRtl ? 'ملف تجريبي' : 'Demo Profile'}</span>
                       </div>
                     </div>
                   )}
@@ -215,8 +215,8 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                         </div>
                       </div>
                       <div className="p-3 bg-neutral-800/90 rounded-xl flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                          <Calendar className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                          <Calendar className="w-4 h-4 text-blue-400" />
                         </div>
                         <div className="text-xs">
                           <p className="font-bold text-white">Book 30-min Strategy Session</p>
@@ -229,7 +229,12 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                   {current.id === 'grow' && (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between pb-2 border-b border-neutral-800 text-neutral-400 font-mono text-[11px]">
-                        <span>traffic_intel</span>
+                        <div className="flex items-center gap-2">
+                          <span>traffic_intel</span>
+                          <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700">
+                            {isRtl ? 'بيانات توضيحية' : 'Sample data'}
+                          </span>
+                        </div>
                         <span className="text-emerald-400 text-[10px]">{isRtl ? 'تحليلات الطرف الأول' : 'First-Party Only'}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -286,7 +291,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
             {[
               { n: '01', title: isRtl ? 'احجز اسمك' : 'Claim your handle', text: isRtl ? 'أنشئ حساباً مجانياً واحصل على رابط liinx.app/@اسمك.' : 'Create a free account and lock your liinx.app/@yourname handle.' },
               { n: '02', title: isRtl ? 'أضف المحتوى والألوان' : 'Add blocks & styling', text: isRtl ? 'أضف الروابط والوسائط والنشرة أو رابط Calendly.' : 'Select an editorial theme, add links, media players, and booking blocks.' },
-              { n: '03', title: isRtl ? 'انشر وعاين أو اربط نطاقك' : 'Publish & connect domain', text: isRtl ? 'عاين صفحتك في الاستوديو ثم شاركها، وأضف نطاقاً مخصصاً على خطة مدفوعة.' : 'Publish immediately to the edge CDN, and attach your custom domain whenever ready.' }
+              { n: '03', title: isRtl ? 'انشر وعاين أو اربط نطاقك' : 'Publish & connect domain', text: isRtl ? 'عاين صفحتك في الاستوديو ثم شاركها، وأضف نطاقاً مخصصاً على خطة مدفوعة.' : 'Publish instantly and share your page, and attach your custom domain whenever ready.' }
             ].map(step => (
               <div key={step.n} className="rounded-2xl border border-neutral-100 bg-neutral-50/70 p-5">
                 <span className="font-mono text-xs font-bold text-amber-700">{step.n}</span>

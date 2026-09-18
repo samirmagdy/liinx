@@ -19,7 +19,7 @@ import { capabilitiesRouter } from './routes/capabilities.js';
 import { apiV1Router } from './routes/apiV1.js';
 import { billingRouter } from './routes/billing.js';
 import { contactRouter } from './routes/contact.js';
-import { pageTitles, brand } from '../shared/index.js';
+import { pageTitles, brand, findSystemDemoProfile } from '../shared/index.js';
 import * as Sentry from '@sentry/node';
 import { log, logError } from './logger.js';
 import { sharedRateLimit } from './middleware/rateLimit.js';
@@ -567,11 +567,30 @@ export async function startServer() {
       const profileMatch = req.path.match(/^\/@([a-z0-9_-]+)(?:\/([a-z0-9-]+))?$/i);
       if (req.path.startsWith('/@') && !profileMatch) return res.status(404).send('This profile is not available.');
       if (profileMatch) {
-        const publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
-          const profileShell = path.join(distDir, 'shell.html');
+        let publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
+        const profileShell = path.join(distDir, 'shell.html');
+        if (!publicProfile) {
+          const systemDemo = findSystemDemoProfile(profileMatch[1].toLowerCase());
+          if (systemDemo) {
+            publicProfile = {
+              username: systemDemo.username,
+              display_name: systemDemo.displayName,
+              bio: systemDemo.bio,
+              avatar_url: systemDemo.avatarUrl,
+              share_title: `${systemDemo.displayName} (@${systemDemo.username}) | ${brand.productName}`,
+              share_description: systemDemo.bio,
+              share_image_url: null,
+              page_redirect_url: null,
+              page_redirect_until: null
+            };
+          }
+        }
         if (!publicProfile) return res.status(404).send('This profile is not available.');
         if (fs.existsSync(profileShell)) {
-          const page = db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE lower(username) = ?) AND slug = ? AND published = 1').get(profileMatch[1].toLowerCase(), profileMatch[2] || 'home') as { title?: string; description?: string } | undefined;
+          let page = db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE lower(username) = ?) AND slug = ? AND published = 1').get(profileMatch[1].toLowerCase(), profileMatch[2] || 'home') as { title?: string; description?: string } | undefined;
+          if (!page && findSystemDemoProfile(profileMatch[1].toLowerCase()) && (!profileMatch[2] || profileMatch[2] === 'home')) {
+            page = { title: publicProfile.display_name, description: publicProfile.bio };
+          }
           if (!page) return res.status(404).send('This page is not available.');
           const redirect = safeRedirectTarget(publicProfile.page_redirect_url, req, publicProfile.username, false);
           if (redirect && (!publicProfile.page_redirect_until || publicProfile.page_redirect_until > Date.now())) {

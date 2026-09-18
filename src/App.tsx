@@ -320,6 +320,11 @@ export default function App() {
             <Route path="/register" component={RegisterPage} />
             <Route path="/studio" component={StudioPage} />
 
+            {/* Reserved System Demo Routes */}
+            <Route path="/demo/:identifier">
+              {(params) => <PublicProfilePage username={params.identifier} />}
+            </Route>
+
             {/* Dynamic Public Bio Pages */}
             <Route path="/@:username/:pageSlug">
               {(params) => <PublicProfilePage username={params.username} pageSlug={params.pageSlug} />}
