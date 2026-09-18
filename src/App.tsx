@@ -18,6 +18,7 @@ const PublicBioView = lazy(() => import('./components/PublicBioView').then(modul
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { FeaturesPage } from './pages/FeaturesPage';
+import { AccountPage } from './pages/AccountPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
 import { type CreatorProfile, type ThemeConfig } from './types';
 import { api, authStorage } from './services/api';
@@ -319,6 +320,7 @@ export default function App() {
             <Route path="/login" component={LoginPage} />
             <Route path="/register" component={RegisterPage} />
             <Route path="/studio" component={StudioPage} />
+            <Route path="/account" component={AccountPage} />
 
             {/* Reserved System Demo Routes */}
             <Route path="/demo/:identifier">

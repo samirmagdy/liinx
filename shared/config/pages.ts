@@ -9,5 +9,6 @@ export const pageTitles: Record<string, [string, string]> = {
   '/terms': ['Terms of use', 'شروط الاستخدام'],
   '/login': ['Sign in', 'تسجيل الدخول'],
   '/register': ['Create an account', 'إنشاء حساب'],
-  '/studio': ['Studio', 'الاستوديو']
+  '/studio': ['Studio', 'الاستوديو'],
+  '/account': ['Account Settings', 'إعدادات الحساب']
 };

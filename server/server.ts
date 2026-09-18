@@ -602,7 +602,7 @@ export async function startServer() {
         }
       }
       const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
-      if (['/studio', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+      if (['/studio', '/account', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
       const fallbackFile = fs.existsSync(path.join(distDir, 'shell.html'))
         ? path.join(distDir, 'shell.html')
         : path.join(distDir, 'index.html');

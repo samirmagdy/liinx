@@ -30,8 +30,30 @@ export const deletionSchema = z.object({
   confirmation: z.literal('DELETE')
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string()
+    .min(8, 'New password must be at least 8 characters long')
+    .max(128, 'New password cannot exceed 128 characters')
+    .refine(s => s.trim().length >= 8, 'Password cannot consist only of whitespace')
+});
+
+export const updateEmailSchema = z.object({
+  email: z.string().email('Please provide a valid email address').max(255, 'Email cannot exceed 255 characters'),
+  password: z.string().min(1, 'Password is required to change email')
+});
+
+export const updatePreferencesSchema = z.object({
+  language: z.enum(['en', 'ar']).optional(),
+  timezone: z.string().max(100).optional(),
+  emailNotifications: z.boolean().optional()
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ResetRequestInput = z.infer<typeof resetRequestSchema>;
 export type ResetConfirmInput = z.infer<typeof resetConfirmSchema>;
 export type DeletionInput = z.infer<typeof deletionSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type UpdateEmailInput = z.infer<typeof updateEmailSchema>;
+export type UpdatePreferencesInput = z.infer<typeof updatePreferencesSchema>;

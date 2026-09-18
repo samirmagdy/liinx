@@ -9,7 +9,9 @@ import {
   loginSchema,
   resetRequestSchema,
   resetConfirmSchema,
-  deletionSchema
+  deletionSchema,
+  changePasswordSchema,
+  updateEmailSchema
 } from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
@@ -403,6 +405,117 @@ authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res) => {
   } catch (err: any) {
     console.error('Auth /me error:', err);
     res.status(500).json({ error: 'Failed to retrieve authenticated session.' });
+  }
+});
+
+// Change password
+authRouter.post('/change-password', requireAuth, sharedRateLimit({ name: 'change-password', limit: 10, windowMs: 15 * 60 * 1000 }), (req: AuthenticatedRequest, res) => {
+  try {
+    const parse = changePasswordSchema.safeParse(req.body);
+    if (!parse.success) {
+      return res.status(400).json({ error: parse.error.issues[0].message });
+    }
+
+    const userId = req.user!.userId;
+    const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId) as any;
+    if (!user || !comparePassword(parse.data.currentPassword, user.password_hash)) {
+      return res.status(401).json({ error: 'Current password is incorrect.' });
+    }
+
+    const newHash = hashPassword(parse.data.newPassword);
+    db.prepare('UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?').run(newHash, userId);
+
+    const token = signJwt({
+      userId,
+      email: req.user!.email,
+      profileId: req.user!.profileId,
+      username: req.user!.username,
+      sessionVersion: 2
+    });
+    setSessionCookie(res, token);
+
+    res.json({ success: true, message: 'Password updated successfully.', ...testOnlySessionToken(token) });
+  } catch (err: any) {
+    console.error('Change password error:', err);
+    res.status(500).json({ error: 'Failed to update password.' });
+  }
+});
+
+// Update email address
+authRouter.post('/update-email', requireAuth, sharedRateLimit({ name: 'update-email', limit: 5, windowMs: 60 * 60 * 1000 }), (req: AuthenticatedRequest, res) => {
+  try {
+    const parse = updateEmailSchema.safeParse(req.body);
+    if (!parse.success) {
+      return res.status(400).json({ error: parse.error.issues[0].message });
+    }
+
+    const userId = req.user!.userId;
+    const cleanEmail = parse.data.email.toLowerCase().trim();
+
+    const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId) as any;
+    if (!user || !comparePassword(parse.data.password, user.password_hash)) {
+      return res.status(401).json({ error: 'Password is incorrect.' });
+    }
+
+    const existing = db.prepare('SELECT id FROM users WHERE email = ? AND id != ?').get(cleanEmail, userId);
+    if (existing) {
+      return res.status(409).json({ error: 'An account with this email address already exists.' });
+    }
+
+    db.prepare('UPDATE users SET email = ?, email_verified_at = NULL WHERE id = ?').run(cleanEmail, userId);
+
+    const token = signJwt({
+      userId,
+      email: cleanEmail,
+      profileId: req.user!.profileId,
+      username: req.user!.username,
+      sessionVersion: 1
+    });
+    setSessionCookie(res, token);
+
+    res.json({ success: true, email: cleanEmail, message: 'Email address updated successfully.', ...testOnlySessionToken(token) });
+  } catch (err: any) {
+    console.error('Update email error:', err);
+    res.status(500).json({ error: 'Failed to update email address.' });
+  }
+});
+
+// Export complete account data (GDPR / Data Portability)
+authRouter.get('/export-data', requireAuth, (req: AuthenticatedRequest, res) => {
+  try {
+    const userId = req.user!.userId;
+    const user = db.prepare('SELECT id, email, created_at, email_verified_at FROM users WHERE id = ?').get(userId) as any;
+    const profiles = db.prepare('SELECT * FROM profiles WHERE user_id = ?').all(userId) as any[];
+
+    const fullExport: any = {
+      account: {
+        id: user.id,
+        email: user.email,
+        createdAt: user.created_at,
+        emailVerifiedAt: user.email_verified_at
+      },
+      exportedAt: Date.now(),
+      profiles: profiles.map((p: any) => {
+        const pages = db.prepare('SELECT * FROM pages WHERE profile_id = ?').all(p.id);
+        const blocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ?').all(p.id);
+        const subscribers = db.prepare('SELECT email, created_at FROM newsletter_subscribers WHERE profile_id = ?').all(p.id);
+        const forms = db.prepare('SELECT form_title, field_labels_json, fields_json, created_at FROM form_submissions WHERE profile_id = ?').all(p.id);
+        return {
+          ...p,
+          pages,
+          blocks,
+          subscribers,
+          formSubmissions: forms
+        };
+      })
+    };
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="liinx-data-export-${req.user!.username}-${Date.now()}.json"`);
+    res.json(fullExport);
+  } catch (err: any) {
+    console.error('Data export error:', err);
+    res.status(500).json({ error: 'Failed to generate account data export.' });
   }
 });
 

@@ -11,7 +11,7 @@ const template = fs.readFileSync('dist/index.html', 'utf8');
 fs.writeFileSync('dist/shell.html', template);
 const origin = process.env.APP_ORIGIN || `https://${brand.domain}`;
 for (const [route, titles] of Object.entries(pageTitles)) {
-  if (route === '/studio') continue;
+  if (route === '/studio' || route === '/account') continue;
   // Wait for lazy marketing components; renderToString emits only the Suspense
   // fallback, leaving the page empty when scripts are unavailable.
   const { prelude } = await prerenderToNodeStream(<Router ssrPath={route}><App /></Router>);

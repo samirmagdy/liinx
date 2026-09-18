@@ -79,6 +79,36 @@ export const api = {
     me: async () => {
       return request<{ user: any; profile: CreatorProfile }>('/api/auth/me');
     },
+    changePassword: async (currentPassword: string, newPassword: string) => {
+      return request<{ success: boolean; message: string; token?: string }>('/api/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+    },
+    updateEmail: async (email: string, password: string) => {
+      const data = await request<{ success: boolean; email: string; message: string; token?: string }>('/api/auth/update-email', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      if (data.token) authStorage.setToken(data.token);
+      return data;
+    },
+    exportData: async () => {
+      const token = authStorage.getToken();
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE_URL}/api/auth/export-data`, {
+        credentials: 'include',
+        headers
+      });
+      if (!res.ok) throw new Error('Failed to download account export');
+      return res.blob();
+    },
+    deleteAccount: async () => {
+      return request<{ success: boolean; message: string }>('/api/auth/account', {
+        method: 'DELETE',
+        body: JSON.stringify({ confirmation: 'DELETE' })
+      });
+    },
     logout: () => {
       void request<{ success: boolean }>('/api/auth/logout', { method: 'POST' }).catch(() => {});
       authStorage.removeToken();

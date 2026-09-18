@@ -95,7 +95,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
               <span>{t.nav.studio}</span>
             </Link>
             <Link
-              href="/studio?tab=settings"
+              href="/account"
               onClick={onClose}
               className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
