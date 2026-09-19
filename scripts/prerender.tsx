@@ -5,7 +5,7 @@ import { Router } from 'wouter';
 import fs from 'node:fs';
 import path from 'node:path';
 import App from '../src/App';
-import { pageTitles, brand } from '../shared/index.js';
+import { pageTitles, pageDescriptions, brand } from '../shared/index.js';
 
 const template = fs.readFileSync('dist/index.html', 'utf8');
 fs.writeFileSync('dist/shell.html', template);
@@ -23,6 +23,7 @@ for (const [route, titles] of Object.entries(pageTitles)) {
     throw new Error(`Prerender did not settle for ${route}`);
   }
   const title = `${titles[0]} | ${brand.productName}`;
+  const description = pageDescriptions[route]?.[0] || pageDescriptions['/'][0];
   const rootStart = template.indexOf('<div id="root">');
   const bodyEnd = template.indexOf('\n  </body>', rootStart);
   const rootEnd = template.lastIndexOf('</div>', bodyEnd) + '</div>'.length;
@@ -31,9 +32,13 @@ for (const [route, titles] of Object.entries(pageTitles)) {
     .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
     .replace(/(<meta property="og:title" content=")[^"]*/, `$1${title}`)
     .replace(/(<meta name="twitter:title" content=")[^"]*/, `$1${title}`)
+    .replace(/(<meta name="description" content=")[^"]*/, `$1${description}`)
+    .replace(/(<meta property="og:description" content=")[^"]*/, `$1${description}`)
+    .replace(/(<meta name="twitter:description" content=")[^"]*/, `$1${description}`)
     .replace(/(<link rel="canonical" href=")[^"]*/, `$1${origin}${route}`)
     .replace(/(<meta property="og:url" content=")[^"]*/, `$1${origin}${route}`)
-    .replace(/(<meta name="robots" content=")[^"]*/, `$1${['/login', '/register'].includes(route) ? 'noindex, nofollow' : 'index, follow'}`);
+    .replace(/(<meta name="robots" content=")[^"]*/, `$1${['/login', '/register', '/studio', '/account'].includes(route) ? 'noindex, nofollow' : 'index, follow'}`)
+    .replace(/<html lang="[^"]*"/, '<html lang="en"');
   fs.writeFileSync(path.join('dist', route === '/' ? 'index.html' : `${route.slice(1)}.html`), html);
 }
 console.log('Pre-rendered 10 routes with route-specific titles and canonical URLs.');

@@ -1,5 +1,15 @@
 {
   "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/studio",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/account",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",
@@ -22,6 +32,10 @@
       "destination": "https://liinx-app.fly.dev/@:username/:pageSlug"
     },
     {
+      "source": "/demo/:identifier",
+      "destination": "https://liinx-app.fly.dev/demo/:identifier"
+    },
+    {
       "source": "/robots.txt",
       "destination": "https://liinx-app.fly.dev/robots.txt"
     },
@@ -30,7 +44,11 @@
       "destination": "https://liinx-app.fly.dev/sitemap.xml"
     },
     {
-      "source": "/(.*)",
+      "source": "/studio",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/account",
       "destination": "/index.html"
     }
   ]

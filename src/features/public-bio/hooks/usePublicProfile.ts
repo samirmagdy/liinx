@@ -140,9 +140,13 @@ export function usePublicProfile({
     document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical);
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
-    if (profile.shareImageUrl) {
-      document.querySelector('meta[property="og:image"]')?.setAttribute('content', profile.shareImageUrl);
-    }
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
+    document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description);
+    const image = profile.shareImageUrl || profile.avatarUrl || 'https://liinx.app/og-liinx.png';
+    document.querySelector('meta[property="og:image"]')?.setAttribute('content', image);
+    document.querySelector('meta[property="og:image:secure_url"]')?.setAttribute('content', image);
+    document.querySelector('meta[property="og:image:alt"]')?.setAttribute('content', `${profile.displayName} on Liinx`);
+    document.querySelector('meta[name="twitter:image"]')?.setAttribute('content', image);
   }, [profile, previewOnly, customDomain]);
 
   return {

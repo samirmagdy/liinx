@@ -188,8 +188,6 @@ Allow: /contact
 Allow: /privacy
 Allow: /terms
 Allow: /@*
-Disallow: /studio
-Disallow: /dashboard
 Disallow: /api/
 Disallow: /uploads/
 
@@ -210,29 +208,21 @@ app.get('/sitemap.xml', (req, res) => {
       LIMIT 50000
     `).all() as { username: string; slug: string; isHome: number; updatedAt: number }[];
     const baseUrl = publicOrigin(req);
-    const nowIso = new Date().toISOString().split('T')[0];
-
     const staticRoutes = [
-      { path: '', changefreq: 'daily', priority: '1.0' },
-      { path: '/features', changefreq: 'weekly', priority: '0.9' },
-      { path: '/templates', changefreq: 'weekly', priority: '0.9' },
-      { path: '/pricing', changefreq: 'weekly', priority: '0.8' },
-      { path: '/about', changefreq: 'monthly', priority: '0.7' },
-      { path: '/contact', changefreq: 'monthly', priority: '0.6' },
-      { path: '/privacy', changefreq: 'monthly', priority: '0.3' },
-      { path: '/terms', changefreq: 'monthly', priority: '0.3' },
+      '', '/features', '/templates', '/pricing', '/about', '/contact', '/privacy', '/terms'
     ];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
     for (const route of staticRoutes) {
-      xml += `  <url>\n    <loc>${baseUrl}${route.path}</loc>\n    <lastmod>${nowIso}</lastmod>\n    <changefreq>${route.changefreq}</changefreq>\n    <priority>${route.priority}</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${baseUrl}${route}</loc>\n  </url>\n`;
     }
 
     for (const page of pages) {
-      const pDate = page.updatedAt ? new Date(page.updatedAt).toISOString().split('T')[0] : nowIso;
+      const updatedAt = Number(page.updatedAt);
+      const pDate = Number.isFinite(updatedAt) && updatedAt > 0 ? new Date(updatedAt).toISOString().split('T')[0] : '';
       const path = `/@${encodeURIComponent(page.username)}${page.isHome ? '' : `/${encodeURIComponent(page.slug)}`}`;
-      xml += `  <url>\n    <loc>${escapeXml(`${baseUrl}${path}`)}</loc>\n    <lastmod>${pDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${escapeXml(`${baseUrl}${path}`)}</loc>\n${pDate ? `    <lastmod>${pDate}</lastmod>\n` : ''}  </url>\n`;
     }
 
     xml += `</urlset>`;
@@ -601,13 +591,32 @@ export async function startServer() {
           return sendProfileShell(res, profileShell, publicProfile, canonical, page);
         }
       }
+      const demoMatch = req.path.match(/^\/demo\/([a-z0-9_-]+)$/i);
+      if (demoMatch) {
+        const demo = findSystemDemoProfile(demoMatch[1].toLowerCase());
+        if (!demo) return res.status(404).send('This demo profile is not available.');
+        const profileShell = path.join(distDir, 'shell.html');
+        if (!fs.existsSync(profileShell)) return res.status(503).send('The profile page is temporarily unavailable.');
+        const profile = {
+          username: demo.username,
+          display_name: demo.displayName,
+          bio: demo.bio,
+          avatar_url: demo.avatarUrl,
+          share_title: `${demo.displayName} (@${demo.username}) | ${brand.productName}`,
+          share_description: demo.bio,
+          share_image_url: null
+        };
+        const canonical = `${publicOrigin(req)}/@${encodeURIComponent(demo.username)}`;
+        return sendProfileShell(res, profileShell, profile, canonical, { title: profile.display_name, description: profile.bio });
+      }
       const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
       if (['/studio', '/account', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-      const fallbackFile = fs.existsSync(path.join(distDir, 'shell.html'))
-        ? path.join(distDir, 'shell.html')
-        : path.join(distDir, 'index.html');
-      const targetFile = routeFile && fs.existsSync(routeFile) ? routeFile : fallbackFile;
-      sendHtmlFileWithNonce(res, targetFile);
+      if (routeFile && fs.existsSync(routeFile)) return sendHtmlFileWithNonce(res, routeFile);
+      if (['/studio', '/account'].includes(req.path)) {
+        const shellFile = path.join(distDir, 'shell.html');
+        if (fs.existsSync(shellFile)) return sendHtmlFileWithNonce(res, shellFile);
+      }
+      return res.status(404).type('text/plain').send('Page not found.');
   });
 }
 
