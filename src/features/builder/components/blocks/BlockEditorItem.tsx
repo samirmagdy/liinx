@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import {
   ArrowUp,
   ArrowDown,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  EyeOff,
   Copy,
   Trash2,
   Clock,
@@ -29,9 +33,11 @@ import {
 interface BlockEditorItemProps {
   block: ProfileBlock;
   index: number;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
-export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }) => {
+export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, isExpanded = true, onToggleExpand }) => {
   const { tr: ui, lang } = useUiLanguage();
   const {
     profile,
@@ -57,9 +63,14 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
   const [richTextLinkUrl, setRichTextLinkUrl] = useState('');
 
   return (
-    <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs space-y-3 hover:border-neutral-400 transition-colors">
+    <div id={"builder-block-" + block.id} tabIndex={-1} className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs space-y-3 hover:border-neutral-400 transition-all scroll-mt-24 focus:outline-none focus:ring-2 focus:ring-neutral-900">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
+          {onToggleExpand && (
+            <button type="button" onClick={onToggleExpand} aria-label={isExpanded ? ui("Collapse block") : ui("Expand block")} className="p-0.5 rounded text-neutral-400 hover:text-black cursor-pointer">
+              {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            </button>
+          )}
           <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">
             {block.type}
           </span>
@@ -82,6 +93,15 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => handleUpdateBlockField(block.id, 'visible', block.visible === false)}
+            aria-label={ui(block.visible === false ? 'Show block' : 'Hide block')}
+            title={ui(block.visible === false ? 'Show block' : 'Hide block')}
+            className={"p-1 rounded-lg transition-colors cursor-pointer " + (block.visible === false ? "text-amber-600 hover:text-amber-800" : "text-neutral-400 hover:text-black")}
+          >
+            {block.visible === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          </button>
           <button
             type="button"
             onClick={() => handleMoveBlock(index, 'up')}
@@ -151,6 +171,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
         </div>
       </div>
 
+      {isExpanded && (
+        <>
       {/* Form Fields per Block Type */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
         <div>
@@ -1158,6 +1180,8 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index }
             </div>
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   );

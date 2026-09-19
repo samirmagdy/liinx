@@ -30,7 +30,8 @@ export const BuilderToolbar: React.FC = () => {
     copiedLink,
     handleCopyPublicLink,
     customTheme,
-    onViewFullscreen
+    onViewFullscreen,
+    setActiveTab
   } = useBuilder();
 
   return (
@@ -39,19 +40,28 @@ export const BuilderToolbar: React.FC = () => {
       <div className="flex items-center gap-4">
         {/* Multi-Profile Switcher Dropdown */}
         <div className="relative">
-          <button
-            onClick={() => {
-              setProfileSwitchError(null);
-              setProfileDropdownOpen(!profileDropdownOpen);
-            }}
-            className="flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer text-xs font-bold text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-          >
-            <span className="font-mono">@{profile.username}</span>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+          <div className="flex items-center bg-neutral-100 hover:bg-neutral-200 rounded-xl transition-colors text-xs font-bold text-neutral-900 border border-transparent hover:border-neutral-300">
+            <button
+              type="button"
+              onClick={() => {
+                setProfileSwitchError(null);
+                setProfileDropdownOpen(!profileDropdownOpen);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-l-xl cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            >
+              <span className="font-mono">@{profile.username}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-neutral-500 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('settings')}
+              title={ui("Manage subscription plan")}
+              aria-label={ui("Manage subscription plan")}
+              className="mr-2 ml-1 text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition-colors cursor-pointer"
+            >
               {profile.plan || 'free'}
-            </span>
-            <ChevronDown className={`w-3.5 h-3.5 text-neutral-500 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
-          </button>
+            </button>
+          </div>
 
           {profileDropdownOpen && (
             <div className="absolute start-0 mt-2 w-64 bg-neutral-100 rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">

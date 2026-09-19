@@ -1,5 +1,5 @@
-import React from 'react';
-import { Upload, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Upload, Loader2, AlertTriangle } from 'lucide-react';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useBuilder } from '../../context/BuilderContext';
 import { SocialLinksEditor } from '../social/SocialLinksEditor';
@@ -7,6 +7,7 @@ import { PageManager } from '../pages/PageManager';
 import { AddBlockMenu } from '../blocks/AddBlockMenu';
 import { BlockList } from '../blocks/BlockList';
 import { BookingEditor } from '../../../../components/BookingEditor';
+import { Modal } from '../../../../components/Modal';
 
 export const ContentPanel: React.FC = () => {
   const { tr: ui } = useUiLanguage();
@@ -21,6 +22,20 @@ export const ContentPanel: React.FC = () => {
     handleProfileChange,
     handleAddBookingBlock
   } = useBuilder();
+
+  const [pendingUsername, setPendingUsername] = useState<string | null>(null);
+
+  const confirmUsernameChange = () => {
+    setPendingUsername(null);
+    void handleUsernameBlur();
+  };
+
+  const cancelUsernameChange = () => {
+    if (pendingUsername !== null) {
+      setProfile(previous => ({ ...previous, username: pendingUsername }));
+    }
+    setPendingUsername(null);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -89,7 +104,19 @@ export const ContentPanel: React.FC = () => {
               value={profile.username}
               maxLength={30}
               onChange={event => setProfile(previous => ({ ...previous, username: event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') }))}
-              onBlur={() => void handleUsernameBlur()}
+              onFocus={() => {
+                if (pendingUsername === null) {
+                  setPendingUsername(profile.username);
+                }
+              }}
+              onBlur={() => {
+                if (pendingUsername !== null && pendingUsername !== profile.username && /^[a-z0-9_]{3,30}$/.test(profile.username)) {
+                  // Keep modal open or trigger confirmation
+                } else {
+                  setPendingUsername(null);
+                  void handleUsernameBlur();
+                }
+              }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
             />
             <p className="mt-1 text-[11px] text-neutral-500">
@@ -156,6 +183,39 @@ export const ContentPanel: React.FC = () => {
 
       {/* Block List */}
       <BlockList />
+
+      {/* Username Change Confirmation Modal */}
+      <Modal
+        open={pendingUsername !== null && pendingUsername !== profile.username && /^[a-z0-9_]{3,30}$/.test(profile.username)}
+        onClose={cancelUsernameChange}
+        label={ui('Confirm handle change')}
+      >
+        <div className="bg-white p-6 rounded-3xl space-y-4 text-neutral-900">
+          <div className="flex items-center gap-3 text-amber-600">
+            <AlertTriangle className="w-6 h-6 shrink-0" />
+            <h3 className="font-bold text-base">{ui('Change public handle?')}</h3>
+          </div>
+          <p className="text-xs text-neutral-600 leading-relaxed">
+            {ui('Changing your handle to')} <span className="font-mono font-bold text-neutral-900">@{profile.username}</span> {ui('will alter your live URL to')} <span className="font-mono font-bold text-neutral-900">liinx.me/@{profile.username}</span>. {ui('Any existing printed QR codes, physical badges, or external links pointing to')} <span className="font-mono font-bold text-neutral-900">@{pendingUsername}</span> {ui('will break.')}
+          </p>
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
+            <button
+              type="button"
+              onClick={cancelUsernameChange}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-colors cursor-pointer"
+            >
+              {ui('Keep')} @{pendingUsername}
+            </button>
+            <button
+              type="button"
+              onClick={confirmUsernameChange}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-900 hover:bg-black text-white transition-colors cursor-pointer"
+            >
+              {ui('Confirm Change')}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

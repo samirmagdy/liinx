@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { THEMES } from '../../../../config/themes';
+import { type ThemeConfig } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useBuilder } from '../../context/BuilderContext';
 
@@ -11,10 +13,38 @@ export const AppearancePanel: React.FC = () => {
     updateThemeOverride
   } = useBuilder();
 
+  const [previousCustomTheme, setPreviousCustomTheme] = useState<ThemeConfig | null>(null);
+
+  const onSelectPreset = (th: ThemeConfig) => {
+    if (!previousCustomTheme) {
+      setPreviousCustomTheme({ ...customTheme });
+    }
+    handleThemeSelect(th);
+  };
+
+  const handleRevertTheme = () => {
+    if (previousCustomTheme) {
+      handleThemeSelect(previousCustomTheme);
+      setPreviousCustomTheme(null);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
-        <h3 className="font-bold text-sm text-neutral-900">{ui("Curated Visual Presets")}</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-sm text-neutral-900">{ui("Curated Visual Presets")}</h3>
+          {previousCustomTheme && (
+            <button
+              type="button"
+              onClick={handleRevertTheme}
+              className="text-xs font-semibold text-amber-800 hover:text-amber-950 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>{ui("Undo preset change")}</span>
+            </button>
+          )}
+        </div>
         <p className="text-xs text-neutral-500">
           {ui("Choose from carefully crafted aesthetic profiles. Every palette is built with strong contrast and responsive tokens.")}
         </p>
@@ -24,7 +54,7 @@ export const AppearancePanel: React.FC = () => {
           {THEMES.map((th) => (
             <button
               key={th.id}
-              onClick={() => handleThemeSelect(th)}
+              onClick={() => onSelectPreset(th)}
               className={`p-3.5 rounded-xl border text-start flex items-center justify-between transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
                 customTheme.id === th.id 
                   ? 'border-neutral-900 ring-2 ring-neutral-900/10 shadow-sm bg-neutral-50' 

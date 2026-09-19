@@ -99,15 +99,19 @@
       ]
     },
     "src/components/Hero.tsx": {
-      "lines": 257,
+      "lines": 230,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 231,
-          "complexity": 26,
+          "lines": 203,
+          "complexity": 24,
           "maxDepth": 2
         }
       ]
+    },
+    "src/components/HeroClaimForm.tsx": {
+      "lines": 93,
+      "functions": []
     },
     "src/components/HeroFeatureShowcase.tsx": {
       "lines": 125,
@@ -176,20 +180,18 @@
         }
       ]
     },
+    "src/components/PricingCard.tsx": {
+      "lines": 172,
+      "functions": []
+    },
     "src/components/PricingSection.tsx": {
-      "lines": 237,
+      "lines": 188,
       "functions": [
         {
           "name": "PricingSection",
-          "lines": 230,
-          "complexity": 51,
-          "maxDepth": 3
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 83,
+          "lines": 180,
           "complexity": 28,
-          "maxDepth": 3
+          "maxDepth": 2
         }
       ]
     },
@@ -219,8 +221,12 @@
       "lines": 40,
       "functions": []
     },
+    "src/components/TemplateCard.tsx": {
+      "lines": 69,
+      "functions": []
+    },
     "src/components/TemplatesSection.tsx": {
-      "lines": 115,
+      "lines": 106,
       "functions": []
     },
     "src/components/TrustProofSection.tsx": {
@@ -299,12 +305,12 @@
       "functions": []
     },
     "src/features/builder/components/BuilderShell.tsx": {
-      "lines": 396,
+      "lines": 422,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 377,
-          "complexity": 24,
+          "lines": 403,
+          "complexity": 28,
           "maxDepth": 2
         }
       ]
@@ -314,11 +320,11 @@
       "functions": []
     },
     "src/features/builder/components/BuilderToolbar.tsx": {
-      "lines": 177,
+      "lines": 187,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 164,
+          "lines": 174,
           "complexity": 19,
           "maxDepth": 3
         }
@@ -341,12 +347,12 @@
       "functions": []
     },
     "src/features/builder/components/blocks/BlockEditorItem.tsx": {
-      "lines": 1165,
+      "lines": 1189,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 1131,
-          "complexity": 121,
+          "lines": 1149,
+          "complexity": 129,
           "maxDepth": 2
         },
         {
@@ -358,7 +364,7 @@
       ]
     },
     "src/features/builder/components/blocks/BlockList.tsx": {
-      "lines": 16,
+      "lines": 68,
       "functions": []
     },
     "src/features/builder/components/blocks/StructuredItemsEditor.tsx": {
@@ -405,23 +411,23 @@
       ]
     },
     "src/features/builder/components/panels/AppearancePanel.tsx": {
-      "lines": 125,
+      "lines": 155,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 119,
-          "complexity": 10,
+          "lines": 147,
+          "complexity": 13,
           "maxDepth": 2
         }
       ]
     },
     "src/features/builder/components/panels/ContentPanel.tsx": {
-      "lines": 162,
+      "lines": 222,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 151,
-          "complexity": 6,
+          "lines": 210,
+          "complexity": 13,
           "maxDepth": 1
         }
       ]
@@ -568,17 +574,21 @@
       "lines": 58,
       "functions": []
     },
+    "src/features/public-bio/components/PublicBackgroundMedia.tsx": {
+      "lines": 36,
+      "functions": []
+    },
     "src/features/public-bio/components/PublicBioHeader.tsx": {
-      "lines": 113,
+      "lines": 107,
       "functions": []
     },
     "src/features/public-bio/components/PublicBioShell.tsx": {
-      "lines": 284,
+      "lines": 267,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 255,
-          "complexity": 38,
+          "lines": 235,
+          "complexity": 35,
           "maxDepth": 2
         }
       ]
@@ -604,6 +614,14 @@
     },
     "src/features/public-bio/components/PublicProfileHeader.tsx": {
       "lines": 84,
+      "functions": []
+    },
+    "src/features/public-bio/components/PublicSearchInput.tsx": {
+      "lines": 41,
+      "functions": []
+    },
+    "src/features/public-bio/components/StickyAudioBar.tsx": {
+      "lines": 106,
       "functions": []
     },
     "src/features/public-bio/components/blocks/AudioBlockView.tsx": {
@@ -774,8 +792,16 @@
       "lines": 137,
       "functions": []
     },
+    "src/features/public-bio/utils/shareUtils.ts": {
+      "lines": 28,
+      "functions": []
+    },
     "src/features/public-bio/utils/socialIcons.tsx": {
       "lines": 30,
+      "functions": []
+    },
+    "src/hooks/useUsernameAvailability.ts": {
+      "lines": 54,
       "functions": []
     },
     "src/main.tsx": {
