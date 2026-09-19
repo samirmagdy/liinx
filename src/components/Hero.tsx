@@ -183,27 +183,31 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 </span>
               </div>
               <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
-              <div 
-                ref={phoneScrollRef}
-                id="hero-phone-scroll-container"
-                dir={isProfileRtl ? 'rtl' : 'ltr'}
-                className="relative w-full h-[590px] rounded-[36px] overflow-y-auto no-scrollbar pt-10 pb-6 px-4 sm:px-5 transition-colors duration-300 scroll-smooth"
-                style={{
-                  background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
-                  color: theme.textColor,
-                  fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
-                }}>
-                <div data-hero-preview><PhonePreview
-                  profile={activeProfile}
-                  customTheme={activeTheme}
-                  compact
-                  interactive={false}
-                  highlightedFeatureId={selectedFeatureId}
-                /></div>
+                <div 
+                  ref={phoneScrollRef}
+                  id="hero-phone-scroll-container"
+                  dir={isProfileRtl ? 'rtl' : 'ltr'}
+                  className="relative w-full h-[590px] rounded-[36px] overflow-y-auto no-scrollbar pt-10 pb-6 px-4 sm:px-5 transition-colors duration-300 scroll-smooth"
+                  style={{
+                    background: theme.bgType === 'gradient' ? theme.bgGradient : theme.bgColor,
+                    color: theme.textColor,
+                    fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)'
+                  }}>
+                  <div data-hero-preview><PhonePreview
+                    profile={activeProfile}
+                    customTheme={activeTheme}
+                    compact
+                    interactive={false}
+                    highlightedFeatureId={selectedFeatureId}
+                  /></div>
+                </div>
+
+                {/* Subtle bottom scroll affordance vignette */}
+                <div className="pointer-events-none absolute bottom-5 left-5 right-5 h-12 bg-gradient-to-t from-black/25 to-transparent rounded-b-[30px] z-20" />
               </div>
-            </div></div>
+            </div>
 
             {/* Action below Phone */}
             <div className="mt-4 flex items-center gap-3">

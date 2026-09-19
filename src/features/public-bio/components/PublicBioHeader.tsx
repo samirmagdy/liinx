@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowLeft, QrCode, Share2, Check } from 'lucide-react';
 import { useLocation } from 'wouter';
-import confetti from 'canvas-confetti';
 import { type ThemeConfig } from '../../../types';
 import { getBorderColor } from '../../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
+import { shareProfile } from '../utils/shareUtils';
 
 interface PublicBioHeaderProps {
   theme: ThemeConfig;
@@ -24,16 +24,10 @@ export const PublicBioHeader: React.FC<PublicBioHeaderProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
 
   const handleShare = () => {
-    if (typeof window !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(window.location.href);
+    void shareProfile(window.location.href, undefined, () => {
       setCopiedLink(true);
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.2 }
-      });
       setTimeout(() => setCopiedLink(false), 2000);
-    }
+    });
   };
 
   return (

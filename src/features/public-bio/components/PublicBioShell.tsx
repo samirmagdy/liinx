@@ -13,6 +13,9 @@ import { PublicBlockRenderer } from './PublicBlockRenderer';
 import { TrackingPixelManager } from './tracking/TrackingPixelManager';
 import { AnalyticsTracker } from './tracking/AnalyticsTracker';
 import { PrivacyConsentBanner } from './tracking/PrivacyConsentBanner';
+import { StickyAudioBarContainer } from './StickyAudioBar';
+import { PublicSearchInput } from './PublicSearchInput';
+import { PublicBackgroundMedia } from './PublicBackgroundMedia';
 
 interface PublicBioShellProps {
   profile: CreatorProfile;
@@ -100,6 +103,10 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
       ((block as any).layout === 'grid' || (block as any).extra?.layout === 'grid')
   );
 
+  const activePlayingBlock = playingAudioId
+    ? availableBlocks.find(b => b.id === playingAudioId && b.type === 'audio')
+    : null;
+
   return (
     <div
       id="public-bio-view"
@@ -124,21 +131,12 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
             : 'var(--font-sans)'
       }}
     >
-      {hasBackgroundMedia && profile.backgroundMediaType === 'video' && !reducedMotion && (
-        <video
-          className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover"
-          src={backgroundMediaHref || undefined}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        />
-      )}
-      {hasBackgroundMedia && (
-        <div className="pointer-events-none fixed inset-0 z-0 bg-black/15" aria-hidden="true" />
-      )}
+      <PublicBackgroundMedia
+        hasBackgroundMedia={hasBackgroundMedia}
+        backgroundMediaType={profile.backgroundMediaType}
+        backgroundMediaHref={backgroundMediaHref}
+        reducedMotion={reducedMotion}
+      />
 
       {profile.customCss && <style dangerouslySetInnerHTML={{ __html: profile.customCss }} />}
 
@@ -173,30 +171,7 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
         <PublicProfileHeader profile={profile} theme={theme} />
         <PublicPageNavigation profile={profile} theme={theme} customDomain={customDomain} />
 
-        {/* Content Blocks Search */}
-        <label
-          className="mb-5 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm"
-          style={{
-            backgroundColor: theme.cardBg,
-            borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,.15)'),
-            color: theme.cardText
-          }}
-        >
-          <span aria-hidden="true">⌕</span>
-          <input
-            id="public-page-search"
-            name="pageSearch"
-            type="search"
-            value={pageSearch}
-            onChange={event => setPageSearch(event.target.value)}
-            placeholder={ui('Search this page')}
-            aria-label={ui('Search this page')}
-            className="min-w-0 flex-1 bg-transparent outline-none"
-          />
-          <span className="sr-only" role="status">
-            {ui('Search includes this page only')}
-          </span>
-        </label>
+        <PublicSearchInput theme={theme} value={pageSearch} onChange={setPageSearch} />
 
         <div
           className={`mb-14 ${
@@ -248,6 +223,14 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
           onBackToStudio={onBackToStudio}
         />
       </main>
+
+      {/* Floating Sticky Audio Bar */}
+      <StickyAudioBarContainer
+        activeBlock={activePlayingBlock as any}
+        theme={theme}
+        playingAudioId={playingAudioId}
+        setPlayingAudioId={setPlayingAudioId}
+      />
 
       <QrCodeModal
         isOpen={qrModalOpen}
