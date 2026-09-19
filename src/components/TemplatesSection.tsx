@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { THEMES } from '../config/themes';
 import { TEMPLATES } from '../config/templates';
 import { type CreatorProfile } from '../types';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
-import { PhonePreview } from './PhonePreview';
+import { TemplateCard } from './TemplateCard';
 
 interface TemplatesSectionProps {
   headingLevel?: 1 | 2;
@@ -18,7 +17,17 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
   const [isHydrated, setIsHydrated] = useState(false);
   const { t, isRtl } = useLanguage();
 
-  const visibleTemplates = maxVisible ? TEMPLATES.slice(0, maxVisible) : TEMPLATES;
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  const categories = React.useMemo(() => {
+    const cats = Array.from(new Set(TEMPLATES.map(t => t.category)));
+    return ['all', ...cats];
+  }, []);
+
+  const filteredTemplates = React.useMemo(() => {
+    const list = selectedCategory === 'all' ? TEMPLATES : TEMPLATES.filter(t => t.category === selectedCategory);
+    return maxVisible ? list.slice(0, maxVisible) : list;
+  }, [selectedCategory, maxVisible]);
 
   useEffect(() => setIsHydrated(true), []);
 
@@ -27,7 +36,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
             <span>{t.templatesSection.badge}</span>
@@ -40,11 +49,27 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
             </p>
           </div>
 
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+                  selectedCategory === cat
+                    ? 'bg-neutral-900 text-white shadow-xs'
+                    : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200'
+                }`}
+              >
+                {cat === 'all' ? (isRtl ? 'الكل' : 'All') : cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Templates Grid */}
         <Reveal stagger><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {visibleTemplates.map((template) => {
+          {filteredTemplates.map((template) => {
             const loc = t.templatesSection.templates[template.id] || {
               name: template.name,
               category: template.category,
@@ -52,51 +77,17 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
             };
 
             return (
-              <div
+              <TemplateCard
                 key={template.id}
-                className="motion-card rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
-              >
-                <div className="relative h-[300px] overflow-hidden border-b" aria-label={`${loc.name} illustrative template preview`}>
-                  <span className="absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[10px] font-semibold text-neutral-800 shadow-sm">
-                    {isRtl ? 'معاينة توضيحية' : 'Illustrative preview'}
-                  </span>
-                  {isHydrated ? (
-                    <div className="absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none" aria-hidden="true" inert>
-                      <PhonePreview profile={template.profile} customTheme={THEMES.find(theme => theme.id === template.profile.themeId)} compact interactive={false} />
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center justify-center p-6 text-center" style={{ backgroundColor: template.previewColor }}>
-                      <div>
-                        <div className="w-14 h-14 rounded-full bg-neutral-900/10 mx-auto mb-3" />
-                        <p className="text-sm font-bold text-neutral-900">{loc.name}</p>
-                        <p className="text-xs text-neutral-600 mt-1">{isRtl ? 'معاينة القالب' : 'Template preview'}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Template Body */}
-                <div className="p-6 flex flex-col flex-1 justify-between text-start">
-                  <div>
-                    <h3 className="font-brand font-bold text-base text-neutral-900 mb-1 text-balance">
-                      {loc.name}
-                    </h3>
-                    <p className="text-xs text-neutral-600 leading-relaxed mb-6 text-pretty">
-                      {loc.description}
-                    </p>
-                  </div>
-
-                <button
-                  onClick={() => onSelectTemplate(template.profile)}
-                  className="w-full py-2.5 px-4 rounded-full bg-neutral-950 border border-neutral-600 hover:border-neutral-500 text-xs font-bold text-neutral-100 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                >
-                  <span>{t.templatesSection.useTemplate}</span>
-                  <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+                template={template}
+                loc={loc}
+                isHydrated={isHydrated}
+                isRtl={isRtl}
+                useTemplateLabel={t.templatesSection.useTemplate}
+                onSelectTemplate={onSelectTemplate}
+              />
+            );
+          })}
         </div></Reveal>
 
         {maxVisible && TEMPLATES.length > maxVisible && (

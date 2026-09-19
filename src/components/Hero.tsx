@@ -17,6 +17,7 @@ import { useHeroMotion } from '../animations/useHeroMotion';
 import { brand } from '../config/brand';
 import { HeroFeatureShowcase } from './HeroFeatureShowcase';
 import { HeroPreviewControls } from './HeroPreviewControls';
+import { HeroClaimForm } from './HeroClaimForm';
 
 interface HeroProps {
   onClaimUsername: (handle: string) => void;
@@ -26,7 +27,6 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => {
   const [, setLocation] = useLocation();
   const { t, isRtl, tr: ui } = useLanguage();
-  const [handle, setHandle] = useState('');
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>('audio');
@@ -73,16 +73,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
     }
   };
 
-  const handleClaim = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (handle.trim()) {
-      onClaimUsername(handle.trim());
-    } else {
-      setLocation('/register');
-    }
-  };
-
-return (
+  return (
     <section ref={heroRef} className="hero-section marketing-hero pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 border-b border-neutral-200 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.05),transparent)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-14 items-start">
@@ -116,35 +107,13 @@ return (
 
             {/* Primary Action: Claim Handle Form */}
             <div data-hero="action" className="w-full max-w-xl lg:max-w-2xl mb-4">
-              <form 
-                onSubmit={handleClaim}
-                className="p-1.5 bg-neutral-50 rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(24,24,23,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
-              >
-                <div className="flex items-center px-4 py-2 sm:py-0 flex-1" dir="ltr">
-                  <span className="text-neutral-500 font-mono text-sm sm:text-base font-semibold select-none">
-                    {brand.domain}/@
-                  </span>
-                  <input
-                    id="hero-claim-input"
-                    type="text"
-                    value={handle}
-                    onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                    placeholder={t.hero.claimPlaceholder}
-                    className="w-full pl-1 outline-none font-mono text-sm sm:text-base font-bold text-neutral-900 placeholder-neutral-400 bg-transparent"
-                    spellCheck={false}
-                    aria-label={`Claim your ${brand.productShortName} handle`}
-                  />
-                </div>
-                
-                <button
-                  id="hero-claim-btn"
-                  type="submit"
-                  className="px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-full bg-neutral-900 hover:bg-black text-white text-sm font-bold tracking-tight transition-colors active:scale-[0.985] flex items-center justify-center gap-2 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-                >
-                  <span>{isRtl ? 'أنشئ صفحتك' : 'Create your page'}</span>
-                  <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
-                </button>
-              </form>
+              <HeroClaimForm
+                isRtl={isRtl}
+                placeholder={t.hero.claimPlaceholder}
+                createLabel={isRtl ? 'أنشئ صفحتك' : 'Create your page'}
+                onClaimUsername={onClaimUsername}
+                onFallbackRedirect={() => setLocation('/register')}
+              />
 
               {/* Secondary CTAs & Concise Guarantees */}
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs px-2">
