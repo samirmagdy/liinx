@@ -58,6 +58,9 @@ export const api = {
   referrals: {
     get: () => request<{ referralUrl: string; total: number; qualified: number; required: number; rewardUntil: number | null; rewardEligible: boolean }>('/api/referrals')
   },
+  agencyReferrals: {
+    get: () => request<{ referralUrl: string; credited: number; pending: number; cap: number; creditCents: number; billingCurrency: string; requiresStudio: boolean }>('/api/agency-referrals')
+  },
   contact: (data: ContactInput) => request<ContactResponse>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
   auth: {
     checkUsername: async (username: string): Promise<{ available: boolean; reason?: string }> => {
@@ -65,12 +68,14 @@ export const api = {
     },
     register: async (email: string, password: string, username: string) => {
       const referral = typeof window !== 'undefined' ? window.localStorage.getItem('liinx-referral') || undefined : undefined;
+      const agencyReferral = typeof window !== 'undefined' ? window.localStorage.getItem('liinx-agency-referral') || undefined : undefined;
       const data = await request<{ token?: string; user: any; profileId: string }>('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email, password, username, referral })
+        body: JSON.stringify({ email, password, username, referral, agencyReferral })
       });
       if (data.token) authStorage.setToken(data.token);
       if (typeof window !== 'undefined') window.localStorage.removeItem('liinx-referral');
+      if (typeof window !== 'undefined') window.localStorage.removeItem('liinx-agency-referral');
       return data;
     },
     login: async (email: string, password: string) => {

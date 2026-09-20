@@ -59,6 +59,8 @@ Key configuration parameters:
 - `INTEGRATION_ENCRYPTION_KEY`: Separate 32-byte key used to encrypt OAuth tokens at rest
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and configured Stripe Price IDs for billing
 
+Configure the Stripe webhook endpoint at `/api/billing/webhook` for `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`, `invoice.payment_failed`, and `invoice.paid`. Agency referral credits depend on signed `invoice.paid` events.
+
 ### 3. Running in Development
 Starts the Express server with Vite middleware hot-module reloading:
 ```bash

@@ -1,6 +1,6 @@
-import { Gift, Key, Layers, Lock, ShieldCheck, User } from 'lucide-react';
+import { Building2, Gift, Key, Layers, Lock, ShieldCheck, User } from 'lucide-react';
 
-export type SettingsTab = 'profile' | 'billing' | 'profiles' | 'referrals' | 'developers' | 'security';
+export type SettingsTab = 'profile' | 'billing' | 'profiles' | 'referrals' | 'agency-referrals' | 'developers' | 'security';
 
 export function AccountSidebar({ ar, activeTab, setActiveTab }: { ar: boolean; activeTab: SettingsTab; setActiveTab: (tab: SettingsTab) => void }) {
   const tabs = [
@@ -8,6 +8,7 @@ export function AccountSidebar({ ar, activeTab, setActiveTab }: { ar: boolean; a
     { id: 'billing' as const, label: ar ? 'الخطة والاشتراك' : 'Plans & Billing', icon: ShieldCheck },
     { id: 'profiles' as const, label: ar ? 'الملفات والمواقع المصغرة' : 'Profiles & Sites', icon: Layers },
     { id: 'referrals' as const, label: ar ? 'دعوة المبدعين' : 'Refer creators', icon: Gift },
+    { id: 'agency-referrals' as const, label: ar ? 'إحالات الوكالات' : 'Agency referrals', icon: Building2 },
     { id: 'developers' as const, label: ar ? 'المطورون ومفاتيح API' : 'API & Developer', icon: Key },
     { id: 'security' as const, label: ar ? 'الأمان وتصدير البيانات' : 'Security & Privacy', icon: Lock }
   ];

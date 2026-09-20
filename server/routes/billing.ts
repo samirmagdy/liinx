@@ -8,6 +8,7 @@ import { logError } from '../logger.js';
 import { hasEntitlement, normalizePlan } from '../entitlements.js';
 import { syncAccountPlanToProfiles } from '../accountEntitlements.js';
 import { invalidatePublicProfileCache } from './profiles.js';
+import { recordAgencyReferralPayment } from '../services/agencyReferrals.js';
 
 export const billingRouter = Router();
 
@@ -218,7 +219,29 @@ function reconcilePaymentFailure(object: any, eventType: string, eventCreatedAt:
   if (ownsSubscription) persistAccountSubscription(userId!, 'free', 'past_due', customerId, null, eventCreatedAt, now);
 }
 
-function processBillingEvent(event: Stripe.Event): void {
+async function getAgencyReferralPayment(event: Stripe.Event): Promise<{ userId: string; invoiceId: string; paidAt: number } | null> {
+  if (event.type !== 'invoice.paid' || !stripeClient) return null;
+  const invoice = event.data.object as Stripe.Invoice;
+  const invoiceData = invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription | null };
+  const subscriptionId = stripeReferenceId(invoiceData.subscription);
+  const customerId = stripeReferenceId(invoice.customer);
+  if (!subscriptionId || !customerId || invoice.billing_reason !== 'subscription_create'
+    || invoice.status !== 'paid' || invoice.amount_paid <= 0 || invoice.currency !== 'usd') return null;
+
+  const subscription = await stripeClient.subscriptions.retrieve(subscriptionId);
+  if (subscription.metadata.plan !== 'studio' || !['active', 'trialing'].includes(subscription.status)) return null;
+  const userId = resolveBillingUserId(subscription.metadata.userId, subscription.metadata.profileId, customerId);
+  if (!userId) return null;
+  const paidAt = invoice.status_transitions?.paid_at
+    ? invoice.status_transitions.paid_at * 1000
+    : (Number.isFinite(event.created) ? event.created * 1000 : Date.now());
+  return { userId, invoiceId: invoice.id, paidAt };
+}
+
+async function processBillingEvent(event: Stripe.Event): Promise<void> {
+  // Stripe calls happen outside the SQLite write transaction. A failure returns
+  // a retryable webhook response, while event persistence remains atomic.
+  const agencyPayment = await getAgencyReferralPayment(event);
   const processEvent = db.transaction(() => {
     const now = Date.now();
     const eventCreatedAt = Number.isFinite(event.created) ? event.created * 1000 : now;
@@ -237,6 +260,7 @@ function processBillingEvent(event: Stripe.Event): void {
       default:
         break;
     }
+    if (agencyPayment) recordAgencyReferralPayment(agencyPayment.userId, agencyPayment.invoiceId, agencyPayment.paidAt);
     db.prepare('INSERT INTO processed_webhook_events (event_id, processed_at) VALUES (?, ?)').run(event.id, now);
   });
   processEvent();
@@ -274,7 +298,7 @@ billingRouter.post('/billing/webhook', async (req: Request, res: Response) => {
     const duplicate = db.prepare('SELECT event_id FROM processed_webhook_events WHERE event_id = ?').get(event.id);
     if (duplicate) return res.json({ received: true, duplicate: true });
 
-    processBillingEvent(event);
+    await processBillingEvent(event);
     res.json({ received: true });
   } catch (err: any) {
     logError('Stripe webhook event processing failed', err, { eventId: event?.id, eventType: event?.type });

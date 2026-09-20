@@ -23,6 +23,7 @@ import { testOnlySessionToken } from './sessionResponse.js';
 import { issueCurrentSession } from '../services/session.js';
 import { consumePasswordResetToken } from '../services/passwordReset.js';
 import { qualifyCreatorReferral, recordCreatorReferral } from '../services/referrals.js';
+import { recordAgencyReferral } from '../services/agencyReferrals.js';
 import { getEffectivePlan } from '../accountEntitlements.js';
 
 export const authRouter = Router();
@@ -245,6 +246,12 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     const inviter = referralUsername
       ? db.prepare('SELECT user_id FROM profiles WHERE username = ? AND user_id IS NOT NULL').get(referralUsername) as { user_id: string } | undefined
       : undefined;
+    const agencyReferralUsername = typeof req.body?.agencyReferral === 'string'
+      ? req.body.agencyReferral.toLowerCase().trim().replace(/[^a-z0-9_]/g, '').slice(0, 30)
+      : '';
+    const agencyInviter = agencyReferralUsername
+      ? db.prepare('SELECT user_id FROM profiles WHERE username = ? AND user_id IS NOT NULL').get(agencyReferralUsername) as { user_id: string } | undefined
+      : undefined;
     const cleanEmail = email.toLowerCase().trim();
     const cleanUsername = username.toLowerCase().trim();
 
@@ -286,6 +293,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
       `).run(userId, cleanEmail, passwordHash, now);
 
       if (inviter && inviter.user_id !== userId) recordCreatorReferral(inviter.user_id, userId, now);
+      if (agencyInviter && agencyInviter.user_id !== userId) recordAgencyReferral(agencyInviter.user_id, userId, now);
 
       db.prepare(`
         INSERT INTO profiles (

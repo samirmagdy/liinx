@@ -316,6 +316,8 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
   useEffect(() => {
     const referral = new URLSearchParams(window.location.search).get('ref')?.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
     if (referral) window.localStorage.setItem('liinx-referral', referral);
+    const agencyReferral = new URLSearchParams(window.location.search).get('agency_ref')?.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+    if (agencyReferral) window.localStorage.setItem('liinx-agency-referral', agencyReferral);
   }, []);
   return (
     <Router base={routerBase} {...routerSsrPath}>

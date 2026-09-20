@@ -69,6 +69,23 @@ export function initDatabase() {
     );
     CREATE INDEX IF NOT EXISTS idx_creator_referrals_inviter ON creator_referrals(inviter_user_id, qualified_at);
 
+    CREATE TABLE IF NOT EXISTS agency_referrals (
+      id TEXT PRIMARY KEY,
+      inviter_user_id TEXT NOT NULL,
+      referred_user_id TEXT NOT NULL UNIQUE,
+      created_at INTEGER NOT NULL,
+      paid_invoice_id TEXT UNIQUE,
+      paid_at INTEGER,
+      available_at INTEGER,
+      stripe_balance_transaction_id TEXT UNIQUE,
+      credited_at INTEGER,
+      FOREIGN KEY (inviter_user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CHECK (inviter_user_id <> referred_user_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_agency_referrals_inviter_pending
+      ON agency_referrals(inviter_user_id, credited_at, available_at);
+
     CREATE TABLE IF NOT EXISTS profiles (
       id TEXT PRIMARY KEY,
       user_id TEXT,

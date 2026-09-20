@@ -4,6 +4,8 @@ import { execFileSync } from 'node:child_process';
 import { db } from './db.js';
 import { log, logError } from './logger.js';
 import { getUploadBackupRetentionCount } from './services/backup/retention.js';
+import { stripeClient } from './routes/billing.js';
+import { grantDueAgencyReferralCredits } from './services/agencyReferrals.js';
 
 const dayMs = 24 * 60 * 60 * 1000;
 
@@ -26,8 +28,15 @@ export function runRetentionCleanup() {
 
 export function startMaintenanceScheduler() {
   if (process.env.NODE_ENV === 'test' || process.env.MAINTENANCE_ENABLED === 'false') return;
+  const grantReferralCredits = async () => {
+    if (!stripeClient) return;
+    const result = await grantDueAgencyReferralCredits(stripeClient);
+    if (result.credited || result.waiting) log('info', 'Agency referral credit sweep completed', result);
+  };
+  void grantReferralCredits().catch(error => logError('Agency referral credit sweep failed', error));
   const interval = setInterval(() => {
     try { runRetentionCleanup(); } catch (error) { logError('Retention cleanup failed', error); }
+    void grantReferralCredits().catch(error => logError('Agency referral credit sweep failed', error));
   }, 24 * 60 * 60 * 1000);
   interval.unref();
 }
