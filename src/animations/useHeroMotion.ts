@@ -19,7 +19,14 @@ export function useHeroMotion(ref: RefObject<HTMLElement | null>, language: stri
         .from('[data-hero="copy"]', { opacity: 0, y: 8, duration: timing.component, stagger: 0.06 }, 0.3)
         .from('[data-hero="action"]', { opacity: 0, y: 8, duration: timing.component }, 0.42)
         .from('[data-hero="visual"]', { opacity: 0, y: distance, duration: timing.hero, ease: easing.hero }, 0.38)
-        .from('[data-hero="controls"]', { opacity: 0, duration: timing.component }, 0.6);
+        .from('[data-hero="controls"]', { opacity: 0, duration: timing.component }, 0.6)
+        .from('[data-hero-feature]', {
+          opacity: 0,
+          y: 8,
+          duration: timing.component,
+          stagger: 0.06,
+          ease: easing.out,
+        }, 0.58);
       const finish = () => tl.progress(1);
       root.addEventListener('focusin', finish);
       if (context.conditions?.desktop && context.conditions?.fine) {

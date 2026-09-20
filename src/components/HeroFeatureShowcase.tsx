@@ -85,6 +85,7 @@ export const HeroFeatureShowcase: React.FC<HeroFeatureShowcaseProps> = ({
           return (
             <button
               key={badge.id}
+              data-hero-feature
               type="button"
               onClick={() => onSelectFeature(badge.id, badge.profileIndex)}
               className={`group text-start py-3 border-b border-neutral-200 transition-colors cursor-pointer flex items-start gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${

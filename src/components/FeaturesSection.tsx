@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { Reveal } from './motion/Reveal';
 
 interface FeaturesSectionProps {
   onOpenStudio: () => void;
@@ -56,7 +57,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
   return (
     <section id="features" className="marketing-section border-y border-neutral-200 bg-neutral-50 py-12 md:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 max-w-3xl">
+        <Reveal distance="md" className="mb-8 max-w-3xl">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">
             {isRtl ? 'ميزات المنصة' : 'Platform features'}
           </p>
@@ -68,11 +69,11 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
               ? 'أنشئ صفحة عامة قابلة للتخصيص، مع أدوات للروابط والوسائط والاشتراكات.'
               : 'Create a customizable public page with tools for links, media, and newsletter signups.'}
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
+        <Reveal stagger className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
           {groups.map((group, index) => (
-            <article key={group.title} className="border-t border-neutral-300 py-5 text-start">
+            <article key={group.title} className="motion-card border-t border-neutral-300 py-5 text-start">
               <div className="mb-2 flex items-baseline gap-3">
                 <span className="font-mono text-xs text-amber-700">0{index + 1}</span>
                 <h3 className="text-base font-semibold text-neutral-900">{group.title}</h3>
@@ -83,9 +84,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
               </ul>
             </article>
           ))}
-        </div>
+        </Reveal>
 
-        <div className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-neutral-300 pt-5 sm:flex-row sm:items-center">
+        <Reveal distance="sm" delay={80} className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-neutral-300 pt-5 sm:flex-row sm:items-center">
           <p className="text-sm text-neutral-600">
             {isRtl ? 'ابدأ بحساب مجاني وأنشئ صفحتك من الاستوديو.' : 'Start with a free account and create your page in Studio.'}
           </p>
@@ -96,7 +97,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
             <span>{isRtl ? 'افتح الاستوديو' : 'Open Studio'}</span>
             <ArrowRight className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
           </button>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useCapabilities } from '../context/CapabilitiesContext';
 import { getFaqs } from '../config/faq';
+import { Reveal } from './motion/Reveal';
 
 export const FaqSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -20,7 +21,7 @@ export const FaqSection: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="text-center mb-8">
+        <Reveal distance="md" className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
             <span>{t.faqSection.badge}</span>
           </div>
@@ -30,16 +31,16 @@ export const FaqSection: React.FC = () => {
           <p className="text-base text-neutral-600 text-pretty">
             {t.faqSection.subtitle}
           </p>
-        </div>
+        </Reveal>
 
         {/* FAQ Accordion */}
-        <div className="space-y-3">
+        <Reveal stagger className="space-y-3">
           {faqList.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div
                 key={idx}
-                className="rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden shadow-xs"
+                className="motion-card rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden shadow-xs"
               >
                 <button
                   id={`faq-question-${idx}`} aria-expanded={isOpen} aria-controls={`faq-answer-${idx}`}
@@ -60,7 +61,7 @@ export const FaqSection: React.FC = () => {
               </div>
             );
           })}
-        </div>
+        </Reveal>
 
       </div>
     </section>
