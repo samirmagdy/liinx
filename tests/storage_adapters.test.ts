@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MemoryObjectStorage } from '../server/infrastructure/memoryObjectStorage.js';
 import { S3CompatibleObjectStorage } from '../server/infrastructure/s3ObjectStorage.js';
+import { MemoryCacheStore } from '../server/infrastructure/memoryCache.js';
 
 describe('media storage adapter contract', () => {
   it('round-trips metadata and bytes without filesystem or credentials', async () => {
@@ -17,6 +18,38 @@ describe('media storage adapter contract', () => {
     expect(await storage.get(stored.key)).toEqual(bytes);
     expect(await storage.delete(stored.key)).toBe(true);
     expect(await storage.exists(stored.key)).toBe(false);
+    expect(await storage.get('missing.txt')).toBeNull();
+    expect(await storage.delete('missing.txt')).toBe(false);
+    expect(await storage.healthCheck()).toBe(true);
+    expect(() => storage.getUrl('../invalid')).toThrow('Invalid object key.');
+  });
+
+  it('expires cache entries and purges expired entries when the cache reaches its limit', () => {
+    vi.useFakeTimers();
+    const cache = new MemoryCacheStore<string>(100, 1);
+    try {
+      expect(cache.get('missing')).toBeNull();
+      cache.set('prefix:first', 'first', 10);
+      expect(cache.get('prefix:first')).toBe('first');
+      vi.advanceTimersByTime(11);
+      expect(cache.get('prefix:first')).toBeNull();
+
+      cache.set('prefix:old', 'old', 5);
+      vi.advanceTimersByTime(6);
+      cache.set('other', 'kept');
+      expect(cache.get('other')).toBe('kept');
+
+      cache.set('prefix:a', 'a');
+      cache.set('prefix:b', 'b');
+      cache.deleteByPrefix('prefix:');
+      expect(cache.get('prefix:a')).toBeNull();
+      expect(cache.get('other')).toBe('kept');
+      cache.delete('other');
+      cache.clear();
+    } finally {
+      cache.destroy();
+      vi.useRealTimers();
+    }
   });
 
   it('uses server-side S3-compatible requests and preserves object metadata', async () => {
@@ -31,7 +64,7 @@ describe('media storage adapter contract', () => {
       }
       if (method === 'GET') {
         const data = objects.get(url);
-        return data ? new Response(data, { status: 200 }) : new Response(null, { status: 404 });
+        return data ? new Response(new Uint8Array(data), { status: 200 }) : new Response(null, { status: 404 });
       }
       if (method === 'HEAD') {
         const data = objects.get(url);
