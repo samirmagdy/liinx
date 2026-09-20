@@ -70,7 +70,7 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
             value={handle}
             onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
             placeholder={placeholder}
-            className="w-full min-w-0 pl-1.5 pr-2 outline-none font-mono text-sm sm:text-base font-bold text-neutral-900 placeholder-neutral-400 bg-transparent"
+            className="hero-claim-input w-full min-w-0 pl-1.5 pr-2 outline-none font-mono text-sm sm:text-base font-bold text-neutral-900 placeholder-neutral-400 bg-transparent"
             spellCheck={false}
             aria-label={`Claim your ${brand.productShortName} handle`}
           />
