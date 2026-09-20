@@ -34,8 +34,8 @@ agencyReferralsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, re
   let availableCreditCents = 0;
   if (stripeClient && account.stripeCustomerId) {
     try {
-      const { data: customer } = await stripeClient.customers.retrieve(account.stripeCustomerId);
-      if (!customer.deleted) availableCreditCents = Math.max(0, -customer.balance);
+      const customer = await stripeClient.customers.retrieve(account.stripeCustomerId);
+      if ('balance' in customer) availableCreditCents = Math.max(0, -customer.balance);
     } catch {
       return res.status(503).json({ error: 'Could not retrieve your Stripe credit balance.' });
     }
