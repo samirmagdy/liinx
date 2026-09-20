@@ -226,6 +226,45 @@ authRouter.get('/check-username/:username', sharedRateLimit({ name: 'username-ch
   res.json({ available: !existing, username: cleanUsername });
 });
 
+function registrationReferrerId(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const username = value.toLowerCase().trim().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+  if (!username) return undefined;
+  return (db.prepare('SELECT user_id FROM profiles WHERE username = ? AND user_id IS NOT NULL').get(username) as { user_id: string } | undefined)?.user_id;
+}
+
+function createRegisteredAccount(input: {
+  userId: string; profileId: string; username: string; email: string; passwordHash: string;
+  inviterId?: string; agencyInviterId?: string; now: number;
+}): void {
+  const { userId, profileId, username, email, passwordHash, inviterId, agencyInviterId, now } = input;
+  const displayName = username.charAt(0).toUpperCase() + username.slice(1);
+  const starterSocials = JSON.stringify([
+    { platform: 'instagram', url: 'https://instagram.com' },
+    { platform: 'email', url: `mailto:${email}` }
+  ]);
+  const starterBlockId = createId('blk');
+  db.transaction(() => {
+    db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, email, passwordHash, now);
+    if (inviterId) recordCreatorReferral(inviterId, userId, now);
+    if (agencyInviterId) recordAgencyReferral(agencyInviterId, userId, now);
+    db.prepare(`INSERT INTO profiles (
+      id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(profileId, userId, username, displayName, 'Welcome to my links! Tap below to explore my latest updates.',
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
+        'Creator', 0, 'editorial-stone', starterSocials, now, now);
+    const homePageId = createId('page');
+    db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at)
+      VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`).run(homePageId, profileId, displayName, now, now);
+    db.prepare(`INSERT INTO blocks (
+      id, profile_id, type, title, url, subtitle, badge, highlighted, position, page_id, extra_json, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(starterBlockId, profileId, 'link', 'My Website', `https://${brand.domain}`,
+        'Check out my official website', 'NEW', 1, 0, homePageId, null, now, now);
+  })();
+}
+
 // Register new user & creator profile
 authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, windowMs: 60 * 60 * 1000 }), (req, res) => {
   try {
@@ -240,18 +279,8 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     }
 
     const { email, password, username } = parse.data;
-    const referralUsername = typeof req.body?.referral === 'string'
-      ? req.body.referral.toLowerCase().trim().replace(/[^a-z0-9_]/g, '').slice(0, 30)
-      : '';
-    const inviter = referralUsername
-      ? db.prepare('SELECT user_id FROM profiles WHERE username = ? AND user_id IS NOT NULL').get(referralUsername) as { user_id: string } | undefined
-      : undefined;
-    const agencyReferralUsername = typeof req.body?.agencyReferral === 'string'
-      ? req.body.agencyReferral.toLowerCase().trim().replace(/[^a-z0-9_]/g, '').slice(0, 30)
-      : '';
-    const agencyInviter = agencyReferralUsername
-      ? db.prepare('SELECT user_id FROM profiles WHERE username = ? AND user_id IS NOT NULL').get(agencyReferralUsername) as { user_id: string } | undefined
-      : undefined;
+    const inviterId = registrationReferrerId(req.body?.referral);
+    const agencyInviterId = registrationReferrerId(req.body?.agencyReferral);
     const cleanEmail = email.toLowerCase().trim();
     const cleanUsername = username.toLowerCase().trim();
 
@@ -276,71 +305,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     const userId = createId('usr');
     const profileId = createId('prf');
     const passwordHash = hashPassword(password);
-    const displayName = cleanUsername.charAt(0).toUpperCase() + cleanUsername.slice(1);
-
-    const starterSocials = JSON.stringify([
-      { platform: 'instagram', url: 'https://instagram.com' },
-      { platform: 'email', url: `mailto:${cleanEmail}` }
-    ]);
-
-    const starterBlockId = createId('blk');
-
-    // Transaction for atomic registration
-    const registerTx = db.transaction(() => {
-      db.prepare(`
-        INSERT INTO users (id, email, password_hash, created_at)
-        VALUES (?, ?, ?, ?)
-      `).run(userId, cleanEmail, passwordHash, now);
-
-      if (inviter && inviter.user_id !== userId) recordCreatorReferral(inviter.user_id, userId, now);
-      if (agencyInviter && agencyInviter.user_id !== userId) recordAgencyReferral(agencyInviter.user_id, userId, now);
-
-      db.prepare(`
-        INSERT INTO profiles (
-          id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        profileId,
-        userId,
-        cleanUsername,
-        displayName,
-        'Welcome to my links! Tap below to explore my latest updates.',
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
-        'Creator',
-        0,
-        'editorial-stone',
-        starterSocials,
-        now,
-        now
-      );
-
-      const homePageId = createId('page');
-      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-        .run(homePageId, profileId, displayName, now, now);
-
-      // Starter link block
-      db.prepare(`
-        INSERT INTO blocks (
-          id, profile_id, type, title, url, subtitle, badge, highlighted, position, page_id, extra_json, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        starterBlockId,
-        profileId,
-        'link',
-        'My Website',
-        `https://${brand.domain}`,
-        'Check out my official website',
-        'NEW',
-        1,
-        0,
-        homePageId,
-        null,
-        now,
-        now
-      );
-    });
-
-    registerTx();
+    createRegisteredAccount({ userId, profileId, username: cleanUsername, email: cleanEmail, passwordHash, inviterId, agencyInviterId, now });
 
     const token = issueCurrentSession(userId, profileId, cleanUsername, cleanEmail);
     setSessionCookie(res, token);
@@ -530,7 +495,10 @@ authRouter.get('/export-data', requireAuth, (req: AuthenticatedRequest, res) => 
       profiles: profiles.map((p: any) => {
         const pages = db.prepare('SELECT * FROM pages WHERE profile_id = ?').all(p.id);
         const blocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ?').all(p.id);
-        const subscribers = db.prepare('SELECT email, created_at FROM newsletter_subscribers WHERE profile_id = ?').all(p.id);
+        const subscribers = db.prepare(`SELECT s.email, s.created_at, c.consented_at, c.confirmed_at,
+          c.consent_method, c.consent_copy_version
+          FROM newsletter_subscribers s LEFT JOIN newsletter_consents c ON c.subscriber_id = s.id
+          WHERE s.profile_id = ?`).all(p.id);
         const forms = db.prepare('SELECT form_title, field_labels_json, fields_json, created_at FROM form_submissions WHERE profile_id = ?').all(p.id);
         return {
           ...p,

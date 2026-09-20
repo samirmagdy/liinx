@@ -24,7 +24,6 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
   const [newsletterError, setNewsletterError] = useState<string | null>(null);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterConsent, setNewsletterConsent] = useState(false);
-  const [newsletterUnsubscribeUrl, setNewsletterUnsubscribeUrl] = useState<string | null>(null);
 
   const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,8 +38,7 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
         return;
       }
       const res = await api.newsletter.subscribe(profileId, block.id, newsletterEmail.trim(), newsletterConsent);
-      setNewsletterSuccess(res.message || ui('Subscribed successfully!'));
-      setNewsletterUnsubscribeUrl(res.unsubscribeUrl || null);
+      setNewsletterSuccess(res.message || ui('Check your email to confirm your subscription.'));
       setNewsletterError(null);
       setTimeout(() => {
         setNewsletterSuccess(null);
@@ -77,11 +75,6 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
         >
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{newsletterSuccess}</span>
-          {newsletterUnsubscribeUrl && (
-            <a href={newsletterUnsubscribeUrl} className="underline underline-offset-2" dir="auto">
-              {ui('Unsubscribe')}
-            </a>
-          )}
         </div>
       ) : (
         <form onSubmit={handleNewsletter} className="space-y-2.5">
@@ -122,10 +115,10 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
               onChange={e => setNewsletterConsent(e.target.checked)}
               className="mt-0.5 min-h-0"
             />
-            <span>{ui('I agree to receive updates from this creator and can unsubscribe later.')}</span>
+            <span>{ui('I agree to receive email updates from this creator and can unsubscribe at any time.')}</span>
           </label>
           <p className="text-[10px] leading-relaxed opacity-75" style={{ color: theme.subtextColor }} dir="auto">
-            {ui('Single opt-in: checking consent adds your email immediately. No confirmation email is sent.')}
+            {ui('You will be added after you confirm the email we send.')}
           </p>
           <button
             type="submit"

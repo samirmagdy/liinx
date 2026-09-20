@@ -74,7 +74,7 @@ export function PrivacyPage() {
       title={lang === 'ar' ? 'الخصوصية' : 'Privacy'}
       sections={lang === 'ar' ? [
         ['بيانات الحساب والمحتوى', 'نخزّن البريد الإلكتروني وكلمة المرور بعد تجزئتها باستخدام bcrypt، ومحتوى الملف والروابط والمظهر الذي تختاره. تظهر المعلومات المنشورة لزوار صفحتك.'],
-        ['الزيارات والاشتراكات', 'نسجّل زيارات الصفحة ونقرات الروابط ومصادر الإحالة ووسوم الحملات. تستخدم الإحصاءات معرّفات مشتقة من عنوان IP وتُستخدم لأغراض مجمعة ومكافحة الإساءة. تُحفظ عناوين المشتركين في القائمة الخاصة بصاحب الصفحة مع وقت الموافقة عندما يوافق المشترك.'],
+        ['الزيارات والاشتراكات', 'نسجّل زيارات الصفحة ونقرات الروابط ومصادر الإحالة ووسوم الحملات. تستخدم الإحصاءات معرّفات مشتقة من عنوان IP وتُستخدم لأغراض مجمعة ومكافحة الإساءة. عند طلب الاشتراك، نرسل رسالة تأكيد ولا نضيف البريد إلى قائمة صاحب الصفحة حتى يضغط الشخص على زر التأكيد. نحذف الطلبات غير المؤكدة بعد 24 ساعة. نسجّل وقت الموافقة والتأكيد وإصدار نص الموافقة؛ ويمكن للمشترك الانسحاب عبر رابط إلغاء الاشتراك.'],
         ['الإحالات', 'إذا سجّلت عبر رابط دعوة، نحفظ مُعرّف الحساب الذي دعاك وحالة التحقق من بريدك لحساب الدعوة ضمن برنامج المكافآت.'],
         ['الخدمات الخارجية والوسائط', 'قد تحمّل الوسائط والحجوزات خدمات خارجية مثل YouTube وSpotify وCalendly. قد تُستخدم Stripe للفوترة، وInstagram OAuth للمزامنة، وGoogle Analytics أو Meta Pixel إذا فعّلها صاحب الصفحة. هذه الخدمات قد تعالج بيانات الزائر وفق سياساتها.'],
         ['رسائل الدعم', 'تُحفظ الرسائل المرسلة من نموذج الدعم مع الاسم والبريد والرسالة ووقت الإرسال. يطّلع عليها حساب المشغّل المصرّح به فقط. قد يُحاول النظام إرسال إشعار إلى صندوق الدعم عند تهيئة مزوّد البريد؛ حفظ الرسالة لا يعني تسليم البريد. لا توجد حالياً مدة احتفاظ تلقائية محددة لرسائل الدعم.'],
@@ -82,7 +82,7 @@ export function PrivacyPage() {
         ['طلبات البيانات', 'استخدم نموذج التواصل لطلبات الوصول إلى بياناتك أو حذفها أو الانسحاب من قائمة بريدية. لا يوجد ادعاء اعتماد امتثال أو مدة تنفيذ مضمونة.']
       ] : [
         ['Account data and content', 'We store your email, bcrypt-hashed password, profile content, links and selected appearance. Published information is visible to page visitors.'],
-        ['Visits and subscriptions', 'We record page views, link clicks, referrers and campaign tags. Analytics uses identifiers derived from IP addresses for aggregate reporting and abuse prevention. Subscriber emails are stored in the page owner\'s private list, with consent time recorded when consent is provided.'],
+        ['Visits and subscriptions', 'We record page views, link clicks, referrers and campaign tags. Analytics uses identifiers derived from IP addresses for aggregate reporting and abuse prevention. When someone requests a newsletter subscription, we send a confirmation email and do not add the address to the page owner\'s list until they press the confirmation button. Unconfirmed requests are deleted after 24 hours. We record consent time, confirmation time, and the consent text version; subscribers can withdraw through their unsubscribe link.'],
         ['Referrals', 'If you register through a referral link, we store the referring account ID and your email-verification status for referral reward accounting.'],
         ['Third-party services and media', 'Media and booking embeds may load YouTube, Spotify and Calendly. Stripe may process billing, Instagram OAuth may process synchronization, and Google Analytics or Meta Pixel may load when enabled by a creator. Those providers process data under their own policies.'],
         ['Support messages', 'Support messages store the sender name, email, message, and submission time. Access is limited to the configured support operator account. The service may attempt an email notification when a mail provider is configured; saving a message does not mean that email was delivered. No automatic retention period is currently configured for support messages.'],
@@ -259,12 +259,12 @@ export function AboutPage() {
       sections={lang === 'ar' ? [
         ['ما هي Liinx؟', 'Liinx أداة لإنشاء صفحة عامة قابلة للتخصيص تجمع الروابط والوسائط المدعومة واشتراكات النشرة وروابط الحجز في مكان واحد.'],
         ['كيف تعمل الصفحة؟', 'أضف محتواك من الاستوديو، رتّب الكتل واختر مظهراً. يمكن نشر صفحات متعددة بروابط مستقلة، وتختلف الميزات المتاحة حسب الخطة.'],
-        ['النشرة والحجوزات', 'تُجمع اشتراكات النشرة عبر كتل الصفحة ويمكن تنزيل سجلات المشتركين بصيغة CSV. تفتح كتل الحجز تقويم Calendly؛ ويُدير Calendly المواعيد والتأكيدات.'],
+        ['النشرة والحجوزات', 'تُجمع طلبات الاشتراك بموافقة صريحة، ولا تظهر للمبدع حتى تأكيد البريد الإلكتروني. تُحذف الطلبات غير المؤكدة بعد 24 ساعة، ونحتفظ بوقت الموافقة والتأكيد وإصدار نص الموافقة لإثبات الاشتراك. يمكن للمشترك إلغاء اشتراكه عبر رابط الإلغاء. تفتح كتل الحجز تقويم Calendly؛ ويُدير Calendly المواعيد والتأكيدات.'],
         ['النطاقات والمدفوعات', 'تدعم الخطط المؤهلة ربط نطاق مخصص بعد التحقق من DNS، مع إعداد الاستضافة وشهادة TLS. لا تعالج Liinx مدفوعات المبيعات أو الحجوزات؛ وتُدار هذه العمليات لدى مزوّد الخدمة الخارجي.']
       ] : [
         ['What is Liinx?', 'Liinx is a tool for creating a customizable public page that brings together links, supported media, newsletter signups, and booking links.'],
         ['How pages work', 'Add content in the Studio, arrange blocks, and choose a theme. You can publish multiple pages at separate URLs; feature availability varies by plan.'],
-        ['Newsletters and bookings', 'Newsletter signup blocks collect subscriber records that can be downloaded as CSV. Booking blocks open Calendly, which manages availability and booking confirmations.'],
+        ['Newsletters and bookings', 'Newsletter signup blocks require an explicit opt-in and email confirmation before a subscriber appears to the creator. Unconfirmed requests expire after 24 hours. We record consent time, confirmation time, and the consent text version as subscription evidence. Subscribers can withdraw through their unsubscribe link. Booking blocks open Calendly, which manages availability and booking confirmations.'],
         ['Domains and payments', 'Eligible plans support custom domains after DNS verification; hosting and TLS also need to be configured. Liinx does not process sales or booking payments; external providers handle those transactions.']
       ]}
     />

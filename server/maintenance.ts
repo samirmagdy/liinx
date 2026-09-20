@@ -20,7 +20,8 @@ export function runRetentionCleanup() {
     const views = db.prepare('DELETE FROM profile_views WHERE created_at < ?').run(analyticsCutoff).changes;
     const clicks = db.prepare('DELETE FROM link_clicks WHERE created_at < ?').run(analyticsCutoff).changes;
     const webhooks = db.prepare('DELETE FROM processed_webhook_events WHERE processed_at < ?').run(webhookCutoff).changes;
-    return { views, clicks, webhooks };
+    const pendingNewsletter = db.prepare('DELETE FROM newsletter_pending_subscriptions WHERE expires_at <= ?').run(now).changes;
+    return { views, clicks, webhooks, pendingNewsletter };
   })();
   log('info', 'Retention cleanup completed', { ...result, analyticsRetentionDays: analyticsDays, webhookRetentionDays: webhookDays });
   return result;

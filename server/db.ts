@@ -197,6 +197,29 @@ export function initDatabase() {
 
     CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_unique ON newsletter_subscribers(profile_id, email);
 
+    CREATE TABLE IF NOT EXISTS newsletter_pending_subscriptions (
+      id TEXT PRIMARY KEY,
+      profile_id TEXT NOT NULL,
+      block_id TEXT,
+      email TEXT NOT NULL,
+      consented_at INTEGER NOT NULL,
+      consent_copy_version TEXT NOT NULL,
+      confirmation_token_hash TEXT NOT NULL UNIQUE,
+      expires_at INTEGER NOT NULL,
+      last_sent_at INTEGER NOT NULL,
+      FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+      UNIQUE (profile_id, email)
+    );
+    CREATE INDEX IF NOT EXISTS idx_newsletter_pending_expiry ON newsletter_pending_subscriptions(expires_at);
+
+    CREATE TABLE IF NOT EXISTS newsletter_unsubscribe_tokens (
+      token_hash TEXT PRIMARY KEY,
+      subscriber_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (subscriber_id) REFERENCES newsletter_subscribers(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_newsletter_unsubscribe_subscriber ON newsletter_unsubscribe_tokens(subscriber_id);
+
 
     CREATE TABLE IF NOT EXISTS instagram_sync (
       id TEXT PRIMARY KEY,
@@ -410,6 +433,13 @@ export function initDatabase() {
     db.exec("ALTER TABLE newsletter_subscribers ADD COLUMN unsubscribe_token_hash TEXT");
   } catch (e) {}
 
+  for (const column of ['confirmed_at INTEGER', 'consent_method TEXT', 'consent_copy_version TEXT']) {
+    try { db.exec(`ALTER TABLE newsletter_consents ADD COLUMN ${column}`); } catch (e) {}
+  }
+  db.prepare(`UPDATE newsletter_consents
+    SET consent_method = 'single_opt_in_legacy', consent_copy_version = 'legacy-v0'
+    WHERE consent_method IS NULL`).run();
+
   for (const column of [
     'token_issued_at INTEGER',
     'last_sync_error TEXT',
@@ -486,6 +516,9 @@ export function initDatabase() {
     CREATE TABLE IF NOT EXISTS newsletter_consents (
       subscriber_id TEXT PRIMARY KEY,
       consented_at INTEGER NOT NULL,
+      confirmed_at INTEGER,
+      consent_method TEXT,
+      consent_copy_version TEXT,
       FOREIGN KEY (subscriber_id) REFERENCES newsletter_subscribers(id) ON DELETE CASCADE
     );
 

@@ -1,27 +1,16 @@
 import { useEffect, useState } from 'react';
-import { BadgeDollarSign, Check, Copy, Users } from 'lucide-react';
+import { BadgeDollarSign, Users } from 'lucide-react';
 import { api } from '../../../services/api';
+import { ReferralLinkCard } from './ReferralLinkCard';
 
 type AgencyReferralData = Awaited<ReturnType<typeof api.agencyReferrals.get>>;
 
 export function AgencyReferralPanel({ ar }: { ar: boolean }) {
   const [data, setData] = useState<AgencyReferralData | null>(null);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
   useEffect(() => {
     api.agencyReferrals.get().then(setData).catch(() => setError(ar ? 'تعذر تحميل بيانات الإحالة.' : 'Could not load agency referral details.'));
   }, [ar]);
-
-  const copyLink = async () => {
-    if (!data) return;
-    try {
-      await navigator.clipboard.writeText(data.referralUrl);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      setError(ar ? 'تعذر نسخ الرابط. انسخه يدوياً.' : 'Could not copy the link. Select and copy it manually.');
-    }
-  };
 
   if (!data && !error) return <div className="animate-pulse h-36 rounded-2xl bg-neutral-100" />;
   if (error && !data) return <p role="alert" className="text-sm text-rose-700">{error}</p>;
@@ -40,16 +29,7 @@ export function AgencyReferralPanel({ ar }: { ar: boolean }) {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5">
-        <label htmlFor="agency-referral-url" className="mb-2 block text-xs font-semibold text-neutral-700">{ar ? 'رابط إحالة الوكالة' : 'Your agency referral link'}</label>
-        <div className="flex gap-2">
-          <input id="agency-referral-url" readOnly value={data.referralUrl} dir="ltr" className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-xs text-neutral-700" />
-          <button type="button" onClick={copyLink} className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-neutral-900 px-3 py-2.5 text-xs font-semibold text-white hover:bg-neutral-800">
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {copied ? (ar ? 'تم النسخ' : 'Copied') : (ar ? 'نسخ' : 'Copy')}
-          </button>
-        </div>
-      </div>
+      <ReferralLinkCard inputId="agency-referral-url" referralUrl={data.referralUrl} label={ar ? 'رابط إحالة الوكالة' : 'Your agency referral link'} ar={ar} />
 
       {data.requiresStudio && <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
         {ar ? 'يُضاف الرصيد عند وجود اشتراك Studio نشط. ستظل إحالاتك المؤهلة معلّقة إلى أن يصبح اشتراكك نشطاً.' : 'Credits are issued to active Studio accounts. Qualified referrals remain pending until your Studio subscription is active.'}
@@ -71,14 +51,7 @@ export function AgencyReferralPanel({ ar }: { ar: boolean }) {
         </div>
       </div>
 
-      {(data.awaitingStudioPayment > 0 || data.coolingOff > 0 || data.pending > 0) && <div className="rounded-2xl border border-neutral-200 p-4">
-        <h3 className="text-sm font-semibold text-neutral-900">{ar ? 'حالة الإحالات' : 'Referral status'}</h3>
-        <ul className="mt-3 space-y-2 text-xs text-neutral-600">
-          {data.awaitingStudioPayment > 0 && <li>{ar ? `بانتظار أول فاتورة Studio: ${data.awaitingStudioPayment}` : `Waiting for first Studio payment: ${data.awaitingStudioPayment}`}</li>}
-          {data.coolingOff > 0 && <li>{ar ? `فترة الانتظار 30 يوماً: ${data.coolingOff}` : `In the 30-day hold: ${data.coolingOff}`}</li>}
-          {data.pending > data.coolingOff && <li>{ar ? `مؤهلة بانتظار إصدار الرصيد أو توفر حد الإحالات: ${data.pending - data.coolingOff}` : `Qualified, waiting for credit issuance or annual-cap availability: ${data.pending - data.coolingOff}`}</li>}
-        </ul>
-      </div>}
+      <AgencyReferralStatus data={data} ar={ar} />
 
       <p className="text-xs leading-relaxed text-neutral-500">
         {ar
@@ -88,4 +61,16 @@ export function AgencyReferralPanel({ ar }: { ar: boolean }) {
       {error && <p role="status" className="text-xs text-rose-700">{error}</p>}
     </section>
   );
+}
+
+function AgencyReferralStatus({ data, ar }: { data: AgencyReferralData; ar: boolean }) {
+  if (data.awaitingStudioPayment <= 0 && data.coolingOff <= 0 && data.pending <= 0) return null;
+  return <div className="rounded-2xl border border-neutral-200 p-4">
+    <h3 className="text-sm font-semibold text-neutral-900">{ar ? 'حالة الإحالات' : 'Referral status'}</h3>
+    <ul className="mt-3 space-y-2 text-xs text-neutral-600">
+      {data.awaitingStudioPayment > 0 && <li>{ar ? `بانتظار أول فاتورة Studio: ${data.awaitingStudioPayment}` : `Waiting for first Studio payment: ${data.awaitingStudioPayment}`}</li>}
+      {data.coolingOff > 0 && <li>{ar ? `فترة الانتظار 30 يوماً: ${data.coolingOff}` : `In the 30-day hold: ${data.coolingOff}`}</li>}
+      {data.pending > data.coolingOff && <li>{ar ? `مؤهلة بانتظار إصدار الرصيد أو توفر حد الإحالات: ${data.pending - data.coolingOff}` : `Qualified, waiting for credit issuance or annual-cap availability: ${data.pending - data.coolingOff}`}</li>}
+    </ul>
+  </div>;
 }

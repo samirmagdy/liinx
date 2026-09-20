@@ -59,7 +59,20 @@ export const api = {
     get: () => request<{ referralUrl: string; total: number; qualified: number; required: number; rewardUntil: number | null; rewardEligible: boolean }>('/api/referrals')
   },
   agencyReferrals: {
-    get: () => request<{ referralUrl: string; credited: number; pending: number; cap: number; creditCents: number; billingCurrency: string; requiresStudio: boolean }>('/api/agency-referrals')
+    get: () => request<{
+      referralUrl: string;
+      referred: number;
+      pending: number;
+      awaitingStudioPayment: number;
+      coolingOff: number;
+      creditedThisYear: number;
+      cap: number;
+      creditCents: number;
+      creditCurrency: string;
+      availableCreditCents: number;
+      requiresStudio: boolean;
+      stripeConfigured: boolean;
+    }>('/api/agency-referrals')
   },
   contact: (data: ContactInput) => request<ContactResponse>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
   auth: {
