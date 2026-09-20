@@ -46,6 +46,36 @@ function ownedUploadForUser(fileUrl: unknown, userId: string): boolean {
   return Boolean(db.prepare('SELECT 1 FROM uploaded_files WHERE path = ? AND owner_user_id = ?').get(fileUrl, userId));
 }
 
+function validateNewBlock(data: BlockRequestData, userId: string): { status: number; error: string } | null {
+  if (data.type === 'download' && !ownedUploadForUser(data.extra?.fileUrl, userId)) {
+    return { status: 403, error: 'The uploaded file does not belong to this account.' };
+  }
+  if (data.type === 'booking' && (!bookingUrl(data.url) || data.extra != null)) {
+    return { status: 400, error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' };
+  }
+  return null;
+}
+
+function resolveBlockPage(profileId: string, pageId?: string): { id: string } | undefined {
+  const profile = db.prepare('SELECT display_name as displayName FROM profiles WHERE id = ?').get(profileId) as { displayName?: string } | undefined;
+  const selectedPage = pageId
+    ? db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(pageId, profileId) as { id: string } | undefined
+    : db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined;
+
+  if (selectedPage || pageId || !profile) return selectedPage;
+
+  const homeId = createId('page');
+  const now = Date.now();
+  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+    .run(homeId, profileId, profile.displayName || 'Home', now, now);
+  return { id: homeId };
+}
+
+function nextBlockPosition(profileId: string, pageId: string): number {
+  const row = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, pageId) as { maxPos: number | null };
+  return row.maxPos === null ? 0 : row.maxPos + 1;
+}
+
 // Public content-gate verification. Protected content is deliberately returned
 // only after the password is checked server-side; it is never included in the
 // public profile response.
@@ -83,23 +113,10 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
     }
 
     const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, pageId, extra } = parse.data as BlockRequestData & { type: ContractBlockType; title: string };
-    if (type === 'download' && !ownedUploadForUser(extra?.fileUrl, req.user!.userId)) {
-      return res.status(403).json({ error: 'The uploaded file does not belong to this account.' });
-    }
-    if (type === 'booking' && (!bookingUrl(url) || extra != null)) {
-      return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
-    }
+    const validationError = validateNewBlock(parse.data as BlockRequestData, req.user!.userId);
+    if (validationError) return res.status(validationError.status).json({ error: validationError.error });
     const profileId = req.user!.profileId;
-    const profile = db.prepare('SELECT plan, display_name as displayName FROM profiles WHERE id = ?').get(profileId) as { plan?: string; displayName?: string } | undefined;
-    const selectedPage = pageId
-      ? db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(pageId, profileId) as { id: string } | undefined
-      : db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined;
-    if (!selectedPage && !pageId && profile) {
-      const homeId = createId('page');
-      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-        .run(homeId, profileId, profile.displayName || 'Home', Date.now(), Date.now());
-    }
-    const resolvedPage = selectedPage || (!pageId ? db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined : undefined);
+    const resolvedPage = resolveBlockPage(profileId, pageId);
     if (!resolvedPage) return res.status(400).json({ error: 'The selected page does not belong to this profile.' });
     if (!hasEntitlement(getEffectivePlan(profileId), 'scheduling') && (startAt != null || endAt != null)) {
       return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
@@ -108,8 +125,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
     const id = createId('blk');
 
     // Get current max position
-    const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, resolvedPage.id) as { maxPos: number | null };
-    const nextPos = (maxPosRow && maxPosRow.maxPos !== null) ? maxPosRow.maxPos + 1 : 0;
+    const nextPos = nextBlockPosition(profileId, resolvedPage.id);
 
     db.prepare(`
       INSERT INTO blocks (
@@ -252,6 +268,80 @@ blocksRouter.post('/studio/blocks/:id/duplicate', requireAuth, (req: Authenticat
   }
 });
 
+function readBlockExtra(raw: string | null | undefined): Record<string, unknown> {
+  try { return raw ? JSON.parse(raw) as Record<string, unknown> : {}; } catch { return {}; }
+}
+
+function validateBlockUpdate(
+  existing: any,
+  data: BlockRequestData,
+  profileId: string,
+  userId: string
+): { error?: { status: number; message: string }; mergedExtra: Record<string, unknown>; previousFileUrl: string | null } {
+  const plan = getEffectivePlan(profileId);
+  if (!hasEntitlement(plan, 'scheduling') && (data.startAt != null || data.endAt != null || existing.start_at != null || existing.end_at != null)) {
+    return { error: { status: 403, message: 'Scheduled links require a Pro or Studio subscription plan.' }, mergedExtra: {}, previousFileUrl: null };
+  }
+  if (existing.type === 'booking' && (!bookingUrl(data.url === undefined ? existing.url : data.url) || data.extra != null)) {
+    return { error: { status: 400, message: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' }, mergedExtra: {}, previousFileUrl: null };
+  }
+
+  const existingExtra = readBlockExtra(existing.extra_json);
+  const mergedExtra = data.extra !== undefined ? { ...existingExtra, ...data.extra } : existingExtra;
+  const previousValue = existing.type === 'download' ? existingExtra.fileUrl : null;
+  const previousFileUrl = typeof previousValue === 'string' ? previousValue : null;
+  if (data.extra !== undefined) {
+    const extraParse = blockExtraSchemas[existing.type as ContractBlockType].safeParse(mergedExtra);
+    if (!extraParse.success) {
+      return { error: { status: 400, message: extraParse.error.issues[0]?.message || 'Invalid block data.' }, mergedExtra, previousFileUrl };
+    }
+  }
+  if (existing.type === 'download' && !ownedUploadForUser(mergedExtra.fileUrl, userId)) {
+    return { error: { status: 403, message: 'The uploaded file does not belong to this account.' }, mergedExtra, previousFileUrl };
+  }
+  return { mergedExtra, previousFileUrl };
+}
+
+function persistBlockUpdate(
+  blockId: string,
+  profileId: string,
+  existing: any,
+  data: BlockRequestData,
+  mergedExtra: Record<string, unknown>,
+  now: number,
+  revision?: number
+) {
+  return db.prepare(`
+    UPDATE blocks
+    SET title = coalesce(?, title),
+        url = ?,
+        subtitle = ?,
+        badge = ?,
+        icon = ?,
+        highlighted = ?,
+        start_at = ?,
+        end_at = ?,
+        extra_json = ?,
+        updated_at = ?
+    WHERE id = ? AND profile_id = ? AND (? IS NULL OR updated_at = ?)
+  `).run(
+    data.title !== undefined ? data.title : existing.title,
+    data.url !== undefined ? data.url : existing.url,
+    data.subtitle !== undefined ? data.subtitle : existing.subtitle,
+    data.badge !== undefined ? data.badge : existing.badge,
+    data.icon !== undefined ? data.icon : existing.icon,
+    data.highlighted !== undefined ? (data.highlighted ? 1 : 0) : existing.highlighted,
+    data.startAt !== undefined ? data.startAt : existing.start_at,
+    data.endAt !== undefined ? data.endAt : existing.end_at,
+    data.extra !== undefined ? prepareBlockExtra(existing.type, mergedExtra) : existing.extra_json,
+    now,
+    blockId,
+    profileId,
+    revision ?? null,
+    revision ?? null
+  );
+}
+
 // Update block
 blocksRouter.put('/studio/blocks/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
@@ -269,64 +359,19 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, async (req: AuthenticatedReq
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
-    const now = Date.now();
     const data = parse.data as BlockRequestData;
     const revision = (parse.data as { revision?: number }).revision;
-    if (!hasEntitlement(getEffectivePlan(profileId), 'scheduling') && (data.startAt != null || data.endAt != null || existing.start_at != null || existing.end_at != null)) {
-      return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
-    }
-    if (existing.type === 'booking' && (!bookingUrl(data.url === undefined ? existing.url : data.url) || data.extra != null)) {
-      return res.status(400).json({ error: 'A valid Calendly event URL is required; booking blocks do not accept extra fields.' });
-    }
-
-    let existingExtra: Record<string, unknown> = {};
-    if (existing.extra_json) {
-      try { existingExtra = JSON.parse(existing.extra_json); } catch (e) {}
-    }
-
-    const mergedExtra = data.extra !== undefined ? { ...existingExtra, ...data.extra } : existingExtra;
-    const previousFileUrl = existing.type === 'download' && typeof (existingExtra as any).fileUrl === 'string' ? (existingExtra as any).fileUrl : null;
-    if (data.extra !== undefined) {
-      const extraParse = blockExtraSchemas[existing.type as ContractBlockType].safeParse(mergedExtra);
-      if (!extraParse.success) return res.status(400).json({ error: extraParse.error.issues[0]?.message || 'Invalid block data.' });
-    }
-    if (existing.type === 'download' && !ownedUploadForUser(mergedExtra.fileUrl, req.user!.userId)) {
-      return res.status(403).json({ error: 'The uploaded file does not belong to this account.' });
-    }
-
-    const saved = db.prepare(`
-      UPDATE blocks
-      SET title = coalesce(?, title),
-          url = ?,
-          subtitle = ?,
-          badge = ?,
-          icon = ?,
-          highlighted = ?,
-          start_at = ?,
-          end_at = ?,
-          extra_json = ?,
-          updated_at = ?
-      WHERE id = ? AND profile_id = ? AND (? IS NULL OR updated_at = ?)
-    `).run(
-      data.title !== undefined ? data.title : existing.title,
-      data.url !== undefined ? data.url : existing.url,
-      data.subtitle !== undefined ? data.subtitle : existing.subtitle,
-      data.badge !== undefined ? data.badge : existing.badge,
-      data.icon !== undefined ? data.icon : existing.icon,
-      data.highlighted !== undefined ? (data.highlighted ? 1 : 0) : existing.highlighted,
-      data.startAt !== undefined ? data.startAt : existing.start_at,
-      data.endAt !== undefined ? data.endAt : existing.end_at,
-      data.extra !== undefined ? prepareBlockExtra(existing.type, mergedExtra) : existing.extra_json,
-      now,
-      blockId,
-      profileId,
-      revision ?? null,
-      revision ?? null
-    );
+    const validation = validateBlockUpdate(existing, data, profileId, req.user!.userId);
+    if (validation.error) return res.status(validation.error.status).json({ error: validation.error.message });
+    const now = Date.now();
+    const saved = persistBlockUpdate(blockId, profileId, existing, data, validation.mergedExtra, now, revision);
 
     if (saved.changes === 0) return res.status(409).json({ error: 'This block changed in another tab. Reload it before retrying your changes.' });
-    const nextFileUrl = existing.type === 'download' && typeof (mergedExtra as any).fileUrl === 'string' ? (mergedExtra as any).fileUrl : null;
-    if (previousFileUrl && previousFileUrl !== nextFileUrl) await cleanupUploadedFileIfUnreferenced(previousFileUrl, req.user!.userId);
+    const nextFile = existing.type === 'download' ? validation.mergedExtra.fileUrl : null;
+    const nextFileUrl = typeof nextFile === 'string' ? nextFile : null;
+    if (validation.previousFileUrl && validation.previousFileUrl !== nextFileUrl) {
+      await cleanupUploadedFileIfUnreferenced(validation.previousFileUrl, req.user!.userId);
+    }
     res.json({ success: true, revision: now, message: 'Block updated successfully.' });
     invalidatePublicProfileCache(profileId);
   } catch (err: any) {

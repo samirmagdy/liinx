@@ -68,6 +68,183 @@ export function isAllowedFontStylesheetUrl(value: string | null | undefined): bo
   } catch { return false; }
 }
 
+const publishedPagesSql = 'SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? AND published = 1 ORDER BY sort_order ASC, created_at ASC';
+
+function publicDemoPayload(systemDemo: any) {
+  const homePage = { id: `page_${systemDemo.id}_home`, slug: 'home', title: 'Home', sortOrder: 0, isHome: true, published: true };
+  return {
+    ...systemDemo,
+    plan: 'pro', hideBranding: false, gaMeasurementId: null, metaPixelId: null,
+    customDomain: null, customCss: null, customFontUrl: null,
+    shareTitle: `${systemDemo.displayName} (@${systemDemo.username}) | ${brand.productName}`,
+    shareDescription: systemDemo.bio, shareImageUrl: null,
+    footerLogoUrl: null, footerLogoLink: null, footerLogoAlt: null,
+    backgroundMediaUrl: null, backgroundMediaType: null,
+    pageRedirectUrl: null, pageRedirectUntil: null, customTheme: null,
+    socials: systemDemo.socials || [], pages: [homePage], page: homePage,
+    blocks: systemDemo.blocks || []
+  };
+}
+
+function publishedPagesForProfile(profile: any): any[] {
+  let pages = db.prepare(publishedPagesSql).all(profile.id) as any[];
+  if (pages.length) return pages;
+  const homeId = createId('page');
+  const now = Date.now();
+  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+    .run(homeId, profile.id, profile.display_name || 'Home', now, now);
+  db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
+  pages = db.prepare(publishedPagesSql).all(profile.id) as any[];
+  return pages;
+}
+
+function publicBlocksForPage(profile: any, page: any, now: number): any[] {
+  const rows = db.prepare(`
+    SELECT * FROM blocks
+    WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1))
+      AND (start_at IS NULL OR start_at <= ?) AND (end_at IS NULL OR end_at > ?)
+    ORDER BY position ASC
+  `).all(profile.id, page.id, page.isHome ? 1 : 0, now, now) as any[];
+  const clickRows = db.prepare('SELECT block_id, COUNT(*) as clicks FROM link_clicks WHERE profile_id = ? GROUP BY block_id')
+    .all(profile.id) as { block_id: string; clicks: number }[];
+  const clicks = new Map(clickRows.map(row => [row.block_id, row.clicks]));
+  const canSchedule = hasEntitlement(getEffectivePlan(profile.id), 'scheduling');
+  return rows.map(block => {
+    const extra = safeJsonParse(block.extra_json, null);
+    const formatted: any = {
+      id: block.id, pageId: block.page_id || page.id, type: block.type,
+      title: block.title, url: block.url, subtitle: block.subtitle,
+      icon: block.icon, badge: block.badge, highlighted: Boolean(block.highlighted),
+      startAt: canSchedule ? (block.start_at || null) : null,
+      endAt: canSchedule ? (block.end_at || null) : null,
+      clicks: clicks.get(block.id) || 0
+    };
+    if (extra) Object.assign(formatted, normalizeBlockExtra(block.type, extra));
+    return formatted;
+  });
+}
+
+function allowedValue<T>(allowed: boolean, value: T | null | undefined): T | null {
+  return allowed ? value || null : null;
+}
+
+function allowedSafeValue(allowed: boolean, valid: boolean, value: string | null | undefined): string | null {
+  return allowed && valid ? value || null : null;
+}
+
+function domainTlsStatus(allowed: boolean, domain: string | null | undefined): string {
+  return allowed && domain ? 'external_provider_required' : 'unknown';
+}
+
+function publicProfilePayload(profile: any, pages: any[], selectedPage: any, blocks: any[]) {
+  const plan = getEffectivePlan(profile.id);
+  const canCustomize = hasEntitlement(plan, 'paidCustomization');
+  return {
+    id: profile.id, username: profile.username, displayName: profile.display_name,
+    bio: profile.bio || '', avatarUrl: profile.avatar_url || '',
+    category: profile.category || 'Creator', verified: Boolean(profile.verified),
+    themeId: profile.theme_id || 'editorial-stone', plan,
+    hideBranding: Boolean(allowedValue(canCustomize, profile.hide_branding)),
+    gaMeasurementId: allowedValue(canCustomize, profile.ga_measurement_id),
+    metaPixelId: allowedValue(canCustomize, profile.meta_pixel_id),
+    customDomain: profile.custom_domain || null,
+    customCss: allowedSafeValue(canCustomize, isSafeCreatorCss(profile.custom_css), profile.custom_css),
+    customFontUrl: allowedSafeValue(canCustomize, isAllowedFontStylesheetUrl(profile.custom_font_url), profile.custom_font_url),
+    shareTitle: profile.share_title || null, shareDescription: profile.share_description || null,
+    shareImageUrl: profile.share_image_url || null,
+    footerLogoUrl: allowedValue(canCustomize, profile.footer_logo_url),
+    footerLogoLink: allowedValue(canCustomize, profile.footer_logo_link),
+    footerLogoAlt: allowedValue(canCustomize, profile.footer_logo_alt),
+    backgroundMediaUrl: allowedValue(canCustomize, profile.background_media_url),
+    backgroundMediaType: allowedValue(canCustomize, profile.background_media_type),
+    pageRedirectUrl: allowedSafeValue(true, isHttpUrl(profile.page_redirect_url), profile.page_redirect_url),
+    pageRedirectUntil: profile.page_redirect_until || null,
+    customTheme: safeJsonParse(profile.custom_theme_json, null),
+    socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
+    pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
+    page: { ...selectedPage, isHome: Boolean(selectedPage.isHome), published: Boolean(selectedPage.published) },
+    blocks
+  };
+}
+
+function cachePublicProfile(key: string, payload: Record<string, unknown>): void {
+  if (publicProfileCache.size >= MAX_PUBLIC_PROFILE_CACHE_ENTRIES) {
+    const oldestKey = publicProfileCache.keys().next().value;
+    if (oldestKey) publicProfileCache.delete(oldestKey);
+  }
+  publicProfileCache.set(key, { expiresAt: Date.now() + PUBLIC_PROFILE_CACHE_TTL_MS, payload });
+}
+
+function studioPagesForProfile(profile: any): any[] {
+  let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC')
+    .all(profile.id) as any[];
+  if (pages.length) return pages;
+  const homeId = createId('page');
+  const now = Date.now();
+  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
+    .run(homeId, profile.id, profile.display_name || 'Home', now, now);
+  db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
+  pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC')
+    .all(profile.id) as any[];
+  return pages;
+}
+
+function studioBlocksForProfile(profile: any, pages: any[]): any[] {
+  const blocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profile.id) as any[];
+  const clickRows = db.prepare('SELECT block_id, COUNT(*) as clicks FROM link_clicks WHERE profile_id = ? GROUP BY block_id')
+    .all(profile.id) as { block_id: string; clicks: number }[];
+  const clicks = new Map(clickRows.map(row => [row.block_id, row.clicks]));
+  const canSchedule = hasEntitlement(getEffectivePlan(profile.id), 'scheduling');
+  const homePageId = pages.find(page => page.isHome)?.id || null;
+  return blocks.map(block => {
+    const formatted: any = {
+      id: block.id, revision: block.updated_at, pageId: block.page_id || homePageId,
+      type: block.type, title: block.title, url: block.url, subtitle: block.subtitle,
+      icon: block.icon, badge: block.badge, highlighted: Boolean(block.highlighted),
+      startAt: canSchedule ? (block.start_at || null) : null,
+      endAt: canSchedule ? (block.end_at || null) : null,
+      clicks: clicks.get(block.id) || 0
+    };
+    const extra = safeJsonParse(block.extra_json, null);
+    if (extra) Object.assign(formatted, normalizeEditorBlockExtra(block.type, extra));
+    return formatted;
+  });
+}
+
+function studioProfilePayload(profile: any, pages: any[], blocks: any[]) {
+  const plan = getEffectivePlan(profile.id);
+  const canCustomize = hasEntitlement(plan, 'paidCustomization');
+  const canUseDomain = hasEntitlement(plan, 'customDomain');
+  const customDomain = canUseDomain ? (profile.custom_domain || null) : null;
+  return {
+    id: profile.id, revision: profile.updated_at, username: profile.username,
+    displayName: profile.display_name, bio: profile.bio || '', avatarUrl: profile.avatar_url || '',
+    category: profile.category || 'Creator', verified: Boolean(profile.verified),
+    themeId: profile.theme_id || 'editorial-stone', plan,
+    hideBranding: Boolean(allowedValue(canCustomize, profile.hide_branding)),
+    gaMeasurementId: allowedValue(canCustomize, profile.ga_measurement_id),
+    metaPixelId: allowedValue(canCustomize, profile.meta_pixel_id),
+    customDomain,
+    customDomainVerified: Boolean(allowedValue(canUseDomain, profile.custom_domain_verified)),
+    customDomainTlsStatus: domainTlsStatus(canUseDomain, profile.custom_domain),
+    customCss: allowedSafeValue(canCustomize, isSafeCreatorCss(profile.custom_css), profile.custom_css),
+    customFontUrl: allowedSafeValue(canCustomize, isAllowedFontStylesheetUrl(profile.custom_font_url), profile.custom_font_url),
+    shareTitle: profile.share_title || null, shareDescription: profile.share_description || null,
+    shareImageUrl: profile.share_image_url || null,
+    footerLogoUrl: allowedValue(canCustomize, profile.footer_logo_url),
+    footerLogoLink: allowedValue(canCustomize, profile.footer_logo_link),
+    footerLogoAlt: allowedValue(canCustomize, profile.footer_logo_alt),
+    backgroundMediaUrl: allowedValue(canCustomize, profile.background_media_url),
+    backgroundMediaType: allowedValue(canCustomize, profile.background_media_type),
+    pageRedirectUrl: allowedSafeValue(true, isHttpUrl(profile.page_redirect_url), profile.page_redirect_url),
+    pageRedirectUntil: profile.page_redirect_until || null,
+    customTheme: safeJsonParse(profile.custom_theme_json, null),
+    socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
+    pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
+    blocks
+  };
+}
+
 // Public: Get profile by username
 profilesRouter.get('/profiles/:username', (req, res) => {
   try {
@@ -84,142 +261,24 @@ profilesRouter.get('/profiles/:username', (req, res) => {
     }
 
     const profile = db.prepare('SELECT * FROM profiles WHERE lower(username) = ?').get(cleanUsername) as any;
-
     if (!profile) {
       const systemDemo = findSystemDemoProfile(cleanUsername);
       if (systemDemo) {
-        const demoPayload = {
-          ...systemDemo,
-          plan: 'pro',
-          hideBranding: false,
-          gaMeasurementId: null,
-          metaPixelId: null,
-          customDomain: null,
-          customCss: null,
-          customFontUrl: null,
-          shareTitle: `${systemDemo.displayName} (@${systemDemo.username}) | ${brand.productName}`,
-          shareDescription: systemDemo.bio,
-          shareImageUrl: null,
-          footerLogoUrl: null,
-          footerLogoLink: null,
-          footerLogoAlt: null,
-          backgroundMediaUrl: null,
-          backgroundMediaType: null,
-          pageRedirectUrl: null,
-          pageRedirectUntil: null,
-          customTheme: null,
-          socials: systemDemo.socials || [],
-          pages: [{ id: `page_${systemDemo.id}_home`, slug: 'home', title: 'Home', sortOrder: 0, isHome: true, published: true }],
-          page: { id: `page_${systemDemo.id}_home`, slug: 'home', title: 'Home', sortOrder: 0, isHome: true, published: true },
-          blocks: systemDemo.blocks || []
-        };
         res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
-        return res.json(demoPayload);
+        return res.json(publicDemoPayload(systemDemo));
       }
       return res.status(404).json({ error: `Creator profile @${cleanUsername} was not found.` });
     }
 
-    let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? AND published = 1 ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
-    if (pages.length === 0) {
-      const homeId = createId('page');
-      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-        .run(homeId, profile.id, profile.display_name || 'Home', Date.now(), Date.now());
-      db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
-      pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? AND published = 1 ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
-    }
+    const pages = publishedPagesForProfile(profile);
     const selectedPage = pages.find(page => page.slug === requestedSlug) || (requestedSlug === 'home' ? pages.find(page => page.isHome) : undefined);
     if (!selectedPage) return res.status(404).json({ error: 'This page is not available.' });
 
     const now = Date.now();
-    const blocks = db.prepare(`
-      SELECT * FROM blocks 
-      WHERE profile_id = ? 
-        AND (page_id = ? OR (page_id IS NULL AND ? = 1))
-        AND (start_at IS NULL OR start_at <= ?) 
-        AND (end_at IS NULL OR end_at > ?)
-      ORDER BY position ASC
-    `).all(profile.id, selectedPage.id, selectedPage.isHome ? 1 : 0, now, now) as any[];
-
-    // Calculate total clicks for blocks
-    const clickCounts = db.prepare(`
-      SELECT block_id, COUNT(*) as clicks 
-      FROM link_clicks 
-      WHERE profile_id = ? 
-      GROUP BY block_id
-    `).all(profile.id) as { block_id: string; clicks: number }[];
-
-    const clickMap = new Map(clickCounts.map(c => [c.block_id, c.clicks]));
-
-    const formattedBlocks = blocks.map(b => {
-      let extra = null;
-      if (b.extra_json) {
-        try { extra = JSON.parse(b.extra_json); } catch (e) {}
-      }
-
-      const baseBlock: any = {
-        id: b.id,
-        pageId: b.page_id || selectedPage.id,
-        type: b.type,
-        title: b.title,
-        url: b.url,
-        subtitle: b.subtitle,
-        icon: b.icon,
-        badge: b.badge,
-        highlighted: Boolean(b.highlighted),
-        startAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.start_at || null) : null,
-        endAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.end_at || null) : null,
-        clicks: clickMap.get(b.id) || 0
-      };
-
-      if (extra) {
-        Object.assign(baseBlock, normalizeBlockExtra(b.type, extra));
-      }
-
-      return baseBlock;
-    });
-
-    const payload = {
-      id: profile.id,
-      username: profile.username,
-      displayName: profile.display_name,
-      bio: profile.bio || '',
-      avatarUrl: profile.avatar_url || '',
-      category: profile.category || 'Creator',
-      verified: Boolean(profile.verified),
-      themeId: profile.theme_id || 'editorial-stone',
-      plan: getEffectivePlan(profile.id),
-      hideBranding: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && Boolean(profile.hide_branding),
-      gaMeasurementId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
-      metaPixelId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
-      customDomain: profile.custom_domain || null,
-      customCss: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
-      customFontUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
-      shareTitle: profile.share_title || null,
-      shareDescription: profile.share_description || null,
-      shareImageUrl: profile.share_image_url || null,
-      footerLogoUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_url || null) : null,
-      footerLogoLink: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_link || null) : null,
-      footerLogoAlt: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
-      backgroundMediaUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_url || null) : null,
-      backgroundMediaType: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_type || null) : null,
-      pageRedirectUrl: isHttpUrl(profile.page_redirect_url) ? profile.page_redirect_url : null,
-      pageRedirectUntil: profile.page_redirect_until || null,
-      customTheme: safeJsonParse(profile.custom_theme_json, null),
-      socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
-      pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
-      page: { ...selectedPage, isHome: Boolean(selectedPage.isHome), published: Boolean(selectedPage.published) },
-      blocks: formattedBlocks
-    };
-
+    const blocks = publicBlocksForPage(profile, selectedPage, now);
+    const payload = publicProfilePayload(profile, pages, selectedPage, blocks);
     if (process.env.NODE_ENV !== 'test') {
-      if (publicProfileCache.size >= MAX_PUBLIC_PROFILE_CACHE_ENTRIES) {
-        const oldestKey = publicProfileCache.keys().next().value;
-        if (oldestKey) publicProfileCache.delete(oldestKey);
-      }
-      publicProfileCache.set(cacheKey, {
-        expiresAt: Date.now() + PUBLIC_PROFILE_CACHE_TTL_MS,
-        payload
-      });
+      cachePublicProfile(cacheKey, payload);
     }
 
     res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
@@ -251,92 +310,10 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
   try {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     const profile = db.prepare('SELECT * FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
-    if (!profile) {
-      return res.status(404).json({ error: 'Profile not found.' });
-    }
-
-    const blocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profile.id) as any[];
-    let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
-    if (pages.length === 0) {
-      const homeId = createId('page');
-      db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-        .run(homeId, profile.id, profile.display_name || 'Home', Date.now(), Date.now());
-      db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
-      pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC').all(profile.id) as any[];
-    }
-
-    // Calculate real total clicks per block
-    const clickCounts = db.prepare(`
-      SELECT block_id, COUNT(*) as clicks 
-      FROM link_clicks 
-      WHERE profile_id = ? 
-      GROUP BY block_id
-    `).all(profile.id) as { block_id: string; clicks: number }[];
-    const clickMap = new Map(clickCounts.map(c => [c.block_id, c.clicks]));
-
-    const formattedBlocks = blocks.map(b => {
-      let extra = null;
-      if (b.extra_json) {
-        try { extra = JSON.parse(b.extra_json); } catch (e) {}
-      }
-
-      const baseBlock: any = {
-        id: b.id,
-        revision: b.updated_at,
-        pageId: b.page_id || pages.find(page => page.isHome)?.id || null,
-        type: b.type,
-        title: b.title,
-        url: b.url,
-        subtitle: b.subtitle,
-        icon: b.icon,
-        badge: b.badge,
-        highlighted: Boolean(b.highlighted),
-        startAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.start_at || null) : null,
-        endAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.end_at || null) : null,
-        clicks: clickMap.get(b.id) || 0
-      };
-
-      if (extra) {
-        Object.assign(baseBlock, normalizeEditorBlockExtra(b.type, extra));
-      }
-
-      return baseBlock;
-    });
-
-    res.json({
-      id: profile.id,
-      revision: profile.updated_at,
-      username: profile.username,
-      displayName: profile.display_name,
-      bio: profile.bio || '',
-      avatarUrl: profile.avatar_url || '',
-      category: profile.category || 'Creator',
-      verified: Boolean(profile.verified),
-      themeId: profile.theme_id || 'editorial-stone',
-      plan: getEffectivePlan(profile.id),
-      hideBranding: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && Boolean(profile.hide_branding),
-      gaMeasurementId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
-      metaPixelId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
-      customDomain: hasEntitlement(getEffectivePlan(profile.id), 'customDomain') ? (profile.custom_domain || null) : null,
-      customDomainVerified: hasEntitlement(getEffectivePlan(profile.id), 'customDomain') && Boolean(profile.custom_domain_verified),
-      customDomainTlsStatus: hasEntitlement(getEffectivePlan(profile.id), 'customDomain') && profile.custom_domain ? 'external_provider_required' : 'unknown',
-      customCss: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
-      customFontUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
-      shareTitle: profile.share_title || null,
-      shareDescription: profile.share_description || null,
-      shareImageUrl: profile.share_image_url || null,
-      footerLogoUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_url || null) : null,
-      footerLogoLink: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_link || null) : null,
-      footerLogoAlt: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
-      backgroundMediaUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_url || null) : null,
-      backgroundMediaType: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_type || null) : null,
-      pageRedirectUrl: isHttpUrl(profile.page_redirect_url) ? profile.page_redirect_url : null,
-      pageRedirectUntil: profile.page_redirect_until || null,
-      customTheme: safeJsonParse(profile.custom_theme_json, null),
-      socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
-      pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
-      blocks: formattedBlocks
-    });
+    if (!profile) return res.status(404).json({ error: 'Profile not found.' });
+    const pages = studioPagesForProfile(profile);
+    const blocks = studioBlocksForProfile(profile, pages);
+    res.json(studioProfilePayload(profile, pages, blocks));
   } catch (err: any) {
     console.error('Studio profile error:', err);
     res.status(500).json({ error: 'Failed to retrieve creator profile.' });
@@ -345,175 +322,172 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
 
 const updateProfileSchema = profileUpdateContract;
 
+type ProfileUpdateData = z.infer<typeof updateProfileSchema>;
+type ProfileUpdateError = { status: number; message: string };
+
+function usernameUpdateError(username: string, existing: any): ProfileUpdateError | null {
+  if (username === existing.username) return null;
+  if (RESERVED_USERNAMES.includes(username as any)) {
+    return { status: 400, message: 'This username is reserved and cannot be claimed.' };
+  }
+  const conflict = db.prepare('SELECT id FROM profiles WHERE lower(username) = ? AND id != ?').get(username, existing.id);
+  return conflict ? { status: 409, message: `The handle @${username} is already taken.` } : null;
+}
+
+function redirectLoopsToProfile(url: string, existing: any, username: string, requestHost: string): boolean {
+  try {
+    const target = new URL(url);
+    const configuredHosts = [requestHost, process.env.PUBLIC_DOMAIN, process.env.PUBLIC_ORIGIN, process.env.APP_ORIGIN]
+      .filter(Boolean)
+      .map(value => {
+        try { return new URL(value as string).hostname; }
+        catch { return String(value).replace(/^https?:\/\//, '').split('/')[0].split(':')[0]; }
+      });
+    const host = target.hostname.toLowerCase();
+    const sameCustomDomain = existing.custom_domain && host === String(existing.custom_domain).toLowerCase();
+    const profilePath = target.pathname.toLowerCase();
+    const samePlatformProfile = configuredHosts.some(configuredHost => host === configuredHost.toLowerCase())
+      && (profilePath === `/@${username}` || profilePath.startsWith(`/@${username}/`));
+    return Boolean(sameCustomDomain || samePlatformProfile);
+  } catch {
+    return false;
+  }
+}
+
+function requestsPaidCustomization(data: ProfileUpdateData): boolean {
+  return data.hideBranding === true || [
+    data.gaMeasurementId, data.metaPixelId, data.customCss, data.customFontUrl,
+    data.footerLogoUrl, data.footerLogoLink, data.footerLogoAlt
+  ].some(Boolean);
+}
+
+function profileStyleError(data: ProfileUpdateData): ProfileUpdateError | null {
+  if (!isSafeCreatorCss(data.customCss)) return { status: 400, message: 'Custom CSS may not import external content or execute scripts.' };
+  if (!isAllowedFontStylesheetUrl(data.customFontUrl)) {
+    return { status: 400, message: 'Custom fonts must use an HTTPS Google Fonts stylesheet URL supported by the site policy.' };
+  }
+  return null;
+}
+
+function validateProfileUpdate(data: ProfileUpdateData, existing: any, username: string, requestHost: string): ProfileUpdateError | null {
+  if (data.pageRedirectUrl && redirectLoopsToProfile(data.pageRedirectUrl, existing, username, requestHost)) {
+    return { status: 400, message: 'A page redirect cannot point back to this profile.' };
+  }
+  const plan = getEffectivePlan(existing.id);
+  const canCustomize = hasEntitlement(plan, 'paidCustomization');
+  if (!canCustomize && requestsPaidCustomization(data)) {
+    return { status: 403, message: 'Custom styling, analytics, and branding removal require a Pro or Studio subscription plan.' };
+  }
+  const enablingBackground = data.backgroundMediaUrl != null || data.backgroundMediaType != null;
+  if (!canCustomize && enablingBackground) {
+    return { status: 403, message: 'Background media requires a Pro or Studio subscription plan.' };
+  }
+  return null;
+}
+
+function resolveCustomDomainUpdate(customDomain: string | null | undefined, existing: any, profileId: string): { value: string | null; verified: number; error?: ProfileUpdateError } {
+  let value = existing.custom_domain;
+  let verified = existing.custom_domain_verified || 0;
+  if (customDomain === undefined) return { value, verified };
+  if (customDomain === null || customDomain.trim() === '') return { value: null, verified: 0 };
+  const cleanDomain = normalizeCustomDomain(customDomain);
+  if (!cleanDomain) return { value, verified, error: { status: 400, message: 'Invalid domain format. Use a hostname such as links.yourdomain.com.' } };
+  if (!hasEntitlement(getEffectivePlan(existing.id), 'customDomain')) {
+    return { value, verified, error: { status: 403, message: 'Custom domains require a Pro or Studio subscription plan.' } };
+  }
+  const conflict = db.prepare('SELECT id FROM profiles WHERE lower(custom_domain) = ? AND id != ?').get(cleanDomain, profileId);
+  if (conflict) return { value, verified, error: { status: 409, message: `The custom domain "${cleanDomain}" is already mapped to another LIINX profile.` } };
+  if (cleanDomain !== existing.custom_domain) {
+    value = cleanDomain;
+    verified = 0;
+  }
+  return { value, verified };
+}
+
+function preserveWhenUndefined<T>(next: T | undefined, current: T): T {
+  return next === undefined ? current : next;
+}
+
+function normalizeOptionalString(value: string | null | undefined): string | null {
+  return value?.trim() || null;
+}
+
+function serializeWhenProvided(value: unknown, current: string | null): string | null {
+  return value === undefined ? current : value ? JSON.stringify(value) : null;
+}
+
+function updatedProfileValues(data: ProfileUpdateData, existing: any, username: string, domain: string | null, domainVerified: number) {
+  return {
+    displayName: preserveWhenUndefined(data.displayName, existing.display_name),
+    username,
+    bio: preserveWhenUndefined(data.bio, existing.bio),
+    avatarUrl: preserveWhenUndefined(data.avatarUrl, existing.avatar_url),
+    category: preserveWhenUndefined(data.category, existing.category),
+    themeId: preserveWhenUndefined(data.themeId, existing.theme_id),
+    hideBranding: data.hideBranding === undefined ? existing.hide_branding : Number(data.hideBranding),
+    gaMeasurementId: preserveWhenUndefined(data.gaMeasurementId, existing.ga_measurement_id),
+    metaPixelId: preserveWhenUndefined(data.metaPixelId, existing.meta_pixel_id),
+    customDomain: domain,
+    customDomainVerified: domainVerified,
+    customCss: preserveWhenUndefined(data.customCss, existing.custom_css),
+    customFontUrl: preserveWhenUndefined(data.customFontUrl, existing.custom_font_url),
+    shareTitle: preserveWhenUndefined(data.shareTitle, existing.share_title),
+    shareDescription: preserveWhenUndefined(data.shareDescription, existing.share_description),
+    shareImageUrl: preserveWhenUndefined(data.shareImageUrl, existing.share_image_url),
+    footerLogoUrl: preserveWhenUndefined(data.footerLogoUrl, existing.footer_logo_url),
+    footerLogoLink: preserveWhenUndefined(data.footerLogoLink, existing.footer_logo_link),
+    footerLogoAlt: data.footerLogoAlt === undefined ? existing.footer_logo_alt : normalizeOptionalString(data.footerLogoAlt),
+    backgroundMediaUrl: preserveWhenUndefined(data.backgroundMediaUrl, existing.background_media_url),
+    backgroundMediaType: preserveWhenUndefined(data.backgroundMediaType, existing.background_media_type),
+    pageRedirectUrl: preserveWhenUndefined(data.pageRedirectUrl, existing.page_redirect_url),
+    pageRedirectUntil: preserveWhenUndefined(data.pageRedirectUntil, existing.page_redirect_until),
+    customThemeJson: serializeWhenProvided(data.customTheme, existing.custom_theme_json),
+    socialsJson: serializeWhenProvided(data.socials, existing.socials_json)
+  };
+}
+
+function saveProfileUpdate(profileId: string, revision: number | undefined, now: number, values: ReturnType<typeof updatedProfileValues>) {
+  return db.prepare(`
+    UPDATE profiles SET display_name = ?, username = ?, bio = ?, avatar_url = ?, category = ?, theme_id = ?,
+      hide_branding = ?, ga_measurement_id = ?, meta_pixel_id = ?, custom_domain = ?, custom_domain_verified = ?,
+      custom_css = ?, custom_font_url = ?, share_title = ?, share_description = ?, share_image_url = ?,
+      footer_logo_url = ?, footer_logo_link = ?, footer_logo_alt = ?, background_media_url = ?,
+      background_media_type = ?, page_redirect_url = ?, page_redirect_until = ?, custom_theme_json = ?,
+      socials_json = ?, updated_at = ? WHERE id = ? AND (? IS NULL OR updated_at = ?)
+  `).run(
+    values.displayName, values.username, values.bio || '', values.avatarUrl || '', values.category || 'Creator',
+    values.themeId || 'editorial-stone', values.hideBranding, values.gaMeasurementId, values.metaPixelId,
+    values.customDomain, values.customDomainVerified, values.customCss, values.customFontUrl,
+    values.shareTitle, values.shareDescription, values.shareImageUrl, values.footerLogoUrl,
+    values.footerLogoLink, values.footerLogoAlt, values.backgroundMediaUrl, values.backgroundMediaType,
+    values.pageRedirectUrl, values.pageRedirectUntil, values.customThemeJson, values.socialsJson,
+    now, profileId, revision ?? null, revision ?? null
+  );
+}
+
 // Authenticated: Update studio profile
 profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
     const parse = updateProfileSchema.safeParse(req.body);
-    if (!parse.success) {
-      return res.status(400).json({ error: parse.error.issues[0].message });
-    }
-
-    const { 
-      username,
-      displayName, 
-      bio, 
-      avatarUrl, 
-      category, 
-      themeId, 
-      hideBranding, 
-      gaMeasurementId, 
-      metaPixelId, 
-      customDomain,
-      customCss,
-      customFontUrl,
-      shareTitle, shareDescription, shareImageUrl, footerLogoUrl, footerLogoLink, footerLogoAlt, backgroundMediaUrl, backgroundMediaType, pageRedirectUrl, pageRedirectUntil,
-      customTheme, 
-      socials 
-    } = parse.data;
-    const revision = parse.data.revision;
-
-    if (!isSafeCreatorCss(customCss)) {
-      return res.status(400).json({ error: 'Custom CSS may not import external content or execute scripts.' });
-    }
-    if (!isAllowedFontStylesheetUrl(customFontUrl)) {
-      return res.status(400).json({ error: 'Custom fonts must use an HTTPS Google Fonts stylesheet URL supported by the site policy.' });
-    }
-
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues[0].message });
+    const data = parse.data;
+    const revision = data.revision;
+    const styleError = profileStyleError(data);
+    if (styleError) return res.status(styleError.status).json({ error: styleError.message });
     const existing = db.prepare('SELECT * FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
-    if (!existing) {
-      return res.status(404).json({ error: 'Profile not found.' });
-    }
-
-    const updatedUsername = username !== undefined ? username.toLowerCase().trim() : existing.username;
-    if (updatedUsername !== existing.username) {
-      if (RESERVED_USERNAMES.includes(updatedUsername as any)) return res.status(400).json({ error: 'This username is reserved and cannot be claimed.' });
-      const conflict = db.prepare('SELECT id FROM profiles WHERE lower(username) = ? AND id != ?').get(updatedUsername, existing.id);
-      if (conflict) return res.status(409).json({ error: `The handle @${updatedUsername} is already taken.` });
-      invalidatePublicProfileCache(existing.id);
-    }
-
-    if (pageRedirectUrl) {
-      try {
-        const target = new URL(pageRedirectUrl);
-        const requestHost = String(req.headers.host || '').split(':')[0];
-        const configuredHosts = [requestHost, process.env.PUBLIC_DOMAIN, process.env.PUBLIC_ORIGIN, process.env.APP_ORIGIN]
-          .filter(Boolean)
-          .flatMap(value => {
-            try { return [new URL(value as string).hostname]; } catch { return [String(value).replace(/^https?:\/\//, '').split('/')[0].split(':')[0]]; }
-          });
-        const sameCustomDomain = existing.custom_domain && target.hostname.toLowerCase() === String(existing.custom_domain).toLowerCase();
-        const samePlatformProfile = configuredHosts.some(host => target.hostname.toLowerCase() === host.toLowerCase())
-          && (target.pathname.toLowerCase() === `/@${updatedUsername}` || target.pathname.toLowerCase().startsWith(`/@${updatedUsername}/`));
-        if (sameCustomDomain || samePlatformProfile) return res.status(400).json({ error: 'A page redirect cannot point back to this profile.' });
-      } catch { /* schema validation already rejects malformed destinations */ }
-    }
-
-    if (!hasEntitlement(getEffectivePlan(existing.id), 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl) || Boolean(footerLogoUrl) || Boolean(footerLogoLink) || Boolean(footerLogoAlt))) {
-      return res.status(403).json({ error: 'Custom styling, analytics, and branding removal require a Pro or Studio subscription plan.' });
-    }
-    const isEnablingBackgroundMedia = (backgroundMediaUrl !== undefined && backgroundMediaUrl !== null) || (backgroundMediaType !== undefined && backgroundMediaType !== null);
-    if (!hasEntitlement(getEffectivePlan(existing.id), 'paidCustomization') && isEnablingBackgroundMedia) {
-      return res.status(403).json({ error: 'Background media requires a Pro or Studio subscription plan.' });
-    }
-
-    // Custom Domain Plan Enforcement & Validation
-    let updatedCustomDomain = existing.custom_domain;
-    let customDomainVerified = existing.custom_domain_verified || 0;
-    if (customDomain !== undefined) {
-      if (customDomain === null || customDomain.trim() === '') {
-        updatedCustomDomain = null;
-        customDomainVerified = 0;
-      } else {
-        const cleanDomain = normalizeCustomDomain(customDomain);
-        if (!cleanDomain) {
-          return res.status(400).json({ error: 'Invalid domain format. Use a hostname such as links.yourdomain.com.' });
-        }
-        if (!hasEntitlement(getEffectivePlan(existing.id), 'customDomain')) {
-          return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
-        }
-        const conflict = db.prepare('SELECT id FROM profiles WHERE lower(custom_domain) = ? AND id != ?').get(cleanDomain, req.user!.profileId);
-        if (conflict) {
-          return res.status(409).json({ error: `The custom domain "${cleanDomain}" is already mapped to another LIINX profile.` });
-        }
-        if (cleanDomain !== existing.custom_domain) {
-          updatedCustomDomain = cleanDomain;
-          customDomainVerified = 0; // Requires re-verification whenever custom domain is modified
-        }
-      }
-    }
-
+    if (!existing) return res.status(404).json({ error: 'Profile not found.' });
+    const updatedUsername = data.username !== undefined ? data.username.toLowerCase().trim() : existing.username;
+    const identityError = usernameUpdateError(updatedUsername, existing);
+    if (identityError) return res.status(identityError.status).json({ error: identityError.message });
+    const requestHost = String(req.headers.host || '').split(':')[0];
+    const updateError = validateProfileUpdate(data, existing, updatedUsername, requestHost);
+    if (updateError) return res.status(updateError.status).json({ error: updateError.message });
+    const domainUpdate = resolveCustomDomainUpdate(data.customDomain, existing, req.user!.profileId);
+    if (domainUpdate.error) return res.status(domainUpdate.error.status).json({ error: domainUpdate.error.message });
+    if (updatedUsername !== existing.username) invalidatePublicProfileCache(existing.id);
     const now = Date.now();
-    const updatedDisplayName = displayName !== undefined ? displayName : existing.display_name;
-    const updatedBio = bio !== undefined ? bio : existing.bio;
-    const updatedAvatarUrl = avatarUrl !== undefined ? avatarUrl : existing.avatar_url;
-    const updatedCategory = category !== undefined ? category : existing.category;
-    const updatedThemeId = themeId !== undefined ? themeId : existing.theme_id;
-    const updatedHideBranding = hideBranding !== undefined ? (hideBranding ? 1 : 0) : existing.hide_branding;
-    const updatedGaMeasurementId = gaMeasurementId !== undefined ? gaMeasurementId : existing.ga_measurement_id;
-    const updatedMetaPixelId = metaPixelId !== undefined ? metaPixelId : existing.meta_pixel_id;
-    const updatedCustomCss = customCss !== undefined ? customCss : existing.custom_css;
-    const updatedCustomFontUrl = customFontUrl !== undefined ? customFontUrl : existing.custom_font_url;
-    const updatedShareTitle = shareTitle !== undefined ? shareTitle : existing.share_title;
-    const updatedShareDescription = shareDescription !== undefined ? shareDescription : existing.share_description;
-    const updatedShareImageUrl = shareImageUrl !== undefined ? shareImageUrl : existing.share_image_url;
-    const updatedFooterLogoUrl = footerLogoUrl !== undefined ? footerLogoUrl : existing.footer_logo_url;
-    const updatedFooterLogoLink = footerLogoLink !== undefined ? footerLogoLink : existing.footer_logo_link;
-    const updatedFooterLogoAlt = footerLogoAlt !== undefined ? (footerLogoAlt?.trim() || null) : existing.footer_logo_alt;
-    const updatedBackgroundMediaUrl = backgroundMediaUrl !== undefined ? backgroundMediaUrl : existing.background_media_url;
-    const updatedBackgroundMediaType = backgroundMediaType !== undefined ? backgroundMediaType : existing.background_media_type;
-    const updatedPageRedirectUrl = pageRedirectUrl !== undefined ? pageRedirectUrl : existing.page_redirect_url;
-    const updatedPageRedirectUntil = pageRedirectUntil !== undefined ? pageRedirectUntil : existing.page_redirect_until;
-    const updatedCustomThemeJson = customTheme !== undefined 
-      ? (customTheme ? JSON.stringify(customTheme) : null) 
-      : existing.custom_theme_json;
-    const updatedSocialsJson = socials !== undefined 
-      ? (socials ? JSON.stringify(socials) : null) 
-      : existing.socials_json;
-
-    const saved = db.prepare(`
-      UPDATE profiles
-      SET display_name = ?,
-          username = ?,
-          bio = ?,
-          avatar_url = ?,
-          category = ?,
-          theme_id = ?,
-          hide_branding = ?,
-          ga_measurement_id = ?,
-          meta_pixel_id = ?,
-          custom_domain = ?,
-          custom_domain_verified = ?,
-          custom_css = ?,
-          custom_font_url = ?,
-          share_title = ?, share_description = ?, share_image_url = ?, footer_logo_url = ?, footer_logo_link = ?, footer_logo_alt = ?,
-          background_media_url = ?, background_media_type = ?, page_redirect_url = ?, page_redirect_until = ?,
-          custom_theme_json = ?,
-          socials_json = ?,
-          updated_at = ?
-      WHERE id = ? AND (? IS NULL OR updated_at = ?)
-    `).run(
-      updatedDisplayName,
-      updatedUsername,
-      updatedBio || '',
-      updatedAvatarUrl || '',
-      updatedCategory || 'Creator',
-      updatedThemeId || 'editorial-stone',
-      updatedHideBranding,
-      updatedGaMeasurementId,
-      updatedMetaPixelId,
-      updatedCustomDomain,
-      customDomainVerified,
-      updatedCustomCss,
-      updatedCustomFontUrl,
-      updatedShareTitle, updatedShareDescription, updatedShareImageUrl, updatedFooterLogoUrl, updatedFooterLogoLink, updatedFooterLogoAlt,
-      updatedBackgroundMediaUrl, updatedBackgroundMediaType, updatedPageRedirectUrl, updatedPageRedirectUntil,
-      updatedCustomThemeJson,
-      updatedSocialsJson,
-      now,
-      req.user!.profileId,
-      revision ?? null,
-      revision ?? null
-    );
+    const values = updatedProfileValues(data, existing, updatedUsername, domainUpdate.value, domainUpdate.verified);
+    const saved = saveProfileUpdate(req.user!.profileId, revision, now, values);
 
     if (saved.changes === 0) return res.status(409).json({ error: 'This profile changed in another tab. Reload it before retrying your changes.' });
 
@@ -674,132 +648,106 @@ function duplicatedBlockExtra(type: string, raw: string | null): string | null {
   }
 }
 
+function profileCreationPlan(userId: string): { plan: string; maxProfiles: number; currentCount: number } {
+  const account = db.prepare('SELECT subscription_plan FROM users WHERE id = ?').get(userId) as { subscription_plan?: string } | undefined;
+  const plan = normalizePlan(account?.subscription_plan);
+  const maxProfiles = entitlementsFor(plan).maxProfiles;
+  const row = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(userId) as { count: number };
+  return { plan, maxProfiles, currentCount: row?.count || 0 };
+}
+
+function profileUsernameError(username: string): ProfileUpdateError | null {
+  if (RESERVED_USERNAMES.includes(username as any)) return { status: 400, message: 'This username is reserved and cannot be claimed.' };
+  const existing = db.prepare('SELECT id FROM profiles WHERE username = ?').get(username);
+  return existing ? { status: 409, message: `The handle @${username} is already taken.` } : null;
+}
+
+function duplicateSourceProfile(sourceId: string | undefined, userId: string): any | null {
+  if (!sourceId) return null;
+  return db.prepare('SELECT * FROM profiles WHERE id = ? AND user_id = ?').get(sourceId, userId) as any || null;
+}
+
+function duplicatePagesAndBlocks(profileId: string, homePageId: string, now: number, sourcePages: any[], sourceBlocks: any[]): void {
+  db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(profileId);
+  db.prepare('DELETE FROM pages WHERE profile_id = ? AND id != ?').run(profileId, homePageId);
+  const pageMap = new Map<string, string>();
+  const blockMap = new Map<string, string>();
+  for (const page of sourcePages) pageMap.set(page.id, page.is_home ? homePageId : createId('page'));
+  for (const block of sourceBlocks) blockMap.set(block.id, createId('blk'));
+  const insertPage = db.prepare('INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  for (const page of sourcePages) {
+    if (page.is_home) continue;
+    insertPage.run(pageMap.get(page.id), profileId, page.slug, page.title, page.description, page.sort_order, 0, page.published, now, now);
+  }
+  const insertBlock = db.prepare('INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  for (const block of sourceBlocks) {
+    const sanitizedExtra = duplicatedBlockExtra(block.type, block.extra_json);
+    const remappedExtra = sanitizedExtra ? JSON.stringify(remapDuplicatedValue(JSON.parse(sanitizedExtra), pageMap, blockMap)) : null;
+    const remappedUrl = typeof block.url === 'string' ? remapDuplicatedValue(block.url, pageMap, blockMap) : block.url;
+    insertBlock.run(blockMap.get(block.id), profileId, block.type, block.title, remappedUrl, block.subtitle,
+      block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at,
+      pageMap.get(block.page_id) || homePageId, remappedExtra, now, now);
+  }
+}
+
+function insertProfileRecord(
+  profileId: string,
+  userId: string,
+  username: string,
+  displayName: string,
+  plan: string,
+  duplicateSource: any | null
+): void {
+  const now = Date.now();
+  const source = duplicateSource || {};
+  const sourcePages = duplicateSource ? db.prepare('SELECT * FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC, id ASC').all(duplicateSource.id) as any[] : [];
+  const sourceBlocks = duplicateSource ? db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC, created_at ASC, id ASC').all(duplicateSource.id) as any[] : [];
+  const sourceHome = sourcePages.find(page => page.is_home) || {};
+  db.exec('BEGIN');
+  db.prepare(`
+    INSERT INTO profiles (
+      id, user_id, username, display_name, bio, avatar_url, category, theme_id, plan,
+      hide_branding, ga_measurement_id, meta_pixel_id, custom_css, custom_font_url,
+      custom_theme_json, socials_json, share_title, share_description, share_image_url,
+      footer_logo_url, footer_logo_link, footer_logo_alt, background_media_url, background_media_type, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(profileId, userId, username, displayName, source.bio || '', source.avatar_url || '',
+    source.category || 'Creator', source.theme_id || 'editorial-stone', plan,
+    source.hide_branding || 0, null, null, source.custom_css || null,
+    source.custom_font_url || null, source.custom_theme_json || null,
+    source.socials_json || null, source.share_title || null,
+    source.share_description || null, source.share_image_url || null,
+    source.footer_logo_url || null, source.footer_logo_link || null,
+    source.footer_logo_alt || null, source.background_media_url || null,
+    source.background_media_type || null, now, now);
+
+  const homePageId = createId('page');
+  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, ?, 0, 1, 1, ?, ?)`)
+    .run(homePageId, profileId, sourceHome.title || displayName, sourceHome.description || null, now, now);
+  db.prepare('INSERT INTO blocks (id, profile_id, type, title, url, position, page_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .run(createId('blk'), profileId, 'link', 'My Website', 'https://example.com', 0, homePageId, now, now);
+  if (duplicateSource) duplicatePagesAndBlocks(profileId, homePageId, now, sourcePages, sourceBlocks);
+  db.exec('COMMIT');
+}
+
 // Authenticated: Create a new profile under the same account (respecting plan limits)
 profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
     const parse = createProfileSchema.safeParse(req.body);
-    if (!parse.success) {
-      return res.status(400).json({ error: parse.error.issues[0].message });
-    }
-
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues[0].message });
     const userId = req.user!.userId;
     const cleanUsername = parse.data.username.toLowerCase().trim();
     const displayName = parse.data.displayName.trim();
-    const duplicateSource = parse.data.duplicateProfileId ? db.prepare('SELECT * FROM profiles WHERE id = ? AND user_id = ?').get(parse.data.duplicateProfileId, userId) as any : null;
+    const duplicateSource = duplicateSourceProfile(parse.data.duplicateProfileId, userId);
     if (parse.data.duplicateProfileId && !duplicateSource) return res.status(404).json({ error: 'The profile to duplicate was not found.' });
-
-    // Check user's primary/active profile plan to determine allowed limit
-    // Profile limits are centralized in the entitlement policy.
-    const account = db.prepare("SELECT subscription_plan FROM users WHERE id = ?").get(userId) as { subscription_plan?: string } | undefined;
-    const userPlan = normalizePlan(account?.subscription_plan);
-    const maxProfiles = entitlementsFor(userPlan).maxProfiles;
-
-    const currentCountRow = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(userId) as { count: number };
-    const currentCount = currentCountRow ? currentCountRow.count : 0;
-
-    if (currentCount >= maxProfiles) {
-      return res.status(403).json({
-        error: `Your current ${userPlan.toUpperCase()} plan allows up to ${maxProfiles} bio profile(s). Please upgrade to create more.`
-      });
+    const capacity = profileCreationPlan(userId);
+    if (capacity.currentCount >= capacity.maxProfiles) {
+      return res.status(403).json({ error: `Your current ${capacity.plan.toUpperCase()} plan allows up to ${capacity.maxProfiles} bio profile(s). Please upgrade to create more.` });
     }
-
-    if (RESERVED_USERNAMES.includes(cleanUsername as any)) {
-      return res.status(400).json({ error: 'This username is reserved and cannot be claimed.' });
-    }
-
-    // Check username availability
-    const existing = db.prepare('SELECT id FROM profiles WHERE username = ?').get(cleanUsername);
-    if (existing) {
-      return res.status(409).json({ error: `The handle @${cleanUsername} is already taken.` });
-    }
-
+    const usernameError = profileUsernameError(cleanUsername);
+    if (usernameError) return res.status(usernameError.status).json({ error: usernameError.message });
     const newProfileId = createId('prf');
-    const now = Date.now();
-    const sourcePages = duplicateSource ? db.prepare('SELECT * FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC, id ASC').all(duplicateSource.id) as any[] : [];
-    const sourceBlocks = duplicateSource ? db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC, created_at ASC, id ASC').all(duplicateSource.id) as any[] : [];
-    const sourceHome = sourcePages.find(page => page.is_home);
-
-    db.exec('BEGIN');
-    db.prepare(`
-      INSERT INTO profiles (
-        id, user_id, username, display_name, bio, avatar_url, category, theme_id, plan,
-        hide_branding, ga_measurement_id, meta_pixel_id, custom_css, custom_font_url,
-        custom_theme_json, socials_json, share_title, share_description, share_image_url,
-        footer_logo_url, footer_logo_link, footer_logo_alt, background_media_url, background_media_type, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      newProfileId,
-      userId,
-      cleanUsername,
-      displayName,
-      duplicateSource?.bio || '',
-      duplicateSource?.avatar_url || '',
-      duplicateSource?.category || 'Creator',
-      duplicateSource?.theme_id || 'editorial-stone',
-      userPlan,
-      duplicateSource?.hide_branding || 0,
-      null,
-      null,
-      duplicateSource?.custom_css || null,
-      duplicateSource?.custom_font_url || null,
-      duplicateSource?.custom_theme_json || null,
-      duplicateSource?.socials_json || null,
-      duplicateSource?.share_title || null,
-      duplicateSource?.share_description || null,
-      duplicateSource?.share_image_url || null,
-      duplicateSource?.footer_logo_url || null,
-      duplicateSource?.footer_logo_link || null,
-      duplicateSource?.footer_logo_alt || null,
-      duplicateSource?.background_media_url || null,
-      duplicateSource?.background_media_type || null,
-      now,
-      now
-    );
-
-    const homePageId = createId('page');
-    db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, ?, 0, 1, 1, ?, ?)`)
-      .run(homePageId, newProfileId, sourceHome?.title || displayName, sourceHome?.description || null, now, now);
-
-    // Add starter block
-    db.prepare(`
-      INSERT INTO blocks (
-        id, profile_id, type, title, url, position, page_id, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      createId('blk'),
-      newProfileId,
-      'link',
-      'My Website',
-      'https://example.com',
-      0,
-      homePageId,
-      now,
-      now
-    );
-
-    if (duplicateSource) {
-      db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(newProfileId);
-      db.prepare('DELETE FROM pages WHERE profile_id = ? AND id != ?').run(newProfileId, homePageId);
-      const pageMap = new Map<string, string>();
-      const blockMap = new Map<string, string>();
-      for (const sourcePage of sourcePages) pageMap.set(sourcePage.id, sourcePage.is_home ? homePageId : createId('page'));
-      for (const sourceBlock of sourceBlocks) blockMap.set(sourceBlock.id, createId('blk'));
-      const insertPage = db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-      for (const sourcePage of sourcePages) {
-        const copiedId = pageMap.get(sourcePage.id)!;
-        if (!sourcePage.is_home) insertPage.run(copiedId, newProfileId, sourcePage.slug, sourcePage.title, sourcePage.description, sourcePage.sort_order, 0, sourcePage.published, now, now);
-      }
-      const copyBlock = db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-      for (const block of sourceBlocks) {
-        const extra = duplicatedBlockExtra(block.type, block.extra_json);
-        let remappedExtra = extra;
-        if (extra) remappedExtra = JSON.stringify(remapDuplicatedValue(JSON.parse(extra), pageMap, blockMap));
-        const remappedUrl = typeof block.url === 'string' ? remapDuplicatedValue(block.url, pageMap, blockMap) : block.url;
-        copyBlock.run(blockMap.get(block.id)!, newProfileId, block.type, block.title, remappedUrl, block.subtitle, block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at, pageMap.get(block.page_id) || homePageId, remappedExtra, now, now);
-      }
-    }
-
-    db.exec('COMMIT');
+    insertProfileRecord(newProfileId, userId, cleanUsername, displayName, capacity.plan, duplicateSource);
 
     // Sign new token for the newly created profile
     const token = issueCurrentSession(userId, newProfileId, cleanUsername, req.user!.email);
@@ -811,7 +759,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
         id: newProfileId,
         username: cleanUsername,
         displayName,
-        plan: userPlan
+        plan: capacity.plan
       },
       ...testOnlySessionToken(token)
     });

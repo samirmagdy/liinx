@@ -13,6 +13,21 @@ import {
 export const formsRouter = Router();
 const submissionSchema = formSubmissionSchema;
 
+function validateSubmittedFields(fields: FormFieldContract[], submitted: Record<string, string>): string | null {
+  const configuredNames = new Set(fields.map(field => field.name));
+  if (Object.keys(submitted).some(name => !configuredNames.has(name))) return 'The form contains an unknown field.';
+  for (const field of fields) {
+    const value = submitted[field.name];
+    if (field.required && !value?.trim()) return `${field.label} is required.`;
+    if (!value) continue;
+    if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Enter a valid email address.';
+    if (field.type === 'tel' && !getPhoneHref(value)) return 'Enter a valid phone number.';
+    if (field.minLength !== undefined && value.length < field.minLength) return `${field.label} is too short.`;
+    if (field.maxLength !== undefined && value.length > field.maxLength) return `${field.label} is too long.`;
+  }
+  return null;
+}
+
 formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', limit: 20, windowMs: 60 * 60 * 1000 }), (req, res) => {
   try {
     const parsed = submissionSchema.safeParse(req.body);
@@ -26,17 +41,8 @@ formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', lim
     if (Array.isArray(rawExtra.fields) && fields.length === 0) return res.status(409).json({ error: 'This form configuration is invalid.' });
     if (fields.length === 0) return res.status(409).json({ error: 'This form has no configured fields.' });
     if (rawExtra.consentRequired === true && parsed.data.consent !== true) return res.status(400).json({ error: 'Please confirm consent before sending this form.' });
-    const configuredNames = new Set(fields.map(field => field.name));
-    for (const submittedName of Object.keys(parsed.data.fields)) if (!configuredNames.has(submittedName)) return res.status(400).json({ error: 'The form contains an unknown field.' });
-    for (const field of fields) {
-      if (field.required && !parsed.data.fields[field.name]?.trim()) return res.status(400).json({ error: `${field.label} is required.` });
-      const value = parsed.data.fields[field.name];
-      if (!value) continue;
-      if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return res.status(400).json({ error: 'Enter a valid email address.' });
-      if (field.type === 'tel' && !getPhoneHref(value)) return res.status(400).json({ error: 'Enter a valid phone number.' });
-      if (field.minLength !== undefined && value.length < field.minLength) return res.status(400).json({ error: `${field.label} is too short.` });
-      if (field.maxLength !== undefined && value.length > field.maxLength) return res.status(400).json({ error: `${field.label} is too long.` });
-    }
+    const fieldError = validateSubmittedFields(fields, parsed.data.fields);
+    if (fieldError) return res.status(400).json({ error: fieldError });
     if (parsed.data.submissionKey) {
       const duplicate = db.prepare('SELECT id FROM form_submissions WHERE block_id = ? AND submission_key = ?').get(parsed.data.blockId, parsed.data.submissionKey);
       if (duplicate) return res.status(200).json({ success: true, duplicate: true, message: 'Your response was already received.' });

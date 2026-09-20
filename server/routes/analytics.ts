@@ -97,6 +97,76 @@ function analyticsDedupeKey(kind: 'view' | 'click', parts: string[], now: number
   return crypto.createHash('sha256').update(`${kind}:${parts.join(':')}:${bucket}`).digest('hex');
 }
 
+function parseBlockExtra(raw: string | null | undefined): any {
+  try { return raw ? JSON.parse(raw) : null; } catch { return null; }
+}
+
+function targetFromBlockType(block: any, extra: any): string | null {
+  let target = block.url as string | null;
+  if (!target && block.type === 'image') target = typeof extra?.linkUrl === 'string' ? extra.linkUrl : null;
+  if (!target && ['event', 'presave', 'product', 'tips'].includes(block.type)) {
+    target = typeof extra?.url === 'string' ? extra.url : null;
+  }
+  if (!target && block.type === 'phone') {
+    target = extra?.contactType === 'email'
+      ? getMailtoHref(extra?.email, extra?.subject, extra?.body)
+      : getPhoneHref(extra?.phone);
+  }
+  return target;
+}
+
+function targetFromListItem(extra: any, query: Record<string, unknown>): string | null | undefined {
+  const itemId = typeof query.item === 'string' ? query.item : null;
+  const itemIndex = typeof query.itemIndex === 'string' && /^\d+$/.test(query.itemIndex) ? Number(query.itemIndex) : null;
+  if (!itemId && itemIndex === null) return undefined;
+  const items = Array.isArray(extra?.items) ? extra.items : [];
+  const item = itemId ? items.find((candidate: any) => candidate?.id === itemId) : items[itemIndex!];
+  if (!item) return null;
+  return typeof item.linkUrl === 'string' ? item.linkUrl : typeof item.url === 'string' ? item.url : null;
+}
+
+function resolveRedirectTarget(block: any, query: Record<string, unknown>): string | null {
+  const extra = parseBlockExtra(block.extra_json);
+  const itemTarget = targetFromListItem(extra, query);
+  const target = itemTarget === undefined ? targetFromBlockType(block, extra) : itemTarget;
+  return typeof target === 'string' && target.trim() ? target : null;
+}
+
+function recordClickIfAllowed(req: any, block: any, targetUrl: string): void {
+  const ip = req.ip || req.socket.remoteAddress || '';
+  const ipHash = hashIp(ip);
+  if (isClickRateLimited(ipHash, block.id)) return;
+
+  const userAgent = (req.headers['user-agent'] as string) || '';
+  if (isLikelyBot(userAgent)) return;
+
+  const referrer = boundedQueryValue(req.headers['referer']) || 'direct';
+  const utmSource = boundedQueryValue(req.query.utm_source);
+  const utmMedium = boundedQueryValue(req.query.utm_medium);
+  const utmCampaign = boundedQueryValue(req.query.utm_campaign);
+  const now = Date.now();
+  const clickId = createId('clk');
+  try {
+    sqliteAnalyticsEventStore.recordClick({
+      id: clickId,
+      blockId: block.id,
+      profileId: block.profile_id,
+      targetUrl,
+      ipHash,
+      referrer,
+      userAgent,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      pageId: block.page_id,
+      dedupeKey: analyticsDedupeKey('click', [ipHash, block.id, targetUrl, utmSource || '', utmMedium || '', utmCampaign || ''], now),
+      createdAt: now
+    });
+  } catch (error) {
+    console.error('Analytics click event was not queued:', error);
+  }
+}
+
 // Background flusher every 100ms
 setInterval(flushAnalyticsBuffers, 100).unref();
 process.on('exit', flushAnalyticsBuffers);
@@ -119,39 +189,8 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
       return res.status(404).send('Link not found or inactive.');
     }
 
-    let rawTarget = block.url as string | null;
-    if (!rawTarget && block.type === 'image') {
-      try {
-        const extra = block.extra_json ? JSON.parse(block.extra_json) : null;
-        rawTarget = typeof extra?.linkUrl === 'string' ? extra.linkUrl : null;
-      } catch { rawTarget = null; }
-    }
-    if (!rawTarget && (block.type === 'event' || block.type === 'presave' || block.type === 'product' || block.type === 'tips')) {
-      try {
-        const extra = block.extra_json ? JSON.parse(block.extra_json) : null;
-        rawTarget = typeof extra?.url === 'string' ? extra.url : null;
-      } catch { rawTarget = null; }
-    }
-    if (!rawTarget && block.type === 'phone') {
-      try {
-        const extra = block.extra_json ? JSON.parse(block.extra_json) : null;
-        rawTarget = extra?.contactType === 'email'
-          ? getMailtoHref(extra?.email, extra?.subject, extra?.body)
-          : getPhoneHref(extra?.phone);
-      } catch { rawTarget = null; }
-    }
-    const itemId = typeof req.query.item === 'string' ? req.query.item : null;
-    const itemIndex = typeof req.query.itemIndex === 'string' && /^\d+$/.test(req.query.itemIndex) ? Number(req.query.itemIndex) : null;
-    if (itemId || itemIndex !== null) {
-      let extra: any = null;
-      try { extra = block.extra_json ? JSON.parse(block.extra_json) : null; } catch { extra = null; }
-      const item = Array.isArray(extra?.items)
-        ? itemId ? extra.items.find((candidate: any) => candidate?.id === itemId) : extra.items[itemIndex]
-        : null;
-      if (!item) return res.status(404).send('Link not found or inactive.');
-      rawTarget = typeof item.linkUrl === 'string' ? item.linkUrl : typeof item.url === 'string' ? item.url : null;
-    }
-    if (!rawTarget || !rawTarget.trim()) {
+    const rawTarget = resolveRedirectTarget(block, req.query);
+    if (!rawTarget) {
       return res.status(404).send('Link not found or inactive.');
     }
     const targetUrl = sanitizeUrl(rawTarget);
@@ -159,55 +198,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
       return res.status(400).send('Invalid destination URL.');
     }
 
-    const ip = req.ip || req.socket.remoteAddress || '';
-    const ipHash = hashIp(ip);
-
-    // Abuse protection: Only record metric if not flooded with repeated clicks from same IP
-    if (!isClickRateLimited(ipHash, block.id)) {
-      const referrer = boundedQueryValue(req.headers['referer']) || 'direct';
-      const userAgent = (req.headers['user-agent'] as string) || '';
-      const utmSource = boundedQueryValue(req.query.utm_source);
-      const utmMedium = boundedQueryValue(req.query.utm_medium);
-      const utmCampaign = boundedQueryValue(req.query.utm_campaign);
-      if (isLikelyBot(userAgent)) return res.redirect(302, targetUrl);
-      const now = Date.now();
-      const clickId = createId('clk');
-
-      const clickRecord = {
-        id: clickId,
-        block_id: block.id,
-        profile_id: block.profile_id,
-        target_url: targetUrl,
-        ip_hash: ipHash,
-        referrer,
-        user_agent: userAgent,
-        utm_source: utmSource,
-        utm_medium: utmMedium,
-        utm_campaign: utmCampaign,
-        page_id: block.page_id,
-        dedupe_key: analyticsDedupeKey('click', [ipHash, block.id, targetUrl, utmSource || '', utmMedium || '', utmCampaign || ''], now),
-        created_at: now
-      };
-      try {
-        sqliteAnalyticsEventStore.recordClick({
-          id: clickRecord.id,
-          blockId: clickRecord.block_id,
-          profileId: clickRecord.profile_id,
-          targetUrl: clickRecord.target_url,
-          ipHash: clickRecord.ip_hash,
-          referrer: clickRecord.referrer,
-          userAgent: clickRecord.user_agent,
-          utmSource: clickRecord.utm_source,
-          utmMedium: clickRecord.utm_medium,
-          utmCampaign: clickRecord.utm_campaign,
-          pageId: clickRecord.page_id,
-          dedupeKey: clickRecord.dedupe_key,
-          createdAt: clickRecord.created_at
-        });
-      } catch (error) {
-        console.error('Analytics click event was not queued:', error);
-      }
-    }
+    recordClickIfAllowed(req, block, targetUrl);
 
     // Fast 302 Found redirect
     res.redirect(302, targetUrl);
@@ -287,6 +278,57 @@ analyticsRouter.post('/api/analytics/view', sharedRateLimit({ name: 'analytics-v
 });
 
 // Authenticated Creator Analytics Stats
+function buildDailyTimeline(scope: string, scopeArgs: string[]) {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const timeline = [];
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+  for (let i = 6; i >= 0; i--) {
+    const dayStartTime = todayStart.getTime() - i * dayMs;
+    const dayEndTime = dayStartTime + dayMs;
+    const date = new Date(dayStartTime).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
+    const views = (db.prepare(`SELECT COUNT(*) as count FROM profile_views WHERE profile_id = ?${scope} AND created_at >= ? AND created_at < ?`)
+      .get(...scopeArgs, dayStartTime, dayEndTime) as { count: number }).count;
+    const clicks = (db.prepare(`SELECT COUNT(*) as count FROM link_clicks WHERE profile_id = ?${scope} AND created_at >= ? AND created_at < ?`)
+      .get(...scopeArgs, dayStartTime, dayEndTime) as { count: number }).count;
+    timeline.push({ date, views, clicks });
+  }
+  return timeline;
+}
+
+function loadTopLinks(pageId: string | null, scopeArgs: string[], cutoff: number) {
+  return db.prepare(`
+    SELECT c.block_id AS id, COALESCE(b.title, 'Deleted link') AS title,
+      COALESCE(b.url, MAX(c.target_url)) AS url, COALESCE(b.type, 'link') AS type,
+      COUNT(c.id) AS clicks
+    FROM link_clicks c
+    LEFT JOIN blocks b ON b.id = c.block_id AND b.profile_id = c.profile_id
+    WHERE c.profile_id = ?${pageId ? ' AND c.page_id = ?' : ''} AND c.created_at >= ?
+    GROUP BY c.block_id, b.title, b.url, b.type
+    ORDER BY clicks DESC
+    LIMIT 5
+  `).all(...scopeArgs, cutoff) as any[];
+}
+
+function loadTopReferrers(scope: string, scopeArgs: string[], cutoff: number) {
+  return db.prepare(`
+    SELECT referrer, COUNT(*) as count FROM profile_views
+    WHERE profile_id = ?${scope} AND created_at >= ?
+    GROUP BY referrer ORDER BY count DESC LIMIT 5
+  `).all(...scopeArgs, cutoff) as { referrer: string; count: number }[];
+}
+
+function loadTopUtmCampaigns(scope: string, scopeArgs: string[], cutoff: number) {
+  return db.prepare(`
+    SELECT COALESCE(utm_source, '(direct)') as source,
+      COALESCE(utm_medium, '(none)') as medium,
+      COALESCE(utm_campaign, '(unnamed)') as campaign, COUNT(*) as count
+    FROM profile_views
+    WHERE profile_id = ?${scope} AND created_at >= ? AND (utm_campaign IS NOT NULL OR utm_source IS NOT NULL)
+    GROUP BY utm_source, utm_medium, utm_campaign ORDER BY count DESC LIMIT 5
+  `).all(...scopeArgs, cutoff) as { source: string; medium: string; campaign: string; count: number }[];
+}
+
 analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
     // Flush any pending buffered clicks and views to ensure 100% up-to-date stats
@@ -299,95 +341,20 @@ analyticsRouter.get('/api/analytics/stats', requireAuth, (req: AuthenticatedRequ
       if (!page) return res.status(403).json({ error: 'You do not have access to this page.' });
     }
     const scope = pageId ? ' AND page_id = ?' : '';
-    const scopeArgs = pageId ? [profileId, pageId] : [profileId];
+    const scopeArgs: string[] = pageId ? [profileId, pageId] : [profileId];
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-
-    // Total Views (30 days)
-    const viewsRow = db.prepare(`
-      SELECT COUNT(*) as count, COUNT(DISTINCT ip_hash) as uniqueCount 
-      FROM profile_views 
-      WHERE profile_id = ?${scope} AND created_at >= ?
-    `).get(...scopeArgs, thirtyDaysAgo) as { count: number; uniqueCount: number };
-
-    const totalViews = viewsRow ? viewsRow.count : 0;
-    const uniqueVisitors = viewsRow ? viewsRow.uniqueCount : 0;
-
-    // Total Clicks (30 days)
-    const clicksRow = db.prepare(`
-      SELECT COUNT(*) as count 
-      FROM link_clicks 
-      WHERE profile_id = ?${scope} AND created_at >= ?
-    `).get(...scopeArgs, thirtyDaysAgo) as { count: number };
-
-    const totalClicks = clicksRow ? clicksRow.count : 0;
-    const ctr = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0';
-
-    // Top Links
-    const topLinks = db.prepare(`
-      SELECT c.block_id AS id, COALESCE(b.title, 'Deleted link') AS title,
-        COALESCE(b.url, MAX(c.target_url)) AS url, COALESCE(b.type, 'link') AS type,
-        COUNT(c.id) AS clicks
-      FROM link_clicks c
-      LEFT JOIN blocks b ON b.id = c.block_id AND b.profile_id = c.profile_id
-      WHERE c.profile_id = ?${pageId ? ' AND c.page_id = ?' : ''} AND c.created_at >= ?
-      GROUP BY c.block_id, b.title, b.url, b.type
-      ORDER BY clicks DESC
-      LIMIT 5
-    `).all(...scopeArgs, thirtyDaysAgo) as any[];
-
-    // 7-Day Timeline Breakdown
-    const dayMs = 24 * 60 * 60 * 1000;
-    const dailyTimeline = [];
-    const todayStart = new Date();
-    todayStart.setUTCHours(0, 0, 0, 0);
-
-    for (let i = 6; i >= 0; i--) {
-      const dayStartTime = todayStart.getTime() - i * dayMs;
-      const dayEndTime = dayStartTime + dayMs;
-      const dateLabel = new Date(dayStartTime).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
-
-      const dayViews = (db.prepare(`
-        SELECT COUNT(*) as count 
-        FROM profile_views 
-        WHERE profile_id = ?${scope} AND created_at >= ? AND created_at < ?
-      `).get(...scopeArgs, dayStartTime, dayEndTime) as { count: number }).count;
-
-      const dayClicks = (db.prepare(`
-        SELECT COUNT(*) as count 
-        FROM link_clicks 
-        WHERE profile_id = ?${scope} AND created_at >= ? AND created_at < ?
-      `).get(...scopeArgs, dayStartTime, dayEndTime) as { count: number }).count;
-
-      dailyTimeline.push({
-        date: dateLabel,
-        views: dayViews,
-        clicks: dayClicks
-      });
-    }
-
-    // Top Traffic Sources
-    const topReferrers = db.prepare(`
-      SELECT referrer, COUNT(*) as count
-      FROM profile_views
-      WHERE profile_id = ?${scope} AND created_at >= ?
-      GROUP BY referrer
-      ORDER BY count DESC
-      LIMIT 5
-    `).all(...scopeArgs, thirtyDaysAgo) as { referrer: string; count: number }[];
-
-    // Top UTM Campaigns (Source / Medium / Campaign)
-    const topUtmCampaigns = db.prepare(`
-      SELECT 
-        COALESCE(utm_source, '(direct)') as source,
-        COALESCE(utm_medium, '(none)') as medium,
-        COALESCE(utm_campaign, '(unnamed)') as campaign,
-        COUNT(*) as count
-      FROM profile_views
-      WHERE profile_id = ?${scope} AND created_at >= ? AND (utm_campaign IS NOT NULL OR utm_source IS NOT NULL)
-      GROUP BY utm_source, utm_medium, utm_campaign
-      ORDER BY count DESC
-      LIMIT 5
-    `).all(...scopeArgs, thirtyDaysAgo) as { source: string; medium: string; campaign: string; count: number }[];
+    const viewsRow = db.prepare(`SELECT COUNT(*) as count, COUNT(DISTINCT ip_hash) as uniqueCount FROM profile_views WHERE profile_id = ?${scope} AND created_at >= ?`)
+      .get(...scopeArgs, thirtyDaysAgo) as { count: number; uniqueCount: number };
+    const clicksRow = db.prepare(`SELECT COUNT(*) as count FROM link_clicks WHERE profile_id = ?${scope} AND created_at >= ?`)
+      .get(...scopeArgs, thirtyDaysAgo) as { count: number };
+    const totalViews = viewsRow?.count || 0;
+    const uniqueVisitors = viewsRow?.uniqueCount || 0;
+    const totalClicks = clicksRow?.count || 0;
+    const ctr = totalViews ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0';
+    const topLinks = loadTopLinks(pageId, scopeArgs, thirtyDaysAgo);
+    const dailyTimeline = buildDailyTimeline(scope, scopeArgs);
+    const topReferrers = loadTopReferrers(scope, scopeArgs, thirtyDaysAgo);
+    const topUtmCampaigns = loadTopUtmCampaigns(scope, scopeArgs, thirtyDaysAgo);
 
     res.json({
       totalViews,

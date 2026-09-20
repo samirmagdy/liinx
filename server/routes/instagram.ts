@@ -97,6 +97,24 @@ instagramRouter.get('/integrations/instagram/auth-url', requireAuth, (req: Authe
 });
 
 // 3. Instagram OAuth Callback
+type ConsumedInstagramState = { profile_id: string; redirect_uri: string; expires_at: number };
+
+function consumeInstagramState(state: string | undefined): ConsumedInstagramState | string {
+  if (!state) return 'Missing_security_state';
+  if (!/^[A-Za-z0-9_-]{40,}$/.test(state)) return 'Malformed_security_state';
+  const stateHash = crypto.createHash('sha256').update(state).digest('hex');
+  const consumed = db.transaction(() => {
+    const row = db.prepare('SELECT profile_id, redirect_uri, expires_at FROM instagram_oauth_states WHERE state_hash = ?')
+      .get(stateHash) as ConsumedInstagramState | undefined;
+    if (!row) return undefined;
+    db.prepare('DELETE FROM instagram_oauth_states WHERE state_hash = ?').run(stateHash);
+    return row;
+  })();
+  if (!consumed) return 'Invalid_or_reused_security_state';
+  if (consumed.expires_at <= Date.now()) return 'Expired_security_state';
+  return consumed;
+}
+
 instagramRouter.get('/integrations/instagram/callback', async (req: Request, res: Response) => {
   const { code, state, error, error_description } = req.query as {
     code?: string;
@@ -117,20 +135,9 @@ instagramRouter.get('/integrations/instagram/callback', async (req: Request, res
   // Validate and consume state atomically. The callback intentionally does not
   // require the Liinx session because the OAuth provider returns to this URL;
   // ownership is bound to the single-use server-side state.
-  if (!state) {
-    return res.redirect('/studio?instagram_error=Missing_security_state');
-  }
-
-  if (!/^[A-Za-z0-9_-]{40,}$/.test(state)) return res.redirect('/studio?instagram_error=Malformed_security_state');
-  const stateHash = crypto.createHash('sha256').update(state).digest('hex');
-  const consumed = db.transaction(() => {
-    const row = db.prepare('SELECT profile_id, redirect_uri, expires_at FROM instagram_oauth_states WHERE state_hash = ?').get(stateHash) as { profile_id: string; redirect_uri: string; expires_at: number } | undefined;
-    if (!row) return undefined;
-    db.prepare('DELETE FROM instagram_oauth_states WHERE state_hash = ?').run(stateHash);
-    return row;
-  })();
-  if (!consumed) return res.redirect('/studio?instagram_error=Invalid_or_reused_security_state');
-  if (consumed.expires_at <= Date.now()) return res.redirect('/studio?instagram_error=Expired_security_state');
+  const stateResult = consumeInstagramState(state);
+  if (typeof stateResult === 'string') return res.redirect(`/studio?instagram_error=${stateResult}`);
+  const consumed = stateResult;
   const profileId = consumed.profile_id;
 
   try {
