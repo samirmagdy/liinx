@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { useLanguage } from '../context/LanguageContext';
 import { pageTitles, pageDescriptions } from '../config/pages';
 import { brand } from '../config/brand';
+import { localizedPath } from '../utils/languagePaths';
 export function PageMetadata() {
   const [location] = useLocation();
   const { lang } = useLanguage();
@@ -22,8 +23,28 @@ export function PageMetadata() {
     const privatePage = ['/login', '/register', '/studio', '/account'].includes(path);
     document.querySelector('meta[name="robots"]')?.setAttribute('content', privatePage ? 'noindex, nofollow' : 'index, follow');
     const canonicalOrigin = brand.domain === window.location.hostname ? window.location.origin : `https://${brand.domain}`;
-    document.querySelector('link[rel="canonical"]')?.setAttribute('href', `${canonicalOrigin}${path}`);
-    document.querySelector('meta[property="og:url"]')?.setAttribute('content', `${canonicalOrigin}${path}`);
+    const canonical = `${canonicalOrigin}${localizedPath(path, lang)}`;
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical);
+    const localizedPublicPage = Boolean(title) && !privatePage;
+    const setAlternate = (language: string, href: string | null) => {
+      const selector = `link[rel="alternate"][hreflang="${language}"]`;
+      let alternate = document.querySelector<HTMLLinkElement>(selector);
+      if (!href) {
+        alternate?.remove();
+        return;
+      }
+      if (!alternate) {
+        alternate = document.createElement('link');
+        alternate.rel = 'alternate';
+        alternate.hreflang = language;
+        document.head.appendChild(alternate);
+      }
+      alternate.href = href;
+    };
+    setAlternate('en', localizedPublicPage ? `${canonicalOrigin}${localizedPath(path, 'en')}` : null);
+    setAlternate('ar', localizedPublicPage ? `${canonicalOrigin}${localizedPath(path, 'ar')}` : null);
+    setAlternate('x-default', localizedPublicPage ? `${canonicalOrigin}${localizedPath(path, 'en')}` : null);
     if (title) {
       document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
       document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', document.title);

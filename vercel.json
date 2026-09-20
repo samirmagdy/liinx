@@ -8,6 +8,14 @@
     {
       "source": "/account",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/ar/studio",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/ar/account",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     }
   ],
   "rewrites": [
@@ -48,7 +56,15 @@
       "destination": "/index.html"
     },
     {
+      "source": "/ar/studio",
+      "destination": "/index.html"
+    },
+    {
       "source": "/account",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ar/account",
       "destination": "/index.html"
     }
   ]

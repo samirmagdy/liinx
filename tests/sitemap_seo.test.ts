@@ -54,6 +54,8 @@ describe('SEO sitemap output', () => {
     expect(response.headers['content-type']).toMatch(/application\/xml/);
     expect(response.text).toContain(`/@${updatedContent.username}`);
     expect(response.text).toContain('<lastmod>2025-05-06</lastmod>');
+    expect(response.text).toContain('/ar/');
+    expect(response.text).toContain('/ar/features');
     expect(response.text).not.toContain(`/@${empty.username}`);
     expect(response.text).not.toContain(`/@${redirected.username}`);
     expect(response.text).not.toContain('<changefreq>');

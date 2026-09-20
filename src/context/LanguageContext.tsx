@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { type Language, translations, type Translations } from '../config/i18n';
 import { translateRuntime } from '../config/runtimeTranslations';
+import { languageForPath, localizedPath } from '../utils/languagePaths';
 
 interface LanguageContextType {
   lang: Language;
@@ -12,14 +13,10 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const LanguageProvider: React.FC<{ children: ReactNode; initialLanguage?: Language }> = ({ children, initialLanguage }) => {
   const [lang, setLang] = useState<Language>(() => {
-    try {
-      const stored = localStorage.getItem('liinx_lang') as Language;
-      return (stored === 'ar' || stored === 'en') ? stored : 'en';
-    } catch {
-      return 'en';
-    }
+    if (initialLanguage) return initialLanguage;
+    return typeof window === 'undefined' ? 'en' : languageForPath(window.location.pathname);
   });
 
   const isRtl = lang === 'ar';
@@ -27,12 +24,17 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
-    try {
-      localStorage.setItem('liinx_lang', lang);
-    } catch {}
   }, [lang, isRtl]);
 
   const setLanguage = (newLang: Language) => {
+    if (typeof window !== 'undefined') {
+      const currentLanguage = languageForPath(window.location.pathname);
+      if (currentLanguage !== newLang) {
+        const nextPath = localizedPath(window.location.pathname, newLang);
+        window.location.assign(`${nextPath}${window.location.search}${window.location.hash}`);
+        return;
+      }
+    }
     setLang(newLang);
   };
 

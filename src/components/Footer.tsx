@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { ResourceModal, type ResourceDocType } from './ResourceModal';
 import { brand } from '../config/brand';
 import { LiinxLogo } from './LiinxLogo';
 import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { Globe, ShieldCheck } from 'lucide-react';
+import { localizedPath } from '../utils/languagePaths';
 
 interface FooterProps {
   onSelectView?: (view: 'home' | 'builder' | 'templates' | 'pricing' | 'features' | 'about' | 'contact') => void;
@@ -13,11 +14,9 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
   const { tr: ui } = useUiLanguage();
   const [activeModalDoc, setActiveModalDoc] = useState<ResourceDocType | null>(null);
-  const { lang, setLanguage, t } = useLanguage();
-
-  const toggleLanguage = () => {
-    setLanguage(lang === 'en' ? 'ar' : 'en');
-  };
+  const { lang, t } = useLanguage();
+  const [location] = useLocation();
+  const languageHref = localizedPath(location, lang === 'en' ? 'ar' : 'en');
 
   return (
     <>
@@ -55,13 +54,13 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
                   <span className="text-[11px] text-neutral-400">{ui("Global availability monitoring")}</span>
                 </div>
 
-                <button
-                  onClick={toggleLanguage}
+                <a
+                  href={languageHref}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-[11px] text-neutral-300 transition-colors cursor-pointer"
                 >
                   <Globe className="w-3 h-3 text-amber-500" />
                   <span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span>
-                </button>
+                </a>
               </div>
             </div>
 

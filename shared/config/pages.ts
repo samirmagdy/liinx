@@ -1,5 +1,5 @@
 export const pageTitles: Record<string, [string, string]> = {
-  '/': ['Link in Bio Page Builder for Creators', 'رابط في البايو للمبدعين'],
+  '/': ['Link in Bio Page Builder for Creators', 'أداة إنشاء صفحة رابط في البايو للمبدعين'],
   '/features': ['Link in Bio Page Features', 'ميزات صفحة رابط البايو'],
   '/templates': ['Templates', 'القوالب'],
   '/pricing': ['Pricing', 'الأسعار'],

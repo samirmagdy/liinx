@@ -1,5 +1,5 @@
 import React, { Component, lazy, Suspense } from 'react';
-import { Switch, Route, useLocation } from 'wouter';
+import { Switch, Route, Router, useLocation } from 'wouter';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useLanguage, LanguageProvider } from './context/LanguageContext';
 import { CapabilitiesProvider } from './context/CapabilitiesContext';
@@ -27,6 +27,8 @@ import { PageMetadata } from './components/PageMetadata';
 import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
+import { languageForPath } from './utils/languagePaths';
+import type { Language } from './config/i18n';
 
 
 
@@ -273,8 +275,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
-export default function App() {
+interface AppProps {
+  initialLanguage?: Language;
+  initialPath?: string;
+}
+
+export default function App({ initialLanguage, initialPath }: AppProps = {}) {
   const currentHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+  const currentPath = initialPath || (typeof window !== 'undefined' ? window.location.pathname : '/');
+  const language = initialLanguage || languageForPath(currentPath);
+  const routerBase = language === 'ar' ? '/ar' : undefined;
+  const routerSsrPath = initialPath ? { ssrPath: initialPath } : {};
   const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
   const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.liinx.app');
 
@@ -283,8 +294,9 @@ export default function App() {
       ? window.location.pathname.split('/').filter(Boolean)[0] || undefined
       : undefined;
     return (
+      <Router base={routerBase} {...routerSsrPath}>
       <ErrorBoundary>
-        <LanguageProvider>
+        <LanguageProvider initialLanguage={language}>
           <AuthProvider>
             <div className="relative min-h-screen">
               <div className="relative z-10">
@@ -298,12 +310,14 @@ export default function App() {
           </AuthProvider>
         </LanguageProvider>
       </ErrorBoundary>
+      </Router>
     );
   }
 
   return (
+    <Router base={routerBase} {...routerSsrPath}>
     <ErrorBoundary>
-      <LanguageProvider>
+      <LanguageProvider initialLanguage={language}>
         <CapabilitiesProvider>
           <AuthProvider>
           <div className="relative min-h-screen">
@@ -364,5 +378,6 @@ export default function App() {
       </CapabilitiesProvider>
     </LanguageProvider>
     </ErrorBoundary>
+    </Router>
   );
 };

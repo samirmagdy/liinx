@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { 
@@ -16,6 +16,7 @@ import { usePanelMotion } from '../animations/usePanelMotion';
 import { brand } from '../config/brand';
 import { LiinxLogo } from './LiinxLogo';
 import { UserMenuDropdown } from './UserMenuDropdown';
+import { localizedPath } from '../utils/languagePaths';
 
 interface NavbarProps {
   activeView?: 'home' | 'builder' | 'templates' | 'pricing' | 'features' | 'about' | 'contact' | 'privacy' | 'terms';
@@ -131,7 +132,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { tr: ui } = useUiLanguage();
   const { user, logout } = useAuth();
-  const { lang, setLanguage, t, isRtl } = useLanguage();
+  const { lang, t, isRtl } = useLanguage();
+  const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   usePanelMotion(headerRef, mobileMenuOpen, '#mobile-navigation a, #mobile-navigation button');
@@ -143,9 +145,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
     }`;
 
-  const toggleLanguage = () => {
-    setLanguage(lang === 'en' ? 'ar' : 'en');
-  };
+  const languageHref = localizedPath(location, lang === 'en' ? 'ar' : 'en');
 
   return (
     <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-neutral-200/70 bg-neutral-100/90 backdrop-blur-md">
@@ -188,14 +188,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Action Bar */}
         <div className="hidden xl:flex items-center gap-2.5">
           {/* Language Switcher */}
-          <button
-            onClick={toggleLanguage}
+          <a
+            href={languageHref}
             title={lang === 'en' ? 'Switch to Arabic (العربية)' : 'Switch to English'}
             className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full border border-neutral-200 bg-white/50 hover:bg-neutral-200/60 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
           >
             <Globe className="w-3.5 h-3.5 text-neutral-500" />
             <span>{lang === 'en' ? 'العربية' : 'English'}</span>
-          </button>
+          </a>
 
           {user ? (
             <div className="flex items-center gap-2">
@@ -236,12 +236,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile menu trigger */}
         <div className="flex xl:hidden items-center gap-2">
-          <button
-            onClick={toggleLanguage}
+          <a
+            href={languageHref}
             className="p-1.5 rounded-lg text-xs font-bold text-neutral-700 hover:bg-neutral-100"
           >
             {lang === 'en' ? 'عربي' : 'EN'}
-          </button>
+          </a>
           {user ? (
             <Link
               href="/studio"

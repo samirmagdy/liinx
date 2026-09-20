@@ -234,10 +234,14 @@ app.get('/sitemap.xml', (req, res) => {
     const staticRoutes = [
       '', '/features', '/templates', '/pricing', '/about', '/contact', '/privacy', '/terms'
     ];
+    const localizedStaticRoutes = [
+      ...staticRoutes,
+      ...staticRoutes.map(route => `/ar${route || '/'}`)
+    ];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
-    for (const route of staticRoutes) {
+    for (const route of localizedStaticRoutes) {
       xml += `  <url>\n    <loc>${baseUrl}${route}</loc>\n  </url>\n`;
     }
 
