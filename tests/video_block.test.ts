@@ -10,7 +10,7 @@ describe('video block URL contract', () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const username = `video_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `video_${unique}@liinx.test`,
+      email: `video_${unique}@raloa.test`,
       password: 'VideoPassword2026!',
       username
     }).expect(201);

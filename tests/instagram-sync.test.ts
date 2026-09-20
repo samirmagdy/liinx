@@ -10,7 +10,7 @@ describe('Instagram caption auto-sync', () => {
     initDatabase();
   });
 
-  const testEmail = `insta_tester_${Date.now()}@liinx.test`;
+  const testEmail = `insta_tester_${Date.now()}@raloa.test`;
   const testUsername = `instadev_${Date.now()}`;
   let authToken = '';
   let profileId = '';
@@ -254,7 +254,7 @@ Also stream our single on Spotify: https://open.spotify.com/track/track999?si=xy
       const userBRes = await request(app)
         .post('/api/auth/register')
         .send({
-          email: `user_b_${Date.now()}@liinx.test`,
+          email: `user_b_${Date.now()}@raloa.test`,
           password: 'Password123!',
           username: `userb_${Date.now()}`
         });

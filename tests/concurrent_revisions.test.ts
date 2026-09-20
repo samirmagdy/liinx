@@ -10,7 +10,7 @@ function unique(prefix: string): string {
 
 describe('editor optimistic revisions', () => {
   it('rejects stale profile and block writes instead of overwriting newer data', async () => {
-    const email = `${unique('revision')}@liinx.test`;
+    const email = `${unique('revision')}@raloa.test`;
     const username = unique('revision_user').slice(0, 30);
     const registered = await request(app).post('/api/auth/register').send({ email, password: 'Password123!', username });
     const token = registered.body.token as string;

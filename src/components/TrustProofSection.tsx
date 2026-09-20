@@ -45,7 +45,7 @@ export const TrustProofSection: React.FC = () => {
       title: ar ? 'لا تعالج ليينكس مدفوعاتك' : 'Payments stay with your provider',
       description: ar
         ? 'لا تعالج ليينكس مدفوعات المبيعات أو الحجوزات. تُدار المدفوعات وأي رسوم عبر مزوّد الخدمة الخارجي.'
-        : 'Liinx does not process sales or booking payments. Payment handling and any fees belong to the external provider.'
+        : 'RALOA does not process sales or booking payments. Payment handling and any fees belong to the external provider.'
     },
     {
       icon: <FileText className="w-5 h-5 text-blue-600" />,
@@ -55,7 +55,7 @@ export const TrustProofSection: React.FC = () => {
         : 'Download newsletter subscriber records as a CSV from the Subscribers panel.'
     },
     {
-      icon: <Lock className="w-5 h-5 text-amber-600" />,
+      icon: <Lock className="w-5 h-5 text-indigo-600" />,
       title: ar ? 'إعداد النطاق المخصص' : 'Custom domain setup',
       description: ar
         ? 'تتطلب الخطط المؤهلة التحقق من DNS وإعداد الاستضافة وشهادة TLS.'
@@ -75,8 +75,8 @@ export const TrustProofSection: React.FC = () => {
             </h2>
             <p className="text-sm sm:text-base text-neutral-600 leading-relaxed text-pretty">
               {ar
-                ? 'هذه ملفات تعريف خيالية توضح بعض أنواع الصفحات التي يمكن إنشاؤها باستخدام Liinx؛ وليست حسابات عملاء.'
-                : 'These fictional profiles demonstrate examples of pages you can build with Liinx. They are not customer accounts.'}
+                ? 'هذه ملفات تعريف خيالية توضح بعض أنواع الصفحات التي يمكن إنشاؤها باستخدام RALOA؛ وليست حسابات عملاء.'
+                : 'These fictional profiles demonstrate examples of pages you can build with RALOA. They are not customer accounts.'}
             </p>
           </div>
         </Reveal>
@@ -107,7 +107,7 @@ export const TrustProofSection: React.FC = () => {
                     href={`/@${showcase.username}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="justify-self-start sm:justify-self-end py-2 text-sm font-semibold text-neutral-800 hover:text-amber-700 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="justify-self-start sm:justify-self-end py-2 text-sm font-semibold text-neutral-800 hover:text-indigo-700 flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <span>{ar ? 'فتح النموذج' : 'Open sample'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />

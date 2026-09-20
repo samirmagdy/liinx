@@ -15,7 +15,7 @@ describe('standalone image block', () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `image_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `image-${unique}@liinx.test`, password: 'ImagePassword2026!', username
+      email: `image-${unique}@raloa.test`, password: 'ImagePassword2026!', username
     }).expect(201);
     token = registration.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);

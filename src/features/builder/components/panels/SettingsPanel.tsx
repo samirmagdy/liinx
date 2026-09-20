@@ -170,7 +170,7 @@ export const SettingsPanel: React.FC = () => {
           <div>
             <h3 className="font-bold text-sm text-neutral-900">{ui("White-Label Branding")}</h3>
             <p className="text-xs text-neutral-500 mt-0.5">
-              {ui("Remove the \"Made with LIINX\" badge from your bio page and footer.")}
+              {ui("Remove the \"Made with RALOA\" badge from your bio page and footer.")}
             </p>
           </div>
           {profile.plan === 'free' ? (
@@ -205,7 +205,7 @@ export const SettingsPanel: React.FC = () => {
         </div>
         {profile.plan === 'free' && (
           <p className="text-[11px] text-neutral-400">
-            {ui("Upgrade to Pro or Studio to completely remove all LIINX branding badges.")}
+            {ui("Upgrade to Pro or Studio to completely remove all RALOA branding badges.")}
           </p>
         )}
       </div>
@@ -336,7 +336,7 @@ export const SettingsPanel: React.FC = () => {
               </li>
             </ol>
             <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-neutral-200 font-mono text-xs shadow-2xs">
-              <span className="font-bold text-neutral-800">liinx-app.fly.dev</span>
+              <span className="font-bold text-neutral-800">raloa-app.fly.dev</span>
               <button
                 type="button"
                 onClick={handleCopyCname}

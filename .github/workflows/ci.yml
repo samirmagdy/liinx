@@ -77,13 +77,13 @@ jobs:
         run: npm run verify:artifacts
 
       - name: Build production Docker image
-        run: docker build --pull --tag liinx:ci .
+        run: docker build --pull --tag raloa:ci .
 
       - name: Verify production Docker image metadata
         run: |
-          docker image inspect liinx:ci >/dev/null
-          test "$(docker image inspect liinx:ci --format '{{.Config.User}}')" = "" \
-            || test "$(docker image inspect liinx:ci --format '{{.Config.User}}')" = "node"
+          docker image inspect raloa:ci >/dev/null
+          test "$(docker image inspect raloa:ci --format '{{.Config.User}}')" = "" \
+            || test "$(docker image inspect raloa:ci --format '{{.Config.User}}')" = "node"
 
   codeql:
     name: CodeQL security analysis

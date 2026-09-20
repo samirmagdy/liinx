@@ -9,7 +9,7 @@ describe('profile switching and onboarding', () => {
   it('onboards to a public Home page and isolates switched profile data', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const registration = await request(app).post('/api/auth/register').send({
-      email: `onboarding-${unique}@liinx.test`, password: 'OnboardingPassword2026!', username: `onboard${unique}`.slice(0, 30)
+      email: `onboarding-${unique}@raloa.test`, password: 'OnboardingPassword2026!', username: `onboard${unique}`.slice(0, 30)
     }).expect(201);
     const firstToken = registration.body.token as string;
     const firstId = registration.body.profileId as string;

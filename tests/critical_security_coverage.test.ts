@@ -134,7 +134,7 @@ describe('Critical Security & Coverage Modules', () => {
     it('signs and verifies valid JWT session tokens', () => {
       const payload = {
         userId: 'usr_test_auth_unit',
-        email: 'auth_unit@liinx.test',
+        email: 'auth_unit@raloa.test',
         profileId: 'prf_test_auth_unit',
         username: 'auth_unit',
         sessionVersion: 1
@@ -223,7 +223,7 @@ describe('Critical Security & Coverage Modules', () => {
     it('rejects token when user does not exist in database', async () => {
       const nonExistentToken = signJwt({
         userId: 'usr_ghost_non_existent',
-        email: 'ghost@liinx.test',
+        email: 'ghost@raloa.test',
         profileId: 'prf_ghost',
         username: 'ghost',
         sessionVersion: 1
@@ -249,7 +249,7 @@ describe('Critical Security & Coverage Modules', () => {
     it('rejects token when profile does not belong to the user', () => {
       const now = Date.now();
       const userId = `usr_auth_mid_${now}`;
-      const email = `auth_mid_${now}@liinx.test`;
+      const email = `auth_mid_${now}@raloa.test`;
       db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
         userId, email, 'hash123', now
       );
@@ -282,7 +282,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('authenticates via cookie when Authorization header is absent', async () => {
-      const email = `cookie_user_${Date.now()}@liinx.test`;
+      const email = `cookie_user_${Date.now()}@raloa.test`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username: `ck_${Date.now().toString().slice(-8)}`
       });
@@ -290,7 +290,7 @@ describe('Critical Security & Coverage Modules', () => {
 
       let nextCalled = false;
       const req: any = {
-        headers: { cookie: `theme=dark; liinx_session=${encodeURIComponent(token)}; lang=en` }
+        headers: { cookie: `theme=dark; raloa_session=${encodeURIComponent(token)}; lang=en` }
       };
       const res: any = { status() { return this; }, json() { return this; } };
       requireAuth(req, res, () => { nextCalled = true; });
@@ -302,7 +302,7 @@ describe('Critical Security & Coverage Modules', () => {
   // 5. server/routes/billing.ts
   describe('Billing & Webhooks Full Lifecycle', () => {
     it('returns billing status for authenticated profile', async () => {
-      const email = `bill_stat_${Date.now()}@liinx.test`;
+      const email = `bill_stat_${Date.now()}@raloa.test`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username: `bst_${Date.now().toString().slice(-8)}`
       });
@@ -319,7 +319,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('rejects invalid plan and interval for create-checkout-session', async () => {
-      const email = `bill_chk_${Date.now()}@liinx.test`;
+      const email = `bill_chk_${Date.now()}@raloa.test`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username: `chk_${Date.now().toString().slice(-8)}`
       });
@@ -341,7 +341,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('handles create-checkout-session edge cases: 503 unconfigured and 409 existing subscription', async () => {
-      const email = `chk_edge_${Date.now()}@liinx.test`;
+      const email = `chk_edge_${Date.now()}@raloa.test`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username: `cke_${Date.now().toString().slice(-8)}`
       });
@@ -361,7 +361,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('handles create-portal-session: 400 when customer absent, 503 when stripe unconfigured, or returns portal url', async () => {
-      const email = `port_edge_${Date.now()}@liinx.test`;
+      const email = `port_edge_${Date.now()}@raloa.test`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username: `pte_${Date.now().toString().slice(-8)}`
       });
@@ -393,7 +393,7 @@ describe('Critical Security & Coverage Modules', () => {
       delete process.env.STRIPE_WEBHOOK_SECRET;
 
       try {
-        const email = `bill_sub_${Date.now()}@liinx.test`;
+        const email = `bill_sub_${Date.now()}@raloa.test`;
         const reg = await request(app).post('/api/auth/register').send({
           email, password: 'Password123!', username: `bsu_${Date.now().toString().slice(-8)}`
         });
@@ -694,7 +694,7 @@ describe('Critical Security & Coverage Modules', () => {
 
     it('rejects registration with reserved username or duplicate email/username', async () => {
       const reservedRes = await request(app).post('/api/auth/register').send({
-        email: 'reserved_test@liinx.test',
+        email: 'reserved_test@raloa.test',
         password: 'Password123!',
         username: 'admin'
       });
@@ -704,7 +704,7 @@ describe('Critical Security & Coverage Modules', () => {
       // Create legitimate user
       const uniqueName = `uniq_${Date.now().toString().slice(-8)}`;
       const reg = await request(app).post('/api/auth/register').send({
-        email: `${uniqueName}@liinx.test`,
+        email: `${uniqueName}@raloa.test`,
         password: 'Password123!',
         username: uniqueName
       });
@@ -712,7 +712,7 @@ describe('Critical Security & Coverage Modules', () => {
 
       // Duplicate email
       const dupEmail = await request(app).post('/api/auth/register').send({
-        email: `${uniqueName}@liinx.test`,
+        email: `${uniqueName}@raloa.test`,
         password: 'Password123!',
         username: `${uniqueName}_diff`
       });
@@ -721,7 +721,7 @@ describe('Critical Security & Coverage Modules', () => {
 
       // Duplicate username
       const dupUsername = await request(app).post('/api/auth/register').send({
-        email: `another_${uniqueName}@liinx.test`,
+        email: `another_${uniqueName}@raloa.test`,
         password: 'Password123!',
         username: uniqueName
       });
@@ -746,7 +746,7 @@ describe('Critical Security & Coverage Modules', () => {
   // 8. server/routes/profiles.ts ownership & switching
   describe('Profile Ownership, Switching, and Multi-Profile Enforcement', () => {
     it('prevents user from deleting their only profile or active profile', async () => {
-      const email = `single_prof_${Date.now()}@liinx.test`;
+      const email = `single_prof_${Date.now()}@raloa.test`;
       const username = `sp_${Date.now().toString().slice(-8)}`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username
@@ -770,7 +770,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('switches profiles and receives updated JWT session claim', async () => {
-      const email = `multi_owner_${Date.now()}@liinx.test`;
+      const email = `multi_owner_${Date.now()}@raloa.test`;
       const username = `mo_${Date.now().toString().slice(-8)}`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username
@@ -812,7 +812,7 @@ describe('Critical Security & Coverage Modules', () => {
   // 9. Account Deletion & Lifecycle (GDPR / Privacy)
   describe('Account Deletion & Session Lifecycle', () => {
     it('requires explicit confirmation DELETE and cleans up all account data', async () => {
-      const email = `del_user_${Date.now()}@liinx.test`;
+      const email = `del_user_${Date.now()}@raloa.test`;
       const username = `du_${Date.now().toString().slice(-8)}`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username
@@ -842,7 +842,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('handles /me and /logout routes correctly', async () => {
-      const email = `me_user_${Date.now()}@liinx.test`;
+      const email = `me_user_${Date.now()}@raloa.test`;
       const username = `me_${Date.now().toString().slice(-8)}`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username
@@ -873,7 +873,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('rejects invalid password or unverified user in login', async () => {
-      const email = `log_user_${Date.now()}@liinx.test`;
+      const email = `log_user_${Date.now()}@raloa.test`;
       const username = `lg_${Date.now().toString().slice(-8)}`;
       await request(app).post('/api/auth/register').send({
         email, password: 'CorrectPassword123!', username
@@ -888,7 +888,7 @@ describe('Critical Security & Coverage Modules', () => {
 
       // Non-existent email (exercises constant-time bcrypt check)
       const noUser = await request(app).post('/api/auth/login').send({
-        email: 'nobody_exists_at_all@liinx.test', password: 'AnyPassword123!'
+        email: 'nobody_exists_at_all@raloa.test', password: 'AnyPassword123!'
       });
       expect(noUser.status).toBe(401);
       expect(noUser.body.error).toMatch(/Invalid email or password/);
@@ -898,7 +898,7 @@ describe('Critical Security & Coverage Modules', () => {
   // 10. Document Upload & File Deletion Lifecycle
   describe('Document Upload & Storage Lifecycle', () => {
     it('uploads valid text and pdf files and manages deletion', async () => {
-      const email = `up_user_${Date.now()}@liinx.test`;
+      const email = `up_user_${Date.now()}@raloa.test`;
       const username = `up_${Date.now().toString().slice(-8)}`;
       const reg = await request(app).post('/api/auth/register').send({
         email, password: 'Password123!', username
@@ -960,7 +960,7 @@ describe('Critical Security & Coverage Modules', () => {
       expect(friendlyErrorMessage({ status: 413 })).toMatch(/too large/);
       expect(friendlyErrorMessage({ status: 429 })).toMatch(/too often/);
       expect(friendlyErrorMessage({ status: 500 })).toMatch(/temporarily unavailable/);
-      expect(friendlyErrorMessage({ message: 'Failed to fetch from backend' })).toMatch(/could not reach LIINX/);
+      expect(friendlyErrorMessage({ message: 'Failed to fetch from backend' })).toMatch(/could not reach RALOA/);
       expect(friendlyErrorMessage({ message: 'SQLITE_ERROR: table missing' })).toMatch(/Something went wrong/);
     });
 

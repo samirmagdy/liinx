@@ -96,7 +96,7 @@ export const HeroFeatureShowcase: React.FC<HeroFeatureShowcaseProps> = ({
             >
               <div className={`mt-0.5 shrink-0 ${
                   isActive 
-                    ? 'text-amber-700'
+                    ? 'text-indigo-700'
                     : 'text-neutral-500 group-hover:text-neutral-800'
                 }`}>
                   <Icon className="w-4 h-4" strokeWidth={1.8} />

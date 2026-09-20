@@ -10,7 +10,7 @@ describe('spacer block boundaries and persistence', () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const username = `spacer_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `spacer_${unique}@liinx.test`,
+      email: `spacer_${unique}@raloa.test`,
       password: 'SpacerPassword2026!',
       username
     }).expect(201);

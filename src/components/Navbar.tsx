@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { usePanelMotion } from '../animations/usePanelMotion';
 import { brand } from '../config/brand';
-import { LiinxLogo } from './LiinxLogo';
 import { UserMenuDropdown } from './UserMenuDropdown';
 import { localizedPath } from '../utils/languagePaths';
 
@@ -92,7 +91,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
               onClick={onClose}
               className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
-              <Smartphone className="w-3.5 h-3.5 text-amber-600" />
+              <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
               <span>{t.nav.studio}</span>
             </Link>
             <Link
@@ -157,14 +156,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             href="/"
             className="flex items-center gap-2.5 text-start group focus:outline-none focus:ring-2 focus:ring-neutral-900/20 rounded-lg cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center group-hover:scale-105 transition-transform">
-              <LiinxLogo variant="light" size="sm" />
-            </div>
-            
-            <div className="flex flex-col">
-              <span className="font-brand font-extrabold text-lg tracking-tight text-neutral-900 leading-none">
-                {brand.productShortName}
-              </span>
+            <div className="flex flex-col group-hover:scale-[1.02] transition-transform">
+              <img
+                src="/brand/navbar-logo.png"
+                alt={brand.productShortName}
+                className="h-8 w-auto"
+                loading="eager"
+                decoding="async"
+              />
               <span className="text-[10px] text-neutral-500 font-medium tracking-wide">
                 {ui("Design-first mini-sites")}
               </span>

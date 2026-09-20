@@ -6,7 +6,7 @@ export async function shareProfile(url: string, title?: string, onCopied?: () =>
   if (navigator.share) {
     try {
       await navigator.share({
-        title: title || document.title || 'Liinx Profile',
+        title: title || document.title || 'RALOA Profile',
         url
       });
       return;

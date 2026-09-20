@@ -1,7 +1,7 @@
 /**
  * Production Startup Safeguards for Single-Node Architecture
  *
- * LIINX is currently architected as a single-node application:
+ * RALOA is currently architected as a single-node application:
  * - SQLite writes require single-process WAL locking.
  * - Uploads are written directly to the local filesystem.
  * - Rate limiting, analytics buffering, and memory caches are process-local.

@@ -5,10 +5,10 @@ import { app } from '../server/server.js';
 describe('profile identity editor', () => {
   it('validates identity fields, handles Arabic text, and updates the public handle', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const first = await request(app).post('/api/auth/register').send({ email: `identity-${unique}@liinx.test`, password: 'IdentityPassword2026!', username: `identity${unique}`.slice(0, 30) }).expect(201);
+    const first = await request(app).post('/api/auth/register').send({ email: `identity-${unique}@raloa.test`, password: 'IdentityPassword2026!', username: `identity${unique}`.slice(0, 30) }).expect(201);
     const token = first.body.token as string;
     const oldUsername = first.body.user.username as string;
-    const second = await request(app).post('/api/auth/register').send({ email: `taken-${unique}@liinx.test`, password: 'IdentityPassword2026!', username: `taken${unique}`.slice(0, 30) }).expect(201);
+    const second = await request(app).post('/api/auth/register').send({ email: `taken-${unique}@raloa.test`, password: 'IdentityPassword2026!', username: `taken${unique}`.slice(0, 30) }).expect(201);
     const takenUsername = second.body.user.username as string;
     const auth = (body: Record<string, unknown>) => request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send(body);
 
@@ -28,7 +28,7 @@ describe('profile identity editor', () => {
 
   it('rejects stale identity saves and keeps a missing avatar renderable by fallback UI', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const registration = await request(app).post('/api/auth/register').send({ email: `identity-stale-${unique}@liinx.test`, password: 'IdentityPassword2026!', username: `stalidentity${unique}`.slice(0, 30) }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `identity-stale-${unique}@raloa.test`, password: 'IdentityPassword2026!', username: `stalidentity${unique}`.slice(0, 30) }).expect(201);
     const token = registration.body.token as string;
     const auth = (body: Record<string, unknown>) => request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send(body);
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);

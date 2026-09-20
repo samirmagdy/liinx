@@ -12,7 +12,7 @@ describe('form field editor contract and submission behavior', () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `form_fields_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `form-fields-${unique}@liinx.test`, password: 'FormFieldsPassword2026!', username
+      email: `form-fields-${unique}@raloa.test`, password: 'FormFieldsPassword2026!', username
     }).expect(201);
     token = registration.body.token;
     profileId = registration.body.profileId;

@@ -17,7 +17,7 @@ describe('End-to-End Creator Journey & Full Lifecycle Test', () => {
 
   const uniqueId = Date.now();
   const username = `studio_${uniqueId}`;
-  const email = `studio_${uniqueId}@liinx.design`;
+  const email = `studio_${uniqueId}@raloa.design`;
   const password = 'CreatorPassword2026!';
 
   let authToken = '';

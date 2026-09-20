@@ -396,7 +396,7 @@ function resolveCustomDomainUpdate(customDomain: string | null | undefined, exis
     return { value, verified, error: { status: 403, message: 'Custom domains require a Pro or Studio subscription plan.' } };
   }
   const conflict = db.prepare('SELECT id FROM profiles WHERE lower(custom_domain) = ? AND id != ?').get(cleanDomain, profileId);
-  if (conflict) return { value, verified, error: { status: 409, message: `The custom domain "${cleanDomain}" is already mapped to another LIINX profile.` } };
+  if (conflict) return { value, verified, error: { status: 409, message: `The custom domain "${cleanDomain}" is already mapped to another RALOA profile.` } };
   if (cleanDomain !== existing.custom_domain) {
     value = cleanDomain;
     verified = 0;
@@ -495,7 +495,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     let token: string | undefined;
     if (updatedUsername !== existing.username) {
       token = issueCurrentSession(req.user!.userId, existing.id, updatedUsername, req.user!.email);
-      res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
+      res.setHeader('Set-Cookie', `raloa_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
     }
     res.json({
       success: true,
@@ -751,7 +751,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
 
     // Sign new token for the newly created profile
     const token = issueCurrentSession(userId, newProfileId, cleanUsername, req.user!.email);
-    res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
+    res.setHeader('Set-Cookie', `raloa_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
     res.status(201).json({
       success: true,
@@ -806,7 +806,7 @@ profilesRouter.post('/studio/profiles/:id/select', requireAuth, (req: Authentica
     }
 
     const token = issueCurrentSession(userId, profile.id, profile.username, req.user!.email);
-    res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
+    res.setHeader('Set-Cookie', `raloa_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
     res.json({
       success: true,

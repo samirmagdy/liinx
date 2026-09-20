@@ -370,7 +370,7 @@ function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
 // Custom Domain Host-Header Routing Engine
 function customDomainMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
   const host = (req.headers.host || '').split(':')[0].toLowerCase().trim();
-  if (isDefaultHost(host) || host.endsWith('.liinx.app')) return next();
+  if (isDefaultHost(host) || host.endsWith('.raloa.app')) return next();
   const profile = db.prepare('SELECT id, username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { id: string; username: string } | undefined;
   if (!profile) return next();
   if (!hasEntitlement(getEffectivePlan(profile.id), 'customDomain')) return res.status(404).send('This custom domain is not available.');
@@ -380,7 +380,7 @@ function customDomainMiddleware(req: express.Request, res: express.Response, nex
 }
 
 function isDefaultHost(host: string) {
-  return !host || ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'].includes(host);
+  return !host || ['localhost', '127.0.0.1', '0.0.0.0', 'raloa.vercel.app', 'raloa.app'].includes(host);
 }
 
 function routeCustomDomainRequest(
@@ -512,7 +512,7 @@ app.get('/api/health', (_req, res) => {
     const mem = process.memoryUsage();
     res.json({
       status: 'ok',
-      service: 'liinx-api',
+      service: 'raloa-api',
       uptimeSeconds: Math.floor(process.uptime()),
       timestamp: new Date().toISOString(),
       database: {
@@ -529,7 +529,7 @@ app.get('/api/health', (_req, res) => {
   } catch (err: any) {
     res.status(503).json({
       status: 'unhealthy',
-      service: 'liinx-api',
+      service: 'raloa-api',
       error: process.env.NODE_ENV === 'production' ? 'Database unavailable' : err.message
     });
   }
@@ -542,10 +542,10 @@ app.get('/api/ready', async (_req, res) => {
   try {
     db.prepare('SELECT 1').get();
     const storageReady = uploadStorage.healthCheck ? await uploadStorage.healthCheck() : true;
-    if (!storageReady) return res.status(503).json({ status: 'not_ready', service: 'liinx-api', error: 'Required storage is unavailable.' });
-    res.json({ status: 'ready', service: 'liinx-api', database: 'connected', uploads: 'writable' });
+    if (!storageReady) return res.status(503).json({ status: 'not_ready', service: 'raloa-api', error: 'Required storage is unavailable.' });
+    res.json({ status: 'ready', service: 'raloa-api', database: 'connected', uploads: 'writable' });
   } catch {
-    res.status(503).json({ status: 'not_ready', service: 'liinx-api', error: 'Required storage is unavailable.' });
+    res.status(503).json({ status: 'not_ready', service: 'raloa-api', error: 'Required storage is unavailable.' });
   }
 });
 
@@ -727,12 +727,12 @@ if (process.env.NODE_ENV !== 'test') {
     const numCPUs = os.availableParallelism ? os.availableParallelism() : os.cpus().length;
 
     if (cluster.isPrimary) {
-      console.log(`[LIINX Cluster] Primary ${process.pid} is running. Forking ${numCPUs} worker processes...`);
+      console.log(`[RALOA Cluster] Primary ${process.pid} is running. Forking ${numCPUs} worker processes...`);
       for (let i = 0; i < numCPUs; i++) {
         cluster.fork();
       }
       cluster.on('exit', (worker) => {
-        console.log(`[LIINX Cluster] Worker ${worker.process.pid} exited. Forking replacement...`);
+        console.log(`[RALOA Cluster] Worker ${worker.process.pid} exited. Forking replacement...`);
         cluster.fork();
       });
     } else {

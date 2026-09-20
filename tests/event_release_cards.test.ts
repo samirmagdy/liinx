@@ -10,7 +10,7 @@ describe('event and release-link cards', () => {
   beforeAll(async () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `events_${unique}`.slice(0, 30);
-    const registration = await request(app).post('/api/auth/register').send({ email: `events-${unique}@liinx.test`, password: 'EventsPassword2026!', username }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `events-${unique}@raloa.test`, password: 'EventsPassword2026!', username }).expect(201);
     token = registration.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     pageId = studio.body.pages.find((page: any) => page.isHome).id;

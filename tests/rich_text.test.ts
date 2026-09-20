@@ -13,7 +13,7 @@ describe('safe rich text block journey', () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `rich_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `rich-text-${unique}@liinx.test`, password: 'RichTextPassword2026!', username
+      email: `rich-text-${unique}@raloa.test`, password: 'RichTextPassword2026!', username
     }).expect(201);
     token = registration.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);

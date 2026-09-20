@@ -15,7 +15,7 @@ function readCookie(req: Request, name: string): string | null {
 export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  const token = bearer || readCookie(req, 'liinx_session');
+  const token = bearer || readCookie(req, 'raloa_session');
   if (!token) {
     return res.status(401).json({ error: 'Authentication required. Please log in.' });
   }

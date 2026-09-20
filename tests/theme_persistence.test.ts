@@ -8,7 +8,7 @@ import { resolveTheme } from '../src/utils/colorContrast.js';
 describe('theme selection and persistence', () => {
   it('persists a preset and safe overrides through studio and public responses', async () => {
     const id = `${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
-    const registration = await request(app).post('/api/auth/register').send({ email: `theme-${id}@liinx.test`, password: 'ThemePassword2026!', username: `theme${id}`.slice(0, 30) }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `theme-${id}@raloa.test`, password: 'ThemePassword2026!', username: `theme${id}`.slice(0, 30) }).expect(201);
     const token = registration.body.token as string;
     const username = registration.body.user.username as string;
     for (const preset of THEMES) {
@@ -26,7 +26,7 @@ describe('theme selection and persistence', () => {
 
   it('rejects unsupported preset ids and unsafe CSS-like theme fragments', async () => {
     const id = `${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
-    const registration = await request(app).post('/api/auth/register').send({ email: `invalid-theme-${id}@liinx.test`, password: 'ThemePassword2026!', username: `invalidtheme${id}`.slice(0, 30) }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `invalid-theme-${id}@raloa.test`, password: 'ThemePassword2026!', username: `invalidtheme${id}`.slice(0, 30) }).expect(201);
     const auth = request(app).put('/api/studio/profile').set('Authorization', `Bearer ${registration.body.token}`);
     await auth.send({ themeId: 'made-up-theme' }).expect(400);
     await auth.send({ customTheme: { cardRadius: 'rounded-xl' } }).expect(400);

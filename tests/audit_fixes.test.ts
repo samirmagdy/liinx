@@ -19,7 +19,7 @@ describe('auth, profile, and infrastructure hardening', () => {
 
     db.prepare('DELETE FROM users WHERE id = ?').run(testUserId);
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
-      testUserId, 'audit@liinx.test', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012', now
+      testUserId, 'audit@raloa.test', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012', now
     );
     db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(testUserId);
 
@@ -33,7 +33,7 @@ describe('auth, profile, and infrastructure hardening', () => {
 
     authToken = signJwt({
       userId: testUserId,
-      email: 'audit@liinx.test',
+      email: 'audit@raloa.test',
       profileId: testProfileId,
       username: testUsername
     });
@@ -77,7 +77,7 @@ describe('auth, profile, and infrastructure hardening', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'toolong@liinx.test',
+          email: 'toolong@raloa.test',
           password: longPassword,
           username: 'toolongpw'
         })
@@ -91,7 +91,7 @@ describe('auth, profile, and infrastructure hardening', () => {
       const res = await request(app)
         .post('/api/auth/login')
         .send({
-          email: 'nonexistent_account_audit@liinx.test',
+          email: 'nonexistent_account_audit@raloa.test',
           password: 'SomePassword123!'
         })
         .expect(401);
@@ -211,7 +211,7 @@ describe('auth, profile, and infrastructure hardening', () => {
         .expect(200);
 
       expect(res.body.domain).toBe('links.customdomain.org');
-      expect(res.body.expectedTarget).toBe('liinx-app.fly.dev');
+      expect(res.body.expectedTarget).toBe('raloa-app.fly.dev');
       expect(res.body.message).toBeDefined();
     });
 

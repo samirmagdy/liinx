@@ -81,7 +81,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `liinx-${username}-qr.png`;
+      link.download = `raloa-${username}-qr.png`;
       document.body.appendChild(link);
       link.click();
       link.remove();

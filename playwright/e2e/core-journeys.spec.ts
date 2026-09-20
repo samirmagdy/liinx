@@ -32,7 +32,7 @@ test.describe('public discovery and localization', () => {
   test('public navigation remains usable at a narrow viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
-    await expect(page.getByRole('link', { name: /Liinx/ }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /RALOA/ }).first()).toBeVisible();
     await page.getByRole('link', { name: /Practical guides/ }).click();
     await expect(page).toHaveURL(/\/guides$/);
     await expect(page.getByRole('heading', { name: 'Make your mini-site useful' })).toBeVisible();
@@ -127,12 +127,12 @@ test.describe('creator publishing and account operations', () => {
 
     await page.goto('/account');
     await page.getByRole('button', { name: 'Refer creators' }).click();
-    await expect(page.getByRole('heading', { name: 'Share Liinx. Earn 90 days of Pro.' })).toBeVisible();
-    await expect(page.getByLabel('Your referral link')).toHaveValue(new RegExp(`/\?ref=${username}`));
+    await expect(page.getByRole('heading', { name: 'Share RALOA. Earn 90 days of Pro.' })).toBeVisible();
+    await expect(page.getByLabel('Your referral link')).toHaveValue(new RegExp(`/\\?ref=${username}`));
 
     await page.getByRole('button', { name: 'Agency referrals' }).click();
     await expect(page.getByRole('heading', { name: 'Earn account credit for each new agency' })).toBeVisible();
-    await expect(page.getByLabel('Your agency referral link')).toHaveValue(new RegExp(`/\?agency_ref=${username}`));
+    await expect(page.getByLabel('Your agency referral link')).toHaveValue(new RegExp(`/\\?agency_ref=${username}`));
     await expect(page.getByText(/Maximum 3 credits in any 12-month period/)).toBeVisible();
   });
 

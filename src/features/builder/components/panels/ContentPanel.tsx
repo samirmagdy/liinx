@@ -55,7 +55,7 @@ export const ContentPanel: React.FC = () => {
               alt={profile.displayName}
               onError={event => {
                 event.currentTarget.onerror = null;
-                event.currentTarget.src = '/favicon.svg';
+                event.currentTarget.src = '/icons/favicon-32x32.png';
               }}
               className="w-16 h-16 rounded-full object-cover ring-2 ring-neutral-200"
             />
@@ -196,7 +196,7 @@ export const ContentPanel: React.FC = () => {
             <h3 className="font-bold text-base">{ui('Change public handle?')}</h3>
           </div>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            {ui('Changing your handle to')} <span className="font-mono font-bold text-neutral-900">@{profile.username}</span> {ui('will alter your live URL to')} <span className="font-mono font-bold text-neutral-900">liinx.me/@{profile.username}</span>. {ui('Any existing printed QR codes, physical badges, or external links pointing to')} <span className="font-mono font-bold text-neutral-900">@{pendingUsername}</span> {ui('will break.')}
+            {ui('Changing your handle to')} <span className="font-mono font-bold text-neutral-900">@{profile.username}</span> {ui('will alter your live URL to')} <span className="font-mono font-bold text-neutral-900">raloa.me/@{profile.username}</span>. {ui('Any existing printed QR codes, physical badges, or external links pointing to')} <span className="font-mono font-bold text-neutral-900">@{pendingUsername}</span> {ui('will break.')}
           </p>
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
             <button

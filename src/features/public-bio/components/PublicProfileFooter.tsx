@@ -99,9 +99,15 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
           }}
         >
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>
-            {ui('Made with')}{' '}
-            <strong>{ui('LIINX')}</strong>
+          <span className="inline-flex items-center gap-1.5">
+            {ui('Made with')}
+            <img
+              src={theme.isDark ? '/brand/raloa-logo-horizontal-on-dark.png' : '/brand/raloa-logo-horizontal-primary.png'}
+              alt="RALOA"
+              className="h-4 w-auto"
+              loading="lazy"
+              decoding="async"
+            />
           </span>
         </button>
       )}

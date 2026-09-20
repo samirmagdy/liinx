@@ -444,7 +444,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
             className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-[11px] text-neutral-900"
           />
           <p className="mt-1 text-[10px] font-normal text-neutral-500">
-            {ui('Optional thumbnail. If it is unavailable, visitors see a neutral fallback. Remote video is hosted by the selected provider or media host; Liinx does not host these URLs.')}
+            {ui('Optional thumbnail. If it is unavailable, visitors see a neutral fallback. Remote video is hosted by the selected provider or media host; RALOA does not host these URLs.')}
           </p>
         </div>
       )}
@@ -783,7 +783,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   />
                 </label>
                 <p className="text-[10px] font-normal text-neutral-500 sm:col-span-2">
-                  {ui('Date and time are displayed exactly as entered. Include the event timezone; Liinx does not convert times for visitors.')}
+                  {ui('Date and time are displayed exactly as entered. Include the event timezone; RALOA does not convert times for visitors.')}
                 </p>
               </div>
             )}
@@ -802,7 +802,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   />
                 </label>
                 <p className="mt-1 text-[10px] font-normal text-neutral-500">
-                  {ui('External release link only. Liinx does not complete a music-service pre-save or request authorization.')}
+                  {ui('External release link only. RALOA does not complete a music-service pre-save or request authorization.')}
                 </p>
               </div>
             )}
@@ -857,7 +857,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   />
                 </label>
                 <p className="text-[10px] font-normal text-neutral-500 sm:col-span-2">
-                  {ui('Display-only price. Liinx does not process checkout, inventory, taxes, or payments.')}
+                  {ui('Display-only price. RALOA does not process checkout, inventory, taxes, or payments.')}
                 </p>
               </div>
             )}
@@ -876,7 +876,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   />
                 </label>
                 <p className="mt-1 text-[10px] font-normal text-neutral-500">
-                  {ui('External support link only. Liinx does not process tips or show earnings.')}
+                  {ui('External support link only. RALOA does not process tips or show earnings.')}
                 </p>
               </div>
             )}
@@ -1000,7 +1000,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   </>
                 )}
                 <p className="text-[10px] font-normal text-neutral-500 sm:col-span-2">
-                  {ui('This is a creator-published contact action, not a form. Visitors are not asked to submit data to Liinx.')}
+                  {ui('This is a creator-published contact action, not a form. Visitors are not asked to submit data to RALOA.')}
                 </p>
               </div>
             )}
@@ -1019,7 +1019,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   {ui('Require visitor consent before storing responses')}
                 </label>
                 <p className="mt-1 pl-5 font-normal">
-                  {ui('Do not imply consent is collected unless this is enabled. Liinx does not send notifications automatically.')}
+                  {ui('Do not imply consent is collected unless this is enabled. RALOA does not send notifications automatically.')}
                 </p>
                 {advanced.consentRequired === true && (
                   <input

@@ -20,7 +20,7 @@ export function ComparisonSection() {
   const { hasAnyImporter } = useCapabilities();
   const ar = lang === 'ar';
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<'both' | 'liinx' | 'generic'>('both');
+  const [activeTab, setActiveTab] = useState<'both' | 'raloa' | 'generic'>('both');
 
   return (
     <section id="comparison" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-neutral-50/50">
@@ -30,7 +30,7 @@ export function ComparisonSection() {
         <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-8">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
               <span>{ar ? 'مقارنة بصرية واضحة' : 'The Visual Difference'}</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
@@ -56,12 +56,12 @@ export function ComparisonSection() {
               {ar ? 'قائمة الروابط البسيطة' : 'Basic link list'}
             </button>
             <button
-              onClick={() => setActiveTab('liinx')}
+              onClick={() => setActiveTab('raloa')}
               className={`px-4 py-1.5 rounded-full transition-colors ${
-                activeTab === 'liinx' ? 'bg-neutral-900 text-white shadow-xs font-bold' : 'text-neutral-600'
+                activeTab === 'raloa' ? 'bg-neutral-900 text-white shadow-xs font-bold' : 'text-neutral-600'
               }`}
             >
-              {ar ? 'موقع ليينكس' : 'Liinx Mini-Site'}
+              {ar ? 'موقع ليينكس' : 'RALOA Mini-Site'}
             </button>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function ComparisonSection() {
             {/* Left: Basic Link List */}
             <div
               className={`rounded-3xl border border-neutral-300 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between transition-all ${
-                activeTab === 'liinx' ? 'hidden md:flex' : 'flex'
+                activeTab === 'raloa' ? 'hidden md:flex' : 'flex'
               }`}
             >
               <div>
@@ -147,26 +147,26 @@ export function ComparisonSection() {
               </div>
             </div>
 
-            {/* Right: Liinx Mini-Website */}
+            {/* Right: RALOA Mini-Website */}
             <div
               className={`rounded-3xl border-2 border-neutral-900 bg-white p-5 sm:p-6 shadow-xl flex flex-col justify-between relative transition-all ${
                 activeTab === 'generic' ? 'hidden md:flex' : 'flex'
               }`}
             >
               <div className="absolute -top-3.5 left-8 px-3.5 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-md">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>{ar ? 'تجربة ليينكس الفائقة' : 'Liinx Mini-Website'}</span>
+                <Sparkles className="w-3 h-3 text-indigo-400" />
+                <span>{ar ? 'تجربة ليينكس الفائقة' : 'RALOA Mini-Website'}</span>
               </div>
 
               <div>
                 <div className="flex items-center justify-between pb-5 border-b border-neutral-200 mb-6 pt-1">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-xs font-bold">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-xs font-bold">
                       ✓
                     </div>
                     <div>
                       <h3 className="text-base font-bold text-neutral-900">
-                        {ar ? 'موقعك المصغر على ليينكس' : 'Your Liinx Mini-Website'}
+                        {ar ? 'موقعك المصغر على ليينكس' : 'Your RALOA Mini-Website'}
                       </h3>
                       <p className="text-xs text-neutral-500">
                         {ar ? 'تصميم متكامل، وسائط مدمجة، وحرية مطلقة' : 'Rich inline media, folders, scheduling & custom domain'}
@@ -178,12 +178,12 @@ export function ComparisonSection() {
                   </span>
                 </div>
 
-                {/* Mockup Preview: Rich Liinx Mini-Site */}
+                {/* Mockup Preview: Rich RALOA Mini-Site */}
                 <div className="rounded-2xl border border-neutral-800 bg-[#17181A] text-white p-5 space-y-3 mb-6 max-w-sm mx-auto shadow-inner">
                   {/* Header */}
                   <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
                     <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 rounded-full bg-neutral-700 overflow-hidden ring-1 ring-amber-400/40">
+                      <div className="w-9 h-9 rounded-full bg-neutral-700 overflow-hidden ring-1 ring-indigo-400/40">
                         <img 
                           src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" 
                           alt="Elena"
@@ -195,7 +195,7 @@ export function ComparisonSection() {
                         <p className="text-[10px] text-neutral-400 font-mono mt-0.5">links.elena.design</p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold">
                       DNS Verified
                     </span>
                   </div>
@@ -214,7 +214,7 @@ export function ComparisonSection() {
                   {/* Accordion Folder */}
                   <div className="p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Folder className="w-3.5 h-3.5 text-amber-400" />
+                      <Folder className="w-3.5 h-3.5 text-indigo-400" />
                       <span className="text-[11px] font-bold">2025 Architectural Portfolio</span>
                     </div>
                     <span className="text-[9px] font-mono text-neutral-400 bg-neutral-800 px-1.5 py-0.5 rounded">
@@ -262,10 +262,10 @@ export function ComparisonSection() {
         </Reveal>
 
         {/* Switch from Linktree Migration Banner */}
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-white border border-amber-300 flex items-center justify-center shrink-0 shadow-xs">
-              <Download className="w-5 h-5 text-amber-700" />
+            <div className="w-10 h-10 rounded-xl bg-white border border-indigo-300 flex items-center justify-center shrink-0 shadow-xs">
+              <Download className="w-5 h-5 text-indigo-700" />
             </div>
             <div>
               <h3 className="font-bold text-base text-neutral-900">
@@ -274,7 +274,7 @@ export function ComparisonSection() {
               <p className="text-sm text-neutral-600 leading-relaxed mt-1">
                 {hasAnyImporter
                   ? (ar ? 'أدخل اسم حسابك العام واستورد جميع روابطك خلال 60 ثانية بدون إعادة كتابة أي شيء.' : 'Enter your handle to preview and import all your public links in 60 seconds.')
-                  : (ar ? 'أنشئ صفحتك في دقائق مع سمات تصميم مخصصة، دون رسوم من Liinx على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها، وتحكم كامل في علامتك التجارية.' : 'Set up your mini-site in minutes with custom themes, no Liinx fee on sales or bookings handled by external providers, and complete layout control.')}
+                  : (ar ? 'أنشئ صفحتك في دقائق مع سمات تصميم مخصصة، دون رسوم من RALOA على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها، وتحكم كامل في علامتك التجارية.' : 'Set up your mini-site in minutes with custom themes, no RALOA fee on sales or bookings handled by external providers, and complete layout control.')}
               </p>
             </div>
           </div>

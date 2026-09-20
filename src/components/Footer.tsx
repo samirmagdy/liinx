@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { ResourceModal, type ResourceDocType } from './ResourceModal';
 import { brand } from '../config/brand';
-import { LiinxLogo } from './LiinxLogo';
 import { useLanguage } from '../context/LanguageContext';
 import { Globe, ShieldCheck } from 'lucide-react';
 import { localizedPath } from '../utils/languagePaths';
@@ -16,15 +15,15 @@ function FooterBrand() {
   const [location] = useLocation();
   const languageHref = localizedPath(location, lang === 'en' ? 'ar' : 'en');
   return <div className="md:col-span-2 space-y-4">
-    <div className="flex items-center gap-2.5"><LiinxLogo variant="dark" size="sm" /><span className="font-brand font-extrabold text-xl tracking-tight text-white">{brand.productShortName}</span></div>
+    <div className="flex items-center"><img src="/brand/footer-logo-white.png" alt={brand.productShortName} className="h-9 w-auto" loading="lazy" decoding="async" /></div>
     <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">{t.footer.tagline}</p>
     <div className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 max-w-sm">
-      <div className="flex items-center gap-2 text-neutral-300 font-mono text-[11px] font-semibold mb-1"><ShieldCheck className="w-3.5 h-3.5 text-amber-500" /><span>{tr('Creator tools')}</span></div>
+      <div className="flex items-center gap-2 text-neutral-300 font-mono text-[11px] font-semibold mb-1"><ShieldCheck className="w-3.5 h-3.5 text-indigo-500" /><span>{tr('Creator tools')}</span></div>
       <p className="text-[11px] text-neutral-400 leading-normal">{tr('Publish a customizable creator page, collect newsletter signups, and export subscriber records as CSV.')}</p>
     </div>
     <div className="flex flex-wrap items-center gap-4 pt-1">
       <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-400" /><span className="text-[11px] text-neutral-400">{tr('Global availability monitoring')}</span></div>
-      <a href={languageHref} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-[11px] text-neutral-300 transition-colors cursor-pointer"><Globe className="w-3 h-3 text-amber-500" /><span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span></a>
+      <a href={languageHref} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-[11px] text-neutral-300 transition-colors cursor-pointer"><Globe className="w-3 h-3 text-indigo-500" /><span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span></a>
     </div>
   </div>;
 }
@@ -63,7 +62,7 @@ function FooterBottom() {
   const { tr, t } = useLanguage();
   return <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500 font-mono">
     <p>© {new Date().getFullYear()} {brand.legalName}. {t.footer.rightsReserved}</p>
-    <div className="flex items-center gap-4"><Link href="/privacy" className="hover:text-white underline-offset-2 hover:underline">{tr('Privacy controls')}</Link><span>•</span><span>{tr('Account-owned content')}</span><span>•</span><span>{tr('No Liinx fee on external sales or bookings')}</span></div>
+    <div className="flex items-center gap-4"><Link href="/privacy" className="hover:text-white underline-offset-2 hover:underline">{tr('Privacy controls')}</Link><span>•</span><span>{tr('Account-owned content')}</span><span>•</span><span>{tr('No RALOA fee on external sales or bookings')}</span></div>
   </div>;
 }
 
@@ -72,8 +71,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
 
   return (
     <>
-      <footer className="bg-[#111315] text-[#A1A1AA] pt-12 pb-8 text-xs border-t border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="relative overflow-hidden bg-[#0F172A] text-[#A1A1AA] pt-12 pb-8 text-xs border-t border-neutral-800">
+        <div className="raloa-hero-bg raloa-hero-bg--dark opacity-40" aria-hidden="true" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="grid grid-cols-1 md:grid-cols-6 gap-8 pb-8 border-b border-neutral-800">
             <FooterBrand />

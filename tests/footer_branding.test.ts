@@ -9,7 +9,7 @@ describe('footer branding separation and entitlement', () => {
 
   beforeAll(async () => {
     const registered = await request(app).post('/api/auth/register').send({
-      email: `footer-${unique}@liinx.test`, password: 'FooterPassword2026!', username: `footer${unique}`.slice(0, 30)
+      email: `footer-${unique}@raloa.test`, password: 'FooterPassword2026!', username: `footer${unique}`.slice(0, 30)
     }).expect(201);
     token = registered.body.token;
     username = registered.body.user.username;

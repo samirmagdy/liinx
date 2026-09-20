@@ -50,7 +50,7 @@ export function useSubscribers({ activeTab, profileId, username }: UseSubscriber
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `liinx-${username}-subscribers.csv`;
+      link.download = `raloa-${username}-subscribers.csv`;
       document.body.appendChild(link);
       link.click();
       link.remove();

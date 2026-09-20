@@ -15,7 +15,7 @@ describe('Custom domain tenant and lifecycle boundaries', () => {
   beforeAll(() => {
     initDatabase();
     const now = Date.now();
-    db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, `${username}@liinx.test`, 'hashed', now);
+    db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, `${username}@raloa.test`, 'hashed', now);
     db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(userId);
     db.prepare(`INSERT INTO profiles (id, user_id, username, display_name, plan, custom_domain, custom_domain_verified, created_at, updated_at)
       VALUES (?, ?, ?, ?, 'pro', ?, 1, ?, ?)`)
@@ -27,7 +27,7 @@ describe('Custom domain tenant and lifecycle boundaries', () => {
     db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at)
       VALUES (?, ?, 'about', 'About', 'Public subpage', 1, 0, 1, ?, ?)`)
       .run(pageId, profileId, now, now);
-    token = signJwt({ userId, email: `${username}@liinx.test`, profileId, username });
+    token = signJwt({ userId, email: `${username}@raloa.test`, profileId, username });
   });
 
   it('rejects malformed domains before persistence', async () => {

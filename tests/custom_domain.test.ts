@@ -25,7 +25,7 @@ describe('custom domain support and host-header routing', () => {
     // 1. Free user
     db.prepare('DELETE FROM users WHERE id = ?').run(freeUserId);
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
-      freeUserId, 'cdfree@liinx.test', 'hashed', now
+      freeUserId, 'cdfree@raloa.test', 'hashed', now
     );
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(freeProfileId, freeUsername);
     db.prepare(`
@@ -35,7 +35,7 @@ describe('custom domain support and host-header routing', () => {
 
     freeToken = signJwt({
       userId: freeUserId,
-      email: 'cdfree@liinx.test',
+      email: 'cdfree@raloa.test',
       profileId: freeProfileId,
       username: freeUsername
     });
@@ -43,7 +43,7 @@ describe('custom domain support and host-header routing', () => {
     // 2. Pro user
     db.prepare('DELETE FROM users WHERE id = ?').run(proUserId);
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
-      proUserId, 'cdpro@liinx.test', 'hashed', now
+      proUserId, 'cdpro@raloa.test', 'hashed', now
     );
     db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(proUserId);
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(proProfileId, proUsername);
@@ -54,7 +54,7 @@ describe('custom domain support and host-header routing', () => {
 
     proToken = signJwt({
       userId: proUserId,
-      email: 'cdpro@liinx.test',
+      email: 'cdpro@raloa.test',
       profileId: proProfileId,
       username: proUsername
     });
@@ -102,7 +102,7 @@ describe('custom domain support and host-header routing', () => {
       })
       .expect(409);
 
-    expect(res.body.error).toMatch(/already mapped to another liinx profile/i);
+    expect(res.body.error).toMatch(/already mapped to another raloa profile/i);
   });
 
   it('successfully binds custom domain to Pro user profile', async () => {
@@ -134,7 +134,7 @@ describe('custom domain support and host-header routing', () => {
       .expect(200);
 
     expect(res.body.domain).toBe('bio.procreator.studio');
-    expect(res.body.expectedTarget).toBe('liinx-app.fly.dev');
+    expect(res.body.expectedTarget).toBe('raloa-app.fly.dev');
     expect(res.body.message).toBeDefined();
   });
 

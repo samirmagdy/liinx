@@ -8,21 +8,21 @@ describe('QR public target construction', () => {
   const about = { id: 'about', slug: 'about-us', title: 'About', sortOrder: 1, isHome: false, published: true };
 
   it('targets platform Home and published subpages without a third-party redirect', () => {
-    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://liinx.example' })).toBe('https://liinx.example/@creator');
-    expect(buildQrTargetUrl({ username: 'creator', page: about, platformOrigin: 'https://liinx.example' })).toBe('https://liinx.example/@creator/about-us');
+    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://raloa.example' })).toBe('https://raloa.example/@creator');
+    expect(buildQrTargetUrl({ username: 'creator', page: about, platformOrigin: 'https://raloa.example' })).toBe('https://raloa.example/@creator/about-us');
   });
 
   it('targets the verified custom domain root instead of adding a platform username path', () => {
-    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://liinx.example', customDomain: 'creator.example' })).toBe('https://creator.example/');
-    expect(buildQrTargetUrl({ username: 'creator', page: about, platformOrigin: 'https://liinx.example', customDomain: 'creator.example' })).toBe('https://creator.example/about-us');
+    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://raloa.example', customDomain: 'creator.example' })).toBe('https://creator.example/');
+    expect(buildQrTargetUrl({ username: 'creator', page: about, platformOrigin: 'https://raloa.example', customDomain: 'creator.example' })).toBe('https://creator.example/about-us');
   });
 
   it('rejects malformed origins rather than producing a misleading QR target', () => {
     expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'not a url' })).toBeNull();
-    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://liinx.example', customDomain: 'javascript:alert(1)' })).toBeNull();
-    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://liinx.example', customDomain: 'user:pass@domain.com' })).toBeNull();
-    expect(buildQrTargetUrl({ username: 'creator', page: undefined, platformOrigin: 'https://liinx.example' })).toBe('https://liinx.example/@creator');
-    expect(buildQrTargetUrl({ username: 'creator', page: undefined, platformOrigin: 'https://liinx.example', customDomain: 'creator.example' })).toBe('https://creator.example/');
+    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://raloa.example', customDomain: 'javascript:alert(1)' })).toBeNull();
+    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://raloa.example', customDomain: 'user:pass@domain.com' })).toBeNull();
+    expect(buildQrTargetUrl({ username: 'creator', page: undefined, platformOrigin: 'https://raloa.example' })).toBe('https://raloa.example/@creator');
+    expect(buildQrTargetUrl({ username: 'creator', page: undefined, platformOrigin: 'https://raloa.example', customDomain: 'creator.example' })).toBe('https://creator.example/');
   });
 
   it('allows the existing QR provider only for the explicit download connection', async () => {

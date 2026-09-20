@@ -62,7 +62,7 @@ export const PublicBioHeader: React.FC<PublicBioHeaderProps> = ({
           }}
         >
           <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
-          <span>{ui('LIINX')}</span>
+          <span>{ui('RALOA')}</span>
         </button>
       )}
 

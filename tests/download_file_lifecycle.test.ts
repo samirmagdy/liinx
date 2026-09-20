@@ -11,9 +11,9 @@ describe('download block and file lifecycle', () => {
 
   beforeAll(async () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
-    const registration = await request(app).post('/api/auth/register').send({ email: `downloads-${unique}@liinx.test`, password: 'DownloadsPassword2026!', username: `downloads_${unique}`.slice(0, 30) }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `downloads-${unique}@raloa.test`, password: 'DownloadsPassword2026!', username: `downloads_${unique}`.slice(0, 30) }).expect(201);
     token = registration.body.token;
-    const other = await request(app).post('/api/auth/register').send({ email: `downloads-other-${unique}@liinx.test`, password: 'DownloadsPassword2026!', username: `other_downloads_${unique}`.slice(0, 30) }).expect(201);
+    const other = await request(app).post('/api/auth/register').send({ email: `downloads-other-${unique}@raloa.test`, password: 'DownloadsPassword2026!', username: `other_downloads_${unique}`.slice(0, 30) }).expect(201);
     otherToken = other.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     pageId = studio.body.pages.find((page: any) => page.isHome).id;

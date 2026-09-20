@@ -143,8 +143,8 @@ export const IntegrationsPanel: React.FC = () => {
             <div className="p-3 bg-neutral-900 text-neutral-200 rounded-xl space-y-1 text-xs font-mono">
               <span className="text-neutral-400 text-[10px] uppercase font-bold tracking-wider block">{ui("Sample API Request")}</span>
               <p className="text-[11px] select-all overflow-x-auto whitespace-nowrap">
-                <span dir="ltr">curl https://liinx.app/api/v1/profile</span><br />
-                {'  -H "Authorization: Bearer liinx_live_your_key_here"'}
+                <span dir="ltr">curl https://raloa.app/api/v1/profile</span><br />
+                {'  -H "Authorization: Bearer raloa_live_your_key_here"'}
               </p>
             </div>
           </div>

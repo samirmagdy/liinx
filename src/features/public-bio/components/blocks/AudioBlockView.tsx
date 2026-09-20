@@ -202,7 +202,7 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
                 if (audioEl) {
                   if (audioEl.paused) {
                     document
-                      .querySelectorAll<HTMLAudioElement>('audio[data-liinx-audio="true"]')
+                      .querySelectorAll<HTMLAudioElement>('audio[data-raloa-audio="true"]')
                       .forEach(other => {
                         if (other !== audioEl) other.pause();
                       });
@@ -275,12 +275,12 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
           src={audioSource}
           controls
           preload="metadata"
-          data-liinx-audio="true"
+          data-raloa-audio="true"
           className="w-full mt-3 h-8"
           onPlay={event => {
             const current = event.currentTarget;
             document
-              .querySelectorAll<HTMLAudioElement>('audio[data-liinx-audio="true"]')
+              .querySelectorAll<HTMLAudioElement>('audio[data-raloa-audio="true"]')
               .forEach(other => {
                 if (other !== current) other.pause();
               });

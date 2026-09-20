@@ -26,7 +26,7 @@ describe('competitor importer boundaries', () => {
 
   it('does not duplicate imported destinations and appends to the selected owned page', async () => {
     const username = `import_${Date.now()}`;
-    const registered = await request(app).post('/api/auth/register').send({ email: `${username}@liinx.test`, password: 'ImporterPassword2026!', username }).expect(201);
+    const registered = await request(app).post('/api/auth/register').send({ email: `${username}@raloa.test`, password: 'ImporterPassword2026!', username }).expect(201);
     const token = registered.body.token as string;
     const profile = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     const page = (await request(app).post('/api/studio/pages').set('Authorization', `Bearer ${token}`).send({ title: 'Imported page', slug: `imported-${Date.now()}` }).expect(201)).body.page;

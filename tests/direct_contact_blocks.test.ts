@@ -11,7 +11,7 @@ describe('phone and direct-contact blocks', () => {
   beforeAll(async () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `contact_${unique}`.slice(0, 30);
-    const registration = await request(app).post('/api/auth/register').send({ email: `contact-${unique}@liinx.test`, password: 'ContactPassword2026!', username }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `contact-${unique}@raloa.test`, password: 'ContactPassword2026!', username }).expect(201);
     token = registration.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     pageId = studio.body.pages.find((page: any) => page.isHome).id;
@@ -23,7 +23,7 @@ describe('phone and direct-contact blocks', () => {
     expect(getMailtoHref('hello@example.com', 'Arabic سؤال', 'Line one\nLine two')).toContain('subject=Arabic+%D8%B3%D8%A4%D8%A7%D9%84');
 
     const phone = await request(app).post('/api/studio/blocks').set('Authorization', `Bearer ${token}`).send({ pageId, type: 'phone', title: 'اتصل بنا / Call us', extra: { contactType: 'phone', phone: '+966 (50) 123-4567', availability: 'Sun–Thu, 9:00–17:00 AST', description: 'Direct creator contact.' } }).expect(201);
-    const email = await request(app).post('/api/studio/blocks').set('Authorization', `Bearer ${token}`).send({ pageId, type: 'phone', title: 'Email us', extra: { contactType: 'email', email: 'hello@example.com', subject: 'Project inquiry', body: 'Hello Liinx', description: 'Send an email directly.' } }).expect(201);
+    const email = await request(app).post('/api/studio/blocks').set('Authorization', `Bearer ${token}`).send({ pageId, type: 'phone', title: 'Email us', extra: { contactType: 'email', email: 'hello@example.com', subject: 'Project inquiry', body: 'Hello RALOA', description: 'Send an email directly.' } }).expect(201);
     const publicProfile = await request(app).get(`/api/profiles/${username}`).expect(200);
     expect(publicProfile.body.blocks.find((block: any) => block.id === phone.body.id)).toEqual(expect.objectContaining({ phone: '+966 (50) 123-4567', availability: 'Sun–Thu, 9:00–17:00 AST' }));
     expect(publicProfile.body.blocks.find((block: any) => block.id === email.body.id)).toEqual(expect.objectContaining({ contactType: 'email', email: 'hello@example.com', subject: 'Project inquiry' }));

@@ -22,7 +22,7 @@ export function ReferralPanel({ ar }: { ar: boolean }) {
     <section className="space-y-5" aria-labelledby="referrals-title">
       <div>
         <div className="flex items-center gap-2 text-amber-700"><Gift className="h-4 w-4" /><span className="text-xs font-semibold uppercase tracking-wide">{ar ? 'دعوة المبدعين' : 'Creator referrals'}</span></div>
-        <h2 id="referrals-title" className="mt-2 text-xl font-bold text-neutral-900">{ar ? 'شارك Liinx واحصل على Pro لمدة 90 يوماً' : 'Share Liinx. Earn 90 days of Pro.'}</h2>
+        <h2 id="referrals-title" className="mt-2 text-xl font-bold text-neutral-900">{ar ? 'شارك RALOA واحصل على Pro لمدة 90 يوماً' : 'Share RALOA. Earn 90 days of Pro.'}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600">
           {ar
             ? 'شارك رابطك. تُحتسب الدعوة بعد إنشاء حساب جديد والتحقق من بريده الإلكتروني. عند اكتمال ثلاث دعوات، تحصل الحسابات المجانية على Pro لمدة 90 يوماً.'

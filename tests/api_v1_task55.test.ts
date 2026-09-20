@@ -17,8 +17,8 @@ describe('API key and page-aware REST boundaries', () => {
 
   beforeAll(async () => {
     initDatabase();
-    const first = await request(app).post('/api/auth/register').send({ email: `api55-${suffix}@liinx.test`, password: 'Password123!', username: `api55_${suffix}` });
-    const second = await request(app).post('/api/auth/register').send({ email: `api55b-${suffix}@liinx.test`, password: 'Password123!', username: `api55b_${suffix}` });
+    const first = await request(app).post('/api/auth/register').send({ email: `api55-${suffix}@raloa.test`, password: 'Password123!', username: `api55_${suffix}` });
+    const second = await request(app).post('/api/auth/register').send({ email: `api55b-${suffix}@raloa.test`, password: 'Password123!', username: `api55b_${suffix}` });
     token = first.body.token;
     profileId = first.body.profileId;
     username = `api55_${suffix}`;

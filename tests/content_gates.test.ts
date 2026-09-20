@@ -14,7 +14,7 @@ describe('protected text content gates', () => {
   beforeAll(async () => {
     initDatabase();
     const registration = await request(app).post('/api/auth/register').send({
-      email: `gate_${suffix}@liinx.test`, password: 'GatePassword2026!', username: `gate_${suffix}`.slice(0, 30)
+      email: `gate_${suffix}@raloa.test`, password: 'GatePassword2026!', username: `gate_${suffix}`.slice(0, 30)
     }).expect(201);
     profileId = registration.body.profileId;
     token = registration.body.token;

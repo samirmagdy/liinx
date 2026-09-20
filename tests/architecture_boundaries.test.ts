@@ -121,9 +121,9 @@ describe('Architecture & Dependency Boundaries', () => {
     const shared = await import('../shared/index.js');
     expect(shared.CONTRACT_VERSION).toBe(1);
     expect(shared.RESERVED_USERNAMES.length).toBeGreaterThan(0);
-    expect(shared.brand.domain).toBe('liinx.app');
+    expect(shared.brand.domain).toBe('raloa.app');
     expect(shared.pageTitles['/']).toBeDefined();
-    expect(shared.paidPlans.pro.name).toBe('Liinx Pro');
+    expect(shared.paidPlans.pro.name).toBe('RALOA Pro');
     expect(typeof shared.isHttpUrl).toBe('function');
     expect(typeof shared.bookingUrl).toBe('function');
     expect(typeof shared.getPhoneHref).toBe('function');

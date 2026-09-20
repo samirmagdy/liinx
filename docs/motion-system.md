@@ -12,7 +12,7 @@ Confirmed previous motion issues: CSS transition declarations existed only on th
 
 | Decision | Reference | Applied role |
 | --- | --- | --- |
-| Keep existing neutral/amber canvas, type, density and layout | Existing Liinx + user's Apple restraint direction | Preserve brand while changing motion |
+| Keep existing neutral/amber canvas, type, density and layout | Existing RALOA + user's Apple restraint direction | Preserve brand while changing motion |
 | One overlapped hero timeline | User's GSAP brief / selected storytelling direction | Eyebrow, headline, copy, CTA, device, controls |
 | Small, fast feedback | Refero bundled Motion & Micro-interactions guide / user's Linear direction | 180ms pointer response; CSS hover/press |
 | Group card reveals | User's ScrollTrigger brief | One trigger per grid, stagger capped at 240ms |

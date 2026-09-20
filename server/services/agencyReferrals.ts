@@ -57,10 +57,10 @@ export async function grantDueAgencyReferralCredits(stripe: Stripe, now = Date.n
         {
           amount: -AGENCY_REFERRAL_CREDIT_CENTS,
           currency: 'usd',
-          description: 'Liinx agency referral credit',
+          description: 'RALOA agency referral credit',
           metadata: { referral_id: referral.id, program: 'agency-referral' }
         },
-        { idempotencyKey: `liinx-agency-referral-${referral.id}` }
+        { idempotencyKey: `raloa-agency-referral-${referral.id}` }
       );
       const result = db.prepare(`
         UPDATE agency_referrals SET stripe_balance_transaction_id = ?, credited_at = ?

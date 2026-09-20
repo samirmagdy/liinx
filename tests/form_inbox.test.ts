@@ -13,10 +13,10 @@ describe('creator form inbox', () => {
 
   beforeAll(async () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
-    const registration = await request(app).post('/api/auth/register').send({ email: `inbox-${unique}@liinx.test`, password: 'InboxPassword2026!', username: `inbox_${unique}`.slice(0, 30) }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `inbox-${unique}@raloa.test`, password: 'InboxPassword2026!', username: `inbox_${unique}`.slice(0, 30) }).expect(201);
     token = registration.body.token;
     profileId = registration.body.profileId;
-    const other = await request(app).post('/api/auth/register').send({ email: `inbox-other-${unique}@liinx.test`, password: 'InboxPassword2026!', username: `other_inbox_${unique}`.slice(0, 30) }).expect(201);
+    const other = await request(app).post('/api/auth/register').send({ email: `inbox-other-${unique}@raloa.test`, password: 'InboxPassword2026!', username: `other_inbox_${unique}`.slice(0, 30) }).expect(201);
     otherToken = other.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     const pageId = studio.body.pages.find((page: { isHome: boolean }) => page.isHome).id;

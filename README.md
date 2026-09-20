@@ -1,4 +1,4 @@
-# LIINX — Design-First Link-in-Bio Platform
+# RALOA — Design-First Link-in-Bio Platform
 
 A production-oriented, design-first link-in-bio platform. Core creator workflows use real persistence, authentication, media blocks, redirects, newsletters, analytics, and Stripe integration. Marketing previews and seeded demo content are separate from user-owned production data.
 
@@ -39,8 +39,8 @@ A production-oriented, design-first link-in-bio platform. Core creator workflows
 
 ### 1. Installation
 ```bash
-git clone <repo-url> liinx
-cd liinx
+git clone <repo-url> raloa
+cd raloa
 npm ci # or npm install
 ```
 
@@ -82,7 +82,7 @@ encryption, and billing configuration. To launch without paid plans, set
 
 ## Docker & Container Deployment
 
-LIINX includes a production-grade multi-stage `Dockerfile` and `docker-compose.yml` with persistent volumes for SQLite and uploaded media:
+RALOA includes a production-grade multi-stage `Dockerfile` and `docker-compose.yml` with persistent volumes for SQLite and uploaded media:
 
 ```bash
 # Build and run containerized application
@@ -95,11 +95,11 @@ docker compose logs -f
 docker compose ps
 ```
 
-The database persists in `./data/liinx.db` and uploaded images persist in `./public/uploads`. Fly uses separate persistent volumes for both paths; do not run more than one SQLite machine against the same logical database without a database migration.
+The database persists in `./data/raloa.db` and uploaded images persist in `./public/uploads`. Fly uses separate persistent volumes for both paths; do not run more than one SQLite machine against the same logical database without a database migration.
 
 ### Vercel + Fly deployment
 
-The Vercel project is the frontend shell. `vercel.json` proxies `/api/*`, `/uploads/*`, `/robots.txt`, and `/sitemap.xml` to the Fly backend at `liinx-app.fly.dev`; the Fly deployment owns Express, SQLite, and uploaded media. Set the backend `APP_ORIGIN`/`CORS_ORIGIN` to the public frontend origin and configure all required secrets before deploying:
+The Vercel project is the frontend shell. `vercel.json` proxies `/api/*`, `/uploads/*`, `/robots.txt`, and `/sitemap.xml` to the Fly backend at `raloa-app.fly.dev`; the Fly deployment owns Express, SQLite, and uploaded media. Set the backend `APP_ORIGIN`/`CORS_ORIGIN` to the public frontend origin and configure all required secrets before deploying:
 
 ```bash
 fly secrets set \
@@ -111,7 +111,7 @@ fly secrets set \
   STRIPE_WEBHOOK_SECRET="REPLACE_WITH_STRIPE_LIVE_WEBHOOK_SECRET"
 ```
 
-Set `MEDIA_STORAGE=s3` and configure `MEDIA_S3_*` for user media in production. AWS S3, Cloudflare R2, Backblaze B2, and MinIO-compatible endpoints are supported. `MEDIA_PUBLIC_URL` is optional: when set, public image/file URLs point directly to the bucket/CDN; when omitted, the Express `/uploads/:key` route reads the object server-side. S3 credentials stay in the backend environment and are never sent to the browser. Keep `MEDIA_S3_PREFIX` dedicated to Liinx media.
+Set `MEDIA_STORAGE=s3` and configure `MEDIA_S3_*` for user media in production. AWS S3, Cloudflare R2, Backblaze B2, and MinIO-compatible endpoints are supported. `MEDIA_PUBLIC_URL` is optional: when set, public image/file URLs point directly to the bucket/CDN; when omitted, the Express `/uploads/:key` route reads the object server-side. S3 credentials stay in the backend environment and are never sent to the browser. Keep `MEDIA_S3_PREFIX` dedicated to RALOA media.
 
 Local `UPLOADS_DIR` storage remains supported for development, tests, and explicitly single-node deployments. Do not deploy local uploads as the primary production media store when multiple instances or ephemeral disks are possible.
 

@@ -55,8 +55,8 @@ export function AgencyReferralPanel({ ar }: { ar: boolean }) {
 
       <p className="text-xs leading-relaxed text-neutral-500">
         {ar
-          ? `ثلاثة أرصدة كحد أقصى خلال أي 12 شهراً. يُطبّق رصيد ${money(data.creditCents)} تلقائياً على فاتورة Liinx مستقبلية عبر Stripe؛ لا قيمة نقدية له ولا يُسترد. تُحتسب الحسابات الجديدة بعد توثيق البريد، واشتراك Studio، ودفع أول فاتورة.`
-          : `Maximum 3 credits in any 12-month period. Each ${money(data.creditCents)} credit is automatically applied to a future Liinx invoice through Stripe; it is non-cash and non-refundable. The referral must be a new account with verified email, an active Studio subscription, and a paid first invoice.`}
+          ? `ثلاثة أرصدة كحد أقصى خلال أي 12 شهراً. يُطبّق رصيد ${money(data.creditCents)} تلقائياً على فاتورة RALOA مستقبلية عبر Stripe؛ لا قيمة نقدية له ولا يُسترد. تُحتسب الحسابات الجديدة بعد توثيق البريد، واشتراك Studio، ودفع أول فاتورة.`
+          : `Maximum 3 credits in any 12-month period. Each ${money(data.creditCents)} credit is automatically applied to a future RALOA invoice through Stripe; it is non-cash and non-refundable. The referral must be a new account with verified email, an active Studio subscription, and a paid first invoice.`}
       </p>
       {error && <p role="status" className="text-xs text-rose-700">{error}</p>}
     </section>

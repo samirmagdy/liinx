@@ -32,14 +32,14 @@ export function GuidesPage() {
 
 function GuideArticle({ guide, ar }: { guide: Guide; ar: boolean }) {
   return <article>
-    <Link href="/guides" className="text-sm font-semibold text-amber-800 hover:underline">{ar ? 'كل الأدلة' : 'All guides'}</Link>
+    <Link href="/guides" className="text-sm font-semibold text-indigo-800 hover:underline">{ar ? 'كل الأدلة' : 'All guides'}</Link>
     <Reveal distance="md" className="mt-8 max-w-3xl">
       <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-balance">{guide.title}</h1>
       <p className="mt-4 text-lg leading-relaxed text-neutral-600">{guide.summary}</p>
     </Reveal>
     <div className="mt-10 divide-y divide-neutral-200 border-y border-neutral-200">
       {guide.sections.map((section, index) => <section key={section.title} className="grid gap-3 py-6 sm:grid-cols-[3rem_1fr]">
-        <span className="font-mono text-sm text-amber-800">0{index + 1}</span>
+        <span className="font-mono text-sm text-indigo-800">0{index + 1}</span>
         <div><h2 className="text-lg font-bold">{section.title}</h2><p className="mt-2 text-sm leading-7 text-neutral-600">{section.body}</p></div>
       </section>)}
     </div>
@@ -56,13 +56,13 @@ function GuideArticle({ guide, ar }: { guide: Guide; ar: boolean }) {
 function GuideIndex({ guides, ar }: { guides: Guide[]; ar: boolean }) {
   return <>
     <Reveal distance="md" className="max-w-3xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-800">{ar ? 'أدلة عملية' : 'Practical guides'}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-800">{ar ? 'أدلة عملية' : 'Practical guides'}</p>
       <h1 className="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl text-balance">{ar ? 'أفكار عملية لموقعك المصغّر' : 'Make your mini-site useful'}</h1>
       <p className="mt-4 text-base leading-relaxed text-neutral-600">{ar ? 'إرشادات واضحة لبناء صفحة تعريف ومشاركة روابطك بالعربية والإنجليزية.' : 'Straightforward advice for building a useful profile page and sharing it in English or Arabic.'}</p>
     </Reveal>
     <div className="mt-10 divide-y divide-neutral-200 border-y border-neutral-200">
       {guides.map(guide => <Link key={guide.path} href={guide.path} className="group block py-6">
-        <h2 className="text-xl font-bold group-hover:text-amber-800">{guide.title}<ArrowRight className={`ms-2 inline h-4 w-4 ${ar ? 'rotate-180' : ''}`} /></h2>
+        <h2 className="text-xl font-bold group-hover:text-indigo-800">{guide.title}<ArrowRight className={`ms-2 inline h-4 w-4 ${ar ? 'rotate-180' : ''}`} /></h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600">{guide.summary}</p>
       </Link>)}
     </div>

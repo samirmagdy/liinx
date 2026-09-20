@@ -99,7 +99,7 @@ describe('System Capabilities API (/api/capabilities)', () => {
     process.env.BILLING_ENABLED = 'true';
     process.env.STRIPE_SECRET_KEY = 'sk_test_123';
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_456';
-    process.env.APP_ORIGIN = 'https://liinx.test';
+    process.env.APP_ORIGIN = 'https://raloa.test';
     expect(getSystemCapabilities().billing).toBe(true);
   });
 });

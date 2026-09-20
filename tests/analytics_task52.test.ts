@@ -13,7 +13,7 @@ describe('analytics measurement contract', () => {
   beforeAll(async () => {
     initDatabase();
     const registered = await request(app).post('/api/auth/register').send({
-      email: `analytics-${suffix}@liinx.test`, password: 'Password123!', username: `analytics_${suffix}`
+      email: `analytics-${suffix}@raloa.test`, password: 'Password123!', username: `analytics_${suffix}`
     });
     token = registered.body.token;
     profileId = registered.body.profileId;

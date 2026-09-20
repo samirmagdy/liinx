@@ -9,7 +9,7 @@ describe('profile duplication', () => {
   it('copies pages, design, blocks, and internal references without private state', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const registration = await request(app).post('/api/auth/register').send({
-      email: `duplicate-${unique}@liinx.test`,
+      email: `duplicate-${unique}@raloa.test`,
       password: 'ProfileDuplicationPassword2026!',
       username: `duplicate${unique}`.slice(0, 30)
     }).expect(201);

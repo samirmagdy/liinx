@@ -72,15 +72,16 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
   };
 
   return (
-    <section ref={heroRef} className="hero-section marketing-hero pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 border-b border-neutral-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={heroRef} className="hero-section marketing-hero relative overflow-hidden pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 border-b border-neutral-200">
+      <div className="raloa-hero-bg raloa-hero-bg--light opacity-70" aria-hidden="true" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-14 items-start">
           
           {/* Left Column: Brand Copy & Claimer */}
           <div className="lg:col-span-7 flex flex-col items-start text-start lg:pt-1">
             
             {/* Top Badge */}
-            <div data-hero="eyebrow" className="mb-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">
+            <div data-hero="eyebrow" className="mb-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">
               {t.hero.badge}
             </div>
 
@@ -114,7 +115,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                   <button
                     type="button"
                     onClick={() => setLocation('/@elenarostova')}
-                    className="font-bold text-neutral-900 hover:text-amber-600 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="font-bold text-neutral-900 hover:text-indigo-600 flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <span>{isRtl ? 'شاهد العرض التجريبي ↗' : 'View live demo ↗'}</span>
                   </button>
@@ -168,7 +169,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             <div data-hero="visual" className="w-full max-w-[380px]">
               <div className="flex items-center justify-between px-2 mb-2">
                 <span className="text-[11px] font-mono font-medium text-neutral-500 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                   {isRtl ? 'نموذج توضيحي' : 'Demo Profile'}
                 </span>
                 <span className="text-[10px] font-mono text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200">
@@ -208,7 +209,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 onClick={() => onOpenStudio(activeProfile)}
                 className="px-4 py-2 rounded-full bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
               >
-                <Palette className="w-3.5 h-3.5 text-amber-600" />
+                <Palette className="w-3.5 h-3.5 text-indigo-600" />
                 <span>{t.hero.customizeCta(activeProfile.displayName.split(' ')[0])}</span>
               </button>
             </div>

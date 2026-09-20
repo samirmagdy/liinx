@@ -1,6 +1,6 @@
 # Architecture guardrails
 
-Liinx treats source size as a review signal, not a formatting target. New
+RALOA treats source size as a review signal, not a formatting target. New
 production code should be organized by responsibility: route handlers should
 validate and delegate, React components should compose focused views/hooks, and
 storage, analytics, persistence, and provider code should remain behind their

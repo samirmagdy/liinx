@@ -550,7 +550,7 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
   };
 
   const handleCopyCname = () => {
-    navigator.clipboard?.writeText('liinx-app.fly.dev');
+    navigator.clipboard?.writeText('raloa-app.fly.dev');
     setCopiedCname(true);
     setTimeout(() => setCopiedCname(false), 2000);
   };

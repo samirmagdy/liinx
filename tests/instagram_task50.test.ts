@@ -12,7 +12,7 @@ describe('Instagram integration security and failure boundaries', () => {
     initDatabase();
     const suffix = Date.now();
     const response = await request(app).post('/api/auth/register').send({
-      email: `instagram-task-${suffix}@liinx.test`,
+      email: `instagram-task-${suffix}@raloa.test`,
       password: 'Password123!',
       username: `instagramtask${suffix}`
     });

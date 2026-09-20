@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: liinx-app
+    container_name: raloa-app
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"

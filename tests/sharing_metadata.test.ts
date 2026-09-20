@@ -11,7 +11,7 @@ describe('server-rendered sharing metadata', () => {
 
   beforeAll(async () => {
     const registered = await request(app).post('/api/auth/register').send({
-      email: `metadata-${unique}@liinx.test`, password: 'MetadataPassword2026!', username: `metadata${unique}`.slice(0, 30)
+      email: `metadata-${unique}@raloa.test`, password: 'MetadataPassword2026!', username: `metadata${unique}`.slice(0, 30)
     }).expect(201);
     token = registered.body.token;
     username = registered.body.user.username;
@@ -79,7 +79,7 @@ describe('server-rendered sharing metadata', () => {
 
   it('marks fictional demo pages noindex and labels their sample content', () => {
     const source = '<title>Default</title><meta name="description" content="Default" /><meta name="robots" content="index, follow" /><link rel="canonical" href="https://default.test/" /><meta property="og:url" content="https://default.test/" /><meta property="og:title" content="Default" /><meta property="og:description" content="Default" /><script type="application/ld+json">{}</script><body></body>';
-    const html = renderProfileShellHtml(source, { username: 'sample', display_name: 'Sample creator', bio: 'Sample bio' }, 'https://liinx.app/@sample', undefined, undefined, [], true);
+    const html = renderProfileShellHtml(source, { username: 'sample', display_name: 'Sample creator', bio: 'Sample bio' }, 'https://raloa.app/@sample', undefined, undefined, [], true);
     expect(html).toContain('name="robots" content="noindex, nofollow"');
     expect(html).toContain('Fictional sample profile. Names, metrics, and links are demonstration content, not customer data.');
   });

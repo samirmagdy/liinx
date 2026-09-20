@@ -108,7 +108,7 @@ formsRouter.get('/api/studio/form-submissions/export', requireAuth, (req: Authen
       for (const [name, value] of Object.entries(fields)) lines.push([new Date(row.createdAt).toISOString(), info.title, info.fieldLabels[name] || name, value].map(csvCell).join(','));
     }
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="liinx-${blockId ? 'form' : 'forms'}-responses.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="raloa-${blockId ? 'form' : 'forms'}-responses.csv"`);
     res.setHeader('Cache-Control', 'no-store');
     res.send(lines.join('\n'));
   } catch (error) {

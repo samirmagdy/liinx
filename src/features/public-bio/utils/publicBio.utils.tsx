@@ -4,7 +4,7 @@ import { type ThemeConfig } from '../../../types';
 export function safePublicHref(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   try {
-    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://liinx.test';
+    const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://raloa.test';
     const url = new URL(value, origin);
     if (!['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)) return null;
     return url.toString();

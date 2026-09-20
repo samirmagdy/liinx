@@ -28,7 +28,7 @@ describe('Concurrency & Race Condition Testing', () => {
       request(app)
         .post('/api/auth/register')
         .send({
-          email: `race_${i}_${Date.now()}@liinx.test`,
+          email: `race_${i}_${Date.now()}@raloa.test`,
           password: 'Password123!',
           username: targetUsername
         })

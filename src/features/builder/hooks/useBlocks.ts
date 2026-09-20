@@ -124,7 +124,7 @@ export function useBlocks({
           subtitle: 'Expandable collection of destinations',
           items: [
             { id: 'f_1', title: 'Main Project', url: 'https://github.com' },
-            { id: 'f_2', title: 'Documentation', url: 'https://liinx.app/features' }
+            { id: 'f_2', title: 'Documentation', url: 'https://raloa.app/features' }
           ]
         }
       });

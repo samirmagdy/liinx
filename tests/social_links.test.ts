@@ -6,7 +6,7 @@ describe('social icons and contact links', () => {
   it('persists supported provider, email, and phone links in order', async () => {
     const id = `${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
     const registration = await request(app).post('/api/auth/register').send({
-      email: `social-${id}@liinx.test`, password: 'SocialPassword2026!', username: `social${id}`.slice(0, 30)
+      email: `social-${id}@raloa.test`, password: 'SocialPassword2026!', username: `social${id}`.slice(0, 30)
     }).expect(201);
     const token = registration.body.token as string;
     const username = registration.body.user.username as string;
@@ -36,13 +36,13 @@ describe('social icons and contact links', () => {
     [{ platform: 'email', url: 'mailto:not-an-email' }, 'invalid email'],
   ])('rejects %s', async (social) => {
     const id = `${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
-    const registration = await request(app).post('/api/auth/register').send({ email: `invalid-social-${id}@liinx.test`, password: 'SocialPassword2026!', username: `invalidsocial${id}`.slice(0, 30) }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `invalid-social-${id}@raloa.test`, password: 'SocialPassword2026!', username: `invalidsocial${id}`.slice(0, 30) }).expect(201);
     await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${registration.body.token}`).send({ socials: [social] }).expect(400);
   });
 
   it('rejects duplicate destinations while preserving the prior saved list', async () => {
     const id = `${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
-    const registration = await request(app).post('/api/auth/register').send({ email: `duplicate-social-${id}@liinx.test`, password: 'SocialPassword2026!', username: `duplicatesocial${id}`.slice(0, 30) }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `duplicate-social-${id}@raloa.test`, password: 'SocialPassword2026!', username: `duplicatesocial${id}`.slice(0, 30) }).expect(201);
     const token = registration.body.token as string;
     const before = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${token}`).send({ socials: [
@@ -60,6 +60,6 @@ describe('social icons and contact links', () => {
     expect(normalizeSocialUrl('phone', '0501234567')).toBe('tel:0501234567');
     expect(normalizeSocialUrl('email', 'creator@example.com')).toBe('mailto:creator@example.com');
     expect(normalizeSocialUrl('email', 'mailto:creator@example.com')).toBe('mailto:creator@example.com');
-    expect(normalizeSocialUrl('instagram', 'https://instagram.com/liinx')).toBe('https://instagram.com/liinx');
+    expect(normalizeSocialUrl('instagram', 'https://instagram.com/raloa')).toBe('https://instagram.com/raloa');
   });
 });

@@ -165,12 +165,12 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
 
               <div className="p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-neutral-700/50 space-y-2">
                 <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  {ui("How to add your links to LIINX:")}
+                  {ui("How to add your links to RALOA:")}
                 </p>
                 <ul className="text-xs text-neutral-600 dark:text-neutral-400 space-y-1.5 list-disc pl-4">
                   <li>{ui("Create customized link, music, video, or booking blocks in seconds.")}</li>
                   <li>{ui("Reorder blocks with drag-and-drop to design your unique layout.")}</li>
-                  <li>{ui("Enjoy full design freedom with custom themes and no Liinx fee on external sales or bookings.")}</li>
+                  <li>{ui("Enjoy full design freedom with custom themes and no RALOA fee on external sales or bookings.")}</li>
                 </ul>
               </div>
 
@@ -382,7 +382,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   ) : (
                     <>
                       <Download className="w-4 h-4" />
-                      <span>{ui("Import")}{selectedIndices.size} {ui("Links into LIINX")}</span>
+                      <span>{ui("Import")}{selectedIndices.size} {ui("Links into RALOA")}</span>
                     </>
                   )}
                 </button>

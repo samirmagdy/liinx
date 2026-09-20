@@ -24,11 +24,11 @@ export const TrackingPixelManager: FC<TrackingPixelManagerProps> = ({
     const gaId = profile.gaMeasurementId.trim();
     if (!gaId || !/^G-[A-Z0-9]+$/i.test(gaId)) return;
 
-    if (!document.getElementById('liinx-ga4-script')) {
+    if (!document.getElementById('raloa-ga4-script')) {
       const script = document.createElement('script');
       script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`;
       script.async = true;
-      script.id = 'liinx-ga4-script';
+      script.id = 'raloa-ga4-script';
       const nonce = (window as Window & { __CSP_NONCE__?: string }).__CSP_NONCE__;
       if (nonce) {
         script.nonce = nonce;
@@ -50,7 +50,7 @@ export const TrackingPixelManager: FC<TrackingPixelManagerProps> = ({
     win.gtag('config', gaId);
 
     return () => {
-      document.getElementById('liinx-ga4-script')?.remove();
+      document.getElementById('raloa-ga4-script')?.remove();
       if (typeof window !== 'undefined') {
         delete (window as Window & { gtag?: unknown }).gtag;
         delete (window as Window & { dataLayer?: unknown }).dataLayer;
@@ -102,9 +102,9 @@ export const TrackingPixelManager: FC<TrackingPixelManagerProps> = ({
       win._fbq = fbqFunction;
     }
 
-    if (!document.getElementById('liinx-meta-pixel-script')) {
+    if (!document.getElementById('raloa-meta-pixel-script')) {
       const script = document.createElement('script');
-      script.id = 'liinx-meta-pixel-script';
+      script.id = 'raloa-meta-pixel-script';
       script.src = 'https://connect.facebook.net/en_US/fbevents.js';
       script.async = true;
       const nonce = (window as Window & { __CSP_NONCE__?: string }).__CSP_NONCE__;
@@ -118,7 +118,7 @@ export const TrackingPixelManager: FC<TrackingPixelManagerProps> = ({
     win.fbq('track', 'PageView');
 
     return () => {
-      document.getElementById('liinx-meta-pixel-script')?.remove();
+      document.getElementById('raloa-meta-pixel-script')?.remove();
       if (typeof window !== 'undefined') {
         delete (window as Window & { fbq?: unknown }).fbq;
         delete (window as Window & { _fbq?: unknown })._fbq;

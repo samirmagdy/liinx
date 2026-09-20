@@ -97,21 +97,21 @@ export function TermsPage() {
   const { lang } = useLanguage();
   return (
     <InformationPage
-      icon={<FileText className="w-3.5 h-3.5 text-amber-600" />}
+      icon={<FileText className="w-3.5 h-3.5 text-indigo-600" />}
       badge={lang === 'ar' ? 'الشروط والأحكام' : 'Terms & Conditions'}
       title={lang === 'ar' ? 'شروط الاستخدام' : 'Terms of use'}
       sections={lang === 'ar' ? [
         ['مسؤولية المحتوى ومكافحة الإساءة', 'أنت مسؤول عن المحتوى والروابط التي تنشرها وعن امتلاك حقوق استخدامها. لا تستخدم الخدمة للتصيد أو البرمجيات الضارة أو الاحتيال أو انتحال الشخصية أو البريد المزعج أو المحتوى غير القانوني. يجوز إزالة الصفحات والروابط المخالفة.'],
         ['الفوترة', 'تُعرض الأسعار وفترة الفوترة قبل الانتقال إلى Stripe. تتجدد الاشتراكات المدفوعة تلقائياً؛ يمكنك إدارتها أو إلغاؤها من بوابة الفوترة.'],
         ['برنامج دعوة المبدعين', 'تُحتسب الدعوة بعد إنشاء حساب جديد والتحقق من البريد الإلكتروني. يحصل الحساب المجاني الذي دعا ثلاثة حسابات مؤهلة على Pro لمدة 90 يوماً مرة واحدة. الحسابات ذات الاشتراك المدفوع غير مؤهلة للمكافأة. لا تُحتسب الحسابات المكررة، ولا تُحوّل المكافأة إلى نقد.'],
-        ['إحالات الوكالات', 'تُحتسب الإحالة عندما ينشئ حساب جديد موثّق البريد اشتراك Studio ويدفع أول فاتورة. يُمنح صاحب الإحالة رصيداً بقيمة 29 دولاراً أمريكياً بعد 30 يوماً، شريطة أن يكون اشتراكه في Studio نشطاً. يُطبّق الرصيد تلقائياً على فاتورة Liinx لاحقة عبر Stripe. الحد الأقصى ثلاثة أرصدة خلال أي 12 شهراً. الرصيد غير نقدي وغير قابل للاسترداد.'],
+        ['إحالات الوكالات', 'تُحتسب الإحالة عندما ينشئ حساب جديد موثّق البريد اشتراك Studio ويدفع أول فاتورة. يُمنح صاحب الإحالة رصيداً بقيمة 29 دولاراً أمريكياً بعد 30 يوماً، شريطة أن يكون اشتراكه في Studio نشطاً. يُطبّق الرصيد تلقائياً على فاتورة RALOA لاحقة عبر Stripe. الحد الأقصى ثلاثة أرصدة خلال أي 12 شهراً. الرصيد غير نقدي وغير قابل للاسترداد.'],
         ['الحجوزات والخدمات الخارجية', 'تُدار المواعيد وتأكيدات الحجز لدى Calendly. فتح أداة الحجز لا يعني اكتمال الحجز. إعداد النطاق وHTTPS يتطلبان استضافة مهيأة.'],
         ['توفر الخدمة', 'لا توجد ضمانات منشورة لزمن الاستجابة أو نسبة التوفر. تواصل معنا بشأن مشكلات الخدمة أو الفوترة.']
       ] : [
         ['Content responsibility and abuse', 'You are responsible for the content and destinations you publish and for having permission to use them. Do not use the service for phishing, malware, fraud, impersonation, spam or unlawful content. We may remove violating pages or destinations.'],
         ['Billing', 'Prices and billing intervals are displayed before Stripe Checkout. Paid subscriptions renew automatically; manage or cancel them through the billing portal.'],
         ['Creator referral program', 'A referral qualifies after a new account is created and its email address is verified. A free account that refers three qualified accounts receives Pro for 90 days once. Accounts with a paid subscription are not eligible for this reward. Each referred account can qualify once; rewards have no cash value.'],
-        ['Agency referral credit', 'A referral qualifies when a new account with a verified email starts a Studio subscription and pays its first invoice. The referrer earns USD $29 in account credit after a 30-day hold, once the referrer has an active Studio subscription. Credit is automatically applied to a future Liinx invoice through Stripe. The limit is three credits in any 12-month period. Each referred account can qualify once; credits are non-cash and non-refundable.'],
+        ['Agency referral credit', 'A referral qualifies when a new account with a verified email starts a Studio subscription and pays its first invoice. The referrer earns USD $29 in account credit after a 30-day hold, once the referrer has an active Studio subscription. Credit is automatically applied to a future RALOA invoice through Stripe. The limit is three credits in any 12-month period. Each referred account can qualify once; credits are non-cash and non-refundable.'],
         ['Bookings and external services', 'Calendly manages availability and booking confirmations. Opening the scheduler does not mean a booking is complete. Custom domains and HTTPS require configured hosting.'],
         ['Service availability', 'No response-time or uptime guarantee is published. Contact us about service or billing problems.']
       ]}
@@ -155,7 +155,7 @@ export function ContactPage() {
       <main className="flex-1 max-w-3xl mx-auto px-6 py-10 sm:py-12">
         <div className="text-center space-y-4 mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-700">
-            <Mail className="w-3.5 h-3.5 text-amber-600" />
+            <Mail className="w-3.5 h-3.5 text-indigo-600" />
             <span>{ui("Get in Touch")}</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 text-balance">{ui("We'd love to hear from you.")}</h1>
@@ -257,15 +257,15 @@ export function AboutPage() {
       badge={lang === 'ar' ? 'من نحن' : 'About Us'}
       title={lang === 'ar' ? `عن ${brand.productShortName}` : `About ${brand.productShortName}`}
       sections={lang === 'ar' ? [
-        ['ما هي Liinx؟', 'Liinx أداة لإنشاء صفحة عامة قابلة للتخصيص تجمع الروابط والوسائط المدعومة واشتراكات النشرة وروابط الحجز في مكان واحد.'],
+        ['ما هي RALOA؟', 'RALOA أداة لإنشاء صفحة عامة قابلة للتخصيص تجمع الروابط والوسائط المدعومة واشتراكات النشرة وروابط الحجز في مكان واحد.'],
         ['كيف تعمل الصفحة؟', 'أضف محتواك من الاستوديو، رتّب الكتل واختر مظهراً. يمكن نشر صفحات متعددة بروابط مستقلة، وتختلف الميزات المتاحة حسب الخطة.'],
         ['النشرة والحجوزات', 'تُجمع طلبات الاشتراك بموافقة صريحة، ولا تظهر للمبدع حتى تأكيد البريد الإلكتروني. تُحذف الطلبات غير المؤكدة بعد 24 ساعة، ونحتفظ بوقت الموافقة والتأكيد وإصدار نص الموافقة لإثبات الاشتراك. يمكن للمشترك إلغاء اشتراكه عبر رابط الإلغاء. تفتح كتل الحجز تقويم Calendly؛ ويُدير Calendly المواعيد والتأكيدات.'],
-        ['النطاقات والمدفوعات', 'تدعم الخطط المؤهلة ربط نطاق مخصص بعد التحقق من DNS، مع إعداد الاستضافة وشهادة TLS. لا تعالج Liinx مدفوعات المبيعات أو الحجوزات؛ وتُدار هذه العمليات لدى مزوّد الخدمة الخارجي.']
+        ['النطاقات والمدفوعات', 'تدعم الخطط المؤهلة ربط نطاق مخصص بعد التحقق من DNS، مع إعداد الاستضافة وشهادة TLS. لا تعالج RALOA مدفوعات المبيعات أو الحجوزات؛ وتُدار هذه العمليات لدى مزوّد الخدمة الخارجي.']
       ] : [
-        ['What is Liinx?', 'Liinx is a tool for creating a customizable public page that brings together links, supported media, newsletter signups, and booking links.'],
+        ['What is RALOA?', 'RALOA is a tool for creating a customizable public page that brings together links, supported media, newsletter signups, and booking links.'],
         ['How pages work', 'Add content in the Studio, arrange blocks, and choose a theme. You can publish multiple pages at separate URLs; feature availability varies by plan.'],
         ['Newsletters and bookings', 'Newsletter signup blocks require an explicit opt-in and email confirmation before a subscriber appears to the creator. Unconfirmed requests expire after 24 hours. We record consent time, confirmation time, and the consent text version as subscription evidence. Subscribers can withdraw through their unsubscribe link. Booking blocks open Calendly, which manages availability and booking confirmations.'],
-        ['Domains and payments', 'Eligible plans support custom domains after DNS verification; hosting and TLS also need to be configured. Liinx does not process sales or booking payments; external providers handle those transactions.']
+        ['Domains and payments', 'Eligible plans support custom domains after DNS verification; hosting and TLS also need to be configured. RALOA does not process sales or booking payments; external providers handle those transactions.']
       ]}
     />
   );

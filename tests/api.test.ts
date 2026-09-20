@@ -15,7 +15,7 @@ describe('backend API', () => {
     initDatabase();
   });
 
-  const testEmail = `test_${Date.now()}@liinx.test`;
+  const testEmail = `test_${Date.now()}@raloa.test`;
   const testUsername = `user_${Date.now()}`;
   let authToken = '';
   let createdBlockId = '';
@@ -24,7 +24,7 @@ describe('backend API', () => {
     const res = await request(app).get('/api/health');
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('ok');
-    expect(res.body.service).toBe('liinx-api');
+    expect(res.body.service).toBe('raloa-api');
   });
 
   it('GET /api/profiles/elenarostova should return seeded creator profile', async () => {
@@ -64,7 +64,7 @@ describe('backend API', () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({
-        email: `another_${Date.now()}@liinx.test`,
+        email: `another_${Date.now()}@raloa.test`,
         password: 'Password123!',
         username: testUsername
       });
@@ -290,7 +290,7 @@ describe('backend API', () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({
-        email: `reserved_${Date.now()}@liinx.test`,
+        email: `reserved_${Date.now()}@raloa.test`,
         password: 'Password123!',
         username: 'admin'
       });
@@ -316,7 +316,7 @@ describe('backend API', () => {
   });
 
   it('DELETE /api/auth/account should permanently delete user and associated profile', async () => {
-    const deletionEmail = `delete_${Date.now()}@liinx.test`;
+    const deletionEmail = `delete_${Date.now()}@raloa.test`;
     const deletionUsername = `delete_${Date.now().toString().slice(-8)}`;
     const registered = await request(app).post('/api/auth/register').send({
       email: deletionEmail,

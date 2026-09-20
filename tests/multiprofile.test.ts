@@ -11,13 +11,13 @@ describe('multi-profile management', () => {
   app.use('/api', profilesRouter);
 
   const testUserId = 'usr_multi_owner';
-  const testEmail = 'multicreator@liinx.test';
+  const testEmail = 'multicreator@raloa.test';
 
   const freeProfileId = 'prf_free_multi';
   const freeUsername = 'freecreator';
 
   const proUserId = 'usr_pro_multi_owner';
-  const proEmail = 'promulti@liinx.test';
+  const proEmail = 'promulti@raloa.test';
   const proProfileId = 'prf_pro_multi';
   const proUsername = 'promulticreator';
 

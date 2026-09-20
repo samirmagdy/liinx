@@ -9,8 +9,8 @@ import type { PricingPlanTranslation } from '../config/i18n';
 function buildPricingPlans(content: Record<'starter' | 'pro' | 'studio', PricingPlanTranslation>, interval: BillingInterval, recommendationLabel: string): PricingPlanItem[] {
   const icons = {
     starter: <Zap className="w-5 h-5 text-neutral-600" />,
-    pro: <Sparkles className="w-5 h-5 text-amber-600" />,
-    studio: <Crown className="w-5 h-5 text-amber-500" />
+    pro: <Sparkles className="w-5 h-5 text-indigo-600" />,
+    studio: <Crown className="w-5 h-5 text-indigo-500" />
   };
   return (['starter', 'pro', 'studio'] as const).map(key => ({
     id: key === 'starter' ? 'free' : key,
@@ -37,7 +37,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
   const plans = buildPricingPlans(t.pricingSection.plans, interval, t.pricingSection.recommended);
 
   return (
-    <section id="pricing" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
+    <section id="pricing" className="marketing-section raloa-pattern-bg py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <Reveal distance="md" className="text-center max-w-2xl mx-auto mb-8">
@@ -74,8 +74,8 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                 {value === 'year' && (
                   <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
                     interval === 'year'
-                      ? 'bg-amber-400 text-neutral-950'
-                      : 'bg-amber-100 text-amber-800'
+                      ? 'bg-indigo-400 text-neutral-950'
+                      : 'bg-indigo-100 text-indigo-800'
                   }`}>
                     {ar ? 'شهران مجاناً' : '2 months free'}
                   </span>

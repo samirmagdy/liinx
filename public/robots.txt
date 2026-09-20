@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /uploads/
 
-Sitemap: https://liinx.app/sitemap.xml
+Sitemap: https://raloa.app/sitemap.xml

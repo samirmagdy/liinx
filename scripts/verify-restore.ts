@@ -47,7 +47,7 @@ export async function verifyRestore(options?: {
   useRemote?: boolean;
 }): Promise<RestoreVerificationResult> {
   const startTime = Date.now();
-  const sandboxDir = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-restore-verify-'));
+  const sandboxDir = fs.mkdtempSync(path.join(os.tmpdir(), 'raloa-restore-verify-'));
 
   try {
     const storage = (options?.useRemote && backupService.getRemoteStorage())
@@ -57,7 +57,7 @@ export async function verifyRestore(options?: {
     // 1. Locate latest or specified DB backup
     let dbKey = options?.dbBackupKey;
     if (!dbKey) {
-      const items = await storage.list('liinx-db-');
+      const items = await storage.list('raloa-db-');
       if (items.length === 0) {
         throw new Error(`No database backups found in ${storage.name} to verify.`);
       }
@@ -143,7 +143,7 @@ export async function verifyRestore(options?: {
     let uploadsResult: { verified: boolean; backupFile: string; fileCount: number } | undefined;
     let uploadsKey = options?.uploadsBackupKey;
     if (!uploadsKey) {
-      const uploadItems = await storage.list('liinx-uploads-');
+      const uploadItems = await storage.list('raloa-uploads-');
       if (uploadItems.length > 0) {
         uploadsKey = uploadItems[0].key;
       }

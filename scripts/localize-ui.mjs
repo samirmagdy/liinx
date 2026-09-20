@@ -15,7 +15,7 @@ function visit(node, component) {
     let text;
     if (!expressionsOnly && ts.isJsxText(node)) {
       text = decode(node.text.replace(/\s+/g, ' ').trim());
-      if (/[A-Za-z]/.test(text) && !/^(https?:|curl |&nbsp;|\/api|#|liinx\.|links\.)/.test(text)) {
+      if (/[A-Za-z]/.test(text) && !/^(https?:|curl |&nbsp;|\/api|#|raloa\.|links\.)/.test(text)) {
         edits.push({ start: node.getStart(file), end: node.end, value: `{ui(${JSON.stringify(text)})}` });
         used.add(component);
       }

@@ -23,7 +23,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-backup-test-'));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'raloa-backup-test-'));
   });
 
   afterEach(() => {
@@ -39,7 +39,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
       const testMetadata = {
         id: 'test-backup-1',
         type: 'database' as const,
-        filename: 'liinx-db-2026-09-17.sqlite',
+        filename: 'raloa-db-2026-09-17.sqlite',
         sizeBytes: testData.length,
         timestamp: new Date().toISOString(),
         version: 1,
@@ -47,39 +47,39 @@ describe('Disaster Recovery & Remote Backup System', () => {
         encrypted: false
       };
 
-      await storage.save('liinx-db-2026-09-17.sqlite', testData, testMetadata);
+      await storage.save('raloa-db-2026-09-17.sqlite', testData, testMetadata);
 
       // Verify files written
-      expect(fs.existsSync(path.join(tempDir, 'liinx-db-2026-09-17.sqlite'))).toBe(true);
-      expect(fs.existsSync(path.join(tempDir, 'liinx-db-2026-09-17.sqlite.meta.json'))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, 'raloa-db-2026-09-17.sqlite'))).toBe(true);
+      expect(fs.existsSync(path.join(tempDir, 'raloa-db-2026-09-17.sqlite.meta.json'))).toBe(true);
 
       // Verify list
-      const items = await storage.list('liinx-db-');
+      const items = await storage.list('raloa-db-');
       expect(items.length).toBe(1);
-      expect(items[0].key).toBe('liinx-db-2026-09-17.sqlite');
+      expect(items[0].key).toBe('raloa-db-2026-09-17.sqlite');
       expect(items[0].sizeBytes).toBe(testData.length);
 
       // Verify get
-      const retrieved = await storage.get('liinx-db-2026-09-17.sqlite');
+      const retrieved = await storage.get('raloa-db-2026-09-17.sqlite');
       expect(retrieved).not.toBeNull();
       expect(retrieved!.data.toString()).toBe('mock database content 123456789');
       expect(retrieved!.metadata?.checksumSha256).toBe(testMetadata.checksumSha256);
 
       // Verify delete removes both payload and metadata
-      await storage.delete('liinx-db-2026-09-17.sqlite');
-      expect(fs.existsSync(path.join(tempDir, 'liinx-db-2026-09-17.sqlite'))).toBe(false);
-      expect(fs.existsSync(path.join(tempDir, 'liinx-db-2026-09-17.sqlite.meta.json'))).toBe(false);
+      await storage.delete('raloa-db-2026-09-17.sqlite');
+      expect(fs.existsSync(path.join(tempDir, 'raloa-db-2026-09-17.sqlite'))).toBe(false);
+      expect(fs.existsSync(path.join(tempDir, 'raloa-db-2026-09-17.sqlite.meta.json'))).toBe(false);
     });
 
     it('marks a checksum-corrupted archive invalid for retention decisions', async () => {
       const storage = new LocalBackupStorage(tempDir);
-      await storage.save('liinx-db-corrupt.sqlite', Buffer.from('actual'), {
-        id: 'corrupt-backup', type: 'database', filename: 'liinx-db-corrupt.sqlite',
+      await storage.save('raloa-db-corrupt.sqlite', Buffer.from('actual'), {
+        id: 'corrupt-backup', type: 'database', filename: 'raloa-db-corrupt.sqlite',
         sizeBytes: 6, timestamp: new Date().toISOString(), version: 1,
         checksumSha256: computeSha256(Buffer.from('different')), encrypted: false
       });
-      const listed = await storage.list('liinx-db-');
-      expect(listed.find(item => item.key === 'liinx-db-corrupt.sqlite')?.valid).toBe(false);
+      const listed = await storage.list('raloa-db-');
+      expect(listed.find(item => item.key === 'raloa-db-corrupt.sqlite')?.valid).toBe(false);
     });
   });
 
@@ -322,7 +322,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
       for (let i = 0; i < 20; i++) {
         const itemDate = new Date(now.getTime() - i * oneDay);
         mockItems.push({
-          key: `liinx-db-${itemDate.toISOString().slice(0, 10)}.sqlite`,
+          key: `raloa-db-${itemDate.toISOString().slice(0, 10)}.sqlite`,
           sizeBytes: 1024,
           lastModified: itemDate.getTime()
         });
@@ -337,7 +337,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
       // Retains all of the most recent 7 days
       for (let i = 0; i < 7; i++) {
         const itemDate = new Date(now.getTime() - i * oneDay);
-        const key = `liinx-db-${itemDate.toISOString().slice(0, 10)}.sqlite`;
+        const key = `raloa-db-${itemDate.toISOString().slice(0, 10)}.sqlite`;
         expect(keep.has(key)).toBe(true);
       }
 
@@ -368,7 +368,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
       // Create a backup using LocalBackupStorage
       const storage = new LocalBackupStorage(path.join(tempDir, 'backups'));
       const dbBuffer = fs.readFileSync(dbPath);
-      const backupKey = 'liinx-db-test-verify.sqlite';
+      const backupKey = 'raloa-db-test-verify.sqlite';
       await storage.save(backupKey, dbBuffer, {
         id: 'test-1',
         type: 'database',
@@ -419,7 +419,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
       const { ciphertext, ivHex, tagHex } = encryptBackupData(rawDb, key);
 
       const storage = new LocalBackupStorage(path.join(tempDir, 'backups_enc'));
-      const backupKey = 'liinx-db-encrypted.sqlite.enc';
+      const backupKey = 'raloa-db-encrypted.sqlite.enc';
       await storage.save(backupKey, ciphertext, {
         id: 'test-enc-1',
         type: 'database',
@@ -449,7 +449,7 @@ describe('Disaster Recovery & Remote Backup System', () => {
     it('fails restore verification if checksum is mismatched or tampered', async () => {
       const storage = new LocalBackupStorage(path.join(tempDir, 'backups_tampered'));
       const fakeData = Buffer.from('corrupted sqlite');
-      const backupKey = 'liinx-db-corrupted.sqlite';
+      const backupKey = 'raloa-db-corrupted.sqlite';
 
       await storage.save(backupKey, fakeData, {
         id: 'test-corrupt-1',

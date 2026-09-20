@@ -79,7 +79,7 @@ describe('media storage adapter contract', () => {
 
     try {
       const storage = new S3CompatibleObjectStorage({
-        bucket: 'liinx-media',
+        bucket: 'raloa-media',
         region: 'auto',
         accessKeyId: 'test-access-key',
         secretAccessKey: 'test-secret-key',
@@ -162,7 +162,7 @@ describe('media storage adapter contract', () => {
     const path = await import('node:path');
     const { LocalFileObjectStorage } = await import('../server/infrastructure/localStorage.js');
 
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-local-storage-test-'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'raloa-local-storage-test-'));
 
     try {
       const storage = new LocalFileObjectStorage(tempDir, '/custom-uploads');

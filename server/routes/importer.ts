@@ -49,7 +49,7 @@ importerRouter.post('/studio/import/commit', requireAuth, sharedRateLimit({ name
       success: true,
       count: result.imported,
       skippedDuplicates: result.skippedDuplicates,
-      message: result.imported > 0 ? `Successfully imported ${result.imported} links into your LIINX profile!` : 'No new links were imported.'
+      message: result.imported > 0 ? `Successfully imported ${result.imported} links into your RALOA profile!` : 'No new links were imported.'
     });
   } catch (err: any) {
     console.error('Import commit error:', err);

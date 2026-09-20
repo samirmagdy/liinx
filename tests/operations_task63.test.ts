@@ -14,7 +14,7 @@ describe('operations diagnostics', () => {
     expect(ready.status).toBe(200);
     expect(ready.body).toEqual({
       status: 'ready',
-      service: 'liinx-api',
+      service: 'raloa-api',
       database: 'connected',
       uploads: 'writable'
     });

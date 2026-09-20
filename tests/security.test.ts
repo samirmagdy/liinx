@@ -10,13 +10,13 @@ describe('security', () => {
     initDatabase();
   });
 
-  const victimEmail = `victim_${Date.now()}@liinx.test`;
+  const victimEmail = `victim_${Date.now()}@raloa.test`;
   const victimUsername = `victim_${Date.now()}`;
   let victimToken = '';
   let victimBlockId = '';
   let victimProfileId = '';
 
-  const attackerEmail = `attacker_${Date.now()}@liinx.test`;
+  const attackerEmail = `attacker_${Date.now()}@raloa.test`;
   const attackerUsername = `attacker_${Date.now()}`;
   let attackerToken = '';
 
@@ -212,9 +212,9 @@ describe('security', () => {
 
     it('should reject expired JWT tokens', async () => {
       // Sign a token with negative expiration time
-      const secret = process.env.JWT_SECRET || 'liinx_production_jwt_secret_key_8492048';
+      const secret = process.env.JWT_SECRET || 'raloa_production_jwt_secret_key_8492048';
       const expiredToken = jwt.sign(
-        { userId: 'usr_test', email: 'test@liinx.test', profileId: 'prf_test', username: 'test' },
+        { userId: 'usr_test', email: 'test@raloa.test', profileId: 'prf_test', username: 'test' },
         secret,
         { expiresIn: '-1s' }
       );
@@ -361,7 +361,7 @@ describe('security', () => {
     it('should accept and log CSP violation reports at /api/csp-report', async () => {
       const violationPayload = {
         'csp-report': {
-          'document-uri': 'https://liinx.app/@creator',
+          'document-uri': 'https://raloa.app/@creator',
           'referrer': '',
           'violated-directive': 'script-src',
           'effective-directive': 'script-src',
@@ -369,7 +369,7 @@ describe('security', () => {
           'disposition': 'enforce',
           'blocked-uri': 'inline',
           'line-number': 1,
-          'source-file': 'https://liinx.app/@creator',
+          'source-file': 'https://raloa.app/@creator',
           'status-code': 200,
           'script-sample': ''
         }

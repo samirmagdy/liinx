@@ -12,8 +12,8 @@ vi.mock('../server/services/email.js', async () => {
 
 describe('Newsletter capture and subscriber management', () => {
   const suffix = Date.now();
-  const ownerEmail = `newsletter_owner_${suffix}@liinx.test`;
-  const secondEmail = `newsletter_second_${suffix}@liinx.test`;
+  const ownerEmail = `newsletter_owner_${suffix}@raloa.test`;
+  const secondEmail = `newsletter_second_${suffix}@raloa.test`;
   let ownerProfileId = '';
   let ownerToken = '';
   let secondProfileId = '';

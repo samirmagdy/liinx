@@ -16,7 +16,7 @@ export const apiV1Router = Router();
 // This is deliberately separate from Studio authentication limits.
 apiV1Router.use('/v1', sharedRateLimit({ name: 'api-v1', limit: 120, windowMs: 60000 }));
 
-// Middleware: Authenticate with API Key (liinx_live_...)
+// Middleware: Authenticate with API Key (raloa_live_...)
 export interface ApiKeyRequest extends Request {
   profile?: any;
   apiKeyId?: string;
@@ -26,13 +26,13 @@ export function requireApiKey(req: ApiKeyRequest, res: Response, next: NextFunct
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
-      error: 'API key required. Include "Authorization: Bearer liinx_live_..." header.'
+      error: 'API key required. Include "Authorization: Bearer raloa_live_..." header.'
     });
   }
 
   const rawKey = authHeader.split(' ')[1].trim();
-  if (!rawKey.startsWith('liinx_live_')) {
-    return res.status(401).json({ error: 'Invalid API key format. Keys start with liinx_live_' });
+  if (!rawKey.startsWith('raloa_live_')) {
+    return res.status(401).json({ error: 'Invalid API key format. Keys start with raloa_live_' });
   }
 
   const hash = crypto.createHash('sha256').update(rawKey).digest('hex');
@@ -98,9 +98,9 @@ apiV1Router.post('/studio/api-keys', requireAuth, (req: AuthenticatedRequest, re
     }
 
     const rawSecret = crypto.randomBytes(24).toString('hex');
-    const fullKey = `liinx_live_${rawSecret}`;
+    const fullKey = `raloa_live_${rawSecret}`;
     const keyHash = crypto.createHash('sha256').update(fullKey).digest('hex');
-    const prefix = `liinx_live_${rawSecret.substring(0, 6)}...`;
+    const prefix = `raloa_live_${rawSecret.substring(0, 6)}...`;
     const keyId = createId('key');
     const now = Date.now();
     const expiresAt = now + 90 * 24 * 60 * 60 * 1000;

@@ -14,7 +14,7 @@ function unique(prefix: string): string {
 }
 
 async function registerAccount() {
-  const email = `${unique('recovery')}@liinx.test`;
+  const email = `${unique('recovery')}@raloa.test`;
   const username = unique('recovery_user').slice(0, 30);
   const response = await request(app).post('/api/auth/register').send({ email, password: 'Password123!', username });
   expect(response.status).toBe(201);
@@ -23,7 +23,7 @@ async function registerAccount() {
 
 describe('account recovery and deletion', () => {
   it('allows only one reset-token consume across independent SQLite connections', async () => {
-    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-reset-race-'));
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'raloa-reset-race-'));
     const databasePath = path.join(directory, 'reset.sqlite');
     const first = new Database(databasePath);
     const second = new Database(databasePath);
@@ -69,7 +69,7 @@ describe('account recovery and deletion', () => {
     delete process.env.RESEND_API_KEY;
     delete process.env.CONTACT_FROM_EMAIL;
     try {
-      const response = await request(app).post('/api/auth/password-reset/request').send({ email: `${unique('unknown')}@liinx.test` });
+      const response = await request(app).post('/api/auth/password-reset/request').send({ email: `${unique('unknown')}@raloa.test` });
       expect(response.status).toBe(503);
       expect(response.body.message).toBeUndefined();
       expect(response.body.error).toMatch(/temporarily unavailable/i);
@@ -175,7 +175,7 @@ describe('account recovery and deletion', () => {
       const oldToken = new URL(emailBody.match(/https?:\/\/[^\s]+/)![0]).searchParams.get('token')!;
 
       // Change the email address — old token is now stale
-      const newEmail = `${unique('changed')}@liinx.test`;
+      const newEmail = `${unique('changed')}@raloa.test`;
       const updateRes = await request(app)
         .post('/api/auth/update-email')
         .set('Authorization', `Bearer ${account.token}`)
@@ -222,7 +222,7 @@ describe('account recovery and deletion', () => {
       ).run(pendingHash, userId, 'email_verification', subjectHash, Date.now() + 24 * 60 * 60 * 1000, Date.now());
 
       // Change email — must atomically mark the seeded token as used
-      const newEmail = `${unique('atomic')}@liinx.test`;
+      const newEmail = `${unique('atomic')}@raloa.test`;
       const updateRes = await request(app)
         .post('/api/auth/update-email')
         .set('Authorization', `Bearer ${account.token}`)

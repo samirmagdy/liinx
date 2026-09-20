@@ -39,7 +39,7 @@ export class BackupService {
           secretAccessKey,
           region: process.env.BACKUP_S3_REGION || 'us-east-1',
           endpoint: process.env.BACKUP_S3_ENDPOINT,
-          prefix: process.env.BACKUP_S3_PREFIX || 'liinx-backups',
+          prefix: process.env.BACKUP_S3_PREFIX || 'raloa-backups',
           forcePathStyle: process.env.BACKUP_S3_FORCE_PATH_STYLE === 'true'
         };
         this.remoteStorage = new S3CompatibleBackupStorage(s3Config);
@@ -72,7 +72,7 @@ export class BackupService {
     initDatabase();
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const tempDbFileName = `liinx-db-${timestamp}.tmp.db`;
+    const tempDbFileName = `raloa-db-${timestamp}.tmp.db`;
     const tempDbPath = path.join(this.localStorage.getDirectory(), tempDbFileName);
 
     try {
@@ -100,7 +100,7 @@ export class BackupService {
       let isEncrypted = false;
       let ivHex: string | undefined;
       let tagHex: string | undefined;
-      let filename = `liinx-db-${timestamp}.db`;
+      let filename = `raloa-db-${timestamp}.db`;
 
       if (this.encryptionKey) {
         const encrypted = encryptBackupData(rawData, this.encryptionKey);
@@ -143,11 +143,11 @@ export class BackupService {
         remoteKey = filename;
 
         // Prune stale remote backups per retention policy
-        await this.pruneStorage(this.remoteStorage, 'liinx-db-');
+        await this.pruneStorage(this.remoteStorage, 'raloa-db-');
       }
 
       // 7. Prune stale local backups per retention policy
-      await this.pruneStorage(this.localStorage, 'liinx-db-');
+      await this.pruneStorage(this.localStorage, 'raloa-db-');
 
       const durationMs = Date.now() - startTime;
       const result: BackupResult = {
@@ -194,7 +194,7 @@ export class BackupService {
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const tempArchivePath = path.join(this.localStorage.getDirectory(), `liinx-uploads-${timestamp}.tmp.tar.gz`);
+    const tempArchivePath = path.join(this.localStorage.getDirectory(), `raloa-uploads-${timestamp}.tmp.tar.gz`);
 
     try {
       // 1. Create shell-safe tar.gz archive
@@ -210,7 +210,7 @@ export class BackupService {
       let isEncrypted = false;
       let ivHex: string | undefined;
       let tagHex: string | undefined;
-      let filename = `liinx-uploads-${timestamp}.tar.gz`;
+      let filename = `raloa-uploads-${timestamp}.tar.gz`;
 
       if (this.encryptionKey) {
         const encrypted = encryptBackupData(rawData, this.encryptionKey);
@@ -253,11 +253,11 @@ export class BackupService {
         remoteKey = filename;
 
         // Prune stale remote backups per retention policy
-        await this.pruneStorage(this.remoteStorage, 'liinx-uploads-');
+        await this.pruneStorage(this.remoteStorage, 'raloa-uploads-');
       }
 
       // 6. Prune stale local backups per retention policy
-      await this.pruneStorage(this.localStorage, 'liinx-uploads-');
+      await this.pruneStorage(this.localStorage, 'raloa-uploads-');
 
       const durationMs = Date.now() - startTime;
       const result: BackupResult = {

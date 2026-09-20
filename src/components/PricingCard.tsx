@@ -104,12 +104,12 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     <article
       className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between h-full transition-all relative ${
         plan.highlight
-          ? 'bg-neutral-900 text-white shadow-xl ring-2 ring-amber-500/20'
+          ? 'bg-neutral-900 text-white shadow-xl ring-2 ring-indigo-500/20'
           : 'bg-white border border-neutral-200 text-neutral-900 shadow-xs'
       }`}
     >
       {plan.highlight && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-400 text-neutral-950 text-xs font-mono font-bold uppercase tracking-wider shadow-xs">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-indigo-400 text-neutral-950 text-xs font-mono font-bold uppercase tracking-wider shadow-xs">
           {plan.recommendationLabel}
         </span>
       )}
@@ -129,7 +129,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           </h3>
         </div>
         <div className="space-y-1 -mt-3">
-          <p className={`text-xs font-semibold ${plan.highlight ? 'text-amber-400' : 'text-amber-700'}`}>
+          <p className={`text-xs font-semibold ${plan.highlight ? 'text-indigo-400' : 'text-indigo-700'}`}>
             {plan.audience}
           </p>
           <p className={`text-sm leading-relaxed ${plan.highlight ? 'text-neutral-300' : 'text-neutral-600'}`}>

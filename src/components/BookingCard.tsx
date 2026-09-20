@@ -24,7 +24,7 @@ export function BookingCard({ block, theme, previewOnly = false }: { block: Book
   };
   return <section className="p-4 rounded-2xl space-y-3 min-w-0 hover:scale-[1.02] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ background: theme.cardBg, color: theme.cardText, border: theme.cardBorder }}>
     <h3 className="font-bold text-base" dir="auto">{block.title}</h3>
-    <p className="text-sm">{ar ? 'اختر موعدك وأكّد الحجز عبر Calendly. لا تعالج Liinx الحجوزات أو المدفوعات.' : 'Choose a time and confirm your booking through Calendly. Liinx does not process bookings or payments.'}</p>
+    <p className="text-sm">{ar ? 'اختر موعدك وأكّد الحجز عبر Calendly. لا تعالج RALOA الحجوزات أو المدفوعات.' : 'Choose a time and confirm your booking through Calendly. RALOA does not process bookings or payments.'}</p>
     <button type="button" aria-expanded={open} aria-disabled={previewOnly} disabled={previewOnly} onClick={openScheduler} className="w-full min-h-11 rounded-xl border px-4 py-2 font-semibold disabled:cursor-not-allowed disabled:opacity-60">
       {previewOnly ? (ar ? 'الحجز معطّل في المعاينة' : 'Booking disabled in preview') : open ? (ar ? 'إغلاق المواعيد' : 'Close scheduler') : (ar ? 'احجز موعداً' : 'Book an appointment')}
     </button>

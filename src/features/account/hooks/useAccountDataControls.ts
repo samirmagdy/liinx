@@ -19,7 +19,7 @@ export function useAccountDataControls(user: AccountUser, ar: boolean, logout: (
       const url = window.URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = `liinx-data-export-${user?.username || 'user'}-${Date.now()}.json`;
+      anchor.download = `raloa-data-export-${user?.username || 'user'}-${Date.now()}.json`;
       document.body.appendChild(anchor);
       anchor.click();
       window.URL.revokeObjectURL(url);

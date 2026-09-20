@@ -133,7 +133,7 @@ instagramRouter.get('/integrations/instagram/callback', async (req: Request, res
   }
 
   // Validate and consume state atomically. The callback intentionally does not
-  // require the Liinx session because the OAuth provider returns to this URL;
+  // require the RALOA session because the OAuth provider returns to this URL;
   // ownership is bound to the single-use server-side state.
   const stateResult = consumeInstagramState(state);
   if (typeof stateResult === 'string') return res.redirect(`/studio?instagram_error=${stateResult}`);
@@ -382,7 +382,7 @@ instagramRouter.post('/integrations/instagram/disconnect', requireAuth, (req: Au
   try {
     const profileId = req.user!.profileId;
     db.prepare('DELETE FROM instagram_sync WHERE profile_id = ?').run(profileId);
-    return res.json({ success: true, message: 'Instagram access removed from Liinx. Revoke Liinx in Instagram settings if you also want to remove Meta-side authorization.' });
+    return res.json({ success: true, message: 'Instagram access removed from RALOA. Revoke RALOA in Instagram settings if you also want to remove Meta-side authorization.' });
   } catch (err: any) {
     return res.status(500).json({ error: 'Failed to disconnect: ' + err.message });
   }

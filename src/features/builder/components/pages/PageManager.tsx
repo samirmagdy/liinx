@@ -132,7 +132,7 @@ export const PageManager: React.FC = () => {
                   {ui('Published')}
                 </label>
                 <p className="text-[11px] font-normal text-neutral-500">
-                  {ui('Changes save directly to the published page. Unpublished pages are hidden; Liinx does not keep a separate draft revision.')}
+                  {ui('Changes save directly to the published page. Unpublished pages are hidden; RALOA does not keep a separate draft revision.')}
                 </p>
               </div>
             )}

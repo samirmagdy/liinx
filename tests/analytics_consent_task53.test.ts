@@ -13,7 +13,7 @@ describe('analytics consent and external pixels', () => {
     initDatabase();
     username = `consent_${suffix}`;
     const response = await request(app).post('/api/auth/register').send({
-      email: `consent-${suffix}@liinx.test`, password: 'Password123!', username
+      email: `consent-${suffix}@raloa.test`, password: 'Password123!', username
     });
     token = response.body.token;
     profileId = response.body.profileId;

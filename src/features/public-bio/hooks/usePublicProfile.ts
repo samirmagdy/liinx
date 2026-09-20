@@ -28,13 +28,13 @@ function updatePublicProfileMetadata(profile: CreatorProfile, customDomain?: str
     return;
   }
 
-  const title = profile.shareTitle || `${profile.displayName} (@${profile.username}) | LIINX`;
-  const description = profile.shareDescription || profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`;
+  const title = profile.shareTitle || `${profile.displayName} (@${profile.username}) | RALOA`;
+  const description = profile.shareDescription || profile.bio || `Explore ${profile.displayName}'s links, media and updates on RALOA.`;
   const isDemo = Boolean(findSystemDemoProfile(profile.username));
   const canonical = customDomain
     ? `https://${customDomain}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`
-    : `https://liinx.app/@${profile.username}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`;
-  const image = profile.shareImageUrl || profile.avatarUrl || 'https://liinx.app/og-liinx.png';
+    : `https://raloa.app/@${profile.username}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`;
+  const image = profile.shareImageUrl || profile.avatarUrl || 'https://raloa.app/social/og-image-1200x630.jpg';
 
   document.title = title;
   setMetaContent('meta[name="description"]', description);
@@ -47,7 +47,7 @@ function updatePublicProfileMetadata(profile: CreatorProfile, customDomain?: str
   setMetaContent('meta[name="twitter:description"]', description);
   setMetaContent('meta[property="og:image"]', image);
   setMetaContent('meta[property="og:image:secure_url"]', image);
-  setMetaContent('meta[property="og:image:alt"]', `${profile.displayName} on Liinx`);
+  setMetaContent('meta[property="og:image:alt"]', `${profile.displayName} on RALOA`);
   setMetaContent('meta[name="twitter:image"]', image);
 }
 
@@ -121,7 +121,7 @@ export function usePublicProfile({
           if (demo) {
             setProfile(demo);
             if (typeof document !== 'undefined') {
-              document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
+              document.title = `${demo.displayName} (@${demo.username}) | RALOA`;
             }
             return;
           }
@@ -130,7 +130,7 @@ export function usePublicProfile({
         }
         setProfile(fetchedProfile);
         if (typeof document !== 'undefined') {
-          document.title = `${fetchedProfile.displayName} (@${fetchedProfile.username}) | LIINX`;
+          document.title = `${fetchedProfile.displayName} (@${fetchedProfile.username}) | RALOA`;
         }
       })
       .catch((err: any) => {
@@ -138,7 +138,7 @@ export function usePublicProfile({
         if (demo) {
           setProfile(demo);
           if (typeof document !== 'undefined') {
-            document.title = `${demo.displayName} (@${demo.username}) | LIINX`;
+            document.title = `${demo.displayName} (@${demo.username}) | RALOA`;
           }
           return;
         }

@@ -11,7 +11,7 @@ describe('link animation contract', () => {
     initDatabase();
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     const registration = await request(app).post('/api/auth/register').send({
-      email: `link-animation-${unique}@liinx.test`, password: 'LinkAnimationPassword2026!', username: `animation${unique}`.slice(0, 30)
+      email: `link-animation-${unique}@raloa.test`, password: 'LinkAnimationPassword2026!', username: `animation${unique}`.slice(0, 30)
     }).expect(201);
     token = registration.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);

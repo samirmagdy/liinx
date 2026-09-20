@@ -11,7 +11,7 @@ function safeError(error: unknown) {
 
 export function log(level: LogLevel, message: string, fields: Record<string, unknown> = {}) {
   if (levels[level] < levels[minimumLevel]) return;
-  const entry = { timestamp: new Date().toISOString(), level, service: 'liinx-api', message, ...fields };
+  const entry = { timestamp: new Date().toISOString(), level, service: 'raloa-api', message, ...fields };
   process.stdout.write(`${JSON.stringify(entry)}\n`);
 }
 

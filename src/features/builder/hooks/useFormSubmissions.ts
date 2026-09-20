@@ -78,7 +78,7 @@ export function useFormSubmissions({ activeTab, profileId }: UseFormSubmissionsP
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `liinx-${formSubmissionFilter ? 'form' : 'forms'}-responses.csv`;
+      link.download = `raloa-${formSubmissionFilter ? 'form' : 'forms'}-responses.csv`;
       document.body.appendChild(link);
       link.click();
       link.remove();

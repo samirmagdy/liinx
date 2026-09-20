@@ -10,7 +10,7 @@ describe('audio block provider boundaries', () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const username = `audio_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `audio_${unique}@liinx.test`,
+      email: `audio_${unique}@raloa.test`,
       password: 'AudioPassword2026!',
       username
     }).expect(201);

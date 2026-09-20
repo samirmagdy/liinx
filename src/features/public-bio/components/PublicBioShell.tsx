@@ -67,13 +67,13 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
   // Read saved analytics consent from localStorage
   useEffect(() => {
     if (previewOnly || typeof window === 'undefined') return;
-    const saved = window.localStorage.getItem('liinx_analytics_consent');
+    const saved = window.localStorage.getItem('raloa_analytics_consent');
     if (saved === 'granted' || saved === 'denied') setAnalyticsConsent(saved);
   }, [previewOnly]);
 
   const updateAnalyticsConsent = (value: 'granted' | 'denied') => {
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('liinx_analytics_consent', value);
+      window.localStorage.setItem('raloa_analytics_consent', value);
     }
     setAnalyticsConsent(value);
   };
@@ -176,7 +176,7 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
         <div
           className={`mb-14 ${
             hasGridLink
-              ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*]:sm:col-span-2 [&>.liinx-grid-link]:sm:col-span-1'
+              ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 [&>*]:sm:col-span-2 [&>.raloa-grid-link]:sm:col-span-1'
               : 'space-y-4'
           }`}
         >

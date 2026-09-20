@@ -171,7 +171,7 @@ export const BuilderToolbar: React.FC = () => {
         <button
           onClick={async () => {
             if (!queueRef.current?.dirty || (await queueRef.current.flush())) {
-              window.sessionStorage.setItem(`liinx-fullscreen-preview:${profile.username.toLowerCase()}`, '1');
+              window.sessionStorage.setItem(`raloa-fullscreen-preview:${profile.username.toLowerCase()}`, '1');
               onViewFullscreen(profile, customTheme);
             }
           }}

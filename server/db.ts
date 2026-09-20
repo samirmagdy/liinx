@@ -13,7 +13,7 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'liinx.db');
+const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'raloa.db');
 export const db = new Database(dbPath);
 
 // Enable WAL mode, concurrency busy timeout, and memory cache tuning
@@ -661,7 +661,7 @@ function seedDefaultData() {
     if (process.env.NODE_ENV === 'test' && !(db.prepare('SELECT id FROM profiles WHERE username = ?').get('elenarostova'))) {
       const now = Date.now();
       const demoUserId = 'usr_demo_01';
-      db.prepare('INSERT OR IGNORE INTO users (id, email, password_hash, session_version, created_at) VALUES (?, ?, ?, 1, ?)').run(demoUserId, 'demo@liinx.co', bcrypt.hashSync('password123', 10), now);
+      db.prepare('INSERT OR IGNORE INTO users (id, email, password_hash, session_version, created_at) VALUES (?, ?, ?, 1, ?)').run(demoUserId, 'demo@raloa.co', bcrypt.hashSync('password123', 10), now);
       const owner = db.prepare('SELECT id FROM users WHERE id = ?').get(demoUserId);
       if (owner) {
         db.prepare(`INSERT OR IGNORE INTO profiles (id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
@@ -679,7 +679,7 @@ function seedDefaultData() {
   db.prepare(`
     INSERT INTO users (id, email, password_hash, created_at)
     VALUES (?, ?, ?, ?)
-  `).run(demoUserId, 'demo@liinx.co', passwordHash, now);
+  `).run(demoUserId, 'demo@raloa.co', passwordHash, now);
 
   // Elena Profile
   const elenaProfileId = 'prf_elena';

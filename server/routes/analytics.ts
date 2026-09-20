@@ -13,7 +13,7 @@ export const analyticsRouter = Router();
 function hashIp(ip?: string): string {
   if (!ip) return 'anonymous';
   const clientIp = ip.split(',')[0].trim();
-  return crypto.createHash('sha256').update(clientIp + 'liinx_salt_2026').digest('hex').substring(0, 16);
+  return crypto.createHash('sha256').update(clientIp + 'raloa_salt_2026').digest('hex').substring(0, 16);
 }
 
 function sanitizeUrl(rawUrl?: string | null): string | null {

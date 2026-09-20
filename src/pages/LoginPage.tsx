@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 import { friendlyErrorMessage } from '../utils/errors';
 import { brand } from '../config/brand';
-import { LiinxLogo } from '../components/LiinxLogo';
 
 export const LoginPage: React.FC = () => {
   const { tr: ui } = useUiLanguage();
@@ -35,11 +34,8 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2.5 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
-          <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center">
-            <LiinxLogo variant="light" size="sm" />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-neutral-900">{brand.productShortName}</span>
+        <Link href="/" className="inline-flex items-center justify-center mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
+          <img src="/brand/raloa-logo-horizontal-primary.png" alt={brand.productShortName} className="h-11 w-auto" loading="eager" decoding="async" />
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 text-balance">
           {ui("Welcome back to your Studio")}</h1>

@@ -15,7 +15,7 @@ export interface PricingPlanTranslation {
 
 export interface ComparisonRow {
   feature: string;
-  liinx: boolean | string;
+  raloa: boolean | string;
   linktree: boolean | string;
   beacons: boolean | string;
 }
@@ -82,7 +82,7 @@ export interface Translations {
     title: string;
     subtitle: string;
     featuresCol: string;
-    liinxCol: string;
+    raloaCol: string;
     linktreeCol: string;
     beaconsCol: string;
     included: string;
@@ -135,14 +135,14 @@ export const translations: Record<Language, Translations> = {
       badge: 'Mini-sites for creators · English + Arabic',
       headline: 'Your mini-site',
       headlineHighlight: 'in your bio.',
-      subheadline: 'Bring your links, work, supported media, bookings, and newsletter together in one customizable page. Publish at liinx.app/@yourname, with English and Arabic support including RTL layouts.',
+      subheadline: 'Bring your links, work, supported media, bookings, and newsletter together in one customizable page. Publish at raloa.app/@yourname, with English and Arabic support including RTL layouts.',
       claimPlaceholder: 'yourname',
       claimButton: 'Build your page',
       exploreTemplates: 'Explore templates',
       previewSubtitle: 'Interactive template preview',
       noCreditCard: 'Start with a free account',
       customDomainIncluded: 'Custom domains on paid plans',
-      zeroCommission: 'No Liinx fee on external sales or bookings',
+      zeroCommission: 'No RALOA fee on external sales or bookings',
       microProof1: 'Preview your page as you build',
       microProof2: 'Templates for creators, studios, and brands',
       themeLabel: 'Theme:',
@@ -219,23 +219,23 @@ export const translations: Record<Language, Translations> = {
     },
     comparisonSection: {
       badge: 'THE HONEST COMPARISON',
-      title: 'Compare Liinx capabilities',
-      subtitle: 'See exactly what Liinx currently supports, what is handled by another provider, and what requires a paid plan.',
+      title: 'Compare RALOA capabilities',
+      subtitle: 'See exactly what RALOA currently supports, what is handled by another provider, and what requires a paid plan.',
       featuresCol: 'Features & Standards',
-      liinxCol: 'LIINX',
+      raloaCol: 'RALOA',
       linktreeCol: 'Linktree',
       beaconsCol: 'Beacons',
       included: 'Included',
       rows: [
-        { feature: 'Clean, Ad-Free Design', liinx: true, linktree: false, beacons: false },
-        { feature: 'Custom Domain (e.g. bio.yoursite.com)', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Supported Spotify & YouTube embeds', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Accordion folders for clean profiles', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Instagram caption link extraction when authorized', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'External checkout and support links', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Public page performance depends on content and hosting', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Curated design themes', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Multiple profiles on eligible plans', liinx: true, linktree: 'Not assessed', beacons: 'Not assessed' }
+        { feature: 'Clean, Ad-Free Design', raloa: true, linktree: false, beacons: false },
+        { feature: 'Custom Domain (e.g. bio.yoursite.com)', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Supported Spotify & YouTube embeds', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Accordion folders for clean profiles', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Instagram caption link extraction when authorized', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'External checkout and support links', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Public page performance depends on content and hosting', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Curated design themes', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
+        { feature: 'Multiple profiles on eligible plans', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' }
       ]
     },
     pricingSection: {
@@ -254,7 +254,7 @@ export const translations: Record<Language, Translations> = {
           audience: 'For creators just getting started',
           tagline: 'A simple place to publish your work and links.',
           features: [
-            '1 published profile (liinx.app/@username)',
+            '1 published profile (raloa.app/@username)',
             'Links, social icons and rich media blocks',
             'Theme and aesthetic customization',
             'Built-in newsletter capture form',
@@ -269,7 +269,7 @@ export const translations: Record<Language, Translations> = {
             'Everything in Free',
             'Up to {maxProfiles} profiles / mini-sites under 1 account',
             'Custom domain support; hosting must configure DNS and TLS',
-            'Remove all Liinx branding',
+            'Remove all RALOA branding',
             'Custom CSS styling & web font injection',
             'Link scheduling & UTM campaign tracking',
             'Google Analytics 4 & Meta Pixel integration'
@@ -294,7 +294,7 @@ export const translations: Record<Language, Translations> = {
     faqSection: {
       badge: 'Questions & Answers',
       title: 'Everything you need to know.',
-      subtitle: 'Clear answers about the features Liinx currently supports.',
+      subtitle: 'Clear answers about the features RALOA currently supports.',
       openAnswer: 'Open answer'
     },
     footer: {
@@ -324,14 +324,14 @@ export const translations: Record<Language, Translations> = {
       badge: 'مواقع مصغّرة للمبدعين · عربي وإنجليزي',
       headline: 'موقعك المصغّر',
       headlineHighlight: 'في نبذتك.',
-      subheadline: 'اجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك ونشرتك البريدية في صفحة واحدة قابلة للتخصيص. انشرها على liinx.app/@اسمك، مع دعم العربية واتجاه RTL.',
+      subheadline: 'اجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك ونشرتك البريدية في صفحة واحدة قابلة للتخصيص. انشرها على raloa.app/@اسمك، مع دعم العربية واتجاه RTL.',
       claimPlaceholder: 'اسمك',
       claimButton: 'أنشئ صفحتك مجاناً',
       exploreTemplates: 'استكشف القوالب',
       previewSubtitle: 'معاينة تفاعلية لقالب',
       noCreditCard: 'ابدأ بحساب مجاني',
       customDomainIncluded: 'النطاقات المخصصة في الخطط المدفوعة',
-      zeroCommission: 'لا تفرض Liinx رسوماً على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها',
+      zeroCommission: 'لا تفرض RALOA رسوماً على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها',
       microProof1: 'عاين صفحتك أثناء بنائها',
       microProof2: 'قوالب للمبدعين والاستوديوهات والعلامات التجارية',
       themeLabel: 'السمة:',
@@ -408,23 +408,23 @@ export const translations: Record<Language, Translations> = {
     },
     comparisonSection: {
       badge: 'المقارنة الشفافة',
-      title: 'قارن إمكانات Liinx',
-      subtitle: 'راجع ما تدعمه Liinx حالياً، وما يتطلب مزوّداً خارجياً أو خطة مدفوعة.',
+      title: 'قارن إمكانات RALOA',
+      subtitle: 'راجع ما تدعمه RALOA حالياً، وما يتطلب مزوّداً خارجياً أو خطة مدفوعة.',
       featuresCol: 'المعايير والمميزات',
-      liinxCol: 'LIINX',
+      raloaCol: 'RALOA',
       linktreeCol: 'Linktree',
       beaconsCol: 'Beacons',
       included: 'مشمول',
       rows: [
-        { feature: 'تصميم نظيف وخالٍ تماماً من الإعلانات', liinx: true, linktree: false, beacons: false },
-        { feature: 'دومين مخصص (مثل bio.yoursite.com)', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'تضمينات Spotify وYouTube المدعومة', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'مجلدات قابلة للطي لتقليل التمرير', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'استخراج روابط Instagram عند التفويض', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'روابط دفع ودعم خارجية', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'أداء الصفحة يعتمد على المحتوى والاستضافة', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'سمات تصميم مختارة بعناية', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'إدارة ملفات متعددة في الخطط المؤهلة', liinx: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' }
+        { feature: 'تصميم نظيف وخالٍ تماماً من الإعلانات', raloa: true, linktree: false, beacons: false },
+        { feature: 'دومين مخصص (مثل bio.yoursite.com)', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'تضمينات Spotify وYouTube المدعومة', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'مجلدات قابلة للطي لتقليل التمرير', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'استخراج روابط Instagram عند التفويض', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'روابط دفع ودعم خارجية', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'أداء الصفحة يعتمد على المحتوى والاستضافة', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'سمات تصميم مختارة بعناية', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
+        { feature: 'إدارة ملفات متعددة في الخطط المؤهلة', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' }
       ]
     },
     pricingSection: {
@@ -443,7 +443,7 @@ export const translations: Record<Language, Translations> = {
           audience: 'للمبدعين في بداية طريقهم',
           tagline: 'مساحة بسيطة لنشر أعمالك وروابطك.',
           features: [
-            'ملف شخصي واحد منشور (liinx.app/@username)',
+            'ملف شخصي واحد منشور (raloa.app/@username)',
             'روابط وأيقونات تواصل وكتل وسائط غنية',
             'تخصيص المظهر والقوالب',
             'نموذج اشتراك في النشرة البريدية',
@@ -458,7 +458,7 @@ export const translations: Record<Language, Translations> = {
             'كل ما تتضمنه الخطة المجانية',
             'حتى {maxProfiles} ملفات شخصية ومواقع مصغرة ضمن حساب واحد',
             'دعم النطاق المخصص؛ يجب على الاستضافة إعداد DNS وTLS',
-            'إزالة جميع شعارات Liinx',
+            'إزالة جميع شعارات RALOA',
             'تخصيص CSS وإضافة خطوط ويب',
             'جدولة الروابط وتتبع حملات UTM',
             'تكامل Google Analytics 4 وMeta Pixel'
@@ -483,7 +483,7 @@ export const translations: Record<Language, Translations> = {
     faqSection: {
       badge: 'الأسئلة الشائعة',
       title: 'كل ما تحتاج لمعرفته.',
-      subtitle: 'إجابات واضحة حول الميزات التي تدعمها Liinx حالياً.',
+      subtitle: 'إجابات واضحة حول الميزات التي تدعمها RALOA حالياً.',
       openAnswer: 'افتح الإجابة'
     },
     footer: {

@@ -25,7 +25,7 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
           alt={profile.displayName}
           onError={event => {
             event.currentTarget.onerror = null;
-            event.currentTarget.src = '/favicon.svg';
+            event.currentTarget.src = '/icons/favicon-32x32.png';
           }}
           className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-md ring-4 ring-white/20"
           referrerPolicy="no-referrer"

@@ -58,8 +58,8 @@ function renderProfileMetadata(
   nonce: string | undefined,
   isDemo: boolean
 ): { html: string; title: string; description: string } {
-  const title = page?.title || profile.share_title || `${profile.display_name} (@${profile.username}) | LIINX`;
-  const description = page?.description || profile.share_description || profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
+  const title = page?.title || profile.share_title || `${profile.display_name} (@${profile.username}) | RALOA`;
+  const description = page?.description || profile.share_description || profile.bio || `Explore ${profile.display_name}'s links, media and updates on RALOA.`;
   const image = profile.share_image_url || profile.avatar_url || '';
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);

@@ -80,12 +80,12 @@ function HomePage() {
 }
 
 function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?: string }) {
-  const previewKey = `liinx-fullscreen-preview:${username.toLowerCase()}`;
+  const previewKey = `raloa-fullscreen-preview:${username.toLowerCase()}`;
   const fullscreenPreview = window.sessionStorage.getItem(previewKey) === '1';
   if (fullscreenPreview) window.sessionStorage.removeItem(previewKey);
   const previewTheme = (() => {
     try {
-      const raw = window.sessionStorage.getItem(`liinx-preview-theme:${username}`);
+      const raw = window.sessionStorage.getItem(`raloa-preview-theme:${username}`);
       if (!raw) return undefined;
       const parsed = JSON.parse(raw) as { theme?: ThemeConfig; createdAt?: number };
       if (!parsed.createdAt || Date.now() - parsed.createdAt > 60_000 || !parsed.theme) return undefined;
@@ -155,7 +155,7 @@ function StudioPage() {
         <Suspense fallback={<LoadingScreen message={tr('Loading your profile…')} submessage="Preparing your creative studio" fullscreen={false} />}>
           <BuilderStudio
             onViewFullscreen={(profile, theme) => {
-              window.sessionStorage.setItem(`liinx-preview-theme:${profile.username}`, JSON.stringify({ theme, createdAt: Date.now() }));
+              window.sessionStorage.setItem(`raloa-preview-theme:${profile.username}`, JSON.stringify({ theme, createdAt: Date.now() }));
               setLocation(`/@${profile.username}`);
             }}
           />
@@ -301,7 +301,7 @@ function CustomDomainApp({ currentHost, language, routerBase, routerSsrPath }: R
                 <Suspense fallback={<BioSkeletonLoader />}><PublicBioView
                   customDomain={currentHost}
                   pageSlug={customPageSlug}
-                  onBackToStudio={() => window.location.href = 'https://liinx.app/studio'}
+                  onBackToStudio={() => window.location.href = 'https://raloa.app/studio'}
                 /></Suspense>
               </div>
             </div>
@@ -315,9 +315,9 @@ function CustomDomainApp({ currentHost, language, routerBase, routerSsrPath }: R
 function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps) {
   useEffect(() => {
     const referral = new URLSearchParams(window.location.search).get('ref')?.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
-    if (referral) window.localStorage.setItem('liinx-referral', referral);
+    if (referral) window.localStorage.setItem('raloa-referral', referral);
     const agencyReferral = new URLSearchParams(window.location.search).get('agency_ref')?.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
-    if (agencyReferral) window.localStorage.setItem('liinx-agency-referral', agencyReferral);
+    if (agencyReferral) window.localStorage.setItem('raloa-agency-referral', agencyReferral);
   }, []);
   return (
     <Router base={routerBase} {...routerSsrPath}>
@@ -329,7 +329,7 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
           <div className="relative min-h-screen">
             <div className="relative z-10">
               <PageMetadata />
-              <Suspense fallback={<LoadingScreen message="Loading..." submessage="Liinx Studio" />}><Switch>
+              <Suspense fallback={<LoadingScreen message="Loading..." submessage="RALOA" />}><Switch>
             {/* Core application routes */}
             <Route path="/" component={HomePage} />
             <Route path="/features" component={FeaturesPage} />
@@ -397,8 +397,8 @@ export default function App({ initialLanguage, initialPath }: AppProps = {}) {
   const language = initialLanguage || languageForPath(currentPath);
   const routerBase = language === 'ar' ? '/ar' : undefined;
   const routerSsrPath = initialPath ? { ssrPath: initialPath } : {};
-  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
-  const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.liinx.app');
+  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'raloa.vercel.app', 'raloa.app'];
+  const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.raloa.app');
 
   return isCustomDomain
     ? <CustomDomainApp currentHost={currentHost} language={language} routerBase={routerBase} routerSsrPath={routerSsrPath} />

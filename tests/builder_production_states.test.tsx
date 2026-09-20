@@ -14,8 +14,8 @@ import type { CreatorProfile } from '../src/types';
 if (typeof window === 'undefined') {
   (global as any).window = {
     location: {
-      origin: 'https://liinx.test',
-      href: 'https://liinx.test/studio',
+      origin: 'https://raloa.test',
+      href: 'https://raloa.test/studio',
       search: ''
     },
     history: {

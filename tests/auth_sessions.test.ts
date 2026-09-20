@@ -17,7 +17,7 @@ describe('authentication and session boundaries', () => {
     const agent = request.agent(app);
     const suffix = Date.now();
     const register = await agent.post('/api/auth/register').send({
-      email: `session_${suffix}@liinx.test`, password: 'SessionPassword123!', username: `session_${suffix}`
+      email: `session_${suffix}@raloa.test`, password: 'SessionPassword123!', username: `session_${suffix}`
     });
     expect(register.status).toBe(201);
     const token = register.body.token as string;
@@ -31,7 +31,7 @@ describe('authentication and session boundaries', () => {
     const agent = request.agent(app);
     const suffix = Date.now();
     const register = await agent.post('/api/auth/register').send({
-      email: `origin_${suffix}@liinx.test`, password: 'OriginPassword123!', username: `origin_${suffix}`
+      email: `origin_${suffix}@raloa.test`, password: 'OriginPassword123!', username: `origin_${suffix}`
     });
     expect(register.status).toBe(201);
     const hostile = await agent.put('/api/studio/profile').set('Origin', 'https://evil.example').send({ bio: 'blocked' });
@@ -42,7 +42,7 @@ describe('authentication and session boundaries', () => {
   it.each([3, 5, 12])('keeps password-change sessions valid when the stored version starts at %i', async (sessionVersion) => {
     const agent = request.agent(app);
     const suffix = `${Date.now()}_${sessionVersion}`;
-    const email = `password_version_${suffix}@liinx.test`;
+    const email = `password_version_${suffix}@raloa.test`;
     const password = 'SessionPassword123!';
     const registered = await agent.post('/api/auth/register').send({ email, password, username: `pv_${Date.now().toString(36)}_${sessionVersion}` });
     expect(registered.status).toBe(201);
@@ -62,7 +62,7 @@ describe('authentication and session boundaries', () => {
   it.each([3, 5, 12])('keeps email-change sessions valid when the stored version starts at %i', async (sessionVersion) => {
     const agent = request.agent(app);
     const suffix = `${Date.now()}_${sessionVersion}`;
-    const email = `email_version_${suffix}@liinx.test`;
+    const email = `email_version_${suffix}@raloa.test`;
     const password = 'SessionPassword123!';
     const registered = await agent.post('/api/auth/register').send({ email, password, username: `email_version_${suffix}` });
     expect(registered.status).toBe(201);
@@ -74,7 +74,7 @@ describe('authentication and session boundaries', () => {
     const loggedIn = await agent.post('/api/auth/login').send({ email, password });
     expect(loggedIn.status).toBe(200);
 
-    const updatedEmail = `email_updated_${suffix}@liinx.test`;
+    const updatedEmail = `email_updated_${suffix}@raloa.test`;
     const changed = await agent.post('/api/auth/update-email').send({ email: updatedEmail, password });
     expect(changed.status).toBe(200);
     expect(verifyJwt(changed.body.token)?.sessionVersion).toBe(sessionVersion + 1);

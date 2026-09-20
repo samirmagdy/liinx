@@ -20,7 +20,7 @@ describe('folder content groups', () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `folder_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `folder-${unique}@liinx.test`, password: 'FolderPassword2026!', username
+      email: `folder-${unique}@raloa.test`, password: 'FolderPassword2026!', username
     }).expect(201);
     token = registration.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);

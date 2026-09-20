@@ -25,7 +25,7 @@ describe('acceptance tests', () => {
 
   const uniqueId = Date.now();
   const username = `accept_${uniqueId}`;
-  const email = `accept_${uniqueId}@liinx.test`;
+  const email = `accept_${uniqueId}@raloa.test`;
   const password = 'AcceptancePass2026!';
 
   let authToken = '';
@@ -449,7 +449,7 @@ describe('acceptance tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
-      expect(res.body.service).toBe('liinx-api');
+      expect(res.body.service).toBe('raloa-api');
       expect(typeof res.body.uptimeSeconds).toBe('number');
       expect(res.body.uptimeSeconds).toBeGreaterThanOrEqual(0);
       expect(new Date(res.body.timestamp).getTime()).not.toBeNaN();

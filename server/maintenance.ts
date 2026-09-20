@@ -48,14 +48,14 @@ export function backupUploads(): { archivePath: string; sizeBytes: number } {
   const backupDir = path.resolve(process.env.UPLOAD_BACKUP_DIR || 'data/backups/uploads');
   fs.mkdirSync(backupDir, { recursive: true });
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const archivePath = path.join(backupDir, `liinx-uploads-${timestamp}.tar.gz`);
+  const archivePath = path.join(backupDir, `raloa-uploads-${timestamp}.tar.gz`);
   // Keep this operation explicit and shell-free so filenames cannot become commands.
   execFileSync('tar', ['-czf', archivePath, '-C', uploadsDir, '.'], { stdio: 'pipe' });
   const sizeBytes = fs.statSync(archivePath).size;
   log('info', 'Upload backup completed', { archivePath, sizeBytes });
   const retentionCount = getUploadBackupRetentionCount();
   const backups = fs.readdirSync(backupDir)
-    .filter(file => file.startsWith('liinx-uploads-') && file.endsWith('.tar.gz'))
+    .filter(file => file.startsWith('raloa-uploads-') && file.endsWith('.tar.gz'))
     .map(file => ({ file, mtime: fs.statSync(path.join(backupDir, file)).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime);
   for (const stale of backups.slice(retentionCount)) {

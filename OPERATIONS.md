@@ -1,4 +1,4 @@
-# LIINX production operations
+# RALOA production operations
 
 ## Monitoring
 
@@ -9,7 +9,7 @@
 
 ## Backups and disaster recovery
 
-LIINX uses an off-site disaster recovery design to guarantee that a full loss of the application disk or host infrastructure does not result in the loss of production data or backups.
+RALOA uses an off-site disaster recovery design to guarantee that a full loss of the application disk or host infrastructure does not result in the loss of production data or backups.
 
 ### Architecture
 
@@ -50,9 +50,9 @@ npm run uploads:backup
 
 Example crontab configuration:
 ```cron
-0 2 * * * cd /app && npm run db:backup >> /var/log/liinx-backup.log 2>&1
-30 2 * * * cd /app && npm run uploads:backup >> /var/log/liinx-backup.log 2>&1
-0 4 * * 0 cd /app && npm run backup:verify >> /var/log/liinx-backup-verify.log 2>&1
+0 2 * * * cd /app && npm run db:backup >> /var/log/raloa-backup.log 2>&1
+30 2 * * * cd /app && npm run uploads:backup >> /var/log/raloa-backup.log 2>&1
+0 4 * * 0 cd /app && npm run backup:verify >> /var/log/raloa-backup-verify.log 2>&1
 ```
 
 ### Encryption and key recovery considerations
@@ -64,8 +64,8 @@ Example crontab configuration:
 
 For remote S3-compatible storage, keep bucket versioning/object lock and lifecycle
 rules managed by the provider as a second operational control. Set their expiry
-longer than the Liinx application policy so a mistaken application prune cannot
-be the only recoverability boundary. Liinx still verifies and prunes its own
+longer than the RALOA application policy so a mistaken application prune cannot
+be the only recoverability boundary. RALOA still verifies and prunes its own
 current-version objects, and logs each deletion with its retention reason.
 
 1. Store `BACKUP_ENCRYPTION_KEY` separately from the application host.
@@ -73,7 +73,7 @@ current-version objects, and logs each deletion with its retention reason.
 
 ### Automated restore verification drill
 
-LIINX includes a non-destructive, sandbox restore verification command:
+RALOA includes a non-destructive, sandbox restore verification command:
 
 ```bash
 # Verify the latest local backup
@@ -108,8 +108,8 @@ In the event of total application disk loss:
 4. Download the latest backup from object storage:
    ```bash
    # Using AWS CLI / S3 compatible tool:
-   aws s3 cp s3://$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX/liinx-db-<TIMESTAMP>.sqlite.enc ./restored.sqlite.enc
-   aws s3 cp s3://$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX/liinx-db-<TIMESTAMP>.sqlite.enc.meta.json ./restored.sqlite.enc.meta.json
+   aws s3 cp s3://$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX/raloa-db-<TIMESTAMP>.sqlite.enc ./restored.sqlite.enc
+   aws s3 cp s3://$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX/raloa-db-<TIMESTAMP>.sqlite.enc.meta.json ./restored.sqlite.enc.meta.json
    ```
 5. Decrypt using the verification utility or Node.js crypto:
    ```bash
@@ -119,12 +119,12 @@ In the event of total application disk loss:
      const meta = JSON.parse(fs.readFileSync('./restored.sqlite.enc.meta.json'));
      const key = derive32ByteKey(process.env.BACKUP_ENCRYPTION_KEY);
      const decrypted = decryptBackupData(fs.readFileSync('./restored.sqlite.enc'), key, meta.ivHex, meta.tagHex);
-     fs.writeFileSync(process.env.DATABASE_PATH || './data/liinx.db', decrypted);
+     fs.writeFileSync(process.env.DATABASE_PATH || './data/raloa.db', decrypted);
    "
    ```
 6. Restore media uploads by extracting the archive:
    ```bash
-   tar -xzf liinx-uploads-<TIMESTAMP>.tar.gz -C "$UPLOADS_DIR"
+   tar -xzf raloa-uploads-<TIMESTAMP>.tar.gz -C "$UPLOADS_DIR"
    ```
 7. Verify integrity:
    ```bash

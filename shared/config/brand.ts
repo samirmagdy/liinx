@@ -23,7 +23,7 @@ export interface BrandConfig {
   };
   colors: {
     ink: string;
-    amber: string;
+    accent: string;
     canvas: string;
     surface: string;
     border: string;
@@ -32,30 +32,30 @@ export interface BrandConfig {
 }
 
 export const brand: BrandConfig = {
-  productName: 'Liinx Studio',
-  productShortName: 'Liinx',
-  tagline: 'Your entire world. Designed your way.',
+  productName: 'RALOA',
+  productShortName: 'RALOA',
+  tagline: 'Your space on the internet.',
   subheadline: 'Create a beautiful mini-site for everything you make, sell and share.',
-  domain: 'liinx.app',
-  cnameTarget: 'liinx-app.fly.dev',
-  supportEmail: 'support@liinx.app',
-  legalName: 'Liinx Studio',
-  copyrightName: 'Liinx Studio',
-  logoMark: 'LX',
+  domain: 'raloa.app',
+  cnameTarget: 'raloa-app.fly.dev',
+  supportEmail: 'support@raloa.app',
+  legalName: 'RALOA',
+  copyrightName: 'RALOA',
+  logoMark: 'R',
   description: 'A design-first micro-website builder for creators, professionals, freelancers, businesses and brands.',
-  defaultTitle: 'Liinx Studio — A design-first micro-site builder for everything you make, sell and share',
+  defaultTitle: 'RALOA — Your space on the internet',
   socials: {
-    twitter: 'https://x.com/liinxapp',
-    instagram: 'https://instagram.com/liinxapp',
-    github: 'https://github.com/liinxapp',
-    linkedin: 'https://linkedin.com/company/liinx'
+    twitter: 'https://x.com/raloaapp',
+    instagram: 'https://instagram.com/raloaapp',
+    github: 'https://github.com/raloaapp',
+    linkedin: 'https://linkedin.com/company/raloa'
   },
   colors: {
-    ink: '#181817',
-    amber: '#D97706',
-    canvas: '#FAF9F6',
+    ink: '#0F172A',
+    accent: '#6366F1',
+    canvas: '#F8FAFC',
     surface: '#FFFFFF',
-    border: '#E5E5E0'
+    border: '#E2E8F0'
   },
   reservedUsernames: RESERVED_USERNAMES
 };

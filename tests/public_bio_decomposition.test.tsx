@@ -29,8 +29,8 @@ import type { CreatorProfile, ThemeConfig } from '../src/types';
 const mockLocation = {
   pathname: '/@creator_decomp',
   search: '?utm_source=twitter&utm_medium=social',
-  href: 'https://liinx.test/@creator_decomp',
-  origin: 'https://liinx.test',
+  href: 'https://raloa.test/@creator_decomp',
+  origin: 'https://raloa.test',
   assign: () => {},
   replace: () => {},
   reload: () => {}
@@ -201,7 +201,7 @@ describe('PublicBioView Decomposition & Domain Regression Tests', () => {
       expect(html).toContain('Latest Single');
       expect(html).toContain('Upcoming Shows');
       expect(html).toContain('Made with');
-      expect(html).toContain('LIINX');
+      expect(html).toContain('RALOA');
     });
 
     it('renders PublicProfileHeader with name, bio, and social channels', () => {
@@ -240,7 +240,7 @@ describe('PublicBioView Decomposition & Domain Regression Tests', () => {
         </LanguageProvider>
       );
       expect(html).toContain('Made with');
-      expect(html).toContain('LIINX');
+      expect(html).toContain('RALOA');
     });
   });
 
@@ -270,8 +270,8 @@ describe('PublicBioView Decomposition & Domain Regression Tests', () => {
           />
         </LanguageProvider>
       );
-      expect(html).toContain('liinx-grid-link');
-      expect(html).toContain('liinx-link-animation-pulse');
+      expect(html).toContain('raloa-grid-link');
+      expect(html).toContain('raloa-link-animation-pulse');
       expect(html).toContain('Merch Shop');
     });
 

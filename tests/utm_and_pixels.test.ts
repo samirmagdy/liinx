@@ -20,7 +20,7 @@ describe('UTM tracking and tracking pixels', () => {
 
   const authToken = signJwt({
     userId: testUserId,
-    email: 'pixel@liinx.test',
+    email: 'pixel@raloa.test',
     profileId: testProfileId,
     username: testUsername
   });
@@ -34,7 +34,7 @@ describe('UTM tracking and tracking pixels', () => {
     db.prepare(`
       INSERT INTO users (id, email, password_hash, created_at)
       VALUES (?, ?, ?, ?)
-    `).run(testUserId, 'pixel@liinx.test', 'hashed_pw', now);
+    `).run(testUserId, 'pixel@raloa.test', 'hashed_pw', now);
     db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(testUserId);
 
     db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(testProfileId);

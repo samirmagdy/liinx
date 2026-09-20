@@ -15,7 +15,7 @@ describe('basic link block journey', () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `link_${unique}`.slice(0, 30);
     const registration = await request(app).post('/api/auth/register').send({
-      email: `basic-link-${unique}@liinx.test`, password: 'BasicLinkPassword2026!', username
+      email: `basic-link-${unique}@raloa.test`, password: 'BasicLinkPassword2026!', username
     }).expect(201);
     token = registration.body.token;
     profileId = registration.body.profileId;

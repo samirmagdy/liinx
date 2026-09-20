@@ -8,13 +8,13 @@ import { chromium, firefox, webkit } from 'playwright';
 const origin = process.env.MOTION_TEST_URL || 'http://127.0.0.1:4187';
 const engine = process.env.MOTION_TEST_BROWSER || 'chromium';
 const browser = await ({ chromium, firefox, webkit }[engine]).launch({ channel: process.env.MOTION_TEST_CHANNEL || undefined });
-const evidence = await mkdtemp(join(tmpdir(), 'liinx-motion-'));
+const evidence = await mkdtemp(join(tmpdir(), 'raloa-motion-'));
 let cases = 0;
 try {
   for (const language of ['en', 'ar']) {
     for (const reducedMotion of ['no-preference', 'reduce']) {
       const context = await browser.newContext({ reducedMotion });
-      await context.addInitScript(lang => localStorage.setItem('liinx_lang', lang), language);
+      await context.addInitScript(lang => localStorage.setItem('raloa_lang', lang), language);
       // Isolated anonymous-session fixture; do not contact the real API or providers.
       await context.route('**/*', route => {
         const url = new URL(route.request().url());

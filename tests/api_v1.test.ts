@@ -25,7 +25,7 @@ describe('public REST API access', () => {
     // 1. Free user
     db.prepare('DELETE FROM users WHERE id = ?').run(freeUserId);
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
-      freeUserId, 'freeapi@liinx.test', 'hashed', now
+      freeUserId, 'freeapi@raloa.test', 'hashed', now
     );
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(freeProfileId, freeUsername);
     db.prepare(`
@@ -35,7 +35,7 @@ describe('public REST API access', () => {
 
     freeToken = signJwt({
       userId: freeUserId,
-      email: 'freeapi@liinx.test',
+      email: 'freeapi@raloa.test',
       profileId: freeProfileId,
       username: freeUsername
     });
@@ -43,7 +43,7 @@ describe('public REST API access', () => {
     // 2. Studio user
     db.prepare('DELETE FROM users WHERE id = ?').run(studioUserId);
     db.prepare("INSERT INTO users (id, email, password_hash, subscription_plan, subscription_status, created_at) VALUES (?, ?, ?, 'studio', 'active', ?)").run(
-      studioUserId, 'studioapi@liinx.test', 'hashed', now
+      studioUserId, 'studioapi@raloa.test', 'hashed', now
     );
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(studioProfileId, studioUsername);
     db.prepare(`
@@ -53,7 +53,7 @@ describe('public REST API access', () => {
 
     studioToken = signJwt({
       userId: studioUserId,
-      email: 'studioapi@liinx.test',
+      email: 'studioapi@raloa.test',
       profileId: studioProfileId,
       username: studioUsername
     });
@@ -81,7 +81,7 @@ describe('public REST API access', () => {
 
     expect(res.body.success).toBe(true);
     expect(res.body.apiKey).toBeDefined();
-    expect(res.body.apiKey).toMatch(/^liinx_live_/);
+    expect(res.body.apiKey).toMatch(/^raloa_live_/);
     expect(res.body.key.name).toBe('Zapier Automation');
 
     generatedApiKey = res.body.apiKey;
@@ -109,7 +109,7 @@ describe('public REST API access', () => {
 
     await request(app)
       .get('/api/v1/profile')
-      .set('Authorization', 'Bearer liinx_live_00000000000000000000000000000000')
+      .set('Authorization', 'Bearer raloa_live_00000000000000000000000000000000')
       .expect(401);
   });
 
@@ -131,7 +131,7 @@ describe('public REST API access', () => {
       .set('Authorization', `Bearer ${generatedApiKey}`)
       .send({
         title: 'API Generated Link',
-        url: 'https://developer.liinx.app/docs',
+        url: 'https://developer.raloa.app/docs',
         subtitle: 'Created programmatically via REST API',
         badge: 'NEW API'
       })

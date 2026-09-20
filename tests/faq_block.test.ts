@@ -10,7 +10,7 @@ describe('FAQ block', () => {
   beforeAll(async () => {
     const unique = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
     username = `faq_${unique}`.slice(0, 30);
-    const registration = await request(app).post('/api/auth/register').send({ email: `faq-${unique}@liinx.test`, password: 'FaqPassword2026!', username }).expect(201);
+    const registration = await request(app).post('/api/auth/register').send({ email: `faq-${unique}@raloa.test`, password: 'FaqPassword2026!', username }).expect(201);
     token = registration.body.token;
     const studio = await request(app).get('/api/studio/profile').set('Authorization', `Bearer ${token}`).expect(200);
     pageId = studio.body.pages.find((page: any) => page.isHome).id;

@@ -23,7 +23,7 @@ describe('custom CSS and font engine', () => {
 
     db.prepare('DELETE FROM users WHERE id = ?').run(testUserId);
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
-      testUserId, 'css@liinx.test', 'hashed', now
+      testUserId, 'css@raloa.test', 'hashed', now
     );
     db.prepare("UPDATE users SET subscription_plan = 'studio' WHERE id = ?").run(testUserId);
 
@@ -35,7 +35,7 @@ describe('custom CSS and font engine', () => {
 
     token = signJwt({
       userId: testUserId,
-      email: 'css@liinx.test',
+      email: 'css@raloa.test',
       profileId: testProfileId,
       username: testUsername
     });

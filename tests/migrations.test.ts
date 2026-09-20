@@ -5,8 +5,8 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 function runMigration(mode: 'fresh' | 'legacy') {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-task-04-'));
-  const dbPath = path.join(directory, 'liinx.db');
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'raloa-task-04-'));
+  const dbPath = path.join(directory, 'raloa.db');
   const uploads = path.join(directory, 'uploads');
   fs.mkdirSync(uploads);
   const fixture = path.resolve('tests/fixtures/migration-check.ts');
@@ -18,8 +18,8 @@ function runMigration(mode: 'fresh' | 'legacy') {
 }
 
 function runAccountBillingMigration() {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-account-billing-'));
-  const dbPath = path.join(directory, 'liinx.db');
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'raloa-account-billing-'));
+  const dbPath = path.join(directory, 'raloa.db');
   const fixture = path.resolve('tests/fixtures/account-billing-migration-check.ts');
   try {
     const output = execFileSync(process.execPath, ['--import', 'tsx/esm', fixture], {

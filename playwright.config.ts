@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const port = 3178;
 const baseURL = `http://127.0.0.1:${port}`;
-const databasePath = path.join(os.tmpdir(), `liinx-playwright-${process.pid}.db`);
+const databasePath = path.join(os.tmpdir(), `raloa-playwright-${process.pid}.db`);
 
 export default defineConfig({
   testDir: './playwright/e2e',

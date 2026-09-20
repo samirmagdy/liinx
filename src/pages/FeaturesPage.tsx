@@ -17,7 +17,7 @@ import {
 function getFeaturePillars(isRtl: boolean) {
   return isRtl ? [
     {
-      icon: <Layers className="w-6 h-6 text-amber-600" />,
+      icon: <Layers className="w-6 h-6 text-indigo-600" />,
       title: "محتوى وروابط",
       description: "أضف روابط ووسائط مدعومة ومجلدات ونماذج اشتراك إلى صفحتك.",
       bullets: [
@@ -28,7 +28,7 @@ function getFeaturePillars(isRtl: boolean) {
       ]
     },
     {
-      icon: <Palette className="w-6 h-6 text-amber-600" />,
+      icon: <Palette className="w-6 h-6 text-indigo-600" />,
       title: "تنسيق الصفحة",
       description: "اختر سمة وعدّل مظهر صفحتك، مع CSS وخطوط ويب مخصصة في الخطط المؤهلة.",
       bullets: [
@@ -38,17 +38,17 @@ function getFeaturePillars(isRtl: boolean) {
       ]
     },
     {
-      icon: <Globe2 className="w-6 h-6 text-amber-600" />,
+      icon: <Globe2 className="w-6 h-6 text-indigo-600" />,
       title: "نطاقات مخصصة",
       description: "اربط نطاقاً فرعياً بعد التحقق من DNS وإعداد الاستضافة وTLS.",
       bullets: [
         "التحقق من DNS",
-        "إزالة شعار Liinx في الخطط المؤهلة",
+        "إزالة شعار RALOA في الخطط المؤهلة",
         "نطاق مخصص لكل ملف مؤهل"
       ]
     },
     {
-      icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
+      icon: <BarChart3 className="w-6 h-6 text-indigo-600" />,
       title: "تحليلات الصفحة",
       description: "راجع زيارات الصفحة ونقرات الروابط ومصادر الإحالة وبيانات حملات UTM.",
       bullets: [
@@ -58,38 +58,38 @@ function getFeaturePillars(isRtl: boolean) {
       ]
     },
     {
-      icon: <Download className="w-6 h-6 text-amber-600" />,
+      icon: <Download className="w-6 h-6 text-indigo-600" />,
       title: "تصدير بيانات الحساب",
       description: "نزّل ملف JSON يتضمن بيانات الحساب والملفات الشخصية والصفحات والعناصر ومشتركي النشرة وردود النماذج. لا يتضمن ملفات الوسائط نفسها أو سجل التحليلات الخام.",
       bullets: ["بيانات الحساب والملفات والصفحات والعناصر", "سجلات المشتركين وردود النماذج", "ملفات الوسائط وسجل التحليلات الخام غير مضمنين"]
     }
   ] : [
     {
-      icon: <Layers className="w-6 h-6 text-amber-600" />,
+      icon: <Layers className="w-6 h-6 text-indigo-600" />,
       title: "Links and content blocks",
       description: "Add links, supported media embeds, folders, and newsletter signup forms to your page.",
       bullets: ["Audio players with supported provider embeds", "YouTube and Vimeo embeds", "Collapsible multi-item folders", "Newsletter subscription forms"]
     },
     {
-      icon: <Palette className="w-6 h-6 text-amber-600" />,
+      icon: <Palette className="w-6 h-6 text-indigo-600" />,
       title: "Page styling",
       description: "Choose a theme and adjust the typography and appearance of your public page.",
       bullets: ["Theme presets", "Custom CSS on eligible plans", "Custom web font links"]
     },
     {
-      icon: <Globe2 className="w-6 h-6 text-amber-600" />,
+      icon: <Globe2 className="w-6 h-6 text-indigo-600" />,
       title: "Custom domains",
       description: "Connect a subdomain after DNS verification and hosting and TLS configuration.",
-      bullets: ["DNS verification", "Remove Liinx branding on eligible plans", "Custom domain support per eligible profile"]
+      bullets: ["DNS verification", "Remove RALOA branding on eligible plans", "Custom domain support per eligible profile"]
     },
     {
-      icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
+      icon: <BarChart3 className="w-6 h-6 text-indigo-600" />,
       title: "Page analytics",
       description: "Review page visits, link clicks, referral sources, and UTM campaign data.",
       bullets: ["Daily page views and link clicks", "Referrer and UTM reporting", "Seven-day activity charts"]
     },
     {
-      icon: <Download className="w-6 h-6 text-amber-600" />,
+      icon: <Download className="w-6 h-6 text-indigo-600" />,
       title: "Export your account data",
       description: "Download a JSON file with account metadata, profiles, pages, blocks, newsletter subscribers, and form submissions. Uploaded file binaries and raw analytics history are not included.",
       bullets: ["Account metadata, profiles, pages, and blocks", "Newsletter subscribers and form submissions", "Uploaded files and raw analytics history are not included"]
@@ -110,7 +110,7 @@ export function FeaturesPage() {
       <main className="flex-1">
         {/* Hero Header */}
         <section className="max-w-6xl mx-auto px-6 pt-12 pb-8 space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">{isRtl ? 'ميزات المنصة' : 'Platform features'}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{isRtl ? 'ميزات المنصة' : 'Platform features'}</p>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-neutral-900 max-w-3xl leading-tight">
             {isRtl ? (
               <>
@@ -155,14 +155,14 @@ export function FeaturesPage() {
                 className="py-6 border-t border-neutral-200 space-y-3 text-start"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-amber-700">{feature.icon}</span>
+                  <span className="text-indigo-700">{feature.icon}</span>
                   <h2 className="text-lg font-semibold text-neutral-900">{feature.title}</h2>
                 </div>
                 <p className="text-sm text-neutral-600 leading-relaxed">{feature.description}</p>
                 <ul className="space-y-2 pt-2">
                   {feature.bullets.map((b, bIdx) => (
                     <li key={bIdx} className="flex items-center gap-2.5 text-sm text-neutral-700">
-                      <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-indigo-700 shrink-0" />
                       <span>{b}</span>
                     </li>
                   ))}

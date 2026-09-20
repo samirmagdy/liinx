@@ -183,7 +183,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           </div>
         )}
 
-        {/* LIINX Branding Footer Badge */}
+        {/* RALOA Branding Footer Badge */}
         {!(profile.plan && profile.plan !== 'free' && profile.hideBranding) && (
           <div className="pt-2 pb-6 text-center">
             <a 
@@ -192,7 +192,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
               style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>{ui("Made with")}{' '}<strong>{ui("LIINX")}</strong></span>
+              <span>{ui("Made with")}{' '}<strong>{ui("RALOA")}</strong></span>
             </a>
           </div>
         )}

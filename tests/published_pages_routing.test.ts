@@ -10,7 +10,7 @@ describe('published pages and public routing', () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const slugSuffix = unique.replace('_', '-');
     const registration = await request(app).post('/api/auth/register').send({
-      email: `public-pages-${unique}@liinx.test`,
+      email: `public-pages-${unique}@raloa.test`,
       password: 'PublishedPagesPassword2026!',
       username: `publicpages${unique}`.slice(0, 30)
     }).expect(201);
@@ -35,7 +35,7 @@ describe('published pages and public routing', () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const slugSuffix = unique.replace('_', '-');
     const registration = await request(app).post('/api/auth/register').send({
-      email: `custom-pages-${unique}@liinx.test`,
+      email: `custom-pages-${unique}@raloa.test`,
       password: 'PublishedPagesPassword2026!',
       username: `custompages${unique}`.slice(0, 30)
     }).expect(201);

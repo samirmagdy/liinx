@@ -18,7 +18,7 @@ export function friendlyErrorMessage(error: unknown, fallback = 'Something went 
   if (status === 429) return 'You are doing that too often. Please wait a moment and try again.';
   if (status >= 500) return 'The service is temporarily unavailable. Please try again shortly.';
   if (!status && /network|fetch failed|failed to fetch|backend unreachable/i.test(raw)) {
-    return 'We could not reach LIINX. Check your connection and try again.';
+    return 'We could not reach RALOA. Check your connection and try again.';
   }
 
   // Never surface implementation details, SQL errors, or stack-like messages.

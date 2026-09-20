@@ -58,11 +58,11 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
     <section id="features" className="marketing-section border-y border-neutral-200 bg-neutral-50 py-12 md:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal distance="md" className="mb-8 max-w-3xl">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">
             {isRtl ? 'ميزات المنصة' : 'Platform features'}
           </p>
           <h2 className="mb-3 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-            {isRtl ? 'ما يمكنك إنشاؤه باستخدام Liinx' : 'What you can build with Liinx'}
+            {isRtl ? 'ما يمكنك إنشاؤه باستخدام RALOA' : 'What you can build with RALOA'}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base">
             {isRtl
@@ -75,7 +75,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
           {groups.map((group, index) => (
             <article key={group.title} className="motion-card border-t border-neutral-300 py-5 text-start">
               <div className="mb-2 flex items-baseline gap-3">
-                <span className="font-mono text-xs text-amber-700">0{index + 1}</span>
+                <span className="font-mono text-xs text-indigo-700">0{index + 1}</span>
                 <h3 className="text-base font-semibold text-neutral-900">{group.title}</h3>
               </div>
               <p className="mb-3 text-sm leading-relaxed text-neutral-600">{group.description}</p>

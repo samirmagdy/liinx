@@ -17,7 +17,7 @@ describe('subscription entitlements', () => {
     const originalWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.STRIPE_WEBHOOK_SECRET;
     try {
-      const email = `${unique('account_billing')}@liinx.test`;
+      const email = `${unique('account_billing')}@raloa.test`;
       const username = unique('acct').slice(0, 24);
       const registered = await request(app).post('/api/auth/register').send({ email, password: 'Password123!', username });
       expect(registered.status).toBe(201);
@@ -78,7 +78,7 @@ describe('subscription entitlements', () => {
     const originalWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.STRIPE_WEBHOOK_SECRET;
     try {
-    const email = `${unique('billing')}@liinx.test`;
+    const email = `${unique('billing')}@raloa.test`;
     const username = unique('bu').slice(0, 24);
     const registered = await request(app).post('/api/auth/register').send({ email, password: 'Password123!', username });
     expect(registered.status).toBe(201);

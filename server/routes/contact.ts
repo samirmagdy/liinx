@@ -33,7 +33,7 @@ async function notifySupport(message: { name: string; email: string; message: st
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: sender, to: [recipient], subject: `LIINX support message from ${message.name}`, text: `From: ${message.name} <${message.email}>\n\n${message.message}` })
+    body: JSON.stringify({ from: sender, to: [recipient], subject: `RALOA support message from ${message.name}`, text: `From: ${message.name} <${message.email}>\n\n${message.message}` })
   });
   if (!response.ok) throw new Error(`Notification provider returned HTTP ${response.status}`);
   return 'sent';

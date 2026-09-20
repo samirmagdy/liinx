@@ -4,7 +4,6 @@ import { useLocation, Link } from 'wouter';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { brand } from '../config/brand';
-import { LiinxLogo } from '../components/LiinxLogo';
 import { THEMES } from '../config/themes';
 import confetti from 'canvas-confetti';
 import {
@@ -146,11 +145,8 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2.5 mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
-          <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center">
-            <LiinxLogo variant="light" size="sm" />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-neutral-900">{brand.productShortName}</span>
+        <Link href="/" className="inline-flex items-center justify-center mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
+          <img src="/brand/raloa-logo-horizontal-primary.png" alt={brand.productShortName} className="h-11 w-auto" loading="eager" decoding="async" />
         </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">
           {step === 1 ? ui("Build your micro-site") : ui("Choose your aesthetic")}
@@ -276,7 +272,7 @@ export const RegisterPage: React.FC = () => {
                             : 'bg-white/60 border-neutral-200 text-neutral-600 hover:border-neutral-300'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-amber-600' : 'text-neutral-400'}`} />
+                        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-indigo-600' : 'text-neutral-400'}`} />
                         <span className="text-[11px] font-semibold leading-tight">{ui(item.label)}</span>
                       </button>
                     );
@@ -335,7 +331,7 @@ export const RegisterPage: React.FC = () => {
                     ) : (
                       <>
                         <span>{ui("Launch My Page")}</span>
-                        <Sparkles className="w-4 h-4 text-amber-400" />
+                        <Sparkles className="w-4 h-4 text-indigo-400" />
                       </>
                     )}
                   </button>

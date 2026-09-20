@@ -21,20 +21,20 @@ export const pageTitles: Record<string, [string, string]> = {
 // client-side language changes use the same truthful page summaries.
 export const pageDescriptions: Record<string, [string, string]> = {
   '/': [
-    'Build a customizable mini-site for your bio with links, work, supported media, bookings, and newsletter signups. Liinx supports English, Arabic, and RTL layouts. Start free.',
-    'أنشئ موقعاً مصغّراً لنبذتك يجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك واشتراكات النشرة البريدية. يدعم Liinx العربية والإنجليزية واتجاه RTL. ابدأ مجاناً.'
+    'Build a customizable mini-site for your bio with links, work, supported media, bookings, and newsletter signups. RALOA supports English, Arabic, and RTL layouts. Start free.',
+    'أنشئ موقعاً مصغّراً لنبذتك يجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك واشتراكات النشرة البريدية. يدعم RALOA العربية والإنجليزية واتجاه RTL. ابدأ مجاناً.'
   ],
   '/features': [
-    'See how Liinx link-in-bio pages use custom themes, supported media, bookings, newsletters, custom domains, and analytics.',
-    'تعرّف على ميزات صفحات Liinx للرابط في البايو، مثل السمات المخصصة والوسائط والحجوزات والنشرات البريدية والنطاقات والتحليلات.'
+    'See how RALOA link-in-bio pages use custom themes, supported media, bookings, newsletters, custom domains, and analytics.',
+    'تعرّف على ميزات صفحات RALOA للرابط في البايو، مثل السمات المخصصة والوسائط والحجوزات والنشرات البريدية والنطاقات والتحليلات.'
   ],
   '/templates': [
-    'Browse customizable Liinx page templates and choose a starting design for your links, media, and creator content.',
-    'تصفح قوالب صفحات Liinx القابلة للتخصيص واختر تصميماً أولياً لروابطك ووسائطك ومحتوى صفحتك.'
+    'Browse customizable RALOA page templates and choose a starting design for your links, media, and creator content.',
+    'تصفح قوالب صفحات RALOA القابلة للتخصيص واختر تصميماً أولياً لروابطك ووسائطك ومحتوى صفحتك.'
   ],
   '/pricing': [
-    'Compare Liinx plans and features, including the free plan, paid options, and custom domain availability.',
-    'قارن خطط Liinx وميزاتها، بما فيها الخطة المجانية والخيارات المدفوعة وإمكانية استخدام نطاق مخصص.'
+    'Compare RALOA plans and features, including the free plan, paid options, and custom domain availability.',
+    'قارن خطط RALOA وميزاتها، بما فيها الخطة المجانية والخيارات المدفوعة وإمكانية استخدام نطاق مخصص.'
   ],
   '/guides': [
     'Practical guides for building a creator mini-site, setting up Arabic RTL pages, and organizing business links.',
@@ -53,23 +53,23 @@ export const pageDescriptions: Record<string, [string, string]> = {
     'استخدم موقعاً مصغّراً قابلاً للتخصيص لعرض معلومات النشاط وروابطه، واجعل WhatsApp وجهة للتواصل.'
   ],
   '/about': [
-    'Learn about Liinx, a page builder for sharing creator links, media, bookings, and newsletter signups.',
-    'تعرّف على Liinx، أداة إنشاء صفحات لمشاركة روابط المبدعين ووسائطهم وحجوزاتهم واشتراكات النشرة البريدية.'
+    'Learn about RALOA, a page builder for sharing creator links, media, bookings, and newsletter signups.',
+    'تعرّف على RALOA، أداة إنشاء صفحات لمشاركة روابط المبدعين ووسائطهم وحجوزاتهم واشتراكات النشرة البريدية.'
   ],
   '/contact': [
-    'Contact the Liinx team for help with your account, creator page, or product questions.',
-    'تواصل مع فريق Liinx للمساعدة في حسابك أو صفحة المبدع أو استفسارات المنتج.'
+    'Contact the RALOA team for help with your account, creator page, or product questions.',
+    'تواصل مع فريق RALOA للمساعدة في حسابك أو صفحة المبدع أو استفسارات المنتج.'
   ],
   '/privacy': [
-    'Read the Liinx privacy policy to learn how the service handles account and visitor information.',
-    'اقرأ سياسة خصوصية Liinx لمعرفة كيفية تعامل الخدمة مع معلومات الحساب والزوار.'
+    'Read the RALOA privacy policy to learn how the service handles account and visitor information.',
+    'اقرأ سياسة خصوصية RALOA لمعرفة كيفية تعامل الخدمة مع معلومات الحساب والزوار.'
   ],
   '/terms': [
-    'Read the terms that apply when you use Liinx and its creator page services.',
-    'اقرأ الشروط التي تنطبق عند استخدام Liinx وخدمات صفحات المبدعين.'
+    'Read the terms that apply when you use RALOA and its creator page services.',
+    'اقرأ الشروط التي تنطبق عند استخدام RALOA وخدمات صفحات المبدعين.'
   ],
-  '/login': ['Sign in to your Liinx account.', 'سجّل الدخول إلى حسابك في Liinx.'],
-  '/register': ['Create a Liinx account to build and publish your creator page.', 'أنشئ حساب Liinx لبناء صفحة المبدع ونشرها.'],
-  '/studio': ['Manage and customize your Liinx creator page.', 'أدر صفحة المبدع في Liinx وخصصها.'],
-  '/account': ['Manage your Liinx account settings.', 'أدر إعدادات حسابك في Liinx.']
+  '/login': ['Sign in to your RALOA account.', 'سجّل الدخول إلى حسابك في RALOA.'],
+  '/register': ['Create a RALOA account to build and publish your creator page.', 'أنشئ حساب RALOA لبناء صفحة المبدع ونشرها.'],
+  '/studio': ['Manage and customize your RALOA creator page.', 'أدر صفحة المبدع في RALOA وخصصها.'],
+  '/account': ['Manage your RALOA account settings.', 'أدر إعدادات حسابك في RALOA.']
 };

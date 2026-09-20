@@ -1,8 +1,8 @@
-# LIINX Architecture: Horizontal Scaling Roadmap & Single-Node Constraints
+# RALOA Architecture: Horizontal Scaling Roadmap & Single-Node Constraints
 
 ## 1. Executive Summary
 
-LIINX currently operates as an efficient, highly optimized **single-node monolith**:
+RALOA currently operates as an efficient, highly optimized **single-node monolith**:
 - **Database**: Local SQLite with Write-Ahead Logging (`better-sqlite3`).
 - **Media & File Storage**: Local persistent disk storage (`public/uploads`).
 - **Rate Limiting**: In-memory sliding window + SQLite event table (`rate_limit_events`).
@@ -56,7 +56,7 @@ Production startup safeguards strictly reject multi-instance deployment until th
 
 ## 3. Architectural Abstraction Boundaries
 
-To prepare for future migration without prematurely abandoning SQLite, LIINX defines infrastructure interfaces in [`server/infrastructure/interfaces.ts`](file:///Users/samirmagdy/Downloads/liinx-_-design-first-link-in-bio/server/infrastructure/interfaces.ts):
+To prepare for future migration without prematurely abandoning SQLite, RALOA defines infrastructure interfaces in [`server/infrastructure/interfaces.ts`](file:///Users/samirmagdy/Downloads/liinx-_-design-first-link-in-bio/server/infrastructure/interfaces.ts):
 
 | Interface | Active Single-Node Implementation | Future Distributed Implementation |
 | :--- | :--- | :--- |

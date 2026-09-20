@@ -51,16 +51,16 @@ export const LinkBlockView: React.FC<LinkBlockViewProps> = ({ block, theme, prev
     </>
   );
 
-  const className = `${linkLayout === 'grid' ? 'liinx-grid-link' : 'sm:col-span-2'} group relative ${
+  const className = `${linkLayout === 'grid' ? 'raloa-grid-link' : 'sm:col-span-2'} group relative ${
     isPill ? 'px-6 py-4' : 'p-4'
   } transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm ${
     hasDestination
       ? 'hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current'
       : 'opacity-75'
   } ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${
-    linkAnimation === 'fade' ? 'liinx-link-animation-fade' : ''
-  } ${linkAnimation === 'pulse' ? 'liinx-link-animation-pulse' : ''} ${
-    linkAnimation === 'lift' && hasDestination ? 'liinx-link-animation-lift' : ''
+    linkAnimation === 'fade' ? 'raloa-link-animation-fade' : ''
+  } ${linkAnimation === 'pulse' ? 'raloa-link-animation-pulse' : ''} ${
+    linkAnimation === 'lift' && hasDestination ? 'raloa-link-animation-lift' : ''
   } ${getRadiusClass(theme.cardRadius, isComplexLink)}`;
 
   const style = {

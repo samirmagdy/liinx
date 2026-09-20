@@ -1,6 +1,6 @@
 # Media storage
 
-Liinx accesses creator media through the `ObjectStorage` interface. The upload
+RALOA accesses creator media through the `ObjectStorage` interface. The upload
 routes do not write paths directly: they validate bytes, generate a safe object
 key, persist through the adapter, and record the returned URL in
 `uploaded_files`.
@@ -13,7 +13,7 @@ key, persist through the adapter, and record the returned URL in
   `MEDIA_S3_BUCKET`, `MEDIA_S3_ACCESS_KEY_ID`, and `MEDIA_S3_SECRET_ACCESS_KEY`.
   `MEDIA_S3_ENDPOINT` and `MEDIA_S3_FORCE_PATH_STYLE` support R2, MinIO,
   Backblaze B2, and other S3-compatible services in addition to AWS S3.
-- `MEDIA_S3_PREFIX` isolates Liinx objects in a bucket. `MEDIA_PUBLIC_URL` may
+- `MEDIA_S3_PREFIX` isolates RALOA objects in a bucket. `MEDIA_PUBLIC_URL` may
   point to a public bucket/CDN origin. Without it, the application proxies
   `/uploads/:key` through the adapter, so credentials remain server-side.
 

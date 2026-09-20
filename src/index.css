@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@import "./brand-tokens.css";
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--raloa-font-ui);
+  --font-display: var(--raloa-font-display);
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -80,17 +81,17 @@
   --motion-distance-sm: 6px;
   --motion-distance-md: 14px;
   --motion-distance-lg: 24px;
-  /* Neutral scale */
-  --color-neutral-50:  #FAF9F6;
-  --color-neutral-100: #F5F5F5;
-  --color-neutral-200: #E5E5E0;
-  --color-neutral-300: #D4D4D4;
-  --color-neutral-400: #A3A3A3;
-  --color-neutral-500: #737373;
-  --color-neutral-600: #525252;
-  --color-neutral-700: #404040;
-  --color-neutral-800: #262626;
-  --color-neutral-900: #181817;
+  /* Neutral scale — RALOA slate/navy */
+  --color-neutral-50:  var(--raloa-offwhite);
+  --color-neutral-100: #F1F5F9;
+  --color-neutral-200: #E2E8F0;
+  --color-neutral-300: #CBD5E1;
+  --color-neutral-400: #94A3B8;
+  --color-neutral-500: var(--raloa-slate);
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1E293B;
+  --color-neutral-900: var(--raloa-navy);
 
   /* Semantic aliases — based on brand colors */
   --color-bg:           var(--color-neutral-50);
@@ -101,11 +102,14 @@
   --color-text-secondary: var(--color-neutral-600);
   --color-text-tertiary: var(--color-neutral-500);
 
-  /* Brand accent — primary accent color */
-  --color-accent:       #B45309;
-  --color-accent-hover: #92300C;
-  --color-accent-tint:  #FEF3C7;
-  --color-accent-text:  #78350F;
+  /* Brand accent — primary accent color (RALOA indigo) */
+  --color-accent:       var(--raloa-primary);
+  --color-accent-hover: #4F46E5;
+  --color-accent-tint:  #E0E7FF;
+  --color-accent-text:  #3730A3;
+
+  /* Brand gradient — cyan → indigo → purple → pink */
+  --brand-gradient: var(--raloa-gradient);
 
   /* Semantic colors */
   --color-success:      #16A34A;
@@ -119,8 +123,8 @@
   --radius-xl:  1rem;
   --radius-2xl: 1.25rem;
   --radius-3xl: 1.75rem;
-  --shadow-soft: 0 12px 36px rgba(24, 24, 23, 0.08);
-  --shadow-lift: 0 24px 70px rgba(24, 24, 23, 0.14);
+  --shadow-soft: 0 12px 36px rgba(15, 23, 42, 0.08);
+  --shadow-lift: 0 24px 70px rgba(15, 23, 42, 0.14);
 }
 
 /* Marketing interaction feedback stays on compositor-friendly properties. */
@@ -157,6 +161,24 @@
   background: var(--color-neutral-50);
 }
 
+/* Brand hero backdrop (04_Website_Graphics). Light for marketing, dark for dark bands. */
+.raloa-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+.raloa-hero-bg--light { background-image: url('/brand/hero-background-light-1920x1080.webp'); }
+.raloa-hero-bg--dark { background-image: url('/brand/hero-background-dark-1920x1080.webp'); }
+
+/* Subtle tiled brand pattern for light marketing bands. */
+.raloa-pattern-bg {
+  background-image: url('/brand/raloa-pattern-light-512.png');
+  background-size: 512px 512px;
+  background-repeat: repeat;
+}
+
 .hero-accent {
   color: var(--color-accent);
   position: relative;
@@ -177,7 +199,7 @@
 }
 
 .hero-section .phone-shell {
-  box-shadow: 0 12px 30px rgba(24, 24, 23, 0.12);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
 }
 
 /* Marketing surfaces use Apple's quieter editorial rhythm: one visual voice,
@@ -190,10 +212,10 @@
 .marketing-shell h2,
 .marketing-shell h3,
 .marketing-shell h4 {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
 }
 .marketing-shell .font-brand {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
 }
 .marketing-shell #features [class*="hover:scale"],
 .marketing-shell #templates [class*="hover:scale"] {
@@ -227,32 +249,32 @@
 }
 
 /* Decorative motion background: never create a stacking or layout dependency. */
-.liinx-motion-background { isolation: isolate; opacity: 0.9; will-change: opacity; }
-.liinx-motion-glow {
+.raloa-motion-background { isolation: isolate; opacity: 0.9; will-change: opacity; }
+.raloa-motion-glow {
   background:
-    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(180, 83, 9, 0.12), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(146, 48, 12, 0.08), transparent 50%),
-    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(179, 141, 81, 0.06), transparent 70%);
-  animation: liinx-bg-breathe 14s ease-in-out infinite alternate;
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(99, 102, 241, 0.14), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.10), transparent 50%),
+    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(6, 182, 212, 0.08), transparent 70%);
+  animation: raloa-bg-breathe 14s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
-.liinx-motion-orbit { fill: none; stroke: var(--color-accent); vector-effect: non-scaling-stroke; transform-box: fill-box; will-change: transform; }
-.liinx-motion-orbit-a { stroke-width: 2; stroke-opacity: 0.28; animation: liinx-bg-orbit 14s ease-in-out infinite alternate; transform-origin: center; }
-.liinx-motion-orbit-b { stroke-width: 1.5; stroke-opacity: 0.2; animation: liinx-bg-orbit 18s ease-in-out -2s infinite alternate-reverse; transform-origin: center; }
-.liinx-motion-orbit-c { stroke-width: 1.8; stroke-opacity: 0.23; animation: liinx-bg-orbit 12s ease-in-out infinite alternate; transform-origin: center; }
-@keyframes liinx-bg-breathe { from { opacity: 0.65; } to { opacity: 1; } }
-@keyframes liinx-bg-orbit { from { transform: rotate(-7deg) scale(0.96); } to { transform: rotate(7deg) scale(1.04); } }
-@keyframes liinx-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
-@keyframes liinx-bar-pulse { 0%, 100% { transform: scaleY(0.7); opacity: 0.7; } 50% { transform: scaleY(1.15); opacity: 1; } }
-@keyframes liinx-glow-pulse { 0%, 100% { transform: scale(0.92); opacity: 0.35; } 50% { transform: scale(1.08); opacity: 0.75; } }
-.animate-liinx-shimmer { animation: liinx-shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-.animate-liinx-bar-1 { animation: liinx-bar-pulse 1.3s ease-in-out infinite; }
-.animate-liinx-bar-2 { animation: liinx-bar-pulse 1.3s ease-in-out 0.2s infinite; }
-.animate-liinx-bar-3 { animation: liinx-bar-pulse 1.3s ease-in-out 0.4s infinite; }
-.animate-liinx-glow { animation: liinx-glow-pulse 4s ease-in-out infinite; }
+.raloa-motion-orbit { fill: none; stroke: var(--color-accent); vector-effect: non-scaling-stroke; transform-box: fill-box; will-change: transform; }
+.raloa-motion-orbit-a { stroke-width: 2; stroke-opacity: 0.28; animation: raloa-bg-orbit 14s ease-in-out infinite alternate; transform-origin: center; }
+.raloa-motion-orbit-b { stroke-width: 1.5; stroke-opacity: 0.2; animation: raloa-bg-orbit 18s ease-in-out -2s infinite alternate-reverse; transform-origin: center; }
+.raloa-motion-orbit-c { stroke-width: 1.8; stroke-opacity: 0.23; animation: raloa-bg-orbit 12s ease-in-out infinite alternate; transform-origin: center; }
+@keyframes raloa-bg-breathe { from { opacity: 0.65; } to { opacity: 1; } }
+@keyframes raloa-bg-orbit { from { transform: rotate(-7deg) scale(0.96); } to { transform: rotate(7deg) scale(1.04); } }
+@keyframes raloa-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+@keyframes raloa-bar-pulse { 0%, 100% { transform: scaleY(0.7); opacity: 0.7; } 50% { transform: scaleY(1.15); opacity: 1; } }
+@keyframes raloa-glow-pulse { 0%, 100% { transform: scale(0.92); opacity: 0.35; } 50% { transform: scale(1.08); opacity: 0.75; } }
+.animate-raloa-shimmer { animation: raloa-shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.animate-raloa-bar-1 { animation: raloa-bar-pulse 1.3s ease-in-out infinite; }
+.animate-raloa-bar-2 { animation: raloa-bar-pulse 1.3s ease-in-out 0.2s infinite; }
+.animate-raloa-bar-3 { animation: raloa-bar-pulse 1.3s ease-in-out 0.4s infinite; }
+.animate-raloa-glow { animation: raloa-glow-pulse 4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .liinx-motion-background *, .liinx-motion-background,
-  .animate-liinx-shimmer, .animate-liinx-bar-1, .animate-liinx-bar-2, .animate-liinx-bar-3, .animate-liinx-glow {
+  .raloa-motion-background *, .raloa-motion-background,
+  .animate-raloa-shimmer, .animate-raloa-bar-1, .animate-raloa-bar-2, .animate-raloa-bar-3, .animate-raloa-glow {
     animation: none !important;
   }
 }
@@ -425,37 +447,37 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 }
 
 /* Public link motion is intentionally local, subtle, and independent of focus styling. */
-@keyframes liinx-link-fade {
+@keyframes raloa-link-fade {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes liinx-link-pulse {
+@keyframes raloa-link-pulse {
   0%, 100% { box-shadow: 0 0 0 0 transparent; }
   50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 16%, transparent); }
 }
 
-.liinx-link-animation-fade { animation: liinx-link-fade 260ms ease-out both; }
+.raloa-link-animation-fade { animation: raloa-link-fade 260ms ease-out both; }
 
-.liinx-link-animation-lift {
+.raloa-link-animation-lift {
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-.liinx-link-animation-lift:hover { transform: translateY(-2px); }
+.raloa-link-animation-lift:hover { transform: translateY(-2px); }
 
-.liinx-link-animation-lift:focus-visible {
+.raloa-link-animation-lift:focus-visible {
   /* Focus has its own outline and must not depend on hover or move the card. */
   transform: none;
 }
 
-.liinx-link-animation-pulse { animation: liinx-link-pulse 2.8s ease-in-out infinite; }
+.raloa-link-animation-pulse { animation: raloa-link-pulse 2.8s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .liinx-link-animation-fade,
-  .liinx-link-animation-pulse { animation: none !important; }
-  .liinx-link-animation-lift,
-  .liinx-link-animation-lift:hover,
-  .liinx-link-animation-lift:focus-visible {
+  .raloa-link-animation-fade,
+  .raloa-link-animation-pulse { animation: none !important; }
+  .raloa-link-animation-lift,
+  .raloa-link-animation-lift:hover,
+  .raloa-link-animation-lift:focus-visible {
     transition: none !important;
     transform: none !important;
   }

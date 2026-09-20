@@ -121,7 +121,7 @@
       "lines": 82,
       "functions": []
     },
-    "src/components/LiinxLogo.tsx": {
+    "src/components/RaloaLogo.tsx": {
       "lines": 100,
       "functions": []
     },
@@ -248,7 +248,7 @@
       "lines": 36,
       "functions": []
     },
-    "src/components/WhyLiinxSection.tsx": {
+    "src/components/WhyRaloaSection.tsx": {
       "lines": 135,
       "functions": [
         {

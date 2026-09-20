@@ -30,7 +30,7 @@ export const authRouter = Router();
 
 function setSessionCookie(res: any, token: string) {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${secure}`);
+  res.setHeader('Set-Cookie', `raloa_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${secure}`);
 }
 
 // In-memory sliding-window rate limiters for auth
@@ -38,7 +38,7 @@ const loginAttempts = new Map<string, number[]>();
 const registerAttempts = new Map<string, number[]>();
 
 // Static dummy hash computed once to prevent user enumeration via timing attack
-const DUMMY_BCRYPT_HASH = hashPassword('dummy_timing_salt_liinx_2026');
+const DUMMY_BCRYPT_HASH = hashPassword('dummy_timing_salt_raloa_2026');
 
 // Purge stale rate limit entries every 5 minutes
 setInterval(() => {
@@ -127,12 +127,12 @@ async function issueAccountToken(
     db.prepare('INSERT INTO account_tokens (token_hash, user_id, purpose, subject_value_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)').run(tokenHash, userId, purpose, subjectHash, expiresAt, now);
   })();
   const path = purpose === 'password_reset' ? '/reset-password' : '/verify-email';
-  const subject = purpose === 'password_reset' ? 'Reset your LIINX password' : 'Verify your LIINX email address';
+  const subject = purpose === 'password_reset' ? 'Reset your RALOA password' : 'Verify your RALOA email address';
   try {
     await sendTransactionalEmail({
       to: email,
       subject,
-      text: `Use this one-time LIINX link before it expires: ${accountOrigin()}${path}?token=${encodeURIComponent(rawToken)}`
+      text: `Use this one-time RALOA link before it expires: ${accountOrigin()}${path}?token=${encodeURIComponent(rawToken)}`
     });
     return true;
   } catch (error) {
@@ -369,7 +369,7 @@ authRouter.post('/login', sharedRateLimit({ name: 'login', limit: 20, windowMs: 
 authRouter.post('/logout', requireAuth, (req: AuthenticatedRequest, res) => {
   db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(req.user!.userId);
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie', `liinx_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${secure}`);
+  res.setHeader('Set-Cookie', `raloa_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${secure}`);
   res.json({ success: true });
 });
 
@@ -511,7 +511,7 @@ authRouter.get('/export-data', requireAuth, (req: AuthenticatedRequest, res) => 
     };
 
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="liinx-data-export-${req.user!.username}-${Date.now()}.json"`);
+    res.setHeader('Content-Disposition', `attachment; filename="raloa-data-export-${req.user!.username}-${Date.now()}.json"`);
     res.json(fullExport);
   } catch (err: any) {
     console.error('Data export error:', err);

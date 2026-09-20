@@ -89,7 +89,7 @@ billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: 
                 currency: 'usd',
                 product_data: {
                   name: planConfig.name,
-                  description: `${interval === 'year' ? 'Annual' : 'Monthly'} subscription for LIINX ${plan.toUpperCase()} tier.`
+                  description: `${interval === 'year' ? 'Annual' : 'Monthly'} subscription for RALOA ${plan.toUpperCase()} tier.`
                 },
                 unit_amount: planConfig[interval as 'month' | 'year'],
                 recurring: { interval }

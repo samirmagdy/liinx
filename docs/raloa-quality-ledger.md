@@ -1,4 +1,4 @@
-# Liinx quality ledger
+# RALOA quality ledger
 
 ## Task 01 — Repository baseline and evidence ledger
 
@@ -6,7 +6,7 @@ Status: VERIFIED WITHIN SCOPE
 
 Baseline recorded: 2026-09-16 (Asia/Riyadh)
 
-- Repository: `samirmagdy/liinx`
+- Repository: `samirmagdy/raloa`
 - Remote default branch: `origin/main`
 - Branch changed: `main`
 - HEAD and remote default SHA: `55a62740b46bc4551938c62536593e6aca6da24d`
@@ -16,14 +16,14 @@ Baseline recorded: 2026-09-16 (Asia/Riyadh)
   `src/components/PhonePreview.tsx`, `src/components/PublicBioView.tsx`,
   `src/utils/colorContrast.ts`, and untracked `.playwright-mcp/`.
 - No root `AGENTS.md`, `CLAUDE.md`, or other repository instruction file was found.
-- No prior `docs/liinx-quality-ledger.md` existed; this file is the only change made for Task 01.
+- No prior `docs/raloa-quality-ledger.md` existed; this file is the only change made for Task 01.
 
 ### Validation environment
 
 Disposable paths used for validation (outside the repository):
 
-- SQLite: `/tmp/liinx-task-01-db/liinx.db`
-- Uploads: `/tmp/liinx-task-01-uploads`
+- SQLite: `/tmp/raloa-task-01-db/raloa.db`
+- Uploads: `/tmp/raloa-task-01-uploads`
 - Environment: `NODE_ENV=test`, `DATABASE_PATH` and `UPLOADS_DIR` set to the paths above.
 
 The isolated database initialized successfully, used SQLite WAL mode, and returned `PRAGMA integrity_check = ok`. The test run created three fixture uploads in the isolated uploads directory. Repository `data/` and `public/uploads/` were not used as test targets.
@@ -97,7 +97,7 @@ Important observed invariants include foreign keys, unique usernames, unique pro
 Deployment artifacts/targets:
 
 - Vercel frontend shell/proxy (`vercel.json`)
-- Fly.io backend `liinx-app` with persistent SQLite and upload volumes (`fly.toml`)
+- Fly.io backend `raloa-app` with persistent SQLite and upload volumes (`fly.toml`)
 - Docker/Compose single-node deployment (`Dockerfile`, `docker-compose.yml`)
 - Optional Caddy reverse proxy example (`Caddyfile`)
 
@@ -170,22 +170,22 @@ git ls-remote origin refs/heads/main
 PASS. Confirmed dirty `main`, HEAD `55a6274`, and matching remote SHA.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-01-db/liinx.db \
-UPLOADS_DIR=/tmp/liinx-task-01-uploads NODE_ENV=test npm run lint
+DATABASE_PATH=/tmp/raloa-task-01-db/raloa.db \
+UPLOADS_DIR=/tmp/raloa-task-01-uploads NODE_ENV=test npm run lint
 ```
 
 PASS. `tsc --noEmit` exited 0.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-01-db/liinx.db \
-UPLOADS_DIR=/tmp/liinx-task-01-uploads NODE_ENV=test npm run build
+DATABASE_PATH=/tmp/raloa-task-01-db/raloa.db \
+UPLOADS_DIR=/tmp/raloa-task-01-uploads NODE_ENV=test npm run build
 ```
 
 PASS. Vite build and prerender exited 0; 10 routes prerendered. Non-failing chunk-size warning recorded above.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-01-db/liinx.db \
-UPLOADS_DIR=/tmp/liinx-task-01-uploads NODE_ENV=test npm test
+DATABASE_PATH=/tmp/raloa-task-01-db/raloa.db \
+UPLOADS_DIR=/tmp/raloa-task-01-uploads NODE_ENV=test npm test
 ```
 
 PASS. 23/23 test files and 189/189 tests passed in 18.29s.
@@ -241,30 +241,30 @@ Changed files: `server/routes/upload.ts`, `server/server.ts`, `tests/audit_fixes
 ### Exact validation commands and outcomes
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-02-final-db/liinx.db \
-UPLOADS_DIR=/tmp/liinx-task-02-final-uploads NODE_ENV=test npm run lint
+DATABASE_PATH=/tmp/raloa-task-02-final-db/raloa.db \
+UPLOADS_DIR=/tmp/raloa-task-02-final-uploads NODE_ENV=test npm run lint
 ```
 
 PASS. `tsc --noEmit` exited 0.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-02-final-db/liinx.db \
-UPLOADS_DIR=/tmp/liinx-task-02-final-uploads NODE_ENV=test \
+DATABASE_PATH=/tmp/raloa-task-02-final-db/raloa.db \
+UPLOADS_DIR=/tmp/raloa-task-02-final-uploads NODE_ENV=test \
 npx vitest run tests/audit_fixes.test.ts tests/security.test.ts --no-file-parallelism
 ```
 
 PASS. 2/2 files and 50/50 tests passed.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-02-full-db/liinx.db \
-UPLOADS_DIR=/tmp/liinx-task-02-full-uploads NODE_ENV=test npm test
+DATABASE_PATH=/tmp/raloa-task-02-full-db/raloa.db \
+UPLOADS_DIR=/tmp/raloa-task-02-full-uploads NODE_ENV=test npm test
 ```
 
 PASS. 23/23 files and 192/192 tests passed in 18.75s.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-02-full-db/liinx.db \
-UPLOADS_DIR=/tmp/liinx-task-02-full-uploads NODE_ENV=test npm run build
+DATABASE_PATH=/tmp/raloa-task-02-full-db/raloa.db \
+UPLOADS_DIR=/tmp/raloa-task-02-full-uploads NODE_ENV=test npm run build
 ```
 
 PASS. Vite build and prerender completed; 10 routes prerendered. Existing non-blocking warning remains: one generated chunk exceeds 500 kB.
@@ -309,7 +309,7 @@ Baseline commit: `a718f8f4bbfd16de962e97a47cda19abff700921` (`main`, matching `o
 
 ### Validation environment
 
-Used disposable paths outside the repository: SQLite `/tmp/liinx-task-03-db/final.sqlite`, uploads `/tmp/liinx-task-03-uploads`, with `NODE_ENV=test` and both paths explicitly configured.
+Used disposable paths outside the repository: SQLite `/tmp/raloa-task-03-db/final.sqlite`, uploads `/tmp/raloa-task-03-uploads`, with `NODE_ENV=test` and both paths explicitly configured.
 
 ### Acceptance criteria
 
@@ -330,19 +330,19 @@ npm run lint
 PASS — `tsc --noEmit` exited 0.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-03-db/contracts.sqlite UPLOADS_DIR=/tmp/liinx-task-03-uploads NODE_ENV=test npm test -- tests/contracts.test.ts tests/api.test.ts tests/security.test.ts
+DATABASE_PATH=/tmp/raloa-task-03-db/contracts.sqlite UPLOADS_DIR=/tmp/raloa-task-03-uploads NODE_ENV=test npm test -- tests/contracts.test.ts tests/api.test.ts tests/security.test.ts
 ```
 
 PASS — 3 files, 50 tests passed.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-03-db/acceptance-2.sqlite UPLOADS_DIR=/tmp/liinx-task-03-uploads NODE_ENV=test npm test -- tests/acceptance.test.ts
+DATABASE_PATH=/tmp/raloa-task-03-db/acceptance-2.sqlite UPLOADS_DIR=/tmp/raloa-task-03-uploads NODE_ENV=test npm test -- tests/acceptance.test.ts
 ```
 
 PASS — 31 tests passed. An initial run exposed a compatibility regression requiring optional nested item IDs; the schema was corrected and this targeted rerun passed.
 
 ```text
-DATABASE_PATH=/tmp/liinx-task-03-db/final.sqlite UPLOADS_DIR=/tmp/liinx-task-03-uploads NODE_ENV=test npm test
+DATABASE_PATH=/tmp/raloa-task-03-db/final.sqlite UPLOADS_DIR=/tmp/raloa-task-03-uploads NODE_ENV=test npm test
 ```
 
 PASS — 24 test files, 198 tests passed in 19.90s.
@@ -396,7 +396,7 @@ Baseline commit: `f76ca1619defbf9bc98d5eea0a71e25fb1dd2fbe` (`main`, matching `o
 
 ### Disposable migration environment
 
-Migration tests create temporary databases under `/tmp/liinx-task-04-*` and copy the legacy database to a `.snapshot` file before importing migration code. Repository data and production databases were not used. Route tests used `/tmp/liinx-task-04-db/*` and `/tmp/liinx-task-04-uploads`.
+Migration tests create temporary databases under `/tmp/raloa-task-04-*` and copy the legacy database to a `.snapshot` file before importing migration code. Repository data and production databases were not used. Route tests used `/tmp/raloa-task-04-db/*` and `/tmp/raloa-task-04-uploads`.
 
 ### Acceptance criteria
 
@@ -414,9 +414,9 @@ Migration tests create temporary databases under `/tmp/liinx-task-04-*` and copy
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `DATABASE_PATH=/tmp/liinx-task-04-db/target-3.sqlite UPLOADS_DIR=/tmp/liinx-task-04-uploads NODE_ENV=test npm test -- tests/migrations.test.ts tests/api.test.ts tests/security.test.ts` — PASS, 48 tests.
-- `DATABASE_PATH=/tmp/liinx-task-04-db/e2e-2.sqlite UPLOADS_DIR=/tmp/liinx-task-04-uploads NODE_ENV=test npm test -- tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts` — PASS, 7 tests.
-- `DATABASE_PATH=/tmp/liinx-task-04-db/full-final-3.sqlite UPLOADS_DIR=/tmp/liinx-task-04-uploads NODE_ENV=test npm test` — PASS, 25 files / 200 tests in 17.84s.
+- `DATABASE_PATH=/tmp/raloa-task-04-db/target-3.sqlite UPLOADS_DIR=/tmp/raloa-task-04-uploads NODE_ENV=test npm test -- tests/migrations.test.ts tests/api.test.ts tests/security.test.ts` — PASS, 48 tests.
+- `DATABASE_PATH=/tmp/raloa-task-04-db/e2e-2.sqlite UPLOADS_DIR=/tmp/raloa-task-04-uploads NODE_ENV=test npm test -- tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts` — PASS, 7 tests.
+- `DATABASE_PATH=/tmp/raloa-task-04-db/full-final-3.sqlite UPLOADS_DIR=/tmp/raloa-task-04-uploads NODE_ENV=test npm test` — PASS, 25 files / 200 tests in 17.84s.
 - `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS, no whitespace errors.
 
@@ -469,8 +469,8 @@ Baseline commit: `3e2c05f45ca0010ce1dced59c1e6846c529eb39a` (`main`, matching `o
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `DATABASE_PATH=/tmp/liinx-task-05-db/auth-final.sqlite UPLOADS_DIR=/tmp/liinx-task-05-uploads NODE_ENV=test npm test -- tests/auth_sessions.test.ts tests/session_cookie.test.ts` — PASS, 4 tests.
-- `DATABASE_PATH=/tmp/liinx-task-05-db/full.sqlite UPLOADS_DIR=/tmp/liinx-task-05-uploads NODE_ENV=test npm test` — PASS, 26 files / 203 tests in 21.46s.
+- `DATABASE_PATH=/tmp/raloa-task-05-db/auth-final.sqlite UPLOADS_DIR=/tmp/raloa-task-05-uploads NODE_ENV=test npm test -- tests/auth_sessions.test.ts tests/session_cookie.test.ts` — PASS, 4 tests.
+- `DATABASE_PATH=/tmp/raloa-task-05-db/full.sqlite UPLOADS_DIR=/tmp/raloa-task-05-uploads NODE_ENV=test npm test` — PASS, 26 files / 203 tests in 21.46s.
 - `npm run build` — PASS; Vite build and prerender completed and 10 routes were prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS, no whitespace errors.
 
@@ -522,9 +522,9 @@ Baseline commit: `9f272661b05afcf6b21cb1a79fa12ce0a69a700f` (`main`, matching `o
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `mkdir -p /tmp/liinx-task-06-db /tmp/liinx-task-06-uploads && DATABASE_PATH=/tmp/liinx-task-06-db/liinx.sqlite UPLOADS_DIR=/tmp/liinx-task-06-uploads npm test -- --run tests/account_recovery.test.ts tests/api.test.ts` — PASS, 2 files / 29 tests.
+- `mkdir -p /tmp/raloa-task-06-db /tmp/raloa-task-06-uploads && DATABASE_PATH=/tmp/raloa-task-06-db/raloa.sqlite UPLOADS_DIR=/tmp/raloa-task-06-uploads npm test -- --run tests/account_recovery.test.ts tests/api.test.ts` — PASS, 2 files / 29 tests.
 - `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
-- `DATABASE_PATH=/tmp/liinx-task-06-db/full.sqlite UPLOADS_DIR=/tmp/liinx-task-06-uploads/full npm test -- --run` — PASS, 27 files / 207 tests in 22.23s.
+- `DATABASE_PATH=/tmp/raloa-task-06-db/full.sqlite UPLOADS_DIR=/tmp/raloa-task-06-uploads/full npm test -- --run` — PASS, 27 files / 207 tests in 22.23s.
 - `git diff --check` — PASS, no whitespace errors.
 
 ### Existing test utilities and remaining risks
@@ -583,8 +583,8 @@ Baseline commit: `65e20e0` (`feat: implement account recovery, password reset, a
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `task07_dir=$(mktemp -d /tmp/liinx-task-07-XXXXXX) && mkdir -p "$task07_dir/uploads" && DATABASE_PATH="$task07_dir/liinx.db" UPLOADS_DIR="$task07_dir/uploads" NODE_ENV=test npm test -- --run tests/subscription_entitlements.test.ts tests/multiprofile.test.ts tests/api_v1.test.ts` — PASS, 13 tests.
-- `task07_dir=$(mktemp -d /tmp/liinx-task-07-full-XXXXXX) && mkdir -p "$task07_dir/uploads" && DATABASE_PATH="$task07_dir/liinx.db" UPLOADS_DIR="$task07_dir/uploads" NODE_ENV=test npm test -- --run` — PASS, 28 files / 209 tests in 22.69s.
+- `task07_dir=$(mktemp -d /tmp/raloa-task-07-XXXXXX) && mkdir -p "$task07_dir/uploads" && DATABASE_PATH="$task07_dir/raloa.db" UPLOADS_DIR="$task07_dir/uploads" NODE_ENV=test npm test -- --run tests/subscription_entitlements.test.ts tests/multiprofile.test.ts tests/api_v1.test.ts` — PASS, 13 tests.
+- `task07_dir=$(mktemp -d /tmp/raloa-task-07-full-XXXXXX) && mkdir -p "$task07_dir/uploads" && DATABASE_PATH="$task07_dir/raloa.db" UPLOADS_DIR="$task07_dir/uploads" NODE_ENV=test npm test -- --run` — PASS, 28 files / 209 tests in 22.69s.
 - `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS, no whitespace errors.
 
@@ -629,8 +629,8 @@ Baseline commit: `5b2fd6b` (`refactor: centralize subscription feature checks wi
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `task08_dir=$(mktemp -d /tmp/liinx-task-08-XXXXXX) && mkdir -p "$task08_dir/uploads" && DATABASE_PATH="$task08_dir/liinx.db" UPLOADS_DIR="$task08_dir/uploads" NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts tests/multiprofile.test.ts tests/api.test.ts` — PASS, 4 files / 37 tests.
-- `task08_dir=$(mktemp -d /tmp/liinx-task-08-full-XXXXXX) && mkdir -p "$task08_dir/uploads" && DATABASE_PATH="$task08_dir/liinx.db" UPLOADS_DIR="$task08_dir/uploads" NODE_ENV=test npm test -- --run` — PASS, 28 files / 209 tests in 23.45s.
+- `task08_dir=$(mktemp -d /tmp/raloa-task-08-XXXXXX) && mkdir -p "$task08_dir/uploads" && DATABASE_PATH="$task08_dir/raloa.db" UPLOADS_DIR="$task08_dir/uploads" NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts tests/multiprofile.test.ts tests/api.test.ts` — PASS, 4 files / 37 tests.
+- `task08_dir=$(mktemp -d /tmp/raloa-task-08-full-XXXXXX) && mkdir -p "$task08_dir/uploads" && DATABASE_PATH="$task08_dir/raloa.db" UPLOADS_DIR="$task08_dir/uploads" NODE_ENV=test npm test -- --run` — PASS, 28 files / 209 tests in 23.45s.
 - `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS, no whitespace errors.
 
@@ -685,9 +685,9 @@ Baseline commit: `995a6f29cc364b6541b07c5f0f32fd8b5a8c1c49` (`refactor: derive b
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `task09_target=$(mktemp -d /tmp/liinx-task09-target-XXXXXX) && mkdir -p "$task09_target/uploads" && DATABASE_PATH="$task09_target/liinx.db" UPLOADS_DIR="$task09_target/uploads" NODE_ENV=test npm test -- --run tests/saveQueue.test.ts tests/concurrent_revisions.test.ts tests/api.test.ts` — PASS, 3 files / 32 tests.
-- `task09_e2e=$(mktemp -d /tmp/liinx-task09-e2e-XXXXXX) && mkdir -p "$task09_e2e/uploads" && DATABASE_PATH="$task09_e2e/liinx.db" UPLOADS_DIR="$task09_e2e/uploads" NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts` — PASS, 1 file / 4 tests; public rendering and upload rejection journey completed through the API.
-- `task09_full=$(mktemp -d /tmp/liinx-task09-full-XXXXXX) && mkdir -p "$task09_full/uploads" && DATABASE_PATH="$task09_full/liinx.db" UPLOADS_DIR="$task09_full/uploads" NODE_ENV=test npm test` — PASS, 29 files / 211 tests.
+- `task09_target=$(mktemp -d /tmp/raloa-task09-target-XXXXXX) && mkdir -p "$task09_target/uploads" && DATABASE_PATH="$task09_target/raloa.db" UPLOADS_DIR="$task09_target/uploads" NODE_ENV=test npm test -- --run tests/saveQueue.test.ts tests/concurrent_revisions.test.ts tests/api.test.ts` — PASS, 3 files / 32 tests.
+- `task09_e2e=$(mktemp -d /tmp/raloa-task09-e2e-XXXXXX) && mkdir -p "$task09_e2e/uploads" && DATABASE_PATH="$task09_e2e/raloa.db" UPLOADS_DIR="$task09_e2e/uploads" NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts` — PASS, 1 file / 4 tests; public rendering and upload rejection journey completed through the API.
+- `task09_full=$(mktemp -d /tmp/raloa-task09-full-XXXXXX) && mkdir -p "$task09_full/uploads" && DATABASE_PATH="$task09_full/raloa.db" UPLOADS_DIR="$task09_full/uploads" NODE_ENV=test npm test` — PASS, 29 files / 211 tests.
 - `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS, no whitespace errors.
 - Initial combined targeted invocation with dynamic/API/saveQueue/revision files — FAIL, 2 of 36 tests; one `ECONNRESET` reported with Supertest's `double callback bug`, and the dynamic catalogue request returned 400. The dynamic file passed independently and the full isolated suite passed, so this was not reproducible as an application failure; it remains a test-order/harness observation.
@@ -739,8 +739,8 @@ Baseline commit: `f10d166` (`feat: add revision tracking and concurrency control
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `task10_pages=$(mktemp -d /tmp/liinx-task10-pages-XXXXXX) && mkdir -p "$task10_pages/uploads" && DATABASE_PATH="$task10_pages/liinx.db" UPLOADS_DIR="$task10_pages/uploads" NODE_ENV=test npm test -- --run tests/page_creation_settings.test.ts tests/backend-e2e.dynamic.test.ts tests/audit_fixes.test.ts` — PASS, 3 files / 38 tests.
-- `task10_final=$(mktemp -d /tmp/liinx-task10-final-XXXXXX) && mkdir -p "$task10_final/uploads" && DATABASE_PATH="$task10_final/liinx.db" UPLOADS_DIR="$task10_final/uploads" NODE_ENV=test npm test` — PASS, 30 files / 216 tests.
+- `task10_pages=$(mktemp -d /tmp/raloa-task10-pages-XXXXXX) && mkdir -p "$task10_pages/uploads" && DATABASE_PATH="$task10_pages/raloa.db" UPLOADS_DIR="$task10_pages/uploads" NODE_ENV=test npm test -- --run tests/page_creation_settings.test.ts tests/backend-e2e.dynamic.test.ts tests/audit_fixes.test.ts` — PASS, 3 files / 38 tests.
+- `task10_final=$(mktemp -d /tmp/raloa-task10-final-XXXXXX) && mkdir -p "$task10_final/uploads" && DATABASE_PATH="$task10_final/raloa.db" UPLOADS_DIR="$task10_final/uploads" NODE_ENV=test npm test` — PASS, 30 files / 216 tests.
 - `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS, no whitespace errors.
 - Browser journey — NOT RUN; no in-app browser automation tool was exposed in this environment.
@@ -794,9 +794,9 @@ Baseline commit: `f10d1668cb54de676f393e2b624b8c111dc5a0f4` on `main` at task st
 ### Exact commands and outcomes
 
 - `npm run lint` — PASS, `tsc --noEmit` exited 0.
-- `task11_target2=$(mktemp -d /tmp/liinx-task11-target2-XXXXXX) && mkdir -p "$task11_target2/uploads" && DATABASE_PATH="$task11_target2/liinx.db" UPLOADS_DIR="$task11_target2/uploads" NODE_ENV=test npm test -- --run tests/block_placement_ordering.test.ts tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts tests/api_v1.test.ts tests/instagram-sync.test.ts` — PASS, 5 files / 31 tests.
-- `task11_final=$(mktemp -d /tmp/liinx-task11-final-XXXXXX) && mkdir -p "$task11_final/uploads" && DATABASE_PATH="$task11_final/liinx.db" UPLOADS_DIR="$task11_final/uploads" NODE_ENV=test npm test` — PASS, 31 files / 219 tests.
-- `task11_pages=$(mktemp -d /tmp/liinx-task11-pages-XXXXXX) && mkdir -p "$task11_pages/uploads" && DATABASE_PATH="$task11_pages/liinx.db" UPLOADS_DIR="$task11_pages/uploads" NODE_ENV=test npm test -- --run tests/block_placement_ordering.test.ts` — PASS, 1 file / 3 tests after the explicit foreign-account assertion.
+- `task11_target2=$(mktemp -d /tmp/raloa-task11-target2-XXXXXX) && mkdir -p "$task11_target2/uploads" && DATABASE_PATH="$task11_target2/raloa.db" UPLOADS_DIR="$task11_target2/uploads" NODE_ENV=test npm test -- --run tests/block_placement_ordering.test.ts tests/backend-e2e.dynamic.test.ts tests/concurrency.test.ts tests/api_v1.test.ts tests/instagram-sync.test.ts` — PASS, 5 files / 31 tests.
+- `task11_final=$(mktemp -d /tmp/raloa-task11-final-XXXXXX) && mkdir -p "$task11_final/uploads" && DATABASE_PATH="$task11_final/raloa.db" UPLOADS_DIR="$task11_final/uploads" NODE_ENV=test npm test` — PASS, 31 files / 219 tests.
+- `task11_pages=$(mktemp -d /tmp/raloa-task11-pages-XXXXXX) && mkdir -p "$task11_pages/uploads" && DATABASE_PATH="$task11_pages/raloa.db" UPLOADS_DIR="$task11_pages/uploads" NODE_ENV=test npm test -- --run tests/block_placement_ordering.test.ts` — PASS, 1 file / 3 tests after the explicit foreign-account assertion.
 - `npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS, no whitespace errors.
 - Browser journey — NOT RUN; no in-app browser automation tool was exposed in this environment.
@@ -821,7 +821,7 @@ Baseline: branch `main`, commit `95428f3` (`feat: add support for page-aware blo
 ### Scope and changed files
 
 - `server/server.ts`: production platform and verified custom-domain HTML routing now returns HTTP 404 when a requested page slug is missing or unpublished instead of serving the SPA shell with a misleading 200.
-- `src/components/BuilderStudio.tsx`: clarifies that edits are saved directly to the published page; unpublished pages are hidden and Liinx does not maintain a separate draft revision stream.
+- `src/components/BuilderStudio.tsx`: clarifies that edits are saved directly to the published page; unpublished pages are hidden and RALOA does not maintain a separate draft revision stream.
 - `tests/published_pages_routing.test.ts`: verifies Home, published/unpublished/unknown page API visibility, custom-domain lookup, and custom-domain missing-page routing.
 
 ### Findings and product model
@@ -829,7 +829,7 @@ Baseline: branch `main`, commit `95428f3` (`feat: add support for page-aware blo
 - The API already selected only `published = 1` pages and exposed only those pages to public navigation. Home is forced published by existing page rules.
 - The client navigation already filtered unpublished pages and marked the selected page with `aria-current="page"`.
 - Production HTML fallback previously returned the shell for an unknown or unpublished platform slug. Verified custom-domain HTML requests had the same problem. Both now return 404.
-- Liinx currently has a single persisted page state. Saving content/settings updates the live state; an unpublished page is hidden, not an unpublished revision of a published page. The studio now states this explicitly.
+- RALOA currently has a single persisted page state. Saving content/settings updates the live state; an unpublished page is hidden, not an unpublished revision of a published page. The studio now states this explicitly.
 - The public API returns 404 for unknown and unpublished pages, including encoded query slugs. Custom-domain resolution preserves the page query.
 
 ### Acceptance criteria
@@ -845,9 +845,9 @@ Baseline: branch `main`, commit `95428f3` (`feat: add support for page-aware blo
 
 ### Exact commands and outcomes
 
-- `task12_db=$(mktemp -d /tmp/liinx-task12-db-XXXXXX); task12_uploads=$(mktemp -d /tmp/liinx-task12-uploads-XXXXXX); DATABASE_PATH="$task12_db/liinx.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task12_db/liinx.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm test -- --run tests/published_pages_routing.test.ts tests/backend-e2e.dynamic.test.ts tests/custom_domain.test.ts tests/page_creation_settings.test.ts` — PASS, typecheck plus 4 files / 18 tests.
-- `task12_db=$(mktemp -d /tmp/liinx-task12-full-db-XXXXXX); task12_uploads=$(mktemp -d /tmp/liinx-task12-full-uploads-XXXXXX); DATABASE_PATH="$task12_db/liinx.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm test` — PASS, 32 files / 221 tests.
-- `task12_build_db=$(mktemp -d /tmp/liinx-task12-build-db-XXXXXX); task12_build_uploads=$(mktemp -d /tmp/liinx-task12-build-uploads-XXXXXX); DATABASE_PATH="$task12_build_db/liinx.db" UPLOADS_DIR="$task12_build_uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `task12_db=$(mktemp -d /tmp/raloa-task12-db-XXXXXX); task12_uploads=$(mktemp -d /tmp/raloa-task12-uploads-XXXXXX); DATABASE_PATH="$task12_db/raloa.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task12_db/raloa.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm test -- --run tests/published_pages_routing.test.ts tests/backend-e2e.dynamic.test.ts tests/custom_domain.test.ts tests/page_creation_settings.test.ts` — PASS, typecheck plus 4 files / 18 tests.
+- `task12_db=$(mktemp -d /tmp/raloa-task12-full-db-XXXXXX); task12_uploads=$(mktemp -d /tmp/raloa-task12-full-uploads-XXXXXX); DATABASE_PATH="$task12_db/raloa.db" UPLOADS_DIR="$task12_uploads" NODE_ENV=test npm test` — PASS, 32 files / 221 tests.
+- `task12_build_db=$(mktemp -d /tmp/raloa-task12-build-db-XXXXXX); task12_build_uploads=$(mktemp -d /tmp/raloa-task12-build-uploads-XXXXXX); DATABASE_PATH="$task12_build_db/raloa.db" UPLOADS_DIR="$task12_build_uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS before the final ledger-only edit; must be rerun after handoff edits.
 - Browser/deployed routing — NOT RUN; no browser automation or live deployment access was available.
 
@@ -896,9 +896,9 @@ Baseline: branch `main`, commit `feb192e` (`feat: enforce 404 routing for unpubl
 
 ### Exact commands and outcomes
 
-- `task13_db=$(mktemp -d /tmp/liinx-task13-db-XXXXXX); task13_uploads=$(mktemp -d /tmp/liinx-task13-uploads-XXXXXX); DATABASE_PATH="$task13_db/liinx.db" UPLOADS_DIR="$task13_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task13_db/liinx.db" UPLOADS_DIR="$task13_uploads" NODE_ENV=test npm test -- --run tests/profile_duplication.test.ts tests/multiprofile.test.ts tests/subscription_entitlements.test.ts` — PASS, typecheck plus 3 files / 8 tests.
-- `task13_full=$(mktemp -d /tmp/liinx-task13-full-XXXXXX); mkdir -p "$task13_full/uploads"; DATABASE_PATH="$task13_full/liinx.db" UPLOADS_DIR="$task13_full/uploads" NODE_ENV=test npm test` — PASS, 33 files / 222 tests.
-- `task13_build=$(mktemp -d /tmp/liinx-task13-build-XXXXXX); mkdir -p "$task13_build/uploads"; DATABASE_PATH="$task13_build/liinx.db" UPLOADS_DIR="$task13_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `task13_db=$(mktemp -d /tmp/raloa-task13-db-XXXXXX); task13_uploads=$(mktemp -d /tmp/raloa-task13-uploads-XXXXXX); DATABASE_PATH="$task13_db/raloa.db" UPLOADS_DIR="$task13_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task13_db/raloa.db" UPLOADS_DIR="$task13_uploads" NODE_ENV=test npm test -- --run tests/profile_duplication.test.ts tests/multiprofile.test.ts tests/subscription_entitlements.test.ts` — PASS, typecheck plus 3 files / 8 tests.
+- `task13_full=$(mktemp -d /tmp/raloa-task13-full-XXXXXX); mkdir -p "$task13_full/uploads"; DATABASE_PATH="$task13_full/raloa.db" UPLOADS_DIR="$task13_full/uploads" NODE_ENV=test npm test` — PASS, 33 files / 222 tests.
+- `task13_build=$(mktemp -d /tmp/raloa-task13-build-XXXXXX); mkdir -p "$task13_build/uploads"; DATABASE_PATH="$task13_build/raloa.db" UPLOADS_DIR="$task13_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS after the final ledger edit.
 - Browser/deployed provider verification — NOT RUN; no browser automation, production deployment, billing provider, or integration credentials were used.
 
@@ -947,9 +947,9 @@ Baseline: branch `main`, commit `deaa9e6` (`feat: implement profile duplication 
 
 ### Exact commands and outcomes
 
-- `task14_db=$(mktemp -d /tmp/liinx-task14-db-XXXXXX); task14_uploads=$(mktemp -d /tmp/liinx-task14-uploads-XXXXXX); DATABASE_PATH="$task14_db/liinx.db" UPLOADS_DIR="$task14_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task14_db/liinx.db" UPLOADS_DIR="$task14_uploads" NODE_ENV=test npm test -- --run tests/profile_switching_onboarding.test.ts tests/multiprofile.test.ts tests/account_recovery.test.ts tests/subscription_entitlements.test.ts` — PASS, typecheck plus 4 files / 12 tests.
-- `task14_full=$(mktemp -d /tmp/liinx-task14-full-XXXXXX); mkdir -p "$task14_full/uploads"; DATABASE_PATH="$task14_full/liinx.db" UPLOADS_DIR="$task14_full/uploads" NODE_ENV=test npm test` — PASS, 34 files / 223 tests.
-- `task14_build=$(mktemp -d /tmp/liinx-task14-build-XXXXXX); mkdir -p "$task14_build/uploads"; DATABASE_PATH="$task14_build/liinx.db" UPLOADS_DIR="$task14_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `task14_db=$(mktemp -d /tmp/raloa-task14-db-XXXXXX); task14_uploads=$(mktemp -d /tmp/raloa-task14-uploads-XXXXXX); DATABASE_PATH="$task14_db/raloa.db" UPLOADS_DIR="$task14_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task14_db/raloa.db" UPLOADS_DIR="$task14_uploads" NODE_ENV=test npm test -- --run tests/profile_switching_onboarding.test.ts tests/multiprofile.test.ts tests/account_recovery.test.ts tests/subscription_entitlements.test.ts` — PASS, typecheck plus 4 files / 12 tests.
+- `task14_full=$(mktemp -d /tmp/raloa-task14-full-XXXXXX); mkdir -p "$task14_full/uploads"; DATABASE_PATH="$task14_full/raloa.db" UPLOADS_DIR="$task14_full/uploads" NODE_ENV=test npm test` — PASS, 34 files / 223 tests.
+- `task14_build=$(mktemp -d /tmp/raloa-task14-build-XXXXXX); mkdir -p "$task14_build/uploads"; DATABASE_PATH="$task14_build/raloa.db" UPLOADS_DIR="$task14_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS after the final ledger edit.
 - Browser/deployed provider verification — NOT RUN; no browser automation, production deployment, or external provider credentials were used.
 
@@ -997,9 +997,9 @@ Baseline: branch `main`, commit `7914ff8` (`feat: add profile deletion functiona
 
 ### Exact commands and outcomes
 
-- `task15_db=$(mktemp -d /tmp/liinx-task15-db-XXXXXX); task15_uploads=$(mktemp -d /tmp/liinx-task15-uploads-XXXXXX); DATABASE_PATH="$task15_db/liinx.db" UPLOADS_DIR="$task15_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task15_db/liinx.db" UPLOADS_DIR="$task15_uploads" NODE_ENV=test npm test -- --run tests/published_pages_routing.test.ts tests/backend-e2e.dynamic.test.ts tests/analytics.test.ts` — PASS, typecheck plus 2 discovered files / 6 tests; `tests/analytics.test.ts` was not present and therefore did not add a test file.
-- `task15_full=$(mktemp -d /tmp/liinx-task15-full-XXXXXX); mkdir -p "$task15_full/uploads"; DATABASE_PATH="$task15_full/liinx.db" UPLOADS_DIR="$task15_full/uploads" NODE_ENV=test npm test` — PASS, 34 files / 223 tests.
-- `task15_build=$(mktemp -d /tmp/liinx-task15-build-XXXXXX); mkdir -p "$task15_build/uploads"; DATABASE_PATH="$task15_build/liinx.db" UPLOADS_DIR="$task15_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `task15_db=$(mktemp -d /tmp/raloa-task15-db-XXXXXX); task15_uploads=$(mktemp -d /tmp/raloa-task15-uploads-XXXXXX); DATABASE_PATH="$task15_db/raloa.db" UPLOADS_DIR="$task15_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task15_db/raloa.db" UPLOADS_DIR="$task15_uploads" NODE_ENV=test npm test -- --run tests/published_pages_routing.test.ts tests/backend-e2e.dynamic.test.ts tests/analytics.test.ts` — PASS, typecheck plus 2 discovered files / 6 tests; `tests/analytics.test.ts` was not present and therefore did not add a test file.
+- `task15_full=$(mktemp -d /tmp/raloa-task15-full-XXXXXX); mkdir -p "$task15_full/uploads"; DATABASE_PATH="$task15_full/raloa.db" UPLOADS_DIR="$task15_full/uploads" NODE_ENV=test npm test` — PASS, 34 files / 223 tests.
+- `task15_build=$(mktemp -d /tmp/raloa-task15-build-XXXXXX); mkdir -p "$task15_build/uploads"; DATABASE_PATH="$task15_build/raloa.db" UPLOADS_DIR="$task15_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS after the final ledger edit.
 - Browser/network journey — NOT RUN; no browser automation was available.
 
@@ -1052,9 +1052,9 @@ Baseline: branch `main`, commit `4951863` (`feat: implement page-isolated inert 
 
 ### Exact commands and outcomes
 
-- `task16_db=$(mktemp -d /tmp/liinx-task16-db-XXXXXX); task16_uploads=$(mktemp -d /tmp/liinx-task16-uploads-XXXXXX); DATABASE_PATH="$task16_db/liinx.db" UPLOADS_DIR="$task16_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task16_db/liinx.db" UPLOADS_DIR="$task16_uploads" NODE_ENV=test npm test -- --run tests/profile_identity.test.ts tests/api.test.ts tests/security.test.ts tests/profile_switching_onboarding.test.ts` — PASS, typecheck plus 4 files / 49 tests.
-- `task16_full=$(mktemp -d /tmp/liinx-task16-full-XXXXXX); mkdir -p "$task16_full/uploads"; DATABASE_PATH="$task16_full/liinx.db" UPLOADS_DIR="$task16_full/uploads" NODE_ENV=test npm test` — PASS, 35 files / 225 tests.
-- `task16_build=$(mktemp -d /tmp/liinx-task16-build-XXXXXX); mkdir -p "$task16_build/uploads"; DATABASE_PATH="$task16_build/liinx.db" UPLOADS_DIR="$task16_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
+- `task16_db=$(mktemp -d /tmp/raloa-task16-db-XXXXXX); task16_uploads=$(mktemp -d /tmp/raloa-task16-uploads-XXXXXX); DATABASE_PATH="$task16_db/raloa.db" UPLOADS_DIR="$task16_uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task16_db/raloa.db" UPLOADS_DIR="$task16_uploads" NODE_ENV=test npm test -- --run tests/profile_identity.test.ts tests/api.test.ts tests/security.test.ts tests/profile_switching_onboarding.test.ts` — PASS, typecheck plus 4 files / 49 tests.
+- `task16_full=$(mktemp -d /tmp/raloa-task16-full-XXXXXX); mkdir -p "$task16_full/uploads"; DATABASE_PATH="$task16_full/raloa.db" UPLOADS_DIR="$task16_full/uploads" NODE_ENV=test npm test` — PASS, 35 files / 225 tests.
+- `task16_build=$(mktemp -d /tmp/raloa-task16-build-XXXXXX); mkdir -p "$task16_build/uploads"; DATABASE_PATH="$task16_build/raloa.db" UPLOADS_DIR="$task16_build/uploads" NODE_ENV=test npm run build` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS before the final ledger edit; must be rerun after this ledger edit.
 - Browser/deployed verification — NOT RUN; no browser automation, CDN, QR provider, or production deployment was used.
 
@@ -1108,8 +1108,8 @@ Baseline: branch `main`, commit `03397a92b16b16246e55c61551b6cfd79ca4b5c9` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `03397a92b16b16246e55c61551b6cfd79ca4b5c9` on `main`.
-- `task17_root=$(mktemp -d /tmp/liinx-task17-XXXXXX); mkdir -p "$task17_root/uploads"; DATABASE_PATH="$task17_root/liinx.db" UPLOADS_DIR="$task17_root/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task17_root/liinx.db" UPLOADS_DIR="$task17_root/uploads" NODE_ENV=test npm test -- tests/social_links.test.ts tests/api.test.ts tests/public_pages_routing.test.ts` — PASS, typecheck and 2 discovered test files / 32 tests. `tests/public_pages_routing.test.ts` was not present in this checkout, so it added no test file.
-- `task17_full=$(mktemp -d /tmp/liinx-task17-full-XXXXXX); mkdir -p "$task17_full/uploads"; DATABASE_PATH="$task17_full/liinx.db" UPLOADS_DIR="$task17_full/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task17_full/liinx.db" UPLOADS_DIR="$task17_full/uploads" NODE_ENV=test npm test` — FAIL outside Task 17: typecheck passed; 33 files / 226 tests passed, 6 failed in existing `api_v1.test.ts` authentication flow, `concurrency.test.ts` newsletter race assertion, and `concurrent_revisions.test.ts` with `ECONNRESET`. These failures do not exercise social-link behavior and were not changed.
+- `task17_root=$(mktemp -d /tmp/raloa-task17-XXXXXX); mkdir -p "$task17_root/uploads"; DATABASE_PATH="$task17_root/raloa.db" UPLOADS_DIR="$task17_root/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task17_root/raloa.db" UPLOADS_DIR="$task17_root/uploads" NODE_ENV=test npm test -- tests/social_links.test.ts tests/api.test.ts tests/public_pages_routing.test.ts` — PASS, typecheck and 2 discovered test files / 32 tests. `tests/public_pages_routing.test.ts` was not present in this checkout, so it added no test file.
+- `task17_full=$(mktemp -d /tmp/raloa-task17-full-XXXXXX); mkdir -p "$task17_full/uploads"; DATABASE_PATH="$task17_full/raloa.db" UPLOADS_DIR="$task17_full/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task17_full/raloa.db" UPLOADS_DIR="$task17_full/uploads" NODE_ENV=test npm test` — FAIL outside Task 17: typecheck passed; 33 files / 226 tests passed, 6 failed in existing `api_v1.test.ts` authentication flow, `concurrency.test.ts` newsletter race assertion, and `concurrent_revisions.test.ts` with `ECONNRESET`. These failures do not exercise social-link behavior and were not changed.
 - `npm run build` — PASS, Vite production build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS.
 - Browser/live external destination verification — NOT RUN; no production data, OAuth, or external messages were used.
@@ -1162,8 +1162,8 @@ Baseline: branch `main`, commit `1e9713af57aeb433308577e454e2ff5599eb7899` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `1e9713af57aeb433308577e454e2ff5599eb7899` on `main`.
-- `task18_final=$(mktemp -d /tmp/liinx-task18-final-XXXXXX); mkdir -p "$task18_final/uploads"; DATABASE_PATH="$task18_final/liinx.db" UPLOADS_DIR="$task18_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task18_final/liinx.db" UPLOADS_DIR="$task18_final/uploads" NODE_ENV=test npm test -- tests/theme_persistence.test.ts tests/colorContrast.test.ts tests/profile_duplication.test.ts && git diff --check` — PASS, typecheck plus 3 files / 7 tests; diff check passed.
-- `task18_check=$(mktemp -d /tmp/liinx-task18-check-XXXXXX); mkdir -p "$task18_check/uploads"; DATABASE_PATH="$task18_check/liinx.db" UPLOADS_DIR="$task18_check/uploads" NODE_ENV=test npm test -- tests/api.test.ts tests/acceptance.test.ts tests/e2e-workflow.test.ts tests/resilience.test.ts` — PASS, 4 files / 73 tests.
+- `task18_final=$(mktemp -d /tmp/raloa-task18-final-XXXXXX); mkdir -p "$task18_final/uploads"; DATABASE_PATH="$task18_final/raloa.db" UPLOADS_DIR="$task18_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task18_final/raloa.db" UPLOADS_DIR="$task18_final/uploads" NODE_ENV=test npm test -- tests/theme_persistence.test.ts tests/colorContrast.test.ts tests/profile_duplication.test.ts && git diff --check` — PASS, typecheck plus 3 files / 7 tests; diff check passed.
+- `task18_check=$(mktemp -d /tmp/raloa-task18-check-XXXXXX); mkdir -p "$task18_check/uploads"; DATABASE_PATH="$task18_check/raloa.db" UPLOADS_DIR="$task18_check/uploads" NODE_ENV=test npm test -- tests/api.test.ts tests/acceptance.test.ts tests/e2e-workflow.test.ts tests/resilience.test.ts` — PASS, 4 files / 73 tests.
 - `npm run build && git diff --check` — PASS, Vite build and prerender completed; 10 routes prerendered. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/deployed verification — NOT RUN; no production data, deployment, or external provider was used.
 
@@ -1214,7 +1214,7 @@ Baseline: branch `main`, commit `353df4a868855dd8db8f4e99e2f1ca29f256ac61` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `353df4a868855dd8db8f4e99e2f1ca29f256ac61` on `main`.
-- `task19_final=$(mktemp -d /tmp/liinx-task19-final-XXXXXX); mkdir -p "$task19_final/uploads"; DATABASE_PATH="$task19_final/liinx.db" UPLOADS_DIR="$task19_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task19_final/liinx.db" UPLOADS_DIR="$task19_final/uploads" NODE_ENV=test npm test -- tests/background_media.test.ts tests/theme_persistence.test.ts tests/colorContrast.test.ts tests/api.test.ts && npm run build && git diff --check` — PASS, typecheck plus 4 files / 33 tests; production build/prerender completed with 10 routes; diff check passed. Existing warning: one generated chunk exceeds 500 kB.
+- `task19_final=$(mktemp -d /tmp/raloa-task19-final-XXXXXX); mkdir -p "$task19_final/uploads"; DATABASE_PATH="$task19_final/raloa.db" UPLOADS_DIR="$task19_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task19_final/raloa.db" UPLOADS_DIR="$task19_final/uploads" NODE_ENV=test npm test -- tests/background_media.test.ts tests/theme_persistence.test.ts tests/colorContrast.test.ts tests/api.test.ts && npm run build && git diff --check` — PASS, typecheck plus 4 files / 33 tests; production build/prerender completed with 10 routes; diff check passed. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/deployed/live-media verification — NOT RUN; no production data, deployment, stock-media provider, or external messages were used.
 
 ### Existing test utilities and remaining risks
@@ -1267,7 +1267,7 @@ Baseline: branch `main`, commit `7bfc9e060d6c8683124e2ba8fa48eacaf2aa1551` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `7bfc9e060d6c8683124e2ba8fa48eacaf2aa1551` on `main`.
-- `task20_final=$(mktemp -d /tmp/liinx-task20-final-XXXXXX); mkdir -p "$task20_final/uploads"; DATABASE_PATH="$task20_final/liinx.db" UPLOADS_DIR="$task20_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task20_final/liinx.db" UPLOADS_DIR="$task20_final/uploads" NODE_ENV=test npm test -- tests/custom_css_font.test.ts tests/colorContrast.test.ts tests/api.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS, typecheck plus 4 files / 62 tests; production build/prerender completed with 10 routes; diff check passed. Existing warning: one generated chunk exceeds 500 kB.
+- `task20_final=$(mktemp -d /tmp/raloa-task20-final-XXXXXX); mkdir -p "$task20_final/uploads"; DATABASE_PATH="$task20_final/raloa.db" UPLOADS_DIR="$task20_final/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task20_final/raloa.db" UPLOADS_DIR="$task20_final/uploads" NODE_ENV=test npm test -- tests/custom_css_font.test.ts tests/colorContrast.test.ts tests/api.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS, typecheck plus 4 files / 62 tests; production build/prerender completed with 10 routes; diff check passed. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/deployed/offline font verification — NOT RUN; no production data, deployment, or external messages were used.
 
 ### Existing test utilities and remaining risks
@@ -1315,8 +1315,8 @@ Baseline: branch `main`, commit `816d24d1cd97a3df030367fdec7343afe730e0f1` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `816d24d1cd97a3df030367fdec7343afe730e0f1` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/basic_link.test.ts` — initial run exposed a legacy bare-host compatibility failure; the implementation was adjusted without weakening new-write validation.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/basic_link.test.ts tests/api.test.ts tests/security.test.ts` — PASS, 3 files / 49 tests; uses disposable SQLite and uploads paths. The first invocation’s 49-test run was the only failed intermediate result and is superseded by this passing rerun.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/basic_link.test.ts` — initial run exposed a legacy bare-host compatibility failure; the implementation was adjusted without weakening new-write validation.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/basic_link.test.ts tests/api.test.ts tests/security.test.ts` — PASS, 3 files / 49 tests; uses disposable SQLite and uploads paths. The first invocation’s 49-test run was the only failed intermediate result and is superseded by this passing rerun.
 - `npm run lint` — PASS, TypeScript check completed.
 - `npm run build` — PASS, Vite production build and prerender completed 10 routes; existing warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS before commit.
@@ -1341,7 +1341,7 @@ Baseline: branch `main`, commit `e1a028a8b9a6b3811d705ee2b381b01ea0f59a2f` at ta
 
 ### Scope and changed files
 
-- `src/components/PublicBioView.tsx`: replaces the negative `:not(.liinx-grid-link)` span rule with an explicit grid model: all direct content items span the full width at desktop/tablet, and only links with `extra.layout === 'grid'` occupy one column. Mobile remains a single-column layout; odd grid counts leave the final card in one normal column.
+- `src/components/PublicBioView.tsx`: replaces the negative `:not(.raloa-grid-link)` span rule with an explicit grid model: all direct content items span the full width at desktop/tablet, and only links with `extra.layout === 'grid'` occupy one column. Mobile remains a single-column layout; odd grid counts leave the final card in one normal column.
 - `server/contracts.ts`: constrains link layout persistence to `list`, `grid`, or `featured`; ordinary links cannot claim a carousel layout.
 - `tests/link_layouts.test.ts`: covers mixed link/list/grid/featured plus heading, form, and video persistence/public deserialization, rejection of `carousel`, and profile-duplication compatibility via the existing duplication suite.
 
@@ -1365,8 +1365,8 @@ Baseline: branch `main`, commit `e1a028a8b9a6b3811d705ee2b381b01ea0f59a2f` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `e1a028a8b9a6b3811d705ee2b381b01ea0f59a2f` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_layouts.test.ts tests/basic_link.test.ts tests/api.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 30 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_layouts.test.ts tests/profile_duplication.test.ts` — PASS, 2 files / 3 tests.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_layouts.test.ts tests/basic_link.test.ts tests/api.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 30 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_layouts.test.ts tests/profile_duplication.test.ts` — PASS, 2 files / 3 tests.
 - Browser/deployed visual verification — NOT RUN; no supported browser-client Node REPL was available, and no production data, deployment, or external messages were used.
 
 ### Existing test utilities and remaining risks
@@ -1410,7 +1410,7 @@ Baseline: branch `main`, commit `09af5c6c7edf44222fc1b65550a90239405db2c7` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `09af5c6c7edf44222fc1b65550a90239405db2c7` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_animation.test.ts tests/link_layouts.test.ts tests/basic_link.test.ts tests/profile_duplication.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 8 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/link_animation.test.ts tests/link_layouts.test.ts tests/basic_link.test.ts tests/profile_duplication.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 8 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/public/preview visual verification — NOT RUN; no supported browser-client Node REPL was available, and no production data, deployment, or external messages were used.
 
 ### Existing test utilities and remaining risks
@@ -1455,7 +1455,7 @@ Baseline: branch `main`, commit `15fa285698a99f6a4323d64b59a672d3e004519e` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `15fa285698a99f6a4323d64b59a672d3e004519e` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/rich_text.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 10 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/rich_text.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 10 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/editor/deployed verification — NOT RUN; no supported browser-client Node REPL was available, and no production data, deployment, or external messages were used.
 
 ### Existing test utilities and remaining risks
@@ -1501,7 +1501,7 @@ Baseline: branch `main`, commit `f3671ff2975b5ea2d5761d56c362db795486e60a` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `f3671ff2975b5ea2d5761d56c362db795486e60a` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/folders.test.ts tests/acceptance.test.ts tests/basic_link.test.ts tests/security.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 58 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/folders.test.ts tests/acceptance.test.ts tests/basic_link.test.ts tests/security.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 58 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/public visual and keyboard verification — NOT RUN; no supported browser-client Node REPL was available. No production database or uploads directory was used; tests used disposable `mktemp` database/uploads paths.
 
 ### Existing test utilities and remaining risks
@@ -1548,7 +1548,7 @@ Baseline: branch `main`, commit `f8c1a8cc0f8d419053cd161a656bb082790d3596` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `f8c1a8cc0f8d419053cd161a656bb082790d3596` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/image_block.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts tests/preview.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 35 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/image_block.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts tests/preview.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 35 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/public/preview visual verification — NOT RUN; no supported browser-client Node REPL was available. Tests used disposable `mktemp` SQLite database and uploads directories; no production data or assets were changed.
 
 ### Existing test utilities and remaining risks
@@ -1595,7 +1595,7 @@ Baseline: branch `main`, commit `134a4cfe3899dcdbabe0af5db5c3297de6ad9572` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `134a4cfe3899dcdbabe0af5db5c3297de6ad9572` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/gallery_block.test.ts tests/image_block.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 37 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/gallery_block.test.ts tests/image_block.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 37 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/editor/public verification — NOT RUN; no supported browser-client Node REPL was available. Tests used disposable `mktemp` SQLite database and uploads directories; no production data or assets were changed.
 
 ### Existing test utilities and remaining risks
@@ -1641,7 +1641,7 @@ Baseline: branch `main`, commit `c0f5f06330cf6f66f3621d6edf4ffa77c1aadb23` at ta
 ### Exact commands and outcomes
 
 - `git rev-parse HEAD` — PASS, baseline `c0f5f06330cf6f66f3621d6edf4ffa77c1aadb23` on `main`.
-- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/liinx.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/carousel_block.test.ts tests/gallery_block.test.ts tests/image_block.test.ts tests/preview.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 6 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
+- `tmpdir=$(mktemp -d) && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdir/raloa.db" UPLOADS_DIR="$tmpdir/uploads" NODE_ENV=test npm test -- --run tests/carousel_block.test.ts tests/gallery_block.test.ts tests/image_block.test.ts tests/preview.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 6 tests, production build/prerender of 10 routes, and diff check. Existing warning: one generated chunk exceeds 500 kB.
 - Browser/editor/public verification — NOT RUN; no supported browser-client Node REPL was available. Tests used disposable `mktemp` SQLite database and uploads directories; no production data or assets were changed.
 
 ### Existing test utilities and remaining risks
@@ -1686,8 +1686,8 @@ Baseline: branch `main`, commit `6da320cd5149c05398faaa30ff42831a243b2b5c` at ta
 
 - `git rev-parse HEAD` — PASS, baseline `6da320cd5149c05398faaa30ff42831a243b2b5c` on `main`; worktree was clean before changes.
 - `npm run lint` — PASS, TypeScript check exited 0.
-- `mkdir -p /tmp/liinx-task-29c-db /tmp/liinx-task-29c-uploads && DATABASE_PATH=/tmp/liinx-task-29c-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-29c-uploads NODE_ENV=test npm test -- --run tests/spacer.test.ts` — first attempt was NOT RUN because the disposable parent directory was absent; after creating the isolated directory, the focused test passed: 1 file / 1 test.
-- `mkdir -p /tmp/liinx-task-29d-db /tmp/liinx-task-29d-uploads && DATABASE_PATH=/tmp/liinx-task-29d-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-29d-uploads NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts` — PASS, 2 files / 35 tests.
+- `mkdir -p /tmp/raloa-task-29c-db /tmp/raloa-task-29c-uploads && DATABASE_PATH=/tmp/raloa-task-29c-db/raloa.db UPLOADS_DIR=/tmp/raloa-task-29c-uploads NODE_ENV=test npm test -- --run tests/spacer.test.ts` — first attempt was NOT RUN because the disposable parent directory was absent; after creating the isolated directory, the focused test passed: 1 file / 1 test.
+- `mkdir -p /tmp/raloa-task-29d-db /tmp/raloa-task-29d-uploads && DATABASE_PATH=/tmp/raloa-task-29d-db/raloa.db UPLOADS_DIR=/tmp/raloa-task-29d-uploads NODE_ENV=test npm test -- --run tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts` — PASS, 2 files / 35 tests.
 - `npm run build` — PASS, production build and prerender completed; 10 routes prerendered. Existing non-blocking warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — pending until the final commit is created.
 
@@ -1722,7 +1722,7 @@ Baseline: branch `main`, commit `9d4efef` at task start. The worktree was clean;
 ### Findings and behavior
 
 - Existing video playback supported YouTube, Vimeo, and direct video extensions, but generated autoplay URLs and used `autoPlay` on direct files. These were removed. YouTube’s official parameter documentation states autoplay is opt-in and causes playback/data collection without user interaction; Vimeo’s official embed guidance likewise treats autoplay as an explicit parameter. [YouTube embed parameters](https://developers.google.com/youtube/player_parameters), [Vimeo autoplay/embed guidance](https://help.vimeo.com/hc/en-us/articles/12426486963857-How-to-add-autoplay-and-loop-parameters-to-my-video-s-embed-code).
-- Supported native behavior is limited to YouTube embeds, Vimeo embeds, and direct HTTPS MP4/WebM/OGV/MOV URLs. Liinx does not host remote video URLs. TikTok remains a legacy contract/platform value but has no native video renderer or false playback claim; it falls back only if a validated external URL is supplied.
+- Supported native behavior is limited to YouTube embeds, Vimeo embeds, and direct HTTPS MP4/WebM/OGV/MOV URLs. RALOA does not host remote video URLs. TikTok remains a legacy contract/platform value but has no native video renderer or false playback claim; it falls back only if a validated external URL is supplied.
 - Provider privacy, removed, private, or domain-denied videos cannot be confirmed locally. The public card keeps a validated “Open video” fallback; provider error pages remain provider-controlled.
 - The existing CSP already allows the genuinely used video frame origins (`www.youtube.com`, `www.youtube-nocookie.com`, and `player.vimeo.com`) and HTTPS media. No broad CSP relaxation was needed. The CSP also contains entries owned by other media/features and was not removed in this task.
 - Thumbnail URLs are validated as safe public HTTP(S) values at the shared contract boundary. Missing/failed thumbnails render a neutral preview state. Empty or malformed video sources cannot trigger a no-op or unsafe window-open control.
@@ -1741,7 +1741,7 @@ Baseline: branch `main`, commit `9d4efef` at task start. The worktree was clean;
 
 - `git status --short --branch && git log -3 --oneline` — PASS, baseline `9d4efef` on `main`; clean worktree before Task 30.
 - `npm run lint` — PASS, TypeScript check exited 0.
-- `task30_tmp=$(mktemp -d) && DATABASE_PATH="$task30_tmp/liinx.db" UPLOADS_DIR="$task30_tmp/uploads" NODE_ENV=test npm test -- --run tests/video_block.test.ts tests/embeds_and_branding.test.ts tests/acceptance.test.ts` — PASS, 3 files / 37 tests using a disposable database/uploads directory.
+- `task30_tmp=$(mktemp -d) && DATABASE_PATH="$task30_tmp/raloa.db" UPLOADS_DIR="$task30_tmp/uploads" NODE_ENV=test npm test -- --run tests/video_block.test.ts tests/embeds_and_branding.test.ts tests/acceptance.test.ts` — PASS, 3 files / 37 tests using a disposable database/uploads directory.
 - `npm run build` — PASS, production build and prerender completed; 10 routes prerendered. Existing non-blocking warning: one generated chunk exceeds 500 kB.
 - `git diff --check` — PASS.
 
@@ -1753,7 +1753,7 @@ Baseline: branch `main`, commit `9d4efef` at task start. The worktree was clean;
 
 - Browser and live-provider verification remain required for actual playback, provider error/fallback UX, network timing, and preview behavior.
 - Vimeo owners can disable embedding or use privacy requirements; the application cannot certify those remote settings without live provider checks.
-- Direct media support depends on the remote server’s CORS/range/content behavior; Liinx only accepts and renders the URL and does not provide hosting.
+- Direct media support depends on the remote server’s CORS/range/content behavior; RALOA only accepts and renders the URL and does not provide hosting.
 
 ### Next eligible prompt
 
@@ -1776,8 +1776,8 @@ Baseline: branch `main`, commit `156710c` at task start. The worktree was clean;
 ### Findings and behavior
 
 - Existing audio branches rendered Spotify, SoundCloud, Apple Music, and direct files, but all provider iframes mounted immediately, SoundCloud requested `auto_play=true`, direct audio used one global playing flag, and artwork/fallback states were incomplete.
-- Supported native behavior is Spotify track/album/playlist/artist/episode embeds, Apple Music page embeds, SoundCloud track embeds, and direct HTTPS MP3/WAV/OGG/M4A/AAC files. Liinx does not host remote audio or invent stream/progress metrics.
-- Provider players are initially replaced by an accessible “Load audio player” button. Only one embedded provider iframe is mounted at a time. Direct audio playback pauses other Liinx direct audio elements and tracks the active block by ID.
+- Supported native behavior is Spotify track/album/playlist/artist/episode embeds, Apple Music page embeds, SoundCloud track embeds, and direct HTTPS MP3/WAV/OGG/M4A/AAC files. RALOA does not host remote audio or invent stream/progress metrics.
+- Provider players are initially replaced by an accessible “Load audio player” button. Only one embedded provider iframe is mounted at a time. Direct audio playback pauses other RALOA direct audio elements and tracks the active block by ID.
 - Provider iframes retain `encrypted-media` where needed for Spotify and use the existing CSP origins: `open.spotify.com`, `w.soundcloud.com`, and `embed.music.apple.com`. No broader CSP relaxation was added.
 - Missing artwork uses a neutral fallback. Direct-file load/play errors expose an alert and the validated external audio link. Provider availability/private-track/embed restrictions remain provider-controlled and cannot be certified locally.
 - This behavior is consistent with current provider documentation: [Spotify Embeds](https://developer.spotify.com/documentation/embeds), [Spotify embed troubleshooting](https://developer.spotify.com/documentation/embeds/tutorials/troubleshooting), and [SoundCloud Widget API](https://developers.soundcloud.com/docs/api/html5-widget).
@@ -1786,7 +1786,7 @@ Baseline: branch `main`, commit `156710c` at task start. The worktree was clean;
 
 - PASS — Each currently implemented provider and direct audio source is parsed and persisted. Evidence: `tests/embeds_and_branding.test.ts` and `tests/audio_block.test.ts` cover Spotify, Apple Music, SoundCloud, and direct MP3 sources.
 - PASS — Active schemes and spoofed provider hosts are rejected. Evidence: parser tests reject spoofed hosts; API test returns 400 for `javascript:alert(1)`.
-- PASS — Unexpected concurrent Liinx direct streams are prevented. Evidence: direct `onPlay` pauses all other `audio[data-liinx-audio="true"]` elements; SoundCloud URL uses `single_active=true`; provider iframe mounting is single-active.
+- PASS — Unexpected concurrent RALOA direct streams are prevented. Evidence: direct `onPlay` pauses all other `audio[data-raloa-audio="true"]` elements; SoundCloud URL uses `single_active=true`; provider iframe mounting is single-active.
 - PASS — No automatic playback is requested. Evidence: provider URLs use no autoplay parameter except SoundCloud’s explicit `auto_play=false`; no direct `autoPlay` is present; iframe loading requires user activation.
 - PASS — Titles, artist labels, responsive width, lazy loading, artwork fallback, and external fallback links are implemented. Evidence: source inspection and API round-trip tests.
 - NOT RUN — Live private/removed/unavailable tracks, provider embed-denial responses, artwork network failure, browser keyboard operation, slow load, and mobile visual sizing. Browser/provider execution was unavailable; source/API evidence is not live-provider evidence.
@@ -1794,7 +1794,7 @@ Baseline: branch `main`, commit `156710c` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch && git log -3 --oneline` — PASS, baseline `156710c` on `main`; clean worktree before Task 31.
-- `task31_tmp=$(mktemp -d) && DATABASE_PATH="$task31_tmp/liinx.db" UPLOADS_DIR="$task31_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task31_tmp/liinx.db" UPLOADS_DIR="$task31_tmp/uploads" NODE_ENV=test npm test -- --run tests/audio_block.test.ts tests/embeds_and_branding.test.ts tests/acceptance.test.ts tests/e2e-workflow.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 49 tests, production build/prerender of 10 routes, and diff check. Existing non-blocking warning: one generated chunk exceeds 500 kB.
+- `task31_tmp=$(mktemp -d) && DATABASE_PATH="$task31_tmp/raloa.db" UPLOADS_DIR="$task31_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task31_tmp/raloa.db" UPLOADS_DIR="$task31_tmp/uploads" NODE_ENV=test npm test -- --run tests/audio_block.test.ts tests/embeds_and_branding.test.ts tests/acceptance.test.ts tests/e2e-workflow.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 4 files / 49 tests, production build/prerender of 10 routes, and diff check. Existing non-blocking warning: one generated chunk exceeds 500 kB.
 - Tests used a disposable SQLite database and uploads directory; no production data, provider credentials, or external playback was used.
 
 ### Implementation commit
@@ -1844,7 +1844,7 @@ Baseline: branch `main`, commit `6454172` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch && git log -3 --oneline` — PASS, baseline `6454172` on `main`; clean worktree before Task 32.
-- `task32_tmp=$(mktemp -d) && DATABASE_PATH="$task32_tmp/liinx.db" UPLOADS_DIR="$task32_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task32_tmp/liinx.db" UPLOADS_DIR="$task32_tmp/uploads" NODE_ENV=test npm test -- --run tests/location_block.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 36 tests, production build/prerender of 10 routes, and diff check. Existing non-blocking warning: one generated chunk exceeds 500 kB.
+- `task32_tmp=$(mktemp -d) && DATABASE_PATH="$task32_tmp/raloa.db" UPLOADS_DIR="$task32_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task32_tmp/raloa.db" UPLOADS_DIR="$task32_tmp/uploads" NODE_ENV=test npm test -- --run tests/location_block.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS, TypeScript check, 3 files / 36 tests, production build/prerender of 10 routes, and diff check. Existing non-blocking warning: one generated chunk exceeds 500 kB.
 - Tests used a disposable SQLite database and uploads directory; no external Maps request was made.
 
 ### Implementation commit
@@ -1893,7 +1893,7 @@ Baseline: branch `main`, commit `927a6d565df0b4ec4c73dca8cb472d55b30fabd9` at ta
 ### Exact commands and outcomes
 
 - `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
-- `task33_tmp=$(mktemp -d); DATABASE_PATH="$task33_tmp/liinx.db" UPLOADS_DIR="$task33_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task33_tmp/liinx.db" UPLOADS_DIR="$task33_tmp/uploads" NODE_ENV=test npm test -- --run tests/faq_block.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 3 test files / 37 tests, production build with 10 prerendered routes, and diff check.
+- `task33_tmp=$(mktemp -d); DATABASE_PATH="$task33_tmp/raloa.db" UPLOADS_DIR="$task33_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task33_tmp/raloa.db" UPLOADS_DIR="$task33_tmp/uploads" NODE_ENV=test npm test -- --run tests/faq_block.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 3 test files / 37 tests, production build with 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests used a disposable SQLite database and uploads directory; no production data or external provider was used.
 - Browser attempt — NOT RUN: no `node_repl` browser tool was exposed, so keyboard and responsive claims remain unverified.
@@ -1928,7 +1928,7 @@ Baseline: branch `main`, commit `2484487` at task start. The worktree was clean;
 ### Findings and behavior
 
 - The prior renderer treated event, pre-save, and unrelated cards as one generic anchor, used `#` when configuration was missing, and did not expose event time/location/artwork controls. Event and release cards are now separate.
-- Date/time/timezone are display-only creator-entered strings. Liinx does not parse or convert them by visitor timezone; creators are instructed to include the timezone. An event with no date remains publishable if its destination is configured, and does not claim expiry because no scheduling model exists for event dates.
+- Date/time/timezone are display-only creator-entered strings. RALOA does not parse or convert them by visitor timezone; creators are instructed to include the timezone. An event with no date remains publishable if its destination is configured, and does not claim expiry because no scheduling model exists for event dates.
 - An event with no destination shows an unavailable status rather than a functional-looking link. A release card is explicitly labelled “External release link”; it does not imply music-service pre-save authorization or completion.
 - Existing event descriptions stored in `subtitle` remain visible through the public fallback. Safe destinations go through `/r/:blockId` for click tracking and server validation. Preview actions are disabled by the existing preview mode behavior.
 - Artwork is URL-based only in this task; no new upload or provider dependency was added.
@@ -1945,7 +1945,7 @@ Baseline: branch `main`, commit `2484487` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
-- `task35_tmp=$(mktemp -d); DATABASE_PATH="$task35_tmp/liinx.db" UPLOADS_DIR="$task35_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task35_tmp/liinx.db" UPLOADS_DIR="$task35_tmp/uploads" NODE_ENV=test npm test -- --run tests/event_release_cards.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 3 test files / 37 tests, production build with 10 prerendered routes, and diff check.
+- `task35_tmp=$(mktemp -d); DATABASE_PATH="$task35_tmp/raloa.db" UPLOADS_DIR="$task35_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task35_tmp/raloa.db" UPLOADS_DIR="$task35_tmp/uploads" NODE_ENV=test npm test -- --run tests/event_release_cards.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 3 test files / 37 tests, production build with 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests used a disposable SQLite database and uploads directory; no production data, tickets, payments, or external provider request was used.
 
@@ -1980,7 +1980,7 @@ Baseline: branch `main`, commit `c86d10a` at task start. The worktree was clean;
 
 - Product and tips previously shared a generic anchor that became `#` without configuration and did not distinguish checkout/support behavior. They now render as separate cards.
 - Product `priceAmount` accepts up to eight integer digits and two decimals; `currency` accepts a three-letter uppercase code. When present, public output consistently renders `CURRENCY amount`; legacy `price` labels remain compatible.
-- Product cards state that checkout happens on another service. Tip cards state that support happens on another service. Liinx does not process payments, taxes, inventory, payouts, memberships, or earnings.
+- Product cards state that checkout happens on another service. Tip cards state that support happens on another service. RALOA does not process payments, taxes, inventory, payouts, memberships, or earnings.
 - Missing product/tip destinations do not render an actionable link and tracked redirects return 404. Preview actions are disabled through the existing preview-only behavior.
 - Product artwork is URL-based only; no new upload or commerce/provider dependency was introduced.
 
@@ -1996,7 +1996,7 @@ Baseline: branch `main`, commit `c86d10a` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
-- `task36_tmp=$(mktemp -d); DATABASE_PATH="$task36_tmp/liinx.db" UPLOADS_DIR="$task36_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task36_tmp/liinx.db" UPLOADS_DIR="$task36_tmp/uploads" NODE_ENV=test npm test -- --run tests/product_support_cards.test.ts tests/event_release_cards.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 39 tests, production build with 10 prerendered routes, and diff check.
+- `task36_tmp=$(mktemp -d); DATABASE_PATH="$task36_tmp/raloa.db" UPLOADS_DIR="$task36_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task36_tmp/raloa.db" UPLOADS_DIR="$task36_tmp/uploads" NODE_ENV=test npm test -- --run tests/product_support_cards.test.ts tests/event_release_cards.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 39 tests, production build with 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests used a disposable SQLite database and uploads directory; no production data, payments, inventory, or external provider request was used.
 
@@ -2031,7 +2031,7 @@ Baseline: branch `main`, commit `953ff8e` at task start. The worktree was clean;
 ### Findings and behavior
 
 - The previous phone block accepted arbitrary text and built `tel:` targets in the renderer. It now accepts only 4–15 digits with optional international `+`, spaces, parentheses, or hyphens, while displaying the creator’s formatted input and redirecting to normalized digits.
-- A phone block can now be explicitly configured as click-to-call or send-email. Email subjects and bodies are URL-encoded; neither mode collects visitor data in Liinx.
+- A phone block can now be explicitly configured as click-to-call or send-email. Email subjects and bodies are URL-encoded; neither mode collects visitor data in RALOA.
 - Availability is optional creator text. Desktop devices without a dialer are not treated as an application failure; the public card says the device may not support calling.
 - Missing or invalid contact data shows a non-actionable status and the tracked redirect returns 404. No messaging provider integration was invented; existing social/contact links remain separate.
 - Phone and email display values use `dir="ltr"` so addresses and handles remain readable inside Arabic/RTL pages.
@@ -2049,7 +2049,7 @@ Baseline: branch `main`, commit `953ff8e` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
-- `task37_tmp=$(mktemp -d); DATABASE_PATH="$task37_tmp/liinx.db" UPLOADS_DIR="$task37_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task37_tmp/liinx.db" UPLOADS_DIR="$task37_tmp/uploads" NODE_ENV=test npm test -- --run tests/direct_contact_blocks.test.ts tests/social_links.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 44 tests, production build with 10 prerendered routes, and diff check.
+- `task37_tmp=$(mktemp -d); DATABASE_PATH="$task37_tmp/raloa.db" UPLOADS_DIR="$task37_tmp/uploads" NODE_ENV=test npm run lint && DATABASE_PATH="$task37_tmp/raloa.db" UPLOADS_DIR="$task37_tmp/uploads" NODE_ENV=test npm test -- --run tests/direct_contact_blocks.test.ts tests/social_links.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 44 tests, production build with 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests used a disposable SQLite database and uploads directory; no visitor contact data, production messaging, or device action was used.
 
@@ -2089,7 +2089,7 @@ Baseline: branch `main`, commit `9f91745` at task start. The worktree was clean;
 - Supported file signatures are PDF, ZIP, MP3, WAV, MP4, and plain text, with a 25 MiB upload limit. The persisted extension and response MIME come from content detection, not the user filename or declared multipart MIME.
 - Display-label edits cannot alter the stored content type or delivery headers. Local upload references can be attached only by their owning account.
 - Replacements and block deletion remove an upload only when no block or supported profile field references it. Failed persistence cleanup is best-effort and reports the save error rather than claiming success; existing Prompt 02 persistence-failure coverage remains green.
-- Missing resources return an unavailable state/404. Preview download actions are disabled. External HTTP(S) download URLs remain creator-configured public links and are not transformed into Liinx-hosted protected downloads.
+- Missing resources return an unavailable state/404. Preview download actions are disabled. External HTTP(S) download URLs remain creator-configured public links and are not transformed into RALOA-hosted protected downloads.
 - Existing unsafe/legacy files are not blindly deleted. The current serving path does not serve unregistered legacy paths; cleanup is reference-aware.
 
 ### Acceptance criteria
@@ -2105,9 +2105,9 @@ Baseline: branch `main`, commit `9f91745` at task start. The worktree was clean;
 
 ### Exact commands and outcomes
 
-- `task38_tmp=$(mktemp -d); DATABASE_PATH="$task38_tmp/liinx.sqlite" UPLOADS_DIR="$task38_tmp/uploads" mkdir -p "$UPLOADS_DIR"` — PASS: disposable SQLite database and uploads directory established for validation.
-- `task38_tmp=$(mktemp -d); export DATABASE_PATH="$task38_tmp/liinx.sqlite"; export UPLOADS_DIR="$task38_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/download_file_lifecycle.test.ts` — PASS: typecheck and 1 test file / 3 tests.
-- `task38_tmp=$(mktemp -d); export DATABASE_PATH="$task38_tmp/liinx.sqlite"; export UPLOADS_DIR="$task38_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/download_file_lifecycle.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 67 tests, production build, 10 prerendered routes, and diff check.
+- `task38_tmp=$(mktemp -d); DATABASE_PATH="$task38_tmp/raloa.sqlite" UPLOADS_DIR="$task38_tmp/uploads" mkdir -p "$UPLOADS_DIR"` — PASS: disposable SQLite database and uploads directory established for validation.
+- `task38_tmp=$(mktemp -d); export DATABASE_PATH="$task38_tmp/raloa.sqlite"; export UPLOADS_DIR="$task38_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/download_file_lifecycle.test.ts` — PASS: typecheck and 1 test file / 3 tests.
+- `task38_tmp=$(mktemp -d); export DATABASE_PATH="$task38_tmp/raloa.sqlite"; export UPLOADS_DIR="$task38_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/download_file_lifecycle.test.ts tests/audit_fixes.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 67 tests, production build, 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests did not use production data, production storage, paid providers, or external file services.
 
@@ -2161,8 +2161,8 @@ Baseline: branch `main`, commit `d416ef5` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
-- `task39_tmp=$(mktemp -d); export DATABASE_PATH="$task39_tmp/liinx.sqlite"; export UPLOADS_DIR="$task39_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_field_editor.test.ts` — PASS: typecheck and 1 test file / 3 tests.
-- `task39_tmp=$(mktemp -d); export DATABASE_PATH="$task39_tmp/liinx.sqlite"; export UPLOADS_DIR="$task39_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_field_editor.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 42 tests, production build, 10 prerendered routes, and diff check.
+- `task39_tmp=$(mktemp -d); export DATABASE_PATH="$task39_tmp/raloa.sqlite"; export UPLOADS_DIR="$task39_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_field_editor.test.ts` — PASS: typecheck and 1 test file / 3 tests.
+- `task39_tmp=$(mktemp -d); export DATABASE_PATH="$task39_tmp/raloa.sqlite"; export UPLOADS_DIR="$task39_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_field_editor.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 4 test files / 42 tests, production build, 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests used disposable SQLite and uploads paths; no production data or external provider was used.
 
@@ -2191,7 +2191,7 @@ Baseline: branch `main`, commit `afd3832` at task start. The worktree was clean;
 - `server/routes/forms.ts`: validates submissions against the saved normalized form schema, requiredness, email/phone types, min/max lengths, allowed field names, explicit consent, published-page visibility, and truthful failure states; adds retry-safe submission-key handling.
 - `server/db.ts`: adds the nullable submission idempotency key and an idempotent unique index for `(block_id, submission_key)`, including upgrade handling for existing databases.
 - `server/contracts.ts`: adds explicit `consentRequired` and bounded consent text to the form contract.
-- `src/components/BuilderStudio.tsx`: adds creator opt-in consent configuration and text, with a clear statement that Liinx does not send notifications automatically.
+- `src/components/BuilderStudio.tsx`: adds creator opt-in consent configuration and text, with a clear statement that RALOA does not send notifications automatically.
 - `src/components/PublicBioView.tsx`: stops rendering a fabricated fallback field for empty forms, renders consent only when enabled, sends a retry-stable key, preserves entered values on errors, and reports honest success/duplicate/error states.
 - `tests/form_submission_pipeline.test.ts`: covers valid persistence, duplicate requests, malformed and unknown/removed fields, explicit consent, empty forms, and unpublished pages.
 
@@ -2199,7 +2199,7 @@ Baseline: branch `main`, commit `afd3832` at task start. The worktree was clean;
 
 - The prior route accepted submissions for blocks on unpublished pages, used independently normalized fields, did not enforce every saved bound, and had no idempotency key. Empty public forms displayed a default message field that the backend could not accept.
 - Published form visibility is required at submission time by joining `blocks` to its published page. Hidden/draft page forms return 404 and are absent from the public profile.
-- Consent is explicit creator configuration. Legacy forms default to no consent checkbox for compatibility; Liinx does not claim consent was collected unless the creator enables the checkbox and the visitor accepts it.
+- Consent is explicit creator configuration. Legacy forms default to no consent checkbox for compatibility; RALOA does not claim consent was collected unless the creator enables the checkbox and the visitor accepts it.
 - Repeated requests carrying the same client-generated submission key return a truthful already-received response and create only one row. Requests without a key remain compatible but are not idempotent across network retries.
 - The existing shared IP rate limiter remains in place for production (20 requests/hour); test mode intentionally bypasses it. No spam scoring, CAPTCHA, or notification provider was invented.
 - Failed API responses preserve browser form state because the client clears values only after a successful or duplicate response. The backend returns a retryable save error for persistence failures.
@@ -2218,8 +2218,8 @@ Baseline: branch `main`, commit `afd3832` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
-- `task40_tmp=$(mktemp -d); export DATABASE_PATH="$task40_tmp/liinx.sqlite"; export UPLOADS_DIR="$task40_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts` — PASS: typecheck and 2 test files / 7 tests.
-- `task40_tmp=$(mktemp -d); export DATABASE_PATH="$task40_tmp/liinx.sqlite"; export UPLOADS_DIR="$task40_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts tests/concurrency.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 5 test files / 45 tests, production build, 10 prerendered routes, and diff check.
+- `task40_tmp=$(mktemp -d); export DATABASE_PATH="$task40_tmp/raloa.sqlite"; export UPLOADS_DIR="$task40_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts` — PASS: typecheck and 2 test files / 7 tests.
+- `task40_tmp=$(mktemp -d); export DATABASE_PATH="$task40_tmp/raloa.sqlite"; export UPLOADS_DIR="$task40_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts tests/concurrency.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 5 test files / 45 tests, production build, 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests used disposable SQLite and uploads paths; no production submissions, email provider, CAPTCHA, or external notification service was used.
 
@@ -2272,8 +2272,8 @@ Baseline: branch `main`, commit `1288d6c` at task start. The worktree was clean;
 ### Exact commands and outcomes
 
 - `git status --short --branch` — PASS at baseline: clean `main`, ahead of `origin/main` by prior task commits.
-- `task41_tmp=$(mktemp -d); export DATABASE_PATH="$task41_tmp/liinx.sqlite"; export UPLOADS_DIR="$task41_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_inbox.test.ts tests/form_submission_pipeline.test.ts tests/profile_switching_onboarding.test.ts` — PASS: typecheck and 3 test files / 8 tests.
-- `task41_tmp=$(mktemp -d); export DATABASE_PATH="$task41_tmp/liinx.sqlite"; export UPLOADS_DIR="$task41_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_inbox.test.ts tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts tests/concurrency.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 6 test files / 48 tests, production build, 10 prerendered routes, and diff check.
+- `task41_tmp=$(mktemp -d); export DATABASE_PATH="$task41_tmp/raloa.sqlite"; export UPLOADS_DIR="$task41_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_inbox.test.ts tests/form_submission_pipeline.test.ts tests/profile_switching_onboarding.test.ts` — PASS: typecheck and 3 test files / 8 tests.
+- `task41_tmp=$(mktemp -d); export DATABASE_PATH="$task41_tmp/raloa.sqlite"; export UPLOADS_DIR="$task41_tmp/uploads"; mkdir -p "$UPLOADS_DIR"; npm run lint && npm test -- --run tests/form_inbox.test.ts tests/form_submission_pipeline.test.ts tests/form_field_editor.test.ts tests/concurrency.test.ts tests/backend-e2e.dynamic.test.ts tests/acceptance.test.ts && npm run build && git diff --check` — PASS: typecheck, 6 test files / 48 tests, production build, 10 prerendered routes, and diff check.
 - Build emitted the existing non-blocking warning that one generated chunk exceeds 500 kB.
 - Tests used disposable SQLite and uploads paths; no production data or newsletter audience data was used.
 
@@ -2317,10 +2317,10 @@ The product remains single opt-in. No campaign sending, sequences, double-opt-in
 
 ### Exact validation and outcomes
 
-- `DATABASE_PATH=/tmp/liinx-task-42d-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42d-uploads NODE_ENV=test npm run build` — PASS: typecheck, Vite build, and prerender; existing non-blocking >500 kB chunk warning remains.
-- `DATABASE_PATH=/tmp/liinx-task-42g-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42g-uploads NODE_ENV=test npx vitest run tests/newsletter_capture.test.ts tests/api.test.ts tests/concurrency.test.ts tests/profile_switching_onboarding.test.ts tests/security.test.ts` — PASS: 5 files / 54 tests against disposable SQLite.
-- `DATABASE_PATH=/tmp/liinx-task-42f-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42f-uploads NODE_ENV=test npx vitest run tests/newsletter_capture.test.ts tests/api.test.ts tests/acceptance.test.ts tests/concurrency.test.ts tests/profile_switching_onboarding.test.ts tests/security.test.ts` — PARTIAL: newsletter/API/concurrency/profile/security coverage passed; acceptance had an unrelated existing `x-content-type-options` header assertion failure.
-- `DATABASE_PATH=/tmp/liinx-task-42e-db/liinx.db UPLOADS_DIR=/tmp/liinx-task-42e-uploads NODE_ENV=test npm test` — PARTIAL: 57 files passed, 2 failed, 286 tests total; failures were the pre-existing multiprofile setup (400) and the API test’s stale non-newsletter block assumption. The latter was corrected and focused validation rerun; full suite was not rerun afterward.
+- `DATABASE_PATH=/tmp/raloa-task-42d-db/raloa.db UPLOADS_DIR=/tmp/raloa-task-42d-uploads NODE_ENV=test npm run build` — PASS: typecheck, Vite build, and prerender; existing non-blocking >500 kB chunk warning remains.
+- `DATABASE_PATH=/tmp/raloa-task-42g-db/raloa.db UPLOADS_DIR=/tmp/raloa-task-42g-uploads NODE_ENV=test npx vitest run tests/newsletter_capture.test.ts tests/api.test.ts tests/concurrency.test.ts tests/profile_switching_onboarding.test.ts tests/security.test.ts` — PASS: 5 files / 54 tests against disposable SQLite.
+- `DATABASE_PATH=/tmp/raloa-task-42f-db/raloa.db UPLOADS_DIR=/tmp/raloa-task-42f-uploads NODE_ENV=test npx vitest run tests/newsletter_capture.test.ts tests/api.test.ts tests/acceptance.test.ts tests/concurrency.test.ts tests/profile_switching_onboarding.test.ts tests/security.test.ts` — PARTIAL: newsletter/API/concurrency/profile/security coverage passed; acceptance had an unrelated existing `x-content-type-options` header assertion failure.
+- `DATABASE_PATH=/tmp/raloa-task-42e-db/raloa.db UPLOADS_DIR=/tmp/raloa-task-42e-uploads NODE_ENV=test npm test` — PARTIAL: 57 files passed, 2 failed, 286 tests total; failures were the pre-existing multiprofile setup (400) and the API test’s stale non-newsletter block assumption. The latter was corrected and focused validation rerun; full suite was not rerun afterward.
 - `git diff --check` — PASS: no whitespace errors.
 
 ### Unresolved risks and dependencies
@@ -2368,8 +2368,8 @@ Baseline: branch `main`, commit `4278304` at task start. The worktree was clean 
 ### Exact validation commands and outcomes
 
 - `git status --short --branch` and `git rev-parse HEAD` — PASS at baseline: clean `main`, commit `4278304`, ahead of `origin/main` only by prior local task commits.
-- `testdb=$(mktemp -d /tmp/liinx-task-43b-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-43b-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npx vitest run tests/content_gates.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts tests/profile_duplication.test.ts tests/acceptance.test.ts` — PASS: 5 files / 43 tests against disposable SQLite and uploads directories.
-- `testdb=$(mktemp -d /tmp/liinx-task-43c-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-43c-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run build` — PASS: TypeScript check, Vite production build, and 10 prerendered routes. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+- `testdb=$(mktemp -d /tmp/raloa-task-43b-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-43b-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npx vitest run tests/content_gates.test.ts tests/contracts.test.ts tests/backend-e2e.dynamic.test.ts tests/profile_duplication.test.ts tests/acceptance.test.ts` — PASS: 5 files / 43 tests against disposable SQLite and uploads directories.
+- `testdb=$(mktemp -d /tmp/raloa-task-43c-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-43c-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run build` — PASS: TypeScript check, Vite production build, and 10 prerendered routes. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
 - `git diff --check` — PASS after implementation; no whitespace errors.
 
 ### Implementation commit
@@ -2418,8 +2418,8 @@ Baseline: branch `main`, commit `98bff8f` at task start. The worktree was clean 
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, commit `98bff8f`, ahead of `origin/main` only by prior local task commits.
-- `tmpdb=$(mktemp -d /tmp/liinx-task-44c-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-44c-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/public_search.test.ts tests/folders.test.ts tests/faq_block.test.ts tests/published_pages_routing.test.ts tests/content_gates.test.ts tests/profile_switching_onboarding.test.ts` — PASS: TypeScript check and 6 files / 13 tests against disposable SQLite/uploads paths.
-- `tmpdb=$(mktemp -d /tmp/liinx-task-44e-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-44e-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: Vite production build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+- `tmpdb=$(mktemp -d /tmp/raloa-task-44c-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/raloa-task-44c-uploads.XXXXXX); DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/public_search.test.ts tests/folders.test.ts tests/faq_block.test.ts tests/published_pages_routing.test.ts tests/content_gates.test.ts tests/profile_switching_onboarding.test.ts` — PASS: TypeScript check and 6 files / 13 tests against disposable SQLite/uploads paths.
+- `tmpdb=$(mktemp -d /tmp/raloa-task-44e-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/raloa-task-44e-uploads.XXXXXX); DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: Vite production build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
 
 ### Implementation commit
 
@@ -2450,8 +2450,8 @@ Baseline: branch `main`, commit `c22c904` at task start. The worktree was clean 
 ### Findings and behavior
 
 - The old footer branch coupled creator-logo presence to platform attribution and rendered a creator logo as a non-actionable image with no independent destination/name.
-- Platform attribution and creator identity are now independent. A paid profile with `hideBranding=true` still shows its creator logo; the Liinx attribution is separately omitted.
-- Creator logo destinations are optional and HTTP(S)-only. When absent, the logo is non-interactive; it never defaults to the Liinx studio or another route.
+- Platform attribution and creator identity are now independent. A paid profile with `hideBranding=true` still shows its creator logo; the RALOA attribution is separately omitted.
+- Creator logo destinations are optional and HTTP(S)-only. When absent, the logo is non-interactive; it never defaults to the RALOA studio or another route.
 - Missing/broken images fall back to the configured accessible name, or a display-name-derived label. The fallback remains non-navigational unless an explicit safe destination was configured.
 - Free-plan UI controls remain disabled with the existing upgrade context, and the API rejects attempts to set logo URL, destination, or accessible name. Existing stored values are not deleted during downgrade, but are withheld from public output while unentitled.
 - No external provider, logo hosting service, or new data-sharing integration was introduced.
@@ -2460,7 +2460,7 @@ Baseline: branch `main`, commit `c22c904` at task start. The worktree was clean 
 
 - PASS — Free/paid plan rules and hide-platform-branding on/off are enforced and persisted. Evidence: `tests/footer_branding.test.ts` and entitlement-gated public/studio payloads.
 - PASS — Custom logo on/off and optional destination behavior are implemented. Evidence: persisted fields, API test, and public footer branch.
-- PASS — A creator logo does not unexpectedly navigate to Liinx studio; absent destination is non-interactive. Evidence: public renderer only creates an anchor for the explicit validated destination.
+- PASS — A creator logo does not unexpectedly navigate to RALOA studio; absent destination is non-interactive. Evidence: public renderer only creates an anchor for the explicit validated destination.
 - PASS — Accessible name and broken-image fallback are implemented. Evidence: `alt`, `aria-label`, and fallback branches in public/preview renderers.
 - PASS — Unsafe destinations are rejected server-side. Evidence: `javascript:` update returns 400 in `tests/footer_branding.test.ts`.
 - PASS — Keyboard/screen-reader semantics are defined: linked logos are labeled/focusable; unlinked logos are noninteractive; platform attribution remains a separate labeled button/link. Source-level evidence only.
@@ -2470,8 +2470,8 @@ Baseline: branch `main`, commit `c22c904` at task start. The worktree was clean 
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, commit `c22c904`, ahead of `origin/main` only by prior local task commits.
-- `tmpdb=$(mktemp -d /tmp/liinx-task-45a-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-45a-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/footer_branding.test.ts tests/subscription_entitlements.test.ts tests/profile_duplication.test.ts tests/profile_switching_onboarding.test.ts tests/acceptance.test.ts` — PASS: TypeScript check and 5 files / 38 tests against disposable SQLite/uploads paths.
-- `tmpdb=$(mktemp -d /tmp/liinx-task-45b-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-45b-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: Vite production build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+- `tmpdb=$(mktemp -d /tmp/raloa-task-45a-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/raloa-task-45a-uploads.XXXXXX); DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/footer_branding.test.ts tests/subscription_entitlements.test.ts tests/profile_duplication.test.ts tests/profile_switching_onboarding.test.ts tests/acceptance.test.ts` — PASS: TypeScript check and 5 files / 38 tests against disposable SQLite/uploads paths.
+- `tmpdb=$(mktemp -d /tmp/raloa-task-45b-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/raloa-task-45b-uploads.XXXXXX); DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: Vite production build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
 
 ### Implementation commit
 
@@ -2495,7 +2495,7 @@ Baseline: branch `main`, commit `60d8314` at task start. The worktree was clean 
 
 ### Findings and behavior
 
-- The prior server shell hardcoded `https://liinx.app`, did not rewrite Twitter metadata, left generic marketing JSON-LD on creator pages, and listed profiles without requiring a published page.
+- The prior server shell hardcoded `https://raloa.app`, did not rewrite Twitter metadata, left generic marketing JSON-LD on creator pages, and listed profiles without requiring a published page.
 - Platform canonical URLs now use `PUBLIC_ORIGIN`, then `APP_ORIGIN`, then configured domain/request fallback. Custom-domain requests retain their verified host as canonical; no new domain mapping was introduced.
 - For subpages, page title and description are authoritative. Home uses creator share metadata, then bio/default fallback. User-provided values are escaped for HTML attributes and JSON-LD script context.
 - Missing share/avatar images remove creator image metadata instead of leaving the generic marketing image. External social-platform cache freshness is not inferred from generated HTML.
@@ -2516,9 +2516,9 @@ Baseline: branch `main`, commit `60d8314` at task start. The worktree was clean 
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, commit `60d8314`, ahead of `origin/main` only by prior local task commits.
-- `tmpdb=$(mktemp -d /tmp/liinx-task-46b-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-46b-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/sharing_metadata.test.ts tests/published_pages_routing.test.ts tests/api.test.ts tests/profile_identity.test.ts` — PASS: TypeScript check and 4 files / 31 tests.
-- `DATABASE_PATH=/tmp/liinx-task-46-production.db UPLOADS_DIR=/tmp/liinx-task-46-production-uploads NODE_ENV=production PORT=3156 APP_ORIGIN=https://configured.example CORS_ORIGIN=https://configured.example INTEGRATION_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef BILLING_ENABLED=false npm run start` plus curl requests for platform Home/subpage, verified custom-domain subpage, sitemap, and unknown profile — PASS: initial HTML metadata observed; platform/custom routes returned 200; unknown profile returned 404. The database/uploads paths were disposable.
-- `tmpdb=$(mktemp -d /tmp/liinx-task-46d-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/liinx-task-46d-uploads.XXXXXX); DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/liinx.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: TypeScript check, Vite build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
+- `tmpdb=$(mktemp -d /tmp/raloa-task-46b-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/raloa-task-46b-uploads.XXXXXX); DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npx vitest run tests/sharing_metadata.test.ts tests/published_pages_routing.test.ts tests/api.test.ts tests/profile_identity.test.ts` — PASS: TypeScript check and 4 files / 31 tests.
+- `DATABASE_PATH=/tmp/raloa-task-46-production.db UPLOADS_DIR=/tmp/raloa-task-46-production-uploads NODE_ENV=production PORT=3156 APP_ORIGIN=https://configured.example CORS_ORIGIN=https://configured.example INTEGRATION_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef BILLING_ENABLED=false npm run start` plus curl requests for platform Home/subpage, verified custom-domain subpage, sitemap, and unknown profile — PASS: initial HTML metadata observed; platform/custom routes returned 200; unknown profile returned 404. The database/uploads paths were disposable.
+- `tmpdb=$(mktemp -d /tmp/raloa-task-46d-db.XXXXXX); tmpuploads=$(mktemp -d /tmp/raloa-task-46d-uploads.XXXXXX); DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run lint && DATABASE_PATH="$tmpdb/raloa.db" UPLOADS_DIR="$tmpuploads" NODE_ENV=test npm run build && git diff --check` — PASS: TypeScript check, Vite build, 10 prerendered routes, and whitespace check. Build emitted the existing non-blocking generated-chunk-over-500-kB warning.
 
 ### Implementation commit
 
@@ -2571,10 +2571,10 @@ Baseline: branch `main`, commit `5bdb7b884dd992fdcc31fcc5fe6d8c311751fb6c` at ta
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git log -4 --oneline` — PASS at baseline: clean `main`, exact baseline `5bdb7b8`, ahead of `origin/main` only by prior local task commits.
-- `testdb=$(mktemp -d /tmp/liinx-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run lint` — PASS: TypeScript check.
-- `testdb=$(mktemp -d /tmp/liinx-task-47-build-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-build-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
-- `testdb=$(mktemp -d /tmp/liinx-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/scheduling.test.ts` — PASS: 1 file / 4 tests.
-- `testdb=$(mktemp -d /tmp/liinx-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/scheduling.test.ts tests/page_creation_settings.test.ts tests/custom_domain.test.ts tests/sharing_metadata.test.ts tests/backend-e2e.dynamic.test.ts` — PASS: 5 files / 22 tests.
+- `testdb=$(mktemp -d /tmp/raloa-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run lint` — PASS: TypeScript check.
+- `testdb=$(mktemp -d /tmp/raloa-task-47-build-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-47-build-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
+- `testdb=$(mktemp -d /tmp/raloa-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/scheduling.test.ts` — PASS: 1 file / 4 tests.
+- `testdb=$(mktemp -d /tmp/raloa-task-47-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-47-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/scheduling.test.ts tests/page_creation_settings.test.ts tests/custom_domain.test.ts tests/sharing_metadata.test.ts tests/backend-e2e.dynamic.test.ts` — PASS: 5 files / 22 tests.
 - `git diff --check` — PASS before implementation commit.
 
 ### Implementation commit
@@ -2632,8 +2632,8 @@ Baseline: branch `main`, commit `5d10f44` at task start. The worktree was clean;
 - `git status --short --branch && git log -5 --oneline` — PASS at baseline: clean `main`, exact baseline `5d10f44`.
 - `npm run lint` — PASS: TypeScript check.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
-- `testdb=$(mktemp -d /tmp/liinx-task-48-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-48-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/qr_code.test.ts` — PASS: 1 file / 4 tests against disposable SQLite/uploads paths.
-- `qrfixture=$(mktemp /tmp/liinx-task-48-qr.XXXXXX.png); curl --fail --silent --show-error --max-time 15 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fliinx.example%2F%40creator&color=111315&bgcolor=FFFFFF' -o "$qrfixture" && file "$qrfixture" && magick identify "$qrfixture"` — PASS: isolated public fixture returned a 300×300, 1-bit PNG. This was not a scan verification.
+- `testdb=$(mktemp -d /tmp/raloa-task-48-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-48-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/qr_code.test.ts` — PASS: 1 file / 4 tests against disposable SQLite/uploads paths.
+- `qrfixture=$(mktemp /tmp/raloa-task-48-qr.XXXXXX.png); curl --fail --silent --show-error --max-time 15 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fraloa.example%2F%40creator&color=111315&bgcolor=FFFFFF' -o "$qrfixture" && file "$qrfixture" && magick identify "$qrfixture"` — PASS: isolated public fixture returned a 300×300, 1-bit PNG. This was not a scan verification.
 - `git diff --check` — PASS before implementation commit.
 
 ### Implementation commit
@@ -2643,7 +2643,7 @@ Baseline: branch `main`, commit `5d10f44` at task start. The worktree was clean;
 ### Unresolved risks and dependencies
 
 - QRServer availability, CORS behavior, deployed CSP, and actual device scanning require external/browser verification.
-- Changing a handle/domain affects newly generated QR targets; existing printed QR images remain encoded with their old direct URL and are not dynamically redirected by Liinx.
+- Changing a handle/domain affects newly generated QR targets; existing printed QR images remain encoded with their old direct URL and are not dynamically redirected by RALOA.
 - Custom-domain QR targets assume the stored custom domain has already passed the repository’s domain verification flow.
 
 ### Next eligible prompt
@@ -2685,8 +2685,8 @@ Baseline: branch `main`, commit `ba84caf` at task start. The worktree was clean;
 - `git status --short --branch && git log -5 --oneline` — PASS at baseline: clean `main`, exact baseline `ba84caf`.
 - `npm run lint` — PASS: TypeScript check.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
-- `testdb=$(mktemp -d /tmp/liinx-task-49-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-49-final-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/importer.test.ts tests/importer_security.test.ts tests/block_placement_ordering.test.ts` — PASS: 3 files / 9 tests against disposable SQLite/uploads paths.
-- `testdb=$(mktemp -d /tmp/liinx-task-49-audit-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-49-audit-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/audit_fixes.test.ts tests/importer_security.test.ts` — PASS: 2 files / 32 tests against disposable SQLite/uploads paths.
+- `testdb=$(mktemp -d /tmp/raloa-task-49-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-49-final-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/importer.test.ts tests/importer_security.test.ts tests/block_placement_ordering.test.ts` — PASS: 3 files / 9 tests against disposable SQLite/uploads paths.
+- `testdb=$(mktemp -d /tmp/raloa-task-49-audit-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-49-audit-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/audit_fixes.test.ts tests/importer_security.test.ts` — PASS: 2 files / 32 tests against disposable SQLite/uploads paths.
 - `git diff --check` — PASS before documentation commit.
 
 ### Implementation commits
@@ -2725,7 +2725,7 @@ Baseline: branch `main`, commit `1d921ae` at task start. The worktree was clean;
 - The supported account requirement is an Instagram professional account: Business or Creator. This task uses Instagram API with Instagram Login and does not support consumer accounts or the separate Facebook Login/Page-account flow.
 - Tokens are encrypted with the existing authenticated-encryption service. Legacy plaintext integration rows are migrated by the existing database migration; malformed/legacy values require reconnect rather than being returned or logged.
 - Manual sync is rate-limited to one request per 30 seconds per profile. Existing blocks are only appended after the media fetch succeeds and remain intact on timeout, provider error, refresh failure, or expired access. Repeated media/link sync remains destination-deduplicated.
-- Long-lived tokens are refreshed through the documented `refresh_access_token` endpoint only while valid and at least 24 hours old. Expired or invalid authorization returns a reconnect state. Disconnect removes Liinx-held access data; no unsupported Meta-side revoke endpoint is claimed, so the UI directs the creator to revoke Liinx in Instagram settings when needed.
+- Long-lived tokens are refreshed through the documented `refresh_access_token` endpoint only while valid and at least 24 hours old. Expired or invalid authorization returns a reconnect state. Disconnect removes RALOA-held access data; no unsupported Meta-side revoke endpoint is claimed, so the UI directs the creator to revoke RALOA in Instagram settings when needed.
 - The feature is caption-link sync only. No Instagram grid renderer, automated caption scraping, post metrics, follower counts, or fabricated live response is presented. Manual caption parsing remains explicitly separate from OAuth sync.
 - Official documentation reviewed: [Instagram API with Instagram Login](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/), [Instagram Login getting started](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/get-started), and [refresh access token](https://developers.facebook.com/docs/instagram-platform/reference/refresh_access_token/). Meta documentation was rate-limited during direct retrieval; the current official URL targets and permission names were cross-checked against Meta’s maintained Postman collection.
 
@@ -2745,7 +2745,7 @@ Baseline: branch `main`, commit `1d921ae` at task start. The worktree was clean;
 
 - `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `1d921aeb027ea4bcda35d9194d25612a86b6a216`.
 - `npm run lint` — PASS: TypeScript check.
-- `testdb=$(mktemp -d /tmp/liinx-task-50-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-50-final-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/instagram_task50.test.ts tests/instagram-sync.test.ts tests/audit_fixes.test.ts` — PASS: 3 files / 47 tests against disposable SQLite/uploads paths.
+- `testdb=$(mktemp -d /tmp/raloa-task-50-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-50-final-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/instagram_task50.test.ts tests/instagram-sync.test.ts tests/audit_fixes.test.ts` — PASS: 3 files / 47 tests against disposable SQLite/uploads paths.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
 - `git diff --check` — PASS.
 
@@ -2782,7 +2782,7 @@ Baseline: branch `main`, commit `7f8194a` at task start. The worktree was clean;
 - The previous validator accepted malformed hostnames such as repeated dots and did not clear `custom_domain_verified` after a later failed DNS check. Both behaviors are repaired.
 - Public custom-host routing now requires an exact lowercased verified mapping and an eligible paid plan. An arbitrary or unverified `Host` header cannot select a tenant; unknown hosts receive no mapped tenant header or tenant payload.
 - Custom-domain root and one-level page paths resolve through the owning profile and published-page checks. Unknown or unpublished subpages return 404. The rewritten query is made explicit so `/about` cannot silently fall back to Home.
-- The application uses Fly deployment `liinx-app`; the displayed subdomain target is `liinx-app.fly.dev`. The current verifier checks DNS CNAME ownership for subdomains. Apex A/AAAA setup is provider-specific and is not falsely treated as verified by this endpoint.
+- The application uses Fly deployment `raloa-app`; the displayed subdomain target is `raloa-app.fly.dev`. The current verifier checks DNS CNAME ownership for subdomains. Apex A/AAAA setup is provider-specific and is not falsely treated as verified by this endpoint.
 - DNS verification is not TLS provisioning. The API returns `tlsStatus: external_provider_required`; the UI instructs operators to attach the hostname with `fly certs add <hostname>` and confirm with `fly certs check <hostname>`. It does not claim a domain is connected solely because a database flag is set.
 - Session cookies remain host-only (`Domain` is not set), HttpOnly, SameSite=Lax, and Secure in production. The custom host is not added to authenticated CORS origins automatically; Studio remains on the configured application origin.
 - Official hosting documentation reviewed: [Fly custom domains](https://fly.io/docs/networking/custom-domain/), [Fly certificates API](https://fly.io/docs/machines/api/certificates-resource/), and [Vercel custom-domain setup](https://vercel.com/docs/domains/set-up-custom-domain). The repository deploys the application runtime on Fly and uses Vercel rewrites for the frontend shell; no Fly/Vercel management credential is configured in the app.
@@ -2802,7 +2802,7 @@ Baseline: branch `main`, commit `7f8194a` at task start. The worktree was clean;
 
 - `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `7f8194a68f390d45070911486c7d1a71a7804906`.
 - `npm run lint` — PASS: TypeScript check.
-- `testdb=$(mktemp -d /tmp/liinx-task-51-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/liinx-task-51-final-uploads.XXXXXX); DATABASE_PATH="$testdb/liinx.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/custom_domain_task51.test.ts tests/custom_domain.test.ts tests/sharing_metadata.test.ts tests/audit_fixes.test.ts` — PASS: 4 files / 42 tests against disposable SQLite/uploads paths.
+- `testdb=$(mktemp -d /tmp/raloa-task-51-final-db.XXXXXX); testuploads=$(mktemp -d /tmp/raloa-task-51-final-uploads.XXXXXX); DATABASE_PATH="$testdb/raloa.db" UPLOADS_DIR="$testuploads" NODE_ENV=test npm test -- --run tests/custom_domain_task51.test.ts tests/custom_domain.test.ts tests/sharing_metadata.test.ts tests/audit_fixes.test.ts` — PASS: 4 files / 42 tests against disposable SQLite/uploads paths.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
 - `git diff --check` — PASS.
 
@@ -2861,9 +2861,9 @@ Baseline: branch `main`, commit `b4ab5f0e8e83406c12b2843ca07f480249d2002a` at ta
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `b4ab5f0e8e83406c12b2843ca07f480249d2002a`.
-- `DATABASE_PATH=/tmp/liinx-task52-test-20260917b.db npm test -- --run tests/analytics_task52.test.ts` — PASS: 1 file / 3 tests against disposable SQLite storage.
-- `DATABASE_PATH=/tmp/liinx-task52-test-20260917.db npm test -- --run tests/api.test.ts tests/basic_link.test.ts tests/folders.test.ts` — PASS: 3 files / 31 tests against disposable SQLite storage.
-- `DATABASE_PATH=/tmp/liinx-task52-regression-20260917.db npm test -- --run tests/audit_fixes.test.ts tests/scheduling.test.ts tests/backend-e2e.dynamic.test.ts` — PASS: 3 files / 37 tests against disposable SQLite storage.
+- `DATABASE_PATH=/tmp/raloa-task52-test-20260917b.db npm test -- --run tests/analytics_task52.test.ts` — PASS: 1 file / 3 tests against disposable SQLite storage.
+- `DATABASE_PATH=/tmp/raloa-task52-test-20260917.db npm test -- --run tests/api.test.ts tests/basic_link.test.ts tests/folders.test.ts` — PASS: 3 files / 31 tests against disposable SQLite storage.
+- `DATABASE_PATH=/tmp/raloa-task52-regression-20260917.db npm test -- --run tests/audit_fixes.test.ts tests/scheduling.test.ts tests/backend-e2e.dynamic.test.ts` — PASS: 3 files / 37 tests against disposable SQLite storage.
 - `npm test -- --run tests/api.test.ts tests/utm_and_pixels.test.ts tests/basic_link.test.ts tests/folders.test.ts` — NOT PASSING in the repository’s shared default database: `tests/utm_and_pixels.test.ts` cleanup hit the pre-existing database invariant `page with blocks must be reassigned before deletion`. This is an environment/fixture isolation conflict from earlier migration work, not a Task 52 assertion failure; the relevant tests pass with isolated databases.
 - `npm run lint` — PASS: TypeScript check.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
@@ -2902,7 +2902,7 @@ Baseline: branch `main`, commit `bfc6050c4b21700012597b6979543c25da672aa6` at ta
 - Public profile responses expose configured IDs only when the profile’s current plan has the paid-customization entitlement. Free-plan profiles return null and server-side updates are rejected with 403.
 - GA4 and Meta IDs are validated at the shared profile contract boundary and again guarded in the renderer. Invalid values are not initialized.
 - Application CSP permits the intended GA script host, Meta script host, GA collection host, and existing application providers. It does not use wildcard script sources. CSP does not itself provide consent; the renderer gate remains required.
-- Core Liinx analytics view/click recording remains separate from optional creator-configured GA/Meta pixels. The consent dialog describes the optional integrations rather than claiming that all first-party measurement is disabled.
+- Core RALOA analytics view/click recording remains separate from optional creator-configured GA/Meta pixels. The consent dialog describes the optional integrations rather than claiming that all first-party measurement is disabled.
 
 ### Acceptance criteria
 
@@ -2920,7 +2920,7 @@ Baseline: branch `main`, commit `bfc6050c4b21700012597b6979543c25da672aa6` at ta
 
 - `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `bfc6050c4b21700012597b6979543c25da672aa6`.
 - `npm run lint` — PASS: TypeScript check.
-- `DATABASE_PATH=/tmp/liinx-task53-test-20260917b.db npm test -- --run tests/analytics_consent_task53.test.ts tests/utm_and_pixels.test.ts` — PASS after updating duplicate-event expectation: 2 files / 6 tests against disposable SQLite storage.
+- `DATABASE_PATH=/tmp/raloa-task53-test-20260917b.db npm test -- --run tests/analytics_consent_task53.test.ts tests/utm_and_pixels.test.ts` — PASS after updating duplicate-event expectation: 2 files / 6 tests against disposable SQLite storage.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
 - `git diff --check` — PASS.
 - Browser network inspection — NOT RUN: the required browser runtime/tool was not exposed in this session.
@@ -2953,7 +2953,7 @@ Baseline: branch `main`, commit `d913eec99f9abd0994c7868644c039c9d2e1d11a` at ta
 ### Findings and behavior
 
 - Calendly’s current developer documentation describes embedding a landing/profile scheduling page or a specific event-type page using the scheduling URL. The validator therefore supports `/user` and `/user/event`, while stripping query and fragment values from the persisted embed URL. Official references: [Calendly getting started with embeds](https://developer.calendly.com/api-docs/overview/embedding/getting-started) and [Calendly embed guide](https://developer.calendly.com/docs/api-guides/how-to-display-the-scheduling-page-for-users-of-your-app).
-- The creator configures a URL and title; availability, scheduling, confirmation, and any payment behavior remain at Calendly. Liinx does not claim native calendar management, booking completion, or payment processing.
+- The creator configures a URL and title; availability, scheduling, confirmation, and any payment behavior remain at Calendly. RALOA does not claim native calendar management, booking completion, or payment processing.
 - The iframe is not loaded until a visitor activates the booking button. A new-tab Calendly link remains available as a fallback. A 10-second timeout and iframe error path disclose failure instead of claiming that availability loaded.
 - Preview/template mode disables the booking activation button and does not render the iframe. Public keyboard users receive a native button, expanded state, native iframe title, and a focus-visible fallback link.
 - CSP already allows `frame-src https://calendly.com`; no arbitrary iframe source or broader CSP exception was added. The external Calendly frame remains subject to provider availability, browser privacy settings, and deployment CSP.
@@ -2964,7 +2964,7 @@ Baseline: branch `main`, commit `d913eec99f9abd0994c7868644c039c9d2e1d11a` at ta
 - PASS — Arbitrary iframe/host URLs rejected. Evidence: URL contract rejects non-Calendly hosts, HTTP, credentials, ports, and unsupported path depth; existing contract tests remain green.
 - PASS — Loading failure and fallback behavior implemented. Evidence: iframe `onError`, 10-second timeout, honest alert, and always-available new-tab link in `BookingCard`.
 - PASS — Responsive/mobile sizing and keyboard access implemented. Evidence: `w-full max-w-full`, bounded viewport-relative height, native button/link controls, accessible iframe title, and focus-visible styles.
-- PASS — Creator integration state and external-provider wording. Evidence: editor helper copy identifies Calendly ownership of availability/confirmations; public copy states Liinx does not process bookings or payments.
+- PASS — Creator integration state and external-provider wording. Evidence: editor helper copy identifies Calendly ownership of availability/confirmations; public copy states RALOA does not process bookings or payments.
 - PASS — Preview does not trigger external booking actions. Evidence: `previewOnly`/`interactive` state disables the button and prevents iframe creation in public and phone previews.
 - PASS — CSP compatibility. Evidence: existing explicit `frame-src https://calendly.com` policy and focused build/tests; no wildcard frame source added.
 - NOT RUN — Live Calendly supported URL availability, private/removed event behavior, provider-denied embeds, iframe timeout under a real network failure, and deployed CSP enforcement. No authorized Calendly account or deployed environment was available.
@@ -2973,7 +2973,7 @@ Baseline: branch `main`, commit `d913eec99f9abd0994c7868644c039c9d2e1d11a` at ta
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `d913eec99f9abd0994c7868644c039c9d2e1d11a`.
-- `npm run lint && DATABASE_PATH=/tmp/liinx-task54-test-20260917.db npm test -- --run tests/booking.test.ts tests/contracts.test.ts tests/published_pages_routing.test.ts tests/analytics_consent_task53.test.ts && git diff --check` — PASS: TypeScript check; 4 files / 11 tests against disposable SQLite storage; diff check clean.
+- `npm run lint && DATABASE_PATH=/tmp/raloa-task54-test-20260917.db npm test -- --run tests/booking.test.ts tests/contracts.test.ts tests/published_pages_routing.test.ts tests/analytics_consent_task53.test.ts && git diff --check` — PASS: TypeScript check; 4 files / 11 tests against disposable SQLite storage; diff check clean.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
 - Official Calendly documentation review — PASS for supported URL model; live provider behavior NOT RUN.
 
@@ -2981,7 +2981,7 @@ Baseline: branch `main`, commit `d913eec99f9abd0994c7868644c039c9d2e1d11a` at ta
 
 - Calendly can change URL formats, embed behavior, availability, or account restrictions; live provider verification remains required before promising a working schedule.
 - Browser privacy controls, third-party cookie policy, network blocking, and provider CSP headers may prevent an iframe even when the URL is valid; the fallback link is the supported recovery path.
-- Cross-origin iframe keyboard and screen-reader behavior depends partly on Calendly’s own accessibility implementation; Liinx supplies an accessible container/title and fallback but does not control provider internals.
+- Cross-origin iframe keyboard and screen-reader behavior depends partly on Calendly’s own accessibility implementation; RALOA supplies an accessible container/title and fallback but does not control provider internals.
 - No native calendar, booking database, payment, confirmation, or booking analytics feature was added.
 
 ### Next eligible prompt
@@ -3003,7 +3003,7 @@ Baseline: branch `main`, commit `9cc359320941abe6d0cd0fb95b78d3991dc55f83` at ta
 
 ### Findings and behavior
 
-- API keys continue to be generated once, returned once, and stored only as SHA-256 hashes. The ledger and application logs contain no generated credentials; examples use `liinx_live_your_key_here`.
+- API keys continue to be generated once, returned once, and stored only as SHA-256 hashes. The ledger and application logs contain no generated credentials; examples use `raloa_live_your_key_here`.
 - New keys expire after 90 days. Existing null-expiry rows are assigned a 90-day expiry from their original creation time during initialization; expired keys are excluded from active-key listings and return the same safe 401 as revoked/unknown keys.
 - Revocation remains profile-scoped and deletes the key record. A key cannot delete or read another profile’s content. Downgrading the associated profile below Studio immediately returns 403 even while the key record exists.
 - API v1 scope is intentionally limited: `GET /api/v1/profile` and `POST/DELETE /api/v1/blocks`. Profile reads now include page metadata and bounded `limit`/`offset` pagination. No full REST parity with Studio pages, settings, forms, subscribers, uploads, analytics, or integrations is claimed.
@@ -3026,7 +3026,7 @@ Baseline: branch `main`, commit `9cc359320941abe6d0cd0fb95b78d3991dc55f83` at ta
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git log -5 --format='%H %s'` — PASS at baseline: clean `main`, exact baseline `9cc359320941abe6d0cd0fb95b78d3991dc55f83`.
-- `npm run lint && DATABASE_PATH=/tmp/liinx-task55-final2-20260917.db npm test -- --run tests/api_v1_task55.test.ts tests/api_v1.test.ts tests/contracts.test.ts && git diff --check` — PASS: TypeScript check; 3 files / 15 tests against disposable SQLite storage; diff check clean.
+- `npm run lint && DATABASE_PATH=/tmp/raloa-task55-final2-20260917.db npm test -- --run tests/api_v1_task55.test.ts tests/api_v1.test.ts tests/contracts.test.ts && git diff --check` — PASS: TypeScript check; 3 files / 15 tests against disposable SQLite storage; diff check clean.
 - `npm run build` — PASS: Vite production build and 10 prerendered routes; existing non-blocking chunk-over-500-kB warning emitted.
 
 ### Unresolved risks and dependencies
@@ -3346,9 +3346,9 @@ Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1`
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git rev-parse HEAD && git log -1 --format='%H %s'` — PASS: `main`, exact SHA `c13052971a58c767aa902d0f920efd080106f4b1`; prior dirty work remained unchanged.
-- `DATABASE_PATH=<fresh /tmp/liinx-task62.../liinx.sqlite> UPLOADS_DIR=<fresh /tmp/liinx-task62.../uploads> npm test -- --run tests/auth_sessions.test.ts tests/session_cookie.test.ts tests/contracts.test.ts tests/importer_security.test.ts tests/content_gates.test.ts tests/download_file_lifecycle.test.ts tests/custom_domain_task51.test.ts tests/profile_duplication.test.ts tests/published_pages_routing.test.ts tests/sharing_metadata.test.ts tests/analytics_task52.test.ts tests/analytics_consent_task53.test.ts tests/form_submission_pipeline.test.ts tests/newsletter_capture.test.ts tests/security.test.ts` — PASS: 15 files / 61 tests; fresh isolated database and uploads directory.
+- `DATABASE_PATH=<fresh /tmp/raloa-task62.../raloa.sqlite> UPLOADS_DIR=<fresh /tmp/raloa-task62.../uploads> npm test -- --run tests/auth_sessions.test.ts tests/session_cookie.test.ts tests/contracts.test.ts tests/importer_security.test.ts tests/content_gates.test.ts tests/download_file_lifecycle.test.ts tests/custom_domain_task51.test.ts tests/profile_duplication.test.ts tests/published_pages_routing.test.ts tests/sharing_metadata.test.ts tests/analytics_task52.test.ts tests/analytics_consent_task53.test.ts tests/form_submission_pipeline.test.ts tests/newsletter_capture.test.ts tests/security.test.ts` — PASS: 15 files / 61 tests; fresh isolated database and uploads directory.
 - `npm test -- --run tests/api_v1_task55.test.ts` — FAIL: 1 test file / 1 test failed because the persistent repository database already contained the fixed idempotency key; four other tests passed. This is the test-isolation finding above, not a production security failure.
-- `DATABASE_PATH=<fresh /tmp/liinx-task62-api.../liinx.sqlite> UPLOADS_DIR=<fresh /tmp/liinx-task62-api.../uploads> npm test -- --run tests/api_v1_task55.test.ts` — PASS: 1 file / 5 tests, including first-create 201 and replay 200.
+- `DATABASE_PATH=<fresh /tmp/raloa-task62-api.../raloa.sqlite> UPLOADS_DIR=<fresh /tmp/raloa-task62-api.../uploads> npm test -- --run tests/api_v1_task55.test.ts` — PASS: 1 file / 5 tests, including first-create 201 and replay 200.
 - `npm test` — FAIL: 69 files passed, 3 failed, 295 passed, 37 skipped, 332 total; all three failures were direct profile-delete fixture cleanup rejected by the intended page/block invariant.
 - `npm run lint` — PASS: `tsc --noEmit` exit 0.
 - `npm run build` — PASS: Vite build and 10 prerendered routes; existing chunk-size and dynamic/static-import advisories remain.
@@ -3378,7 +3378,7 @@ Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1`
 - `OPERATIONS.md`: makes readiness and paired database/media restore checks explicit, including matching upload archive extraction and rollback verification.
 - `tests/operations_task63.test.ts`: regression coverage for health/readiness response shape and absence of environment/secret fields.
 
-Topology audit: Vercel is configured as the frontend shell and rewrite proxy; Fly app `liinx-app` owns Express, SQLite, and uploads on separate persistent volumes. The Vercel catch-all follows backend rewrites, so `/api`, `/uploads`, public profile paths, robots, and sitemap are sent to Fly; Fly is the single SQLite writer. Horizontal scaling is explicitly rejected until shared rate limiting, analytics queue, and event storage exist. Request logs are JSON with request id, method, path, status, and duration; Sentry is opt-in with default PII disabled. Production configuration validates HTTPS origin, explicit CORS, encryption-key length, and billing secrets when billing is enabled.
+Topology audit: Vercel is configured as the frontend shell and rewrite proxy; Fly app `raloa-app` owns Express, SQLite, and uploads on separate persistent volumes. The Vercel catch-all follows backend rewrites, so `/api`, `/uploads`, public profile paths, robots, and sitemap are sent to Fly; Fly is the single SQLite writer. Horizontal scaling is explicitly rejected until shared rate limiting, analytics queue, and event storage exist. Request logs are JSON with request id, method, path, status, and duration; Sentry is opt-in with default PII disabled. Production configuration validates HTTPS origin, explicit CORS, encryption-key length, and billing secrets when billing is enabled.
 
 Backup/restore audit: `npm run db:backup` uses SQLite `VACUUM INTO` plus integrity validation; `npm run uploads:backup` creates a separate gzip archive. A database-only restore preserves references but not media, so operations must restore the matching upload archive into the same disposable `UPLOADS_DIR`. Maintenance and Instagram schedulers are single-process, non-test, non-overlapping timers; no multi-instance scheduler ownership is claimed.
 
@@ -3391,7 +3391,7 @@ Backup/restore audit: `npm run db:backup` uses SQLite `VACUUM INTO` plus integri
 ### Acceptance criteria
 
 - PASS — Isolated production-like instance built, started, and stopped gracefully. Evidence: production `npm start` on port 3163 with disposable SQLite/uploads, `/api/health` 200, `/api/ready` 200, and SIGINT logged `Shutdown requested` before exit.
-- PASS — Backup restored into a disposable environment and database integrity verified. Evidence: copied `data/backups/liinx-backup-2026-09-17T00-35-50-895Z.db`; `PRAGMA integrity_check` returned `ok`; restored counts were 1,257 profiles, 1,309 pages, 3,049 blocks, and 33 uploaded-file records.
+- PASS — Backup restored into a disposable environment and database integrity verified. Evidence: copied `data/backups/raloa-backup-2026-09-17T00-35-50-895Z.db`; `PRAGMA integrity_check` returned `ok`; restored counts were 1,257 profiles, 1,309 pages, 3,049 blocks, and 33 uploaded-file records.
 - PASS — Public page and owned asset verified after paired media restoration. Evidence: a disposable upload archive was created from the local fixture set and extracted beside the restored database; `/@elenarostova` returned 200 and the matching referenced PDF returned 200, `application/pdf`, 16 bytes, byte-for-byte equal to the source.
 - PASS — Useful health/readiness diagnostics exist without secret fields. Evidence: new regression test passed and production curl checks returned expected JSON; readiness checks writable uploads separately from liveness.
 - PASS — Unknown public profile status is correct in production-like routing. Evidence: `/@not-a-real-profile` returned 404 after the route fix.
@@ -3402,9 +3402,9 @@ Backup/restore audit: `npm run db:backup` uses SQLite `VACUUM INTO` plus integri
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git rev-parse HEAD && git log -1 --format='%H %s'` — PASS: `main`, SHA `c13052971a58c767aa902d0f920efd080106f4b1`; existing dirty work preserved.
-- `cp data/backups/liinx-backup-2026-09-17T00-35-50-895Z.db <disposable>/liinx.sqlite` plus SQLite `PRAGMA integrity_check`/table counts — PASS: integrity `ok`; counts recorded above.
+- `cp data/backups/raloa-backup-2026-09-17T00-35-50-895Z.db <disposable>/raloa.sqlite` plus SQLite `PRAGMA integrity_check`/table counts — PASS: integrity `ok`; counts recorded above.
 - `UPLOADS_DIR=public/uploads UPLOAD_BACKUP_DIR=<disposable>/archive npm run uploads:backup` plus `tar -xzf <archive> -C <disposable>/uploads` — PASS: disposable media archive extracted; referenced asset was present.
-- `NODE_ENV=production DATABASE_PATH=<disposable>/liinx.sqlite UPLOADS_DIR=<disposable>/uploads APP_ORIGIN=https://configured.example CORS_ORIGIN=https://configured.example INTEGRATION_ENCRYPTION_KEY=<32-byte test key> BILLING_ENABLED=false npm start` — PASS: production-mode process started on port 3163.
+- `NODE_ENV=production DATABASE_PATH=<disposable>/raloa.sqlite UPLOADS_DIR=<disposable>/uploads APP_ORIGIN=https://configured.example CORS_ORIGIN=https://configured.example INTEGRATION_ENCRYPTION_KEY=<32-byte test key> BILLING_ENABLED=false npm start` — PASS: production-mode process started on port 3163.
 - `curl http://127.0.0.1:3163/api/health` — PASS: HTTP 200, database connected, no secrets.
 - `curl http://127.0.0.1:3163/api/ready` — PASS: HTTP 200, database connected, uploads writable.
 - `curl http://127.0.0.1:3164/@elenarostova` and matching `/uploads/...pdf`, plus `cmp` — PASS: paired-restore page HTTP 200; asset HTTP 200, `application/pdf`, 16 bytes, byte match.
@@ -3464,7 +3464,7 @@ Baseline: branch `main`, exact commit `c13052971a58c767aa902d0f920efd080106f4b1`
 ### Exact validation commands and outcomes
 
 - `git status --short --branch && git rev-parse HEAD` — PASS: `main`, `c13052971a58c767aa902d0f920efd080106f4b1`; existing dirty work preserved.
-- `task64_db=$(mktemp -d /tmp/liinx-task64-e2e.XXXXXX); task64_uploads=$(mktemp -d /tmp/liinx-task64-uploads.XXXXXX); DATABASE_PATH="$task64_db/liinx.sqlite" UPLOADS_DIR="$task64_uploads" NODE_ENV=test BILLING_ENABLED=false npm test -- --run tests/backend-e2e.dynamic.test.ts tests/e2e-workflow.test.ts tests/block_placement_ordering.test.ts tests/profile_switching_onboarding.test.ts tests/page_creation_settings.test.ts tests/saveQueue.test.ts tests/preview.test.ts` — PASS: 6 existing files / 31 tests; `tests/preview.test.ts` is absent and was not executed.
+- `task64_db=$(mktemp -d /tmp/raloa-task64-e2e.XXXXXX); task64_uploads=$(mktemp -d /tmp/raloa-task64-uploads.XXXXXX); DATABASE_PATH="$task64_db/raloa.sqlite" UPLOADS_DIR="$task64_uploads" NODE_ENV=test BILLING_ENABLED=false npm test -- --run tests/backend-e2e.dynamic.test.ts tests/e2e-workflow.test.ts tests/block_placement_ordering.test.ts tests/profile_switching_onboarding.test.ts tests/page_creation_settings.test.ts tests/saveQueue.test.ts tests/preview.test.ts` — PASS: 6 existing files / 31 tests; `tests/preview.test.ts` is absent and was not executed.
 - `npm run lint` — PASS: `tsc --noEmit` exit 0.
 - `npm run build` — PASS: Vite build and 10 prerendered routes; existing chunk-size and dynamic/static-import advisories remain.
 - `git diff --check` — PASS.
@@ -3517,14 +3517,14 @@ NO-GO for release. The core isolated API creator journey passes and no high-impa
 ### Configuration, migration, deployment, and rollback handoff
 
 - Required production configuration includes HTTPS `APP_ORIGIN`, explicit HTTPS `CORS_ORIGIN`, 32-byte `INTEGRATION_ENCRYPTION_KEY`, `JWT_SECRET`, and Stripe secrets unless `BILLING_ENABLED=false`; provider-specific variables are documented in `README.md`/`OPERATIONS.md`.
-- Fly `liinx-app` owns the Express runtime, SQLite, and persistent data/uploads volumes; Vercel is the shell/rewrite layer. Only one SQLite writer/process is supported. Do not run cluster mode or multiple database writers.
+- Fly `raloa-app` owns the Express runtime, SQLite, and persistent data/uploads volumes; Vercel is the shell/rewrite layer. Only one SQLite writer/process is supported. Do not run cluster mode or multiple database writers.
 - Run explicit idempotent migrations on the target volume, take `npm run db:backup` and `npm run uploads:backup`, and retain both matching artifacts. Restore the database and matching media archive into separate disposable paths, run integrity/readiness/public asset checks, and preserve the original volumes until verified.
 - Rollback is to the last known-good immutable image/release, followed by `npm run health:check`, `/api/ready`, public profile, and Studio checks. Restore data only into a separate volume first; do not edit live containers or perform destructive rollback in place.
 
 ### Exact validation commands and outcomes
 
 - `git status --short --branch; git rev-parse HEAD; git diff --check` — PASS: branch `main`, SHA `c13052971a58c767aa902d0f920efd080106f4b1`; pre-existing dirty work preserved; diff check clean.
-- `task65_db=$(mktemp -d /tmp/liinx-task65-full.XXXXXX); task65_uploads=$(mktemp -d /tmp/liinx-task65-uploads.XXXXXX); DATABASE_PATH="$task65_db/liinx.sqlite" UPLOADS_DIR="$task65_uploads" NODE_ENV=test BILLING_ENABLED=false npm test` — FAIL: 70 files passed, 3 failed; 330 tests passed, 3 failed.
+- `task65_db=$(mktemp -d /tmp/raloa-task65-full.XXXXXX); task65_uploads=$(mktemp -d /tmp/raloa-task65-uploads.XXXXXX); DATABASE_PATH="$task65_db/raloa.sqlite" UPLOADS_DIR="$task65_uploads" NODE_ENV=test BILLING_ENABLED=false npm test` — FAIL: 70 files passed, 3 failed; 330 tests passed, 3 failed.
 - Individual fresh reruns of `tests/concurrent_revisions.test.ts`, `tests/location_block.test.ts`, and `tests/custom_domain.test.ts` — PASS: 1, 1, and 1 files respectively; 1, 1, and 7 tests respectively. This does not clear the suite-level failure.
 - Task 64 isolated journey command — PASS: 6 files / 31 tests.
 - `npm run lint` — PASS: `tsc --noEmit` exit 0.

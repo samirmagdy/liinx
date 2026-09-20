@@ -9,7 +9,7 @@ function unique(prefix: string): string {
 
 async function creator(prefix: string) {
   const username = unique(prefix).slice(0, 30);
-  const response = await request(app).post('/api/auth/register').send({ email: `${username}@liinx.test`, password: 'BlockPlacementPassword2026!', username }).expect(201);
+  const response = await request(app).post('/api/auth/register').send({ email: `${username}@raloa.test`, password: 'BlockPlacementPassword2026!', username }).expect(201);
   return { token: response.body.token as string, username };
 }
 

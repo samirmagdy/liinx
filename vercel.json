@@ -21,35 +21,35 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://liinx-app.fly.dev/api/:path*"
+      "destination": "https://raloa-app.fly.dev/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://liinx-app.fly.dev/uploads/:path*"
+      "destination": "https://raloa-app.fly.dev/uploads/:path*"
     },
     {
       "source": "/r/:path*",
-      "destination": "https://liinx-app.fly.dev/r/:path*"
+      "destination": "https://raloa-app.fly.dev/r/:path*"
     },
     {
       "source": "/@:username",
-      "destination": "https://liinx-app.fly.dev/@:username"
+      "destination": "https://raloa-app.fly.dev/@:username"
     },
     {
       "source": "/@:username/:pageSlug",
-      "destination": "https://liinx-app.fly.dev/@:username/:pageSlug"
+      "destination": "https://raloa-app.fly.dev/@:username/:pageSlug"
     },
     {
       "source": "/demo/:identifier",
-      "destination": "https://liinx-app.fly.dev/demo/:identifier"
+      "destination": "https://raloa-app.fly.dev/demo/:identifier"
     },
     {
       "source": "/robots.txt",
-      "destination": "https://liinx-app.fly.dev/robots.txt"
+      "destination": "https://raloa-app.fly.dev/robots.txt"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "https://liinx-app.fly.dev/sitemap.xml"
+      "destination": "https://raloa-app.fly.dev/sitemap.xml"
     },
     {
       "source": "/studio",

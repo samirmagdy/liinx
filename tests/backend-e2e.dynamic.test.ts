@@ -22,7 +22,7 @@ describe('Dynamic Backend E2E — chained real API workflow', () => {
   it('completes a creator lifecycle using only API response state', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const credentials = {
-      email: `dynamic_${unique}@liinx.test`,
+      email: `dynamic_${unique}@raloa.test`,
       password: 'DynamicCreatorPassword2026!',
       username: `dynamic_${unique}`.slice(0, 30)
     };
@@ -123,7 +123,7 @@ describe('Dynamic Backend E2E — chained real API workflow', () => {
   it('rejects HTML disguised as a document upload through the real multipart endpoint', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const registration = await request(app).post('/api/auth/register').send({
-      email: `upload_${unique}@liinx.test`,
+      email: `upload_${unique}@raloa.test`,
       password: 'DynamicUploadPassword2026!',
       username: `upload_${unique}`.slice(0, 30)
     }).expect(201);
@@ -138,7 +138,7 @@ describe('Dynamic Backend E2E — chained real API workflow', () => {
   it('exercises the advanced block catalogue, newsletter export, and Studio REST API', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const registration = await request(app).post('/api/auth/register').send({
-      email: `catalogue_${unique}@liinx.test`,
+      email: `catalogue_${unique}@raloa.test`,
       password: 'DynamicCataloguePassword2026!',
       username: `catalogue_${unique}`.slice(0, 30)
     }).expect(201);
@@ -199,7 +199,7 @@ describe('Dynamic Backend E2E — chained real API workflow', () => {
   it('chains multi-profile creation and active-profile switching', async () => {
     const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const registration = await request(app).post('/api/auth/register').send({
-      email: `profiles_${unique}@liinx.test`,
+      email: `profiles_${unique}@raloa.test`,
       password: 'DynamicProfilesPassword2026!',
       username: `profiles_${unique}`.slice(0, 30)
     }).expect(201);
