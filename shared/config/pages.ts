@@ -1,6 +1,6 @@
 export const pageTitles: Record<string, [string, string]> = {
-  '/': ['Your links, media and bookings', 'روابطك ووسائطك وحجوزاتك'],
-  '/features': ['Features', 'الميزات'],
+  '/': ['Link in Bio Page Builder for Creators', 'رابط في البايو للمبدعين'],
+  '/features': ['Link in Bio Page Features', 'ميزات صفحة رابط البايو'],
   '/templates': ['Templates', 'القوالب'],
   '/pricing': ['Pricing', 'الأسعار'],
   '/about': ['About', 'عن المنصة'],
@@ -17,12 +17,12 @@ export const pageTitles: Record<string, [string, string]> = {
 // client-side language changes use the same truthful page summaries.
 export const pageDescriptions: Record<string, [string, string]> = {
   '/': [
-    'Create a customizable page for your links, media, bookings, and newsletter. Start with Liinx’s free plan.',
-    'أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك ونشرتك البريدية. ابدأ بالخطة المجانية من Liinx.'
+    'Create a customizable link-in-bio page for your links, media, bookings, and newsletter. Start free with Liinx.',
+    'أنشئ صفحة رابط في البايو لروابطك ووسائطك وحجوزاتك ونشرتك البريدية. ابدأ مجاناً مع Liinx.'
   ],
   '/features': [
-    'Explore Liinx features for creator pages, including supported media, custom themes, custom domains, and page analytics.',
-    'اكتشف ميزات Liinx لصفحات المبدعين، بما فيها الوسائط المدعومة والسمات المخصصة والنطاقات المخصصة وتحليلات الصفحات.'
+    'See how Liinx link-in-bio pages use custom themes, supported media, bookings, newsletters, custom domains, and analytics.',
+    'تعرّف على ميزات صفحات Liinx للرابط في البايو، مثل السمات المخصصة والوسائط والحجوزات والنشرات البريدية والنطاقات والتحليلات.'
   ],
   '/templates': [
     'Browse customizable Liinx page templates and choose a starting design for your links, media, and creator content.',
