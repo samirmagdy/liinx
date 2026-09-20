@@ -103,10 +103,10 @@ export const api = {
       if (!res.ok) throw new Error('Failed to download account export');
       return res.blob();
     },
-    deleteAccount: async () => {
+    deleteAccount: async (password: string) => {
       return request<{ success: boolean; message: string }>('/api/auth/account', {
         method: 'DELETE',
-        body: JSON.stringify({ confirmation: 'DELETE' })
+        body: JSON.stringify({ confirmation: 'DELETE', password })
       });
     },
     logout: () => {

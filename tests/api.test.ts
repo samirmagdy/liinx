@@ -308,19 +308,27 @@ describe('LIINX Production Backend API', () => {
   });
 
   it('DELETE /api/auth/account should permanently delete user and associated profile', async () => {
+    const deletionEmail = `delete_${Date.now()}@liinx.test`;
+    const deletionUsername = `delete_${Date.now().toString().slice(-8)}`;
+    const registered = await request(app).post('/api/auth/register').send({
+      email: deletionEmail,
+      password: 'Password123!',
+      username: deletionUsername
+    });
+    expect(registered.status).toBe(201);
     const res = await request(app)
       .delete('/api/auth/account')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({ confirmation: 'DELETE' });
+      .set('Authorization', `Bearer ${registered.body.token}`)
+      .send({ confirmation: 'DELETE', password: 'Password123!' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
 
     // Verify user and profile are deleted from SQLite
-    const userCheck = db.prepare('SELECT * FROM users WHERE email = ?').get(testEmail);
+    const userCheck = db.prepare('SELECT * FROM users WHERE email = ?').get(deletionEmail);
     expect(userCheck).toBeUndefined();
 
-    const profileCheck = db.prepare('SELECT * FROM profiles WHERE username = ?').get(testUsername);
+    const profileCheck = db.prepare('SELECT * FROM profiles WHERE username = ?').get(deletionUsername);
     expect(profileCheck).toBeUndefined();
   });
 });

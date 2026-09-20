@@ -27,7 +27,8 @@ export const resetConfirmSchema = z.object({
 });
 
 export const deletionSchema = z.object({
-  confirmation: z.literal('DELETE')
+  confirmation: z.literal('DELETE'),
+  password: z.string().min(1, 'Current password is required').max(128, 'Password cannot exceed 128 characters')
 });
 
 export const changePasswordSchema = z.object({

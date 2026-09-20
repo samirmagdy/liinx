@@ -500,8 +500,12 @@ authRouter.get('/export-data', requireAuth, (req: AuthenticatedRequest, res) => 
 authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const confirmation = deletionSchema.safeParse(req.body);
-    if (!confirmation.success) return res.status(400).json({ error: 'Type DELETE in the confirmation field to permanently delete this account.' });
+    if (!confirmation.success) return res.status(400).json({ error: 'Enter your current password and type DELETE to permanently delete this account.' });
     const userId = req.user!.userId;
+    const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(userId) as { password_hash: string } | undefined;
+    if (!user || !comparePassword(confirmation.data.password, user.password_hash)) {
+      return res.status(401).json({ error: 'Current password is incorrect.' });
+    }
     const subscriptions = db.prepare('SELECT stripe_subscription_id FROM profiles WHERE user_id = ? AND stripe_subscription_id IS NOT NULL').all(userId) as { stripe_subscription_id: string }[];
     // Cancel provider subscriptions first. If Stripe is unavailable, retain the
     // account so the operation can be retried instead of deleting local state.

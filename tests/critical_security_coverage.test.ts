@@ -821,15 +821,15 @@ describe('Critical Security & Coverage Modules', () => {
       const badConfirm = await request(app)
         .delete('/api/auth/account')
         .set('Authorization', `Bearer ${token}`)
-        .send({ confirmation: 'NO' });
+        .send({ confirmation: 'NO', password: 'Password123!' });
       expect(badConfirm.status).toBe(400);
-      expect(badConfirm.body.error).toMatch(/Type DELETE in the confirmation field/);
+      expect(badConfirm.body.error).toMatch(/current password and type DELETE/);
 
       // Successful deletion
       const delSuccess = await request(app)
         .delete('/api/auth/account')
         .set('Authorization', `Bearer ${token}`)
-        .send({ confirmation: 'DELETE' });
+        .send({ confirmation: 'DELETE', password: 'Password123!' });
       expect(delSuccess.status).toBe(200);
       expect(delSuccess.body.success).toBe(true);
 

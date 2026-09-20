@@ -64,6 +64,7 @@ export function AccountPage() {
 
   // Danger zone state
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -180,7 +181,7 @@ export function AccountPage() {
     setDeleteError(null);
     setDeleteLoading(true);
     try {
-      await api.auth.deleteAccount();
+      await api.auth.deleteAccount(deletePassword);
       logout();
       setLocation('/');
     } catch (err: any) {
@@ -617,9 +618,24 @@ export function AccountPage() {
 
                   <div className="space-y-3 max-w-md">
                     <p className="text-xs text-neutral-600 font-medium">
-                      {ar ? 'لتأكيد الحذف، اكتب كلمة DELETE أدناه:' : 'To confirm, type DELETE in uppercase below:'}
+                      {ar ? 'أدخل كلمة مرورك الحالية واكتب DELETE لتأكيد الحذف:' : 'Enter your current password and type DELETE to confirm deletion:'}
                     </p>
+                    <label className="block text-xs font-medium text-neutral-700" htmlFor="delete-account-password">
+                      {ar ? 'كلمة المرور الحالية' : 'Current password'}
+                    </label>
                     <input
+                      id="delete-account-password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-xl border border-rose-300 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                    />
+                    <label className="block text-xs font-medium text-neutral-700" htmlFor="delete-account-confirmation">
+                      {ar ? 'اكتب DELETE للتأكيد' : 'Type DELETE to confirm'}
+                    </label>
+                    <input
+                      id="delete-account-confirmation"
                       type="text"
                       value={deleteConfirmText}
                       onChange={(e) => setDeleteConfirmText(e.target.value)}
@@ -633,7 +649,7 @@ export function AccountPage() {
 
                     <button
                       type="button"
-                      disabled={deleteConfirmText !== 'DELETE' || deleteLoading}
+                      disabled={deleteConfirmText !== 'DELETE' || !deletePassword || deleteLoading}
                       onClick={handleDeleteAccount}
                       className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     >

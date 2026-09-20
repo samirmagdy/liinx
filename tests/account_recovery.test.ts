@@ -85,14 +85,18 @@ describe('account recovery and deletion', () => {
     db.prepare('INSERT INTO newsletter_subscribers (id, profile_id, email, created_at) VALUES (?, ?, ?, ?)').run(unique('subscriber'), profile.id, 'subscriber@example.test', now);
     db.prepare('INSERT INTO form_submissions (id, profile_id, fields_json, created_at) VALUES (?, ?, ?, ?)').run(unique('submission'), profile.id, '{}', now);
 
-    expect((await request(app).delete('/api/auth/account').set('Authorization', `Bearer ${account.token}`)).status).toBe(400);
-    const failed = await request(app).delete('/api/auth/account').set('Authorization', `Bearer ${account.token}`).send({ confirmation: 'DELETE' });
+    const missingReauth = await request(app).delete('/api/auth/account').set('Authorization', `Bearer ${account.token}`).send({ confirmation: 'DELETE' });
+    expect(missingReauth.status).toBe(400);
+    const wrongPassword = await request(app).delete('/api/auth/account').set('Authorization', `Bearer ${account.token}`).send({ confirmation: 'DELETE', password: 'WrongPassword123!' });
+    expect(wrongPassword.status).toBe(401);
+    expect(db.prepare('SELECT id FROM users WHERE email = ?').get(account.email)).toBeDefined();
+    const failed = await request(app).delete('/api/auth/account').set('Authorization', `Bearer ${account.token}`).send({ confirmation: 'DELETE', password: 'Password123!' });
     expect(failed.status).toBe(500);
     expect(failed.body.success).toBeUndefined();
     expect(db.prepare('SELECT id FROM users WHERE email = ?').get(account.email)).toBeDefined();
 
     db.prepare('UPDATE profiles SET stripe_subscription_id = NULL WHERE id = ?').run(profile.id);
-    const retried = await request(app).delete('/api/auth/account').set('Authorization', `Bearer ${account.token}`).send({ confirmation: 'DELETE' });
+    const retried = await request(app).delete('/api/auth/account').set('Authorization', `Bearer ${account.token}`).send({ confirmation: 'DELETE', password: 'Password123!' });
     expect(retried.status).toBe(200);
     expect(db.prepare('SELECT id FROM users WHERE email = ?').get(account.email)).toBeUndefined();
     expect(db.prepare('SELECT id FROM profiles WHERE id = ?').get(profile.id)).toBeUndefined();
