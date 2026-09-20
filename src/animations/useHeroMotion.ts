@@ -56,7 +56,14 @@ export function useHeroMotion(ref: RefObject<HTMLElement | null>, language: stri
   useGSAP(() => {
     const mm = gsap.matchMedia();
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.from('[data-hero-preview]', { opacity: 0.65, duration: timing.component, ease: easing.smooth, clearProps: 'opacity' });
+      gsap.from('[data-hero-preview]', {
+        opacity: 0.72,
+        y: 6,
+        scale: 0.995,
+        duration: timing.component,
+        ease: easing.out,
+        clearProps: 'opacity,transform',
+      });
     });
     return () => mm.revert();
   }, { scope: ref, dependencies: [preview], revertOnUpdate: true });

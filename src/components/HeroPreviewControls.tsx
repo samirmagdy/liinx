@@ -21,7 +21,8 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
   onSelectTheme,
   activeTheme
 }) => {
-  const { t, tr: ui } = useLanguage();
+  const { t, tr: ui, isRtl } = useLanguage();
+  const visibleProfileCount = Math.max(1, Math.min(currentProfiles.length, 4));
 
   return (
     <div data-hero="controls" className="w-full max-w-[380px] mb-3.5">
@@ -29,15 +30,25 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
         <p className="text-xs font-semibold text-neutral-600 text-center">{t.hero.previewSubtitle}</p>
         
         {/* Profile switcher tabs */}
-        <div className="flex items-center justify-between gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
+        <div className="relative isolate flex items-center justify-between gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-neutral-900"
+            style={{
+              insetInlineStart: '4px',
+              width: `calc((100% - 8px) / ${visibleProfileCount})`,
+              transform: `translateX(${selectedProfileIndex * (isRtl ? -100 : 100)}%)`,
+              transition: 'transform 260ms var(--motion-ease-out)',
+            }}
+          />
           {currentProfiles.slice(0, 4).map((prof, idx) => (
             <button
               key={prof.id}
               aria-pressed={selectedProfileIndex === idx}
               onClick={() => onSelectProfile(idx)}
-              className={`flex-1 py-1.5 px-2 rounded-full text-[11px] font-semibold transition-colors truncate cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`relative z-10 flex-1 py-1.5 px-2 rounded-full text-[11px] font-semibold transition-colors duration-200 truncate cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
                 selectedProfileIndex === idx
-                  ? 'bg-neutral-900 text-white'
+                  ? 'text-white'
                   : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
@@ -62,7 +73,7 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
                 onClick={() => onSelectTheme(theme.id)}
                 title={theme.name}
                 aria-label={`Select ${theme.name} theme`}
-                className={`w-5 h-5 rounded-full border transition-transform cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/40 focus-visible:ring-offset-1 ${
+                className={`w-5 h-5 rounded-full border transition-[transform,opacity,box-shadow] duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/40 focus-visible:ring-offset-1 ${
                   selectedThemeId === theme.id
                     ? 'ring-2 ring-neutral-900 ring-offset-1 scale-110'
                     : 'opacity-70 hover:opacity-100'
