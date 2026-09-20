@@ -280,21 +280,19 @@ interface AppProps {
   initialPath?: string;
 }
 
-export default function App({ initialLanguage, initialPath }: AppProps = {}) {
-  const currentHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
-  const currentPath = initialPath || (typeof window !== 'undefined' ? window.location.pathname : '/');
-  const language = initialLanguage || languageForPath(currentPath);
-  const routerBase = language === 'ar' ? '/ar' : undefined;
-  const routerSsrPath = initialPath ? { ssrPath: initialPath } : {};
-  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
-  const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.liinx.app');
+interface RoutedAppProps {
+  language: Language;
+  routerBase?: string;
+  routerSsrPath: { ssrPath?: string };
+}
 
-  if (isCustomDomain) {
-    const customPageSlug = typeof window !== 'undefined'
-      ? window.location.pathname.split('/').filter(Boolean)[0] || undefined
-      : undefined;
-    return (
-      <Router base={routerBase} {...routerSsrPath}>
+function CustomDomainApp({ currentHost, language, routerBase, routerSsrPath }: RoutedAppProps & { currentHost: string }) {
+  const customPageSlug = typeof window !== 'undefined'
+    ? window.location.pathname.split('/').filter(Boolean)[0] || undefined
+    : undefined;
+
+  return (
+    <Router base={routerBase} {...routerSsrPath}>
       <ErrorBoundary>
         <LanguageProvider initialLanguage={language}>
           <AuthProvider>
@@ -310,10 +308,11 @@ export default function App({ initialLanguage, initialPath }: AppProps = {}) {
           </AuthProvider>
         </LanguageProvider>
       </ErrorBoundary>
-      </Router>
-    );
-  }
+    </Router>
+  );
+}
 
+function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps) {
   return (
     <Router base={routerBase} {...routerSsrPath}>
     <ErrorBoundary>
@@ -380,4 +379,18 @@ export default function App({ initialLanguage, initialPath }: AppProps = {}) {
     </ErrorBoundary>
     </Router>
   );
-};
+}
+
+export default function App({ initialLanguage, initialPath }: AppProps = {}) {
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+  const currentPath = initialPath || (typeof window !== 'undefined' ? window.location.pathname : '/');
+  const language = initialLanguage || languageForPath(currentPath);
+  const routerBase = language === 'ar' ? '/ar' : undefined;
+  const routerSsrPath = initialPath ? { ssrPath: initialPath } : {};
+  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
+  const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.liinx.app');
+
+  return isCustomDomain
+    ? <CustomDomainApp currentHost={currentHost} language={language} routerBase={routerBase} routerSsrPath={routerSsrPath} />
+    : <MainApplication language={language} routerBase={routerBase} routerSsrPath={routerSsrPath} />;
+}
