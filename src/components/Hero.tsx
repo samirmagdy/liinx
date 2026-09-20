@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 
 import { useHeroMotion } from '../animations/useHeroMotion';
-import { brand } from '../config/brand';
 import { HeroFeatureShowcase } from './HeroFeatureShowcase';
 import { HeroPreviewControls } from './HeroPreviewControls';
 import { HeroClaimForm } from './HeroClaimForm';
@@ -26,7 +25,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => {
   const [, setLocation] = useLocation();
-  const { t, isRtl, tr: ui } = useLanguage();
+  const { t, isRtl } = useLanguage();
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>('audio');
