@@ -45,6 +45,7 @@ describe('Milestone 6: Custom Domain Support & Host-Header Routing Engine (0% Fa
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
       proUserId, 'cdpro@liinx.test', 'hashed', now
     );
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(proUserId);
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(proProfileId, proUsername);
     db.prepare(`
       INSERT INTO profiles (id, user_id, username, display_name, plan, created_at, updated_at)

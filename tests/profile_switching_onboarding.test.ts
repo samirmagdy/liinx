@@ -19,7 +19,7 @@ describe('profile switching and onboarding', () => {
     expect(firstHome?.id).toBeTruthy();
     await request(app).get(`/api/profiles/${username}`).expect(200);
 
-    db.prepare("UPDATE profiles SET plan = 'pro' WHERE id = ?").run(firstId);
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = (SELECT user_id FROM profiles WHERE id = ?)").run(firstId);
     const created = await request(app).post('/api/studio/profiles').set('Authorization', `Bearer ${firstToken}`).send({ username: `second${unique}`.slice(0, 30), displayName: 'Second Profile' }).expect(201);
     const secondId = created.body.profile.id as string;
     const now = Date.now();

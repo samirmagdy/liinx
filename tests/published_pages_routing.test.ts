@@ -41,7 +41,8 @@ describe('published pages and public routing', () => {
     }).expect(201);
     const token = registration.body.token as string;
     const username = registration.body.user.username as string;
-    db.prepare('UPDATE profiles SET plan = ?, custom_domain = ?, custom_domain_verified = 1 WHERE username = ?').run('pro', `${username}.example.test`, username);
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = (SELECT user_id FROM profiles WHERE username = ?)").run(username);
+    db.prepare('UPDATE profiles SET custom_domain = ?, custom_domain_verified = 1 WHERE username = ?').run(`${username}.example.test`, username);
     const page = await request(app).post('/api/studio/pages').set('Authorization', `Bearer ${token}`).send({ title: 'Public', slug: `public-${slugSuffix}`, published: true }).expect(201);
 
     const publicPage = await request(app).get(`/api/profiles/by-domain/${username}.example.test?page=${page.body.page.slug}`).expect(307);

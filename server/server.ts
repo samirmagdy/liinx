@@ -5,6 +5,7 @@ import fs from 'fs';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'url';
 import { db, initDatabase } from './db.js';
+import { getEffectivePlan } from './accountEntitlements.js';
 import { authRouter } from './routes/auth.js';
 import { profilesRouter } from './routes/profiles.js';
 import { blocksRouter } from './routes/blocks.js';
@@ -361,9 +362,9 @@ function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
 function customDomainMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
   const host = (req.headers.host || '').split(':')[0].toLowerCase().trim();
   if (isDefaultHost(host) || host.endsWith('.liinx.app')) return next();
-  const profile = db.prepare('SELECT username, plan FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { username: string; plan: string } | undefined;
+  const profile = db.prepare('SELECT id, username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { id: string; username: string } | undefined;
   if (!profile) return next();
-  if (!hasEntitlement(profile.plan, 'customDomain')) return res.status(404).send('This custom domain is not available.');
+  if (!hasEntitlement(getEffectivePlan(profile.id), 'customDomain')) return res.status(404).send('This custom domain is not available.');
 
   res.setHeader('X-Custom-Domain-User', profile.username);
   if (routeCustomDomainRequest(req, res, host, profile)) next();

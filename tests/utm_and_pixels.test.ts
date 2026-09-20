@@ -35,6 +35,7 @@ describe('Milestone 4: UTM Tracking & Tracking Pixels (0% Fake Implementation)',
       INSERT INTO users (id, email, password_hash, created_at)
       VALUES (?, ?, ?, ?)
     `).run(testUserId, 'pixel@liinx.test', 'hashed_pw', now);
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(testUserId);
 
     db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(testProfileId);
     db.prepare('DELETE FROM pages WHERE profile_id = ?').run(testProfileId);

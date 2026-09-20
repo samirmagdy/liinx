@@ -42,7 +42,7 @@ describe('Milestone 8: Public REST API Access (Studio Tier) (0% Fake Implementat
 
     // 2. Studio user
     db.prepare('DELETE FROM users WHERE id = ?').run(studioUserId);
-    db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
+    db.prepare("INSERT INTO users (id, email, password_hash, subscription_plan, subscription_status, created_at) VALUES (?, ?, ?, 'studio', 'active', ?)").run(
       studioUserId, 'studioapi@liinx.test', 'hashed', now
     );
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(studioProfileId, studioUsername);

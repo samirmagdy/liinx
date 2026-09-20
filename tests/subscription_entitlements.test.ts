@@ -13,7 +13,68 @@ async function webhook(id: string, type: string, created: number, object: Record
 }
 
 describe('subscription entitlements', () => {
-  it('reconciles per-profile upgrades, cancellation, duplicate delivery, stale events, and payment failure', async () => {
+  it('revokes account-wide Studio access on cancellation across profiles and paid features', async () => {
+    const originalWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    delete process.env.STRIPE_WEBHOOK_SECRET;
+    try {
+      const email = `${unique('account_billing')}@liinx.test`;
+      const username = unique('acct').slice(0, 24);
+      const registered = await request(app).post('/api/auth/register').send({ email, password: 'Password123!', username });
+      expect(registered.status).toBe(201);
+      const token = registered.body.token as string;
+      const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as { id: string };
+      const first = db.prepare('SELECT id FROM profiles WHERE username = ?').get(username) as { id: string };
+
+      expect((await webhook(unique('evt_studio'), 'checkout.session.completed', 1_000, {
+        client_reference_id: user.id,
+        customer: 'cus_account_entitlements',
+        subscription: 'sub_account_entitlements',
+        payment_status: 'paid',
+        metadata: { userId: user.id, plan: 'studio' }
+      })).status).toBe(200);
+
+      const createProfile = async (suffix: string) => request(app).post('/api/studio/profiles')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ username: `${username.slice(0, 16)}_${suffix}_${randomBytes(2).toString('hex')}`, displayName: `Studio ${suffix}` });
+      const second = await createProfile('two');
+      const third = await createProfile('three');
+      expect(second.status).toBe(201);
+      expect(third.status).toBe(201);
+      const profileIds = [first.id, second.body.profile.id, third.body.profile.id] as string[];
+      expect(db.prepare('SELECT subscription_plan FROM users WHERE id = ?').get(user.id)).toEqual({ subscription_plan: 'studio' });
+      expect((db.prepare(`SELECT COUNT(*) AS count FROM profiles WHERE id IN (?, ?, ?) AND plan = 'studio'`).get(...profileIds) as { count: number }).count).toBe(3);
+
+      expect((await webhook(unique('evt_account_cancel'), 'customer.subscription.deleted', 2_000, {
+        id: 'sub_account_entitlements', customer: 'cus_account_entitlements', metadata: { userId: user.id, plan: 'studio' }
+      })).status).toBe(200);
+      expect(db.prepare('SELECT subscription_plan, stripe_subscription_id, subscription_status FROM users WHERE id = ?').get(user.id)).toEqual({
+        subscription_plan: 'free', stripe_subscription_id: null, subscription_status: 'canceled'
+      });
+      expect((db.prepare(`SELECT COUNT(*) AS count FROM profiles WHERE id IN (?, ?, ?) AND plan = 'free'`).get(...profileIds) as { count: number }).count).toBe(3);
+
+      // Simulate stale copied profile values left behind by the old model. The
+      // account remains the authorization source even when a legacy cache is wrong.
+      db.prepare("UPDATE profiles SET plan = 'studio' WHERE id IN (?, ?)").run(profileIds[1], profileIds[2]);
+      const selectedExtraProfile = await request(app).post(`/api/studio/profiles/${profileIds[1]}/select`).set('Authorization', `Bearer ${token}`);
+      expect(selectedExtraProfile.status).toBe(200);
+      const extraProfileToken = selectedExtraProfile.body.token as string;
+
+      await request(app).post('/api/studio/api-keys').set('Authorization', `Bearer ${extraProfileToken}`).send({ name: 'After cancellation' }).expect(403);
+      await request(app).put('/api/studio/profile').set('Authorization', `Bearer ${extraProfileToken}`).send({ customDomain: 'links.example.com' }).expect(403);
+      await request(app).post('/api/studio/blocks').set('Authorization', `Bearer ${extraProfileToken}`).send({
+        type: 'link', title: 'Scheduled after cancellation', url: 'https://example.com', startAt: Date.now() + 60_000
+      }).expect(403);
+      const overLimit = await request(app).post('/api/studio/profiles').set('Authorization', `Bearer ${token}`).send({
+        username: `${username.slice(0, 14)}_four_${randomBytes(2).toString('hex')}`, displayName: 'No longer allowed'
+      });
+      expect(overLimit.status).toBe(403);
+      expect(overLimit.body.error).toMatch(/FREE plan allows up to 1/i);
+    } finally {
+      if (originalWebhookSecret === undefined) delete process.env.STRIPE_WEBHOOK_SECRET; else process.env.STRIPE_WEBHOOK_SECRET = originalWebhookSecret;
+    }
+  });
+
+  it('reconciles account subscriptions, cancellation, duplicate delivery, stale events, and payment failure', async () => {
     const originalWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     delete process.env.STRIPE_WEBHOOK_SECRET;
     try {
@@ -68,12 +129,11 @@ describe('subscription entitlements', () => {
     expect(stale.status).toBe(200);
     expect((db.prepare('SELECT plan FROM profiles WHERE id = ?').get(original.id) as { plan: string }).plan).toBe('free');
 
-    db.prepare("UPDATE profiles SET plan = 'studio', stripe_customer_id = 'cus_copy', stripe_subscription_id = 'sub_copy' WHERE id = ?").run(duplicateId);
     const failedPayment = await webhook(unique('evt_failed'), 'invoice.payment_failed', 300, {
-      customer: 'cus_copy', subscription: 'sub_copy'
+      customer: 'cus_original', subscription: 'sub_original'
     });
     expect(failedPayment.status).toBe(200);
-    expect((db.prepare('SELECT plan, stripe_subscription_id FROM profiles WHERE id = ?').get(duplicateId) as { plan: string; stripe_subscription_id: string | null })).toEqual({ plan: 'free', stripe_subscription_id: null });
+    expect((db.prepare('SELECT subscription_plan, stripe_subscription_id FROM users WHERE email = ?').get(email) as { subscription_plan: string; stripe_subscription_id: string | null })).toEqual({ subscription_plan: 'free', stripe_subscription_id: null });
     } finally {
       if (originalWebhookSecret === undefined) delete process.env.STRIPE_WEBHOOK_SECRET; else process.env.STRIPE_WEBHOOK_SECRET = originalWebhookSecret;
     }

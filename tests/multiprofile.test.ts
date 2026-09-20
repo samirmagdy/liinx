@@ -54,6 +54,7 @@ describe('Milestone 5: Multi-Profile Management (One Login) (0% Fake Implementat
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
       proUserId, proEmail, 'hashed_pw', now
     );
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(proUserId);
 
     db.prepare('DELETE FROM blocks WHERE profile_id IN (SELECT id FROM profiles WHERE user_id = ? OR id = ? OR username = ? OR username = ?)').run(proUserId, proProfileId, proUsername, 'brand2pro');
     db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE user_id = ? OR id = ? OR username = ? OR username = ?)').run(proUserId, proProfileId, proUsername, 'brand2pro');

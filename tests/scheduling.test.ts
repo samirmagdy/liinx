@@ -32,7 +32,7 @@ describe('Link Scheduling & Time-Release Engine (0% Fake Implementation)', () =>
     db.prepare('DELETE FROM blocks WHERE profile_id = ?').run(testProfileId);
     db.prepare('DELETE FROM pages WHERE profile_id = ?').run(testProfileId);
     db.prepare('DELETE FROM profiles WHERE id = ?').run(testProfileId);
-    db.prepare(`INSERT OR REPLACE INTO users (id, email, password_hash, session_version, created_at) VALUES (?, ?, ?, 1, ?)`)
+    db.prepare(`INSERT OR REPLACE INTO users (id, email, password_hash, session_version, subscription_plan, created_at) VALUES (?, ?, ?, 1, 'pro', ?)`)
       .run(testUserId, 'schedule@example.test', 'fixture-hash', now);
     // Insert test profile
     db.prepare(`

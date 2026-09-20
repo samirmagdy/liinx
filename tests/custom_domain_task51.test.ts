@@ -16,6 +16,7 @@ describe('Custom domain tenant and lifecycle boundaries', () => {
     initDatabase();
     const now = Date.now();
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, `${username}@liinx.test`, 'hashed', now);
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(userId);
     db.prepare(`INSERT INTO profiles (id, user_id, username, display_name, plan, custom_domain, custom_domain_verified, created_at, updated_at)
       VALUES (?, ?, ?, ?, 'pro', ?, 1, ?, ?)`)
       .run(profileId, userId, username, 'Domain Fixture', domain, now, now);
@@ -61,10 +62,10 @@ describe('Custom domain tenant and lifecycle boundaries', () => {
   });
 
   it('does not route a verified domain after a plan downgrade', async () => {
-    db.prepare("UPDATE profiles SET plan = 'free' WHERE id = ?").run(profileId);
+    db.prepare("UPDATE users SET subscription_plan = 'free' WHERE id = ?").run(userId);
     const response = await request(app).get('/').set('Host', domain);
     expect(response.status).toBe(404);
-    db.prepare("UPDATE profiles SET plan = 'pro' WHERE id = ?").run(profileId);
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(userId);
   });
 
   it('clears stale verification when DNS no longer matches', async () => {

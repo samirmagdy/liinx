@@ -14,6 +14,7 @@ describe('profile duplication', () => {
       username: `duplicate${unique}`.slice(0, 30)
     }).expect(201);
     const sourceId = registration.body.profileId as string;
+    db.prepare("UPDATE users SET subscription_plan = 'studio' WHERE id = (SELECT user_id FROM profiles WHERE id = ?)").run(sourceId);
     const token = registration.body.token as string;
     const sourceUsername = registration.body.user.username as string;
     const now = Date.now();

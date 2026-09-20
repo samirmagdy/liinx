@@ -17,7 +17,7 @@ describe('Task 53 analytics consent and external pixels', () => {
     });
     token = response.body.token;
     profileId = response.body.profileId;
-    db.prepare('UPDATE profiles SET plan = ? WHERE id = ?').run('pro', profileId);
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = (SELECT user_id FROM profiles WHERE id = ?)").run(profileId);
   });
 
   it('rejects malformed provider ids and accepts only the documented shapes', async () => {
@@ -33,7 +33,7 @@ describe('Task 53 analytics consent and external pixels', () => {
   });
 
   it('applies entitlement gating and does not expose ids for a free public profile', async () => {
-    db.prepare('UPDATE profiles SET plan = ? WHERE id = ?').run('free', profileId);
+    db.prepare("UPDATE users SET subscription_plan = 'free' WHERE id = (SELECT user_id FROM profiles WHERE id = ?)").run(profileId);
     const publicResponse = await request(app).get(`/api/profiles/${username}`);
     expect(publicResponse.status).toBe(200);
     expect(publicResponse.body.gaMeasurementId).toBeNull();

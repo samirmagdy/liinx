@@ -25,6 +25,7 @@ describe('Milestone 7: Custom CSS & Custom Font Engine (0% Fake Implementation)'
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
       testUserId, 'css@liinx.test', 'hashed', now
     );
+    db.prepare("UPDATE users SET subscription_plan = 'studio' WHERE id = ?").run(testUserId);
 
     db.prepare('DELETE FROM profiles WHERE id = ? OR username = ?').run(testProfileId, testUsername);
     db.prepare(`

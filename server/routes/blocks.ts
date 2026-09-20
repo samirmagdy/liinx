@@ -8,6 +8,7 @@ import { createId } from '../utils/ids.js';
 import bcrypt from 'bcryptjs';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { hasEntitlement } from '../entitlements.js';
+import { getEffectivePlan } from '../accountEntitlements.js';
 import { cleanupUploadedFileIfUnreferenced } from '../services/uploadLifecycle.js';
 
 export const blocksRouter = Router();
@@ -100,7 +101,7 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
     }
     const resolvedPage = selectedPage || (!pageId ? db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined : undefined);
     if (!resolvedPage) return res.status(400).json({ error: 'The selected page does not belong to this profile.' });
-    if (!hasEntitlement(profile?.plan, 'scheduling') && (startAt != null || endAt != null)) {
+    if (!hasEntitlement(getEffectivePlan(profileId), 'scheduling') && (startAt != null || endAt != null)) {
       return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
     }
     const now = Date.now();
@@ -271,8 +272,7 @@ blocksRouter.put('/studio/blocks/:id', requireAuth, async (req: AuthenticatedReq
     const now = Date.now();
     const data = parse.data as BlockRequestData;
     const revision = (parse.data as { revision?: number }).revision;
-    const profile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(profileId) as { plan?: string } | undefined;
-        if (!hasEntitlement(profile?.plan, 'scheduling') && (data.startAt != null || data.endAt != null || existing.start_at != null || existing.end_at != null)) {
+    if (!hasEntitlement(getEffectivePlan(profileId), 'scheduling') && (data.startAt != null || data.endAt != null || existing.start_at != null || existing.end_at != null)) {
       return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
     }
     if (existing.type === 'booking' && (!bookingUrl(data.url === undefined ? existing.url : data.url) || data.extra != null)) {

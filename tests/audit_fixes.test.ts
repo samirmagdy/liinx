@@ -21,6 +21,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(
       testUserId, 'audit@liinx.test', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012', now
     );
+    db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = ?").run(testUserId);
 
     db.prepare('DELETE FROM blocks WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);
     db.prepare('DELETE FROM pages WHERE profile_id IN (SELECT id FROM profiles WHERE id = ? OR username = ?)').run(testProfileId, testUsername);

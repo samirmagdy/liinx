@@ -30,6 +30,11 @@ export function initDatabase() {
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       session_version INTEGER NOT NULL DEFAULT 1,
+      subscription_plan TEXT NOT NULL DEFAULT 'free',
+      stripe_customer_id TEXT,
+      stripe_subscription_id TEXT,
+      billing_event_created_at INTEGER,
+      subscription_status TEXT NOT NULL DEFAULT 'inactive',
       email_verified_at INTEGER,
       created_at INTEGER NOT NULL
     );
@@ -330,6 +335,42 @@ export function initDatabase() {
   try {
     db.exec("ALTER TABLE users ADD COLUMN email_verified_at INTEGER");
   } catch (e) {}
+
+  for (const column of [
+    "subscription_plan TEXT NOT NULL DEFAULT 'free'",
+    'stripe_customer_id TEXT',
+    'stripe_subscription_id TEXT',
+    'billing_event_created_at INTEGER',
+    "subscription_status TEXT NOT NULL DEFAULT 'inactive'"
+  ]) {
+    try { db.exec(`ALTER TABLE users ADD COLUMN ${column}`); } catch (e) {}
+  }
+
+  // Move existing profile-owned Stripe subscriptions to their account. The newest
+  // billing event wins if legacy data contains more than one subscription.
+  const accountBillingMigration = db.prepare("SELECT 1 FROM schema_migrations WHERE version = 'account-level-billing-v1'").get();
+  if (!accountBillingMigration) {
+    const migrateBilling = db.transaction(() => {
+      db.prepare(`
+        UPDATE users
+        SET subscription_plan = coalesce((SELECT p.plan FROM profiles p WHERE p.user_id = users.id AND p.stripe_subscription_id IS NOT NULL ORDER BY coalesce(p.billing_event_created_at, 0) DESC, p.updated_at DESC LIMIT 1), 'free'),
+            stripe_customer_id = coalesce((SELECT p.stripe_customer_id FROM profiles p WHERE p.user_id = users.id AND p.stripe_customer_id IS NOT NULL ORDER BY coalesce(p.billing_event_created_at, 0) DESC, p.updated_at DESC LIMIT 1), stripe_customer_id),
+            stripe_subscription_id = (SELECT p.stripe_subscription_id FROM profiles p WHERE p.user_id = users.id AND p.stripe_subscription_id IS NOT NULL ORDER BY coalesce(p.billing_event_created_at, 0) DESC, p.updated_at DESC LIMIT 1),
+            billing_event_created_at = (SELECT p.billing_event_created_at FROM profiles p WHERE p.user_id = users.id AND p.stripe_subscription_id IS NOT NULL ORDER BY coalesce(p.billing_event_created_at, 0) DESC, p.updated_at DESC LIMIT 1),
+            subscription_status = CASE WHEN EXISTS (SELECT 1 FROM profiles p WHERE p.user_id = users.id AND p.stripe_subscription_id IS NOT NULL) THEN 'active' ELSE 'inactive' END
+        WHERE EXISTS (SELECT 1 FROM profiles p WHERE p.user_id = users.id AND (p.stripe_subscription_id IS NOT NULL OR p.stripe_customer_id IS NOT NULL))
+      `).run();
+      db.prepare(`
+        UPDATE profiles
+        SET plan = coalesce((SELECT u.subscription_plan FROM users u WHERE u.id = profiles.user_id), 'free'),
+            stripe_customer_id = CASE WHEN stripe_customer_id = (SELECT u.stripe_customer_id FROM users u WHERE u.id = profiles.user_id) THEN NULL ELSE stripe_customer_id END,
+            stripe_subscription_id = CASE WHEN stripe_subscription_id = (SELECT u.stripe_subscription_id FROM users u WHERE u.id = profiles.user_id) THEN NULL ELSE stripe_subscription_id END
+        WHERE user_id IS NOT NULL
+      `).run();
+      db.prepare("INSERT INTO schema_migrations (version, applied_at) VALUES ('account-level-billing-v1', ?)").run(Date.now());
+    });
+    migrateBilling();
+  }
 
   try {
     db.exec("ALTER TABLE newsletter_subscribers ADD COLUMN unsubscribe_token_hash TEXT");

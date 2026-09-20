@@ -349,7 +349,7 @@ describe('Critical Security & Coverage Modules', () => {
       const profileId = reg.body.profileId;
 
       // Existing subscription conflict (409) if stripe configured or 503 if unconfigured
-      db.prepare('UPDATE profiles SET stripe_subscription_id = ? WHERE id = ?').run('sub_existing_123', profileId);
+      db.prepare('UPDATE users SET stripe_subscription_id = ? WHERE id = (SELECT user_id FROM profiles WHERE id = ?)').run('sub_existing_123', profileId);
       const conflictRes = await request(app)
         .post('/api/billing/create-checkout-session')
         .set('Authorization', `Bearer ${token}`)
@@ -380,7 +380,7 @@ describe('Critical Security & Coverage Modules', () => {
       }
 
       // With stripe_customer_id set
-      db.prepare('UPDATE profiles SET stripe_customer_id = ? WHERE id = ?').run('cus_test_portal_999', profileId);
+      db.prepare('UPDATE users SET stripe_customer_id = ? WHERE id = (SELECT user_id FROM profiles WHERE id = ?)').run('cus_test_portal_999', profileId);
       const withCustRes = await request(app)
         .post('/api/billing/create-portal-session')
         .set('Authorization', `Bearer ${token}`)
@@ -398,10 +398,11 @@ describe('Critical Security & Coverage Modules', () => {
           email, password: 'Password123!', username: `bsu_${Date.now().toString().slice(-8)}`
         });
         const profileId = reg.body.profileId;
+        const userId = reg.body.user.id;
         const customerId = `cus_test_${randomBytes(4).toString('hex')}`;
         const subscriptionId = `sub_test_${randomBytes(4).toString('hex')}`;
 
-        db.prepare('UPDATE profiles SET stripe_customer_id = ? WHERE id = ?').run(customerId, profileId);
+        db.prepare('UPDATE users SET stripe_customer_id = ? WHERE id = ?').run(customerId, userId);
 
         // 1. customer.subscription.updated without profileId in metadata (falls back to customerId)
         const updateEventId = `evt_sub_up_${randomBytes(4).toString('hex')}`;
@@ -420,9 +421,9 @@ describe('Critical Security & Coverage Modules', () => {
         });
         expect(updated.status).toBe(200);
 
-        const profileAfterUpdate = db.prepare('SELECT plan, stripe_subscription_id FROM profiles WHERE id = ?').get(profileId) as any;
-        expect(profileAfterUpdate.plan).toBe('studio');
-        expect(profileAfterUpdate.stripe_subscription_id).toBe(subscriptionId);
+        const accountAfterUpdate = db.prepare('SELECT subscription_plan, stripe_subscription_id FROM users WHERE id = ?').get(userId) as any;
+        expect(accountAfterUpdate.subscription_plan).toBe('studio');
+        expect(accountAfterUpdate.stripe_subscription_id).toBe(subscriptionId);
 
         // 2. customer.subscription.paused / invoice.payment_failed (downgrades to free)
         const pauseEventId = `evt_sub_pause_${randomBytes(4).toString('hex')}`;
@@ -440,12 +441,12 @@ describe('Critical Security & Coverage Modules', () => {
         });
         expect(paused.status).toBe(200);
 
-        const profileAfterPause = db.prepare('SELECT plan, stripe_subscription_id FROM profiles WHERE id = ?').get(profileId) as any;
-        expect(profileAfterPause.plan).toBe('free');
-        expect(profileAfterPause.stripe_subscription_id).toBeNull();
+        const accountAfterPause = db.prepare('SELECT subscription_plan, stripe_subscription_id FROM users WHERE id = ?').get(userId) as any;
+        expect(accountAfterPause.subscription_plan).toBe('free');
+        expect(accountAfterPause.stripe_subscription_id).toBeNull();
 
         // 3. customer.subscription.deleted with customerId
-        db.prepare('UPDATE profiles SET plan = ?, stripe_subscription_id = ? WHERE id = ?').run('pro', subscriptionId, profileId);
+        db.prepare("UPDATE users SET subscription_plan = 'pro', stripe_subscription_id = ? WHERE id = ?").run(subscriptionId, userId);
         const delEventId = `evt_sub_del_${randomBytes(4).toString('hex')}`;
         const deleted = await request(app).post('/api/billing/webhook').send({
           id: delEventId,
@@ -778,7 +779,7 @@ describe('Critical Security & Coverage Modules', () => {
       const originalProfileId = reg.body.profileId;
 
       // Upgrade to pro so multi-profile is allowed
-      db.prepare('UPDATE profiles SET plan = ? WHERE id = ?').run('pro', originalProfileId);
+      db.prepare("UPDATE users SET subscription_plan = 'pro' WHERE id = (SELECT user_id FROM profiles WHERE id = ?)").run(originalProfileId);
 
       const newUsername = `m2_${Date.now().toString().slice(-8)}`;
       const created = await request(app)

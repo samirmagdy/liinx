@@ -22,7 +22,7 @@ describe('Task 55 API key and page-aware REST boundaries', () => {
     token = first.body.token;
     profileId = first.body.profileId;
     username = `api55_${suffix}`;
-    db.prepare('UPDATE profiles SET plan = ? WHERE id IN (?, ?)').run('studio', profileId, second.body.profileId);
+    db.prepare("UPDATE users SET subscription_plan = 'studio' WHERE id IN (SELECT user_id FROM profiles WHERE id IN (?, ?))").run(profileId, second.body.profileId);
     pageId = (db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string }).id;
     foreignPageId = (db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(second.body.profileId) as { id: string }).id;
     apiKey = (await request(app).post('/api/studio/api-keys').set('Authorization', `Bearer ${token}`).send({ name: 'Task 55 test key' })).body.apiKey;
@@ -71,7 +71,7 @@ describe('Task 55 API key and page-aware REST boundaries', () => {
 
   it('removes API entitlement immediately on plan downgrade', async () => {
     const activeKey = (await request(app).post('/api/studio/api-keys').set('Authorization', `Bearer ${token}`).send({ name: 'Downgrade test key' })).body.apiKey;
-    db.prepare('UPDATE profiles SET plan = ? WHERE id = ?').run('free', profileId);
+    db.prepare("UPDATE users SET subscription_plan = 'free' WHERE id = (SELECT user_id FROM profiles WHERE id = ?)").run(profileId);
     const response = await request(app).get('/api/v1/profile').set('Authorization', `Bearer ${activeKey}`);
     expect(response.status).toBe(403);
     expect(response.body.error).toMatch(/studio tier/i);

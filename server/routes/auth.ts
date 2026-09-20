@@ -506,7 +506,11 @@ authRouter.delete('/account', requireAuth, async (req: AuthenticatedRequest, res
     if (!user || !comparePassword(confirmation.data.password, user.password_hash)) {
       return res.status(401).json({ error: 'Current password is incorrect.' });
     }
-    const subscriptions = db.prepare('SELECT stripe_subscription_id FROM profiles WHERE user_id = ? AND stripe_subscription_id IS NOT NULL').all(userId) as { stripe_subscription_id: string }[];
+    const subscriptions = db.prepare(`
+      SELECT stripe_subscription_id FROM users WHERE id = ? AND stripe_subscription_id IS NOT NULL
+      UNION
+      SELECT stripe_subscription_id FROM profiles WHERE user_id = ? AND stripe_subscription_id IS NOT NULL
+    `).all(userId, userId) as { stripe_subscription_id: string }[];
     // Cancel provider subscriptions first. If Stripe is unavailable, retain the
     // account so the operation can be retried instead of deleting local state.
     for (const subscription of subscriptions) await cancelStripeSubscription(subscription.stripe_subscription_id);

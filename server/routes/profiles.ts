@@ -17,6 +17,7 @@ import {
 } from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
+import { getEffectivePlan, syncAccountPlanToProfiles } from '../accountEntitlements.js';
 import { normalizeCustomDomain } from '../utils/customDomain.js';
 import { testOnlySessionToken } from './sessionResponse.js';
 
@@ -165,8 +166,8 @@ profilesRouter.get('/profiles/:username', (req, res) => {
         icon: b.icon,
         badge: b.badge,
         highlighted: Boolean(b.highlighted),
-        startAt: hasEntitlement(profile.plan, 'scheduling') ? (b.start_at || null) : null,
-        endAt: hasEntitlement(profile.plan, 'scheduling') ? (b.end_at || null) : null,
+        startAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.start_at || null) : null,
+        endAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.end_at || null) : null,
         clicks: clickMap.get(b.id) || 0
       };
 
@@ -186,21 +187,21 @@ profilesRouter.get('/profiles/:username', (req, res) => {
       category: profile.category || 'Creator',
       verified: Boolean(profile.verified),
       themeId: profile.theme_id || 'editorial-stone',
-      plan: normalizePlan(profile.plan),
-      hideBranding: hasEntitlement(profile.plan, 'paidCustomization') && Boolean(profile.hide_branding),
-      gaMeasurementId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
-      metaPixelId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
+      plan: getEffectivePlan(profile.id),
+      hideBranding: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && Boolean(profile.hide_branding),
+      gaMeasurementId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
+      metaPixelId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
       customDomain: profile.custom_domain || null,
-      customCss: hasEntitlement(profile.plan, 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
-      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
+      customCss: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
+      customFontUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
       shareTitle: profile.share_title || null,
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
-      footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
-      footerLogoLink: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_link || null) : null,
-      footerLogoAlt: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
-      backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
-      backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
+      footerLogoUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_url || null) : null,
+      footerLogoLink: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_link || null) : null,
+      footerLogoAlt: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
+      backgroundMediaUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_url || null) : null,
+      backgroundMediaType: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_type || null) : null,
       pageRedirectUrl: isHttpUrl(profile.page_redirect_url) ? profile.page_redirect_url : null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
@@ -233,8 +234,8 @@ profilesRouter.get('/profiles/:username', (req, res) => {
 profilesRouter.get('/profiles/by-domain/:domain', (req, res) => {
   try {
     const domain = req.params.domain.toLowerCase().trim();
-    const profile = db.prepare('SELECT username, plan FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(domain) as { username: string; plan: string } | undefined;
-    if (!profile || !hasEntitlement(profile.plan, 'customDomain')) {
+    const profile = db.prepare('SELECT id, username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(domain) as { id: string; username: string } | undefined;
+    if (!profile || !hasEntitlement(getEffectivePlan(profile.id), 'customDomain')) {
       return res.status(404).json({ error: `No profile mapped to custom domain ${domain}` });
     }
     const pageQuery = typeof req.query.page === 'string' ? `?page=${encodeURIComponent(req.query.page)}` : '';
@@ -290,8 +291,8 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
         icon: b.icon,
         badge: b.badge,
         highlighted: Boolean(b.highlighted),
-        startAt: hasEntitlement(profile.plan, 'scheduling') ? (b.start_at || null) : null,
-        endAt: hasEntitlement(profile.plan, 'scheduling') ? (b.end_at || null) : null,
+        startAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.start_at || null) : null,
+        endAt: hasEntitlement(getEffectivePlan(profile.id), 'scheduling') ? (b.end_at || null) : null,
         clicks: clickMap.get(b.id) || 0
       };
 
@@ -312,23 +313,23 @@ profilesRouter.get('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       category: profile.category || 'Creator',
       verified: Boolean(profile.verified),
       themeId: profile.theme_id || 'editorial-stone',
-      plan: normalizePlan(profile.plan),
-      hideBranding: hasEntitlement(profile.plan, 'paidCustomization') && Boolean(profile.hide_branding),
-      gaMeasurementId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
-      metaPixelId: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
-      customDomain: hasEntitlement(profile.plan, 'customDomain') ? (profile.custom_domain || null) : null,
-      customDomainVerified: hasEntitlement(profile.plan, 'customDomain') && Boolean(profile.custom_domain_verified),
-      customDomainTlsStatus: hasEntitlement(profile.plan, 'customDomain') && profile.custom_domain ? 'external_provider_required' : 'unknown',
-      customCss: hasEntitlement(profile.plan, 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
-      customFontUrl: hasEntitlement(profile.plan, 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
+      plan: getEffectivePlan(profile.id),
+      hideBranding: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && Boolean(profile.hide_branding),
+      gaMeasurementId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.ga_measurement_id || null) : null,
+      metaPixelId: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.meta_pixel_id || null) : null,
+      customDomain: hasEntitlement(getEffectivePlan(profile.id), 'customDomain') ? (profile.custom_domain || null) : null,
+      customDomainVerified: hasEntitlement(getEffectivePlan(profile.id), 'customDomain') && Boolean(profile.custom_domain_verified),
+      customDomainTlsStatus: hasEntitlement(getEffectivePlan(profile.id), 'customDomain') && profile.custom_domain ? 'external_provider_required' : 'unknown',
+      customCss: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isSafeCreatorCss(profile.custom_css) ? (profile.custom_css || null) : null,
+      customFontUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') && isAllowedFontStylesheetUrl(profile.custom_font_url) ? (profile.custom_font_url || null) : null,
       shareTitle: profile.share_title || null,
       shareDescription: profile.share_description || null,
       shareImageUrl: profile.share_image_url || null,
-      footerLogoUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_url || null) : null,
-      footerLogoLink: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_link || null) : null,
-      footerLogoAlt: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
-      backgroundMediaUrl: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_url || null) : null,
-      backgroundMediaType: hasEntitlement(profile.plan, 'paidCustomization') ? (profile.background_media_type || null) : null,
+      footerLogoUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_url || null) : null,
+      footerLogoLink: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_link || null) : null,
+      footerLogoAlt: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.footer_logo_alt || null) : null,
+      backgroundMediaUrl: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_url || null) : null,
+      backgroundMediaType: hasEntitlement(getEffectivePlan(profile.id), 'paidCustomization') ? (profile.background_media_type || null) : null,
       pageRedirectUrl: isHttpUrl(profile.page_redirect_url) ? profile.page_redirect_url : null,
       pageRedirectUntil: profile.page_redirect_until || null,
       customTheme: safeJsonParse(profile.custom_theme_json, null),
@@ -407,11 +408,11 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
       } catch { /* schema validation already rejects malformed destinations */ }
     }
 
-    if (!hasEntitlement(existing.plan, 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl) || Boolean(footerLogoUrl) || Boolean(footerLogoLink) || Boolean(footerLogoAlt))) {
+    if (!hasEntitlement(getEffectivePlan(existing.id), 'paidCustomization') && (hideBranding === true || Boolean(gaMeasurementId) || Boolean(metaPixelId) || Boolean(customCss) || Boolean(customFontUrl) || Boolean(footerLogoUrl) || Boolean(footerLogoLink) || Boolean(footerLogoAlt))) {
       return res.status(403).json({ error: 'Custom styling, analytics, and branding removal require a Pro or Studio subscription plan.' });
     }
     const isEnablingBackgroundMedia = (backgroundMediaUrl !== undefined && backgroundMediaUrl !== null) || (backgroundMediaType !== undefined && backgroundMediaType !== null);
-    if (!hasEntitlement(existing.plan, 'paidCustomization') && isEnablingBackgroundMedia) {
+    if (!hasEntitlement(getEffectivePlan(existing.id), 'paidCustomization') && isEnablingBackgroundMedia) {
       return res.status(403).json({ error: 'Background media requires a Pro or Studio subscription plan.' });
     }
 
@@ -427,7 +428,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
         if (!cleanDomain) {
           return res.status(400).json({ error: 'Invalid domain format. Use a hostname such as links.yourdomain.com.' });
         }
-        if (!hasEntitlement(existing.plan, 'customDomain')) {
+        if (!hasEntitlement(getEffectivePlan(existing.id), 'customDomain')) {
           return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
         }
         const conflict = db.prepare('SELECT id FROM profiles WHERE lower(custom_domain) = ? AND id != ?').get(cleanDomain, req.user!.profileId);
@@ -558,11 +559,11 @@ profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: Aut
 
     // A failed DNS check must revoke the old flag; otherwise a changed DNS
     // record would remain publicly routable based on stale database state.
-    const saved = db.prepare('SELECT custom_domain, plan FROM profiles WHERE id = ?').get(req.user!.profileId) as { custom_domain?: string | null; plan?: string } | undefined;
+    const saved = db.prepare('SELECT custom_domain FROM profiles WHERE id = ?').get(req.user!.profileId) as { custom_domain?: string | null; plan?: string } | undefined;
     if (!saved?.custom_domain || saved.custom_domain !== cleanDomain) {
       return res.status(409).json({ error: 'Verify the exact custom domain saved on this profile.' });
     }
-    if (!hasEntitlement(saved.plan, 'customDomain')) return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
+    if (!hasEntitlement(getEffectivePlan(req.user!.profileId), 'customDomain')) return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
     db.prepare('UPDATE profiles SET custom_domain_verified = ?, updated_at = ? WHERE id = ? AND custom_domain = ?').run(
       isVerified ? 1 : 0, Date.now(), req.user!.profileId, cleanDomain
     );
@@ -603,11 +604,11 @@ profilesRouter.put('/studio/plan', requireAuth, (req: AuthenticatedRequest, res)
       return res.status(400).json({ error: 'Invalid plan tier. Choose from free, pro, or studio.' });
     }
 
-    db.prepare('UPDATE profiles SET plan = ?, updated_at = ? WHERE id = ?').run(
-      plan,
-      Date.now(),
-      req.user!.profileId
+    const now = Date.now();
+    db.prepare('UPDATE users SET subscription_plan = ?, subscription_status = ? WHERE id = ?').run(
+      plan, plan === 'free' ? 'inactive' : 'active', req.user!.userId
     );
+    syncAccountPlanToProfiles(req.user!.userId, plan, now);
 
     res.json({ success: true, plan, message: `Successfully updated to ${plan.toUpperCase()} tier!` });
   } catch (err: any) {
@@ -621,7 +622,7 @@ profilesRouter.get('/studio/profiles', requireAuth, (req: AuthenticatedRequest, 
   try {
     const userId = req.user!.userId;
     const profiles = db.prepare(`
-      SELECT id, username, display_name as displayName, avatar_url as avatarUrl, plan, category, created_at as createdAt
+      SELECT id, username, display_name as displayName, avatar_url as avatarUrl, coalesce((SELECT u.subscription_plan FROM users u WHERE u.id = profiles.user_id), plan) as plan, category, created_at as createdAt
       FROM profiles
       WHERE user_id = ?
       ORDER BY created_at ASC
@@ -689,9 +690,8 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
 
     // Check user's primary/active profile plan to determine allowed limit
     // Profile limits are centralized in the entitlement policy.
-    const activeProfile = db.prepare('SELECT plan FROM profiles WHERE id = ?').get(req.user!.profileId) as any;
-    const planRow = db.prepare("SELECT plan FROM profiles WHERE user_id = ? ORDER BY CASE plan WHEN 'studio' THEN 3 WHEN 'pro' THEN 2 ELSE 1 END DESC LIMIT 1").get(userId) as any;
-    const userPlan = planRow?.plan || activeProfile?.plan || 'free';
+    const account = db.prepare("SELECT subscription_plan FROM users WHERE id = ?").get(userId) as { subscription_plan?: string } | undefined;
+    const userPlan = normalizePlan(account?.subscription_plan);
     const maxProfiles = entitlementsFor(userPlan).maxProfiles;
 
     const currentCountRow = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(userId) as { count: number };
@@ -825,8 +825,9 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
 // Authenticated: Delete a non-active profile owned by the current account.
 profilesRouter.delete('/studio/profiles/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const target = db.prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?').get(req.params.id, req.user!.userId) as { id: string } | undefined;
+    const target = db.prepare('SELECT id, stripe_subscription_id FROM profiles WHERE id = ? AND user_id = ?').get(req.params.id, req.user!.userId) as { id: string; stripe_subscription_id?: string | null } | undefined;
     if (!target) return res.status(404).json({ error: 'Profile not found or does not belong to your account.' });
+    if (target.stripe_subscription_id) return res.status(409).json({ error: 'This profile is still linked to a Stripe subscription. Transfer or cancel billing before deleting it.' });
     if (target.id === req.user!.profileId) return res.status(409).json({ error: 'Switch to another profile before deleting this profile.' });
     const count = db.prepare('SELECT COUNT(*) as count FROM profiles WHERE user_id = ?').get(req.user!.userId) as { count: number };
     if (count.count <= 1) return res.status(400).json({ error: 'Your account must keep at least one profile.' });
@@ -866,7 +867,7 @@ profilesRouter.post('/studio/profiles/:id/select', requireAuth, (req: Authentica
         id: profile.id,
         username: profile.username,
         displayName: profile.display_name,
-        plan: profile.plan
+        plan: getEffectivePlan(profile.id)
       }
     });
   } catch (err: any) {
