@@ -30,6 +30,8 @@ import { isHttpUrl } from './utils/urlValidation.js';
 import { hasEntitlement } from './entitlements.js';
 import { enforceSingleNodeSafeguards } from './infrastructure/safeguards.js';
 import { uploadStorage } from './services/uploadStorage.js';
+import { escapeHtml, injectNonceIntoHtml, renderProfileShellHtml, type PublicProfileContentItem } from './profileHtml.js';
+export { injectNonceIntoHtml, renderProfileShellHtml, safeJsonForHtml } from './profileHtml.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -257,10 +259,6 @@ app.get('/sitemap.xml', (req, res) => {
   }
 });
 
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character] || character));
-}
-
 function escapeXml(value: string): string {
   return escapeHtml(value);
 }
@@ -290,77 +288,6 @@ function safeRedirectTarget(raw: unknown, req: express.Request, username: string
   return target.toString();
 }
 
-// JSON is placed inside an HTML script element. Escaping the HTML-significant
-// characters prevents user content such as `</script>` from breaking out of it.
-export function safeJsonForHtml(value: unknown): string {
-  return JSON.stringify(value)
-    .replace(/</g, '\\u003c')
-    .replace(/>/g, '\\u003e')
-    .replace(/&/g, '\\u0026')
-    .replace(/\u2028/g, '\\u2028')
-    .replace(/\u2029/g, '\\u2029');
-}
-
-export function injectNonceIntoHtml(sourceHtml: string, nonce?: string): string {
-  if (!nonce) return sourceHtml;
-  let html = sourceHtml;
-  const nonceGlobalScript = `<script nonce="${escapeHtml(nonce)}">window.__CSP_NONCE__="${escapeHtml(nonce)}";</script>`;
-  if (/<head[^>]*>/i.test(html)) {
-    html = html.replace(/(<head[^>]*>)/i, `$1${nonceGlobalScript}`);
-  } else {
-    html = `${nonceGlobalScript}${html}`;
-  }
-  // Add nonce attribute to script tags that do not already have one
-  html = html.replace(/<script\b(?![^>]*\bnonce=)([^>]*)>/gi, `<script nonce="${escapeHtml(nonce)}"$1>`);
-  return html;
-}
-
-type PublicProfileContentItem = { type: 'link' | 'text'; title: string; url?: string; subtitle?: string | null; body?: string };
-
-export function renderProfileShellHtml(
-  sourceHtml: string,
-  profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null },
-  canonical: string,
-  page?: { title?: string | null; description?: string | null },
-  nonce?: string,
-  publicContent: PublicProfileContentItem[] = [],
-  isDemo = false
-): string {
-  let html = sourceHtml;
-  const title = page?.title || profile.share_title || `${profile.display_name} (@${profile.username}) | LIINX`;
-  const description = page?.description || profile.share_description || profile.bio || `Explore ${profile.display_name}'s links, media and updates on Liinx.`;
-  const image = profile.share_image_url || profile.avatar_url || '';
-  const safeTitle = escapeHtml(title);
-  const safeDescription = escapeHtml(description);
-  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`)
-    .replace(/<meta name="description" content="[^"]*"\s*\/>/i, `<meta name="description" content="${safeDescription}" />`)
-    .replace(/<meta name="robots" content="[^"]*"\s*\/>/i, `<meta name="robots" content="${isDemo ? 'noindex, nofollow' : 'index, follow'}" />`)
-    .replace(/<link rel="canonical" href="[^"]*"\s*\/>/i, `<link rel="canonical" href="${escapeHtml(canonical)}" />`)
-    .replace(/<meta property="og:url" content="[^"]*"\s*\/>/i, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
-    .replace(/<meta property="og:title" content="[^"]*"\s*\/>/i, `<meta property="og:title" content="${safeTitle}" />`)
-    .replace(/<meta property="og:description" content="[^"]*"\s*\/>/i, `<meta property="og:description" content="${safeDescription}" />`)
-    .replace(/<meta property="og:image" content="[^"]*"\s*\/>/i, image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : '')
-    .replace(/<meta property="og:image:secure_url" content="[^"]*"\s*\/>/i, image ? `<meta property="og:image:secure_url" content="${escapeHtml(image)}" />` : '')
-    .replace(/<meta property="og:image:alt" content="[^"]*"\s*\/>/i, image ? `<meta property="og:image:alt" content="${escapeHtml(profile.display_name)}" />` : '')
-    .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/i, `<meta name="twitter:title" content="${safeTitle}" />`)
-    .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/i, `<meta name="twitter:description" content="${safeDescription}" />`)
-    .replace(/<meta name="twitter:image" content="[^"]*"\s*\/>/i, image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : '')
-    .replace(/<script\b[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, `<script type="application/ld+json"${nonce ? ` nonce="${escapeHtml(nonce)}"` : ''}>${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, ...(image ? { image } : {}), mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, ...(profile.avatar_url ? { image: profile.avatar_url } : {}) } })}</script>`);
-
-  const linkItems = publicContent.filter((item): item is typeof item & { url: string } => item.type === 'link' && Boolean(item.url))
-    .map(link => `<li><a href="${escapeHtml(link.url)}" rel="noopener noreferrer">${escapeHtml(link.title)}</a>${link.subtitle ? `<p>${escapeHtml(link.subtitle)}</p>` : ''}</li>`).join('');
-  const textBlocks = publicContent.filter(item => item.type === 'text')
-    .map(item => `<article>${item.title ? `<h2>${escapeHtml(item.title)}</h2>` : ''}${item.body ? `<p>${escapeHtml(item.body).replace(/\r?\n/g, '<br>')}</p>` : ''}</article>`).join('');
-  const demoNotice = isDemo ? '<p role="note">Fictional sample profile. Names, metrics, and links are demonstration content, not customer data.</p>' : '';
-  const profileContent = `<section id="profile-crawl-content" aria-label="${escapeHtml(profile.display_name)}">${demoNotice}<h1>${escapeHtml(profile.display_name)}</h1>${profile.bio ? `<p>${escapeHtml(profile.bio)}</p>` : ''}${page?.title && page.title !== profile.display_name ? `<h2>${escapeHtml(page.title)}</h2>` : ''}${page?.description ? `<p>${escapeHtml(page.description)}</p>` : ''}${textBlocks}${linkItems ? `<h2>Links</h2><ul>${linkItems}</ul>` : ''}</section>`;
-  html = /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${profileContent}</body>`) : `${html}${profileContent}`;
-
-  if (nonce) {
-    html = injectNonceIntoHtml(html, nonce);
-  }
-  return html;
-}
-
 function sendProfileShell(
   res: express.Response,
   filePath: string,
@@ -375,25 +302,41 @@ function sendProfileShell(
   res.type('html').send(html);
 }
 
+type PublicProfileBlockRow = { type: string; title: string; url?: string | null; subtitle?: string | null; extraJson?: string | null };
+
 function getPublicProfileContent(profileId: string, pageId: string, isHome: boolean): PublicProfileContentItem[] {
-  const now = Date.now();
-  const blocks = db.prepare(`SELECT type, title, url, subtitle, extra_json as extraJson FROM blocks
-    WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1))
-      AND (start_at IS NULL OR start_at <= ?) AND (end_at IS NULL OR end_at > ?)
-    ORDER BY position ASC`).all(profileId, pageId, isHome ? 1 : 0, now, now) as Array<{ type: string; title: string; url?: string | null; subtitle?: string | null; extraJson?: string | null }>;
+  const blocks = loadVisibleProfileBlocks(profileId, pageId, isHome);
   // A content gate may protect following blocks; omit page links from the fallback in that case.
   if (blocks.some(block => block.type === 'content_gate')) return [];
-  return blocks.reduce<PublicProfileContentItem[]>((content, block) => {
-    if (block.type === 'link' && block.url && isHttpUrl(block.url)) content.push({ type: 'link', title: block.title, url: block.url, subtitle: block.subtitle });
-    if (block.type === 'header') content.push({ type: 'text', title: block.title });
-    if (block.type === 'rich_text') {
-      try {
-        const body = JSON.parse(block.extraJson || '{}')?.body;
-        if (typeof body === 'string' && body.trim()) content.push({ type: 'text', title: block.title, body });
-      } catch { /* Ignore malformed optional block data. */ }
-    }
-    return content;
-  }, []);
+  return blocks.map(toPublicProfileContent).filter((item): item is PublicProfileContentItem => item !== null);
+}
+
+function loadVisibleProfileBlocks(profileId: string, pageId: string, isHome: boolean): PublicProfileBlockRow[] {
+  const now = Date.now();
+  return db.prepare(`SELECT type, title, url, subtitle, extra_json as extraJson FROM blocks
+    WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1))
+      AND (start_at IS NULL OR start_at <= ?) AND (end_at IS NULL OR end_at > ?)
+    ORDER BY position ASC`).all(profileId, pageId, isHome ? 1 : 0, now, now) as PublicProfileBlockRow[];
+}
+
+function toPublicProfileContent(block: PublicProfileBlockRow): PublicProfileContentItem | null {
+  if (block.type === 'link' && block.url && isHttpUrl(block.url)) {
+    return { type: 'link', title: block.title, url: block.url, subtitle: block.subtitle };
+  }
+  if (block.type === 'header') return { type: 'text', title: block.title };
+  if (block.type !== 'rich_text') return null;
+
+  const body = parseRichTextBody(block.extraJson);
+  return body ? { type: 'text', title: block.title, body } : null;
+}
+
+function parseRichTextBody(extraJson?: string | null): string | null {
+  try {
+    const body = JSON.parse(extraJson || '{}')?.body;
+    return typeof body === 'string' && body.trim() ? body : null;
+  } catch {
+    return null;
+  }
 }
 
 function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
@@ -411,44 +354,63 @@ function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
 }
 
 // Custom Domain Host-Header Routing Engine (Milestone 6)
-app.use((req, res, next) => {
+function customDomainMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
   const host = (req.headers.host || '').split(':')[0].toLowerCase().trim();
-  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'];
+  if (isDefaultHost(host) || host.endsWith('.liinx.app')) return next();
+  const profile = db.prepare('SELECT username, plan FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { username: string; plan: string } | undefined;
+  if (!profile) return next();
+  if (!hasEntitlement(profile.plan, 'customDomain')) return res.status(404).send('This custom domain is not available.');
 
-  if (host && !defaultHosts.includes(host) && !host.endsWith('.liinx.app')) {
-    const profile = db.prepare('SELECT username, plan FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { username: string; plan: string } | undefined;
-    if (profile && !hasEntitlement(profile.plan, 'customDomain')) return res.status(404).send('This custom domain is not available.');
-    if (profile) {
-      res.setHeader('X-Custom-Domain-User', profile.username);
-      const customPageMatch = req.path.match(/^\/([a-z0-9-]+)$/i);
-      if (req.path === '/' || req.path === '' || customPageMatch) {
-        const pageSlug = customPageMatch?.[1];
-        const acceptsHtml = req.headers.accept && req.headers.accept.includes('text/html');
-        const shellFile = path.resolve(__dirname, '../dist/shell.html');
-        const indexFile = path.resolve(__dirname, '../dist/index.html');
-        const distIndex = fs.existsSync(shellFile) ? shellFile : indexFile;
-        if (acceptsHtml && fs.existsSync(distIndex)) {
-          const customProfile = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE username = ?').get(profile.username) as any;
-          const page = db.prepare(`SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND ${pageSlug ? 'slug = ?' : 'is_home = 1'} AND published = 1`)
-            .get(customProfile.id, ...(pageSlug ? [pageSlug] : [])) as { id: string; title?: string; description?: string; isHome: number } | undefined;
-          if (pageSlug && !page) return res.status(404).send('This page is not available.');
-          const redirect = safeRedirectTarget(customProfile?.page_redirect_url, req, customProfile?.username, true);
-          if (redirect && (!customProfile.page_redirect_until || customProfile.page_redirect_until > Date.now())) {
-            res.setHeader('Cache-Control', 'no-store');
-            return res.redirect(302, redirect);
-          }
-          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page, page ? getPublicProfileContent(customProfile.id, page.id, Boolean(page.isHome)) : []) : sendHtmlFileWithNonce(res, distIndex);
-        }
-        req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
-        // Express may have cached req.query while evaluating req.path above;
-        // keep the rewritten tenant/page selection authoritative for the
-        // downstream profile route.
-        if (pageSlug) req.query.page = pageSlug;
-      }
-    }
+  res.setHeader('X-Custom-Domain-User', profile.username);
+  if (routeCustomDomainRequest(req, res, host, profile)) next();
+}
+
+function isDefaultHost(host: string) {
+  return !host || ['localhost', '127.0.0.1', '0.0.0.0', 'liinx.vercel.app', 'liinx.app'].includes(host);
+}
+
+function routeCustomDomainRequest(
+  req: express.Request,
+  res: express.Response,
+  host: string,
+  profile: { username: string }
+): boolean {
+  const pageMatch = req.path.match(/^\/([a-z0-9-]+)$/i);
+  if (req.path !== '/' && req.path !== '' && !pageMatch) return true;
+  const pageSlug = pageMatch?.[1];
+  const shellFile = path.resolve(__dirname, '../dist/shell.html');
+  const indexFile = path.resolve(__dirname, '../dist/index.html');
+  const htmlFile = fs.existsSync(shellFile) ? shellFile : indexFile;
+  if (req.headers.accept?.includes('text/html') && fs.existsSync(htmlFile)) {
+    sendCustomDomainProfilePage(req, res, host, profile.username, pageSlug, htmlFile);
+    return false;
   }
-  next();
-});
+
+  req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
+  if (pageSlug) req.query.page = pageSlug;
+  return true;
+}
+
+function sendCustomDomainProfilePage(req: express.Request, res: express.Response, host: string, username: string, pageSlug: string | undefined, htmlFile: string) {
+  const customProfile = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE username = ?').get(username) as any;
+  if (!customProfile) return sendHtmlFileWithNonce(res, htmlFile);
+  const pageQuery = pageSlug ? 'slug = ?' : 'is_home = 1';
+  const params = pageSlug ? [customProfile.id, pageSlug] : [customProfile.id];
+  const page = db.prepare(`SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND ${pageQuery} AND published = 1`)
+    .get(...params) as { id: string; title?: string; description?: string; isHome: number } | undefined;
+  if (pageSlug && !page) return res.status(404).send('This page is not available.');
+
+  const redirect = safeRedirectTarget(customProfile.page_redirect_url, req, customProfile.username, true);
+  if (redirect && (!customProfile.page_redirect_until || customProfile.page_redirect_until > Date.now())) {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.redirect(302, redirect);
+  }
+  const canonical = `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`;
+  const content = page ? getPublicProfileContent(customProfile.id, page.id, Boolean(page.isHome)) : [];
+  return sendProfileShell(res, htmlFile, customProfile, canonical, page, content);
+}
+
+app.use(customDomainMiddleware);
 
 // Serve only content that can be classified from its bytes. In particular,
 // never let a legacy or manually placed .html/.svg file execute on the app
@@ -585,101 +547,120 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
+function registerProductionRoutes(distDir: string) {
+  app.use(express.static(distDir, {
+    maxAge: '1d',
+    setHeaders: (res, filePath) => {
+      if (filePath.includes('/assets/')) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }));
+  app.get('*', (req, res) => handleProductionPageRequest(req, res, distDir));
+}
+
+function handleProductionPageRequest(req: express.Request, res: express.Response, distDir: string) {
+  res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
+  const profileMatch = req.path.match(/^\/@([a-z0-9_-]+)(?:\/([a-z0-9-]+))?$/i);
+  if (req.path.startsWith('/@') && !profileMatch) return res.status(404).send('This profile is not available.');
+  if (profileMatch) return handlePublicProfileRequest(req, res, distDir, profileMatch);
+
+  const demoMatch = req.path.match(/^\/demo\/([a-z0-9_-]+)$/i);
+  if (demoMatch) return handleDemoProfileRequest(req, res, distDir, demoMatch[1]);
+  return handleStaticProductionRoute(req, res, distDir);
+}
+
+function handlePublicProfileRequest(req: express.Request, res: express.Response, distDir: string, match: RegExpMatchArray) {
+  const loaded = loadPublicProfile(match[1]);
+  if (!loaded) return res.status(404).send('This profile is not available.');
+  const profileShell = path.join(distDir, 'shell.html');
+  if (!fs.existsSync(profileShell)) return res.status(404).type('text/plain').send('Page not found.');
+
+  const page = resolvePublicProfilePage(loaded.profile, match[1], match[2], loaded.isDemo);
+  if (!page) return res.status(404).send('This page is not available.');
+  const redirect = safeRedirectTarget(loaded.profile.page_redirect_url, req, loaded.profile.username, false);
+  if (redirect && (!loaded.profile.page_redirect_until || loaded.profile.page_redirect_until > Date.now())) {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.redirect(302, redirect);
+  }
+  const canonical = `${publicOrigin(req)}/@${encodeURIComponent(loaded.profile.username)}${match[2] ? `/${encodeURIComponent(match[2])}` : ''}`;
+  const content = loaded.isDemo ? [] : getPublicProfileContent(loaded.profile.id, page.id, Boolean(page.isHome));
+  return sendProfileShell(res, profileShell, loaded.profile, canonical, page, content, loaded.isDemo);
+}
+
+function loadPublicProfile(username: string): { profile: any; isDemo: boolean } | null {
+  const cleanUsername = username.toLowerCase();
+  const stored = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(cleanUsername) as any;
+  if (stored) return { profile: stored, isDemo: false };
+  const demo = findSystemDemoProfile(cleanUsername);
+  if (!demo) return null;
+  return {
+    isDemo: true,
+    profile: {
+      username: demo.username,
+      display_name: demo.displayName,
+      bio: demo.bio,
+      avatar_url: demo.avatarUrl,
+      share_title: `${demo.displayName} (@${demo.username}) | ${brand.productName}`,
+      share_description: demo.bio,
+      share_image_url: null,
+      page_redirect_url: null,
+      page_redirect_until: null
+    }
+  };
+}
+
+function resolvePublicProfilePage(profile: any, username: string, pageSlug: string | undefined, isDemo: boolean) {
+  if (isDemo) {
+    if (pageSlug && pageSlug !== 'home') return undefined;
+    const demo = findSystemDemoProfile(username);
+    return demo ? { id: `demo_${demo.id}_home`, title: profile.display_name, description: profile.bio, isHome: 1 } : undefined;
+  }
+  const requestedSlug = pageSlug || 'home';
+  let page = db.prepare('SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND slug = ? AND published = 1')
+    .get(profile.id, requestedSlug) as { id: string; title?: string; description?: string; isHome: number } | undefined;
+  if (!page && !pageSlug) page = db.prepare('SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND is_home = 1 AND published = 1').get(profile.id) as typeof page;
+  return page;
+}
+
+function handleDemoProfileRequest(req: express.Request, res: express.Response, distDir: string, username: string) {
+  const demo = findSystemDemoProfile(username.toLowerCase());
+  if (!demo) return res.status(404).send('This demo profile is not available.');
+  const profileShell = path.join(distDir, 'shell.html');
+  if (!fs.existsSync(profileShell)) return res.status(503).send('The profile page is temporarily unavailable.');
+  const profile = {
+    username: demo.username,
+    display_name: demo.displayName,
+    bio: demo.bio,
+    avatar_url: demo.avatarUrl,
+    share_title: `${demo.displayName} (@${demo.username}) | ${brand.productName}`,
+    share_description: demo.bio,
+    share_image_url: null
+  };
+  const canonical = `${publicOrigin(req)}/@${encodeURIComponent(demo.username)}`;
+  return sendProfileShell(res, profileShell, profile, canonical, { title: profile.display_name, description: profile.bio }, [], true);
+}
+
+function handleStaticProductionRoute(req: express.Request, res: express.Response, distDir: string) {
+  const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
+  if (['/studio', '/account', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  if (routeFile && fs.existsSync(routeFile)) return sendHtmlFileWithNonce(res, routeFile);
+  const shellFile = path.join(distDir, 'shell.html');
+  if (['/studio', '/account'].includes(req.path) && fs.existsSync(shellFile)) return sendHtmlFileWithNonce(res, shellFile);
+  return res.status(404).type('text/plain').send('Page not found.');
+}
+
+async function configureDevelopmentServer() {
+  const { createServer: createViteServer } = await import('vite');
+  const vite = await createViteServer({
+    server: { middlewareMode: true, hmr: { port: Number(process.env.VITE_HMR_PORT) || 24679 } },
+    appType: 'spa'
+  });
+  app.use(vite.middlewares);
+}
+
 export async function startServer() {
   const isProd = process.env.NODE_ENV === 'production';
-
-  if (!isProd) {
-    // Development mode: Vite middleware mode
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      // Keep the embedded Vite HMR socket away from other local projects that
-      // commonly claim Vite's default port.
-      server: { middlewareMode: true, hmr: { port: Number(process.env.VITE_HMR_PORT) || 24679 } },
-      appType: 'spa'
-    });
-    app.use(vite.middlewares);
-  } else {
-    // Production mode: Serve pre-built static assets from dist with caching
-    const distDir = path.resolve(__dirname, '../dist');
-    app.use(express.static(distDir, {
-      maxAge: '1d',
-      setHeaders: (res, filePath) => {
-        if (filePath.includes('/assets/')) {
-          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        }
-      }
-    }));
-    app.get('*', (req, res) => {
-      res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
-      const profileMatch = req.path.match(/^\/@([a-z0-9_-]+)(?:\/([a-z0-9-]+))?$/i);
-      if (req.path.startsWith('/@') && !profileMatch) return res.status(404).send('This profile is not available.');
-      if (profileMatch) {
-        let publicProfile = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
-        let isDemo = false;
-        const profileShell = path.join(distDir, 'shell.html');
-        if (!publicProfile) {
-          const systemDemo = findSystemDemoProfile(profileMatch[1].toLowerCase());
-          if (systemDemo) {
-            isDemo = true;
-            publicProfile = {
-              username: systemDemo.username,
-              display_name: systemDemo.displayName,
-              bio: systemDemo.bio,
-              avatar_url: systemDemo.avatarUrl,
-              share_title: `${systemDemo.displayName} (@${systemDemo.username}) | ${brand.productName}`,
-              share_description: systemDemo.bio,
-              share_image_url: null,
-              page_redirect_url: null,
-              page_redirect_until: null
-            };
-          }
-        }
-        if (!publicProfile) return res.status(404).send('This profile is not available.');
-        if (fs.existsSync(profileShell)) {
-          let page = db.prepare('SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND slug = ? AND published = 1').get(publicProfile.id, profileMatch[2] || 'home') as { id: string; title?: string; description?: string; isHome: number } | undefined;
-          if (!page && !profileMatch[2]) page = db.prepare('SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND is_home = 1 AND published = 1').get(publicProfile.id) as { id: string; title?: string; description?: string; isHome: number } | undefined;
-          if (!page && findSystemDemoProfile(profileMatch[1].toLowerCase()) && (!profileMatch[2] || profileMatch[2] === 'home')) {
-            const demo = findSystemDemoProfile(profileMatch[1].toLowerCase())!;
-            page = { id: `demo_${demo.id}_home`, title: publicProfile.display_name, description: publicProfile.bio, isHome: 1 };
-          }
-          if (!page) return res.status(404).send('This page is not available.');
-          const redirect = safeRedirectTarget(publicProfile.page_redirect_url, req, publicProfile.username, false);
-          if (redirect && (!publicProfile.page_redirect_until || publicProfile.page_redirect_until > Date.now())) {
-            res.setHeader('Cache-Control', 'no-store');
-            return res.redirect(302, redirect);
-          }
-          const canonical = `${publicOrigin(req)}/@${encodeURIComponent(publicProfile.username)}${profileMatch[2] ? `/${encodeURIComponent(profileMatch[2])}` : ''}`;
-          return sendProfileShell(res, profileShell, publicProfile, canonical, page, page && !isDemo ? getPublicProfileContent(publicProfile.id, page.id, Boolean(page.isHome)) : [], isDemo);
-        }
-      }
-      const demoMatch = req.path.match(/^\/demo\/([a-z0-9_-]+)$/i);
-      if (demoMatch) {
-        const demo = findSystemDemoProfile(demoMatch[1].toLowerCase());
-        if (!demo) return res.status(404).send('This demo profile is not available.');
-        const profileShell = path.join(distDir, 'shell.html');
-        if (!fs.existsSync(profileShell)) return res.status(503).send('The profile page is temporarily unavailable.');
-        const profile = {
-          username: demo.username,
-          display_name: demo.displayName,
-          bio: demo.bio,
-          avatar_url: demo.avatarUrl,
-          share_title: `${demo.displayName} (@${demo.username}) | ${brand.productName}`,
-          share_description: demo.bio,
-          share_image_url: null
-        };
-        const canonical = `${publicOrigin(req)}/@${encodeURIComponent(demo.username)}`;
-        return sendProfileShell(res, profileShell, profile, canonical, { title: profile.display_name, description: profile.bio }, [], true);
-      }
-      const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
-      if (['/studio', '/account', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-      if (routeFile && fs.existsSync(routeFile)) return sendHtmlFileWithNonce(res, routeFile);
-      if (['/studio', '/account'].includes(req.path)) {
-        const shellFile = path.join(distDir, 'shell.html');
-        if (fs.existsSync(shellFile)) return sendHtmlFileWithNonce(res, shellFile);
-      }
-      return res.status(404).type('text/plain').send('Page not found.');
-  });
-}
+  if (isProd) registerProductionRoutes(path.resolve(__dirname, '../dist'));
+  else await configureDevelopmentServer();
 
 startMaintenanceScheduler();
 startInstagramSyncScheduler();

@@ -6,6 +6,7 @@ import { getAccessibleTextColor, getBorderColor } from '../../../utils/colorCont
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { safePublicHref } from '../utils/publicBio.utils';
 import { renderSocialIcon } from '../utils/socialIcons';
+import { DemoProfileNotice } from './DemoProfileNotice';
 
 interface PublicProfileHeaderProps {
   profile: CreatorProfile;
@@ -17,6 +18,7 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
 
   return (
     <div className="flex flex-col items-center text-center mb-8">
+      <DemoProfileNotice username={profile.username} />
       <div className="relative mb-4">
         <img
           src={profile.avatarUrl}

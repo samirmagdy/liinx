@@ -14,6 +14,47 @@ interface UsePublicProfileProps {
   previewOnly?: boolean;
 }
 
+function updatePublicProfileMetadata(profile: CreatorProfile, customDomain?: string) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+  const redirectUrl = safePublicHref(profile.pageRedirectUrl);
+  const redirectIsActive = Boolean(
+    redirectUrl &&
+    /^https?:$/i.test(new URL(redirectUrl).protocol) &&
+    (!profile.pageRedirectUntil || profile.pageRedirectUntil > Date.now())
+  );
+  if (redirectUrl && redirectIsActive) {
+    window.location.replace(redirectUrl);
+    return;
+  }
+
+  const title = profile.shareTitle || `${profile.displayName} (@${profile.username}) | LIINX`;
+  const description = profile.shareDescription || profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`;
+  const isDemo = Boolean(findSystemDemoProfile(profile.username));
+  const canonical = customDomain
+    ? `https://${customDomain}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`
+    : `https://liinx.app/@${profile.username}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`;
+  const image = profile.shareImageUrl || profile.avatarUrl || 'https://liinx.app/og-liinx.png';
+
+  document.title = title;
+  setMetaContent('meta[name="description"]', description);
+  setMetaContent('meta[name="robots"]', isDemo ? 'noindex, nofollow' : 'index, follow');
+  setMetaContent('link[rel="canonical"]', canonical, 'href');
+  setMetaContent('meta[property="og:url"]', canonical);
+  setMetaContent('meta[property="og:title"]', title);
+  setMetaContent('meta[property="og:description"]', description);
+  setMetaContent('meta[name="twitter:title"]', title);
+  setMetaContent('meta[name="twitter:description"]', description);
+  setMetaContent('meta[property="og:image"]', image);
+  setMetaContent('meta[property="og:image:secure_url"]', image);
+  setMetaContent('meta[property="og:image:alt"]', `${profile.displayName} on Liinx`);
+  setMetaContent('meta[name="twitter:image"]', image);
+}
+
+function setMetaContent(selector: string, value: string, attribute = 'content') {
+  document.querySelector(selector)?.setAttribute(attribute, value);
+}
+
 export function usePublicProfile({
   initialProfile,
   routeUsername,
@@ -116,38 +157,7 @@ export function usePublicProfile({
   // SEO & Head Metadata & Redirects
   useEffect(() => {
     if (!profile || previewOnly || typeof window === 'undefined' || typeof document === 'undefined') return;
-
-    // Page Redirect
-    const redirectUrl = safePublicHref(profile.pageRedirectUrl);
-    if (
-      redirectUrl &&
-      /^https?:$/i.test(new URL(redirectUrl).protocol) &&
-      (!profile.pageRedirectUntil || profile.pageRedirectUntil > Date.now())
-    ) {
-      window.location.replace(redirectUrl);
-      return;
-    }
-
-    const title = profile.shareTitle || `${profile.displayName} (@${profile.username}) | LIINX`;
-    const description = profile.shareDescription || profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`;
-    document.title = title;
-    document.querySelector('meta[name="description"]')?.setAttribute('content', description);
-    const isDemo = Boolean(findSystemDemoProfile(profile.username));
-    document.querySelector('meta[name="robots"]')?.setAttribute('content', isDemo ? 'noindex, nofollow' : 'index, follow');
-    const canonical = customDomain
-      ? `https://${customDomain}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`
-      : `https://liinx.app/@${profile.username}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`;
-    document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical);
-    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical);
-    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
-    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
-    document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
-    document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description);
-    const image = profile.shareImageUrl || profile.avatarUrl || 'https://liinx.app/og-liinx.png';
-    document.querySelector('meta[property="og:image"]')?.setAttribute('content', image);
-    document.querySelector('meta[property="og:image:secure_url"]')?.setAttribute('content', image);
-    document.querySelector('meta[property="og:image:alt"]')?.setAttribute('content', `${profile.displayName} on Liinx`);
-    document.querySelector('meta[name="twitter:image"]')?.setAttribute('content', image);
+    updatePublicProfileMetadata(profile, customDomain);
   }, [profile, previewOnly, customDomain]);
 
   return {
