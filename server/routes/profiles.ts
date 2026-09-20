@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import dns from 'dns';
 import { db } from '../db.js';
-import { signJwt } from '../auth.js';
+import { issueCurrentSession } from '../services/session.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import {
   RESERVED_USERNAMES,
@@ -519,7 +519,7 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     invalidatePublicProfileCache(existing.id);
     let token: string | undefined;
     if (updatedUsername !== existing.username) {
-      token = signJwt({ userId: req.user!.userId, email: req.user!.email, profileId: existing.id, username: updatedUsername, sessionVersion: Number((db.prepare('SELECT session_version FROM users WHERE id = ?').get(req.user!.userId) as any)?.session_version || 1) });
+      token = issueCurrentSession(req.user!.userId, existing.id, updatedUsername, req.user!.email);
       res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
     }
     res.json({
@@ -802,13 +802,7 @@ profilesRouter.post('/studio/profiles', requireAuth, (req: AuthenticatedRequest,
     db.exec('COMMIT');
 
     // Sign new token for the newly created profile
-    const token = signJwt({
-      userId,
-      email: req.user!.email,
-      profileId: newProfileId,
-      username: cleanUsername,
-      sessionVersion: Number((db.prepare('SELECT session_version FROM users WHERE id = ?').get(userId) as any)?.session_version || 1)
-    });
+    const token = issueCurrentSession(userId, newProfileId, cleanUsername, req.user!.email);
     res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
     res.status(201).json({
@@ -862,13 +856,7 @@ profilesRouter.post('/studio/profiles/:id/select', requireAuth, (req: Authentica
       return res.status(404).json({ error: 'Profile not found or does not belong to your account.' });
     }
 
-    const token = signJwt({
-      userId,
-      email: req.user!.email,
-      profileId: profile.id,
-      username: profile.username,
-      sessionVersion: Number((db.prepare('SELECT session_version FROM users WHERE id = ?').get(userId) as any)?.session_version || 1)
-    });
+    const token = issueCurrentSession(userId, profile.id, profile.username, req.user!.email);
     res.setHeader('Set-Cookie', `liinx_session=${encodeURIComponent(token)}; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
     res.json({

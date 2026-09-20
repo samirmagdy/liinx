@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { hashPassword, comparePassword, signJwt } from '../auth.js';
+import { hashPassword, comparePassword } from '../auth.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import {
   RESERVED_USERNAMES,
@@ -20,6 +20,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { EmailDeliveryUnavailable, sendTransactionalEmail } from '../services/email.js';
 import { storageKeyFromUrl, uploadStorage } from '../services/uploadStorage.js';
 import { testOnlySessionToken } from './sessionResponse.js';
+import { issueCurrentSession } from '../services/session.js';
 
 export const authRouter = Router();
 
@@ -296,13 +297,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
 
     registerTx();
 
-    const token = signJwt({
-      userId,
-      email: cleanEmail,
-      profileId,
-      username: cleanUsername,
-      sessionVersion: 1
-    });
+    const token = issueCurrentSession(userId, profileId, cleanUsername, cleanEmail);
     setSessionCookie(res, token);
 
     res.status(201).json({
@@ -347,13 +342,7 @@ authRouter.post('/login', sharedRateLimit({ name: 'login', limit: 20, windowMs: 
       return res.status(404).json({ error: 'Associated profile not found.' });
     }
 
-    const token = signJwt({
-      userId: user.id,
-      email: user.email,
-      profileId: profile.id,
-      username: profile.username,
-      sessionVersion: Number(user.session_version || 1)
-    });
+    const token = issueCurrentSession(user.id, profile.id, profile.username, user.email);
     setSessionCookie(res, token);
 
     res.json({
@@ -425,13 +414,7 @@ authRouter.post('/change-password', requireAuth, sharedRateLimit({ name: 'change
     const newHash = hashPassword(parse.data.newPassword);
     db.prepare('UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?').run(newHash, userId);
 
-    const token = signJwt({
-      userId,
-      email: req.user!.email,
-      profileId: req.user!.profileId,
-      username: req.user!.username,
-      sessionVersion: 2
-    });
+    const token = issueCurrentSession(userId, req.user!.profileId, req.user!.username, req.user!.email);
     setSessionCookie(res, token);
 
     res.json({ success: true, message: 'Password updated successfully.', ...testOnlySessionToken(token) });
@@ -464,13 +447,7 @@ authRouter.post('/update-email', requireAuth, sharedRateLimit({ name: 'update-em
 
     db.prepare('UPDATE users SET email = ?, email_verified_at = NULL WHERE id = ?').run(cleanEmail, userId);
 
-    const token = signJwt({
-      userId,
-      email: cleanEmail,
-      profileId: req.user!.profileId,
-      username: req.user!.username,
-      sessionVersion: 1
-    });
+    const token = issueCurrentSession(userId, req.user!.profileId, req.user!.username, cleanEmail);
     setSessionCookie(res, token);
 
     res.json({ success: true, email: cleanEmail, message: 'Email address updated successfully.', ...testOnlySessionToken(token) });

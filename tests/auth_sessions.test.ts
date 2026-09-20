@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { signJwt, verifyJwt } from '../server/auth.js';
+import { db } from '../server/db.js';
 
 describe('authentication and session boundaries', () => {
   it('rejects forged, malformed, and expired-signature tokens', async () => {
@@ -35,6 +36,48 @@ describe('authentication and session boundaries', () => {
     expect(register.status).toBe(201);
     const hostile = await agent.put('/api/studio/profile').set('Origin', 'https://evil.example').send({ bio: 'blocked' });
     expect(hostile.status).toBe(403);
+    expect((await agent.get('/api/auth/me')).status).toBe(200);
+  });
+
+  it.each([3, 5, 12])('keeps password-change sessions valid when the stored version starts at %i', async (sessionVersion) => {
+    const agent = request.agent(app);
+    const suffix = `${Date.now()}_${sessionVersion}`;
+    const email = `password_version_${suffix}@liinx.test`;
+    const password = 'SessionPassword123!';
+    const registered = await agent.post('/api/auth/register').send({ email, password, username: `pv_${Date.now().toString(36)}_${sessionVersion}` });
+    expect(registered.status).toBe(201);
+
+    const userId = registered.body.user.id as string;
+    db.prepare('UPDATE users SET session_version = ? WHERE id = ?').run(sessionVersion - 1, userId);
+    expect((await agent.post('/api/auth/login').send({ email, password })).status).toBe(200);
+    expect((await agent.post('/api/auth/logout')).status).toBe(200);
+    expect((await agent.post('/api/auth/login').send({ email, password })).status).toBe(200);
+
+    const changed = await agent.post('/api/auth/change-password').send({ currentPassword: password, newPassword: 'NewSessionPassword456!' });
+    expect(changed.status).toBe(200);
+    expect(verifyJwt(changed.body.token)?.sessionVersion).toBe(sessionVersion + 1);
+    expect((await agent.get('/api/auth/me')).status).toBe(200);
+  });
+
+  it.each([3, 5, 12])('keeps email-change sessions valid when the stored version starts at %i', async (sessionVersion) => {
+    const agent = request.agent(app);
+    const suffix = `${Date.now()}_${sessionVersion}`;
+    const email = `email_version_${suffix}@liinx.test`;
+    const password = 'SessionPassword123!';
+    const registered = await agent.post('/api/auth/register').send({ email, password, username: `email_version_${suffix}` });
+    expect(registered.status).toBe(201);
+
+    const userId = registered.body.user.id as string;
+    db.prepare('UPDATE users SET session_version = ? WHERE id = ?').run(sessionVersion - 1, userId);
+    expect((await agent.post('/api/auth/login').send({ email, password })).status).toBe(200);
+    expect((await agent.post('/api/auth/logout')).status).toBe(200);
+    expect((await agent.post('/api/auth/login').send({ email, password })).status).toBe(200);
+
+    const updatedEmail = `email_updated_${suffix}@liinx.test`;
+    const changed = await agent.post('/api/auth/update-email').send({ email: updatedEmail, password });
+    expect(changed.status).toBe(200);
+    expect(verifyJwt(changed.body.token)?.sessionVersion).toBe(sessionVersion);
+    expect(verifyJwt(changed.body.token)?.email).toBe(updatedEmail);
     expect((await agent.get('/api/auth/me')).status).toBe(200);
   });
 });
