@@ -15,12 +15,8 @@ import {
   Download
 } from 'lucide-react';
 
-export function FeaturesPage() {
-  const { tr: ui } = useUiLanguage();
-  const [, setLocation] = useLocation();
-  const { isRtl } = useLanguage();
-
-  const featurePillars = isRtl ? [
+function getFeaturePillars(isRtl: boolean) {
+  return isRtl ? [
     {
       icon: <Layers className="w-6 h-6 text-amber-600" />,
       title: "بنية عناصر قابلة للتوسّع",
@@ -103,6 +99,14 @@ export function FeaturesPage() {
       bullets: ["Account metadata, profiles, pages, and blocks", "Newsletter subscribers and form submissions", "Uploaded files and raw analytics history are not included"]
     }
   ];
+}
+
+export function FeaturesPage() {
+  const { tr: ui } = useUiLanguage();
+  const [, setLocation] = useLocation();
+  const { isRtl } = useLanguage();
+
+  const featurePillars = getFeaturePillars(isRtl);
 
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">

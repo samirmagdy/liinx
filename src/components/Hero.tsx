@@ -122,7 +122,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                     onClick={() => setLocation('/@elenarostova')}
                     className="font-bold text-neutral-900 hover:text-amber-600 flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <span>{isRtl ? 'معاينة صفحة حية ↗' : 'View live example ↗'}</span>
+                    <span>{isRtl ? 'شاهد العرض التجريبي ↗' : 'View live demo ↗'}</span>
                   </button>
                   <span className="text-neutral-300">•</span>
                   <button

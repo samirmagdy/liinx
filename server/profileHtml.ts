@@ -9,6 +9,7 @@ export type PublicProfileContentItem = {
 export type RenderablePublicProfile = {
   username: string;
   display_name: string;
+  category?: string | null;
   bio?: string | null;
   avatar_url?: string | null;
   share_title?: string | null;
@@ -17,6 +18,15 @@ export type RenderablePublicProfile = {
 };
 
 export type PublicProfilePageMetadata = { title?: string | null; description?: string | null };
+
+export function resolveSchemaEntityType(category?: string | null): 'Person' | 'Organization' | undefined {
+  if (!category?.trim()) return undefined;
+  const value = category.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const isPerson = /\b(creators?|influencers?|photographers?|artists?|musicians?|producers?|djs?|consultants?|coach(?:es)?|designers?|developers?)\b/.test(value);
+  const isOrganization = /\b(business(?:es)?|brands?|companies|company|agencies|agency|studios?|labels?|shops?|organizations?)\b/.test(value);
+  if (isPerson === isOrganization) return undefined;
+  return isPerson ? 'Person' : 'Organization';
+}
 
 export function escapeHtml(value: string): string {
   return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character] || character));
@@ -54,6 +64,7 @@ function renderProfileMetadata(
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
   const safeCanonical = escapeHtml(canonical);
+  const entityType = resolveSchemaEntityType(profile.category);
   const structuredData = safeJsonForHtml({
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
@@ -61,7 +72,7 @@ function renderProfileMetadata(
     name: title,
     description,
     ...(image ? { image } : {}),
-    mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, ...(profile.avatar_url ? { image: profile.avatar_url } : {}) }
+    ...(entityType ? { mainEntity: { '@type': entityType, name: profile.display_name, url: canonical, ...(profile.avatar_url ? { image: profile.avatar_url } : {}) } } : {})
   });
   const scriptNonce = nonce ? ` nonce="${escapeHtml(nonce)}"` : '';
   const robots = isDemo ? 'noindex, nofollow' : 'index, follow';

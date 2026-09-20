@@ -30,7 +30,7 @@ import { isHttpUrl } from './utils/urlValidation.js';
 import { hasEntitlement } from './entitlements.js';
 import { enforceSingleNodeSafeguards } from './infrastructure/safeguards.js';
 import { uploadStorage } from './services/uploadStorage.js';
-import { escapeHtml, injectNonceIntoHtml, renderProfileShellHtml, type PublicProfileContentItem } from './profileHtml.js';
+import { escapeHtml, injectNonceIntoHtml, renderProfileShellHtml, type PublicProfileContentItem, type RenderablePublicProfile } from './profileHtml.js';
 export { injectNonceIntoHtml, renderProfileShellHtml, safeJsonForHtml } from './profileHtml.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -295,7 +295,7 @@ function safeRedirectTarget(raw: unknown, req: express.Request, username: string
 function sendProfileShell(
   res: express.Response,
   filePath: string,
-  profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null },
+  profile: RenderablePublicProfile,
   canonical: string,
   page?: { title?: string | null; description?: string | null },
   publicContent: PublicProfileContentItem[] = [],
@@ -396,7 +396,7 @@ function routeCustomDomainRequest(
 }
 
 function sendCustomDomainProfilePage(req: express.Request, res: express.Response, host: string, username: string, pageSlug: string | undefined, htmlFile: string) {
-  const customProfile = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE username = ?').get(username) as any;
+  const customProfile = db.prepare('SELECT id, username, display_name, bio, category, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE username = ?').get(username) as any;
   if (!customProfile) return sendHtmlFileWithNonce(res, htmlFile);
   const pageQuery = pageSlug ? 'slug = ?' : 'is_home = 1';
   const params = pageSlug ? [customProfile.id, pageSlug] : [customProfile.id];
@@ -592,7 +592,7 @@ function handlePublicProfileRequest(req: express.Request, res: express.Response,
 
 function loadPublicProfile(username: string): { profile: any; isDemo: boolean } | null {
   const cleanUsername = username.toLowerCase();
-  const stored = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(cleanUsername) as any;
+  const stored = db.prepare('SELECT id, username, display_name, bio, category, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(cleanUsername) as any;
   if (stored) return { profile: stored, isDemo: false };
   const demo = findSystemDemoProfile(cleanUsername);
   if (!demo) return null;
@@ -602,6 +602,7 @@ function loadPublicProfile(username: string): { profile: any; isDemo: boolean } 
       username: demo.username,
       display_name: demo.displayName,
       bio: demo.bio,
+      category: demo.category,
       avatar_url: demo.avatarUrl,
       share_title: `${demo.displayName} (@${demo.username}) | ${brand.productName}`,
       share_description: demo.bio,
@@ -634,6 +635,7 @@ function handleDemoProfileRequest(req: express.Request, res: express.Response, d
     username: demo.username,
     display_name: demo.displayName,
     bio: demo.bio,
+    category: demo.category,
     avatar_url: demo.avatarUrl,
     share_title: `${demo.displayName} (@${demo.username}) | ${brand.productName}`,
     share_description: demo.bio,

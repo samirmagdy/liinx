@@ -12,7 +12,7 @@ export const TrustProofSection: React.FC = () => {
   const { lang } = useLanguage();
   const ar = lang === 'ar';
 
-  const liveShowcases = [
+  const demoProfiles = [
     {
       username: 'elenarostova',
       name: 'Elena Rostova',
@@ -81,10 +81,10 @@ export const TrustProofSection: React.FC = () => {
           </div>
         </Reveal>
 
-        {/* Live Published Showcases (Interactive Demos) */}
+        {/* Fictional profile demos */}
         <Reveal stagger>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {liveShowcases.map((showcase) => (
+            {demoProfiles.map((showcase) => (
               <div
                 key={showcase.username}
                 className="motion-card rounded-3xl bg-white border border-neutral-200 p-6 flex flex-col justify-between hover:border-neutral-300 shadow-xs transition-all"

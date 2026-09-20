@@ -56,6 +56,27 @@ describe('server-rendered sharing metadata', () => {
     expect(html).toContain('<script nonce="testNonce12345" src="/main.js"></script>');
   });
 
+  it('uses Person for a creator profile and Organization for a business profile', () => {
+    const source = '<title>Default</title><meta name="description" content="Default" /><meta name="robots" content="index, follow" /><link rel="canonical" href="https://default.test/" /><meta property="og:url" content="https://default.test/" /><meta property="og:title" content="Default" /><meta property="og:description" content="Default" /><script type="application/ld+json">{}</script><body></body>';
+    const readStructuredData = (html: string) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1]);
+
+    const creatorHtml = renderProfileShellHtml(source, { username: 'creator', display_name: 'A Creator', category: 'Creator' }, 'https://example.test/@creator');
+    const businessHtml = renderProfileShellHtml(source, { username: 'business', display_name: 'A Business', category: 'Small Business / Brand' }, 'https://example.test/@business');
+
+    expect(readStructuredData(creatorHtml).mainEntity['@type']).toBe('Person');
+    expect(readStructuredData(businessHtml).mainEntity['@type']).toBe('Organization');
+  });
+
+  it('omits mainEntity when profile category is missing, unclear, or mixed', () => {
+    const source = '<title>Default</title><meta name="description" content="Default" /><meta name="robots" content="index, follow" /><link rel="canonical" href="https://default.test/" /><meta property="og:url" content="https://default.test/" /><meta property="og:title" content="Default" /><meta property="og:description" content="Default" /><script type="application/ld+json">{}</script><body></body>';
+    const readStructuredData = (html: string) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1]);
+    const unknown = renderProfileShellHtml(source, { username: 'unknown', display_name: 'Unclassified', category: 'Design & Art' }, 'https://example.test/@unknown');
+    const mixed = renderProfileShellHtml(source, { username: 'mixed', display_name: 'Mixed', category: 'Designer Studio' }, 'https://example.test/@mixed');
+
+    expect(readStructuredData(unknown)).not.toHaveProperty('mainEntity');
+    expect(readStructuredData(mixed)).not.toHaveProperty('mainEntity');
+  });
+
   it('marks fictional demo pages noindex and labels their sample content', () => {
     const source = '<title>Default</title><meta name="description" content="Default" /><meta name="robots" content="index, follow" /><link rel="canonical" href="https://default.test/" /><meta property="og:url" content="https://default.test/" /><meta property="og:title" content="Default" /><meta property="og:description" content="Default" /><script type="application/ld+json">{}</script><body></body>';
     const html = renderProfileShellHtml(source, { username: 'sample', display_name: 'Sample creator', bio: 'Sample bio' }, 'https://liinx.app/@sample', undefined, undefined, [], true);

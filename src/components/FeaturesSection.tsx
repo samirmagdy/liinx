@@ -81,9 +81,8 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
       highlights: [
         isRtl ? 'ربط نطاق خاص (links.yourname.com) مع توجيه DNS وتشفير HTTPS بعد إعداد الاستضافة' : 'Custom domain support with secure HTTPS after hosting configuration',
         isRtl ? 'تصدير المشتركين وردود النماذج إلى CSV بنقرة واحدة' : 'Export subscribers and form responses to CSV',
-        isRtl ? 'تصدير بيانات الحساب بصيغة JSON، بما يشمل الملفات والصفحات والعناصر والمشتركين وردود النماذج' : 'Export account data as JSON: profiles, pages, blocks, subscribers, and form responses',
+        isRtl ? 'تصدير JSON لبيانات الحساب والملفات والصفحات والعناصر والمشتركين والردود، دون ملفات وسائط أو سجل تحليلات خام' : 'JSON export of account details, profiles, pages, blocks, subscribers, and form responses; excludes uploads and raw analytics',
         isRtl ? 'واجهة برمجية مفتوحة (Public REST API v1)' : 'Public REST API v1 for automated builds and pipelines',
-        isRtl ? 'ملفات الوسائط وسجل التحليلات الخام غير مضمنين في تصدير JSON' : 'Uploaded file binaries and raw analytics history are not included in the JSON export'
       ]
     }
   ];
@@ -271,10 +270,6 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                       </div>
                       <div className="p-2.5 bg-neutral-800 rounded-xl text-[11px] text-neutral-300 flex items-center justify-between">
                         <span>export_subscribers.csv</span>
-                        <Download className="w-3.5 h-3.5 text-neutral-400" />
-                      </div>
-                      <div className="p-2.5 bg-neutral-800 rounded-xl text-[11px] text-neutral-300 flex items-center justify-between">
-                        <span>account_data.json</span>
                         <Download className="w-3.5 h-3.5 text-neutral-400" />
                       </div>
                     </div>
