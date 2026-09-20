@@ -97,15 +97,30 @@ function transactionalEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.CONTACT_FROM_EMAIL);
 }
 
-async function issueAccountToken(userId: string, email: string, purpose: 'password_reset' | 'email_verification'): Promise<boolean> {
+/**
+ * Issues a single-use account token (email verification or password reset).
+ *
+ * The token is bound to `subjectValue` (the email address being acted on) via a
+ * SHA-256 hash stored in `subject_value_hash`. The confirmation handler rejects
+ * any token whose bound email no longer matches the account's current email,
+ * preventing a credential-swap bypass where an attacker verifies a new email
+ * using a token issued for the old one.
+ */
+async function issueAccountToken(
+  userId: string,
+  email: string,
+  purpose: 'password_reset' | 'email_verification',
+  subjectValue: string
+): Promise<boolean> {
   const rawToken = randomBytes(32).toString('base64url');
   const tokenHash = hashAccountToken(rawToken);
+  const subjectHash = createHash('sha256').update(subjectValue.toLowerCase().trim()).digest('hex');
   const now = Date.now();
   const expiresAt = now + (purpose === 'password_reset' ? 60 : 24 * 60) * 60 * 1000;
   db.transaction(() => {
     db.prepare('DELETE FROM account_tokens WHERE expires_at <= ? OR used_at IS NOT NULL').run(now);
     db.prepare('UPDATE account_tokens SET used_at = ? WHERE user_id = ? AND purpose = ? AND used_at IS NULL').run(now, userId, purpose);
-    db.prepare('INSERT INTO account_tokens (token_hash, user_id, purpose, expires_at, created_at) VALUES (?, ?, ?, ?, ?)').run(tokenHash, userId, purpose, expiresAt, now);
+    db.prepare('INSERT INTO account_tokens (token_hash, user_id, purpose, subject_value_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)').run(tokenHash, userId, purpose, subjectHash, expiresAt, now);
   })();
   const path = purpose === 'password_reset' ? '/reset-password' : '/verify-email';
   const subject = purpose === 'password_reset' ? 'Reset your LIINX password' : 'Verify your LIINX email address';
@@ -130,7 +145,7 @@ authRouter.post('/password-reset/request', sharedRateLimit({ name: 'password-res
   const user = db.prepare('SELECT id, email FROM users WHERE email = ?').get(parsed.data.email.toLowerCase().trim()) as { id: string; email: string } | undefined;
   if (!user) return res.status(202).json({ message: 'If an account exists, reset instructions will be sent.' });
   try {
-    const available = await issueAccountToken(user.id, user.email, 'password_reset');
+    const available = await issueAccountToken(user.id, user.email, 'password_reset', user.email);
     if (!available) return res.status(503).json({ error: 'Password reset email is temporarily unavailable. Please try again later.' });
   } catch (error) {
     console.error('Password reset delivery failed:', error instanceof Error ? error.message : 'unknown provider error');
@@ -158,7 +173,7 @@ authRouter.post('/email-verification/request', requireAuth, async (req: Authenti
   if (!user) return res.status(401).json({ error: 'User account not found.' });
   if (user.email_verified_at) return res.json({ verified: true, message: 'This email is already verified.' });
   try {
-    const available = await issueAccountToken(req.user!.userId, user.email, 'email_verification');
+    const available = await issueAccountToken(req.user!.userId, user.email, 'email_verification', user.email);
     if (!available) return res.status(503).json({ error: 'Email verification is temporarily unavailable. Please try again later.' });
   } catch (error) {
     console.error('Email verification delivery failed:', error instanceof Error ? error.message : 'unknown provider error');
@@ -172,8 +187,22 @@ authRouter.post('/email-verification/confirm', sharedRateLimit({ name: 'email-ve
   if (tokenValue.length < 32 || tokenValue.length > 200) return res.status(400).json({ error: 'This verification link is invalid or expired.' });
   const now = Date.now();
   const tokenHash = hashAccountToken(tokenValue);
-  const token = db.prepare('SELECT user_id FROM account_tokens WHERE token_hash = ? AND purpose = ? AND used_at IS NULL AND expires_at > ?').get(tokenHash, 'email_verification', now) as { user_id: string } | undefined;
+  const token = db.prepare(
+    'SELECT user_id, subject_value_hash FROM account_tokens WHERE token_hash = ? AND purpose = ? AND used_at IS NULL AND expires_at > ?'
+  ).get(tokenHash, 'email_verification', now) as { user_id: string; subject_value_hash: string | null } | undefined;
   if (!token) return res.status(400).json({ error: 'This verification link is invalid or expired.' });
+
+  // Enforce email snapshot binding: the token must have been issued for the
+  // account's *current* email address. This prevents an attacker from using a
+  // verification token that was sent to an old email to verify a newly-changed
+  // email that was never actually sent a verification message.
+  const user = db.prepare('SELECT email FROM users WHERE id = ?').get(token.user_id) as { email: string } | undefined;
+  if (!user) return res.status(400).json({ error: 'This verification link is invalid or expired.' });
+  const currentEmailHash = createHash('sha256').update(user.email.toLowerCase().trim()).digest('hex');
+  if (!token.subject_value_hash || token.subject_value_hash !== currentEmailHash) {
+    return res.status(400).json({ error: 'This verification link is invalid or expired.' });
+  }
+
   db.transaction(() => {
     db.prepare('UPDATE users SET email_verified_at = ? WHERE id = ?').run(now, token.user_id);
     db.prepare('UPDATE account_tokens SET used_at = ? WHERE token_hash = ?').run(now, tokenHash);
@@ -445,7 +474,16 @@ authRouter.post('/update-email', requireAuth, sharedRateLimit({ name: 'update-em
       return res.status(409).json({ error: 'An account with this email address already exists.' });
     }
 
-    db.prepare('UPDATE users SET email = ?, email_verified_at = NULL, session_version = session_version + 1 WHERE id = ?').run(cleanEmail, userId);
+    const now = Date.now();
+    db.transaction(() => {
+      db.prepare('UPDATE users SET email = ?, email_verified_at = NULL, session_version = session_version + 1 WHERE id = ?').run(cleanEmail, userId);
+      // Invalidate any pending tokens bound to the old credential. This is
+      // defence-in-depth alongside the subject_value_hash check in the confirm
+      // handler: even a token issued before this fix deploys cannot be replayed.
+      db.prepare(
+        "UPDATE account_tokens SET used_at = ? WHERE user_id = ? AND purpose IN ('email_verification', 'password_reset') AND used_at IS NULL"
+      ).run(now, userId);
+    })();
 
     const token = issueCurrentSession(userId, req.user!.profileId, req.user!.username, cleanEmail);
     setSessionCookie(res, token);

@@ -476,6 +476,11 @@ export function initDatabase() {
   try { db.exec('ALTER TABLE api_keys ADD COLUMN expires_at INTEGER'); } catch {}
   db.prepare('UPDATE api_keys SET expires_at = created_at + ? WHERE expires_at IS NULL').run(90 * 24 * 60 * 60 * 1000);
   try { db.exec('ALTER TABLE form_submissions ADD COLUMN submission_key TEXT'); } catch {}
+
+  // Bind verification tokens to the specific email/credential they were issued
+  // for. Tokens without this hash (issued before this migration) are treated as
+  // mismatched and will be rejected on confirmation – they expire naturally anyway.
+  try { db.exec('ALTER TABLE account_tokens ADD COLUMN subject_value_hash TEXT'); } catch {}
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_form_submissions_idempotency ON form_submissions(block_id, submission_key) WHERE submission_key IS NOT NULL');
 
   // Every profile has a stable home page. Existing blocks remain visible by
