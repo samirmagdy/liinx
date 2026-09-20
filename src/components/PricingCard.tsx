@@ -101,7 +101,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
 }) => {
   return (
     <article
-      className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all relative ${
+      className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between h-full transition-all relative ${
         plan.highlight
           ? 'bg-neutral-900 text-white shadow-xl ring-2 ring-amber-500/20'
           : 'bg-white border border-neutral-200 text-neutral-900 shadow-xs'
@@ -114,7 +114,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       )}
 
       {/* Plan Header */}
-      <div className="space-y-4">
+      <div className="space-y-4 flex flex-1 flex-col">
         <div className="flex items-center gap-3">
           <div
             className={`w-10 h-10 rounded-xl flex items-center justify-center ${
