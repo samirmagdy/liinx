@@ -21,6 +21,7 @@ import { EmailDeliveryUnavailable, sendTransactionalEmail } from '../services/em
 import { storageKeyFromUrl, uploadStorage } from '../services/uploadStorage.js';
 import { testOnlySessionToken } from './sessionResponse.js';
 import { issueCurrentSession } from '../services/session.js';
+import { consumePasswordResetToken } from '../services/passwordReset.js';
 
 export const authRouter = Router();
 
@@ -159,12 +160,8 @@ authRouter.post('/password-reset/confirm', sharedRateLimit({ name: 'password-res
   if (!parsed.success) return res.status(400).json({ error: 'Use a valid, new password and reset token.' });
   const now = Date.now();
   const tokenHash = hashAccountToken(parsed.data.token);
-  const token = db.prepare('SELECT user_id FROM account_tokens WHERE token_hash = ? AND purpose = ? AND used_at IS NULL AND expires_at > ?').get(tokenHash, 'password_reset', now) as { user_id: string } | undefined;
-  if (!token) return res.status(400).json({ error: 'This reset link is invalid or expired.' });
-  db.transaction(() => {
-    db.prepare('UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?').run(hashPassword(parsed.data.password), token.user_id);
-    db.prepare('UPDATE account_tokens SET used_at = ? WHERE token_hash = ?').run(now, tokenHash);
-  })();
+  const consumed = consumePasswordResetToken(db, tokenHash, now, hashPassword(parsed.data.password));
+  if (!consumed) return res.status(400).json({ error: 'This reset link is invalid or expired.' });
   return res.json({ success: true, message: 'Your password was reset. Please sign in again.' });
 });
 

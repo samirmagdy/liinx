@@ -32,12 +32,12 @@ export default defineConfig(({ mode }) => {
         include: [
           'server/**/*.ts',
           'shared/**/*.ts',
-          'src/config/**/*.ts',
-          'src/utils/**/*.ts'
+          'src/**/*.{ts,tsx}'
         ],
         exclude: [
           '**/*.d.ts',
           '**/types/**',
+          'src/demo/**',
           'scripts/**',
           'dist/**',
           'server/maintenance.ts',
@@ -48,6 +48,12 @@ export default defineConfig(({ mode }) => {
           lines: 79,
           functions: 80,
           branches: 72,
+          'src/**/*.{ts,tsx}': {
+            statements: 50,
+            lines: 50,
+            functions: 40,
+            branches: 40
+          },
           'server/auth.ts': {
             statements: 85,
             lines: 90,

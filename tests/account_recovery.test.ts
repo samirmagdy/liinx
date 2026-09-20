@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { db } from '../server/db.js';
+import Database from 'better-sqlite3';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { consumePasswordResetToken } from '../server/services/passwordReset.js';
 
 function unique(prefix: string): string {
   return `${prefix}_${Date.now()}_${randomBytes(4).toString('hex')}`;
@@ -17,6 +22,47 @@ async function registerAccount() {
 }
 
 describe('account recovery and deletion', () => {
+  it('allows only one reset-token consume across independent SQLite connections', async () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-reset-race-'));
+    const databasePath = path.join(directory, 'reset.sqlite');
+    const first = new Database(databasePath);
+    const second = new Database(databasePath);
+    try {
+      first.exec(`
+        CREATE TABLE users (id TEXT PRIMARY KEY, password_hash TEXT NOT NULL, session_version INTEGER NOT NULL);
+        CREATE TABLE account_tokens (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL, purpose TEXT NOT NULL, used_at INTEGER, expires_at INTEGER NOT NULL);
+      `);
+      first.prepare('INSERT INTO users VALUES (?, ?, ?)').run('user-1', 'original-hash', 4);
+      first.prepare('INSERT INTO account_tokens VALUES (?, ?, ?, NULL, ?)').run('hashed-reset-token', 'user-1', 'password_reset', Date.now() + 60_000);
+
+      // Both independent connections observe eligibility before either tries to consume.
+      expect(first.prepare("SELECT 1 FROM account_tokens WHERE token_hash = ? AND used_at IS NULL").get('hashed-reset-token')).toBeDefined();
+      expect(second.prepare("SELECT 1 FROM account_tokens WHERE token_hash = ? AND used_at IS NULL").get('hashed-reset-token')).toBeDefined();
+      let readyCount = 0;
+      let release!: () => void;
+      const ready = new Promise<void>(resolve => { release = resolve; });
+      const consume = async (connection: Database.Database, chosenHash: string) => {
+        readyCount += 1;
+        if (readyCount === 2) release();
+        await ready;
+        return consumePasswordResetToken(connection, 'hashed-reset-token', Date.now(), chosenHash);
+      };
+      const results = await Promise.all([consume(first, 'winner-hash'), consume(second, 'loser-hash')]);
+
+      expect(results.filter(Boolean)).toHaveLength(1);
+      expect(results.filter(result => !result)).toHaveLength(1);
+      const user = first.prepare('SELECT password_hash, session_version FROM users WHERE id = ?').get('user-1') as { password_hash: string; session_version: number };
+      const token = first.prepare('SELECT used_at FROM account_tokens WHERE token_hash = ?').get('hashed-reset-token') as { used_at: number | null };
+      expect(user.password_hash).toBe(results[0] ? 'winner-hash' : 'loser-hash');
+      expect(user.session_version).toBe(5);
+      expect(token.used_at).not.toBeNull();
+    } finally {
+      first.close();
+      second.close();
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
   it('does not enumerate accounts when mail delivery is unavailable', async () => {
     const originalKey = process.env.RESEND_API_KEY;
     const originalFrom = process.env.CONTACT_FROM_EMAIL;
