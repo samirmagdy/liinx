@@ -45,10 +45,10 @@ export const WhyLiinxSection: React.FC = () => {
     {
       icon: <FileSpreadsheet className="w-6 h-6 text-emerald-600" />,
       outcome: ar ? 'ملكية مطلقة لجمهورك' : 'Portable Audience Data (CSV)',
-      feature: ar ? 'تصدير المشتركين بنقرة واحدة بدون شروط' : 'Direct subscriber export to CSV with 0% platform cuts',
+      feature: ar ? 'تنزيل بيانات مشتركي النشرة بصيغة CSV' : 'Download newsletter subscribers as CSV',
       description: ar
-        ? 'بيانات المشتركين في نشرتك البريدية ملكك وحدك. صدّرها في أي وقت وانقلها لأي مزود بريد تريده.'
-        : 'Your newsletter subscribers belong to you. Export CSV files anytime and import them directly into Mailchimp, ConvertKit, or Beehiiv.'
+        ? 'نزّل سجلات مشتركي النشرة من لوحة المشتركين بصيغة CSV.'
+        : 'Download newsletter subscriber records as a CSV from the Subscribers panel.'
     }
   ];
 

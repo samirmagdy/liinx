@@ -251,11 +251,15 @@ export function AboutPage() {
       badge={lang === 'ar' ? 'من نحن' : 'About Us'}
       title={lang === 'ar' ? `عن ${brand.productShortName}` : `About ${brand.productShortName}`}
       sections={lang === 'ar' ? [
-        ['صفحة واحدة لأعمالك', 'اجمع روابطك ووسائطك ونموذج الاشتراك والحجوزات في صفحة شخصية.'],
-        ['صمّمها لتناسبك', 'اختر مظهراً جاهزاً ثم خصّص الألوان والخطوط وترتيب المحتوى. اختبر الصفحة المنشورة قبل مشاركتها.']
+        ['ما هي Liinx؟', 'Liinx أداة لإنشاء صفحة عامة قابلة للتخصيص تجمع الروابط والوسائط المدعومة واشتراكات النشرة وروابط الحجز في مكان واحد.'],
+        ['كيف تعمل الصفحة؟', 'أضف محتواك من الاستوديو، رتّب الكتل واختر مظهراً. يمكن نشر صفحات متعددة بروابط مستقلة، وتختلف الميزات المتاحة حسب الخطة.'],
+        ['النشرة والحجوزات', 'تُجمع اشتراكات النشرة عبر كتل الصفحة ويمكن تنزيل سجلات المشتركين بصيغة CSV. تفتح كتل الحجز تقويم Calendly؛ ويُدير Calendly المواعيد والتأكيدات.'],
+        ['النطاقات والمدفوعات', 'تدعم الخطط المؤهلة ربط نطاق مخصص بعد التحقق من DNS، مع إعداد الاستضافة وشهادة TLS. لا تعالج Liinx مدفوعات المبيعات أو الحجوزات؛ وتُدار هذه العمليات لدى مزوّد الخدمة الخارجي.']
       ] : [
-        ['One page for your work', 'Bring your links, media, email capture and bookings together on a personal page.'],
-        ['Make it yours', 'Choose a theme, then customize colors, typography and content order. Test your published page before sharing it.']
+        ['What is Liinx?', 'Liinx is a tool for creating a customizable public page that brings together links, supported media, newsletter signups, and booking links.'],
+        ['How pages work', 'Add content in the Studio, arrange blocks, and choose a theme. You can publish multiple pages at separate URLs; feature availability varies by plan.'],
+        ['Newsletters and bookings', 'Newsletter signup blocks collect subscriber records that can be downloaded as CSV. Booking blocks open Calendly, which manages availability and booking confirmations.'],
+        ['Domains and payments', 'Eligible plans support custom domains after DNS verification; hosting and TLS also need to be configured. Liinx does not process sales or booking payments; external providers handle those transactions.']
       ]}
     />
   );

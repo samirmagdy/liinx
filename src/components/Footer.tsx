@@ -42,10 +42,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <div className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 max-w-sm">
                 <div className="flex items-center gap-2 text-neutral-300 font-mono text-[11px] font-semibold mb-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
-                  <span>{ui("Creator Ownership Guarantee")}</span>
+                  <span>{ui("Creator tools")}</span>
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-normal">
-                  {ui("Your audience, your domain, your data. Zero commission on sales and instant CSV export at any time.")}
+                  {ui("Publish a customizable creator page, collect newsletter signups, and export subscriber records as CSV.")}
                 </p>
               </div>
 

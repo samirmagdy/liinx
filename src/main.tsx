@@ -24,6 +24,10 @@ if (sentryDsn) {
   });
 }
 
+// The server sends a readable public-profile fallback for crawlers and no-JS
+// visitors. The interactive app replaces it once its client bundle starts.
+document.getElementById('profile-crawl-content')?.remove();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

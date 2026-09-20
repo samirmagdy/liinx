@@ -16,6 +16,7 @@ import { PrivacyConsentBanner } from './tracking/PrivacyConsentBanner';
 import { StickyAudioBarContainer } from './StickyAudioBar';
 import { PublicSearchInput } from './PublicSearchInput';
 import { PublicBackgroundMedia } from './PublicBackgroundMedia';
+import { findSystemDemoProfile } from '../../../../shared/index.js';
 
 interface PublicBioShellProps {
   profile: CreatorProfile;
@@ -45,6 +46,7 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
   const [pageSearch, setPageSearch] = useState('');
   const [renderNow, setRenderNow] = useState(() => Date.now());
   const [analyticsConsent, setAnalyticsConsent] = useState<'granted' | 'denied' | null>(null);
+  const isSystemDemo = Boolean(findSystemDemoProfile(profile.username));
 
   // Audio, Video, and Folder state
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
@@ -168,6 +170,11 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
             : undefined
         }
       >
+        {isSystemDemo && (
+          <p role="note" className="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            {ui('Fictional sample profile. Names, metrics, and links are demonstration content, not customer data.')}
+          </p>
+        )}
         <PublicProfileHeader profile={profile} theme={theme} />
         <PublicPageNavigation profile={profile} theme={theme} customDomain={customDomain} />
 

@@ -42,24 +42,24 @@ export const TrustProofSection: React.FC = () => {
   const trustGuarantees = [
     {
       icon: <Coins className="w-5 h-5 text-emerald-600" />,
-      title: ar ? 'عمولة 0% على جميع تعاملاتك' : '0% Platform Commission',
+      title: ar ? 'لا تعالج ليينكس مدفوعاتك' : 'Payments stay with your provider',
       description: ar
-        ? 'لا نأخذ أي نسبة من أرباحك، مبيعاتك، أو حجوزاتك على Calendly وStripe. أرباحك لك بالكامل.'
-        : 'We never take a percentage cut of your sales, bookings, or client payments. You keep 100% of your revenue.'
+        ? 'لا تعالج ليينكس مدفوعات المبيعات أو الحجوزات. تُدار المدفوعات وأي رسوم عبر مزوّد الخدمة الخارجي.'
+        : 'Liinx does not process sales or booking payments. Payment handling and any fees belong to the external provider.'
     },
     {
       icon: <FileText className="w-5 h-5 text-blue-600" />,
-      title: ar ? 'تصدير كامل لقائمتك البريدية' : 'Full Audience Data Portability',
+      title: ar ? 'تصدير مشتركي النشرة' : 'Export newsletter subscribers',
       description: ar
-        ? 'بيانات المشتركين في نشرتك البريدية ملكك وحدك. يمكنك تنزيلها بصيغة CSV في أي ثانية بنقرة واحدة.'
-        : 'Your subscribers are your assets. Download your complete email list as a CSV at any time without fees.'
+        ? 'يمكنك تنزيل عناوين مشتركي النشرة البريدية بصيغة CSV من لوحة المشتركين.'
+        : 'Download newsletter subscriber records as a CSV from the Subscribers panel.'
     },
     {
       icon: <Lock className="w-5 h-5 text-amber-600" />,
-      title: ar ? 'ربط النطاق مع توجيه DNS' : 'Custom Domains & Guided DNS',
+      title: ar ? 'إعداد النطاق المخصص' : 'Custom domain setup',
       description: ar
-        ? 'اربط نطاقك المخصص عبر إرشادات DNS دقيقة خطوة بخطوة، مع دعم تشفير HTTPS الآمن بعد إعداد الاستضافة.'
-        : 'Connect your custom domain with guided DNS verification and secure HTTPS after hosting configuration.'
+        ? 'تتطلب الخطط المؤهلة التحقق من DNS وإعداد الاستضافة وشهادة TLS.'
+        : 'Eligible plans require DNS verification plus hosting and TLS configuration.'
     }
   ];
 
@@ -71,12 +71,12 @@ export const TrustProofSection: React.FC = () => {
         <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-8">
           <div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
-              {ar ? 'صفحات تجريبية تفاعلية يمكنك استكشافها الآن' : 'Interactive demo pages you can explore right now'}
+              {ar ? 'نماذج توضيحية تفاعلية يمكنك استكشافها' : 'Explore interactive sample pages'}
             </h2>
             <p className="text-base sm:text-lg text-neutral-600 leading-relaxed text-pretty">
               {ar
-                ? 'استكشف صفحات تجريبية تفاعلية واكتشف ما يمكن لـ Liinx تقديمه ونشره.'
-                : 'Explore interactive demo pages and see exactly what Liinx can publish.'}
+                ? 'هذه ملفات تعريف خيالية توضح بعض أنواع الصفحات التي يمكن إنشاؤها باستخدام Liinx؛ وليست حسابات عملاء.'
+                : 'These fictional profiles demonstrate examples of pages you can build with Liinx. They are not customer accounts.'}
             </p>
           </div>
         </Reveal>
@@ -92,7 +92,7 @@ export const TrustProofSection: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-4">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
-                      {ar ? 'عرض تجريبي حي' : 'Live Demo'}
+                      {ar ? 'نموذج خيالي' : 'Fictional sample'}
                     </span>
                     <span className="text-[11px] font-mono text-neutral-400">
                       @{showcase.username}
@@ -129,7 +129,7 @@ export const TrustProofSection: React.FC = () => {
                   rel="noreferrer"
                   className="w-full py-2.5 px-4 rounded-xl border border-neutral-300 hover:bg-neutral-50 text-xs font-bold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <span>{ar ? 'فتح العرض التجريبي' : 'Open Live Demo'}</span>
+                  <span>{ar ? 'فتح النموذج' : 'Open sample'}</span>
                   <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
                 </a>
               </div>
@@ -159,7 +159,7 @@ export const TrustProofSection: React.FC = () => {
           ))}
         </div>
 
-        {/* Founder & Philosophy Statement */}
+        {/* Factual product summary */}
         <div className="rounded-3xl bg-white border border-neutral-200 p-6 sm:p-8 max-w-4xl mx-auto shadow-xs text-start">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold font-mono">
@@ -167,22 +167,18 @@ export const TrustProofSection: React.FC = () => {
             </div>
             <div>
               <h4 className="font-bold text-sm text-neutral-900">
-                {ar ? 'لماذا بنينا ليينكس' : 'The Philosophy Behind Liinx'}
+                {ar ? 'ما الذي تقدمه Liinx' : 'What Liinx provides'}
               </h4>
               <p className="text-xs text-neutral-500">
-                {ar ? 'رسالة من فريق التصميم والهندسة' : 'A note on craft, aesthetics, and creator ownership'}
+                {ar ? 'ملخص للميزات المتاحة' : 'A summary of product capabilities'}
               </p>
             </div>
           </div>
-          <p className="text-sm text-neutral-700 leading-relaxed italic mb-4">
+          <p className="text-sm text-neutral-700 leading-relaxed">
             {ar
-              ? '«معظم أدوات الروابط الحيوية تركز فقط على وضع الروابط. بنينا ليينكس ليكون منصة متكاملة للعرض والهوية والملكية: صفحة مصغرة عالية الحرفية، وسائط تعمل مباشرة، نطاق خاص بك، وتصدير كامل لبياناتك دون عمولات خفية.»'
-              : '"Most bio tools optimize for links. Liinx is built for presentation, identity, and ownership: a fast, high-aesthetic mini-website with playable media, custom typography, zero transaction commissions, and complete data portability."'}
+              ? 'تتيح Liinx إنشاء صفحة عامة قابلة للتخصيص للروابط والوسائط المدعومة واشتراكات النشرة وحجوزات Calendly. وتختلف بعض الميزات حسب الخطة.'
+              : 'Liinx lets creators publish a customizable public page with links, supported media, newsletter signups, and Calendly booking links. Feature availability can vary by plan.'}
           </p>
-          <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-2 border-t border-neutral-100">
-            <span>Liinx Studio Team</span>
-            <span>{ar ? 'نماذج تجريبية ومعايير الحرفية' : 'Interactive Demos & Craft Standards'}</span>
-          </div>
         </div>
 
       </div>

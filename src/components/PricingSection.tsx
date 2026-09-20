@@ -111,8 +111,8 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
             </Heading>
             <p className="text-base text-neutral-600 leading-relaxed text-pretty">
               {ar
-                ? 'لا بطاقة بنكية مطلوبة للبدء. عمولة 0% على جميع تعاملاتك دائماً.'
-                : 'No credit card required. 0% platform commission on any plan, forever.'}
+                ? 'قارن الميزات المتاحة في كل خطة قبل الترقية.'
+                : 'Compare the features included in each plan before upgrading.'}
             </p>
           </div>
         </Reveal>

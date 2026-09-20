@@ -315,12 +315,16 @@ export function injectNonceIntoHtml(sourceHtml: string, nonce?: string): string 
   return html;
 }
 
+type PublicProfileContentItem = { type: 'link' | 'text'; title: string; url?: string; subtitle?: string | null; body?: string };
+
 export function renderProfileShellHtml(
   sourceHtml: string,
   profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null },
   canonical: string,
   page?: { title?: string | null; description?: string | null },
-  nonce?: string
+  nonce?: string,
+  publicContent: PublicProfileContentItem[] = [],
+  isDemo = false
 ): string {
   let html = sourceHtml;
   const title = page?.title || profile.share_title || `${profile.display_name} (@${profile.username}) | LIINX`;
@@ -330,7 +334,7 @@ export function renderProfileShellHtml(
   const safeDescription = escapeHtml(description);
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`)
     .replace(/<meta name="description" content="[^"]*"\s*\/>/i, `<meta name="description" content="${safeDescription}" />`)
-    .replace(/<meta name="robots" content="[^"]*"\s*\/>/i, '<meta name="robots" content="index, follow" />')
+    .replace(/<meta name="robots" content="[^"]*"\s*\/>/i, `<meta name="robots" content="${isDemo ? 'noindex, nofollow' : 'index, follow'}" />`)
     .replace(/<link rel="canonical" href="[^"]*"\s*\/>/i, `<link rel="canonical" href="${escapeHtml(canonical)}" />`)
     .replace(/<meta property="og:url" content="[^"]*"\s*\/>/i, `<meta property="og:url" content="${escapeHtml(canonical)}" />`)
     .replace(/<meta property="og:title" content="[^"]*"\s*\/>/i, `<meta property="og:title" content="${safeTitle}" />`)
@@ -343,6 +347,14 @@ export function renderProfileShellHtml(
     .replace(/<meta name="twitter:image" content="[^"]*"\s*\/>/i, image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : '')
     .replace(/<script\b[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, `<script type="application/ld+json"${nonce ? ` nonce="${escapeHtml(nonce)}"` : ''}>${safeJsonForHtml({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: canonical, name: title, description, ...(image ? { image } : {}), mainEntity: { '@type': 'Person', name: profile.display_name, url: canonical, ...(profile.avatar_url ? { image: profile.avatar_url } : {}) } })}</script>`);
 
+  const linkItems = publicContent.filter((item): item is typeof item & { url: string } => item.type === 'link' && Boolean(item.url))
+    .map(link => `<li><a href="${escapeHtml(link.url)}" rel="noopener noreferrer">${escapeHtml(link.title)}</a>${link.subtitle ? `<p>${escapeHtml(link.subtitle)}</p>` : ''}</li>`).join('');
+  const textBlocks = publicContent.filter(item => item.type === 'text')
+    .map(item => `<article>${item.title ? `<h2>${escapeHtml(item.title)}</h2>` : ''}${item.body ? `<p>${escapeHtml(item.body).replace(/\r?\n/g, '<br>')}</p>` : ''}</article>`).join('');
+  const demoNotice = isDemo ? '<p role="note">Fictional sample profile. Names, metrics, and links are demonstration content, not customer data.</p>' : '';
+  const profileContent = `<section id="profile-crawl-content" aria-label="${escapeHtml(profile.display_name)}">${demoNotice}<h1>${escapeHtml(profile.display_name)}</h1>${profile.bio ? `<p>${escapeHtml(profile.bio)}</p>` : ''}${page?.title && page.title !== profile.display_name ? `<h2>${escapeHtml(page.title)}</h2>` : ''}${page?.description ? `<p>${escapeHtml(page.description)}</p>` : ''}${textBlocks}${linkItems ? `<h2>Links</h2><ul>${linkItems}</ul>` : ''}</section>`;
+  html = /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${profileContent}</body>`) : `${html}${profileContent}`;
+
   if (nonce) {
     html = injectNonceIntoHtml(html, nonce);
   }
@@ -354,11 +366,34 @@ function sendProfileShell(
   filePath: string,
   profile: { username: string; display_name: string; bio?: string | null; avatar_url?: string | null; share_title?: string | null; share_description?: string | null; share_image_url?: string | null },
   canonical: string,
-  page?: { title?: string | null; description?: string | null }
+  page?: { title?: string | null; description?: string | null },
+  publicContent: PublicProfileContentItem[] = [],
+  isDemo = false
 ) {
   const nonce = res.locals?.cspNonce;
-  const html = renderProfileShellHtml(fs.readFileSync(filePath, 'utf8'), profile, canonical, page, nonce);
+  const html = renderProfileShellHtml(fs.readFileSync(filePath, 'utf8'), profile, canonical, page, nonce, publicContent, isDemo);
   res.type('html').send(html);
+}
+
+function getPublicProfileContent(profileId: string, pageId: string, isHome: boolean): PublicProfileContentItem[] {
+  const now = Date.now();
+  const blocks = db.prepare(`SELECT type, title, url, subtitle, extra_json as extraJson FROM blocks
+    WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1))
+      AND (start_at IS NULL OR start_at <= ?) AND (end_at IS NULL OR end_at > ?)
+    ORDER BY position ASC`).all(profileId, pageId, isHome ? 1 : 0, now, now) as Array<{ type: string; title: string; url?: string | null; subtitle?: string | null; extraJson?: string | null }>;
+  // A content gate may protect following blocks; omit page links from the fallback in that case.
+  if (blocks.some(block => block.type === 'content_gate')) return [];
+  return blocks.reduce<PublicProfileContentItem[]>((content, block) => {
+    if (block.type === 'link' && block.url && isHttpUrl(block.url)) content.push({ type: 'link', title: block.title, url: block.url, subtitle: block.subtitle });
+    if (block.type === 'header') content.push({ type: 'text', title: block.title });
+    if (block.type === 'rich_text') {
+      try {
+        const body = JSON.parse(block.extraJson || '{}')?.body;
+        if (typeof body === 'string' && body.trim()) content.push({ type: 'text', title: block.title, body });
+      } catch { /* Ignore malformed optional block data. */ }
+    }
+    return content;
+  }, []);
 }
 
 function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
@@ -393,15 +428,16 @@ app.use((req, res, next) => {
         const indexFile = path.resolve(__dirname, '../dist/index.html');
         const distIndex = fs.existsSync(shellFile) ? shellFile : indexFile;
         if (acceptsHtml && fs.existsSync(distIndex)) {
-          const customProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE username = ?').get(profile.username) as any;
-          const page = pageSlug ? db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE username = ?) AND slug = ? AND published = 1').get(profile.username, pageSlug) as { title?: string; description?: string } | undefined : undefined;
+          const customProfile = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE username = ?').get(profile.username) as any;
+          const page = db.prepare(`SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND ${pageSlug ? 'slug = ?' : 'is_home = 1'} AND published = 1`)
+            .get(customProfile.id, ...(pageSlug ? [pageSlug] : [])) as { id: string; title?: string; description?: string; isHome: number } | undefined;
           if (pageSlug && !page) return res.status(404).send('This page is not available.');
           const redirect = safeRedirectTarget(customProfile?.page_redirect_url, req, customProfile?.username, true);
           if (redirect && (!customProfile.page_redirect_until || customProfile.page_redirect_until > Date.now())) {
             res.setHeader('Cache-Control', 'no-store');
             return res.redirect(302, redirect);
           }
-          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page) : sendHtmlFileWithNonce(res, distIndex);
+          return customProfile ? sendProfileShell(res, distIndex, customProfile, `https://${host}${pageSlug ? `/${encodeURIComponent(pageSlug)}` : '/'}`, page, page ? getPublicProfileContent(customProfile.id, page.id, Boolean(page.isHome)) : []) : sendHtmlFileWithNonce(res, distIndex);
         }
         req.url = `/api/profiles/${encodeURIComponent(profile.username)}${pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : ''}`;
         // Express may have cached req.query while evaluating req.path above;
@@ -578,11 +614,13 @@ export async function startServer() {
       const profileMatch = req.path.match(/^\/@([a-z0-9_-]+)(?:\/([a-z0-9-]+))?$/i);
       if (req.path.startsWith('/@') && !profileMatch) return res.status(404).send('This profile is not available.');
       if (profileMatch) {
-        let publicProfile = db.prepare('SELECT username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
+        let publicProfile = db.prepare('SELECT id, username, display_name, bio, avatar_url, share_title, share_description, share_image_url, page_redirect_url, page_redirect_until FROM profiles WHERE lower(username) = ?').get(profileMatch[1].toLowerCase()) as any;
+        let isDemo = false;
         const profileShell = path.join(distDir, 'shell.html');
         if (!publicProfile) {
           const systemDemo = findSystemDemoProfile(profileMatch[1].toLowerCase());
           if (systemDemo) {
+            isDemo = true;
             publicProfile = {
               username: systemDemo.username,
               display_name: systemDemo.displayName,
@@ -598,9 +636,11 @@ export async function startServer() {
         }
         if (!publicProfile) return res.status(404).send('This profile is not available.');
         if (fs.existsSync(profileShell)) {
-          let page = db.prepare('SELECT title, description FROM pages WHERE profile_id = (SELECT id FROM profiles WHERE lower(username) = ?) AND slug = ? AND published = 1').get(profileMatch[1].toLowerCase(), profileMatch[2] || 'home') as { title?: string; description?: string } | undefined;
+          let page = db.prepare('SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND slug = ? AND published = 1').get(publicProfile.id, profileMatch[2] || 'home') as { id: string; title?: string; description?: string; isHome: number } | undefined;
+          if (!page && !profileMatch[2]) page = db.prepare('SELECT id, title, description, is_home as isHome FROM pages WHERE profile_id = ? AND is_home = 1 AND published = 1').get(publicProfile.id) as { id: string; title?: string; description?: string; isHome: number } | undefined;
           if (!page && findSystemDemoProfile(profileMatch[1].toLowerCase()) && (!profileMatch[2] || profileMatch[2] === 'home')) {
-            page = { title: publicProfile.display_name, description: publicProfile.bio };
+            const demo = findSystemDemoProfile(profileMatch[1].toLowerCase())!;
+            page = { id: `demo_${demo.id}_home`, title: publicProfile.display_name, description: publicProfile.bio, isHome: 1 };
           }
           if (!page) return res.status(404).send('This page is not available.');
           const redirect = safeRedirectTarget(publicProfile.page_redirect_url, req, publicProfile.username, false);
@@ -609,7 +649,7 @@ export async function startServer() {
             return res.redirect(302, redirect);
           }
           const canonical = `${publicOrigin(req)}/@${encodeURIComponent(publicProfile.username)}${profileMatch[2] ? `/${encodeURIComponent(profileMatch[2])}` : ''}`;
-          return sendProfileShell(res, profileShell, publicProfile, canonical, page);
+          return sendProfileShell(res, profileShell, publicProfile, canonical, page, page && !isDemo ? getPublicProfileContent(publicProfile.id, page.id, Boolean(page.isHome)) : [], isDemo);
         }
       }
       const demoMatch = req.path.match(/^\/demo\/([a-z0-9_-]+)$/i);
@@ -628,7 +668,7 @@ export async function startServer() {
           share_image_url: null
         };
         const canonical = `${publicOrigin(req)}/@${encodeURIComponent(demo.username)}`;
-        return sendProfileShell(res, profileShell, profile, canonical, { title: profile.display_name, description: profile.bio });
+        return sendProfileShell(res, profileShell, profile, canonical, { title: profile.display_name, description: profile.bio }, [], true);
       }
       const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
       if (['/studio', '/account', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');

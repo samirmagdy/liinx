@@ -132,7 +132,8 @@ export function usePublicProfile({
     const description = profile.shareDescription || profile.bio || `Explore ${profile.displayName}'s links, media and updates on Liinx.`;
     document.title = title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', description);
-    document.querySelector('meta[name="robots"]')?.setAttribute('content', 'index, follow');
+    const isDemo = Boolean(findSystemDemoProfile(profile.username));
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', isDemo ? 'noindex, nofollow' : 'index, follow');
     const canonical = customDomain
       ? `https://${customDomain}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`
       : `https://liinx.app/@${profile.username}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`;

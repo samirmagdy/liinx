@@ -59,14 +59,14 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
       title: isRtl ? 'تنمية الجمهور' : 'Grow Audience',
       desc: isRtl 
         ? 'احصل على تحليل زيارات فوري يحترم الخصوصية واجمع المشتركين في نشرتك.'
-        : 'Privacy-first traffic intelligence, UTM attribution, and zero-commission newsletter capture.',
+        : 'Page analytics, UTM attribution, and newsletter signup collection.',
       icon: TrendingUp,
       badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-200',
       highlights: [
         isRtl ? 'إحصاءات زيارات ونقرات دقيقة بدون كوكيز متطفلة' : 'Cookie-free real-time analytics for visits and clicks',
         isRtl ? 'تتبع مصادر الزيارات وحملات UTM بدقة' : 'Full UTM campaign tracking and referrer breakdowns',
         isRtl ? 'نموذج جمع مشتركين في النشرة البريدية بدون وسيط' : 'Embedded email newsletter subscriber collection',
-        isRtl ? 'عمولة 0% على كافة المبيعات والخدمات' : '0% sales commission — keep 100% of your earnings'
+        isRtl ? 'لا تعالج ليينكس مدفوعات المبيعات' : 'Liinx does not process sales payments'
       ]
     },
     {
