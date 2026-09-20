@@ -1,8 +1,12 @@
 export const pageTitles: Record<string, [string, string]> = {
-  '/': ['Link in Bio Page Builder for Creators', 'أداة إنشاء صفحة رابط في البايو للمبدعين'],
+  '/': ['Mini-Site Builder for Creators', 'منشئ المواقع المصغّرة للمبدعين'],
   '/features': ['Link in Bio Page Features', 'ميزات صفحة رابط البايو'],
   '/templates': ['Templates', 'القوالب'],
   '/pricing': ['Pricing', 'الأسعار'],
+  '/guides': ['Mini-Site Guides for Creators', 'أدلة المواقع المصغّرة للمبدعين'],
+  '/guides/arabic-rtl-mini-site': ['Build an Arabic RTL Mini-Site', 'إنشاء موقع مصغّر بالعربية واتجاه RTL'],
+  '/guides/instagram-bio-saudi-business': ['Instagram Bio Page for Saudi Businesses', 'صفحة رابط Instagram للنشاط التجاري السعودي'],
+  '/guides/whatsapp-business-page': ['Mini-Site with WhatsApp Business', 'موقع مصغّر مع WhatsApp Business'],
   '/about': ['About', 'عن المنصة'],
   '/contact': ['Contact', 'تواصل معنا'],
   '/privacy': ['Privacy', 'الخصوصية'],
@@ -17,8 +21,8 @@ export const pageTitles: Record<string, [string, string]> = {
 // client-side language changes use the same truthful page summaries.
 export const pageDescriptions: Record<string, [string, string]> = {
   '/': [
-    'Create a customizable link-in-bio page for your links, media, bookings, and newsletter. Start free with Liinx.',
-    'أنشئ صفحة رابط في البايو لروابطك ووسائطك وحجوزاتك ونشرتك البريدية. ابدأ مجاناً مع Liinx.'
+    'Build a customizable mini-site for your bio with links, work, supported media, bookings, and newsletter signups. Liinx supports English, Arabic, and RTL layouts. Start free.',
+    'أنشئ موقعاً مصغّراً لنبذتك يجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك واشتراكات النشرة البريدية. يدعم Liinx العربية والإنجليزية واتجاه RTL. ابدأ مجاناً.'
   ],
   '/features': [
     'See how Liinx link-in-bio pages use custom themes, supported media, bookings, newsletters, custom domains, and analytics.',
@@ -31,6 +35,22 @@ export const pageDescriptions: Record<string, [string, string]> = {
   '/pricing': [
     'Compare Liinx plans and features, including the free plan, paid options, and custom domain availability.',
     'قارن خطط Liinx وميزاتها، بما فيها الخطة المجانية والخيارات المدفوعة وإمكانية استخدام نطاق مخصص.'
+  ],
+  '/guides': [
+    'Practical guides for building a creator mini-site, setting up Arabic RTL pages, and organizing business links.',
+    'إرشادات عملية لإنشاء موقع مصغّر للمبدعين وصفحات عربية باتجاه RTL وتنظيم روابط الأنشطة التجارية.'
+  ],
+  '/guides/arabic-rtl-mini-site': [
+    'A practical guide to organizing links and creator content in an Arabic right-to-left mini-site.',
+    'دليل عملي لتنظيم الروابط ومحتوى المبدعين في موقع مصغّر باللغة العربية واتجاه RTL.'
+  ],
+  '/guides/instagram-bio-saudi-business': [
+    'How Saudi businesses can organize an Instagram bio page with useful links and a tested WhatsApp destination.',
+    'كيفية تنظيم صفحة رابط Instagram لنشاط تجاري سعودي مع روابط مفيدة ووجهة WhatsApp مختبرة.'
+  ],
+  '/guides/whatsapp-business-page': [
+    'Use a customizable mini-site for business details and links, with WhatsApp as a contact destination.',
+    'استخدم موقعاً مصغّراً قابلاً للتخصيص لعرض معلومات النشاط وروابطه، واجعل WhatsApp وجهة للتواصل.'
   ],
   '/about': [
     'Learn about Liinx, a page builder for sharing creator links, media, bookings, and newsletter signups.',

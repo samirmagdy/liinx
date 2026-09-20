@@ -1,12 +1,13 @@
-import { Key, Layers, Lock, ShieldCheck, User } from 'lucide-react';
+import { Gift, Key, Layers, Lock, ShieldCheck, User } from 'lucide-react';
 
-export type SettingsTab = 'profile' | 'billing' | 'profiles' | 'developers' | 'security';
+export type SettingsTab = 'profile' | 'billing' | 'profiles' | 'referrals' | 'developers' | 'security';
 
 export function AccountSidebar({ ar, activeTab, setActiveTab }: { ar: boolean; activeTab: SettingsTab; setActiveTab: (tab: SettingsTab) => void }) {
   const tabs = [
     { id: 'profile' as const, label: ar ? 'الملف الشخصي والحساب' : 'Profile & Login', icon: User },
     { id: 'billing' as const, label: ar ? 'الخطة والاشتراك' : 'Plans & Billing', icon: ShieldCheck },
     { id: 'profiles' as const, label: ar ? 'الملفات والمواقع المصغرة' : 'Profiles & Sites', icon: Layers },
+    { id: 'referrals' as const, label: ar ? 'دعوة المبدعين' : 'Refer creators', icon: Gift },
     { id: 'developers' as const, label: ar ? 'المطورون ومفاتيح API' : 'API & Developer', icon: Key },
     { id: 'security' as const, label: ar ? 'الأمان وتصدير البيانات' : 'Security & Privacy', icon: Lock }
   ];

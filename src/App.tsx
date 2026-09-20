@@ -1,4 +1,4 @@
-import React, { Component, lazy, Suspense } from 'react';
+import React, { Component, lazy, Suspense, useEffect } from 'react';
 import { Switch, Route, Router, useLocation } from 'wouter';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useLanguage, LanguageProvider } from './context/LanguageContext';
@@ -10,6 +10,7 @@ const ComparisonSection = lazy(() => import('./components/ComparisonSection').th
 const TrustProofSection = lazy(() => import('./components/TrustProofSection').then(module => ({ default: module.TrustProofSection })));
 const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
 const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
+const GuidesPage = lazy(() => import('./pages/GuidesPage').then(module => ({ default: module.GuidesPage })));
 const FaqSection = lazy(() => import('./components/FaqSection').then(module => ({ default: module.FaqSection })));
 const Footer = lazy(() => import('./components/Footer').then(module => ({ default: module.Footer })));
 const BuilderStudio = lazy(() => import('./components/BuilderStudio').then(module => ({ default: module.BuilderStudio })));
@@ -312,6 +313,10 @@ function CustomDomainApp({ currentHost, language, routerBase, routerSsrPath }: R
 }
 
 function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps) {
+  useEffect(() => {
+    const referral = new URLSearchParams(window.location.search).get('ref')?.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+    if (referral) window.localStorage.setItem('liinx-referral', referral);
+  }, []);
   return (
     <Router base={routerBase} {...routerSsrPath}>
     <ErrorBoundary>
@@ -328,6 +333,8 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
             <Route path="/features" component={FeaturesPage} />
             <Route path="/templates" component={TemplatesPage} />
             <Route path="/pricing" component={PricingPage} />
+            <Route path="/guides" component={GuidesPage} />
+            <Route path="/guides/:guide" component={GuidesPage} />
             <Route path="/about" component={AboutPage} />
             <Route path="/contact" component={ContactPage} />
             <Route path="/privacy" component={PrivacyPage} />

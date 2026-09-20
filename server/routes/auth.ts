@@ -22,6 +22,8 @@ import { storageKeyFromUrl, uploadStorage } from '../services/uploadStorage.js';
 import { testOnlySessionToken } from './sessionResponse.js';
 import { issueCurrentSession } from '../services/session.js';
 import { consumePasswordResetToken } from '../services/passwordReset.js';
+import { qualifyCreatorReferral, recordCreatorReferral } from '../services/referrals.js';
+import { getEffectivePlan } from '../accountEntitlements.js';
 
 export const authRouter = Router();
 
@@ -204,6 +206,7 @@ authRouter.post('/email-verification/confirm', sharedRateLimit({ name: 'email-ve
     db.prepare('UPDATE users SET email_verified_at = ? WHERE id = ?').run(now, token.user_id);
     db.prepare('UPDATE account_tokens SET used_at = ? WHERE token_hash = ?').run(now, tokenHash);
   })();
+  qualifyCreatorReferral(token.user_id, now);
   return res.json({ success: true, verified: true });
 });
 
@@ -236,6 +239,12 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     }
 
     const { email, password, username } = parse.data;
+    const referralUsername = typeof req.body?.referral === 'string'
+      ? req.body.referral.toLowerCase().trim().replace(/[^a-z0-9_]/g, '').slice(0, 30)
+      : '';
+    const inviter = referralUsername
+      ? db.prepare('SELECT user_id FROM profiles WHERE username = ? AND user_id IS NOT NULL').get(referralUsername) as { user_id: string } | undefined
+      : undefined;
     const cleanEmail = email.toLowerCase().trim();
     const cleanUsername = username.toLowerCase().trim();
 
@@ -275,6 +284,8 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
         INSERT INTO users (id, email, password_hash, created_at)
         VALUES (?, ?, ?, ?)
       `).run(userId, cleanEmail, passwordHash, now);
+
+      if (inviter && inviter.user_id !== userId) recordCreatorReferral(inviter.user_id, userId, now);
 
       db.prepare(`
         INSERT INTO profiles (
@@ -407,6 +418,7 @@ authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res) => {
       },
       profile: {
         ...profile,
+        plan: getEffectivePlan(profile.id),
         verified: Boolean(profile.verified),
         socials: safeJsonParse(profile.socials_json, []),
         customTheme: safeJsonParse(profile.custom_theme_json, null),

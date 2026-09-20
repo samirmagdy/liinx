@@ -20,6 +20,7 @@ import { capabilitiesRouter } from './routes/capabilities.js';
 import { apiV1Router } from './routes/apiV1.js';
 import { billingRouter } from './routes/billing.js';
 import { contactRouter } from './routes/contact.js';
+import { referralsRouter } from './routes/referrals.js';
 import { pageTitles, brand, findSystemDemoProfile } from '../shared/index.js';
 import * as Sentry from '@sentry/node';
 import { log, logError } from './logger.js';
@@ -233,7 +234,9 @@ app.get('/sitemap.xml', (req, res) => {
     `).all(now, now, now) as { username: string; slug: string; isHome: number; updatedAt: number }[];
     const baseUrl = publicOrigin(req);
     const staticRoutes = [
-      '', '/features', '/templates', '/pricing', '/about', '/contact', '/privacy', '/terms'
+      '', '/features', '/templates', '/pricing', '/guides',
+      '/guides/arabic-rtl-mini-site', '/guides/instagram-bio-saudi-business', '/guides/whatsapp-business-page',
+      '/about', '/contact', '/privacy', '/terms'
     ];
     const localizedStaticRoutes = [
       ...staticRoutes,
@@ -470,6 +473,7 @@ app.use('/api', capabilitiesRouter);
 app.use('/api', apiV1Router);
 app.use('/api', billingRouter);
 app.use('/api', contactRouter);
+app.use('/api/referrals', referralsRouter);
 
 // CSP Violation Reporting Endpoint
 app.post('/api/csp-report', sharedRateLimit({ name: 'csp-report', limit: 60, windowMs: 60000 }), (req, res) => {
@@ -647,8 +651,12 @@ function handleDemoProfileRequest(req: express.Request, res: express.Response, d
 }
 
 function handleStaticProductionRoute(req: express.Request, res: express.Response, distDir: string) {
-  const routeFile = req.path === '/' ? path.join(distDir, 'index.html') : pageTitles[req.path] ? path.join(distDir, `${req.path.slice(1)}.html`) : '';
-  if (['/studio', '/account', '/login', '/register'].includes(req.path)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  const isArabic = req.path === '/ar' || req.path.startsWith('/ar/');
+  const route = isArabic ? req.path.replace(/^\/ar(?=\/|$)/, '') || '/' : req.path;
+  const routeFile = pageTitles[route]
+    ? path.join(distDir, ...(isArabic ? ['ar'] : []), route === '/' ? 'index.html' : `${route.slice(1)}.html`)
+    : '';
+  if (['/studio', '/account', '/login', '/register'].includes(route)) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   if (routeFile && fs.existsSync(routeFile)) return sendHtmlFileWithNonce(res, routeFile);
   const shellFile = path.join(distDir, 'shell.html');
   if (['/studio', '/account'].includes(req.path) && fs.existsSync(shellFile)) return sendHtmlFileWithNonce(res, shellFile);

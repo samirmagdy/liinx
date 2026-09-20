@@ -105,6 +105,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <h4 className="font-mono text-xs font-bold text-white uppercase tracking-wider">{ui("Resources")}</h4>
               <ul className="space-y-2">
                 <li>
+                  <Link href="/guides" className="hover:text-white transition-colors cursor-pointer text-start block">
+                    {lang === 'ar' ? 'أدلة عملية' : 'Practical guides'}
+                  </Link>
+                </li>
+                <li>
                   <button 
                     type="button"
                     onClick={() => setActiveModalDoc('creator-handbook')}

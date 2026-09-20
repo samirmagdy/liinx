@@ -9,6 +9,7 @@ import { BillingSettingsPanel } from '../features/account/components/BillingSett
 import { ProfilesSettingsPanel } from '../features/account/components/ProfilesSettingsPanel';
 import { DeveloperSettingsPanel } from '../features/account/components/DeveloperSettingsPanel';
 import { SecuritySettingsPanel } from '../features/account/components/SecuritySettingsPanel';
+import { ReferralPanel } from '../features/account/components/ReferralPanel';
 import { AccountSidebar, type SettingsTab } from '../features/account/components/AccountSidebar';
 import { useAccountSecurity } from '../features/account/hooks/useAccountSecurity';
 import { useAccountProfiles } from '../features/account/hooks/useAccountProfiles';
@@ -55,6 +56,7 @@ export function AccountPage() {
             {activeTab === 'profile' && <ProfileSettingsPanel ar={ar} {...security} />}
             {activeTab === 'billing' && <BillingSettingsPanel ar={ar} currentPlan={currentPlan} profilesCount={accountProfiles.profilesList.length} hasActiveSubscription={Boolean(billing.billingStatus?.hasActiveSubscription)} setLocation={setLocation} openBillingPortal={billing.openBillingPortal} />}
             {activeTab === 'profiles' && <ProfilesSettingsPanel ar={ar} profilesList={accountProfiles.profilesList} profilesLoading={accountProfiles.profilesLoading} setLocation={setLocation} selectProfile={accountProfiles.selectProfile} />}
+            {activeTab === 'referrals' && <ReferralPanel ar={ar} />}
             {activeTab === 'developers' && <DeveloperSettingsPanel ar={ar} currentPlan={currentPlan} setLocation={setLocation} {...apiKeys} />}
             {activeTab === 'security' && <SecuritySettingsPanel ar={ar} {...security} />}
           </div>

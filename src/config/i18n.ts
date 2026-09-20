@@ -132,10 +132,10 @@ export const translations: Record<Language, Translations> = {
       claimCta: 'Build your page'
     },
     hero: {
-      badge: 'A flexible page for everything you share',
-      headline: 'A page for',
-      headlineHighlight: 'everything you share.',
-      subheadline: 'Liinx is a design-first micro-site builder for creators, professionals, and small brands. Create one customizable page for your links, supported audio and video, newsletter signups, and Calendly bookings, then publish it at liinx.app/@yourname or connect a custom domain on a paid plan.',
+      badge: 'Mini-sites for creators · English + Arabic',
+      headline: 'Your mini-site',
+      headlineHighlight: 'in your bio.',
+      subheadline: 'Bring your links, work, supported media, bookings, and newsletter together in one customizable page. Publish at liinx.app/@yourname, with English and Arabic support including RTL layouts.',
       claimPlaceholder: 'yourname',
       claimButton: 'Build your page',
       exploreTemplates: 'Explore templates',
@@ -298,7 +298,7 @@ export const translations: Record<Language, Translations> = {
       openAnswer: 'Open answer'
     },
     footer: {
-      tagline: 'A design-first micro-website builder for everything you make, sell, and share.',
+      tagline: 'Your mini-site for everything you make, share, and sell.',
       product: 'Product',
       company: 'Company',
       legal: 'Legal',
@@ -321,10 +321,10 @@ export const translations: Record<Language, Translations> = {
       claimCta: 'أنشئ صفحتك'
     },
     hero: {
-      badge: 'صفحة مرنة لكل ما تشاركه',
-      headline: 'صفحة لكل ما',
-      headlineHighlight: 'تشاركه.',
-      subheadline: 'Liinx منصة مصغّرة تركز على التصميم للمبدعين والمحترفين والعلامات التجارية الصغيرة. أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك المدعومة واشتراكاتك وحجوزات Calendly، وانشرها على liinx.app/@اسمك أو اربط نطاقاً مخصصاً في الخطط المدفوعة.',
+      badge: 'مواقع مصغّرة للمبدعين · عربي وإنجليزي',
+      headline: 'موقعك المصغّر',
+      headlineHighlight: 'في نبذتك.',
+      subheadline: 'اجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك ونشرتك البريدية في صفحة واحدة قابلة للتخصيص. انشرها على liinx.app/@اسمك، مع دعم العربية واتجاه RTL.',
       claimPlaceholder: 'اسمك',
       claimButton: 'أنشئ صفحتك مجاناً',
       exploreTemplates: 'استكشف القوالب',
@@ -487,7 +487,7 @@ export const translations: Record<Language, Translations> = {
       openAnswer: 'افتح الإجابة'
     },
     footer: {
-      tagline: 'منصة تصميم المواقع المصغرة الأولى لكل ما تصنعه وتبيعه وتشاركه.',
+      tagline: 'موقعك المصغّر لكل ما تصنعه وتشاركه وتبيعه.',
       product: 'المنتج',
       company: 'الشركة',
       legal: 'الشروط القانونية',

@@ -35,6 +35,8 @@ export function initDatabase() {
       stripe_subscription_id TEXT,
       billing_event_created_at INTEGER,
       subscription_status TEXT NOT NULL DEFAULT 'inactive',
+      referral_pro_until INTEGER,
+      referral_rewarded_at INTEGER,
       email_verified_at INTEGER,
       created_at INTEGER NOT NULL
     );
@@ -54,6 +56,18 @@ export function initDatabase() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
     CREATE INDEX IF NOT EXISTS idx_account_tokens_lookup ON account_tokens(user_id, purpose, expires_at);
+
+    CREATE TABLE IF NOT EXISTS creator_referrals (
+      id TEXT PRIMARY KEY,
+      inviter_user_id TEXT NOT NULL,
+      referred_user_id TEXT NOT NULL UNIQUE,
+      created_at INTEGER NOT NULL,
+      qualified_at INTEGER,
+      FOREIGN KEY (inviter_user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CHECK (inviter_user_id <> referred_user_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_creator_referrals_inviter ON creator_referrals(inviter_user_id, qualified_at);
 
     CREATE TABLE IF NOT EXISTS profiles (
       id TEXT PRIMARY KEY,
@@ -335,6 +349,9 @@ export function initDatabase() {
   try {
     db.exec("ALTER TABLE users ADD COLUMN email_verified_at INTEGER");
   } catch (e) {}
+
+  try { db.exec('ALTER TABLE users ADD COLUMN referral_pro_until INTEGER'); } catch (e) {}
+  try { db.exec('ALTER TABLE users ADD COLUMN referral_rewarded_at INTEGER'); } catch (e) {}
 
   for (const column of [
     "subscription_plan TEXT NOT NULL DEFAULT 'free'",

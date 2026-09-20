@@ -55,17 +55,22 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  referrals: {
+    get: () => request<{ referralUrl: string; total: number; qualified: number; required: number; rewardUntil: number | null; rewardEligible: boolean }>('/api/referrals')
+  },
   contact: (data: ContactInput) => request<ContactResponse>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
   auth: {
     checkUsername: async (username: string): Promise<{ available: boolean; reason?: string }> => {
       return request<{ available: boolean; reason?: string }>(`/api/auth/check-username/${encodeURIComponent(username)}`);
     },
     register: async (email: string, password: string, username: string) => {
+      const referral = typeof window !== 'undefined' ? window.localStorage.getItem('liinx-referral') || undefined : undefined;
       const data = await request<{ token?: string; user: any; profileId: string }>('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email, password, username })
+        body: JSON.stringify({ email, password, username, referral })
       });
       if (data.token) authStorage.setToken(data.token);
+      if (typeof window !== 'undefined') window.localStorage.removeItem('liinx-referral');
       return data;
     },
     login: async (email: string, password: string) => {

@@ -75,6 +75,7 @@ export function PrivacyPage() {
       sections={lang === 'ar' ? [
         ['بيانات الحساب والمحتوى', 'نخزّن البريد الإلكتروني وكلمة المرور بعد تجزئتها باستخدام bcrypt، ومحتوى الملف والروابط والمظهر الذي تختاره. تظهر المعلومات المنشورة لزوار صفحتك.'],
         ['الزيارات والاشتراكات', 'نسجّل زيارات الصفحة ونقرات الروابط ومصادر الإحالة ووسوم الحملات. تستخدم الإحصاءات معرّفات مشتقة من عنوان IP وتُستخدم لأغراض مجمعة ومكافحة الإساءة. تُحفظ عناوين المشتركين في القائمة الخاصة بصاحب الصفحة مع وقت الموافقة عندما يوافق المشترك.'],
+        ['الإحالات', 'إذا سجّلت عبر رابط دعوة، نحفظ مُعرّف الحساب الذي دعاك وحالة التحقق من بريدك لحساب الدعوة ضمن برنامج المكافآت.'],
         ['الخدمات الخارجية والوسائط', 'قد تحمّل الوسائط والحجوزات خدمات خارجية مثل YouTube وSpotify وCalendly. قد تُستخدم Stripe للفوترة، وInstagram OAuth للمزامنة، وGoogle Analytics أو Meta Pixel إذا فعّلها صاحب الصفحة. هذه الخدمات قد تعالج بيانات الزائر وفق سياساتها.'],
         ['رسائل الدعم', 'تُحفظ الرسائل المرسلة من نموذج الدعم مع الاسم والبريد والرسالة ووقت الإرسال. يطّلع عليها حساب المشغّل المصرّح به فقط. قد يُحاول النظام إرسال إشعار إلى صندوق الدعم عند تهيئة مزوّد البريد؛ حفظ الرسالة لا يعني تسليم البريد. لا توجد حالياً مدة احتفاظ تلقائية محددة لرسائل الدعم.'],
         ['الاحتفاظ والحذف', 'يمكن لصاحب الحساب حذف حسابه ومحتواه من الخدمة، مع إزالة سجلات الحساب والاشتراكات والتكاملات المرتبطة. قد تبقى نسخ احتياطية آمنة حتى انتهاء فترة الاحتفاظ التشغيلية. يمكن إزالة المشترك من قائمة صاحب الصفحة عند طلبه منه.'],
@@ -82,6 +83,7 @@ export function PrivacyPage() {
       ] : [
         ['Account data and content', 'We store your email, bcrypt-hashed password, profile content, links and selected appearance. Published information is visible to page visitors.'],
         ['Visits and subscriptions', 'We record page views, link clicks, referrers and campaign tags. Analytics uses identifiers derived from IP addresses for aggregate reporting and abuse prevention. Subscriber emails are stored in the page owner\'s private list, with consent time recorded when consent is provided.'],
+        ['Referrals', 'If you register through a referral link, we store the referring account ID and your email-verification status for referral reward accounting.'],
         ['Third-party services and media', 'Media and booking embeds may load YouTube, Spotify and Calendly. Stripe may process billing, Instagram OAuth may process synchronization, and Google Analytics or Meta Pixel may load when enabled by a creator. Those providers process data under their own policies.'],
         ['Support messages', 'Support messages store the sender name, email, message, and submission time. Access is limited to the configured support operator account. The service may attempt an email notification when a mail provider is configured; saving a message does not mean that email was delivered. No automatic retention period is currently configured for support messages.'],
         ['Retention and deletion', 'Account owners can delete their account and associated content, subscriptions and integrations. Secure backups may retain deleted records for an operational retention period. Subscribers can ask the creator to remove their address from the creator\'s list.'],
@@ -101,11 +103,13 @@ export function TermsPage() {
       sections={lang === 'ar' ? [
         ['مسؤولية المحتوى ومكافحة الإساءة', 'أنت مسؤول عن المحتوى والروابط التي تنشرها وعن امتلاك حقوق استخدامها. لا تستخدم الخدمة للتصيد أو البرمجيات الضارة أو الاحتيال أو انتحال الشخصية أو البريد المزعج أو المحتوى غير القانوني. يجوز إزالة الصفحات والروابط المخالفة.'],
         ['الفوترة', 'تُعرض الأسعار وفترة الفوترة قبل الانتقال إلى Stripe. تتجدد الاشتراكات المدفوعة تلقائياً؛ يمكنك إدارتها أو إلغاؤها من بوابة الفوترة.'],
+        ['برنامج دعوة المبدعين', 'تُحتسب الدعوة بعد إنشاء حساب جديد والتحقق من البريد الإلكتروني. يحصل الحساب المجاني الذي دعا ثلاثة حسابات مؤهلة على Pro لمدة 90 يوماً مرة واحدة. الحسابات ذات الاشتراك المدفوع غير مؤهلة للمكافأة. لا تُحتسب الحسابات المكررة، ولا تُحوّل المكافأة إلى نقد.'],
         ['الحجوزات والخدمات الخارجية', 'تُدار المواعيد وتأكيدات الحجز لدى Calendly. فتح أداة الحجز لا يعني اكتمال الحجز. إعداد النطاق وHTTPS يتطلبان استضافة مهيأة.'],
         ['توفر الخدمة', 'لا توجد ضمانات منشورة لزمن الاستجابة أو نسبة التوفر. تواصل معنا بشأن مشكلات الخدمة أو الفوترة.']
       ] : [
         ['Content responsibility and abuse', 'You are responsible for the content and destinations you publish and for having permission to use them. Do not use the service for phishing, malware, fraud, impersonation, spam or unlawful content. We may remove violating pages or destinations.'],
         ['Billing', 'Prices and billing intervals are displayed before Stripe Checkout. Paid subscriptions renew automatically; manage or cancel them through the billing portal.'],
+        ['Creator referral program', 'A referral qualifies after a new account is created and its email address is verified. A free account that refers three qualified accounts receives Pro for 90 days once. Accounts with a paid subscription are not eligible for this reward. Duplicate accounts do not count; rewards have no cash value.'],
         ['Bookings and external services', 'Calendly manages availability and booking confirmations. Opening the scheduler does not mean a booking is complete. Custom domains and HTTPS require configured hosting.'],
         ['Service availability', 'No response-time or uptime guarantee is published. Contact us about service or billing problems.']
       ]}

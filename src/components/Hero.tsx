@@ -81,7 +81,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             
             {/* Top Badge */}
             <div data-hero="eyebrow" className="mb-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">
-              {isRtl ? 'مواقع مصغّرة للمبدعين' : 'Mini-sites for independent creators'}
+              {t.hero.badge}
             </div>
 
             {/* Main Headline */}
@@ -94,9 +94,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             {/* Subtitle - One concise benefit statement */}
             <div data-hero="copy">
               <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl lg:max-w-2xl mb-6 text-pretty">
-                {isRtl 
-                ? 'أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك ونشرتك البريدية. أضف مشغلات صوت وفيديو، واربط نطاقاً مخصصاً في الخطط المدفوعة.'
-                : 'Create a customizable mini-site for your links, media, bookings, and newsletter. Add audio and video embeds, then connect a custom domain on a paid plan.'}
+                {t.hero.subheadline}
               </p>
             </div>
 
