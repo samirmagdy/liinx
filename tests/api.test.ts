@@ -295,7 +295,10 @@ describe('LIINX Production Backend API', () => {
     const robotsRes = await request(app).get('/robots.txt');
     expect(robotsRes.status).toBe(200);
     expect(robotsRes.text).toContain('Sitemap:');
-    expect(robotsRes.text).toContain('Disallow: /studio');
+    expect(robotsRes.text).toContain('User-agent: *');
+    expect(robotsRes.text).toContain('Allow: /features');
+    expect(robotsRes.text).toContain('Disallow: /api/');
+    expect(robotsRes.text).not.toContain('Disallow: /studio');
 
     const sitemapRes = await request(app).get('/sitemap.xml');
     expect(sitemapRes.status).toBe(200);
