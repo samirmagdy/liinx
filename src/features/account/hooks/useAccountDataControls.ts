@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { api } from '../../../services/api';
+import { useProductFeedback } from '../../../components/ProductFeedback';
 
 type AccountUser = { username: string } | null;
 
 export function useAccountDataControls(user: AccountUser, ar: boolean, logout: () => void, setLocation: (path: string) => void) {
+  const { notify } = useProductFeedback();
   const [exportLoading, setExportLoading] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deletePassword, setDeletePassword] = useState('');
@@ -23,7 +25,7 @@ export function useAccountDataControls(user: AccountUser, ar: boolean, logout: (
       window.URL.revokeObjectURL(url);
       anchor.remove();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Export failed');
+      notify(error instanceof Error ? error.message : (ar ? 'تعذر تصدير البيانات' : 'Export failed'));
     } finally {
       setExportLoading(false);
     }

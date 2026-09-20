@@ -24,6 +24,7 @@ import { type CreatorProfile, type ThemeConfig } from './types';
 import { api } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
+import { ProductFeedbackProvider } from './components/ProductFeedback';
 import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
@@ -319,6 +320,7 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
       <LanguageProvider initialLanguage={language}>
         <CapabilitiesProvider>
           <AuthProvider>
+          <ProductFeedbackProvider>
           <div className="relative min-h-screen">
             <div className="relative z-10">
               <PageMetadata />
@@ -373,6 +375,7 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
               </Switch></Suspense>
             </div>
           </div>
+          </ProductFeedbackProvider>
         </AuthProvider>
       </CapabilitiesProvider>
     </LanguageProvider>

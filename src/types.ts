@@ -16,14 +16,3 @@ export interface TemplateItem {
   profile: CreatorProfile;
   previewColor: string;
 }
-
-export interface PricingPlan {
-  id: string;
-  name: string;
-  tagline: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  popular?: boolean;
-  features: string[];
-  ctaText: string;
-}

@@ -11,7 +11,9 @@ import { isLoginRateLimited, isRegisterRateLimited, resetAuthRateLimits } from '
 import { isAllowedFontStylesheetUrl } from '../src/utils/fontValidation.js';
 import { friendlyErrorMessage } from '../src/utils/errors.js';
 import { TEMPLATES } from '../src/config/templates.js';
-import { PRICING_PLANS, COMPARISON_FEATURES, FAQS } from '../src/config/marketing.js';
+import { COMPARISON_FEATURES } from '../src/config/marketing.js';
+import { getFaqs } from '../src/config/faq.js';
+import { paidPlans, PLAN_ENTITLEMENTS } from '../shared/config/plans.js';
 import { translations } from '../src/config/i18n.js';
 import { randomBytes } from 'node:crypto';
 
@@ -963,16 +965,22 @@ describe('Critical Security & Coverage Modules', () => {
 
     it('verifies marketing plans, templates, and translation functions', () => {
       expect(TEMPLATES.length).toBeGreaterThan(0);
-      expect(PRICING_PLANS.length).toBe(3);
       expect(COMPARISON_FEATURES.length).toBeGreaterThan(0);
-      expect(FAQS.length).toBeGreaterThan(0);
+      expect(getFaqs('en', false).length).toBeGreaterThan(0);
+      expect(getFaqs('ar', false).length).toBeGreaterThan(0);
+      expect(paidPlans.pro.month).toBe(1200);
+      expect(paidPlans.studio.month).toBe(2900);
+      expect(PLAN_ENTITLEMENTS.pro.maxProfiles).toBe(5);
+      expect(PLAN_ENTITLEMENTS.studio.maxProfiles).toBe(25);
 
-      // Exercise dynamic translation functions in i18n
+      // Check all translated plans have a usable audience, description, and feature list.
       ['starter', 'pro', 'studio'].forEach(plan => {
-        const enText = (translations.en.pricingSection.plans as any)[plan].billedAnnuallyText(100);
-        expect(enText).toContain('100');
-        const arText = (translations.ar.pricingSection.plans as any)[plan].billedAnnuallyText(100);
-        expect(arText).toContain('100');
+        for (const language of ['en', 'ar'] as const) {
+          const translatedPlan = translations[language].pricingSection.plans[plan];
+          expect(translatedPlan.audience).toBeTruthy();
+          expect(translatedPlan.tagline).toBeTruthy();
+          expect(translatedPlan.features.length).toBeGreaterThan(0);
+        }
       });
 
       const customizeCta = translations.en.hero.customizeCta('Alex');

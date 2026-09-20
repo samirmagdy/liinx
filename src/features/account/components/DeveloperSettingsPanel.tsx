@@ -7,12 +7,12 @@ export function DeveloperSettingsPanel(props: DeveloperSettingsPanelProps) {
     <div className="bg-white p-6 rounded-3xl border border-neutral-200 shadow-xs space-y-6 text-start">
       <div className="border-b border-neutral-100 pb-4">
         <h2 className="text-base font-bold text-neutral-900">{ar ? 'واجهة البرمجة ومفاتيح API' : 'REST API v1 Access'}</h2>
-        <p className="text-xs text-neutral-500 mt-0.5">{ar ? 'أتمتة تحديث الروابط ونشر المحتوى برمجياً.' : 'Manage headless API keys for programmatic publishing and link synchronization.'}</p>
+        <p className="text-xs text-neutral-500 mt-0.5">{ar ? 'اقرأ بيانات الملف الشخصي وأضف كتل الروابط أو احذفها عبر REST API.' : 'Read profile data and create or delete link blocks with the REST API.'}</p>
       </div>
       {currentPlan !== 'studio' ? (
         <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-900"><Sparkles className="w-4 h-4 text-amber-600" /><span>{ar ? 'ميزة حصرية لخطة Studio' : 'Exclusive to Studio Plan'}</span></div>
-          <p className="text-xs text-amber-800 leading-relaxed">{ar ? 'تتطلب واجهة REST API v1 الترقية إلى خطة Studio لتوليد مفاتيح تشغيل مؤتمتة.' : 'Public REST API keys are available exclusively on the Studio tier. Upgrade your account to unlock headless CMS and CI/CD pipelines.'}</p>
+          <p className="text-xs text-amber-800 leading-relaxed">{ar ? 'مفاتيح REST API v1 متاحة حصرياً في خطة Studio. تتيح الواجهة قراءة بيانات الملف الشخصي وإنشاء كتل الروابط وحذفها.' : 'REST API v1 keys are available exclusively on Studio. The API currently reads profile data and creates or deletes link blocks.'}</p>
           <button onClick={() => props.setLocation('/pricing')} className="px-4 py-2 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer inline-flex items-center gap-1.5">
             <span>{ar ? 'ترقية إلى Studio' : 'Upgrade to Studio'}</span><ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
           </button>

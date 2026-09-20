@@ -82,7 +82,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
         isRtl ? 'ربط نطاق خاص (links.yourname.com) مع توجيه DNS وتشفير HTTPS بعد إعداد الاستضافة' : 'Custom domain support with secure HTTPS after hosting configuration',
         isRtl ? 'تصدير المشتركين وردود النماذج إلى CSV بنقرة واحدة' : 'Export subscribers and form responses to CSV',
         isRtl ? 'تصدير JSON لبيانات الحساب والملفات والصفحات والعناصر والمشتركين والردود، دون ملفات وسائط أو سجل تحليلات خام' : 'JSON export of account details, profiles, pages, blocks, subscribers, and form responses; excludes uploads and raw analytics',
-        isRtl ? 'واجهة برمجية مفتوحة (Public REST API v1)' : 'Public REST API v1 for automated builds and pipelines',
+        isRtl ? 'واجهة REST API v1 لقراءة بيانات الملف وإدارة كتل الروابط' : 'REST API v1 to read profile data and manage link blocks',
       ]
     }
   ];

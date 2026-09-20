@@ -49,7 +49,7 @@ export const IntegrationsPanel: React.FC = () => {
             <div>
               <h3 className="font-bold text-sm text-neutral-900">{ui("Developer & REST API Access")}</h3>
               <p className="text-xs text-neutral-500 mt-0.5">
-                {ui("Manage your LIINX link bio programmatically via our public REST API v1.")}
+                {ui("Read profile details and create or delete link blocks with REST API v1.")}
               </p>
             </div>
           </div>

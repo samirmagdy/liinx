@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { api } from '../../../services/api';
+import { useProductFeedback } from '../../../components/ProductFeedback';
 
 export type AccountApiKey = { id: string; name: string; prefix: string; createdAt: number };
 
 export function useApiKeys(user: { id: string } | null, plan: string | undefined, ar: boolean) {
+  const { confirm, notify } = useProductFeedback();
   const [apiKeys, setApiKeys] = useState<AccountApiKey[]>([]);
   const [newKeyName, setNewKeyName] = useState('');
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
@@ -28,19 +30,25 @@ export function useApiKeys(user: { id: string } | null, plan: string | undefined
       setApiKeys(previous => [data.key, ...previous]);
       setNewKeyName('');
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to create API key');
+      notify(error instanceof Error ? error.message : (ar ? 'تعذر إنشاء مفتاح API' : 'Failed to create API key'));
     } finally {
       setKeyLoading(false);
     }
   };
 
   const revokeApiKey = async (keyId: string) => {
-    if (!confirm(ar ? 'هل أنت متأكد من إلغاء هذا المفتاح؟' : 'Are you sure you want to revoke this API key?')) return;
+    const accepted = await confirm(ar ? 'هل تريد إلغاء مفتاح API هذا؟ لن تتمكن الأنظمة التي تستخدمه من الوصول بعد ذلك.' : 'Revoke this API key? Systems using it will lose access.', {
+      title: ar ? 'إلغاء مفتاح API' : 'Revoke API key',
+      confirmLabel: ar ? 'إلغاء المفتاح' : 'Revoke key',
+      cancelLabel: ar ? 'إبقاء المفتاح' : 'Keep key',
+      destructive: true
+    });
+    if (!accepted) return;
     try {
       await api.studio.revokeApiKey(keyId);
       setApiKeys(previous => previous.filter(key => key.id !== keyId));
     } catch {
-      alert(ar ? 'تعذر إلغاء المفتاح' : 'Failed to revoke API key');
+      notify(ar ? 'تعذر إلغاء المفتاح' : 'Failed to revoke API key');
     }
   };
 

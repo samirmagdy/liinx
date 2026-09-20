@@ -29,10 +29,10 @@ export const WhyLiinxSection: React.FC = () => {
     {
       icon: <Terminal className="w-6 h-6 text-blue-600" />,
       outcome: ar ? 'واجهة برمجية REST API مفتوحة' : 'Public REST API & Automation',
-      feature: ar ? 'مفاتيح API في خطة الاستوديو لتحديث الروابط برمجياً' : 'Headless API access to publish and sync links programmatically',
+      feature: ar ? 'مفاتيح API في خطة الاستوديو لقراءة الملف وإدارة كتل الروابط' : 'Studio API keys to read profile data and manage link blocks',
       description: ar
-        ? 'حدّث روابطك وقوائمك تلقائياً من نظام إدارة المحتوى (CMS) الخاص بك أو مسارات العمل المؤتمتة.'
-        : 'Automate link updates, sync new products, or integrate your bio directly into your existing CMS and deployment pipeline.'
+        ? 'تتيح الواجهة قراءة بيانات الملف وإنشاء كتل الروابط وحذفها. لا تدعم حالياً مزامنة بقية محتوى الصفحة.'
+        : 'The API reads profile data and creates or deletes link blocks. It does not currently sync other page content.'
     },
     {
       icon: <Code2 className="w-6 h-6 text-purple-600" />,

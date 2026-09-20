@@ -5,6 +5,7 @@ import { BuilderStudio } from '../src/components/BuilderStudio';
 import { BuilderProvider } from '../src/features/builder/context/BuilderContext';
 import { LanguageProvider } from '../src/context/LanguageContext';
 import { CapabilitiesProvider } from '../src/context/CapabilitiesContext';
+import { ProductFeedbackProvider } from '../src/components/ProductFeedback';
 import { DEMO_PROFILES } from '../src/demo/demoProfiles';
 import { TEST_CREATOR_PROFILE } from './fixtures/testProfiles';
 import type { CreatorProfile } from '../src/types';
@@ -30,7 +31,7 @@ describe('Builder Studio Production Load States & Silent Demo Fallback Preventio
     const html = renderToString(
       <LanguageProvider>
         <CapabilitiesProvider>
-          <BuilderStudio />
+          <ProductFeedbackProvider><BuilderStudio /></ProductFeedbackProvider>
         </CapabilitiesProvider>
       </LanguageProvider>
     );
@@ -57,7 +58,7 @@ describe('Builder Studio Production Load States & Silent Demo Fallback Preventio
     const html = renderToString(
       <LanguageProvider>
         <CapabilitiesProvider>
-          <BuilderStudio initialProfile={liveProfile} />
+          <ProductFeedbackProvider><BuilderStudio initialProfile={liveProfile} /></ProductFeedbackProvider>
         </CapabilitiesProvider>
       </LanguageProvider>
     );
@@ -78,9 +79,11 @@ describe('Builder Studio Production Load States & Silent Demo Fallback Preventio
     const html = renderToString(
       <LanguageProvider>
         <CapabilitiesProvider>
-          <BuilderProvider>
-            <div data-testid="test-child">Child Content</div>
-          </BuilderProvider>
+          <ProductFeedbackProvider>
+            <BuilderProvider>
+              <div data-testid="test-child">Child Content</div>
+            </BuilderProvider>
+          </ProductFeedbackProvider>
         </CapabilitiesProvider>
       </LanguageProvider>
     );

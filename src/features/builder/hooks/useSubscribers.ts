@@ -3,6 +3,7 @@ import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { type SubscriberItem, type BuilderTab } from '../types/builder.types';
+import { useProductFeedback } from '../../../components/ProductFeedback';
 
 interface UseSubscribersProps {
   activeTab: BuilderTab;
@@ -11,7 +12,8 @@ interface UseSubscribersProps {
 }
 
 export function useSubscribers({ activeTab, profileId, username }: UseSubscribersProps) {
-  const { tr: ui } = useUiLanguage();
+  const { tr: ui, lang } = useUiLanguage();
+  const { confirm } = useProductFeedback();
   const [subscribers, setSubscribers] = useState<SubscriberItem[]>([]);
   const [subscribersLoading, setSubscribersLoading] = useState(false);
   const [subscribersError, setSubscribersError] = useState<string | null>(null);
@@ -59,7 +61,16 @@ export function useSubscribers({ activeTab, profileId, username }: UseSubscriber
   };
 
   const handleDeleteSubscriber = async (id: string) => {
-    if (!window.confirm(ui('Remove this subscriber from your list?'))) return;
+    const accepted = await confirm(
+      lang === 'ar' ? 'سيؤدي هذا إلى إزالة المشترك من قائمتك.' : 'This will remove the subscriber from your list.',
+      {
+        title: lang === 'ar' ? 'إزالة المشترك' : 'Remove subscriber',
+        confirmLabel: lang === 'ar' ? 'إزالة' : 'Remove',
+        cancelLabel: lang === 'ar' ? 'إلغاء' : 'Cancel',
+        destructive: true
+      }
+    );
+    if (!accepted) return;
     try {
       await api.studio.deleteSubscriber(id);
       setSubscribers(current => current.filter(subscriber => subscriber.id !== id));

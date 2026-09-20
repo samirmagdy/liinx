@@ -51,7 +51,7 @@ export const uiArabic: Record<string, string> = {
   'DNS Configuration Instructions:': 'تعليمات إعداد DNS:', 'Add a': 'أضف سجل', 'record at your DNS provider pointing to:': 'لدى مزوّد DNS يشير إلى:', 'Copy Target': 'نسخ الهدف',
   'Custom CSS & Custom Webfonts': 'تخصيص CSS وخطوط الويب', 'Inject custom stylesheet overrides and Google Fonts to match your brand guide.': 'أضف تنسيقات CSS وخطوط Google لتناسب هويتك البصرية.',
   'Google Fonts / Webfont Stylesheet URL': 'رابط ملف تنسيق خطوط الويب أو Google Fonts', 'Custom CSS Overrides': 'تنسيقات CSS المخصصة', 'Scoped to #public-bio-view': 'ضمن العنصر #public-bio-view',
-  'Developer & REST API Access': 'المطورون والوصول إلى REST API', 'Manage your LIINX link bio programmatically via our public REST API v1.': 'أدر صفحتك برمجياً باستخدام REST API v1.',
+  'Developer & REST API Access': 'المطورون والوصول إلى REST API', 'Read profile details and create or delete link blocks with REST API v1.': 'اقرأ بيانات الملف وأنشئ كتل الروابط أو احذفها باستخدام REST API v1.',
   'STUDIO TIER ONLY': 'خطة Studio فقط', 'API ENABLED': 'واجهة API مفعّلة',
   'REST API keys and programmatic block automation require a Studio subscription. Upgrade to unlock direct API access.': 'يتطلب إنشاء مفاتيح REST API وإدارة الكتل برمجياً اشتراك Studio.',
   'Active API Keys': 'مفاتيح API النشطة', 'No API keys generated yet. Click "Generate Key" to create your first API credential.': 'لا توجد مفاتيح بعد. اضغط «إنشاء مفتاح» للبدء.',

@@ -252,7 +252,7 @@ export function ComparisonSection() {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 stroke-[2.5]" />
-                    <span><strong>{ar ? 'أتمتة عبر REST API' : 'REST API automation'}:</strong> {ar ? 'تحديث الروابط والملفات تلقائياً من أنظمتك عبر واجهة برمجية مفتوحة' : 'Programmatic profile updates and pipeline integration via REST API v1'}</span>
+                    <span><strong>REST API v1:</strong> {ar ? 'قراءة بيانات الملف وإنشاء كتل الروابط أو حذفها' : 'Read profile data and create or delete link blocks'}</span>
                   </li>
                 </ul>
               </div>

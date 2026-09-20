@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../../services/api';
+import { useLanguage } from '../../../context/LanguageContext';
+import { useProductFeedback } from '../../../components/ProductFeedback';
 
 export function useBillingStatus(user: { id: string } | null, profile: { plan?: string } | null) {
+  const { lang } = useLanguage();
+  const { notify } = useProductFeedback();
   const [billingStatus, setBillingStatus] = useState<{ configured: boolean; plan: string; hasActiveSubscription: boolean } | null>(null);
 
   useEffect(() => {
@@ -13,7 +17,7 @@ export function useBillingStatus(user: { id: string } | null, profile: { plan?: 
       const result = await api.billing.createPortalSession();
       if (result.url) window.location.href = result.url;
     } catch {
-      alert('Billing portal unavailable');
+      notify(lang === 'ar' ? 'تعذر فتح بوابة الفواتير. حاول مرة أخرى.' : 'The billing portal could not be opened. Please try again.');
     }
   };
 

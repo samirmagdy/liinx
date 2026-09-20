@@ -445,7 +445,7 @@ authRouter.post('/update-email', requireAuth, sharedRateLimit({ name: 'update-em
       return res.status(409).json({ error: 'An account with this email address already exists.' });
     }
 
-    db.prepare('UPDATE users SET email = ?, email_verified_at = NULL WHERE id = ?').run(cleanEmail, userId);
+    db.prepare('UPDATE users SET email = ?, email_verified_at = NULL, session_version = session_version + 1 WHERE id = ?').run(cleanEmail, userId);
 
     const token = issueCurrentSession(userId, req.user!.profileId, req.user!.username, cleanEmail);
     setSessionCookie(res, token);

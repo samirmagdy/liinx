@@ -17,6 +17,7 @@ import { PreviewControls } from '../src/features/builder/components/PreviewContr
 import { BuilderProvider } from '../src/features/builder/context/BuilderContext';
 import { LanguageProvider } from '../src/context/LanguageContext';
 import { CapabilitiesProvider } from '../src/context/CapabilitiesContext';
+import { ProductFeedbackProvider } from '../src/components/ProductFeedback';
 import { TEST_CREATOR_PROFILE } from './fixtures/testProfiles';
 import type { CreatorProfile } from '../src/types';
 
@@ -100,9 +101,11 @@ describe('Builder Decomposition & Architectural Integrity', () => {
     return renderToString(
       <LanguageProvider>
         <CapabilitiesProvider>
-          <BuilderProvider initialProfile={initialProfile}>
-            {ui}
-          </BuilderProvider>
+          <ProductFeedbackProvider>
+            <BuilderProvider initialProfile={initialProfile}>
+              {ui}
+            </BuilderProvider>
+          </ProductFeedbackProvider>
         </CapabilitiesProvider>
       </LanguageProvider>
     );
@@ -136,7 +139,9 @@ describe('Builder Decomposition & Architectural Integrity', () => {
       const html = renderToString(
         <LanguageProvider>
           <CapabilitiesProvider>
-            <BuilderStudio initialProfile={mockProfile} />
+            <ProductFeedbackProvider>
+              <BuilderStudio initialProfile={mockProfile} />
+            </ProductFeedbackProvider>
           </CapabilitiesProvider>
         </LanguageProvider>
       );

@@ -8,10 +8,9 @@ export interface TemplateTranslation {
 
 export interface PricingPlanTranslation {
   name: string;
+  audience: string;
   tagline: string;
   features: string[];
-  ctaText: string;
-  billedAnnuallyText: (annualPrice: number) => string;
 }
 
 export interface ComparisonRow {
@@ -19,11 +18,6 @@ export interface ComparisonRow {
   liinx: boolean | string;
   linktree: boolean | string;
   beacons: boolean | string;
-}
-
-export interface FaqItem {
-  question: string;
-  answer: string;
 }
 
 export interface Translations {
@@ -103,7 +97,7 @@ export interface Translations {
     yearlySave: string;
     startTrial: string;
     perMonth: string;
-    popular: string;
+    recommended: string;
     plans: Record<string, PricingPlanTranslation>;
   };
   faqSection: {
@@ -111,7 +105,6 @@ export interface Translations {
     title: string;
     subtitle: string;
     openAnswer: string;
-    faqs: FaqItem[];
   };
   footer: {
     tagline: string;
@@ -254,90 +247,55 @@ export const translations: Record<Language, Translations> = {
       yearlySave: 'Save 20%',
       startTrial: 'Start free',
       perMonth: '/ month',
-      popular: 'Most Popular',
+      recommended: 'Recommended',
       plans: {
         starter: {
           name: 'Free',
+          audience: 'For creators just getting started',
           tagline: 'A simple place to publish your work and links.',
           features: [
-            'Personalized liinx.app/@username',
-            'Links, social icons, and supported blocks',
-            'Supported audio and video embeds',
-            'Expandable accordion folders',
-            'Curated typography & theme studio',
+            '1 published profile (liinx.app/@username)',
+            'Links, social icons and rich media blocks',
+            'Theme and aesthetic customization',
             'Built-in newsletter capture form',
-            'Profile QR code with downloadable export',
-            'Basic analytics (views & click counts)',
-            'Liinx does not process payments'
-          ],
-          ctaText: 'Start free',
-          billedAnnuallyText: (p) => `billed $${p}/yr`
+            'Visits, clicks, and referrer analytics'
+          ]
         },
         pro: {
           name: 'Pro',
+          audience: 'For serious creators & visual artists',
           tagline: 'More control for growing creator businesses.',
           features: [
-            'Everything in Free, plus:',
-            'Connect your own custom domain (e.g. links.yourbrand.com)',
-            'Multi-profile management (Up to 5 profiles included)',
-            'Extract eligible links from supported captions',
-            'Custom CSS styling & custom font uploads',
-            'Remove Liinx branding on eligible plans',
-            'Deep UTM tracking & Google Analytics / Meta Pixel',
-            'Scheduling & time-release links',
-            'Priority support'
-          ],
-          ctaText: 'Start free',
-          billedAnnuallyText: (p) => `billed $${p}/yr`
+            'Everything in Free',
+            'Up to {maxProfiles} profiles / mini-sites under 1 account',
+            'Custom domain support; hosting must configure DNS and TLS',
+            'Remove all Liinx branding',
+            'Custom CSS styling & web font injection',
+            'Link scheduling & UTM campaign tracking',
+            'Google Analytics 4 & Meta Pixel integration'
+          ]
         },
         studio: {
           name: 'Studio / Agency',
+          audience: 'For studios managing multiple profiles',
           tagline: 'Manage multiple pages and studio projects in one account.',
           features: [
             'Everything in Pro, plus:',
-            'Up to 25 profiles / mini-sites under 1 account',
+            'Up to {maxProfiles} profiles / mini-sites under 1 account',
             'REST API v1 access',
             'API key management',
             'Custom domain support per profile',
             'Subscriber CSV export',
             'Form-response CSV export'
-          ],
-          ctaText: 'Contact Studio Team',
-          billedAnnuallyText: (p) => `billed $${p}/yr`
+          ]
         }
       }
     },
     faqSection: {
       badge: 'Questions & Answers',
       title: 'Everything you need to know.',
-      subtitle: 'Clear answers to help you choose the right foundation for your audience.',
-      openAnswer: 'Open answer',
-      faqs: [
-        {
-          question: 'How is LIINX different from Linktree or generic link-in-bio tools?',
-          answer: 'Liinx gives creators one customizable page for links, media, bookings, and newsletters, with layouts that give content more room than a basic list of buttons.'
-        },
-        {
-          question: 'Can I connect my own custom domain?',
-          answer: 'Yes. Paid plans support custom domains and subdomains. You must add the required DNS record and configure hosting and TLS.'
-        },
-        {
-          question: 'How does Instagram caption link extraction work?',
-          answer: 'Where the Instagram integration is configured and authorized, Liinx can extract eligible links from supported captions. Availability depends on account access and permissions.'
-        },
-        {
-          question: 'Can I easily migrate my links from my existing link-in-bio?',
-          answer: 'You can preview publicly available links from supported profiles, select what you want to keep, and import the selection. Some sites may block extraction.'
-        },
-        {
-          question: 'Can I play music and videos directly on my LIINX page?',
-          answer: 'You can add supported media embeds to your page. Playback and availability are controlled by the media provider, and some content may open outside your page.'
-        },
-        {
-          question: 'Is there a free plan?',
-          answer: 'Yes. You can create and publish a page on the free plan. Paid plans are charged for the billing interval you select through Stripe.'
-        }
-      ]
+      subtitle: 'Clear answers about the features Liinx currently supports.',
+      openAnswer: 'Open answer'
     },
     footer: {
       tagline: 'A design-first micro-website builder for everything you make, sell, and share.',
@@ -478,90 +436,55 @@ export const translations: Record<Language, Translations> = {
       yearlySave: 'وفّر ٢٠٪',
       startTrial: 'ابدأ مجاناً',
       perMonth: '/ شهرياً',
-      popular: 'الأكثر شعبية',
+      recommended: 'موصى بها',
       plans: {
         starter: {
           name: 'المجانية',
+          audience: 'للمبدعين في بداية طريقهم',
           tagline: 'مساحة بسيطة لنشر أعمالك وروابطك.',
           features: [
-            'رابط صفحتك liinx.app/@username',
-            'روابط وأيقونات تواصل وكتل مدعومة',
-            'تضمين وسائط صوتية ومرئية مدعومة',
-            'مجلدات مجمعة وقابلة للطي',
-            'استوديو خطوط ومظهر مصمم بعناية',
-            'نموذج اشتراك في النشرة البريدية مدمج',
-            'رمز QR للصفحة مع إمكانية التنزيل',
-            'تحليلات أساسية (المشاهدات والنقرات)',
-            'لا تعالج Liinx المدفوعات نيابةً عنك'
-          ],
-          ctaText: 'ابدأ مجاناً',
-          billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
+            'ملف شخصي واحد منشور (liinx.app/@username)',
+            'روابط وأيقونات تواصل وكتل وسائط غنية',
+            'تخصيص المظهر والقوالب',
+            'نموذج اشتراك في النشرة البريدية',
+            'إحصاءات الزيارات والنقرات ومصادر الإحالة'
+          ]
         },
         pro: {
           name: 'المحترف',
+          audience: 'للمحترفين والمبدعين المستقلين',
           tagline: 'تحكم أكبر للأنشطة الإبداعية النامية.',
           features: [
-            'كل مميزات الخطة المجانية، بالإضافة إلى:',
-            'ربط دومين مخصص خاص بك (مثل links.yourbrand.com)',
-            'إدارة حسابات متعددة (حتى 5 ملفات شخصية)',
-            'استخراج الروابط المؤهلة من نصوص المنشورات المدعومة',
-            'تخصيص كامل بأكواد CSS ورفع خطوط مخصصة',
-            'إزالة شعار LIINX في الخطط المؤهلة',
-            'تتبع UTM متقدم وربط Google Analytics / Meta Pixel',
-            'جدولة الروابط وتحديد أوقات نشرها وانتهاء صلاحيتها',
-            'دعم فني ذو أولوية'
-          ],
-          ctaText: 'ابدأ مجاناً',
-          billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
+            'كل ما تتضمنه الخطة المجانية',
+            'حتى {maxProfiles} ملفات شخصية ومواقع مصغرة ضمن حساب واحد',
+            'دعم النطاق المخصص؛ يجب على الاستضافة إعداد DNS وTLS',
+            'إزالة جميع شعارات Liinx',
+            'تخصيص CSS وإضافة خطوط ويب',
+            'جدولة الروابط وتتبع حملات UTM',
+            'تكامل Google Analytics 4 وMeta Pixel'
+          ]
         },
         studio: {
           name: 'الاستوديو / الوكالات',
+          audience: 'للاستوديوهات التي تدير ملفات متعددة',
           tagline: 'أدر صفحات ومشاريع متعددة من حساب واحد.',
           features: [
             'كل مميزات باقة المحترف، بالإضافة إلى:',
-            'حتى 25 ملفاً شخصياً أو موقعاً مصغراً ضمن حساب واحد',
+            'حتى {maxProfiles} ملفاً شخصياً أو موقعاً مصغراً ضمن حساب واحد',
             'الوصول إلى REST API v1',
             'إدارة مفاتيح API',
             'دعم نطاق مخصص لكل ملف شخصي',
             'تصدير المشتركين بصيغة CSV',
             'تصدير ردود النماذج بصيغة CSV'
-          ],
-          ctaText: 'تواصل مع فريق الاستوديو',
-          billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
+          ]
         }
       }
     },
     faqSection: {
       badge: 'الأسئلة الشائعة',
       title: 'كل ما تحتاج لمعرفته.',
-      subtitle: 'إجابات مباشرة وواضحة لمساعدتك في اتخاذ القرار الأمثل لحضورك الرقمي.',
-      openAnswer: 'افتح الإجابة',
-      faqs: [
-        {
-          question: 'كيف تختلف منصة LIINX عن Linktree وأدوات الروابط التقليدية الأخرى؟',
-          answer: 'تمنحك Liinx صفحة واحدة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك ونشرتك البريدية، مع تخطيطات تمنح المحتوى مساحة أكبر من قائمة الأزرار التقليدية.'
-        },
-        {
-          question: 'هل يمكنني ربط دومين مخصص خاص بي؟',
-          answer: 'نعم. تدعم الخطط المدفوعة النطاقات والنطاقات الفرعية المخصصة. يجب إضافة سجل DNS المطلوب وإعداد الاستضافة وTLS.'
-        },
-        {
-          question: 'كيف يعمل استخراج الروابط من نصوص إنستغرام؟',
-          answer: 'عند إعداد تكامل إنستغرام ومنحه الصلاحيات اللازمة، يمكن لـ Liinx استخراج الروابط المؤهلة من نصوص المنشورات المدعومة. يعتمد ذلك على الوصول إلى الحساب والصلاحيات.'
-        },
-        {
-          question: 'هل يمكنني استيراد روابطي الحالية بسهولة من أدوات أخرى؟',
-          answer: 'يمكنك معاينة الروابط العامة من الملفات المدعومة، واختيار ما تريد الاحتفاظ به، ثم استيراده. قد تمنع بعض المواقع استخراج محتواها.'
-        },
-        {
-          question: 'هل يمكن تشغيل الموسيقى ومقاطع الفيديو مباشرة في صفحتي؟',
-          answer: 'يمكنك إضافة مشغلات وسائط مدعومة إلى صفحتك. يتحكم مزود الوسائط في التشغيل والتوفر، وقد يفتح بعض المحتوى خارج صفحتك.'
-        },
-        {
-          question: 'هل توجد خطة مجانية؟',
-          answer: 'نعم. يمكنك إنشاء صفحة ونشرها ضمن الخطة المجانية. تُحصّل الخطط المدفوعة حسب الفترة التي تختارها عبر Stripe.'
-        }
-      ]
+      subtitle: 'إجابات واضحة حول الميزات التي تدعمها Liinx حالياً.',
+      openAnswer: 'افتح الإجابة'
     },
     footer: {
       tagline: 'منصة تصميم المواقع المصغرة الأولى لكل ما تصنعه وتبيعه وتشاركه.',

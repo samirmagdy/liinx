@@ -3,14 +3,28 @@ import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { type FormSubmissionItem, type BuilderTab } from '../types/builder.types';
+import { useProductFeedback } from '../../../components/ProductFeedback';
 
 interface UseFormSubmissionsProps {
   activeTab: BuilderTab;
   profileId: string;
 }
 
+async function confirmFormResponseRemoval(confirm: ReturnType<typeof useProductFeedback>['confirm'], lang: 'en' | 'ar') {
+  return confirm(
+    lang === 'ar' ? 'سيؤدي هذا إلى حذف رد النموذج نهائياً.' : 'This will permanently delete the form response.',
+    {
+      title: lang === 'ar' ? 'حذف رد النموذج' : 'Delete form response',
+      confirmLabel: lang === 'ar' ? 'حذف الرد' : 'Delete response',
+      cancelLabel: lang === 'ar' ? 'إلغاء' : 'Cancel',
+      destructive: true
+    }
+  );
+}
+
 export function useFormSubmissions({ activeTab, profileId }: UseFormSubmissionsProps) {
-  const { tr: ui } = useUiLanguage();
+  const { tr: ui, lang } = useUiLanguage();
+  const { confirm } = useProductFeedback();
   const [formSubmissions, setFormSubmissions] = useState<FormSubmissionItem[]>([]);
   const [formSubmissionPage, setFormSubmissionPage] = useState(1);
   const [formSubmissionTotal, setFormSubmissionTotal] = useState(0);
@@ -75,7 +89,8 @@ export function useFormSubmissions({ activeTab, profileId }: UseFormSubmissionsP
   };
 
   const handleDeleteFormSubmission = async (id: string) => {
-    if (!window.confirm(ui('Delete this form response permanently?'))) return;
+    const accepted = await confirmFormResponseRemoval(confirm, lang);
+    if (!accepted) return;
     try {
       await api.studio.deleteFormSubmission(id);
       setFormSubmissions(current => current.filter(item => item.id !== id));

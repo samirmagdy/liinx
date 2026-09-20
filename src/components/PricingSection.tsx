@@ -1,101 +1,40 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { paidPlans, type BillingInterval } from '../config/plans';
+import { paidPlans, entitlementsFor, type BillingInterval } from '../config/plans';
 import { Sparkles, Zap, Crown } from 'lucide-react';
 import { Reveal } from './motion/Reveal';
 import { PricingCard, type PricingPlanItem } from './PricingCard';
+import type { PricingPlanTranslation } from '../config/i18n';
+
+function buildPricingPlans(content: Record<'starter' | 'pro' | 'studio', PricingPlanTranslation>, interval: BillingInterval, recommendationLabel: string): PricingPlanItem[] {
+  const icons = {
+    starter: <Zap className="w-5 h-5 text-neutral-600" />,
+    pro: <Sparkles className="w-5 h-5 text-amber-600" />,
+    studio: <Crown className="w-5 h-5 text-amber-500" />
+  };
+  return (['starter', 'pro', 'studio'] as const).map(key => ({
+    id: key === 'starter' ? 'free' : key,
+    name: content[key].name,
+    audience: content[key].audience,
+    icon: icons[key],
+    tagline: content[key].tagline,
+    price: key === 'starter' ? 0 : paidPlans[key][interval],
+    features: content[key].features.map(feature => feature.replace('{maxProfiles}', String(entitlementsFor(key === 'starter' ? 'free' : key).maxProfiles))),
+    highlight: key === 'pro',
+    recommendationLabel: key === 'pro' ? recommendationLabel : undefined
+  }));
+}
 
 export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPlan: (plan: string, interval: BillingInterval) => void | Promise<void>; headingLevel?: 1 | 2 }) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const ar = lang === 'ar';
   const [interval, setInterval] = useState<BillingInterval>(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('interval') === 'year' ? 'year' : 'month');
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const currency = (cents: number) => new Intl.NumberFormat(lang, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(cents / 100);
 
-  const plans: PricingPlanItem[] = [
-    {
-      id: 'free' as const,
-      name: ar ? 'مجاني' : 'Free',
-      audience: ar ? 'للمبدعين في بداية طريقهم' : 'For creators just getting started',
-      icon: <Zap className="w-5 h-5 text-neutral-600" />,
-      tagline: ar ? 'صفحة مصغرة أساسية لنشر روابطك ووسائطك.' : 'A focused mini-site to publish your links and media.',
-      price: 0,
-      features: ar
-        ? [
-            'ملف شخصي واحد (liinx.app/@اسمك)',
-            'روابط ووسائط متعددة وأيقونات تواصل',
-            'تخصيص القوالب والألوان',
-            'نموذج اشتراك في النشرة البريدية',
-            'إحصاءات أساسية للزيارات والنقرات ومصادر الإحالة'
-          ]
-        : [
-            '1 published profile (liinx.app/@username)',
-            'Links, social icons and rich media blocks',
-            'Theme and aesthetic customization',
-            'Built-in newsletter capture form',
-            'Visits, clicks, and referrer analytics'
-          ],
-      highlight: false,
-    },
-    {
-      id: 'pro' as const,
-      name: paidPlans.pro.name,
-      audience: ar ? 'للمحترفين والمبدعين المستقلين' : 'For serious creators & visual artists',
-      icon: <Sparkles className="w-5 h-5 text-amber-600" />,
-      tagline: ar ? 'نطاق خاص وتحكم كامل بدون أي شارات للمنصة.' : 'Custom domain, advanced styling, and zero branding.',
-      price: paidPlans.pro[interval],
-      features: ar
-        ? [
-            'كل ما تتضمنه الخطة المجانية',
-            'حتى 5 ملفات شخصية ومواقع مصغرة',
-            'دعم النطاق المخصص مع تشفير HTTPS بعد إعداد الاستضافة',
-            'إزالة شارة ليينكس بالكامل',
-            'تخصيص CSS وخطوط ويب إضافية',
-            'جدولة الروابط وتتبع حملات UTM',
-            'ربط Google Analytics وبيكسل ميتا'
-          ]
-        : [
-            'Everything in Free',
-            'Up to 5 profiles / mini-sites under 1 account',
-            'Custom domain support with secure HTTPS after hosting configuration',
-            'Remove all Liinx branding',
-            'Custom CSS styling & web font injection',
-            'Link scheduling & UTM campaign tracking',
-            'Google Analytics 4 & Meta Pixel integration'
-          ],
-      highlight: true,
-    },
-    {
-      id: 'studio' as const,
-      name: paidPlans.studio.name,
-      audience: ar ? 'للاستوديوهات التي تدير ملفات متعددة' : 'For studios managing multiple profiles',
-      icon: <Crown className="w-5 h-5 text-amber-500" />,
-      tagline: ar ? 'أقصى قدرات ليينكس للمشاريع المتعددة وإدارة العملاء.' : 'Maximum capacity for multiple client profiles & brands.',
-      price: paidPlans.studio[interval],
-      features: ar
-        ? [
-            'كل ما تتضمنه خطة برو',
-            'حتى 25 ملفاً شخصياً وموقعاً مصغراً',
-            'الوصول إلى REST API v1',
-            'إدارة مفاتيح API',
-            'دعم نطاق مخصص لكل ملف شخصي',
-            'تصدير المشتركين بصيغة CSV',
-            'تصدير ردود النماذج بصيغة CSV'
-          ]
-        : [
-            'Everything in Pro',
-            'Up to 25 profiles / mini-sites under 1 account',
-            'REST API v1 access',
-            'API key management',
-            'Custom domain support per profile',
-            'Subscriber CSV export',
-            'Form-response CSV export'
-          ],
-      highlight: false,
-    },
-  ];
+  const plans = buildPricingPlans(t.pricingSection.plans, interval, t.pricingSection.recommended);
 
   return (
     <section id="pricing" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">

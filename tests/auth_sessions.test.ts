@@ -71,13 +71,15 @@ describe('authentication and session boundaries', () => {
     db.prepare('UPDATE users SET session_version = ? WHERE id = ?').run(sessionVersion - 1, userId);
     expect((await agent.post('/api/auth/login').send({ email, password })).status).toBe(200);
     expect((await agent.post('/api/auth/logout')).status).toBe(200);
-    expect((await agent.post('/api/auth/login').send({ email, password })).status).toBe(200);
+    const loggedIn = await agent.post('/api/auth/login').send({ email, password });
+    expect(loggedIn.status).toBe(200);
 
     const updatedEmail = `email_updated_${suffix}@liinx.test`;
     const changed = await agent.post('/api/auth/update-email').send({ email: updatedEmail, password });
     expect(changed.status).toBe(200);
-    expect(verifyJwt(changed.body.token)?.sessionVersion).toBe(sessionVersion);
+    expect(verifyJwt(changed.body.token)?.sessionVersion).toBe(sessionVersion + 1);
     expect(verifyJwt(changed.body.token)?.email).toBe(updatedEmail);
     expect((await agent.get('/api/auth/me')).status).toBe(200);
+    expect((await request(app).get('/api/auth/me').set('Authorization', `Bearer ${loggedIn.body.token}`)).status).toBe(401);
   });
 });

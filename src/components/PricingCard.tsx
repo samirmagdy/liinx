@@ -11,6 +11,7 @@ export interface PricingPlanItem {
   price: number;
   features: string[];
   highlight: boolean;
+  recommendationLabel?: string;
 }
 
 interface PricingCardProps {
@@ -109,7 +110,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     >
       {plan.highlight && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-400 text-neutral-950 text-xs font-mono font-bold uppercase tracking-wider shadow-xs">
-          {ar ? 'الأكثر طلباً' : 'Most Popular'}
+          {plan.recommendationLabel}
         </span>
       )}
 
