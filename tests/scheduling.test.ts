@@ -9,7 +9,7 @@ import { formsRouter } from '../server/routes/forms';
 import { newsletterRouter } from '../server/routes/newsletter';
 import { signJwt } from '../server/auth';
 
-describe('Link Scheduling & Time-Release Engine (0% Fake Implementation)', () => {
+describe('link scheduling and time-release', () => {
   const app = express();
   app.use(express.json());
   app.use('/api', profilesRouter);

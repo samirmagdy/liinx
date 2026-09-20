@@ -3,7 +3,7 @@ import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 
-describe('Task 53 analytics consent and external pixels', () => {
+describe('analytics consent and external pixels', () => {
   const suffix = Date.now();
   let token = '';
   let username = '';

@@ -4,7 +4,7 @@ import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 import { signJwt } from '../server/auth.js';
 
-describe('Milestone 6: Custom Domain Support & Host-Header Routing Engine (0% Fake Implementation)', () => {
+describe('custom domain support and host-header routing', () => {
   const freeUserId = 'usr_cd_free';
   const freeProfileId = 'prf_cd_free';
   const freeUsername = 'freecustomdomain';

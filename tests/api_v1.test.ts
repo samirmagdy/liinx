@@ -4,7 +4,7 @@ import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 import { signJwt } from '../server/auth.js';
 
-describe('Milestone 8: Public REST API Access (Studio Tier) (0% Fake Implementation)', () => {
+describe('public REST API access', () => {
   const freeUserId = 'usr_api_free';
   const freeProfileId = 'prf_api_free';
   const freeUsername = 'freeapidev';

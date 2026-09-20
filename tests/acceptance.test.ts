@@ -1,18 +1,8 @@
 /**
- * LIINX End-to-End Acceptance Tests
+ * End-to-end acceptance tests.
  *
- * Verifies every advertised feature that was not yet explicitly covered:
- *   - Newsletter CSV export (real Content-Type, Content-Disposition, CSV body)
- *   - Video block full lifecycle (create → public visibility → SQLite verify → delete)
- *   - Folder block full lifecycle (create → nested items on public API → SQLite verify)
- *   - Security response headers (OWASP hardening)
- *   - Observability headers (X-Request-Id, X-Response-Time)
- *   - Duplicate newsletter subscription idempotency
- *   - Invalid plan tier rejection
- *   - GET /api/studio/profile private authenticated endpoint
- *   - /api/health full diagnostics schema
- *
- * All assertions use real SQLite persistence and live HTTP routes via supertest.
+ * Covers the full lifecycle of each major feature using real SQLite persistence
+ * and live HTTP routes via supertest — no mocks, no stubs.
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
@@ -20,7 +10,7 @@ import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 
-describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)', () => {
+describe('acceptance tests', () => {
   beforeAll(() => {
     initDatabase();
   });
@@ -43,11 +33,7 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
     profileId = res.body.profileId;
   });
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // 1. Newsletter CSV Export
-  //    README advertises: "1-click CSV export"
-  // ──────────────────────────────────────────────────────────────────────────
-  describe('Newsletter CSV Export (Advertised: "1-click CSV export")', () => {
+  describe('newsletter CSV export', () => {
     const subscriberEmail = `csvfan_${uniqueId}@example.com`;
 
     it('subscribes a real email to the creator newsletter', async () => {
@@ -123,9 +109,9 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
 
   // ──────────────────────────────────────────────────────────────────────────
   // 2. Video Block — full CRUD lifecycle
-  //    README advertises: "Video Players (embed URL, thumbnail)"
+  
   // ──────────────────────────────────────────────────────────────────────────
-  describe('Video Block — Full Persistence Lifecycle (Advertised Block Type)', () => {
+  describe('video block full persistence lifecycle', () => {
     let videoBlockId = '';
 
     it('creates a video block with embed URL and thumbnail extra data', async () => {
@@ -197,9 +183,9 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
 
   // ──────────────────────────────────────────────────────────────────────────
   // 3. Folder Block — full CRUD lifecycle
-  //    README advertises: "Collapsible Link Folders (nested items)"
+  
   // ──────────────────────────────────────────────────────────────────────────
-  describe('Folder Block — Full Persistence Lifecycle (Advertised: "Collapsible Link Folders")', () => {
+  describe('folder block full persistence lifecycle', () => {
     let folderBlockId = '';
 
     const folderItems = [
@@ -276,9 +262,9 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
 
   // ──────────────────────────────────────────────────────────────────────────
   // 4. OWASP Security Response Headers
-  //    README advertises: "OWASP / Production Hardening"
+  
   // ──────────────────────────────────────────────────────────────────────────
-  describe('Security Response Headers (Advertised: OWASP / Production Hardening)', () => {
+  describe('security response headers', () => {
     it('GET /api/health carries all mandatory OWASP security headers', async () => {
       const res = await request(app).get('/api/health');
       expect(res.header['x-content-type-options']).toBe('nosniff');
@@ -313,9 +299,9 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
 
   // ──────────────────────────────────────────────────────────────────────────
   // 5. Request Observability Headers
-  //    README advertises: "X-Request-Id", "X-Response-Time"
+  
   // ──────────────────────────────────────────────────────────────────────────
-  describe('Request Observability Headers (Advertised: X-Request-Id, X-Response-Time)', () => {
+  describe('request observability headers', () => {
     it('server generates a unique X-Request-Id for each concurrent request', async () => {
       const [res1, res2] = await Promise.all([
         request(app).get('/api/health'),
@@ -397,7 +383,7 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
 
   // ──────────────────────────────────────────────────────────────────────────
   // 7. GET /api/studio/profile — Private authenticated endpoint
-  //    Advertised in README API reference table
+  
   // ──────────────────────────────────────────────────────────────────────────
   describe('GET /api/studio/profile — Private Authenticated Profile Endpoint', () => {
     it('returns full private profile with correct cache headers', async () => {
@@ -446,9 +432,9 @@ describe('Acceptance Tests — All Advertised Features (0% Fake Implementation)'
 
   // ──────────────────────────────────────────────────────────────────────────
   // 8. /api/health Full Diagnostics Schema
-  //    README advertises: "Service liveness, uptime, memory, and database status"
+  
   // ──────────────────────────────────────────────────────────────────────────
-  describe('/api/health — Full Diagnostics Schema (Advertised: Observability)', () => {
+  describe('/api/health full diagnostics schema', () => {
     it('returns complete production-grade health diagnostics', async () => {
       const res = await request(app).get('/api/health');
 

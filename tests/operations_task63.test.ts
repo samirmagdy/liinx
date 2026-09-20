@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 
-describe('Task 63 operations diagnostics', () => {
+describe('operations diagnostics', () => {
   it('reports liveness and writable-storage readiness without secrets', async () => {
     const health = await request(app).get('/api/health');
     expect(health.status).toBe(200);

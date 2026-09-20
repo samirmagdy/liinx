@@ -7,7 +7,7 @@ import { signJwt } from '../server/auth';
 import { profilesRouter } from '../server/routes/profiles';
 import { analyticsRouter, flushAnalyticsBuffers } from '../server/routes/analytics';
 
-describe('Milestone 4: UTM Tracking & Tracking Pixels (0% Fake Implementation)', () => {
+describe('UTM tracking and tracking pixels', () => {
   const app = express();
   app.use(express.json());
   app.use(analyticsRouter);

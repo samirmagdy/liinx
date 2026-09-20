@@ -7,7 +7,7 @@ import { profilesRouter } from '../server/routes/profiles';
 import { app as serverApp } from '../server/server';
 import { isSafeCreatorCss } from '../shared/contracts/profiles';
 
-describe('Milestone 7: Custom CSS & Custom Font Engine (0% Fake Implementation)', () => {
+describe('custom CSS and font engine', () => {
   const app = express();
   app.use(express.json());
   app.use('/api', profilesRouter);

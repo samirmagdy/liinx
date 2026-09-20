@@ -3,7 +3,7 @@ import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 
-describe('LIINX Production Backend API', () => {
+describe('backend API', () => {
   beforeAll(() => {
     initDatabase();
   });

@@ -9,7 +9,7 @@ import {
   isDirectVideoFile 
 } from '../src/utils/mediaEmbeds';
 
-describe('Media Embed Utilities (0% Fake Implementation)', () => {
+describe('media embed utilities', () => {
   it('converts Spotify track, album, and playlist URLs to official embeds', () => {
     const track = getSpotifyEmbedUrl('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT?si=abc');
     expect(track).toBe('https://open.spotify.com/embed/track/4cOdK2wGLETKBW3PvgPWqT?utm_source=generator&theme=0');

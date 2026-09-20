@@ -7,7 +7,7 @@ import { db, initDatabase } from '../server/db.js';
 import { signJwt } from '../server/auth.js';
 import { uploadStorage } from '../server/services/uploadStorage.js';
 
-describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)', () => {
+describe('auth, profile, and infrastructure hardening', () => {
   const testUserId = 'usr_audit_test';
   const testProfileId = 'prf_audit_test';
   const testUsername = 'audituser';
@@ -71,8 +71,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     await request(app).get(`/api/profiles/${testUsername}?page=${slug}`).expect(404);
   });
 
-  // Point 1: Registration / Login Security
-  describe('Point 1: Registration & Login Hardening', () => {
+  describe('registration and login hardening', () => {
     it('rejects passwords exceeding 128 characters to prevent DoS', async () => {
       const longPassword = 'a'.repeat(129);
       const res = await request(app)
@@ -104,8 +103,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 2: Profile & Block Editing Persistence
-  describe('Point 2: Profile & Block Editing Reliability', () => {
+  describe('profile and block editing reliability', () => {
     it('persists profile edits accurately to database', async () => {
       const res = await request(app)
         .put('/api/studio/profile')
@@ -152,8 +150,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 3: Paid Subscriptions (Authentic Stripe flow, no fake upgrade in production)
-  describe('Point 3: Paid Subscriptions & Stripe Billing', () => {
+  describe('paid subscriptions and Stripe billing', () => {
     it('disallows direct plan tampering via PUT /api/studio/plan in simulated production', async () => {
       const originalEnv = process.env.NODE_ENV;
       try {
@@ -204,8 +201,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 4: Custom Domains
-  describe('Point 4: Custom Domain Verification & Routing', () => {
+  describe('custom domain verification and routing', () => {
     it('provides DNS CNAME ownership verification via /api/studio/custom-domain/verify', async () => {
       db.prepare('UPDATE profiles SET custom_domain = ?, custom_domain_verified = 0 WHERE id = ?').run('links.customdomain.org', testProfileId);
       const res = await request(app)
@@ -236,8 +232,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 5: Image Uploads (Magic bytes verification, no MIME spoofing)
-  describe('Point 5: Secure Image Uploads & Magic Byte Inspection', () => {
+  describe('secure image uploads and magic byte inspection', () => {
     it('rejects spoofed images with executable / shell / HTML content disguised as JPEG', async () => {
       const fakeJpgContent = Buffer.from('#!/bin/bash\necho "exploit"\n');
       const res = await request(app)
@@ -384,8 +379,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 6: Analytics Abuse Prevention
-  describe('Point 6: Analytics Abuse Rate Limiting', () => {
+  describe('analytics abuse rate limiting', () => {
     it('rate limits excessive view pings to prevent bot inflation', async () => {
       const agent = request(app);
       let hit429 = false;
@@ -407,8 +401,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 7: Profile Importer SSRF & IP Rebinding Defense
-  describe('Point 7: Profile Importer SSRF Protection', () => {
+  describe('profile importer SSRF protection', () => {
     it('blocks private IPv4 localhost addresses', async () => {
       const res = await request(app)
         .post('/api/studio/import/preview')
@@ -460,8 +453,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 8: Public Profile Pages (No Fake Demo Profiles)
-  describe('Point 8: Honest Public Profile Rendering (No Fallback Masks)', () => {
+  describe('public profile rendering', () => {
     it('returns an honest 404 for unknown creators instead of concealing failure with demo data', async () => {
       const res = await request(app)
         .get('/api/profiles/absolutely_nonexistent_creator_xyz_999')
@@ -474,8 +466,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 9: Instagram Integration
-  describe('Point 9: Instagram OAuth Configuration Transparency', () => {
+  describe('Instagram OAuth configuration transparency', () => {
     it('returns honest error status when Instagram credentials are unconfigured', async () => {
       const originalClientId = process.env.INSTAGRAM_CLIENT_ID;
       const originalSecret = process.env.INSTAGRAM_CLIENT_SECRET;
@@ -496,8 +487,7 @@ describe('Audit Remediation Acceptance Test Suite (10 Production-Grade Points)',
     });
   });
 
-  // Point 10: Production Docker Deployment & Compiled Server Build
-  describe('Point 10: Production Dockerfile & Runtime Dependency Integrity', () => {
+  describe('production Dockerfile and runtime dependency integrity', () => {
     it('verifies Dockerfile copies compiled dist-server/ and excludes raw src/ from runtime container', () => {
       const dockerfilePath = path.resolve(__dirname, '../Dockerfile');
       expect(fs.existsSync(dockerfilePath)).toBe(true);

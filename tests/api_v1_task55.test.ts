@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 
-describe('Task 55 API key and page-aware REST boundaries', () => {
+describe('API key and page-aware REST boundaries', () => {
   const suffix = Date.now();
   let token = '';
   let profileId = '';
@@ -25,8 +25,8 @@ describe('Task 55 API key and page-aware REST boundaries', () => {
     db.prepare("UPDATE users SET subscription_plan = 'studio' WHERE id IN (SELECT user_id FROM profiles WHERE id IN (?, ?))").run(profileId, second.body.profileId);
     pageId = (db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string }).id;
     foreignPageId = (db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(second.body.profileId) as { id: string }).id;
-    apiKey = (await request(app).post('/api/studio/api-keys').set('Authorization', `Bearer ${token}`).send({ name: 'Task 55 test key' })).body.apiKey;
-    foreignApiKey = (await request(app).post('/api/studio/api-keys').set('Authorization', `Bearer ${second.body.token}`).send({ name: 'Task 55 foreign key' })).body.apiKey;
+    apiKey = (await request(app).post('/api/studio/api-keys').set('Authorization', `Bearer ${token}`).send({ name: 'Integration test key' })).body.apiKey;
+    foreignApiKey = (await request(app).post('/api/studio/api-keys').set('Authorization', `Bearer ${second.body.token}`).send({ name: 'Foreign integration key' })).body.apiKey;
   });
 
   it('creates exactly one block when a page-aware request is retried with the same idempotency key', async () => {

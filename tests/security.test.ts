@@ -5,7 +5,7 @@ import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 import { normalizeRequestId } from '../server/utils/ids.js';
 
-describe('Security & Penetration Testing (OWASP Top 10)', () => {
+describe('security', () => {
   beforeAll(() => {
     initDatabase();
   });

@@ -5,7 +5,7 @@ import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 import { extractLinksFromCaption, syncMediaToBlocks } from '../server/services/instagramSync.js';
 
-describe('Instagram Caption Auto-Sync Suite (0% Fake Implementation)', () => {
+describe('Instagram caption auto-sync', () => {
   beforeAll(() => {
     initDatabase();
   });

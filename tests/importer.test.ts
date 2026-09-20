@@ -5,7 +5,7 @@ import {
   parseGenericHtmlBio 
 } from '../server/services/importer';
 
-describe('Public Bio Importer Service (0% Fake Implementation)', () => {
+describe('public bio importer service', () => {
   it('blocks private IPs, localhost, and SSRF attempts', () => {
     expect(isSafePublicUrl('http://localhost:3000')).toBe(false);
     expect(isSafePublicUrl('http://127.0.0.1:8080')).toBe(false);

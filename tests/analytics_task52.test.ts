@@ -3,7 +3,7 @@ import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
 
-describe('Task 52 analytics measurement contract', () => {
+describe('analytics measurement contract', () => {
   const suffix = Date.now();
   let token = '';
   let profileId = '';

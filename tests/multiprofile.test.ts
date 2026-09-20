@@ -5,7 +5,7 @@ import { db, initDatabase } from '../server/db';
 import { signJwt } from '../server/auth';
 import { profilesRouter } from '../server/routes/profiles';
 
-describe('Milestone 5: Multi-Profile Management (One Login) (0% Fake Implementation)', () => {
+describe('multi-profile management', () => {
   const app = express();
   app.use(express.json());
   app.use('/api', profilesRouter);

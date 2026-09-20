@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { runtimeTranslations, translateRuntime } from '../src/config/runtimeTranslations';
 import { formatUiDate, getUiLocale } from '../src/utils/localization';
 
-describe('Task 56 localization boundaries', () => {
+describe('localization boundaries', () => {
   it('uses Arabic locale formatting without translating creator data', () => {
     expect(getUiLocale('ar')).toBe('ar-SA');
     expect(getUiLocale('en')).toBe('en-US');

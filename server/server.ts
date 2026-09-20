@@ -358,7 +358,7 @@ function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
   }
 }
 
-// Custom Domain Host-Header Routing Engine (Milestone 6)
+// Custom Domain Host-Header Routing Engine
 function customDomainMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
   const host = (req.headers.host || '').split(':')[0].toLowerCase().trim();
   if (isDefaultHost(host) || host.endsWith('.liinx.app')) return next();
