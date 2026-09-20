@@ -72,17 +72,18 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
     {
       id: 'own' as const,
       tag: '04',
-      title: isRtl ? 'ملكية رقمية تامة' : 'Own Everything',
+      title: isRtl ? 'بياناتك وهويتك الرقمية' : 'Your Data & Digital Identity',
       desc: isRtl 
-        ? 'نطاقك الخاص، تصدير المشتركين والردود، وواجهة برمجية REST تضمن استقلالك.'
-        : 'Your personal custom domain with guided DNS, CSV exports for subscribers and forms, and a developer REST API.',
+        ? 'اربط نطاقاً مؤهلاً، وصدّر بيانات حسابك ومشتركيك وردود النماذج، واستخدم REST API.'
+        : 'Connect a custom domain on an eligible plan, export your account data and CSV records, and use the REST API.',
       icon: ShieldCheck,
       badgeColor: 'bg-purple-100 text-purple-900 border-purple-200',
       highlights: [
         isRtl ? 'ربط نطاق خاص (links.yourname.com) مع توجيه DNS وتشفير HTTPS بعد إعداد الاستضافة' : 'Custom domain support with secure HTTPS after hosting configuration',
         isRtl ? 'تصدير المشتركين وردود النماذج إلى CSV بنقرة واحدة' : 'Export subscribers and form responses to CSV',
+        isRtl ? 'تصدير بيانات الحساب بصيغة JSON، بما يشمل الملفات والصفحات والعناصر والمشتركين وردود النماذج' : 'Export account data as JSON: profiles, pages, blocks, subscribers, and form responses',
         isRtl ? 'واجهة برمجية مفتوحة (Public REST API v1)' : 'Public REST API v1 for automated builds and pipelines',
-        isRtl ? 'مصمم لقابلية نقل البيانات: واجهة برمجية مفتوحة وتصدير بيانات الجمهور' : 'Built for data portability: Open API + exportable audience data'
+        isRtl ? 'ملفات الوسائط وسجل التحليلات الخام غير مضمنين في تصدير JSON' : 'Uploaded file binaries and raw analytics history are not included in the JSON export'
       ]
     }
   ];
@@ -260,7 +261,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                     <div className="space-y-3 font-mono text-xs">
                       <div className="flex items-center justify-between pb-2 border-b border-neutral-800 text-neutral-400 text-[11px]">
                         <span>portability_engine</span>
-                        <span className="text-emerald-400 text-[10px]">Unrestricted</span>
+                        <span className="text-emerald-400 text-[10px]">JSON + CSV exports</span>
                       </div>
                       <div className="p-2.5 bg-neutral-800 rounded-xl text-[11px] text-neutral-300">
                         <span className="text-amber-400">GET</span> /api/v1/profiles/me
@@ -270,6 +271,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                       </div>
                       <div className="p-2.5 bg-neutral-800 rounded-xl text-[11px] text-neutral-300 flex items-center justify-between">
                         <span>export_subscribers.csv</span>
+                        <Download className="w-3.5 h-3.5 text-neutral-400" />
+                      </div>
+                      <div className="p-2.5 bg-neutral-800 rounded-xl text-[11px] text-neutral-300 flex items-center justify-between">
+                        <span>account_data.json</span>
                         <Download className="w-3.5 h-3.5 text-neutral-400" />
                       </div>
                     </div>

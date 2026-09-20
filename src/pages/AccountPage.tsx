@@ -590,8 +590,8 @@ export function AccountPage() {
                 {/* Data Portability / Export */}
                 <div className="bg-white p-6 rounded-3xl border border-neutral-200 shadow-xs space-y-4 text-start">
                   <div className="border-b border-neutral-100 pb-4">
-                    <h2 className="text-base font-bold text-neutral-900">{ar ? 'تصدير كامل بيانات الحساب' : 'Account Data Portability (JSON)'}</h2>
-                    <p className="text-xs text-neutral-500 mt-0.5">{ar ? 'تنزيل حزمة كاملة لجميع ملفاتك، وصفحاتك، وعناصرك، ومشتركيك بصيغة مفتوحة.' : 'Download a complete export of all your profiles, sub-pages, blocks, and subscribers with zero lock-in.'}</p>
+                    <h2 className="text-base font-bold text-neutral-900">{ar ? 'تصدير بيانات الحساب' : 'Export your account data'}</h2>
+                    <p className="text-xs text-neutral-500 mt-0.5">{ar ? 'نزّل ملف JSON يتضمن بيانات الحساب والملفات الشخصية والصفحات والعناصر ومشتركي النشرة وردود النماذج. لا يتضمن ملفات الوسائط نفسها أو سجل التحليلات الخام.' : 'Download a JSON file with account metadata, profiles, pages, blocks, newsletter subscribers, and form submissions. Uploaded file binaries and raw analytics history are not included.'}</p>
                   </div>
 
                   <button
@@ -600,7 +600,7 @@ export function AccountPage() {
                     className="px-4 py-2.5 rounded-xl border border-neutral-300 hover:bg-neutral-50 text-neutral-800 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors disabled:opacity-50"
                   >
                     <Download className="w-4 h-4 text-neutral-500" />
-                    <span>{exportLoading ? (ar ? 'جاري التصدير...' : 'Exporting...') : (ar ? 'تنزيل حزمة البيانات (.json)' : 'Download Account Archive (.json)')}</span>
+                    <span>{exportLoading ? (ar ? 'جاري التصدير...' : 'Exporting...') : (ar ? 'تنزيل بيانات الحساب (.json)' : 'Download account data (.json)')}</span>
                   </button>
                 </div>
 

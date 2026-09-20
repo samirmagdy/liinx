@@ -11,7 +11,8 @@ import {
   BarChart3, 
   ArrowRight,
   Palette,
-  CheckCircle2
+  CheckCircle2,
+  Download
 } from 'lucide-react';
 
 export function FeaturesPage() {
@@ -63,6 +64,12 @@ export function FeaturesPage() {
         "تتبع مصادر وحملات UTM بدقة",
         "مخططات تفاعل يومية للمشاهدات والنقرات لـ ٧ أيام"
       ]
+    },
+    {
+      icon: <Download className="w-6 h-6 text-amber-600" />,
+      title: "تصدير بيانات الحساب",
+      description: "نزّل ملف JSON يتضمن بيانات الحساب والملفات الشخصية والصفحات والعناصر ومشتركي النشرة وردود النماذج. لا يتضمن ملفات الوسائط نفسها أو سجل التحليلات الخام.",
+      bullets: ["بيانات الحساب والملفات والصفحات والعناصر", "سجلات المشتركين وردود النماذج", "ملفات الوسائط وسجل التحليلات الخام غير مضمنين"]
     }
   ] : [
     {
@@ -88,6 +95,12 @@ export function FeaturesPage() {
       title: "Decision-Support Analytics",
       description: "Replace vanity numbers with actionable data: understand your top-performing links, traffic sources, UTM campaigns, and click-through rates.",
       bullets: ["Zero data fabrication or inflated counts", "Hashed, privacy-preserving IP aggregation", "UTM source, medium, and campaign tracking", "7-day daily view and click timeline charts"]
+    },
+    {
+      icon: <Download className="w-6 h-6 text-amber-600" />,
+      title: "Export your account data",
+      description: "Download a JSON file with account metadata, profiles, pages, blocks, newsletter subscribers, and form submissions. Uploaded file binaries and raw analytics history are not included.",
+      bullets: ["Account metadata, profiles, pages, and blocks", "Newsletter subscribers and form submissions", "Uploaded files and raw analytics history are not included"]
     }
   ];
 
