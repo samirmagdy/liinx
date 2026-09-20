@@ -115,8 +115,8 @@ export const WhyLiinxSection: React.FC = () => {
             </h3>
             <p className="text-sm text-neutral-400 leading-relaxed">
               {ar
-                ? 'لا قيود على المنصة، لا عمولات خفية على المبيعات، ولا احتجاز لقائمتك البريدية. ليينكس أداة لتمكين استقلاليتك الرقمية.'
-                : 'No vendor lock-in, zero transaction cuts on bookings, and instant export of every subscriber. Liinx is built to empower creator sovereignty.'}
+                ? 'لا قيود على المنصة ولا احتجاز لقائمتك البريدية. يدير مزودون خارجيون مدفوعات المبيعات والحجوزات، ولا تفرض Liinx رسوماً على تلك المدفوعات. ليينكس أداة لتمكين استقلاليتك الرقمية.'
+                : 'No vendor lock-in or subscriber-list lock-in. External providers handle sales and booking payments, and Liinx takes no fee on those payments. Liinx is built to empower creator sovereignty.'}
             </p>
           </div>
           <button

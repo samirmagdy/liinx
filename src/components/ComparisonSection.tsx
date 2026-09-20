@@ -274,7 +274,7 @@ export function ComparisonSection() {
               <p className="text-sm text-neutral-600 leading-relaxed mt-1">
                 {hasAnyImporter
                   ? (ar ? 'أدخل اسم حسابك العام واستورد جميع روابطك خلال 60 ثانية بدون إعادة كتابة أي شيء.' : 'Enter your handle to preview and import all your public links in 60 seconds.')
-                  : (ar ? 'أنشئ صفحتك في دقائق مع سمات تصميم مخصصة، عمولة 0%، وتحكم كامل في علامتك التجارية.' : 'Set up your mini-site in minutes with custom themes, zero transaction commissions, and complete layout control.')}
+                  : (ar ? 'أنشئ صفحتك في دقائق مع سمات تصميم مخصصة، دون رسوم من Liinx على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها، وتحكم كامل في علامتك التجارية.' : 'Set up your mini-site in minutes with custom themes, no Liinx fee on sales or bookings handled by external providers, and complete layout control.')}
               </p>
             </div>
           </div>

@@ -165,7 +165,7 @@ export const runtimeTranslations: Record<string, string> = {
   'How to add your links to LIINX:': 'كيفية إضافة روابطك إلى LIINX:',
   'Create customized link, music, video, or booking blocks in seconds.': 'أنشئ روابطك ومقاطع الموسيقى والفيديو وحجوزات المواعيد في ثوانٍ.',
   'Reorder blocks with drag-and-drop to design your unique layout.': 'أعد ترتيب الكتل بالسحب والإفلات لتصميم مظهرك الخاص.',
-  'Enjoy full design freedom with custom themes and zero platform commissions.': 'تمتّع بحرية كاملة في التصميم مع سمات مخصصة وبدون أي عمولة للمنصة.',
+  'Enjoy full design freedom with custom themes and no Liinx fee on external sales or bookings.': 'استمتع بحرية التصميم مع سمات مخصصة، دون رسوم من Liinx على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها.',
   'Add links manually': 'إضافة الروابط يدوياً',
   'Moving from Linktree? Easy setup in minutes': 'تنتقل من Linktree؟ إعداد سهل في دقائق',
   'Moving from Linktree? Import your links': 'تنتقل من Linktree؟ استورد روابطك',

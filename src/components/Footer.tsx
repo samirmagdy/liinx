@@ -202,7 +202,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectView }) => {
               <span>•</span>
               <span>{ui("Account-owned content")}</span>
               <span>•</span>
-              <span>{ui("0% transaction cut")}</span>
+              <span>{ui("No Liinx fee on external sales or bookings")}</span>
             </div>
           </div>
 

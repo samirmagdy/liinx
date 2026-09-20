@@ -1,5 +1,6 @@
 export const uiArabic: Record<string, string> = {
   'Creator tools': 'أدوات المبدعين',
+  'No Liinx fee on external sales or bookings': 'لا تفرض Liinx رسوماً على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها',
   'Publish a customizable creator page, collect newsletter signups, and export subscriber records as CSV.': 'أنشئ صفحة مخصصة، واجمع اشتراكات النشرة، ونزّل سجلات المشتركين بصيغة CSV.',
   'Fictional sample profile. Names, metrics, and links are demonstration content, not customer data.': 'ملف تجريبي خيالي. الأسماء والإحصاءات والروابط أمثلة توضيحية وليست بيانات عملاء.',
   'Reload this page to try again.': 'أعد تحميل الصفحة للمحاولة مجدداً.',

@@ -244,9 +244,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }
                           <p className="text-[10px] text-emerald-400 font-mono mt-1">+18.4% vs last week</p>
                         </div>
                         <div className="p-3 bg-neutral-800/90 rounded-xl">
-                          <p className="text-[10px] text-neutral-400">Sales Commission</p>
-                          <p className="text-lg font-bold text-amber-400 font-mono mt-0.5">$0.00</p>
-                          <p className="text-[10px] text-neutral-400 font-mono mt-1">100% creator cut</p>
+                          <p className="text-[10px] text-neutral-400">Payment handling</p>
+                          <p className="text-sm font-bold text-amber-400 mt-1">External provider</p>
+                          <p className="text-[10px] text-neutral-400 font-mono mt-1">Liinx does not process payments</p>
                         </div>
                       </div>
                       <div className="p-2.5 bg-neutral-800/60 rounded-xl text-[10px] text-neutral-400 font-mono space-y-1">
