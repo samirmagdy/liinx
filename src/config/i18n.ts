@@ -133,8 +133,8 @@ export const translations: Record<Language, Translations> = {
     },
     hero: {
       badge: 'A flexible page for everything you share',
-      headline: 'Your entire world.',
-      headlineHighlight: 'Designed your way.',
+      headline: 'A page for',
+      headlineHighlight: 'everything you share.',
       subheadline: 'Liinx is a design-first micro-site builder for creators, professionals, and small brands. Create one customizable page for your links, supported audio and video, newsletter signups, and Calendly bookings, then publish it at liinx.app/@yourname or connect a custom domain on a paid plan.',
       claimPlaceholder: 'yourname',
       claimButton: 'Build your page',
@@ -322,8 +322,8 @@ export const translations: Record<Language, Translations> = {
     },
     hero: {
       badge: 'صفحة مرنة لكل ما تشاركه',
-      headline: 'عالمك بالكامل.',
-      headlineHighlight: 'مصمم على طريقتك.',
+      headline: 'صفحة لكل ما',
+      headlineHighlight: 'تشاركه.',
       subheadline: 'Liinx منصة مصغّرة تركز على التصميم للمبدعين والمحترفين والعلامات التجارية الصغيرة. أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك المدعومة واشتراكاتك وحجوزات Calendly، وانشرها على liinx.app/@اسمك أو اربط نطاقاً مخصصاً في الخطط المدفوعة.',
       claimPlaceholder: 'اسمك',
       claimButton: 'أنشئ صفحتك مجاناً',

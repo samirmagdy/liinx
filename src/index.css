@@ -137,13 +137,12 @@
 .marketing-home a:active { transform: scale(0.985); }
 .marketing-shell .motion-card,
 .marketing-home .motion-card {
-  transition: transform var(--motion-duration-standard) var(--motion-ease-out),
-    border-color var(--motion-duration-fast) var(--motion-ease-out),
-    box-shadow var(--motion-duration-standard) var(--motion-ease-out);
+  transition: border-color var(--motion-duration-fast) var(--motion-ease-out),
+    background-color var(--motion-duration-fast) var(--motion-ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .marketing-shell .motion-card:hover,
-  .marketing-home .motion-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+  .marketing-home .motion-card:hover { border-color: var(--color-neutral-300); }
 }
 @media (prefers-reduced-motion: reduce) {
   .marketing-shell button:active,
@@ -155,9 +154,7 @@
 }
 
 .hero-section {
-  background:
-    radial-gradient(circle at 75% 18%, var(--color-accent-tint), transparent 24rem),
-    linear-gradient(180deg, var(--color-neutral-50) 0%, var(--color-neutral-100) 100%);
+  background: var(--color-neutral-50);
 }
 
 .hero-accent {
@@ -180,7 +177,7 @@
 }
 
 .hero-section .phone-shell {
-  box-shadow: var(--shadow-lift);
+  box-shadow: 0 12px 30px rgba(24, 24, 23, 0.12);
 }
 
 /* Marketing surfaces use Apple's quieter editorial rhythm: one visual voice,

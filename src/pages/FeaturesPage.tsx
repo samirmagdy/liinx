@@ -5,7 +5,6 @@ import { Footer } from '../components/Footer';
 import { ComparisonSection } from '../components/ComparisonSection';
 import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { 
-  Sparkles, 
   Layers, 
   Globe2, 
   BarChart3, 
@@ -19,8 +18,8 @@ function getFeaturePillars(isRtl: boolean) {
   return isRtl ? [
     {
       icon: <Layers className="w-6 h-6 text-amber-600" />,
-      title: "بنية عناصر قابلة للتوسّع",
-      description: "لا تكتفِ بمجرد مشاركة روابط. ابنِ حضوراً تفاعلياً غنياً بوسائط مدعومة، ومجلدات قابلة للطي، ونماذج اشتراك مباشر.",
+      title: "محتوى وروابط",
+      description: "أضف روابط ووسائط مدعومة ومجلدات ونماذج اشتراك إلى صفحتك.",
       bullets: [
         "مشغلات صوتية مع معاينة سبوتيفاي",
         "تشغيل كامل لفيديوهات يوتيوب وفيميو",
@@ -30,35 +29,32 @@ function getFeaturePillars(isRtl: boolean) {
     },
     {
       icon: <Palette className="w-6 h-6 text-amber-600" />,
-      title: "نظام تصميم تحريري فاخر",
-      description: "صُمم خصيصاً للمبدعين والمصورين والاستوديوهات التي ترفض القوالب المكررة. خطوط متناسقة وألوان معاصرة.",
+      title: "تنسيق الصفحة",
+      description: "اختر سمة وعدّل مظهر صفحتك، مع CSS وخطوط ويب مخصصة في الخطط المؤهلة.",
       bullets: [
-        "خطوط راقية تدعم العربية والإنجليزية ببراعة",
-        "سمات حجرية وداكنة مصممة بأناقة",
-        "دعم كامل لأكواد CSS المخصصة",
-        "إمكانية ربط ورفع خطوط ويب خارجية"
+        "سمات جاهزة",
+        "CSS مخصص في الخطط المؤهلة",
+        "روابط لخطوط ويب مخصصة"
       ]
     },
     {
       icon: <Globe2 className="w-6 h-6 text-amber-600" />,
       title: "نطاقات مخصصة",
-      description: "اربط links.yourbrand.com أو نطاقاً فرعياً بعد إضافة سجل DNS وإعداد الاستضافة وTLS.",
+      description: "اربط نطاقاً فرعياً بعد التحقق من DNS وإعداد الاستضافة وTLS.",
       bullets: [
-        "تحقق تلقائي من سجلات CNAME",
+        "التحقق من DNS",
         "إزالة شعار Liinx في الخطط المؤهلة",
-        "دعم ملفات متعددة تحت حساب واحد",
-        "ربط النطاقات الرئيسية والفرعية"
+        "نطاق مخصص لكل ملف مؤهل"
       ]
     },
     {
       icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
-      title: "تحليلات لدعم اتخاذ القرار",
-      description: "استبدل الأرقام التقديرية ببيانات حقيقية: اعرف الروابط الأكثر تحويلاً، مصادر الزيارات، وحملات UTM بدقة.",
+      title: "تحليلات الصفحة",
+      description: "راجع زيارات الصفحة ونقرات الروابط ومصادر الإحالة وبيانات حملات UTM.",
       bullets: [
-        "صفر بيانات وهمية أو أرقام مضخمة",
-        "تجميع آمن ومشفر يحفظ خصوصية الزوار",
-        "تتبع مصادر وحملات UTM بدقة",
-        "مخططات تفاعل يومية للمشاهدات والنقرات لـ ٧ أيام"
+        "مشاهدات الصفحة ونقرات الروابط اليومية",
+        "تقارير مصادر الإحالة وUTM",
+        "مخططات نشاط لسبعة أيام"
       ]
     },
     {
@@ -70,27 +66,27 @@ function getFeaturePillars(isRtl: boolean) {
   ] : [
     {
       icon: <Layers className="w-6 h-6 text-amber-600" />,
-      title: "Extensible Block Architecture",
-      description: "Don't just share links. Build rich interactive pages with supported media embeds, expandable folders, contact forms, and newsletter capture.",
+      title: "Links and content blocks",
+      description: "Add links, supported media embeds, folders, and newsletter signup forms to your page.",
       bullets: ["Audio players with supported provider embeds", "YouTube and Vimeo embeds", "Collapsible multi-item folders", "Newsletter subscription forms"]
     },
     {
       icon: <Palette className="w-6 h-6 text-amber-600" />,
-      title: "Editorial Design System",
-      description: "Crafted specifically for artists, photographers, and studios who refuse to accept cookie-cutter link buttons. Curated typography pairings and bespoke themes.",
-      bullets: ["Syne, Plus Jakarta Sans & JetBrains Mono typography", "Light & dark architectural stone & obsidian themes", "Custom CSS support for pixel-perfect adjustments", "Custom font web-link injection"]
+      title: "Page styling",
+      description: "Choose a theme and adjust the typography and appearance of your public page.",
+      bullets: ["Theme presets", "Custom CSS on eligible plans", "Custom web font links"]
     },
     {
       icon: <Globe2 className="w-6 h-6 text-amber-600" />,
       title: "Custom domains",
-      description: "Connect links.yourbrand.com or a subdomain after DNS verification and hosting configuration.",
-      bullets: ["DNS CNAME verification", "Remove Liinx branding on eligible plans", "Multiple profiles under one account", "Apex and subdomain mapping"]
+      description: "Connect a subdomain after DNS verification and hosting and TLS configuration.",
+      bullets: ["DNS verification", "Remove Liinx branding on eligible plans", "Custom domain support per eligible profile"]
     },
     {
       icon: <BarChart3 className="w-6 h-6 text-amber-600" />,
-      title: "Decision-Support Analytics",
-      description: "Replace vanity numbers with actionable data: understand your top-performing links, traffic sources, UTM campaigns, and click-through rates.",
-      bullets: ["Zero data fabrication or inflated counts", "Hashed, privacy-preserving IP aggregation", "UTM source, medium, and campaign tracking", "7-day daily view and click timeline charts"]
+      title: "Page analytics",
+      description: "Review page visits, link clicks, referral sources, and UTM campaign data.",
+      bullets: ["Daily page views and link clicks", "Referrer and UTM reporting", "Seven-day activity charts"]
     },
     {
       icon: <Download className="w-6 h-6 text-amber-600" />,
@@ -113,40 +109,37 @@ export function FeaturesPage() {
       <Navbar activeView="features" />
       <main className="flex-1">
         {/* Hero Header */}
-        <section className="max-w-5xl mx-auto px-6 pt-10 pb-8 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-800">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>{isRtl ? 'صفحة واحدة لكل ما تشاركه' : 'One page for everything you share'}</span>
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-neutral-900 max-w-3xl mx-auto leading-tight">
+        <section className="max-w-6xl mx-auto px-6 pt-12 pb-8 space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">{isRtl ? 'ميزات المنصة' : 'Platform features'}</p>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-neutral-900 max-w-3xl leading-tight">
             {isRtl ? (
               <>
-                كل ما يستحقه عملك وإبداعك. <br className="hidden sm:inline" />
-                <span className="text-neutral-500">مدمج في منصة واحدة.</span>
+                أنشئ صفحة لأعمالك. <br className="hidden sm:inline" />
+                <span className="text-neutral-500">روابطك ووسائطك في مكان واحد.</span>
               </>
             ) : (
               <>
-                {ui("Everything your work deserves.")}<br className="hidden sm:inline" />
-                <span className="block text-neutral-500">{ui("Built into one platform.")}</span>
+                {ui("Create one page for your work.")}<br className="hidden sm:inline" />
+                <span className="block text-neutral-500">{ui("Links, media, and bookings.")}</span>
               </>
             )}
           </h1>
-          <p className="text-base sm:text-lg text-neutral-600 max-w-xl mx-auto leading-relaxed">
+          <p className="text-base text-neutral-600 max-w-2xl leading-relaxed">
             {isRtl 
               ? 'أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك وقائمتك البريدية.' 
               : 'Build a customizable page for your links, media, bookings, and newsletter.'}
           </p>
-          <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
+          <div className="pt-2 flex flex-col sm:flex-row gap-3 items-start">
             <button
               onClick={() => setLocation('/register')}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-neutral-900 text-white font-bold text-sm hover:bg-black transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-3 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-black transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>{isRtl ? 'أنشئ موقعك المصغر' : 'Build your micro-site'}</span>
               <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
             </button>
             <button
               onClick={() => setLocation('/templates')}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-neutral-300 text-neutral-800 font-semibold text-sm hover:bg-neutral-50 transition-colors cursor-pointer"
+              className="w-full sm:w-auto px-5 py-3 rounded-lg border border-neutral-300 text-neutral-800 font-semibold text-sm hover:bg-neutral-50 transition-colors cursor-pointer"
             >
               {isRtl ? 'استكشف القوالب' : 'Explore Templates'}
             </button>
@@ -155,21 +148,21 @@ export function FeaturesPage() {
 
         {/* Feature Grid */}
         <section className="max-w-6xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
             {featurePillars.map((feature, idx) => (
               <div
                 key={idx}
-                className="p-8 rounded-3xl bg-neutral-50/80 border border-neutral-200 hover:border-neutral-300 transition-all space-y-4 text-start"
+                className="py-6 border-t border-neutral-200 space-y-3 text-start"
               >
-                <div className="w-12 h-12 rounded-2xl bg-white border border-neutral-200 flex items-center justify-center shadow-xs">
-                  {feature.icon}
+                <div className="flex items-center gap-3">
+                  <span className="text-amber-700">{feature.icon}</span>
+                  <h2 className="text-lg font-semibold text-neutral-900">{feature.title}</h2>
                 </div>
-                <h2 className="text-xl font-bold text-neutral-900">{feature.title}</h2>
                 <p className="text-sm text-neutral-600 leading-relaxed">{feature.description}</p>
                 <ul className="space-y-2 pt-2">
                   {feature.bullets.map((b, bIdx) => (
-                    <li key={bIdx} className="flex items-center gap-2.5 text-xs font-medium text-neutral-700">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <li key={bIdx} className="flex items-center gap-2.5 text-sm text-neutral-700">
+                      <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0" />
                       <span>{b}</span>
                     </li>
                   ))}

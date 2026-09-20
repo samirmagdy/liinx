@@ -3,8 +3,7 @@ import {
   Music, 
   Calendar, 
   Layers, 
-  Globe, 
-  Sparkles 
+  Globe
 } from 'lucide-react';
 
 export interface HeroFeatureBadge {
@@ -68,18 +67,17 @@ export const HeroFeatureShowcase: React.FC<HeroFeatureShowcaseProps> = ({
   onSelectFeature
 }) => {
   return (
-    <div className="w-full max-w-xl lg:max-w-2xl mt-8 pt-6 border-t border-neutral-200/70">
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-          <span>{isRtl ? 'قدرات متقدمة مدمجة' : 'Native Building Blocks'}</span>
+    <div className="w-full max-w-xl lg:max-w-2xl mt-8 pt-5 border-t border-neutral-200">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="text-xs font-semibold text-neutral-800">
+          {isRtl ? 'استكشف ميزات الصفحة' : 'Explore page features'}
         </span>
-        <span className="text-[11px] text-neutral-400 font-medium">
+        <span className="text-xs text-neutral-500">
           {isRtl ? 'انقر للمعاينة الحية' : 'Click to preview on device'}
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
         {HERO_FEATURE_BADGES.map((badge) => {
           const Icon = badge.icon;
           const isActive = selectedFeatureId === badge.id;
@@ -89,29 +87,24 @@ export const HeroFeatureShowcase: React.FC<HeroFeatureShowcaseProps> = ({
               key={badge.id}
               type="button"
               onClick={() => onSelectFeature(badge.id, badge.profileIndex)}
-              className={`group text-start p-2.5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`group text-start py-3 border-b border-neutral-200 transition-colors cursor-pointer flex items-start gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
                 isActive
-                  ? 'bg-white border-neutral-900 shadow-xs ring-1 ring-neutral-900/10'
-                  : 'bg-white/60 hover:bg-white border-neutral-200/80 hover:border-neutral-300'
+                  ? 'text-neutral-950'
+                  : 'text-neutral-700 hover:text-neutral-950'
               }`}
             >
-              <div className="flex items-center justify-between w-full mb-1.5">
-                <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-colors ${
+              <div className={`mt-0.5 shrink-0 ${
                   isActive 
-                    ? 'bg-neutral-900 text-white' 
-                    : 'bg-neutral-100 text-neutral-700 group-hover:bg-neutral-200/70'
+                    ? 'text-amber-700'
+                    : 'text-neutral-500 group-hover:text-neutral-800'
                 }`}>
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" strokeWidth={1.8} />
                 </div>
-                {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                )}
-              </div>
-              <div>
-                <p className={`text-xs font-bold leading-tight ${isActive ? 'text-neutral-900' : 'text-neutral-800'}`}>
+              <div className="min-w-0">
+                <p className={`text-sm font-semibold leading-tight ${isActive ? 'text-neutral-950' : 'text-neutral-800'}`}>
                   {isRtl ? badge.labelAr : badge.labelEn}
                 </p>
-                <p className="text-[10px] text-neutral-500 line-clamp-1 mt-0.5 font-normal">
+                <p className="text-xs text-neutral-500 mt-1 font-normal">
                   {isRtl ? badge.descAr : badge.descEn}
                 </p>
               </div>

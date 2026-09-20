@@ -9,8 +9,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { 
   ArrowRight, 
   Palette, 
-  Check, 
-  Sparkles
+  Check
 } from 'lucide-react';
 
 import { useHeroMotion } from '../animations/useHeroMotion';
@@ -73,7 +72,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
   };
 
   return (
-    <section ref={heroRef} className="hero-section marketing-hero pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 border-b border-neutral-200 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.05),transparent)]">
+    <section ref={heroRef} className="hero-section marketing-hero pt-8 pb-12 md:pt-10 md:pb-14 lg:pt-12 lg:pb-16 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-14 items-start">
           
@@ -81,11 +80,8 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
           <div className="lg:col-span-7 flex flex-col items-start text-start lg:pt-1">
             
             {/* Top Badge */}
-            <div data-hero="eyebrow" className="inline-flex">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-neutral-100/90 border border-neutral-200/90 text-xs font-semibold text-neutral-800 mb-3.5 shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>{isRtl ? 'موقع مصغر يركز على التصميم، وليس مجرد قائمة روابط' : 'A design-first mini website, not a list of links'}</span>
-              </div>
+            <div data-hero="eyebrow" className="mb-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">
+              {isRtl ? 'مواقع مصغّرة للمبدعين' : 'Mini-sites for independent creators'}
             </div>
 
             {/* Main Headline */}
@@ -99,8 +95,8 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             <div data-hero="copy">
               <p className="text-base sm:text-lg text-neutral-600 leading-relaxed max-w-xl lg:max-w-2xl mb-6 text-pretty">
                 {isRtl 
-                  ? 'أنشئ موقعاً مصغراً فائق الأناقة لكل ما تصنعه وتشاركه وتبيعه. مع مشغلات صوت وفيديو وجدولة مواعيد ونطاق مخصص خاص بك.'
-                  : 'Build a high-craft mini website for everything you make, share, and sell. Featuring inline audio players, video embeds, scheduling, and your own custom domain.'}
+                ? 'أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك ونشرتك البريدية. أضف مشغلات صوت وفيديو، واربط نطاقاً مخصصاً في الخطط المدفوعة.'
+                : 'Create a customizable mini-site for your links, media, bookings, and newsletter. Add audio and video embeds, then connect a custom domain on a paid plan.'}
               </p>
             </div>
 
