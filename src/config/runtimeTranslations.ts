@@ -104,7 +104,7 @@ export const runtimeTranslations: Record<string, string> = {
   'How can we help?': 'كيف يمكننا مساعدتك؟',
   'Send Message': 'إرسال الرسالة',
   'Official policies, setup instructions, and technical references': 'السياسات الرسمية وتعليمات الإعداد والمراجع التقنية',
-  'Effective Date: January 1, 2026 • Version 2.4 (GDPR / CCPA Compliant)': 'تاريخ السريان: ١ يناير ٢٠٢٦ • الإصدار ٢.٤ (متوافق مع GDPR / CCPA)',
+  'Privacy Policy • Effective January 1, 2026': 'سياسة الخصوصية • سارية اعتباراً من ١ يناير ٢٠٢٦',
   'Theme:': 'السمة:',
   'Live canvas preview while you build': 'معاينة حية أثناء البناء',
   '8+ distinct creative disciplines': 'أكثر من ٨ مجالات إبداعية مختلفة',
