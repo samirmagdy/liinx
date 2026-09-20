@@ -48,8 +48,12 @@ export const PRICING_PLANS: PricingPlan[] = [
     yearlyPrice: 288,
     features: [
       'Everything in Pro, plus:',
-      'Up to 25 managed creator profiles',
-      'Page-aware REST API keys for programmatic access'
+      'Up to 25 profiles / mini-sites under 1 account',
+      'REST API v1 access',
+      'API key management',
+      'Custom domain support per profile',
+      'Subscriber CSV export',
+      'Form-response CSV export'
     ],
     ctaText: 'Contact Studio Team'
   }

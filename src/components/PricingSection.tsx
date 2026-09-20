@@ -70,7 +70,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
     {
       id: 'studio' as const,
       name: paidPlans.studio.name,
-      audience: ar ? 'للوكالات وفرق الإنتاج' : 'For design studios, labels & teams',
+      audience: ar ? 'للاستوديوهات التي تدير ملفات متعددة' : 'For studios managing multiple profiles',
       icon: <Crown className="w-5 h-5 text-amber-500" />,
       tagline: ar ? 'أقصى قدرات ليينكس للمشاريع المتعددة وإدارة العملاء.' : 'Maximum capacity for multiple client profiles & brands.',
       price: paidPlans.studio[interval],
@@ -78,20 +78,20 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         ? [
             'كل ما تتضمنه خطة برو',
             'حتى 25 ملفاً شخصياً وموقعاً مصغراً',
-            'نطاقات مخصصة غير محدودة',
-            'تصدير كود نظيف وتضمين خارجي',
-            'إمكانية إضافة أعضاء للفريق',
-            'تصدير مباشر لبيانات المشتركين (CSV)',
-            'أولوية الدعم عبر البريد الإلكتروني'
+            'الوصول إلى REST API v1',
+            'إدارة مفاتيح API',
+            'دعم نطاق مخصص لكل ملف شخصي',
+            'تصدير المشتركين بصيغة CSV',
+            'تصدير ردود النماذج بصيغة CSV'
           ]
         : [
             'Everything in Pro',
             'Up to 25 profiles / mini-sites under 1 account',
-            'Unlimited custom domains',
-            'Clean HTML export & embed mode',
-            'Team collaboration & shared access',
-            'Instant CSV subscriber data export',
-            'Dedicated priority support'
+            'REST API v1 access',
+            'API key management',
+            'Custom domain support per profile',
+            'Subscriber CSV export',
+            'Form-response CSV export'
           ],
       highlight: false,
     },

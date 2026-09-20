@@ -295,8 +295,12 @@ export const translations: Record<Language, Translations> = {
           tagline: 'Manage multiple pages and studio projects in one account.',
           features: [
             'Everything in Pro, plus:',
-            'Up to 25 managed creator profiles',
-            'Page-aware REST API keys for programmatic access'
+            'Up to 25 profiles / mini-sites under 1 account',
+            'REST API v1 access',
+            'API key management',
+            'Custom domain support per profile',
+            'Subscriber CSV export',
+            'Form-response CSV export'
           ],
           ctaText: 'Contact Studio Team',
           billedAnnuallyText: (p) => `billed $${p}/yr`
@@ -515,8 +519,12 @@ export const translations: Record<Language, Translations> = {
           tagline: 'أدر صفحات ومشاريع متعددة من حساب واحد.',
           features: [
             'كل مميزات باقة المحترف، بالإضافة إلى:',
-            'إدارة حتى 25 ملفاً شخصياً لصناع المحتوى',
-            'مفاتيح REST API مرتبطة بالصفحات للوصول البرمجي'
+            'حتى 25 ملفاً شخصياً أو موقعاً مصغراً ضمن حساب واحد',
+            'الوصول إلى REST API v1',
+            'إدارة مفاتيح API',
+            'دعم نطاق مخصص لكل ملف شخصي',
+            'تصدير المشتركين بصيغة CSV',
+            'تصدير ردود النماذج بصيغة CSV'
           ],
           ctaText: 'تواصل مع فريق الاستوديو',
           billedAnnuallyText: (p) => `فاتورة سنوية $${p}/سنة`
