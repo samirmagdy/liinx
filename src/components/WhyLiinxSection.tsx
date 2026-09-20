@@ -103,7 +103,7 @@ export const WhyLiinxSection: React.FC = () => {
           </div>
         </Reveal>
 
-        {/* Ownership Commitment Card (Issue #25) */}
+        {/* Ownership Commitment Card */}
         <div className="rounded-3xl bg-[#111315] text-white p-6 sm:p-8 border border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6 text-start">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-800 text-amber-400 text-xs font-mono font-semibold">

@@ -137,7 +137,7 @@ export const TrustProofSection: React.FC = () => {
           </div>
         </Reveal>
 
-        {/* 3 Concrete Platform Commitments (Issue #5) */}
+        {/* Platform Commitments */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {trustGuarantees.map((item, idx) => (
             <div
