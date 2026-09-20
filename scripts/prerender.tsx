@@ -28,7 +28,7 @@ for (const [route, titles] of Object.entries(pageTitles)) {
   const bodyEnd = template.indexOf('\n  </body>', rootStart);
   const rootEnd = template.lastIndexOf('</div>', bodyEnd) + '</div>'.length;
   if (rootStart < 0 || bodyEnd < 0 || rootEnd <= rootStart) throw new Error('Unable to locate prerender root shell');
-  const html = template.slice(0, rootStart) + `<div id="root">${markup}</div>` + template.slice(rootEnd)
+  const html = (template.slice(0, rootStart) + `<div id="root">${markup}</div>` + template.slice(rootEnd))
     .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
     .replace(/(<meta property="og:title" content=")[^"]*/, `$1${title}`)
     .replace(/(<meta name="twitter:title" content=")[^"]*/, `$1${title}`)

@@ -200,13 +200,34 @@ app.get('/sitemap.xml', (req, res) => {
   try {
     // Sitemap protocol supports up to 50,000 URLs per file. Include all public
     // profiles instead of silently dropping older creators at an arbitrary 500.
+    const now = Date.now();
     const pages = db.prepare(`
-      SELECT profiles.username, pages.slug, pages.is_home as isHome, pages.updated_at as updatedAt
+      SELECT profiles.username, pages.slug, pages.is_home as isHome,
+        MAX(profiles.updated_at, pages.updated_at, COALESCE((
+          SELECT MAX(blocks.updated_at) FROM blocks
+          WHERE blocks.profile_id = profiles.id AND blocks.page_id = pages.id
+        ), 0)) as updatedAt
       FROM profiles INNER JOIN pages ON pages.profile_id = profiles.id
       WHERE profiles.username IS NOT NULL AND pages.published = 1
+        AND NOT (
+          profiles.page_redirect_url IS NOT NULL AND profiles.page_redirect_url <> ''
+          AND (profiles.page_redirect_until IS NULL OR profiles.page_redirect_until > ?)
+        )
+        AND (
+          length(trim(COALESCE(profiles.bio, ''))) > 0
+          OR length(trim(COALESCE(profiles.share_description, ''))) > 0
+          OR length(trim(COALESCE(pages.description, ''))) > 0
+          OR trim(COALESCE(profiles.socials_json, '')) NOT IN ('', '[]', '{}', 'null')
+          OR EXISTS (
+            SELECT 1 FROM blocks
+            WHERE blocks.profile_id = profiles.id AND blocks.page_id = pages.id
+              AND (blocks.start_at IS NULL OR blocks.start_at <= ?)
+              AND (blocks.end_at IS NULL OR blocks.end_at > ?)
+          )
+        )
       ORDER BY pages.updated_at DESC, pages.created_at ASC
       LIMIT 50000
-    `).all() as { username: string; slug: string; isHome: number; updatedAt: number }[];
+    `).all(now, now, now) as { username: string; slug: string; isHome: number; updatedAt: number }[];
     const baseUrl = publicOrigin(req);
     const staticRoutes = [
       '', '/features', '/templates', '/pricing', '/about', '/contact', '/privacy', '/terms'
