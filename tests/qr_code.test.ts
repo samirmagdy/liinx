@@ -20,6 +20,9 @@ describe('QR public target construction', () => {
   it('rejects malformed origins rather than producing a misleading QR target', () => {
     expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'not a url' })).toBeNull();
     expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://liinx.example', customDomain: 'javascript:alert(1)' })).toBeNull();
+    expect(buildQrTargetUrl({ username: 'creator', page: home, platformOrigin: 'https://liinx.example', customDomain: 'user:pass@domain.com' })).toBeNull();
+    expect(buildQrTargetUrl({ username: 'creator', page: undefined, platformOrigin: 'https://liinx.example' })).toBe('https://liinx.example/@creator');
+    expect(buildQrTargetUrl({ username: 'creator', page: undefined, platformOrigin: 'https://liinx.example', customDomain: 'creator.example' })).toBe('https://creator.example/');
   });
 
   it('allows the existing QR provider only for the explicit download connection', async () => {

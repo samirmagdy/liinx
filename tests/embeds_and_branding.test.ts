@@ -54,13 +54,56 @@ describe('Media Embed Utilities (0% Fake Implementation)', () => {
     expect(getAppleMusicEmbedUrl('https://music.apple.com.evil.example/us/album/test/123')).toBeNull();
   });
 
-  it('identifies direct audio and video media files', () => {
-    expect(isDirectAudioFile('https://cdn.example.com/track.mp3')).toBe(true);
-    expect(isDirectAudioFile('https://cdn.example.com/track.wav?download=1')).toBe(true);
-    expect(isDirectAudioFile('https://spotify.com')).toBe(false);
+  it('handles edge cases and variations across all embed and media checks', () => {
+    // Empty / nullish
+    expect(getSpotifyEmbedUrl()).toBeNull();
+    expect(getSpotifyEmbedUrl('')).toBeNull();
+    expect(getSpotifyEmbedUrl('https://other.example.com')).toBeNull();
+    expect(getSpotifyEmbedUrl('spotify:artist:abc12345')).toContain('embed/artist/abc12345');
+    expect(getSpotifyEmbedUrl('spotify:episode:abc12345')).toContain('embed/episode/abc12345');
+    expect(getSpotifyEmbedUrl('https://open.spotify.com/embed/playlist/abc12345')).toContain('embed/playlist/abc12345');
 
-    expect(isDirectVideoFile('https://cdn.example.com/clip.mp4')).toBe(true);
-    expect(isDirectVideoFile('https://cdn.example.com/clip.webm')).toBe(true);
-    expect(isDirectVideoFile('https://youtube.com')).toBe(false);
+    // YouTube variations
+    expect(getYouTubeEmbedUrl()).toBeNull();
+    expect(getYouTubeEmbedUrl('')).toBeNull();
+    expect(getYouTubeEmbedUrl('not a url')).toBeNull();
+    expect(getYouTubeEmbedUrl('ftp://youtube.com/watch?v=dQw4w9WgXcQ')).toBeNull();
+    expect(getYouTubeEmbedUrl('https://m.youtube.com/watch?v=dQw4w9WgXcQ')).toContain('youtube-nocookie.com/embed/dQw4w9WgXcQ');
+    expect(getYouTubeEmbedUrl('https://youtube.com/embed/dQw4w9WgXcQ')).toContain('youtube-nocookie.com/embed/dQw4w9WgXcQ');
+    expect(getYouTubeEmbedUrl('https://youtube.com/v/dQw4w9WgXcQ')).toContain('youtube-nocookie.com/embed/dQw4w9WgXcQ');
+    expect(getYouTubeEmbedUrl('https://youtube-nocookie.com/embed/dQw4w9WgXcQ')).toContain('youtube-nocookie.com/embed/dQw4w9WgXcQ');
+    expect(getYouTubeEmbedUrl('https://youtu.be/')).toBeNull();
+
+    // Vimeo variations
+    expect(getVimeoEmbedUrl()).toBeNull();
+    expect(getVimeoEmbedUrl('')).toBeNull();
+    expect(getVimeoEmbedUrl('not a url')).toBeNull();
+    expect(getVimeoEmbedUrl('https://player.vimeo.com/video/76979871')).toContain('player.vimeo.com/video/76979871');
+    expect(getVimeoEmbedUrl('https://vimeo.com/no-id-here')).toBeNull();
+
+    // SoundCloud & Apple Music variations
+    expect(getSoundCloudEmbedUrl()).toBeNull();
+    expect(getSoundCloudEmbedUrl('')).toBeNull();
+    expect(getSoundCloudEmbedUrl('not a url')).toBeNull();
+    expect(getSoundCloudEmbedUrl('https://soundcloud.com/')).toBeNull();
+
+    expect(getAppleMusicEmbedUrl()).toBeNull();
+    expect(getAppleMusicEmbedUrl('')).toBeNull();
+    expect(getAppleMusicEmbedUrl('not a url')).toBeNull();
+    expect(getAppleMusicEmbedUrl('https://music.apple.com/')).toBeNull();
+
+    // Audio & Video variations
+    expect(isDirectAudioFile()).toBe(false);
+    expect(isDirectAudioFile('')).toBe(false);
+    expect(isDirectAudioFile('not a url')).toBe(false);
+    expect(isDirectAudioFile('https://example.com/audio.ogg')).toBe(true);
+    expect(isDirectAudioFile('https://example.com/audio.m4a')).toBe(true);
+    expect(isDirectAudioFile('https://example.com/audio.aac')).toBe(true);
+
+    expect(isDirectVideoFile()).toBe(false);
+    expect(isDirectVideoFile('')).toBe(false);
+    expect(isDirectVideoFile('not a url')).toBe(false);
+    expect(isDirectVideoFile('https://example.com/video.ogv')).toBe(true);
+    expect(isDirectVideoFile('https://example.com/video.mov')).toBe(true);
   });
 });

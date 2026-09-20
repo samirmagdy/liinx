@@ -99,8 +99,105 @@ describe('media storage adapter contract', () => {
       expect(await storage.get(stored.key)).toEqual(Buffer.from('png-fixture'));
       expect(await storage.delete(stored.key)).toBe(true);
       expect(await storage.exists(stored.key)).toBe(false);
+      expect(await storage.healthCheck()).toBe(true);
+      expect(() => storage.getUrl('../invalid')).toThrow('Invalid object key.');
+      await expect(storage.put('bad/name', Buffer.from('x'), { mimeType: 'text/plain' })).rejects.toThrow('Invalid object key.');
+
+      // Test attachment disposition, default cacheControl, default originalFilename
+      const attachmentStored = await storage.put('doc.pdf', Buffer.from('pdf-data'), {
+        mimeType: 'application/pdf',
+        contentDisposition: 'attachment'
+      });
+      expect(attachmentStored.url).toBe('https://cdn.example.test/media/doc.pdf');
+
+      // Test storage without publicUrl (falls back to /uploads/...) and with empty prefix
+      const storageNoPublic = new S3CompatibleObjectStorage({
+        bucket: 'no-public',
+        region: 'us-east-1',
+        accessKeyId: 'key',
+        secretAccessKey: 'secret',
+        keyPrefix: ''
+      });
+      expect(storageNoPublic.getUrl('image.png')).toBe('/uploads/image.png');
+      expect(await storageNoPublic.healthCheck()).toBe(true);
     } finally {
       globalThis.fetch = originalFetch;
+    }
+  });
+
+  it('validates environment configuration in createS3ObjectStorageFromEnv', async () => {
+    const { createS3ObjectStorageFromEnv } = await import('../server/infrastructure/s3ObjectStorage.js');
+    const oldEnv = { ...process.env };
+
+    try {
+      delete process.env.MEDIA_S3_BUCKET;
+      delete process.env.MEDIA_S3_ACCESS_KEY_ID;
+      delete process.env.MEDIA_S3_SECRET_ACCESS_KEY;
+
+      expect(() => createS3ObjectStorageFromEnv()).toThrow('MEDIA_S3_BUCKET is required when MEDIA_STORAGE=s3.');
+
+      process.env.MEDIA_S3_BUCKET = 'my-bucket';
+      expect(() => createS3ObjectStorageFromEnv()).toThrow('MEDIA_S3_ACCESS_KEY_ID is required when MEDIA_STORAGE=s3.');
+
+      process.env.MEDIA_S3_ACCESS_KEY_ID = 'my-key-id';
+      expect(() => createS3ObjectStorageFromEnv()).toThrow('MEDIA_S3_SECRET_ACCESS_KEY is required when MEDIA_STORAGE=s3.');
+
+      process.env.MEDIA_S3_SECRET_ACCESS_KEY = 'my-secret';
+      process.env.MEDIA_S3_FORCE_PATH_STYLE = 'true';
+      process.env.MEDIA_S3_ENDPOINT = 'https://s3.custom.test';
+      process.env.MEDIA_PUBLIC_URL = 'https://cdn.custom.test';
+
+      const s3Storage = createS3ObjectStorageFromEnv();
+      expect(s3Storage.provider).toBe('s3');
+      expect(s3Storage.getUrl('avatar.jpg')).toBe('https://cdn.custom.test/avatar.jpg');
+      expect(await s3Storage.healthCheck()).toBe(true);
+    } finally {
+      process.env = oldEnv;
+    }
+  });
+
+  it('exercises LocalFileObjectStorage full lifecycle and error handling', async () => {
+    const fs = await import('node:fs');
+    const os = await import('node:os');
+    const path = await import('node:path');
+    const { LocalFileObjectStorage } = await import('../server/infrastructure/localStorage.js');
+
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'liinx-local-storage-test-'));
+
+    try {
+      const storage = new LocalFileObjectStorage(tempDir, '/custom-uploads');
+      expect(storage.provider).toBe('local-fs');
+
+      // Put
+      const bytes = Buffer.from('hello-local-file');
+      const stored = await storage.put('test-file.txt', bytes, {
+        mimeType: 'text/plain'
+      });
+      expect(stored.url).toBe('/custom-uploads/test-file.txt');
+      expect(stored.sizeBytes).toBe(bytes.length);
+
+      // Exists & Get
+      expect(await storage.exists('test-file.txt')).toBe(true);
+      expect(await storage.exists('non-existent.txt')).toBe(false);
+      expect(await storage.get('test-file.txt')).toEqual(bytes);
+      expect(await storage.get('non-existent.txt')).toBeNull();
+
+      // GetUrl
+      expect(storage.getUrl('test-file.txt')).toBe('/custom-uploads/test-file.txt');
+
+      // HealthCheck
+      expect(await storage.healthCheck()).toBe(true);
+
+      // Delete (existing and non-existing idempotent)
+      expect(await storage.delete('test-file.txt')).toBe(true);
+      expect(await storage.exists('test-file.txt')).toBe(false);
+      expect(await storage.delete('test-file.txt')).toBe(true);
+
+      // Invalid key handling
+      expect(() => storage.getUrl('../escape.txt')).toThrow('Invalid object key.');
+      await expect(storage.put('../escape.txt', bytes, { mimeType: 'text/plain' })).rejects.toThrow('Invalid object key.');
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
 });

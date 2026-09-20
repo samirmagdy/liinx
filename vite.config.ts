@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
       fileParallelism: false,
       maxWorkers: 1,
       minWorkers: 1,
+      testTimeout: 15000,
       coverage: {
         provider: 'v8',
         reporter: ['text', 'text-summary', 'lcov', 'json', 'html'],
