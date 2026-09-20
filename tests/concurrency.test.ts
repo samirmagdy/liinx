@@ -1,7 +1,14 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
+import { confirmNewsletter } from './helpers/newsletterEmail.js';
+
+vi.mock('../server/services/email.js', async () => {
+  const { captureTransactionalEmail } = await import('./helpers/newsletterEmail.js');
+  return { sendTransactionalEmail: vi.fn(captureTransactionalEmail) };
+});
+
 
 describe('Concurrency & Race Condition Testing', () => {
   beforeAll(() => {
@@ -65,7 +72,10 @@ describe('Concurrency & Race Condition Testing', () => {
     // All should successfully return with HTTP 200/201 (idempotent friendly handling)
     for (const res of responses) {
       expect(res.body.success).toBe(true);
+      expect([200, 202]).toContain(res.status);
     }
+
+    await confirmNewsletter(app, targetEmail);
 
     // Verify in database that exactly 1 subscriber record was stored, no duplicates
     const records = db.prepare('SELECT id FROM newsletter_subscribers WHERE profile_id = ? AND email = ?').all(userProfileId, targetEmail);

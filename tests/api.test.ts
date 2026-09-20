@@ -1,7 +1,14 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
+import { confirmNewsletter } from './helpers/newsletterEmail.js';
+
+vi.mock('../server/services/email.js', async () => {
+  const { captureTransactionalEmail } = await import('./helpers/newsletterEmail.js');
+  return { sendTransactionalEmail: vi.fn(captureTransactionalEmail) };
+});
+
 
 describe('backend API', () => {
   beforeAll(() => {
@@ -197,8 +204,9 @@ describe('backend API', () => {
         consent: true
       });
 
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(202);
     expect(res.body.success).toBe(true);
+    await confirmNewsletter(app, subscriberEmail);
 
     // Verify subscriber is in database
     const sub = db.prepare('SELECT * FROM newsletter_subscribers WHERE email = ?').get(subscriberEmail) as any;

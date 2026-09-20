@@ -1,7 +1,14 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
+import { confirmNewsletter } from './helpers/newsletterEmail.js';
+
+vi.mock('../server/services/email.js', async () => {
+  const { captureTransactionalEmail } = await import('./helpers/newsletterEmail.js');
+  return { sendTransactionalEmail: vi.fn(captureTransactionalEmail) };
+});
+
 
 describe('Newsletter capture and subscriber management', () => {
   const suffix = Date.now();
@@ -49,22 +56,26 @@ describe('Newsletter capture and subscriber management', () => {
     const email = `Retry_${suffix}@Example.com`;
     const first = await request(app).post('/api/newsletter/subscribe').send({
       profileId: ownerProfileId, blockId: newsletterBlockId, email, consent: true
-    }).expect(201);
-    expect(first.body.message).not.toMatch(/email|sent|confirmation/i);
+    }).expect(202);
+    expect(first.body.message).toMatch(/email|confirmation/i);
     const duplicate = await request(app).post('/api/newsletter/subscribe').send({
       profileId: ownerProfileId, blockId: newsletterBlockId, email: email.toLowerCase(), consent: true
     }).expect(200);
-    expect(duplicate.body.message).toMatch(/already subscribed/i);
+    expect(duplicate.body.message).toMatch(/confirmation/i);
+    expect(db.prepare('SELECT COUNT(*) AS count FROM newsletter_subscribers WHERE profile_id = ? AND email = ?').get(ownerProfileId, email.toLowerCase())).toEqual({ count: 0 });
+    await confirmNewsletter(app, email);
     expect(db.prepare('SELECT COUNT(*) AS count FROM newsletter_subscribers WHERE profile_id = ? AND email = ?').get(ownerProfileId, email.toLowerCase())).toEqual({ count: 1 });
     const subscriber = db.prepare('SELECT id FROM newsletter_subscribers WHERE profile_id = ? AND email = ?').get(ownerProfileId, email.toLowerCase()) as { id: string };
     expect(db.prepare('SELECT subscriber_id FROM newsletter_consents WHERE subscriber_id = ?').get(subscriber.id)).toEqual({ subscriber_id: subscriber.id });
   });
 
   it('supports one-use unauthenticated unsubscribe tokens and rejects token abuse', async () => {
-    const response = await request(app).post('/api/newsletter/subscribe').send({
-      profileId: ownerProfileId, email: `unsubscribe_${suffix}@example.com`, consent: true
-    }).expect(201);
-    const token = new URL(response.body.unsubscribeUrl).searchParams.get('token');
+    const email = `unsubscribe_${suffix}@example.com`;
+    await request(app).post('/api/newsletter/subscribe').send({
+      profileId: ownerProfileId, email, consent: true
+    }).expect(202);
+    const confirmed = await confirmNewsletter(app, email);
+    const token = confirmed.unsubscribeUrl && new URL(confirmed.unsubscribeUrl).searchParams.get('token');
     expect(token).toMatch(/^[A-Za-z0-9_-]{32}$/);
     await request(app).get(`/api/newsletter/unsubscribe?token=${token}`).expect(200);
     await request(app).get(`/api/newsletter/unsubscribe?token=${token}`).expect(404);
@@ -73,12 +84,12 @@ describe('Newsletter capture and subscriber management', () => {
   });
 
   it('exports only the active profile and neutralizes spreadsheet formulas', async () => {
-    await request(app).post('/api/newsletter/subscribe').send({
-      profileId: ownerProfileId, email: `+sheet_${suffix}@example.com`, consent: true
-    }).expect(201);
-    await request(app).post('/api/newsletter/subscribe').send({
-      profileId: secondProfileId, email: `other_${suffix}@example.com`, consent: true
-    }).expect(201);
+    const sheetEmail = `+sheet_${suffix}@example.com`;
+    const otherEmail = `other_${suffix}@example.com`;
+    await request(app).post('/api/newsletter/subscribe').send({ profileId: ownerProfileId, email: sheetEmail, consent: true }).expect(202);
+    await confirmNewsletter(app, sheetEmail);
+    await request(app).post('/api/newsletter/subscribe').send({ profileId: secondProfileId, email: otherEmail, consent: true }).expect(202);
+    await confirmNewsletter(app, otherEmail);
     const response = await request(app).get('/api/studio/subscribers/export').set('Authorization', `Bearer ${ownerToken}`).expect(200);
     expect(response.headers['cache-control']).toMatch(/no-store/);
     expect(response.text).toContain("'+sheet_");

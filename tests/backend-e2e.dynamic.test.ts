@@ -1,7 +1,14 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { initDatabase } from '../server/db.js';
+import { confirmNewsletter } from './helpers/newsletterEmail.js';
+
+vi.mock('../server/services/email.js', async () => {
+  const { captureTransactionalEmail } = await import('./helpers/newsletterEmail.js');
+  return { sendTransactionalEmail: vi.fn(captureTransactionalEmail) };
+});
+
 
 /**
  * Stateful backend journey.
@@ -171,7 +178,9 @@ describe('Dynamic Backend E2E — chained real API workflow', () => {
     expect(gate.body.body).toBe('Private material');
 
     const newsletter = await createBlock({ type: 'newsletter', title: 'Dispatch', extra: { description: 'Updates', buttonText: 'Join' } });
-    await request(app).post('/api/newsletter/subscribe').send({ profileId, blockId: newsletter.body.id, email: `reader_${unique}@example.com`, consent: true }).expect(201);
+    const newsletterEmail = `reader_${unique}@example.com`;
+    await request(app).post('/api/newsletter/subscribe').send({ profileId, blockId: newsletter.body.id, email: newsletterEmail, consent: true }).expect(202);
+    await confirmNewsletter(app, newsletterEmail);
     const exportResponse = await auth(request(app).get('/api/studio/subscribers/export')).expect(200);
     expect(exportResponse.text).toContain(`reader_${unique}@example.com`);
 

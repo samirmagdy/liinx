@@ -2,13 +2,21 @@
  * End-to-end acceptance tests.
  *
  * Covers the full lifecycle of each major feature using real SQLite persistence
- * and live HTTP routes via supertest — no mocks, no stubs.
+ * and live HTTP routes via supertest. Transactional email delivery is captured
+ * by this suite so confirmation can be exercised without Resend.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
+import { confirmNewsletter } from './helpers/newsletterEmail.js';
+
+vi.mock('../server/services/email.js', async () => {
+  const { captureTransactionalEmail } = await import('./helpers/newsletterEmail.js');
+  return { sendTransactionalEmail: vi.fn(captureTransactionalEmail) };
+});
+
 
 describe('acceptance tests', () => {
   beforeAll(() => {
@@ -41,8 +49,9 @@ describe('acceptance tests', () => {
         .post('/api/newsletter/subscribe')
         .send({ profileId, email: subscriberEmail, consent: true });
 
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(202);
       expect(res.body.success).toBe(true);
+      await confirmNewsletter(app, subscriberEmail);
 
       const row = db
         .prepare('SELECT email FROM newsletter_subscribers WHERE email = ?')
@@ -80,7 +89,7 @@ describe('acceptance tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.message).toMatch(/already subscribed/i);
+      expect(res.body.message).toMatch(/confirmation/i);
 
       const count = db
         .prepare('SELECT COUNT(*) as n FROM newsletter_subscribers WHERE email = ? AND profile_id = ?')

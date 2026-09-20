@@ -1,7 +1,14 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../server/server.js';
 import { db, initDatabase } from '../server/db.js';
+import { confirmNewsletter } from './helpers/newsletterEmail.js';
+
+vi.mock('../server/services/email.js', async () => {
+  const { captureTransactionalEmail } = await import('./helpers/newsletterEmail.js');
+  return { sendTransactionalEmail: vi.fn(captureTransactionalEmail) };
+});
+
 
 describe('End-to-End Creator Journey & Full Lifecycle Test', () => {
   beforeAll(() => {
@@ -184,9 +191,10 @@ describe('End-to-End Creator Journey & Full Lifecycle Test', () => {
         consent: true
       });
 
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(202);
     expect(res.body.success).toBe(true);
-    expect(res.body.message).toMatch(/subscribed to aesthetic studio/i);
+    expect(res.body.message).toMatch(/confirmation/i);
+    await confirmNewsletter(app, subscriberEmail);
   });
 
   it('Step 10: Creator checks Studio analytics and views logged stats', async () => {

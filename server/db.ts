@@ -436,9 +436,6 @@ export function initDatabase() {
   for (const column of ['confirmed_at INTEGER', 'consent_method TEXT', 'consent_copy_version TEXT']) {
     try { db.exec(`ALTER TABLE newsletter_consents ADD COLUMN ${column}`); } catch (e) {}
   }
-  db.prepare(`UPDATE newsletter_consents
-    SET consent_method = 'single_opt_in_legacy', consent_copy_version = 'legacy-v0'
-    WHERE consent_method IS NULL`).run();
 
   for (const column of [
     'token_issued_at INTEGER',
@@ -540,6 +537,9 @@ export function initDatabase() {
     );
     CREATE INDEX IF NOT EXISTS idx_form_submissions_profile ON form_submissions(profile_id, created_at);
   `);
+  db.prepare(`UPDATE newsletter_consents
+    SET consent_method = 'single_opt_in_legacy', consent_copy_version = 'legacy-v0'
+    WHERE consent_method IS NULL`).run();
   try { db.exec('ALTER TABLE api_keys ADD COLUMN expires_at INTEGER'); } catch {}
   db.prepare('UPDATE api_keys SET expires_at = created_at + ? WHERE expires_at IS NULL').run(90 * 24 * 60 * 60 * 1000);
   try { db.exec('ALTER TABLE form_submissions ADD COLUMN submission_key TEXT'); } catch {}
