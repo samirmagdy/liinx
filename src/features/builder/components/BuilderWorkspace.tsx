@@ -9,6 +9,8 @@ import { ContentPanel } from './panels/ContentPanel';
 import { AppearancePanel } from './panels/AppearancePanel';
 import { AnalyticsPanel } from './panels/AnalyticsPanel';
 import { SettingsPanel } from './panels/SettingsPanel';
+import { AudiencePanel } from './panels/AudiencePanel';
+import { StudioMobileTabBar } from './StudioMobileTabBar';
 
 export const BuilderWorkspace: React.FC = () => {
   const { tr: ui } = useUiLanguage();
@@ -49,7 +51,8 @@ export const BuilderWorkspace: React.FC = () => {
           <BuilderSidebar />
 
           {activeTab === 'content' && <ContentPanel />}
-          {activeTab === 'appearance' && <AppearancePanel />}
+          {activeTab === 'design' && <AppearancePanel />}
+          {activeTab === 'audience' && <AudiencePanel />}
           {activeTab === 'analytics' && <AnalyticsPanel />}
           {activeTab === 'settings' && <SettingsPanel />}
         </div>
@@ -61,7 +64,10 @@ export const BuilderWorkspace: React.FC = () => {
       </div>
 
       {/* Mobile Switcher Floating Bar */}
-      <div className="lg:hidden fixed bottom-6 inset-x-0 z-40 flex justify-center pointer-events-none px-4">
+      <StudioMobileTabBar />
+
+      {/* Editor / Live Preview switch, lifted clear of the tab bar */}
+      <div className="studio-mobile-switcher lg:hidden fixed bottom-20 inset-x-0 z-40 flex justify-center pointer-events-none px-4">
         <div className="pointer-events-auto bg-neutral-900/90 backdrop-blur-md p-1 rounded-full shadow-2xl border border-neutral-700/60 flex items-center gap-1 text-xs font-semibold text-white">
           <button
             type="button"

@@ -17,6 +17,89 @@ async function completeRegistration(page: Page, values: { username: string; emai
   await expect(page).toHaveURL(/\/studio(?:\?|$)/);
 }
 
+test.describe('contextual upgrades', () => {
+  test('a locked control names the capability and reaches the real checkout endpoint', async ({ page }) => {
+    const username = uniqueName('upg');
+    await completeRegistration(page, { username, email: `${username}@example.test`, password: 'UpgradePath2026pass!' });
+
+    const requests: { url: string; body: string }[] = [];
+    // The Stripe round trip is external; the routing and the payload are not.
+    await page.route('**/api/billing/create-checkout-session', route => {
+      requests.push({ url: route.request().url(), body: route.request().postData() ?? '' });
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ url: 'https://checkout.invalid/upgrade', sessionId: 'cs_test_upgrade' })
+      });
+    });
+    await page.route('https://checkout.invalid/**', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<html><body>stub checkout</body></html>' }));
+
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    await page.getByRole('button', { name: 'Domain & SEO' }).click();
+    await expect(page.getByRole('button', { name: 'Needs Pro' }).first()).toBeVisible();
+
+    await page.getByRole('button', { name: 'Needs Pro' }).first().click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Connect your own domain')).toBeVisible();
+    await expect(dialog.getByText(/links\.yourbrand\.com/)).toBeVisible();
+
+    await dialog.getByRole('button', { name: /Upgrade to Pro/ }).click();
+    await expect.poll(() => requests.length).toBe(1);
+    expect(requests[0].url).toContain('/api/billing/create-checkout-session');
+    expect(JSON.parse(requests[0].body)).toMatchObject({ plan: 'pro' });
+  });
+});
+
+test.describe('mobile studio navigation', () => {
+  for (const width of [360, 390, 414]) {
+    test(`keeps the bottom tab bar usable at ${width}px`, async ({ page }) => {
+      const username = uniqueName(`m${width}`);
+      await page.setViewportSize({ width, height: 844 });
+      await completeRegistration(page, { username, email: `${username}@example.test`, password: 'MobileBar2026pass!' });
+
+      const bar = page.locator('.studio-mobile-tabs');
+      await expect(bar).toBeVisible();
+      // The desktop strip must not double up with the bottom bar on a phone.
+      await expect(page.locator('.studio-tabs')).toBeHidden();
+      const labels = await bar.locator('button > span').allTextContents();
+      expect(labels).toEqual(['Content', 'Design', 'Stats', 'More']);
+
+      const fit = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
+      expect(fit.scroll, 'no horizontal scroll').toBeLessThanOrEqual(fit.viewport);
+
+      const taps = await bar.locator('button').evaluateAll(els => els.map(el => {
+        const r = el.getBoundingClientRect();
+        const size = parseFloat(getComputedStyle(el.querySelector('span') as Element).fontSize);
+        return { h: r.height, w: r.width, size };
+      }));
+      taps.forEach(tap => {
+        expect(tap.h, 'tap target height').toBeGreaterThanOrEqual(44);
+        expect(tap.w, 'tap target width').toBeGreaterThanOrEqual(44);
+        expect(tap.size, 'label size stays readable').toBeGreaterThanOrEqual(13);
+      });
+
+      // The bottom chrome is fixed, so scrolled to the end the page must have reserved its
+      // band — otherwise the last footer row is trapped underneath it forever.
+      const clearance = await page.evaluate(() => {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' });
+        const chrome = document.querySelector('.studio-mobile-switcher');
+        const links = Array.from(document.querySelectorAll('.studio-page footer a, .studio-page footer button'));
+        if (!chrome || links.length === 0) throw new Error('studio page missing');
+        const lowest = Math.max(...links.map(el => el.getBoundingClientRect().bottom));
+        return { lowest, chromeTop: chrome.getBoundingClientRect().top };
+      });
+      expect(clearance.lowest, 'the page end clears the fixed bottom chrome').toBeLessThan(clearance.chromeTop);
+
+      // "More" holds the two tabs that do not fit as full labels.
+      await bar.getByRole('button', { name: 'More' }).click();
+      // Scoped to the bar: the desktop tab strip is display:none here but a page-wide
+      // role query still resolves to it.
+      await bar.getByRole('button', { name: 'Audience' }).click();
+      await expect(page.getByRole('heading', { name: 'Form responses' })).toBeVisible();
+    });
+  }
+});
+
 test.describe('public discovery and localization', () => {
   test('public guide and privacy content render in English and Arabic RTL', async ({ page }) => {
     await page.goto('/guides');

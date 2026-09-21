@@ -16,7 +16,8 @@ import {
   type ProfileSummary,
   type ApiKeyItem,
   type FormSubmissionItem,
-  type BuilderLoadState
+  type BuilderLoadState,
+  type UpgradeCapability
 } from '../types/builder.types';
 import { initialBuilderTab } from '../utils/builder.utils';
 import { useAutosave } from '../hooks/useAutosave';
@@ -29,6 +30,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { useSubscribers } from '../hooks/useSubscribers';
 import { useInstagramIntegration } from '../hooks/useInstagramIntegration';
 import { useApiKeys } from '../hooks/useApiKeys';
+import { useStudioSettingsInputs } from '../hooks/useStudioSettingsInputs';
 import { useFormSubmissions } from '../hooks/useFormSubmissions';
 
 export interface BuilderContextType {
@@ -41,6 +43,11 @@ export interface BuilderContextType {
   setQrModalOpen: (open: boolean) => void;
   copiedLink: boolean;
   handleCopyPublicLink: () => void;
+
+  // Locked affordances: which one the creator just reached for
+  upgradeFor: UpgradeCapability | null;
+  requestUpgrade: (capability: UpgradeCapability) => void;
+  closeUpgrade: () => void;
 
   // Profile & Theme
   profile: CreatorProfile;
@@ -304,59 +311,33 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('mobile');
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [upgradeFor, setUpgradeFor] = useState<UpgradeCapability | null>(null);
+  const requestUpgrade = (capability: UpgradeCapability) => setUpgradeFor(capability);
+  const closeUpgrade = () => setUpgradeFor(null);
 
   // Profile ref bridge
   const profileRef = useRef<CreatorProfile>(initialProfile || EMPTY_BUILDER_PROFILE);
 
-  // Settings inputs state
-  const [gaInput, setGaInput] = useState('');
-  const [metaPixelInput, setMetaPixelInput] = useState('');
-  const [isSavingPixels, setIsSavingPixels] = useState(false);
-  const [pixelsSavedFeedback, setPixelsSavedFeedback] = useState(false);
-  const [pixelsError, setPixelsError] = useState<string | null>(null);
+  // Settings inputs live in one hook; the provider only orchestrates.
+  const {
+    gaInput, setGaInput, metaPixelInput, setMetaPixelInput,
+    isSavingPixels, setIsSavingPixels, pixelsSavedFeedback, setPixelsSavedFeedback,
+    pixelsError, setPixelsError,
+    customDomainInput, setCustomDomainInput, isVerifyingDns, setIsVerifyingDns,
+    dnsVerificationResult, setDnsVerificationResult, isSavingDomain, setIsSavingDomain,
+    copiedCname, setCopiedCname, domainFeedback, setDomainFeedback,
+    customCssInput, setCustomCssInput, customFontUrlInput, setCustomFontUrlInput,
+    shareTitleInput, setShareTitleInput, shareDescriptionInput, setShareDescriptionInput,
+    shareImageUrlInput, setShareImageUrlInput,
+    footerLogoUrlInput, setFooterLogoUrlInput, footerLogoLinkInput, setFooterLogoLinkInput,
+    footerLogoAltInput, setFooterLogoAltInput,
+    backgroundMediaUrlInput, setBackgroundMediaUrlInput, backgroundMediaTypeInput, setBackgroundMediaTypeInput,
+    pageRedirectUrlInput, setPageRedirectUrlInput, pageRedirectUntilInput, setPageRedirectUntilInput,
+    isSavingPageSettings, setIsSavingPageSettings, pageSettingsFeedback, setPageSettingsFeedback,
+    isSavingStyling, setIsSavingStyling, stylingSavedFeedback, setStylingSavedFeedback,
+    stylingError, setStylingError, syncSettingsState
+  } = useStudioSettingsInputs();
 
-  const [customDomainInput, setCustomDomainInput] = useState('');
-  const [isVerifyingDns, setIsVerifyingDns] = useState(false);
-  const [dnsVerificationResult, setDnsVerificationResult] = useState<{ verified: boolean; message: string } | null>(null);
-  const [isSavingDomain, setIsSavingDomain] = useState(false);
-  const [copiedCname, setCopiedCname] = useState(false);
-  const [domainFeedback, setDomainFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
-  const [customCssInput, setCustomCssInput] = useState('');
-  const [customFontUrlInput, setCustomFontUrlInput] = useState('');
-  const [shareTitleInput, setShareTitleInput] = useState('');
-  const [shareDescriptionInput, setShareDescriptionInput] = useState('');
-  const [shareImageUrlInput, setShareImageUrlInput] = useState('');
-  const [footerLogoUrlInput, setFooterLogoUrlInput] = useState('');
-  const [footerLogoLinkInput, setFooterLogoLinkInput] = useState('');
-  const [footerLogoAltInput, setFooterLogoAltInput] = useState('');
-  const [backgroundMediaUrlInput, setBackgroundMediaUrlInput] = useState('');
-  const [backgroundMediaTypeInput, setBackgroundMediaTypeInput] = useState<'image' | 'video'>('image');
-  const [pageRedirectUrlInput, setPageRedirectUrlInput] = useState('');
-  const [pageRedirectUntilInput, setPageRedirectUntilInput] = useState('');
-  const [isSavingPageSettings, setIsSavingPageSettings] = useState(false);
-  const [pageSettingsFeedback, setPageSettingsFeedback] = useState<string | null>(null);
-  const [isSavingStyling, setIsSavingStyling] = useState(false);
-  const [stylingSavedFeedback, setStylingSavedFeedback] = useState(false);
-  const [stylingError, setStylingError] = useState<string | null>(null);
-
-  const syncSettingsState = (p: CreatorProfile) => {
-    setGaInput(p.gaMeasurementId || '');
-    setMetaPixelInput(p.metaPixelId || '');
-    setCustomDomainInput(p.customDomain || '');
-    setCustomCssInput(p.customCss || '');
-    setCustomFontUrlInput(p.customFontUrl || '');
-    setShareTitleInput(p.shareTitle || '');
-    setShareDescriptionInput(p.shareDescription || '');
-    setShareImageUrlInput(p.shareImageUrl || '');
-    setFooterLogoUrlInput(p.footerLogoUrl || '');
-    setFooterLogoLinkInput(p.footerLogoLink || '');
-    setFooterLogoAltInput(p.footerLogoAlt || '');
-    setBackgroundMediaUrlInput(p.backgroundMediaUrl || '');
-    setBackgroundMediaTypeInput((p.backgroundMediaType as 'image' | 'video') || 'image');
-    setPageRedirectUrlInput(p.pageRedirectUrl || '');
-    setPageRedirectUntilInput(p.pageRedirectUntil ? new Date(p.pageRedirectUntil).toISOString().slice(0, 16) : '');
-  };
 
   // 1. Profile hook
   const profileHook = useProfile({
@@ -586,6 +567,10 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
     }
   };
 
+  /**
+   * The public-page fields are one group on the server, so every Settings section that
+   * holds one of them saves the whole group. The label says exactly that.
+   */
   const handleSavePageSettings = async () => {
     setIsSavingPageSettings(true);
     setPageSettingsFeedback(null);
@@ -623,6 +608,9 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
     setQrModalOpen,
     copiedLink,
     handleCopyPublicLink,
+    upgradeFor,
+    requestUpgrade,
+    closeUpgrade,
 
     ...profileHook,
     updateThemeOverride,

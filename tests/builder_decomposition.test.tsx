@@ -9,6 +9,11 @@ import { ContentPanel } from '../src/features/builder/components/panels/ContentP
 import { AppearancePanel } from '../src/features/builder/components/panels/AppearancePanel';
 import { AnalyticsPanel } from '../src/features/builder/components/panels/AnalyticsPanel';
 import { SettingsPanel } from '../src/features/builder/components/panels/SettingsPanel';
+import { AudiencePanel } from '../src/features/builder/components/panels/AudiencePanel';
+import { SettingsDomainSection } from '../src/features/builder/components/panels/settings/SettingsDomainSection';
+import { SettingsIntegrationsSection } from '../src/features/builder/components/panels/settings/SettingsIntegrationsSection';
+import { SettingsBillingSection } from '../src/features/builder/components/panels/settings/SettingsBillingSection';
+import { SettingsAdvancedSection } from '../src/features/builder/components/panels/settings/SettingsAdvancedSection';
 import { StructuredItemsEditor } from '../src/features/builder/components/blocks/StructuredItemsEditor';
 import { AddBlockMenu } from '../src/features/builder/components/blocks/AddBlockMenu';
 import { PageManager } from '../src/features/builder/components/pages/PageManager';
@@ -119,12 +124,10 @@ describe('Builder Decomposition & Architectural Integrity', () => {
       expect(html).toContain('testcreator');
       expect(html).toContain('studio');
       
-      // Sidebar tab navigation
-      expect(html).toContain('>Content</span>');
-      expect(html).toContain('>Themes &amp; Styles</span>');
-      // The glossary is Account → Site → Pages → Blocks, so each tab is one short noun.
-      expect(html).toContain('>Analytics</span>');
-      expect(html).toContain('>Settings &amp; Plan</span>');
+      // Sidebar tab navigation: Account → Site → Pages → Blocks, one short noun per tab.
+      ['Content', 'Design', 'Audience', 'Analytics', 'Settings'].forEach(label => {
+        expect(html, label).toContain(`>${label}</span>`);
+      });
 
       // Default active ContentPanel
       expect(html).toContain('Creator Identity');
@@ -167,14 +170,14 @@ describe('Builder Decomposition & Architectural Integrity', () => {
   });
 
   describe('BuilderSidebar Component', () => {
-    it('renders all four domain navigation tabs with proper accessibility attributes', () => {
+    it('renders the five studio tabs with the active one marked', () => {
       const html = renderWithProviders(<BuilderSidebar />);
 
-      expect(html).toContain('>Content</span>');
-      expect(html).toContain('>Themes &amp; Styles</span>');
-      // The glossary is Account → Site → Pages → Blocks, so each tab is one short noun.
-      expect(html).toContain('>Analytics</span>');
-      expect(html).toContain('>Settings &amp; Plan</span>');
+      ['Content', 'Design', 'Audience', 'Analytics', 'Settings'].forEach(label => {
+        expect(html, label).toContain(`>${label}</span>`);
+      });
+      expect(html).toContain('aria-current="page"');
+      expect(html).toContain('aria-label="Studio sections"');
     });
   });
 
@@ -227,19 +230,43 @@ describe('Builder Decomposition & Architectural Integrity', () => {
     });
   });
 
+  describe('AudiencePanel Component', () => {
+    it('owns the form inbox and the newsletter list that used to sit in Settings', () => {
+      const html = renderWithProviders(<AudiencePanel />);
+
+      expect(html).toContain('Form responses');
+      expect(html).toContain('Export responses CSV');
+      expect(html).toContain('Newsletter Email Subscribers');
+    });
+  });
+
   describe('SettingsPanel Component', () => {
-    it('renders Plan Upgrades, Domains, Pixels, Custom CSS, and SEO controls', () => {
+    it('opens on Site and offers the five sections', () => {
       const html = renderWithProviders(<SettingsPanel />);
 
-      expect(html).toContain('Subscription Plan');
-      expect(html).toContain('Analytics &amp; Retargeting Pixels');
-      expect(html).toContain('Google Analytics 4 Measurement ID');
-      expect(html).toContain('Custom Domain');
-      expect(html).toContain('Background media URL');
-      expect(html).toContain('Public Page Controls');
-      expect(html).toContain('Developer &amp; REST API Access');
-      expect(html).toContain('Form submissions');
+      ['Site', 'Domain &amp; SEO', 'Integrations', 'Billing', 'Advanced'].forEach(label => {
+        expect(html, label).toContain(`>${label}</button>`);
+      });
+      expect(html).toContain('White-label branding');
+      expect(html).toContain('Footer logo');
+      expect(html).toContain('Duplicate this site');
+      // The editor no longer sells: one row states the plan, one action changes it.
+      expect(html).not.toContain('Select Pro');
+      expect(html).not.toContain('Membership &amp; Subscription Plan');
     });
+
+    /** Acceptance: everything reachable in the old single-page Settings is reachable now. */
+    it.each([
+      ['Domain & SEO', <SettingsDomainSection key="d" />, ['Custom Domain', 'Link preview', 'Share title']],
+      ['Integrations', <SettingsIntegrationsSection key="i" />, ['Analytics and retargeting pixels', 'Google Analytics 4 Measurement ID', 'REST API access']],
+      ['Billing', <SettingsBillingSection key="b" />, ['Current plan:', 'Manage subscription']],
+      ['Advanced', <SettingsAdvancedSection key="a" />, ['Custom CSS and webfonts', 'Background media URL', 'Temporary redirect']]
+    ] as Array<[string, React.ReactElement, string[]]>)(
+      'the %s section renders its controls', (_name, element, expected) => {
+        const html = renderWithProviders(element);
+        expected.forEach(text => expect(html, text).toContain(text));
+      }
+    );
   });
 
   describe('StructuredItemsEditor Component', () => {

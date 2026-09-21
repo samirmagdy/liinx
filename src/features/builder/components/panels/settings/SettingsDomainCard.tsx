@@ -1,13 +1,16 @@
 import React from 'react';
 import { Globe2 } from 'lucide-react';
-import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
-import { useBuilder } from '../../context/BuilderContext';
-import { brand } from '../../../../config/brand';
+import { useLanguage as useUiLanguage } from '../../../../../context/LanguageContext';
+import { useBuilder } from '../../../context/BuilderContext';
+import { brand } from '../../../../../config/brand';
+import { planUnlocks } from '../../../config/studioNavigation';
+import { UpgradeGate } from './UpgradeGate';
 
 /** The custom-domain card: the creator's host, the exact CNAME target, and DNS verification. */
 export const SettingsDomainCard: React.FC = () => {
   const { tr: ui } = useUiLanguage();
   const { profile, customDomainInput, setCustomDomainInput } = useBuilder();
+  const canUseDomain = planUnlocks(profile.plan, 'custom-domain');
 
   return (
     <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
@@ -23,14 +26,12 @@ export const SettingsDomainCard: React.FC = () => {
             </p>
           </div>
         </div>
-        {profile.plan === 'free' ? (
-          <span className="whitespace-nowrap text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
-            {ui("PRO / STUDIO")}
-          </span>
-        ) : (
+        {canUseDomain ? (
           <span className="whitespace-nowrap text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
             {profile.customDomainVerified ? ui("DNS VERIFIED") : ui("SETUP REQUIRED")}
           </span>
+        ) : (
+          <UpgradeGate capability="custom-domain" />
         )}
       </div>
 
@@ -43,7 +44,7 @@ export const SettingsDomainCard: React.FC = () => {
             aria-label={ui("Domain / Subdomain Name")}
             dir="ltr"
             type="text"
-            disabled={profile.plan === 'free'}
+            disabled={!canUseDomain}
             value={customDomainInput}
             onChange={e => setCustomDomainInput(e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))}
             placeholder={ui("e.g. links.sarahcreator.com")}

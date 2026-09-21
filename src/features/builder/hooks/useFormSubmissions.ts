@@ -44,7 +44,7 @@ export function useFormSubmissions({ activeTab, profileId }: UseFormSubmissionsP
   }, [profileId]);
 
   useEffect(() => {
-    if (activeTab !== 'settings') return;
+    if (activeTab !== 'audience') return;
     let cancelled = false;
     setFormSubmissionsLoading(true);
     setFormSubmissionsError(null);

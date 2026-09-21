@@ -1,5 +1,7 @@
 import { formatUiDate } from '../../../utils/localization';
 import { type Language } from '../../../config/i18n';
+import { parseBuilderTab } from '../config/studioNavigation';
+import { type BuilderTab } from '../types/builder.types';
 
 export const toDateTimeLocal = (ts?: number | null): string => {
   if (!ts) return '';
@@ -46,12 +48,8 @@ export const getScheduleStatus = (
 export const initialPageId = (nextProfile: { pages?: Array<{ id: string; isHome?: boolean }> }): string =>
   nextProfile.pages?.find(page => page.isHome)?.id || nextProfile.pages?.[0]?.id || '';
 
-export const initialBuilderTab = (): 'content' | 'appearance' | 'settings' | 'analytics' => {
+export const initialBuilderTab = (): BuilderTab => {
   if (typeof window === 'undefined') return 'content';
-  const param = new URLSearchParams(window.location.search).get('tab');
-  if (param === 'settings' || param === 'appearance' || param === 'analytics' || param === 'content') {
-    return param;
-  }
-  return 'content';
+  return parseBuilderTab(new URLSearchParams(window.location.search).get('tab'));
 };
 

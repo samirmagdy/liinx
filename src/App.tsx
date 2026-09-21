@@ -158,7 +158,9 @@ function StudioPage() {
   }
 
   return (
-    <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
+    // The Studio's bottom chrome is fixed, so the page reserves its band once here rather
+    // than in each column — otherwise the last footer row can never be scrolled clear.
+    <div className="studio-page marketing-shell min-h-screen flex flex-col bg-white text-neutral-900 pb-36 lg:pb-0">
       <Navbar activeView="builder" />
       <main id="main-content" tabIndex={-1} className="flex-1">
         <Suspense fallback={<LoadingScreen message={tr('Loading your profile…')} submessage="Preparing your creative studio" fullscreen={false} />}>

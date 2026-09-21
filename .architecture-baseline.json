@@ -17,7 +17,7 @@
   ],
   "files": {
     "src/App.tsx": {
-      "lines": 409,
+      "lines": 419,
       "functions": []
     },
     "src/animations/gsap.ts": {
@@ -83,7 +83,7 @@
       ]
     },
     "src/components/HeroClaimForm.tsx": {
-      "lines": 98,
+      "lines": 101,
       "functions": []
     },
     "src/components/HeroFeatureShowcase.tsx": {
@@ -91,7 +91,7 @@
       "functions": []
     },
     "src/components/HeroPreviewControls.tsx": {
-      "lines": 98,
+      "lines": 109,
       "functions": []
     },
     "src/components/LinktreeImporterModal.tsx": {
@@ -119,19 +119,13 @@
       "functions": []
     },
     "src/components/PhonePreview.tsx": {
-      "lines": 203,
+      "lines": 162,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 178,
-          "complexity": 29,
+          "lines": 137,
+          "complexity": 19,
           "maxDepth": 4
-        },
-        {
-          "name": "renderProfileContent",
-          "lines": 103,
-          "complexity": 13,
-          "maxDepth": 2
         }
       ]
     },
@@ -175,11 +169,11 @@
       "functions": []
     },
     "src/components/TemplateCard.tsx": {
-      "lines": 69,
+      "lines": 78,
       "functions": []
     },
     "src/components/TemplatesSection.tsx": {
-      "lines": 106,
+      "lines": 110,
       "functions": []
     },
     "src/components/TrustProofSection.tsx": {
@@ -282,24 +276,36 @@
       "functions": []
     },
     "src/components/phone-preview/PhoneBlocksList.tsx": {
-      "lines": 516,
+      "lines": 505,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 481,
-          "complexity": 59,
+          "lines": 457,
+          "complexity": 54,
           "maxDepth": 5
         },
         {
           "name": "<anonymous>",
-          "lines": 440,
-          "complexity": 51,
+          "lines": 415,
+          "complexity": 46,
           "maxDepth": 5
         }
       ]
     },
+    "src/components/phone-preview/PhoneDocumentBlock.tsx": {
+      "lines": 39,
+      "functions": []
+    },
+    "src/components/phone-preview/PhoneFooterBranding.tsx": {
+      "lines": 59,
+      "functions": []
+    },
+    "src/components/phone-preview/PhoneNewsletterBlock.tsx": {
+      "lines": 66,
+      "functions": []
+    },
     "src/components/phone-preview/PhoneProfileHeader.tsx": {
-      "lines": 72,
+      "lines": 86,
       "functions": []
     },
     "src/components/phone-preview/PhoneSocialsRow.tsx": {
@@ -347,7 +353,7 @@
       "functions": []
     },
     "src/features/account/components/AccountSidebar.tsx": {
-      "lines": 31,
+      "lines": 33,
       "functions": []
     },
     "src/features/account/components/AgencyReferralPanel.tsx": {
@@ -371,7 +377,7 @@
       "functions": []
     },
     "src/features/account/components/ProfilesSettingsPanel.tsx": {
-      "lines": 45,
+      "lines": 47,
       "functions": []
     },
     "src/features/account/components/ReferralLinkCard.tsx": {
@@ -415,30 +421,38 @@
       "functions": []
     },
     "src/features/builder/components/BuilderShell.tsx": {
-      "lines": 102,
+      "lines": 113,
       "functions": []
     },
     "src/features/builder/components/BuilderSidebar.tsx": {
-      "lines": 62,
+      "lines": 45,
       "functions": []
     },
     "src/features/builder/components/BuilderToolbar.tsx": {
-      "lines": 187,
+      "lines": 182,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 174,
-          "complexity": 19,
+          "lines": 168,
+          "complexity": 17,
           "maxDepth": 3
         }
       ]
     },
     "src/features/builder/components/BuilderWorkspace.tsx": {
-      "lines": 87,
+      "lines": 93,
       "functions": []
     },
     "src/features/builder/components/PreviewControls.tsx": {
       "lines": 64,
+      "functions": []
+    },
+    "src/features/builder/components/SetupStateSync.tsx": {
+      "lines": 33,
+      "functions": []
+    },
+    "src/features/builder/components/StudioMobileTabBar.tsx": {
+      "lines": 96,
       "functions": []
     },
     "src/features/builder/components/blocks/AddBlockHeader.tsx": {
@@ -446,7 +460,11 @@
       "functions": []
     },
     "src/features/builder/components/blocks/AddBlockMenu.tsx": {
-      "lines": 119,
+      "lines": 49,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/AddBlockPopover.tsx": {
+      "lines": 99,
       "functions": []
     },
     "src/features/builder/components/blocks/BlockCatalogGrid.tsx": {
@@ -454,24 +472,19 @@
       "functions": []
     },
     "src/features/builder/components/blocks/BlockEditorItem.tsx": {
-      "lines": 1189,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 1149,
-          "complexity": 129,
-          "maxDepth": 2
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 634,
-          "complexity": 83,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 41,
+      "functions": []
     },
     "src/features/builder/components/blocks/BlockList.tsx": {
-      "lines": 68,
+      "lines": 69,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/BlockListEmptyState.tsx": {
+      "lines": 26,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/RecommendedBlocks.tsx": {
+      "lines": 42,
       "functions": []
     },
     "src/features/builder/components/blocks/StructuredItemsEditor.tsx": {
@@ -495,6 +508,110 @@
       "lines": 269,
       "functions": []
     },
+    "src/features/builder/components/blocks/editors/AdvancedFields.tsx": {
+      "lines": 66,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/BlockCoreFields.tsx": {
+      "lines": 103,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/BlockEditorActions.tsx": {
+      "lines": 107,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/BlockEditorHeader.tsx": {
+      "lines": 26,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/BlockEditorIdentity.tsx": {
+      "lines": 58,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/ContactTargetField.tsx": {
+      "lines": 53,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/ContentGateField.tsx": {
+      "lines": 36,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/DestinationUrlField.tsx": {
+      "lines": 45,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/EventFields.tsx": {
+      "lines": 91,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/FolderFields.tsx": {
+      "lines": 111,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/FormConsentField.tsx": {
+      "lines": 45,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/ImageFields.tsx": {
+      "lines": 50,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/ImageMetadataFields.tsx": {
+      "lines": 108,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/LinkFields.tsx": {
+      "lines": 96,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/LinkScheduleFields.tsx": {
+      "lines": 80,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/MapFields.tsx": {
+      "lines": 34,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/MediaFields.tsx": {
+      "lines": 98,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/PhoneFields.tsx": {
+      "lines": 86,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/PresaveFields.tsx": {
+      "lines": 33,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/ProductFields.tsx": {
+      "lines": 69,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/RichTextField.tsx": {
+      "lines": 49,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/RichTextToolbar.tsx": {
+      "lines": 57,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/SpacerField.tsx": {
+      "lines": 42,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/TipsFields.tsx": {
+      "lines": 33,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/useAdvancedFields.ts": {
+      "lines": 16,
+      "functions": []
+    },
+    "src/features/builder/components/blocks/editors/useRichTextEditor.ts": {
+      "lines": 65,
+      "functions": []
+    },
     "src/features/builder/components/dialogs/ApiKeyDialog.tsx": {
       "lines": 93,
       "functions": []
@@ -515,16 +632,29 @@
       "lines": 101,
       "functions": []
     },
+    "src/features/builder/components/dialogs/StarterSiteDialog.tsx": {
+      "lines": 145,
+      "functions": []
+    },
+    "src/features/builder/components/dialogs/StarterSiteDialogHost.tsx": {
+      "lines": 20,
+      "functions": []
+    },
+    "src/features/builder/components/dialogs/UpgradeDialog.tsx": {
+      "lines": 62,
+      "functions": []
+    },
+    "src/features/builder/components/pages/PageEditorFields.tsx": {
+      "lines": 64,
+      "functions": []
+    },
+    "src/features/builder/components/pages/PageEditorForm.tsx": {
+      "lines": 85,
+      "functions": []
+    },
     "src/features/builder/components/pages/PageManager.tsx": {
-      "lines": 185,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 180,
-          "complexity": 11,
-          "maxDepth": 1
-        }
-      ]
+      "lines": 83,
+      "functions": []
     },
     "src/features/builder/components/panels/AnalyticsPanel.tsx": {
       "lines": 162,
@@ -545,39 +675,48 @@
       "lines": 78,
       "functions": []
     },
+    "src/features/builder/components/panels/AudiencePanel.tsx": {
+      "lines": 12,
+      "functions": []
+    },
     "src/features/builder/components/panels/AvatarUploader.tsx": {
-      "lines": 59,
+      "lines": 60,
       "functions": []
     },
     "src/features/builder/components/panels/ContentPanel.tsx": {
-      "lines": 93,
+      "lines": 98,
+      "functions": []
+    },
+    "src/features/builder/components/panels/FormSubmissionsPanel.tsx": {
+      "lines": 158,
       "functions": []
     },
     "src/features/builder/components/panels/IdentityFields.tsx": {
-      "lines": 83,
+      "lines": 87,
       "functions": []
     },
     "src/features/builder/components/panels/IntegrationsPanel.tsx": {
-      "lines": 328,
+      "lines": 322,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 314,
-          "complexity": 23,
+          "lines": 306,
+          "complexity": 22,
           "maxDepth": 3
         }
       ]
     },
     "src/features/builder/components/panels/SettingsPanel.tsx": {
-      "lines": 800,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 786,
-          "complexity": 60,
-          "maxDepth": 4
-        }
-      ]
+      "lines": 52,
+      "functions": []
+    },
+    "src/features/builder/components/panels/SetupChecklist.tsx": {
+      "lines": 124,
+      "functions": []
+    },
+    "src/features/builder/components/panels/SetupMilestoneCard.tsx": {
+      "lines": 60,
+      "functions": []
     },
     "src/features/builder/components/panels/SubscribersPanel.tsx": {
       "lines": 77,
@@ -591,17 +730,85 @@
       "lines": 58,
       "functions": []
     },
+    "src/features/builder/components/panels/settings/SavePageSettingsButton.tsx": {
+      "lines": 30,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsAdvancedCards.tsx": {
+      "lines": 130,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsAdvancedSection.tsx": {
+      "lines": 13,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsBillingSection.tsx": {
+      "lines": 76,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsCard.tsx": {
+      "lines": 21,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsDomainCard.tsx": {
+      "lines": 160,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsDomainSection.tsx": {
+      "lines": 12,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsDuplicateCard.tsx": {
+      "lines": 44,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsFooterCard.tsx": {
+      "lines": 81,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsIntegrationsSection.tsx": {
+      "lines": 87,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsPublicPageCards.tsx": {
+      "lines": 148,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsSiteSection.tsx": {
+      "lines": 14,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/SettingsWhiteLabelCard.tsx": {
+      "lines": 58,
+      "functions": []
+    },
+    "src/features/builder/components/panels/settings/UpgradeGate.tsx": {
+      "lines": 41,
+      "functions": []
+    },
+    "src/features/builder/components/share/PublishSharePrompt.tsx": {
+      "lines": 44,
+      "functions": []
+    },
+    "src/features/builder/components/share/ShareActions.tsx": {
+      "lines": 72,
+      "functions": []
+    },
     "src/features/builder/components/social/SocialLinksEditor.tsx": {
       "lines": 177,
       "functions": []
     },
+    "src/features/builder/config/studioNavigation.ts": {
+      "lines": 108,
+      "functions": []
+    },
     "src/features/builder/context/BuilderContext.tsx": {
-      "lines": 691,
+      "lines": 686,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 401,
-          "complexity": 47,
+          "lines": 382,
+          "complexity": 32,
           "maxDepth": 1
         }
       ]
@@ -626,7 +833,7 @@
       ]
     },
     "src/features/builder/hooks/useBlocks.ts": {
-      "lines": 345,
+      "lines": 346,
       "functions": [
         {
           "name": "useBlocks",
@@ -651,24 +858,28 @@
         }
       ]
     },
+    "src/features/builder/hooks/useLivePreview.ts": {
+      "lines": 18,
+      "functions": []
+    },
     "src/features/builder/hooks/usePages.ts": {
-      "lines": 180,
+      "lines": 188,
       "functions": [
         {
           "name": "usePages",
-          "lines": 166,
-          "complexity": 39,
+          "lines": 156,
+          "complexity": 37,
           "maxDepth": 1
         }
       ]
     },
     "src/features/builder/hooks/useProfile.ts": {
-      "lines": 279,
+      "lines": 275,
       "functions": [
         {
           "name": "useProfile",
-          "lines": 248,
-          "complexity": 36,
+          "lines": 244,
+          "complexity": 34,
           "maxDepth": 1
         }
       ]
@@ -683,6 +894,14 @@
           "maxDepth": 1
         }
       ]
+    },
+    "src/features/builder/hooks/useStarterSite.ts": {
+      "lines": 64,
+      "functions": []
+    },
+    "src/features/builder/hooks/useStudioSettingsInputs.ts": {
+      "lines": 90,
+      "functions": []
     },
     "src/features/builder/hooks/useSubscribers.ts": {
       "lines": 92,
@@ -700,11 +919,19 @@
       ]
     },
     "src/features/builder/types/builder.types.ts": {
-      "lines": 70,
+      "lines": 86,
       "functions": []
     },
     "src/features/builder/utils/builder.utils.ts": {
-      "lines": 58,
+      "lines": 56,
+      "functions": []
+    },
+    "src/features/builder/utils/publishEvents.ts": {
+      "lines": 18,
+      "functions": []
+    },
+    "src/features/builder/utils/shareLinks.ts": {
+      "lines": 8,
       "functions": []
     },
     "src/features/public-bio/components/DemoProfileNotice.tsx": {
@@ -759,11 +986,11 @@
       "functions": []
     },
     "src/features/public-bio/components/PublicProfileHeader.tsx": {
-      "lines": 89,
+      "lines": 100,
       "functions": []
     },
     "src/features/public-bio/components/PublicSearchInput.tsx": {
-      "lines": 41,
+      "lines": 42,
       "functions": []
     },
     "src/features/public-bio/components/StickyAudioBar.tsx": {
@@ -932,7 +1159,7 @@
       "functions": []
     },
     "src/features/public-bio/hooks/usePublicProfile.ts": {
-      "lines": 173,
+      "lines": 174,
       "functions": [
         {
           "name": "usePublicProfile",
@@ -958,6 +1185,30 @@
       "lines": 30,
       "functions": []
     },
+    "src/features/register/components/SignupAccountStep.tsx": {
+      "lines": 92,
+      "functions": []
+    },
+    "src/features/register/components/SignupStarterSiteStep.tsx": {
+      "lines": 104,
+      "functions": []
+    },
+    "src/features/register/components/StarterSiteChoices.tsx": {
+      "lines": 114,
+      "functions": []
+    },
+    "src/features/register/hooks/useSignupFlow.ts": {
+      "lines": 113,
+      "functions": []
+    },
+    "src/features/register/hooks/useStarterSiteChoice.ts": {
+      "lines": 42,
+      "functions": []
+    },
+    "src/features/register/hooks/useUsernameAvailability.ts": {
+      "lines": 38,
+      "functions": []
+    },
     "src/hooks/useUsernameAvailability.ts": {
       "lines": 54,
       "functions": []
@@ -971,11 +1222,11 @@
       "functions": []
     },
     "src/pages/FeaturesPage.tsx": {
-      "lines": 187,
+      "lines": 178,
       "functions": []
     },
     "src/pages/GuidesPage.tsx": {
-      "lines": 71,
+      "lines": 73,
       "functions": []
     },
     "src/pages/LegalPages.tsx": {
@@ -1001,26 +1252,23 @@
       ]
     },
     "src/pages/RegisterPage.tsx": {
-      "lines": 357,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 321,
-          "complexity": 33,
-          "maxDepth": 3
-        }
-      ]
+      "lines": 52,
+      "functions": []
     },
     "src/pages/guides.data.ts": {
       "lines": 74,
       "functions": []
     },
     "src/services/api.ts": {
-      "lines": 487,
+      "lines": 509,
       "functions": []
     },
     "src/types.ts": {
-      "lines": 19,
+      "lines": 9,
+      "functions": []
+    },
+    "src/utils/avatarInitials.ts": {
+      "lines": 7,
       "functions": []
     },
     "src/utils/booking.ts": {
@@ -1066,6 +1314,10 @@
       "lines": 96,
       "functions": []
     },
+    "src/utils/previewSession.ts": {
+      "lines": 41,
+      "functions": []
+    },
     "src/utils/publicSearch.ts": {
       "lines": 34,
       "functions": []
@@ -1076,6 +1328,10 @@
     },
     "src/utils/saveQueue.ts": {
       "lines": 66,
+      "functions": []
+    },
+    "src/utils/starterSites.ts": {
+      "lines": 125,
       "functions": []
     },
     "server/accountEntitlements.ts": {
@@ -1176,17 +1432,10 @@
     },
     "server/routes/apiV1.ts": {
       "lines": 264,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 60,
-          "complexity": 26,
-          "maxDepth": 2
-        }
-      ]
+      "functions": []
     },
     "server/routes/auth.ts": {
-      "lines": 585,
+      "lines": 601,
       "functions": []
     },
     "server/routes/billing.ts": {
@@ -1194,7 +1443,7 @@
       "functions": []
     },
     "server/routes/blocks.ts": {
-      "lines": 408,
+      "lines": 404,
       "functions": []
     },
     "server/routes/capabilities.ts": {
@@ -1225,7 +1474,7 @@
       ]
     },
     "server/routes/newsletter.ts": {
-      "lines": 284,
+      "lines": 285,
       "functions": []
     },
     "server/routes/pages.ts": {
@@ -1233,7 +1482,7 @@
       "functions": []
     },
     "server/routes/profiles.ts": {
-      "lines": 826,
+      "lines": 824,
       "functions": []
     },
     "server/routes/referrals.ts": {
@@ -1242,6 +1491,14 @@
     },
     "server/routes/sessionResponse.ts": {
       "lines": 9,
+      "functions": []
+    },
+    "server/routes/setup.ts": {
+      "lines": 64,
+      "functions": []
+    },
+    "server/routes/templates.ts": {
+      "lines": 43,
       "functions": []
     },
     "server/routes/upload.ts": {
@@ -1260,7 +1517,7 @@
       "functions": []
     },
     "server/server.ts": {
-      "lines": 746,
+      "lines": 748,
       "functions": []
     },
     "server/services/agencyReferrals.ts": {
@@ -1341,7 +1598,7 @@
       "functions": []
     },
     "server/services/importer/commit.ts": {
-      "lines": 96,
+      "lines": 80,
       "functions": []
     },
     "server/services/importer/index.ts": {
@@ -1397,6 +1654,14 @@
     },
     "server/services/session.ts": {
       "lines": 17,
+      "functions": []
+    },
+    "server/services/setupProgress.ts": {
+      "lines": 102,
+      "functions": []
+    },
+    "server/services/siteComposition.ts": {
+      "lines": 188,
       "functions": []
     },
     "server/services/uploadLifecycle.ts": {

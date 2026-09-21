@@ -24,7 +24,7 @@ export function useSubscribers({ activeTab, profileId, username }: UseSubscriber
   }, [profileId]);
 
   useEffect(() => {
-    if (activeTab !== 'settings') return;
+    if (activeTab !== 'audience') return;
     let cancelled = false;
     setSubscribersLoading(true);
     setSubscribersError(null);

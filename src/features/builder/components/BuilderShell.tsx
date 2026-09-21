@@ -6,6 +6,7 @@ import { QrCodeModal } from '../../../components/QrCodeModal';
 import { LinktreeImporterModal } from '../../../components/LinktreeImporterModal';
 import { ConfirmDeleteDialog } from './dialogs/ConfirmDeleteDialog';
 import { NewProfileDialog } from './dialogs/NewProfileDialog';
+import { UpgradeDialog } from './dialogs/UpgradeDialog';
 import { ApiKeyDialog } from './dialogs/ApiKeyDialog';
 import { StarterSiteDialogHost } from './dialogs/StarterSiteDialogHost';
 import { PublishSharePrompt } from './share/PublishSharePrompt';
@@ -76,6 +77,8 @@ export const BuilderShell: React.FC = () => {
         onImportComplete={reloadProfileAfterImport}
         pages={profile.pages || []}
       />
+
+      <UpgradeDialog />
 
       <ConfirmDeleteDialog
         open={Boolean(deletePageId)}

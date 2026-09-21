@@ -1,6 +1,22 @@
 import { type CreatorProfile, type ThemeConfig } from '../../../types';
 
-export type BuilderTab = 'content' | 'appearance' | 'settings' | 'analytics';
+/** The five Studio tabs. Keep in sync with STUDIO_TABS, the single source of labels. */
+export type BuilderTab = 'content' | 'design' | 'audience' | 'analytics' | 'settings';
+
+/** Sub-navigation inside Settings. Keep in sync with SETTINGS_SECTIONS. */
+export type SettingsSection = 'site' | 'domain' | 'integrations' | 'billing' | 'advanced';
+
+/** A locked affordance the creator can ask to unlock, and the plan that unlocks it. */
+export type UpgradeCapability =
+  | 'custom-domain'
+  | 'tracking-pixels'
+  | 'custom-css'
+  | 'white-label'
+  | 'background-media'
+  | 'footer-branding'
+  | 'scheduling'
+  | 'api-access'
+  | 'extra-sites';
 
 export type BuilderLoadState = 'loading' | 'empty' | 'ready' | 'error';
 

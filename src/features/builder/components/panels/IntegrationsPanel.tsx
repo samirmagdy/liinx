@@ -1,5 +1,6 @@
 import React from 'react';
 import { canonicalOrigin } from '../../../../config/brand';
+import { UpgradeGate } from './settings/UpgradeGate';
 import {
   Terminal,
   Plus,
@@ -48,21 +49,13 @@ export const IntegrationsPanel: React.FC = () => {
               <Terminal className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-bold text-sm text-neutral-900">{ui("Developer & REST API Access")}</h2>
+              <h2 className="font-bold text-sm text-neutral-900">{ui("REST API access")}</h2>
               <p className="text-xs text-neutral-500 mt-0.5">
                 {ui("Read profile details and create or delete link blocks with REST API v1.")}
               </p>
             </div>
           </div>
-          {profile.plan !== 'studio' ? (
-            <span className="whitespace-nowrap text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
-              {ui("STUDIO TIER ONLY")}
-            </span>
-          ) : (
-            <span className="whitespace-nowrap text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
-              {ui("API ENABLED")}
-            </span>
-          )}
+          <UpgradeGate capability="api-access" />
         </div>
 
         {profile.plan !== 'studio' ? (
