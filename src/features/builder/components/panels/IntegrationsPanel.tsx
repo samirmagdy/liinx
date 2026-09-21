@@ -54,11 +54,11 @@ export const IntegrationsPanel: React.FC = () => {
             </div>
           </div>
           {profile.plan !== 'studio' ? (
-            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("STUDIO TIER ONLY")}
             </span>
           ) : (
-            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {ui("API ENABLED")}
             </span>
           )}
@@ -102,9 +102,9 @@ export const IntegrationsPanel: React.FC = () => {
                   <div key={k.id} className="p-3 flex items-center justify-between gap-3">
                     <div className="flex flex-col">
                       <span className="font-bold text-neutral-900">{k.name}</span>
-                      <span className="font-mono text-[11px] text-neutral-600" dir="ltr">{k.prefix}</span>
+                      <span className="font-mono text-xs text-neutral-600" dir="ltr">{k.prefix}</span>
                       {k.expiresAt && (
-                        <span className="text-[11px] text-neutral-500" dir="auto">
+                        <span className="text-xs text-neutral-500" dir="auto">
                           {ui('Expires')} <span dir="ltr">{formatUiDate(k.expiresAt, lang)}</span>
                         </span>
                       )}
@@ -114,14 +114,14 @@ export const IntegrationsPanel: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleRevokeApiKey(k.id)}
-                          className="px-2.5 py-1 rounded-lg bg-rose-700 hover:bg-rose-800 text-white text-[11px] font-bold transition-colors cursor-pointer"
+                          className="px-2.5 py-1 rounded-lg bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold transition-colors cursor-pointer"
                         >
                           {ui("Confirm Revoke")}
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirmRevokeKeyId(null)}
-                          className="px-2 py-1 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 text-[11px] font-semibold transition-colors cursor-pointer"
+                          className="px-2 py-1 rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50 text-xs font-semibold transition-colors cursor-pointer"
                         >
                           {ui("Cancel")}
                         </button>
@@ -142,7 +142,7 @@ export const IntegrationsPanel: React.FC = () => {
 
             <div className="p-3 bg-neutral-900 text-neutral-200 rounded-xl space-y-1 text-xs font-mono">
               <span className="text-neutral-600 text-[11px] uppercase font-bold tracking-caps block">{ui("Sample API Request")}</span>
-              <p className="text-[11px] select-all overflow-x-auto whitespace-nowrap">
+              <p className="text-xs select-all overflow-x-auto whitespace-nowrap">
                 <span dir="ltr">curl https://raloa.app/api/v1/profile</span><br />
                 {'  -H "Authorization: Bearer raloa_live_your_key_here"'}
               </p>
@@ -205,12 +205,12 @@ export const IntegrationsPanel: React.FC = () => {
                 </span>
               </div>
               {instagramStatus.needsReconnect && (
-                <p role="alert" className="text-[11px] text-rose-700">
+                <p role="alert" className="text-xs text-rose-700">
                   {ui("Instagram access expired. Reconnect to sync again; existing links are unchanged.")}
                 </p>
               )}
               {instagramStatus.lastSyncError && !instagramStatus.needsReconnect && (
-                <p role="alert" className="text-[11px] text-rose-700">{instagramStatus.lastSyncError}</p>
+                <p role="alert" className="text-xs text-rose-700">{instagramStatus.lastSyncError}</p>
               )}
               <div className="flex items-center gap-2">
                 <button
@@ -250,10 +250,10 @@ export const IntegrationsPanel: React.FC = () => {
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
               <span>{ui("Meta Instagram OAuth Setup Required")}</span>
             </div>
-            <p className="text-amber-800 text-[11px] leading-relaxed">
+            <p className="text-amber-800 text-xs leading-relaxed">
               {ui("To connect your live Instagram account, server administrators must configure")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[11px]">{ui("INSTAGRAM_CLIENT_ID")}</code> {ui("and")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[11px]">{ui("INSTAGRAM_CLIENT_SECRET")}</code> {ui("in the server environment.")}
             </p>
-            <div className="pt-1 flex items-center justify-between text-[11px] text-amber-900 font-medium">
+            <div className="pt-1 flex items-center justify-between text-xs text-amber-900 font-medium">
               <span>{ui("Live Caption Parser & Link Ingest is available below without OAuth.")}</span>
             </div>
           </div>
@@ -262,7 +262,7 @@ export const IntegrationsPanel: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold text-neutral-900">{ui("Connect your Instagram account")}</p>
-                <p className="text-[11px] text-neutral-500 mt-0.5">
+                <p className="text-xs text-neutral-500 mt-0.5">
                   {ui("Authorize via official Meta Graph API to enable automatic post polling & real-time webhook updates.")}
                 </p>
               </div>
@@ -287,7 +287,7 @@ export const IntegrationsPanel: React.FC = () => {
             <button
               type="button"
               onClick={() => setInstagramCaptionInput('Tickets for Berlin studio show live now: https://eventbrite.com/e/berlin-live-2025! Also grab the vinyl bundle at https://shop.artist.studio/vinyl.')}
-              className="text-[11px] font-mono text-amber-700 hover:underline cursor-pointer"
+              className="text-xs font-mono text-amber-700 hover:underline cursor-pointer"
             >
               {ui("Fill sample caption")}
             </button>

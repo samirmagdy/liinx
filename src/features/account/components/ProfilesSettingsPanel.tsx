@@ -24,7 +24,7 @@ export function ProfilesSettingsPanel({ ar, profilesList, profilesLoading, setLo
                 </div>
                 <div>
                   <p className="text-xs font-bold text-neutral-900">@{profile.username}</p>
-                  <p className="text-[11px] text-neutral-500">{profile.displayName} • {profile.category || 'Creator'}</p>
+                  <p className="text-xs text-neutral-500">{profile.displayName} • {profile.category || 'Creator'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

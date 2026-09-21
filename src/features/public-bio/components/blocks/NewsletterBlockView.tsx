@@ -105,7 +105,7 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
               {newsletterError}
             </p>
           )}
-          <label className="flex items-start gap-2 text-[11px] leading-relaxed" style={{ color: theme.subtextColor }} dir="auto">
+          <label className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: theme.subtextColor }} dir="auto">
             <input
               id={`newsletter-consent-${block.id}`}
               name="consent"
@@ -117,7 +117,7 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
             />
             <span>{ui('I agree to receive email updates from this creator and can unsubscribe at any time.')}</span>
           </label>
-          <p className="text-[11px] leading-relaxed opacity-75" style={{ color: theme.subtextColor }} dir="auto">
+          <p className="text-xs leading-relaxed opacity-75" style={{ color: theme.subtextColor }} dir="auto">
             {ui('You will be added after you confirm the email we send.')}
           </p>
           <button

@@ -86,7 +86,7 @@ export const FormBlockView: React.FC<FormBlockViewProps> = ({
             <label key={field.id || field.name} className="grid gap-1 text-xs font-semibold">
               {field.label || field.name}
               {field.helpText && (
-                <span className="font-normal text-[11px]" style={{ color: theme.subtextColor }}>
+                <span className="font-normal text-xs" style={{ color: theme.subtextColor }}>
                   {field.helpText}
                 </span>
               )}

@@ -116,7 +116,7 @@ export const SettingsPanel: React.FC = () => {
           }`}>
             <div>
               <div className="font-bold text-sm text-neutral-900">{ui("Free")}</div>
-              <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Core links, analytics & bio")}</div>
+              <div className="text-neutral-500 text-xs mt-0.5">{ui("Core links, analytics & bio")}</div>
             </div>
             <button
               onClick={() => handleUpgradePlan('free')}
@@ -135,7 +135,7 @@ export const SettingsPanel: React.FC = () => {
                 <span className="font-bold text-sm text-neutral-900">{ui("Pro")}</span>
                 <span className="text-[11px] bg-amber-100 text-amber-800 font-mono font-bold px-1.5 py-0.5 rounded">{ui("POPULAR")}</span>
               </div>
-              <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Custom domain and branding controls")}</div>
+              <div className="text-neutral-500 text-xs mt-0.5">{ui("Custom domain and branding controls")}</div>
             </div>
             <button
               onClick={() => handleUpgradePlan('pro')}
@@ -151,7 +151,7 @@ export const SettingsPanel: React.FC = () => {
           }`}>
             <div>
               <div className="font-bold text-sm text-neutral-900">{ui("Studio")}</div>
-              <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Custom CSS and REST API")}</div>
+              <div className="text-neutral-500 text-xs mt-0.5">{ui("Custom CSS and REST API")}</div>
             </div>
             <button
               onClick={() => handleUpgradePlan('studio')}
@@ -174,7 +174,7 @@ export const SettingsPanel: React.FC = () => {
             </p>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO FEATURE")}
             </span>
           ) : (
@@ -204,7 +204,7 @@ export const SettingsPanel: React.FC = () => {
           )}
         </div>
         {profile.plan === 'free' && (
-          <p className="text-[11px] text-neutral-600">
+          <p className="text-xs text-neutral-600">
             {ui("Upgrade to Pro or Studio to completely remove all RALOA branding badges.")}
           </p>
         )}
@@ -220,11 +220,11 @@ export const SettingsPanel: React.FC = () => {
             </p>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO FEATURE")}
             </span>
           ) : (
-            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {ui("ACTIVE")}
             </span>
           )}
@@ -244,7 +244,7 @@ export const SettingsPanel: React.FC = () => {
               placeholder={ui("G-XXXXXXXXXX")}
               className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
             />
-            <p className="text-[11px] text-neutral-600">{ui("Found in GA4 Admin > Data Streams > Measurement ID")}</p>
+            <p className="text-xs text-neutral-600">{ui("Found in GA4 Admin > Data Streams > Measurement ID")}</p>
           </div>
 
           <div className="space-y-1.5">
@@ -260,7 +260,7 @@ export const SettingsPanel: React.FC = () => {
               placeholder={ui("e.g. 123456789012345")}
               className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
             />
-            <p className="text-[11px] text-neutral-600">{ui("Found in Meta Events Manager > Data Sources")}</p>
+            <p className="text-xs text-neutral-600">{ui("Found in Meta Events Manager > Data Sources")}</p>
           </div>
         </div>
 
@@ -297,11 +297,11 @@ export const SettingsPanel: React.FC = () => {
             </div>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO / STUDIO")}
             </span>
           ) : (
-            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {profile.customDomainVerified ? ui("DNS VERIFIED") : ui("SETUP REQUIRED")}
             </span>
           )}
@@ -327,7 +327,7 @@ export const SettingsPanel: React.FC = () => {
             <span className="font-bold text-neutral-900 block text-xs">
               {ui("How to connect your domain:")}
             </span>
-            <ol className="space-y-1.5 text-[11px] text-neutral-600 list-decimal list-inside leading-relaxed">
+            <ol className="space-y-1.5 text-xs text-neutral-600 list-decimal list-inside leading-relaxed">
               <li>{ui("Enter your subdomain above (e.g. links.yourdomain.com)")}</li>
               <li>
                 {ui("In your DNS provider (Cloudflare, GoDaddy, etc.), add a ")}
@@ -340,12 +340,12 @@ export const SettingsPanel: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyCname}
-                className="text-[11px] text-amber-700 hover:text-amber-800 font-sans font-bold cursor-pointer transition-colors"
+                className="text-xs text-amber-700 hover:text-amber-800 font-sans font-bold cursor-pointer transition-colors"
               >
                 {copiedCname ? ui("Copied!") : ui("Copy Target")}
               </button>
             </div>
-            <p className="text-[11px] leading-relaxed text-neutral-500 pt-1">
+            <p className="text-xs leading-relaxed text-neutral-500 pt-1">
               {profile.customDomainVerified
                 ? ui("✓ Domain connected successfully. Secure HTTPS becomes active once your hosting provider completes TLS certificate provisioning.")
                 : ui("3. Click 'Verify DNS' below once your record is created. Connect your custom domain with guided DNS verification.")}
@@ -414,11 +414,11 @@ export const SettingsPanel: React.FC = () => {
             </div>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO / STUDIO")}
             </span>
           ) : (
-            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="whitespace-nowrap text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {ui("ACTIVE")}
             </span>
           )}
@@ -439,14 +439,14 @@ export const SettingsPanel: React.FC = () => {
               className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
             />
           </div>
-          <p className="text-[11px] text-neutral-500">
+          <p className="text-xs text-neutral-500">
             {ui("Unsupported imports, external URLs, and rules that can hide or cover controls are rejected.")}
           </p>
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label htmlFor="settings-custom-css" className="text-xs font-semibold text-neutral-800">{ui("Custom CSS Overrides")}</label>
-              <span className="text-[11px] font-mono text-neutral-600">{ui("Scoped to #public-bio-view")}</span>
+              <span className="text-xs font-mono text-neutral-600">{ui("Scoped to #public-bio-view")}</span>
             </div>
             <textarea
               id="settings-custom-css"
@@ -592,7 +592,7 @@ export const SettingsPanel: React.FC = () => {
               className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2 text-xs font-normal text-neutral-900 disabled:opacity-50"
             />
             {profile.plan === 'free' && (
-              <span className="mt-1 block text-[11px] font-normal text-neutral-500">
+              <span className="mt-1 block text-xs font-normal text-neutral-500">
                 {ui('Background media requires a paid plan.')}
               </span>
             )}
@@ -633,13 +633,13 @@ export const SettingsPanel: React.FC = () => {
               onChange={e => setPageRedirectUntilInput(e.target.value)}
               className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900"
             />
-            <span className="mt-1 block text-[11px] font-normal text-neutral-500">
+            <span className="mt-1 block text-xs font-normal text-neutral-500">
               {ui('Times use this browser timezone and are saved as UTC instants. The redirect expires at the selected time.')}
             </span>
           </label>
         </div>
         {profile.plan === 'free' && (
-          <p className="text-[11px] text-neutral-500" role="note">
+          <p className="text-xs text-neutral-500" role="note">
             {ui('Background media is unavailable on the free plan. Existing media is hidden publicly until the plan is upgraded.')}
           </p>
         )}
@@ -694,13 +694,13 @@ export const SettingsPanel: React.FC = () => {
               type="button"
               disabled={formSubmissionsLoading || formSubmissionTotal === 0}
               onClick={() => void handleExportFormResponses()}
-              className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-[11px] font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {ui('Export responses CSV')}
             </button>
           </div>
 
-          <label htmlFor="settings-form-submission-filter" className="block text-[11px] font-semibold text-neutral-700">
+          <label htmlFor="settings-form-submission-filter" className="block text-xs font-semibold text-neutral-700">
             {ui('Filter by form')}
             <select
               id="settings-form-submission-filter"
@@ -710,7 +710,7 @@ export const SettingsPanel: React.FC = () => {
                 setFormSubmissionFilter(event.target.value);
                 setFormSubmissionPage(1);
               }}
-              className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[11px] font-normal text-neutral-900"
+              className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-xs font-normal text-neutral-900"
             >
               <option value="">{ui('All forms')}</option>
               {profile.blocks.filter(block => block.type === 'form').map(block => (
@@ -735,7 +735,7 @@ export const SettingsPanel: React.FC = () => {
           ) : (
             <div className="max-h-96 space-y-2 overflow-auto">
               {formSubmissions.map(item => (
-                <article key={item.id} className="rounded-xl border border-neutral-200 bg-white p-3 text-[11px] text-neutral-700">
+                <article key={item.id} className="rounded-xl border border-neutral-200 bg-white p-3 text-xs text-neutral-700">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-semibold text-neutral-900">{item.formTitle}</p>
@@ -765,7 +765,7 @@ export const SettingsPanel: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-2 border-t border-neutral-200 pt-2 text-[11px] text-neutral-500">
+          <div className="flex items-center justify-between gap-2 border-t border-neutral-200 pt-2 text-xs text-neutral-500">
             <span>{formSubmissionTotal ? `${ui('Page')} ${formSubmissionPage} · ${formSubmissionTotal} ${ui('total')}` : ''}</span>
             <div className="flex gap-2">
               <button

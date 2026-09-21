@@ -392,7 +392,7 @@ export const BuilderShell: React.FC = () => {
                   placeholder={ui("e.g., Zapier Sync, Mobile App Integration")}
                   className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none"
                 />
-                <p className="text-[11px] text-neutral-600">
+                <p className="text-xs text-neutral-600">
                   {ui("Give your API key a recognizable name so you can track where it is being used.")}
                 </p>
               </div>

@@ -42,9 +42,9 @@ export const TrustProofSection: React.FC = () => {
   const trustGuarantees = [
     {
       icon: <Coins className="w-5 h-5 text-emerald-600" />,
-      title: ar ? 'لا تعالج ليينكس مدفوعاتك' : 'Payments stay with your provider',
+      title: ar ? 'لا تعالج RALOA مدفوعاتك' : 'Payments stay with your provider',
       description: ar
-        ? 'لا تعالج ليينكس مدفوعات المبيعات أو الحجوزات. تُدار المدفوعات وأي رسوم عبر مزوّد الخدمة الخارجي.'
+        ? 'لا تعالج RALOA مدفوعات المبيعات أو الحجوزات. تُدار المدفوعات وأي رسوم عبر مزوّد الخدمة الخارجي.'
         : 'RALOA does not process sales or booking payments. Payment handling and any fees belong to the external provider.'
     },
     {

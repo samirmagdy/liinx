@@ -41,7 +41,7 @@ export const LoginPage: React.FC = () => {
           {ui("Welcome back to your Studio")}</h1>
         <p className="mt-2 text-sm text-neutral-600">
           {ui("Or")}{' '}
-          <Link href="/register" className="font-semibold text-neutral-900 hover:underline focus-visible:ring-2 focus-visible:ring-indigo-500 rounded">
+          <Link href="/register" className="inline-flex min-h-11 items-center rounded font-semibold text-neutral-900 hover:underline">
             {ui("claim a new handle and create your page")}</Link>
         </p>
       </div>

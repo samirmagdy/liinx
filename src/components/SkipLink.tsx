@@ -6,7 +6,7 @@ export const SkipLink: React.FC = () => {
   return (
     <a
       href="#main-content"
-      className="sr-only min-h-11 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[100]"
+      className="fixed start-4 top-4 z-[100] inline-flex min-h-11 -translate-y-[220%] items-center rounded-xl bg-neutral-900 px-4 text-sm font-semibold text-white shadow-lg transition-transform duration-150 focus:translate-y-0"
     >
       {tr('Skip to content')}
     </a>

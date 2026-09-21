@@ -165,7 +165,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             {/* Live Interactive Device Preview with Apple-style motion */}
             <div data-hero="visual" className="w-full max-w-[380px]">
               <div className="flex items-center justify-between px-2 mb-2">
-                <span className="text-[11px] font-mono font-medium text-neutral-500 flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-neutral-600">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                   {isRtl ? 'نموذج توضيحي' : 'Demo Profile'}
                 </span>

@@ -61,7 +61,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
         {/* Subdued Subtitle */}
         {submessage && (
-          <span className="text-[11px] font-mono uppercase tracking-widest text-neutral-600">
+          <span className="text-xs font-mono uppercase tracking-widest text-neutral-600">
             {submessage}
           </span>
         )}
@@ -151,7 +151,7 @@ export const BioSkeletonLoader: React.FC = () => {
         {/* Footer Brand Mark Skeleton */}
         <div className="mt-10 flex items-center gap-1.5 opacity-60">
           <img src="/brand/loader-mark-256.png" alt="" width={16} height={16} className="w-4 h-4" loading="lazy" decoding="async" />
-          <span className="text-[11px] font-brand font-bold text-neutral-500 tracking-wider">RALOA</span>
+          <span className="text-xs font-brand font-bold text-neutral-500 tracking-wider">RALOA</span>
         </div>
       </div>
     </div>

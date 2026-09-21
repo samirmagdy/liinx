@@ -124,7 +124,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
             {ui("Profile QR code")}</h3>
           <p className="text-xs text-neutral-500 mt-0.5">
             {lang === 'ar' ? `شارك صفحة ${displayName} عبر رمز QR` : `Share ${displayName}'s page with a QR code`}</p>
-          <p className="text-[11px] leading-relaxed text-neutral-500 mt-2">
+          <p className="text-xs leading-relaxed text-neutral-500 mt-2">
             {ui("This is a profile QR code. Only the selected public URL is sent to the QR image provider.")}
           </p>
         </div>

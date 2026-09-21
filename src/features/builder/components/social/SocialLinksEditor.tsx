@@ -51,7 +51,7 @@ const SocialLinkItem: React.FC<SocialLinkItemProps> = ({
         value={draftValue ?? soc.url}
         onChange={event => onDraftChange(event.target.value)}
         onBlur={event => onBlur(event.target.value)}
-        className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-neutral-600 truncate font-mono text-[11px] focus:border-neutral-900"
+        className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-neutral-600 truncate font-mono text-xs focus:border-neutral-900"
       />
     </div>
     <button
@@ -125,7 +125,7 @@ export const SocialLinksEditor: React.FC = () => {
             />
           ))
         ) : (
-          <p className="text-[11px] text-neutral-600">{ui("No social links added yet.")}</p>
+          <p className="text-xs text-neutral-600">{ui("No social links added yet.")}</p>
         )}
       </div>
 
@@ -170,7 +170,7 @@ export const SocialLinksEditor: React.FC = () => {
           {ui("Add")}
         </button>
       </div>
-      {socialError && <p role="alert" className="mt-2 text-[11px] text-rose-700">{socialError}</p>}
+      {socialError && <p role="alert" className="mt-2 text-xs text-rose-700">{socialError}</p>}
     </div>
   );
 };

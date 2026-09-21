@@ -44,7 +44,7 @@ export const StickyAudioBar: React.FC<StickyAudioBarProps> = ({
           <p className="text-xs font-bold truncate leading-tight" dir="auto">
             {playingBlock.title || ui('Audio Track')}
           </p>
-          <p className="text-[11px] truncate opacity-70" dir="auto">
+          <p className="text-xs truncate opacity-70" dir="auto">
             {playingBlock.artist || ui('Now playing')}
           </p>
         </div>

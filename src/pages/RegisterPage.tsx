@@ -155,7 +155,7 @@ export const RegisterPage: React.FC = () => {
           {step === 1 ? (
             <>
               {ui("Already have an account?")}{' '}
-              <Link href="/login" className="font-semibold text-neutral-900 hover:underline">
+              <Link href="/login" className="inline-flex min-h-11 items-center font-semibold text-neutral-900 hover:underline">
                 {ui("Sign in here")}</Link>
             </>
           ) : (
@@ -202,7 +202,7 @@ export const RegisterPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <p className="mt-1.5 text-[11px] text-neutral-500">
+                <p className="mt-1.5 text-xs text-neutral-500">
                   {ui("Your live link will be")}<span className="font-mono text-neutral-700 font-semibold">{brand.domain}/@{username || 'yourname'}</span>
                 </p>
               </div>
@@ -273,7 +273,7 @@ export const RegisterPage: React.FC = () => {
                         }`}
                       >
                         <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-indigo-600' : 'text-neutral-600'}`} />
-                        <span className="text-[11px] font-semibold leading-tight">{ui(item.label)}</span>
+                        <span className="text-xs font-semibold leading-tight">{ui(item.label)}</span>
                       </button>
                     );
                   })}
@@ -301,7 +301,7 @@ export const RegisterPage: React.FC = () => {
                           className="w-5 h-5 rounded-full border shadow-xs"
                           style={{ backgroundColor: theme.bgColor, borderColor: theme.isDark ? '#444' : '#ccc' }}
                         />
-                        <span className="text-[11px] font-semibold truncate w-full">{theme.name}</span>
+                        <span className="text-xs font-semibold truncate w-full">{theme.name}</span>
                       </button>
                     );
                   })}

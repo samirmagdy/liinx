@@ -36,14 +36,14 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
   >
     {/* User Info Header */}
     <div className="px-3.5 py-2.5 border-b border-neutral-100">
-      <div className="text-[11px] text-neutral-600 font-medium">
+      <div className="text-xs text-neutral-600 font-medium">
         {ui('Logged in')}
       </div>
       <div className="text-xs font-bold text-neutral-900 truncate font-mono">
         @{user.username}
       </div>
       {user.email && (
-        <div className="text-[11px] text-neutral-500 truncate mt-0.5">
+        <div className="text-xs text-neutral-500 truncate mt-0.5">
           {user.email}
         </div>
       )}

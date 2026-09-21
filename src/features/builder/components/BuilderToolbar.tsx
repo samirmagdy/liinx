@@ -57,7 +57,7 @@ export const BuilderToolbar: React.FC = () => {
               onClick={() => setActiveTab('settings')}
               title={ui("Manage subscription plan")}
               aria-label={ui("Manage subscription plan")}
-              className="mr-2 ml-1 text-[11px] font-mono font-bold uppercase tracking-caps px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition-colors cursor-pointer"
+              className="mr-2 ml-1 inline-flex min-h-11 min-w-11 items-center text-[11px] font-mono font-bold uppercase tracking-caps px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition-colors cursor-pointer"
             >
               {profile.plan || 'free'}
             </button>
@@ -66,7 +66,7 @@ export const BuilderToolbar: React.FC = () => {
           {profileDropdownOpen && (
             <div className="absolute start-0 mt-2 w-64 bg-neutral-100 rounded-2xl shadow-xl border border-neutral-200 py-2 z-50 animate-fade-in">
               {profileSwitchError && (
-                <div role="alert" className="mx-2 mb-2 p-2 rounded-lg bg-rose-50 border border-rose-200 text-[11px] text-rose-700 font-medium">
+                <div role="alert" className="mx-2 mb-2 p-2 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
                   {profileSwitchError}
                 </div>
               )}
@@ -83,7 +83,7 @@ export const BuilderToolbar: React.FC = () => {
                   >
                     <button type="button" onClick={() => handleSelectProfile(p.id)} className="flex min-w-0 flex-1 flex-col truncate text-start">
                       <span className="truncate">{p.displayName || p.username}</span>
-                      <span className="text-[11px] font-mono text-neutral-600">@{p.username}</span>
+                      <span className="text-xs font-mono text-neutral-600">@{p.username}</span>
                     </button>
                     {p.id === profile.id ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -144,7 +144,7 @@ export const BuilderToolbar: React.FC = () => {
         <button
           onClick={() => setQrModalOpen(true)}
           aria-label={ui('QR Code')}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 transition-colors cursor-pointer"
         >
           <QrCode className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">{ui("QR Code")}</span>
@@ -153,7 +153,7 @@ export const BuilderToolbar: React.FC = () => {
         <button
           onClick={handleCopyPublicLink}
           aria-label={ui('Copy Link')}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 transition-colors cursor-pointer"
         >
           {copiedLink ? (
             <>

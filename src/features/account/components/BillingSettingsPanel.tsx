@@ -16,17 +16,17 @@ export function BillingSettingsPanel({ ar, currentPlan, profilesCount, hasActive
         <div className="p-4 rounded-2xl border border-neutral-200 bg-neutral-50/60">
           <p className="text-xs text-neutral-500 font-medium">{ar ? 'الملفات المتاحة' : 'Profile Limit'}</p>
           <p className="text-xl font-bold text-neutral-900 font-mono mt-1">{entitlementsFor(currentPlan).maxProfiles}</p>
-          <p className="text-[11px] text-neutral-600 mt-0.5">{profilesCount} {ar ? 'مستخدمة حالياً' : 'currently active'}</p>
+          <p className="text-xs text-neutral-600 mt-0.5">{profilesCount} {ar ? 'مستخدمة حالياً' : 'currently active'}</p>
         </div>
         <div className="p-4 rounded-2xl border border-neutral-200 bg-neutral-50/60">
           <p className="text-xs text-neutral-500 font-medium">{ar ? 'النطاقات المخصصة' : 'Custom Domains'}</p>
           <p className="text-xl font-bold text-neutral-900 font-mono mt-1">{currentPlan === 'free' ? (ar ? 'غير متاح' : 'None') : (ar ? 'مشمول' : 'Included')}</p>
-          <p className="text-[11px] text-neutral-600 mt-0.5">{ar ? 'إرشادات DNS، ويلزم إعداد TLS لدى مزوّد الاستضافة' : 'DNS setup guidance; TLS must be configured by your host'}</p>
+          <p className="text-xs text-neutral-600 mt-0.5">{ar ? 'إرشادات DNS، ويلزم إعداد TLS لدى مزوّد الاستضافة' : 'DNS setup guidance; TLS must be configured by your host'}</p>
         </div>
         <div className="p-4 rounded-2xl border border-neutral-200 bg-neutral-50/60">
           <p className="text-xs text-neutral-500 font-medium">{ar ? 'واجهة REST API' : 'REST API v1'}</p>
           <p className="text-xl font-bold text-neutral-900 font-mono mt-1">{currentPlan === 'studio' ? (ar ? 'مفعل' : 'Active') : (ar ? 'خطة Studio فقط' : 'Studio only')}</p>
-          <p className="text-[11px] text-neutral-600 mt-0.5">{ar ? 'قراءة بيانات الملف وإضافة كتل الروابط أو حذفها' : 'Read profile data and create or delete link blocks'}</p>
+          <p className="text-xs text-neutral-600 mt-0.5">{ar ? 'قراءة بيانات الملف وإضافة كتل الروابط أو حذفها' : 'Read profile data and create or delete link blocks'}</p>
         </div>
       </div>
       <div className="pt-2 flex flex-wrap items-center gap-3">

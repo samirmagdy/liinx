@@ -28,7 +28,7 @@ export const AnalyticsPanel: React.FC = () => {
           </button>
         </div>
       )}
-      <p className="text-[11px] text-neutral-500">
+      <p className="text-xs text-neutral-500">
         {ui('Reports use UTC and the last 30 days. Views count accepted page loads, unique visitors are distinct anonymous visitor hashes, and click-through is total clicks divided by total views.')}
       </p>
       <div className="grid grid-cols-3 gap-3">
@@ -37,7 +37,7 @@ export const AnalyticsPanel: React.FC = () => {
           <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
             {analyticsData ? analyticsData.totalViews.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US') : '...'}
           </p>
-          <span className="text-[11px] text-neutral-500 font-mono tabular-nums">
+          <span className="text-xs text-neutral-500 font-mono tabular-nums">
             {analyticsData ? `${analyticsData.uniqueVisitors} unique` : ui("loading")}
           </span>
         </div>
@@ -47,7 +47,7 @@ export const AnalyticsPanel: React.FC = () => {
           <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">
             {analyticsData ? analyticsData.ctr : '...'}
           </p>
-          <span className="text-[11px] text-emerald-700 font-semibold font-mono">{ui("Clicks per view")}</span>
+          <span className="text-xs text-emerald-700 font-semibold font-mono">{ui("Clicks per view")}</span>
         </div>
 
         <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
@@ -55,7 +55,7 @@ export const AnalyticsPanel: React.FC = () => {
           <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
             {analyticsData ? analyticsData.totalClicks.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US') : '...'}
           </p>
-          <span className="text-[11px] text-neutral-500 font-mono">{ui("Live logged")}</span>
+          <span className="text-xs text-neutral-500 font-mono">{ui("Live logged")}</span>
         </div>
       </div>
 
@@ -67,7 +67,7 @@ export const AnalyticsPanel: React.FC = () => {
               <TrendingUp className="w-4 h-4 text-emerald-500" />
               <span>{ui("7-Day Engagement Timeline")}</span>
             </h2>
-            <div className="flex items-center gap-3 text-[11px] font-mono">
+            <div className="flex items-center gap-3 text-xs font-mono">
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-neutral-200 rounded" /> {ui("Views")}</span>
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded" /> {ui("Clicks")}</span>
             </div>
@@ -93,7 +93,7 @@ export const AnalyticsPanel: React.FC = () => {
                       title={`${day.clicks} clicks`}
                     />
                   </div>
-                  <span className="text-[11px] font-mono text-neutral-500 truncate w-full text-center">
+                  <span className="text-xs font-mono text-neutral-500 truncate w-full text-center">
                     {day.date.split(',')[0]}
                   </span>
                 </div>
@@ -113,7 +113,7 @@ export const AnalyticsPanel: React.FC = () => {
             <div className="space-y-2.5 text-xs">
               {analyticsData.topLinks.map((link) => (
                 <div key={link.id} className="space-y-1">
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between text-xs">
                     <span className="font-semibold truncate max-w-xs">{link.title}</span>
                     <span className="font-mono text-neutral-500 tabular-nums">{link.clicks} {ui("clicks (")}{link.percentage}%)</span>
                   </div>
@@ -135,7 +135,7 @@ export const AnalyticsPanel: React.FC = () => {
         <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-bold text-neutral-900">{ui("UTM Campaign & Traffic Attribution")}</h2>
-            <span className="text-[11px] font-mono text-neutral-500">{ui("Source / Medium / Campaign")}</span>
+            <span className="text-xs font-mono text-neutral-500">{ui("Source / Medium / Campaign")}</span>
           </div>
           {!analyticsData.topUtmCampaigns || analyticsData.topUtmCampaigns.length === 0 ? (
             <p className="text-xs text-neutral-600 py-2">
@@ -147,7 +147,7 @@ export const AnalyticsPanel: React.FC = () => {
                 <div key={idx} className="py-2.5 flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="font-semibold text-neutral-900">{utm.campaign}</span>
-                    <span className="text-[11px] font-mono text-neutral-500">{utm.source} / {utm.medium}</span>
+                    <span className="text-xs font-mono text-neutral-500">{utm.source} / {utm.medium}</span>
                   </div>
                   <span className="font-mono font-bold text-neutral-800 tabular-nums">{utm.count} {ui("views")}</span>
                 </div>

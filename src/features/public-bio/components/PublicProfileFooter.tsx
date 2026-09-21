@@ -104,6 +104,8 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
             <img
               src={theme.isDark ? '/brand/raloa-logo-horizontal-on-dark.png' : '/brand/raloa-logo-horizontal-primary.png'}
               alt="RALOA"
+              width={36}
+              height={16}
               className="h-4 w-auto"
               loading="lazy"
               decoding="async"

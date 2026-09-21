@@ -89,7 +89,7 @@ export const ContentPanel: React.FC = () => {
                 {avatarError}
               </p>
             )}
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-xs text-neutral-500">
               {ui("Supports JPG, PNG, WEBP up to 5MB. Stored directly on server.")}
             </p>
           </div>
@@ -122,7 +122,7 @@ export const ContentPanel: React.FC = () => {
               }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-neutral-900 focus-visible:ring-1 focus-visible:ring-indigo-500"
             />
-            <p className="mt-1 text-[11px] text-neutral-500">
+            <p className="mt-1 text-xs text-neutral-500">
               {usernameCheck.loading ? ui('Checking handle…') : usernameCheck.error || ui('3–30 lowercase letters, numbers, or underscores.')}
             </p>
           </div>

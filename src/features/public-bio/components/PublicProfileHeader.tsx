@@ -70,7 +70,7 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
               rel={/^(https?:)/i.test(social.url) ? 'noreferrer' : undefined}
               aria-label={`${social.platform} link`}
               dir="ltr"
-              className="p-2.5 rounded-full transition-transform duration-200 hover:scale-110 active:scale-95 border shadow-xs focus-visible:ring-2 focus-visible:ring-current"
+              className="grid h-11 w-11 place-items-center rounded-full border shadow-xs transition-transform duration-200 hover:scale-110 active:scale-95"
               style={{
                 backgroundColor: theme.cardBg,
                 borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.1)'),

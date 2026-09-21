@@ -57,7 +57,7 @@ export const AppearancePanel: React.FC = () => {
         <p className="text-xs text-neutral-500">
           {ui("Choose from carefully crafted aesthetic profiles. Every palette is built with strong contrast and responsive tokens.")}
         </p>
-        <p className="text-[11px] text-amber-800" role="note">{ui("Selecting a preset replaces custom appearance overrides.")}</p>
+        <p className="text-xs text-amber-800" role="note">{ui("Selecting a preset replaces custom appearance overrides.")}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           {THEMES.map((th) => (
@@ -77,7 +77,7 @@ export const AppearancePanel: React.FC = () => {
                 />
                 <div>
                   <p className="font-bold text-xs text-neutral-900">{th.name}</p>
-                  <p className="text-[11px] text-neutral-500 font-mono capitalize">{th.fontFamily} {ui("font")}</p>
+                  <p className="text-xs text-neutral-500 font-mono capitalize">{th.fontFamily} {ui("font")}</p>
                 </div>
               </div>
               <span className={`text-[11px] font-mono px-2 py-0.5 rounded ${th.isDark ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-900'}`}>

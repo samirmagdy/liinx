@@ -56,7 +56,7 @@ export const SubscribersPanel: React.FC = () => {
             <div key={sub.id} className="p-3 flex items-center justify-between gap-3 text-xs hover:bg-neutral-50">
               <span className="font-semibold text-neutral-800 break-all">{sub.email}</span>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="font-mono text-neutral-600 text-[11px]">{sub.subscribedAt}</span>
+                <span className="font-mono text-neutral-600 text-xs">{sub.subscribedAt}</span>
                 <button
                   type="button"
                   onClick={() => handleDeleteSubscriber(sub.id)}

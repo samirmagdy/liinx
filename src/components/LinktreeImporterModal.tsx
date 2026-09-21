@@ -265,11 +265,11 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     {previewData.displayName || previewData.username}
                   </h4>
                   {previewData.bio && (
-                    <p className="text-[11px] text-neutral-500 truncate mt-0.5">
+                    <p className="text-xs text-neutral-500 truncate mt-0.5">
                       {previewData.bio}
                     </p>
                   )}
-                  <span className="inline-block mt-1 text-[11px] text-neutral-600 dark:text-neutral-300 font-medium">
+                  <span className="inline-block mt-1 text-xs text-neutral-600 dark:text-neutral-300 font-medium">
                     {previewData.links.length} {ui("links found")}
                   </span>
                 </div>
@@ -300,7 +300,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                 >
                   {availablePages.map(page => <option key={page.id} value={page.id}>{page.isHome ? ui('Home') : `${page.title}${page.published ? '' : ' (draft)'}`}</option>)}
                 </select>
-                <span className="mt-1 block text-[11px] font-normal text-neutral-500">{ui("Imported links are appended to this page; existing content is not overwritten.")}</span>
+                <span className="mt-1 block text-xs font-normal text-neutral-500">{ui("Imported links are appended to this page; existing content is not overwritten.")}</span>
               </label>
 
               {previewData.warnings?.length > 0 && (
@@ -342,7 +342,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     >
                       <div className="min-w-0 pr-2">
                         <p className="font-semibold text-neutral-900 dark:text-white truncate">{link.title}</p>
-                        <p className="text-[11px] text-neutral-600 truncate">{link.url}</p>
+                        <p className="text-xs text-neutral-600 truncate">{link.url}</p>
                       </div>
                       <div className={`w-4 h-4 rounded flex items-center justify-center border ${
                         selectedIndices.has(idx)

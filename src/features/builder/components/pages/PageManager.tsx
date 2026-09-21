@@ -33,7 +33,7 @@ export const PageManager: React.FC = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 id="pages-heading" className="text-sm font-bold text-neutral-900">{ui('Pages')}</h2>
-          <p className="mt-1 text-[11px] text-neutral-500">{ui('Create separate pages and publish them from your profile navigation.')}</p>
+          <p className="mt-1 text-xs text-neutral-500">{ui('Create separate pages and publish them from your profile navigation.')}</p>
         </div>
         <nav className="flex flex-wrap gap-2" aria-label={ui('Profile pages')}>
           {pages.map(page => (
@@ -82,7 +82,7 @@ export const PageManager: React.FC = () => {
       </div>
       {activePage && (
         <div className="mt-4 grid grid-cols-1 gap-2 border-t border-neutral-100 pt-4 sm:grid-cols-2">
-          <label htmlFor="page-manager-edit-title" className="grid gap-1 text-[11px] font-semibold text-neutral-700">
+          <label htmlFor="page-manager-edit-title" className="grid gap-1 text-xs font-semibold text-neutral-700">
             {ui('Page title')}
             <input
               id="page-manager-edit-title"
@@ -93,7 +93,7 @@ export const PageManager: React.FC = () => {
               className="rounded-xl border border-neutral-200 px-3 py-2 text-xs text-neutral-900"
             />
           </label>
-          <label htmlFor="page-manager-edit-slug" className="grid gap-1 text-[11px] font-semibold text-neutral-700">
+          <label htmlFor="page-manager-edit-slug" className="grid gap-1 text-xs font-semibold text-neutral-700">
             {ui('URL slug')}
             <input
               id="page-manager-edit-slug"
@@ -105,7 +105,7 @@ export const PageManager: React.FC = () => {
               className="rounded-xl border border-neutral-200 px-3 py-2 font-mono text-xs text-neutral-900 disabled:bg-neutral-100"
             />
           </label>
-          <label htmlFor="page-manager-edit-description" className="grid gap-1 text-[11px] font-semibold text-neutral-700 sm:col-span-2">
+          <label htmlFor="page-manager-edit-description" className="grid gap-1 text-xs font-semibold text-neutral-700 sm:col-span-2">
             {ui('Description')}
             <textarea
               id="page-manager-edit-description"
@@ -131,7 +131,7 @@ export const PageManager: React.FC = () => {
                   />
                   {ui('Published')}
                 </label>
-                <p className="text-[11px] font-normal text-neutral-500">
+                <p className="text-xs font-normal text-neutral-500">
                   {ui('Changes save directly to the published page. Unpublished pages are hidden; RALOA does not keep a separate draft revision.')}
                 </p>
               </div>
@@ -149,7 +149,7 @@ export const PageManager: React.FC = () => {
               onClick={() => handleMovePage(-1)}
               disabled={activePage.isHome || pages.findIndex(page => page.id === activePage.id) <= 1}
               aria-label={ui('Move page left')}
-              className="rounded-xl border border-neutral-200 px-2 py-2 text-xs font-bold disabled:opacity-30"
+              className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-neutral-200 text-xs font-bold disabled:opacity-30"
             >
               ←
             </button>
@@ -158,7 +158,7 @@ export const PageManager: React.FC = () => {
               onClick={() => handleMovePage(1)}
               disabled={pages.findIndex(page => page.id === activePage.id) === pages.length - 1}
               aria-label={ui('Move page right')}
-              className="rounded-xl border border-neutral-200 px-2 py-2 text-xs font-bold disabled:opacity-30"
+              className="grid min-h-11 min-w-11 place-items-center rounded-xl border border-neutral-200 text-xs font-bold disabled:opacity-30"
             >
               →
             </button>

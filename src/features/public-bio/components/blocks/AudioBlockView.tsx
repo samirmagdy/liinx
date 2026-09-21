@@ -246,7 +246,7 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
         </div>
 
         <div className="flex-1 min-w-0" dir="auto">
-          <div className="flex items-center gap-1.5 text-[11px] mb-0.5" style={{ color: theme.subtextColor }}>
+          <div className="flex items-center gap-1.5 text-xs mb-0.5" style={{ color: theme.subtextColor }}>
             <Music2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             <span className="uppercase font-mono tracking-caps font-semibold">{ui('Audio Track')}</span>
           </div>

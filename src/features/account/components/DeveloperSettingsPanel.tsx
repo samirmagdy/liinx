@@ -29,7 +29,7 @@ export function DeveloperSettingsPanel(props: DeveloperSettingsPanelProps) {
             <div className="p-4 rounded-2xl bg-neutral-900 text-white space-y-2 font-mono text-xs">
               <p className="text-amber-400 font-bold">{ar ? 'انسخ مفتاحك الآن (لن يظهر مجدداً):' : 'Copy your API key now (it will never be displayed again):'}</p>
               <div className="flex items-center justify-between gap-2 p-2 bg-neutral-800 rounded-xl">
-                <code className="text-[11px] truncate">{props.generatedKey}</code>
+                <code className="text-xs truncate">{props.generatedKey}</code>
                 <button onClick={props.copyGeneratedKey} className="p-1.5 hover:bg-neutral-700 rounded-lg text-neutral-300 hover:text-white">
                   {props.copiedKey ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 </button>
@@ -42,7 +42,7 @@ export function DeveloperSettingsPanel(props: DeveloperSettingsPanelProps) {
               <div className="divide-y divide-neutral-100">
                 {props.apiKeys.map(key => (
                   <div key={key.id} className="py-2.5 flex items-center justify-between gap-2">
-                    <div><p className="text-xs font-bold text-neutral-900">{key.name}</p><p className="text-[11px] font-mono text-neutral-600">{key.prefix}</p></div>
+                    <div><p className="text-xs font-bold text-neutral-900">{key.name}</p><p className="text-xs font-mono text-neutral-600">{key.prefix}</p></div>
                     <button onClick={() => props.revokeApiKey(key.id)} className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer">{ar ? 'إلغاء المفتاح' : 'Revoke'}</button>
                   </div>
                 ))}

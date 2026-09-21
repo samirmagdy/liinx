@@ -63,7 +63,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
         <div className="p-3 bg-white rounded-2xl border border-neutral-200 space-y-2.5">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[11px] text-neutral-600 block">{ui("Logged in")}</span>
+              <span className="text-xs text-neutral-600 block">{ui("Logged in")}</span>
               <span className="text-xs font-bold font-mono text-neutral-900">@{user.username}</span>
             </div>
             <button
@@ -81,7 +81,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
             <Link
               href={`/@${user.username}`}
               onClick={onClose}
-              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
+              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-xs font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
               <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
               <span>{ui("View page")}</span>
@@ -89,7 +89,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
             <Link
               href="/studio"
               onClick={onClose}
-              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
+              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-xs font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
               <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
               <span>{t.nav.studio}</span>
@@ -97,7 +97,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, lang, t, ui, onClose, onL
             <Link
               href="/account"
               onClick={onClose}
-              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-[11px] font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
+              className="p-2 rounded-xl bg-neutral-50 border border-neutral-200 text-center text-xs font-semibold flex flex-col items-center gap-1 hover:bg-neutral-100"
             >
               <Settings className="w-3.5 h-3.5 text-neutral-500" />
               <span>{ui("Settings")}</span>
@@ -255,15 +255,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             !onStudio && (
               <Link
                 href="/studio"
-                className="inline-flex min-h-11 items-center rounded-full bg-neutral-900 px-4 text-xs font-semibold text-white"
+                className="hidden sm:inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white"
               >
                 {t.nav.studio}
               </Link>
             )
           ) : (
+            /* Below sm this CTA duplicates the one inside the mobile menu panel. */
             <Link
               href="/register"
-              className="inline-flex min-h-11 items-center rounded-full bg-neutral-900 px-4 text-xs font-semibold text-white"
+              className="hidden sm:inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white"
             >
               {lang === 'ar' ? 'أنشئ صفحتك' : 'Create your page'}
             </Link>
