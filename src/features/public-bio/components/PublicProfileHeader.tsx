@@ -62,7 +62,7 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
         <span>{profile.displayName}</span>
       </h1>
 
-      <p className="text-xs sm:text-sm font-mono mb-3" style={{ color: theme.subtextColor }}>
+      <p className="text-xs sm:text-sm font-mono mb-3" dir="ltr" style={{ color: theme.subtextColor }}>
         {brand.domain}/@{profile.username}
       </p>
 

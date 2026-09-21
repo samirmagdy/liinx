@@ -33,7 +33,7 @@ export const UsernameChangeDialog: React.FC<UsernameChangeDialogProps> = ({
           <h3 className="font-bold text-base">{ui('Change public handle?')}</h3>
         </div>
         <p className="text-xs text-neutral-600 leading-relaxed">
-          {ui('Changing your handle to')} <span className="font-mono font-bold text-neutral-900">@{profile.username}</span> {ui('will alter your live URL to')} <span className="font-mono font-bold text-neutral-900">{brand.domain}/@{profile.username}</span>. {ui('Any existing printed QR codes, physical badges, or external links pointing to')} <span className="font-mono font-bold text-neutral-900">@{previousUsername}</span> {ui('will break.')}
+          {ui('Changing your handle to')} <span className="font-mono font-bold text-neutral-900" dir="ltr">@{profile.username}</span> {ui('will alter your live URL to')} <span className="font-mono font-bold text-neutral-900" dir="ltr">{brand.domain}/@{profile.username}</span>. {ui('Any existing printed QR codes, physical badges, or external links pointing to')} <span className="font-mono font-bold text-neutral-900" dir="ltr">@{previousUsername}</span> {ui('will break.')}
         </p>
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
           <button

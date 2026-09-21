@@ -26,6 +26,7 @@ export const PublicSearchInput: React.FC<PublicSearchInputProps> = ({ theme, val
         id="public-page-search"
         name="pageSearch"
         type="search"
+        dir="auto"
         value={value}
         onChange={event => onChange(event.target.value)}
         placeholder={ui('Search this page')}

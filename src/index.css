@@ -391,8 +391,12 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 
 [dir="rtl"] .text-left { text-align: right; }
 [dir="rtl"] .text-right { text-align: left; }
-[dir="rtl"] input:not([dir="ltr"]), [dir="rtl"] textarea:not([dir="ltr"]) { text-align: right; }
+[dir="rtl"] input:not([dir="ltr"]):not([dir="auto"]), [dir="rtl"] textarea:not([dir="ltr"]):not([dir="auto"]) { text-align: right; }
 [dir="rtl"] input[dir="ltr"], [dir="rtl"] textarea[dir="ltr"] { text-align: left; }
+/* dir="auto" resolves a field's direction from what is typed in it, so the alignment has to follow
+   that resolved direction rather than the page's: an Arabic display name stays on the right, the
+   Latin one lines up on the left, and neither ends up detached from its label. */
+:is(input, textarea)[dir="auto"] { text-align: start; }
 [dir="rtl"] code { direction: ltr; unicode-bidi: plaintext; }
 [dir="rtl"] .font-mono:not(code):not(input) { letter-spacing: normal; }
 [dir="rtl"] .save-status { letter-spacing: normal; }

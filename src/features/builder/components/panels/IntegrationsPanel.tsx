@@ -198,7 +198,7 @@ export const IntegrationsPanel: React.FC = () => {
           <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-neutral-900">@{instagramStatus.username}</span>
+                <span className="font-bold text-neutral-900" dir="ltr">@{instagramStatus.username}</span>
                 <span className="text-neutral-500" aria-hidden="true">•</span>
                 <span className="font-mono text-neutral-500">
                   {instagramStatus.syncedLinksCount ?? 0} {ui("synced links active")}

@@ -13,7 +13,7 @@ export function ProfileSettingsPanel(props: ProfileSettingsPanelProps) {
         <form onSubmit={props.handleUpdateEmail} className="space-y-4 max-w-md">
           <div>
             <label htmlFor="account-email" className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'البريد الإلكتروني' : 'Email Address'}</label>
-            <input id="account-email" type="email" name="email" autoComplete="email" required value={props.newEmail} onChange={event => props.setNewEmail(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900" />
+            <input id="account-email" type="email" name="email" dir="ltr" autoComplete="email" required value={props.newEmail} onChange={event => props.setNewEmail(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900" />
           </div>
           <div>
             <label htmlFor="account-email-password" className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'كلمة المرور الحالية للتأكيد' : 'Current Password (to confirm)'}</label>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { brand } from '../config/brand';
 import { useUsernameAvailability } from '../hooks/useUsernameAvailability';
+import { useLanguage } from '../context/LanguageContext';
 import { ArrowRight, Check, AlertCircle, Loader2 } from 'lucide-react';
 
 interface HeroClaimFormProps {
@@ -41,6 +42,7 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
   onClaimUsername,
   onFallbackRedirect
 }) => {
+  const { tr: ui } = useLanguage();
   const [handle, setHandle] = useState('');
   const { status, reason } = useUsernameAvailability(handle, isRtl);
 
@@ -75,7 +77,7 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
             placeholder={placeholder}
             className="hero-claim-input w-full min-w-0 pl-1.5 pr-2 font-mono text-sm sm:text-base font-bold text-neutral-900 placeholder:text-neutral-500 bg-transparent"
             spellCheck={false}
-            aria-label={`Claim your ${brand.productShortName} handle`}
+            aria-label={ui('Claim your handle')}
             aria-describedby="hero-claim-status"
           />
 

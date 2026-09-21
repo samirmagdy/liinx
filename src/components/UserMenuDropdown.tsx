@@ -39,11 +39,11 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
       <div className="text-xs text-neutral-600 font-medium">
         {ui('Logged in')}
       </div>
-      <div className="text-xs font-bold text-neutral-900 truncate font-mono">
+      <div className="text-xs font-bold text-neutral-900 truncate font-mono" dir="ltr">
         @{user.username}
       </div>
       {user.email && (
-        <div className="text-xs text-neutral-500 truncate mt-0.5">
+        <div className="text-xs text-neutral-500 truncate mt-0.5" dir="ltr">
           {user.email}
         </div>
       )}
@@ -143,7 +143,7 @@ export const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
         }`}
       >
         <User className="w-3.5 h-3.5" />
-        <span className="font-mono">@{user.username}</span>
+        <span className="font-mono" dir="ltr">@{user.username}</span>
         <ChevronDown
           className={`w-3 h-3 text-neutral-500 transition-transform ${
             isOpen ? 'rotate-180 text-neutral-300' : ''

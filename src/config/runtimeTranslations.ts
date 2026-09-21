@@ -273,6 +273,32 @@ export const runtimeTranslations: Record<string, string> = {
   'Product showcase with price and buy link': 'عرض منتج مع السعر ورابط الشراء',
   'Tips': 'إكراميات',
   'Creator support and tipping link': 'رابط دعم صانع المحتوى وإرسال الإكراميات',
+
+  // The pages panel. Its labels already went through the translator; only the entries were missing.
+  'Pages': 'الصفحات',
+  'Create separate pages and publish them from your profile navigation.': 'أنشئ صفحات منفصلة وانشرها من شريط التنقل في ملفك.',
+  'Profile pages': 'صفحات الملف الشخصي',
+  'New page title': 'عنوان الصفحة الجديد',
+  'url-slug': 'الرابط المختصر',
+  'New page URL slug': 'الرابط المختصر للصفحة الجديدة',
+  'Add page': 'إضافة صفحة',
+  'Page title': 'عنوان الصفحة',
+  'URL slug': 'الرابط المختصر',
+  'Description': 'الوصف',
+  'Page description': 'وصف الصفحة',
+  'Published': 'منشورة',
+  'Saving…': 'جارٍ الحفظ…',
+  'Save page settings': 'حفظ إعدادات الصفحة',
+  'Move page earlier': 'نقل الصفحة إلى موضع أسبق',
+  'Move page later': 'نقل الصفحة إلى موضع تالٍ',
+  'Delete current page': 'حذف الصفحة الحالية',
+  'Claim your handle': 'احجز معرّفك',
+
+  // The identity panel's own labels: the handle hint reads as scrambled digits when an English
+  // sentence is dropped into an Arabic paragraph, so it has to be Arabic.
+  'Username / Handle': 'المعرّف',
+  'Checking handle…': 'جارٍ التحقق من المعرّف…',
+  '3–30 lowercase letters, numbers, or underscores.': 'من ٣ إلى ٣٠ حرفاً صغيراً أو رقماً أو شرطة سفلية.',
 };
 
 export function translateRuntime(value: string, lang: Language): string {

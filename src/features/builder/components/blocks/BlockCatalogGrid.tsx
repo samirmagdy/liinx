@@ -40,7 +40,7 @@ export const BlockCatalogGrid: React.FC<BlockCatalogGridProps> = ({
               <div className="text-xs font-bold text-neutral-900 truncate">
                 {ui(item.titleKey)}
               </div>
-              <div className="text-xs text-neutral-500 line-clamp-1 leading-tight mt-0.5">
+              <div className="text-xs text-neutral-500 line-clamp-2 leading-tight mt-0.5">
                 {ui(item.descKey)}
               </div>
             </div>

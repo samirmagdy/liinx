@@ -19,6 +19,7 @@ export const IdentityFields: React.FC<IdentityFieldsProps> = ({ onUsernameFocus,
           <input
             id="builder-profile-username"
             name="username"
+            dir="ltr"
             autoComplete="username"
             aria-label={ui('Username / Handle')}
             type="text"
@@ -39,6 +40,7 @@ export const IdentityFields: React.FC<IdentityFieldsProps> = ({ onUsernameFocus,
           <input
             id="builder-profile-displayName"
             name="displayName"
+            dir="auto"
             autoComplete="name"
             aria-label={ui("Display Name")}
             type="text"
@@ -54,6 +56,7 @@ export const IdentityFields: React.FC<IdentityFieldsProps> = ({ onUsernameFocus,
           <input
             id="builder-profile-category"
             name="category"
+            dir="auto"
             aria-label={ui("Category / Tag")}
             type="text"
             maxLength={50}
@@ -69,6 +72,7 @@ export const IdentityFields: React.FC<IdentityFieldsProps> = ({ onUsernameFocus,
         <textarea
           id="builder-profile-bio"
           name="bio"
+          dir="auto"
           aria-label={ui("Short Bio")}
           rows={2}
           maxLength={500}

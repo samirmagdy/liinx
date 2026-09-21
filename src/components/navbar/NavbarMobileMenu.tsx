@@ -43,7 +43,7 @@ export const NavbarMobileMenu: React.FC<NavbarMobileMenuProps> = ({ user, lang, 
           <div className="flex items-center justify-between">
             <div>
               <span className="text-xs text-neutral-600 block">{ui("Logged in")}</span>
-              <span className="text-xs font-bold font-mono text-neutral-900">@{user.username}</span>
+              <span className="text-xs font-bold font-mono text-neutral-900" dir="ltr">@{user.username}</span>
             </div>
             <button
               onClick={() => {

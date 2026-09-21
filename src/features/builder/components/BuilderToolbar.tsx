@@ -49,7 +49,7 @@ export const BuilderToolbar: React.FC = () => {
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-l-xl cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-              <span className="font-mono">@{profile.username}</span>
+              <span className="font-mono" dir="ltr">@{profile.username}</span>
               <ChevronDown className={`w-3.5 h-3.5 text-neutral-500 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             <button
@@ -83,7 +83,7 @@ export const BuilderToolbar: React.FC = () => {
                   >
                     <button type="button" onClick={() => handleSelectProfile(p.id)} className="flex min-w-0 flex-1 flex-col truncate text-start">
                       <span className="truncate">{p.displayName || p.username}</span>
-                      <span className="text-xs font-mono text-neutral-600">@{p.username}</span>
+                      <span className="text-xs font-mono text-neutral-600" dir="ltr">@{p.username}</span>
                     </button>
                     {p.id === profile.id ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />

@@ -163,3 +163,47 @@ test.describe('creator publishing and account operations', () => {
     await expect(page).toHaveURL(/\/login(?:\?|$)/);
   });
 });
+
+test.describe('arabic studio reading order', () => {
+  test('keeps latin handles and typed values on the side the reader expects', async ({ page }) => {
+    const username = uniqueName('ar');
+    await completeRegistration(page, { username, email: `${username}@example.test`, password: 'SecureBrowserPass2026!' });
+    await page.goto('/ar/studio');
+    await page.waitForSelector('#builder-profile-displayName');
+
+    await expect(page.getByRole('heading', { name: 'الصفحات' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'إضافة صفحة' })).toBeVisible();
+
+    const handle = await page.evaluate((name) => {
+      const span = [...document.querySelectorAll('.studio-toolbar span')].find(s => s.textContent.trim() === `@${name}`);
+      if (!span) return null;
+      const positions: { at: number; name: number } = { at: -1, name: -1 };
+      for (const node of [...span.childNodes]) {
+        if (node.nodeType !== Node.TEXT_NODE || !node.textContent) continue;
+        const text = node.textContent;
+        const at = text.indexOf('@');
+        const named = text.search(/[A-Za-z0-9]/);
+        const measure = (index: number) => {
+          const range = document.createRange();
+          range.setStart(node, index);
+          range.setEnd(node, index + 1);
+          return range.getBoundingClientRect().left;
+        };
+        if (at >= 0 && positions.at === -1) positions.at = measure(at);
+        if (named >= 0 && positions.name === -1) positions.name = measure(named);
+      }
+      return positions;
+    }, username);
+    expect(handle, 'the toolbar handle chip').not.toBeNull();
+    expect(handle!.at).toBeGreaterThanOrEqual(0);
+    // An Arabic paragraph would push the '@' to the right of the name, so the handle must stay an LTR island.
+    expect(handle!.at).toBeLessThan(handle!.name);
+
+    const typed = await page.evaluate(() => {
+      const el = document.getElementById('builder-profile-displayName');
+      const cs = getComputedStyle(el);
+      return { direction: cs.direction, value: el.value };
+    });
+    expect(typed.direction, `display name "${typed.value}"`).toBe('ltr');
+  });
+});

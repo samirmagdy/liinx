@@ -96,7 +96,7 @@ export const TrustProofSection: React.FC = () => {
                       <h3 className="font-bold text-base text-neutral-900 leading-tight">
                         {showcase.name}
                       </h3>
-                      <p className="text-xs text-neutral-500 mt-1">@{showcase.username}</p>
+                      <p className="text-xs text-neutral-500 mt-1" dir="ltr">@{showcase.username}</p>
                     </div>
                   </div>
                   <div className="min-w-0">

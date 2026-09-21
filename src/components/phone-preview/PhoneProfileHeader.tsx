@@ -66,6 +66,7 @@ export const PhoneProfileHeader: React.FC<PhoneProfileHeaderProps> = ({
               : ''
           }`}
           style={{ color: highlightedFeatureId === 'domain' ? undefined : theme.subtextColor }}
+          dir="ltr"
         >
           {brand.domain}/@{profile.username}
         </p>

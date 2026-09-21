@@ -23,7 +23,7 @@ export function ProfilesSettingsPanel({ ar, profilesList, profilesLoading, setLo
                   {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" width={36} height={36} loading="lazy" decoding="async" className="w-full h-full object-cover" /> : profile.username.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-neutral-900">@{profile.username}</p>
+                  <p className="text-xs font-bold text-neutral-900" dir="ltr">@{profile.username}</p>
                   <p className="text-xs text-neutral-500">{profile.displayName} • {profile.category || 'Creator'}</p>
                 </div>
               </div>
