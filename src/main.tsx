@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import * as Sentry from '@sentry/react';
+import { Analytics } from '@vercel/analytics/react';
 
 // Shield against third-party extension crashes (e.g. frame_start.js, IDM, adblockers)
 if (typeof window !== 'undefined') {
@@ -31,5 +32,6 @@ document.getElementById('profile-crawl-content')?.remove();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
+    <Analytics />
   </StrictMode>,
 );
