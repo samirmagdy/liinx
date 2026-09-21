@@ -1,16 +1,18 @@
 import React from 'react';
 import { THEMES } from '../config/themes';
-import { type CreatorProfile, type TemplateItem } from '../types';
+import { type SiteTemplate } from '../../shared/index.js';
 import { ArrowRight } from 'lucide-react';
 import { PhonePreview } from './PhonePreview';
+import { starterSitePreview } from '../utils/starterSites';
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 
 interface TemplateCardProps {
-  template: TemplateItem;
+  template: SiteTemplate;
   loc: { name: string; category: string; description: string };
   isHydrated: boolean;
   isRtl: boolean;
   useTemplateLabel: string;
-  onSelectTemplate: (profile: CreatorProfile) => void;
+  onSelectTemplate: (templateId: string) => void;
 }
 
 export const TemplateCard: React.FC<TemplateCardProps> = ({
@@ -21,20 +23,24 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
   useTemplateLabel,
   onSelectTemplate
 }) => {
+  const { tr: ui } = useUiLanguage();
+  const theme = THEMES.find(item => item.id === template.themeId);
+  const pageCount = 1 + (template.pages || []).length;
+
   return (
     <div
       className="motion-card rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
     >
-      <div className="relative h-[300px] overflow-hidden border-b" aria-label={`${loc.name} illustrative template preview`}>
+      <div className="relative h-[300px] overflow-hidden border-b" aria-label={ui('Starter site preview')}>
         <span className="absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[11px] font-semibold text-neutral-800 shadow-sm">
-          {isRtl ? 'معاينة توضيحية' : 'Illustrative preview'}
+          {ui('Starter site preview')}
         </span>
         {isHydrated ? (
           <div className="absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none" aria-hidden="true" inert>
-            <PhonePreview profile={template.profile} customTheme={THEMES.find(theme => theme.id === template.profile.themeId)} compact interactive={false} />
+            <PhonePreview profile={starterSitePreview(template)} compact interactive={false} />
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center p-6 text-center" style={{ backgroundColor: template.previewColor }}>
+          <div className="h-full flex items-center justify-center p-6 text-center" style={{ backgroundColor: theme?.bgColor }}>
             <div>
               <div className="w-14 h-14 rounded-full bg-neutral-900/10 mx-auto mb-3" />
               <p className="text-sm font-bold text-neutral-900">{loc.name}</p>
@@ -50,13 +56,16 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           <h3 className="font-brand font-bold text-base text-neutral-900 mb-1 text-balance">
             {loc.name}
           </h3>
-          <p className="text-xs text-neutral-600 leading-relaxed mb-6 text-pretty">
+          <p className="text-xs text-neutral-600 leading-relaxed mb-3 text-pretty">
             {loc.description}
+          </p>
+          <p className="text-xs font-semibold text-neutral-500">
+            {pageCount} {ui('pages')} · {template.blocks.length} {ui('blocks')}
           </p>
         </div>
 
         <button
-          onClick={() => onSelectTemplate(template.profile)}
+          onClick={() => onSelectTemplate(template.id)}
           className="w-full py-2.5 px-4 rounded-full bg-neutral-950 border border-neutral-600 hover:border-neutral-500 text-xs font-bold text-neutral-100 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <span>{useTemplateLabel}</span>

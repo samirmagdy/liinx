@@ -7,6 +7,12 @@ import {
 } from '../../shared/index.js';
 import { friendlyErrorMessage } from '../utils/errors';
 
+export interface ApplyTemplateResult {
+  success: boolean;
+  applied: { templateId: string; mode: 'append' | 'replace'; pagesAdded: number; blocksAdded: number };
+  profile: CreatorProfile;
+}
+
 let sessionToken: string | null = null;
 
 export const authStorage = {
@@ -193,6 +199,12 @@ export const api = {
       return request<{ success: boolean }>('/api/studio/blocks/reorder', {
         method: 'PUT',
         body: JSON.stringify({ blockIds, pageId })
+      });
+    },
+    applyTemplate: async (templateId: string, mode: 'append' | 'replace'): Promise<ApplyTemplateResult> => {
+      return request<ApplyTemplateResult>(`/api/studio/templates/${encodeURIComponent(templateId)}/apply`, {
+        method: 'POST',
+        body: JSON.stringify({ mode })
       });
     },
     getAnalytics: async () => {

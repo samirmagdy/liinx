@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import { type CreatorProfile, type ThemeConfig, type ProfileBlock, type CreatorPage, type SocialLink } from '../../../types';
+import { type SiteTemplate } from '../../../../shared/index.js';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
@@ -66,6 +67,11 @@ export interface BuilderContextType {
   billingError: string | null;
   showImporterModal: boolean;
   setShowImporterModal: (open: boolean) => void;
+  starterSite: SiteTemplate | null;
+  starterSiteError: string | null;
+  applyingStarterSite: boolean;
+  applyStarterSite: (mode: 'append' | 'replace') => Promise<void>;
+  dismissStarterSite: () => void;
   handleProfileChange: (field: keyof CreatorProfile, value: any) => void;
   handleSelectProfile: (id: string) => Promise<void>;
   handleCreateProfileSubmit: (e: React.FormEvent) => Promise<void>;

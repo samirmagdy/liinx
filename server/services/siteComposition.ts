@@ -2,8 +2,7 @@ import { db } from '../db.js';
 import { createId } from '../utils/ids.js';
 import {
   findSiteTemplate,
-  normalizeBlockExtra,
-  normalizeFormFields,
+  templateBlockExtra,
   type SiteTemplate,
   type SiteTemplateBlock
 } from '../../shared/index.js';
@@ -84,20 +83,9 @@ export function nextPageSortOrder(profileId: string): number {
   return row.maxOrder === null ? 0 : row.maxOrder + 1;
 }
 
-/**
- * Starter blocks are authored without item ids. Stored rows always carry them, because the
- * builder keys its repeated editors by id and would treat two rows without one as the same row.
- */
-function templateExtra(type: string, extra: Record<string, unknown> | undefined): string | null {
-  if (!extra) return null;
-  const normalized = normalizeBlockExtra(type, extra);
-  if (Array.isArray(normalized.items)) {
-    normalized.items = normalized.items.map((item, index) => (
-      item && typeof item === 'object' ? { id: `item_${index}`, ...(item as Record<string, unknown>) } : item
-    ));
-  }
-  if (type === 'form' && Array.isArray(normalized.fields)) normalized.fields = normalizeFormFields(normalized.fields);
-  return Object.keys(normalized).length ? JSON.stringify(normalized) : null;
+function templateExtra(type: SiteTemplateBlock['type'], extra: Record<string, unknown> | undefined): string | null {
+  const normalized = templateBlockExtra(type, extra);
+  return normalized ? JSON.stringify(normalized) : null;
 }
 
 function compositionBlock(block: SiteTemplateBlock, pageId: string, position: number): CompositionBlock {

@@ -20,7 +20,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { AccountPage } from './pages/AccountPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
-import { type CreatorProfile, type ThemeConfig } from './types';
+import { type ThemeConfig } from './types';
 import { api } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
@@ -30,6 +30,7 @@ import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 import { languageForPath } from './utils/languagePaths';
+import { starterSitePath } from './utils/starterSites';
 import type { Language } from './config/i18n';
 
 
@@ -46,9 +47,8 @@ function HomePage() {
     setLocation('/studio');
   };
 
-  const handleSelectTemplate = (profile: CreatorProfile) => {
-    const theme = encodeURIComponent(profile.themeId);
-    setLocation(user ? `/studio?template=${theme}` : `/register?template=${theme}`);
+  const handleSelectTemplate = (templateId: string) => {
+    setLocation(starterSitePath(templateId, Boolean(user)));
   };
 
   const handleSelectPlan = (plan: string, interval: 'month' | 'year') => {
@@ -171,9 +171,8 @@ function TemplatesPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
 
-  const handleSelectTemplate = (profile: CreatorProfile) => {
-    const theme = encodeURIComponent(profile.themeId);
-    setLocation(user ? `/studio?template=${theme}` : `/register?template=${theme}`);
+  const handleSelectTemplate = (templateId: string) => {
+    setLocation(starterSitePath(templateId, Boolean(user)));
   };
 
   return (

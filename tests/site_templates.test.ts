@@ -8,7 +8,7 @@ import {
 } from '../shared/index.js';
 import { presetThemeIds } from '../shared/contracts/profiles.js';
 import { THEMES } from '../src/config/themes.js';
-import { TEMPLATES as GALLERY_TEMPLATES } from '../src/config/templates.js';
+import { translations } from '../src/config/i18n.js';
 
 const SERIALIZED = JSON.stringify(SITE_TEMPLATES);
 
@@ -51,8 +51,17 @@ describe('site template catalog', () => {
     for (const template of SITE_TEMPLATES) expect(parseSiteTemplate(template).success).toBe(true);
   });
 
-  it('keeps the gallery ids that marketing copy is written against', () => {
-    expect(new Set(SITE_TEMPLATES.map(template => template.id))).toEqual(new Set(GALLERY_TEMPLATES.map(template => template.id)));
+  it('has gallery copy in both languages for every starter site', () => {
+    // The gallery lists the server catalog directly, so a catalog entry without translated
+    // copy would surface an English name in Arabic, or an empty card.
+    for (const language of ['en', 'ar'] as const) {
+      const entries = translations[language].templatesSection.templates;
+      for (const template of SITE_TEMPLATES) {
+        expect(entries[template.id]?.name, `${language} name for ${template.id}`).toBeTruthy();
+        expect(entries[template.id]?.description, `${language} description for ${template.id}`).toBeTruthy();
+        expect(entries[template.id]?.category, `${language} category for ${template.id}`).toBeTruthy();
+      }
+    }
   });
 
   it('references only real themes and placeholder-safe block types', () => {

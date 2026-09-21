@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TEMPLATES } from '../config/templates';
-import { type CreatorProfile } from '../types';
+import { SITE_TEMPLATES } from '../../shared/index.js';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
@@ -8,7 +7,7 @@ import { TemplateCard } from './TemplateCard';
 
 interface TemplatesSectionProps {
   headingLevel?: 1 | 2;
-  onSelectTemplate: (profile: CreatorProfile) => void;
+  onSelectTemplate: (templateId: string) => void;
   maxVisible?: number;
 }
 
@@ -16,16 +15,21 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   const [isHydrated, setIsHydrated] = useState(false);
   const { t, isRtl } = useLanguage();
-
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const categories = React.useMemo(() => {
-    const cats = Array.from(new Set(TEMPLATES.map(t => t.category)));
-    return ['all', ...cats];
-  }, []);
+  /** Each category is labelled by its own translated template entry, never by the raw catalog string. */
+  const categoryLabels = React.useMemo(() => {
+    const labels = new Map<string, string>();
+    for (const template of SITE_TEMPLATES) {
+      if (!labels.has(template.category)) labels.set(template.category, t.templatesSection.templates[template.id]?.category || template.category);
+    }
+    return labels;
+  }, [t]);
+
+  const categories = React.useMemo(() => ['all', ...categoryLabels.keys()], [categoryLabels]);
 
   const filteredTemplates = React.useMemo(() => {
-    const list = selectedCategory === 'all' ? TEMPLATES : TEMPLATES.filter(t => t.category === selectedCategory);
+    const list = selectedCategory === 'all' ? SITE_TEMPLATES : SITE_TEMPLATES.filter(template => template.category === selectedCategory);
     return maxVisible ? list.slice(0, maxVisible) : list;
   }, [selectedCategory, maxVisible]);
 
@@ -61,7 +65,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                     : 'bg-neutral-100 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200'
                 }`}
               >
-                {cat === 'all' ? (isRtl ? 'الكل' : 'All') : cat}
+                {cat === 'all' ? t.templatesSection.allCategory : categoryLabels.get(cat) || cat}
               </button>
             ))}
           </div>
@@ -90,7 +94,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
           })}
         </div></Reveal>
 
-        {maxVisible && TEMPLATES.length > maxVisible && (
+        {maxVisible && SITE_TEMPLATES.length > maxVisible && (
           <div className="mt-8 text-center">
             <a href="/templates" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold text-neutral-800 hover:bg-neutral-100 transition-colors">
               {isRtl ? 'عرض جميع القوالب' : 'View all templates'}

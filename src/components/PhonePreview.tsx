@@ -1,15 +1,15 @@
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { type CreatorProfile, type ThemeConfig, type ProfileBlock } from '../types';
-import { LoadingLogo } from '../components/LoadingLogo';
 import { 
   CheckCircle2, 
   Share2
 } from 'lucide-react';
-import { getBorderColor, getThemeBackground, resolveTheme } from '../utils/colorContrast';
+import { getThemeBackground, resolveTheme } from '../utils/colorContrast';
 import { PhoneProfileHeader } from './phone-preview/PhoneProfileHeader';
 import { PhoneSocialsRow } from './phone-preview/PhoneSocialsRow';
 import { PhoneBlocksList } from './phone-preview/PhoneBlocksList';
+import { PhoneFooterBranding } from './phone-preview/PhoneFooterBranding';
 
 interface PhonePreviewProps {
   profile: CreatorProfile;
@@ -37,8 +37,6 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   const themeBackground = getThemeBackground(theme);
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [previewNotice, setPreviewNotice] = useState<string | null>(null);
-  const [footerLogoFailed, setFooterLogoFailed] = useState(false);
-  const [footerLogoLoading, setFooterLogoLoading] = useState(false);
 
   const handleShare = async () => {
     try { await navigator.clipboard.writeText(window.location.origin + '/@' + profile.username); }
@@ -149,53 +147,14 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           interactive={interactive}
           onLinkClick={onLinkClick}
           highlightedFeatureId={highlightedFeatureId}
+          profileId={profile.id}
           onSubscribeNotice={(msg) => {
             setPreviewNotice(msg);
             setTimeout(() => setPreviewNotice(null), 2500);
           }}
         />
 
-        {profile.footerLogoUrl && (
-          <div className="pt-2 text-center">
-            {footerLogoFailed ? (
-              <span role="img" aria-label={profile.footerLogoAlt || ui('Creator logo')} className="text-xs font-semibold" dir="auto">{profile.footerLogoAlt || ui('Creator logo')}</span>
-            ) : (
-              <>
-                {footerLogoLoading && (
-                  <LoadingLogo
-                    loading={true}
-                    size="sm"
-                    className="mx-auto h-4 max-w-20 object-contain"
-                  />
-                )}
-                <img
-                  src={profile.footerLogoUrl}
-                  alt={profile.footerLogoAlt || ui('Creator logo')}
-                  onLoad={() => setFooterLogoLoading(false)}
-                  onError={() => {
-                    setFooterLogoFailed(true);
-                    setFooterLogoLoading(false);
-                  }}
-                  className={`mx-auto h-4 max-w-20 object-contain ${footerLogoLoading ? 'hidden' : 'inline'}`}
-                />
-              </>
-            )}
-          </div>
-        )}
-
-        {/* RALOA Branding Footer Badge */}
-        {!(profile.plan && profile.plan !== 'free' && profile.hideBranding) && (
-          <div className="pt-2 pb-6 text-center">
-            <a 
-              href="#builder" 
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-3 font-mono text-xs tracking-wider transition-opacity hover:opacity-100 dark:border-white/10 dark:bg-neutral-50/5 cursor-pointer"
-              style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>{ui("Made with")}{' '}<strong>{ui("RALOA")}</strong></span>
-            </a>
-          </div>
-        )}
+        <PhoneFooterBranding profile={profile} theme={theme} />
       </>
     );
   }

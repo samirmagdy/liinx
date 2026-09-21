@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { type CreatorProfile, type ThemeConfig } from '../../../types';
-import { THEMES } from '../../../config/themes';
 import { api, authStorage } from '../../../services/api';
+import { useStarterSite } from './useStarterSite';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
@@ -60,6 +60,9 @@ export function useProfile({
   profileRef.current = profile;
   onProfileSwitchedRef.current = onProfileSwitched;
 
+  // Applying a starter site rewrites the page tree, so it lands through the same switch handler.
+  const starterSiteHook = useStarterSite({ profile, setProfile, setCustomTheme, flushQueue, onApplied: p => onProfileSwitchedRef.current?.(p) });
+
   const loadProfilesList = () => {
     api.studio.getProfiles()
       .then(res => {
@@ -78,20 +81,12 @@ export function useProfile({
     }
 
     api.studio.getProfile()
-      .then(async liveProfile => {
+      .then(liveProfile => {
         if (!liveProfile || !liveProfile.id) {
           setLoadState('empty');
           return;
         }
-        const params = new URLSearchParams(window.location.search);
-        const template = params.get('template');
-        const shouldOpenImporter = params.get('import') === '1';
-
-        if (template && THEMES.some(theme => theme.id === template)) {
-          await api.studio.updateProfile({ themeId: template, customTheme: THEMES.find(theme => theme.id === template)! });
-          liveProfile = await api.studio.getProfile();
-          window.history.replaceState(null, '', '/studio');
-        }
+        const shouldOpenImporter = new URLSearchParams(window.location.search).get('import') === '1';
 
         setLoadState('ready');
         savedUsernameRef.current = liveProfile.username;
@@ -239,6 +234,7 @@ export function useProfile({
   };
 
   return {
+    ...starterSiteHook,
     profile,
     setProfile,
     profileRef,

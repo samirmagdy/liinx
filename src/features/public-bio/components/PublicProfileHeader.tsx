@@ -5,6 +5,7 @@ import { brand } from '../../../config/brand';
 import { getAccessibleTextColor, getBorderColor } from '../../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { safePublicHref } from '../utils/publicBio.utils';
+import { avatarInitials } from '../../../utils/avatarInitials';
 import { renderSocialIcon } from '../utils/socialIcons';
 import { DemoProfileNotice } from './DemoProfileNotice';
 
@@ -20,19 +21,29 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
     <div className="flex flex-col items-center text-center mb-8">
       <DemoProfileNotice username={profile.username} />
       <div className="relative mb-4">
-        <img
-          src={profile.avatarUrl}
-          alt={profile.displayName}
-          width={96}
-          height={96}
-          decoding="async"
-          onError={event => {
-            event.currentTarget.onerror = null;
-            event.currentTarget.src = '/icons/favicon-32x32.png';
-          }}
-          className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-md ring-4 ring-white/20"
-          referrerPolicy="no-referrer"
-        />
+        {profile.avatarUrl ? (
+          <img
+            src={profile.avatarUrl}
+            alt={profile.displayName}
+            width={96}
+            height={96}
+            decoding="async"
+            onError={event => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = '/icons/favicon-32x32.png';
+            }}
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-md ring-4 ring-white/20"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="grid h-24 w-24 place-items-center rounded-full text-3xl font-bold shadow-md ring-4 ring-white/20 sm:h-28 sm:w-28"
+            style={{ backgroundColor: theme.cardBg, color: theme.cardText }}
+          >
+            {avatarInitials(profile.displayName)}
+          </div>
+        )}
         {profile.verified && (
           <div
             className="absolute bottom-1 end-1 p-1.5 rounded-full text-white shadow-md"

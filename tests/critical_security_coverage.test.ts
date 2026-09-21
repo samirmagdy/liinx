@@ -10,7 +10,7 @@ import { detectImageMagicBytes, detectDocument, getImageDimensions } from '../se
 import { isLoginRateLimited, isRegisterRateLimited, resetAuthRateLimits } from '../server/routes/auth.js';
 import { isAllowedFontStylesheetUrl } from '../src/utils/fontValidation.js';
 import { friendlyErrorMessage } from '../src/utils/errors.js';
-import { TEMPLATES } from '../src/config/templates.js';
+import { SITE_TEMPLATES } from '../shared/index.js';
 import { COMPARISON_FEATURES } from '../src/config/marketing.js';
 import { getFaqs } from '../src/config/faq.js';
 import { paidPlans, PLAN_ENTITLEMENTS } from '../shared/config/plans.js';
@@ -965,7 +965,7 @@ describe('Critical Security & Coverage Modules', () => {
     });
 
     it('verifies marketing plans, templates, and translation functions', () => {
-      expect(TEMPLATES.length).toBeGreaterThan(0);
+      expect(SITE_TEMPLATES.length).toBeGreaterThan(0);
       expect(COMPARISON_FEATURES.length).toBeGreaterThan(0);
       expect(getFaqs('en', false).length).toBeGreaterThan(0);
       expect(getFaqs('ar', false).length).toBeGreaterThan(0);

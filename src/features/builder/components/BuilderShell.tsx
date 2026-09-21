@@ -7,6 +7,7 @@ import { LinktreeImporterModal } from '../../../components/LinktreeImporterModal
 import { ConfirmDeleteDialog } from './dialogs/ConfirmDeleteDialog';
 import { NewProfileDialog } from './dialogs/NewProfileDialog';
 import { ApiKeyDialog } from './dialogs/ApiKeyDialog';
+import { StarterSiteDialogHost } from './dialogs/StarterSiteDialogHost';
 import { api } from '../../../services/api';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { initialPageId } from '../utils/builder.utils';
@@ -94,6 +95,8 @@ export const BuilderShell: React.FC = () => {
       />
 
       <NewProfileDialog />
+
+      <StarterSiteDialogHost />
 
       <ApiKeyDialog />
     </div>

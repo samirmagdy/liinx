@@ -5,12 +5,12 @@ import {
   Pause,
   ChevronDown,
   ChevronUp,
-  Send,
-  Mail,
   Music2
 } from 'lucide-react';
 import { type ProfileBlock, type ThemeConfig, type LinkBlock, type AudioBlock, type VideoBlock, type FolderBlock, type InstagramGridBlock, type NewsletterBlock } from '../../types';
 import { BookingCard } from '../BookingCard';
+import { isDocumentBlock, PhoneDocumentBlock } from './PhoneDocumentBlock';
+import { PhoneNewsletterBlock } from './PhoneNewsletterBlock';
 import {
   getSpotifyEmbedUrl,
   getSoundCloudEmbedUrl,
@@ -20,8 +20,19 @@ import {
   isDirectAudioFile,
   isDirectVideoFile
 } from '../../utils/mediaEmbeds';
-import { getAccessibleTextColor, getBorderColor } from '../../utils/colorContrast';
+import { getAccessibleTextColor } from '../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../context/LanguageContext';
+
+/** Which preview block, if any, the feature tour is pointing at. */
+const highlightClassFor = (blockType: string, highlightedFeatureId?: string | null) => {
+  const isHighlighted =
+    (blockType === 'booking' && highlightedFeatureId === 'booking') ||
+    (blockType === 'audio' && highlightedFeatureId === 'audio') ||
+    (blockType === 'folder' && highlightedFeatureId === 'folders');
+  return isHighlighted
+    ? 'ring-2 ring-amber-500 shadow-lg shadow-amber-500/20 scale-[1.02] transition-all duration-300'
+    : 'transition-all duration-300';
+};
 
 interface PhoneBlocksListProps {
   blocks?: ProfileBlock[];
@@ -30,6 +41,8 @@ interface PhoneBlocksListProps {
   onLinkClick?: (block: ProfileBlock) => void;
   highlightedFeatureId?: string | null;
   onSubscribeNotice?: (message: string) => void;
+  /** Only forms need it, and only when the preview is live enough to accept a submission. */
+  profileId?: string;
 }
 
 export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
@@ -38,7 +51,8 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
   interactive = true,
   onLinkClick,
   highlightedFeatureId,
-  onSubscribeNotice
+  onSubscribeNotice,
+  profileId = ''
 }) => {
   const { tr: ui } = useUiLanguage();
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
@@ -70,15 +84,8 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
 
   return (
     <div className="space-y-3 mb-8">
-      {blocks.map((block) => {
-        const isBlockHighlighted =
-          (block.type === 'booking' && highlightedFeatureId === 'booking') ||
-          (block.type === 'audio' && highlightedFeatureId === 'audio') ||
-          (block.type === 'folder' && highlightedFeatureId === 'folders');
-
-        const highlightClass = isBlockHighlighted
-          ? 'ring-2 ring-amber-500 shadow-lg shadow-amber-500/20 scale-[1.02] transition-all duration-300'
-          : 'transition-all duration-300';
+      {blocks.map((block, index) => {
+        const highlightClass = highlightClassFor(block.type, highlightedFeatureId);
 
         if (block.type === 'booking') {
           return (
@@ -453,47 +460,29 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
         }
 
         if (block.type === 'newsletter') {
-          const nlBlock = block as NewsletterBlock;
           return (
-            <div
+            <PhoneNewsletterBlock
               key={block.id}
-              className={`p-4 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)}`}
-              style={{ backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText }}
-            >
-              <h3 className="text-xs font-bold mb-1 flex items-center gap-1.5" dir="auto">
-                <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: theme.accentColor }} />
-                <span dir="auto">{block.title}</span>
-              </h3>
-              <p className="text-[11px] mb-3 leading-relaxed text-pretty" style={{ color: theme.subtextColor }} dir="auto">
-                {nlBlock.description}
-              </p>
+              block={block as NewsletterBlock}
+              theme={theme}
+              radiusClass={getRadiusClass(theme.cardRadius, true)}
+              email={newsletterEmail}
+              onEmailChange={setNewsletterEmail}
+              onSubscribe={handleSubscribe}
+            />
+          );
+        }
 
-              <form onSubmit={handleSubscribe} className="space-y-2">
-                <input
-                  id={`phone-preview-newsletter-email-${block.id}`}
-                  name="email"
-                  autoComplete="email"
-                  aria-label={ui('Email address')}
-                  type="email"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder="your@email.com…"
-                  className="w-full px-3 py-2 text-xs rounded-xl border outline-none transition-colors focus-visible:ring-1 focus-visible:ring-indigo-500"
-                  style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)'), color: theme.cardText }}
-                  required
-                  spellCheck={false}
-                  dir="ltr"
-                />
-                <button
-                  type="submit"
-                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
-                  style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
-                >
-                  <span dir="auto">{nlBlock.buttonText}</span>
-                  <Send className="w-3 h-3 shrink-0" />
-                </button>
-              </form>
-            </div>
+        if (isDocumentBlock(block.type)) {
+          return (
+            <PhoneDocumentBlock
+              key={block.id}
+              block={block}
+              theme={theme}
+              blockIndex={index}
+              blockCount={blocks.length}
+              profileId={profileId}
+            />
           );
         }
 

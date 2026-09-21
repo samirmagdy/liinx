@@ -242,10 +242,15 @@ function createRegisteredAccount(input: {
 }): void {
   const { userId, profileId, username, email, passwordHash, inviterId, agencyInviterId, now, template } = input;
   const displayName = username.charAt(0).toUpperCase() + username.slice(1);
-  const starterSocials = JSON.stringify([
-    { platform: 'instagram', url: 'https://instagram.com' },
-    { platform: 'email', url: `mailto:${email}` }
-  ]);
+  // A starter site is only allowed to promise what it can deliver, so a template account starts
+  // with the one social that is genuinely known at signup and no photo of a stranger.
+  const starterSocials = JSON.stringify(template
+    ? [{ platform: 'email', url: `mailto:${email}` }]
+    : [
+      { platform: 'instagram', url: 'https://instagram.com' },
+      { platform: 'email', url: `mailto:${email}` }
+    ]);
+  const starterAvatar = template ? null : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop';
   db.transaction(() => {
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, email, passwordHash, now);
     if (inviterId) recordCreatorReferral(inviterId, userId, now);
@@ -254,7 +259,7 @@ function createRegisteredAccount(input: {
       id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .run(profileId, userId, username, displayName, template ? '' : 'Welcome to my links! Tap below to explore my latest updates.',
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
+        starterAvatar,
         template?.category || 'Creator', 0, template?.themeId || 'editorial-stone', starterSocials, now, now);
     const homePageId = createHomePage(profileId, displayName, null, now);
     if (template) {

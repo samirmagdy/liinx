@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { blockExtraSchemas, MAX_URL, type ContractBlockType } from './blocks.js';
+import { blockExtraSchemas, MAX_URL, normalizeBlockExtra, normalizeFormFields, type ContractBlockType } from './blocks.js';
 import { isSafeLinkUrl } from './urlValidation.js';
 import { pageContract, presetThemeIds } from './profiles.js';
 
@@ -90,4 +90,24 @@ export function assertSiteTemplateCatalog(catalog: readonly unknown[]): SiteTemp
     ids.add(parsed.data.id);
     return parsed.data;
   });
+}
+
+/**
+ * Turns an authored block's `extra` into the shape a stored row holds.
+ *
+ * Starter blocks are authored without item ids. Stored rows always carry them, because the
+ * builder keys its repeated editors by id and would treat two rows without one as the same row.
+ * The preview of a starter site runs through this function too, so what a visitor sees before
+ * clicking "use" is the same data the server later writes.
+ */
+export function templateBlockExtra(type: ContractBlockType, extra: Record<string, unknown> | undefined): Record<string, unknown> | null {
+  if (!extra) return null;
+  const normalized = normalizeBlockExtra(type, extra);
+  if (Array.isArray(normalized.items)) {
+    normalized.items = normalized.items.map((item, index) => (
+      item && typeof item === 'object' ? { id: `item_${index}`, ...(item as Record<string, unknown>) } : item
+    ));
+  }
+  if (type === 'form' && Array.isArray(normalized.fields)) normalized.fields = normalizeFormFields(normalized.fields);
+  return Object.keys(normalized).length ? normalized : null;
 }
