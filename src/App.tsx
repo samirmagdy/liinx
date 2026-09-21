@@ -32,6 +32,7 @@ import * as Sentry from '@sentry/react';
 import { languageForPath } from './utils/languagePaths';
 import { starterSitePath } from './utils/starterSites';
 import type { Language } from './config/i18n';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 
 
@@ -305,6 +306,7 @@ function CustomDomainApp({ currentHost, language, routerBase, routerSsrPath }: R
                 /></Suspense>
               </div>
             </div>
+            <SpeedInsights />
           </AuthProvider>
         </LanguageProvider>
       </ErrorBoundary>
@@ -383,6 +385,7 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
               </Switch></Suspense>
             </div>
           </div>
+          <SpeedInsights />
           </ProductFeedbackProvider>
         </AuthProvider>
       </CapabilitiesProvider>
