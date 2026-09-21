@@ -205,7 +205,6 @@
     "SETUP REQUIRED",
     "Safe format: paragraphs, # headings, - or 1. lists, **bold**, *italic*, and [label](https://url). HTML is shown as text.",
     "Safe link URL",
-    "Saving...",
     "Scheduled sync:",
     "Search this page",
     "Send email",
@@ -259,7 +258,7 @@
     "stored responses",
     "✓ Domain connected successfully. Secure HTTPS becomes active once your hosting provider completes TLS certificate provisioning."
   ],
-  "count": 258,
+  "count": 257,
   "inlineBilingualTernaries": {
     "src/components/BookingCard.tsx": 9,
     "src/components/BookingEditor.tsx": 7,

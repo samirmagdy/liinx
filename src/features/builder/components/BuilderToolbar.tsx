@@ -10,6 +10,7 @@ import {
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { useBuilder } from '../context/BuilderContext';
 import { useLivePreview } from '../hooks/useLivePreview';
+import { SaveStatusIndicator } from './SaveStatusIndicator';
 
 export const BuilderToolbar: React.FC = () => {
   const { tr: ui } = useUiLanguage();
@@ -23,10 +24,6 @@ export const BuilderToolbar: React.FC = () => {
     handleSelectProfile,
     setDeleteProfileId,
     setShowNewProfileModal,
-    saveStatus,
-    saveErrorBanner,
-    queueRef,
-    handleRetryFailedSaves,
     setQrModalOpen,
     copiedLink,
     handleCopyPublicLink,
@@ -119,24 +116,7 @@ export const BuilderToolbar: React.FC = () => {
           )}
         </div>
 
-        <div className="save-status flex items-center gap-1.5 text-xs text-neutral-600">
-          <span className={`w-2 h-2 rounded-full ${
-            saveStatus === 'saving' ? 'bg-amber-500 animate-ping' : 
-            saveStatus === 'error' ? 'bg-rose-500' : 'bg-emerald-500'
-          }`} />
-          <span className="font-mono text-xs">
-            {ui(saveErrorBanner ? 'Save failed' : queueRef.current?.dirty || saveStatus === 'saving' ? 'Saving...' : saveStatus === 'error' ? 'Save failed' : 'Saved')}
-          </span>
-          {queueRef.current?.dirty && saveStatus === 'error' && (
-            <button
-              type="button"
-              onClick={handleRetryFailedSaves}
-              className="ml-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
-            >
-              {ui("Retry")}
-            </button>
-          )}
-        </div>
+        <SaveStatusIndicator />
       </div>
 
       {/* Right Action Tools */}

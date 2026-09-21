@@ -38,7 +38,7 @@ export const PageEditorForm: React.FC = () => {
                 {ui('Published')}
               </label>
               <p className="text-xs font-normal text-neutral-500">
-                {ui('Changes save directly to the published page. Unpublished pages are hidden; RALOA does not keep a separate draft revision.')}
+                {ui('Changes save directly to this page. Unpublishing hides it from visitors until it is published again.')}
               </p>
             </div>
           )}

@@ -50,6 +50,54 @@ test.describe('contextual upgrades', () => {
   });
 });
 
+test.describe('the saved and live claim', () => {
+  test('says Live only for the page a visitor can actually reach', async ({ page }) => {
+    const username = uniqueName('live');
+    await completeRegistration(page, { username, email: `${username}@example.test`, password: 'SavedLive2026pass!' });
+
+    const status = page.locator('.save-status');
+    const chips = page.locator('nav[aria-label="Profile pages"] button');
+    const openChip = page.locator('nav[aria-label="Profile pages"] button[aria-current="page"]');
+    // The page a creator opened is the page the toolbar describes. The home page carries the
+    // creator's display name, so the title is read from the chip rather than assumed.
+    const assertDescribesOpenPage = async () => {
+      const title = (await openChip.getAttribute('title')) ?? '';
+      expect(title, 'the chip names its own page').toBeTruthy();
+      await expect(status, `the toolbar says "${title}"`).toContainText(title);
+    };
+    await expect(status).toContainText('Saved · Live');
+    await assertDescribesOpenPage();
+    await expect(status).toHaveAttribute('title', 'Changes are published automatically');
+
+    await page.getByLabel('New page title').fill('Archive');
+    await page.getByLabel('New page URL slug').fill('archive');
+    await page.getByRole('button', { name: 'Add page' }).click();
+    const archive = chips.filter({ hasText: 'Archive' });
+    await expect(archive).toHaveAttribute('title', 'Archive is live');
+
+    await page.locator('#page-manager-edit-published').uncheck();
+    await page.getByRole('button', { name: 'Save page settings' }).click();
+    await expect(archive).toHaveAttribute('title', 'Archive is unpublished');
+
+    await chips.filter({ hasText: '(Home)' }).click();
+    await expect(status).toContainText('Saved · Live');
+    await archive.click();
+    await expect(status).not.toContainText('Live');
+    await assertDescribesOpenPage();
+
+    // The Studio only says "unpublished" because the server agrees. The public HTML route is
+    // served by the production server, so the assertion goes to the payload that route reads.
+    const publicPageStatus = () => page.request.get(`/api/profiles/${username}?page=archive`).then(r => r.status());
+    await expect.poll(publicPageStatus, 'an unpublished page is not reachable').toBe(404);
+
+    await page.locator('#page-manager-edit-published').check();
+    await page.getByRole('button', { name: 'Save page settings' }).click();
+    await expect(status).toContainText('Saved · Live');
+    await expect(status).toContainText('Archive is live');
+    await expect.poll(publicPageStatus, 'publishing makes it reachable').toBe(200);
+  });
+});
+
 test.describe('mobile studio navigation', () => {
   for (const width of [360, 390, 414]) {
     test(`keeps the bottom tab bar usable at ${width}px`, async ({ page }) => {

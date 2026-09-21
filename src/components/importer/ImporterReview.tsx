@@ -66,7 +66,7 @@ export const ImporterReview: React.FC<ImporterReviewProps> = ({
         className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-normal text-neutral-900"
         aria-label={ui("Import destination page")}
       >
-        {pages.map(page => <option key={page.id} value={page.id}>{page.isHome ? ui('Home') : `${page.title}${page.published ? '' : ' (draft)'}`}</option>)}
+        {pages.map(page => <option key={page.id} value={page.id}>{page.isHome ? ui('Home') : `${page.title}${page.published ? '' : ` (${ui('Unpublished')})`}`}</option>)}
       </select>
       <span className="mt-1 block text-xs font-normal text-neutral-500">{ui("Imported links are appended to this page; existing content is not overwritten.")}</span>
     </label>

@@ -31,6 +31,7 @@ export const PageManager: React.FC = () => {
               type="button"
               aria-current={page.id === activePage?.id ? 'page' : undefined}
               onClick={() => setActivePageId(page.id)}
+              title={`${page.title} ${page.published ? ui('is live') : ui('is unpublished')}`}
               className={`rounded-xl border px-3 py-1.5 text-xs font-semibold focus-visible:ring-2 focus-visible:ring-neutral-900/30 ${
                 page.id === activePage?.id
                   ? 'border-neutral-900 bg-neutral-900 text-white'
@@ -38,6 +39,13 @@ export const PageManager: React.FC = () => {
               }`}
             >
               {page.title}{page.isHome ? ` (${ui('Home')})` : ''}
+              {!page.published && (
+                <span className={`ms-1.5 font-mono text-[11px] font-bold uppercase tracking-caps ${
+                  page.id === activePage?.id ? 'text-neutral-300' : 'text-neutral-500'
+                }`}>
+                  {ui('Unpublished')}
+                </span>
+              )}
             </button>
           ))}
         </nav>
