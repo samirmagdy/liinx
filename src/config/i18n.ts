@@ -33,14 +33,8 @@ export interface Translations {
     headlineHighlight: string;
     subheadline: string;
     claimPlaceholder: string;
-    claimButton: string;
     exploreTemplates: string;
     previewSubtitle: string;
-    noCreditCard: string;
-    customDomainIncluded: string;
-    zeroCommission: string;
-    microProof1: string;
-    microProof2: string;
     themeLabel: string;
     customizeCta: (name: string) => string;
   };
@@ -119,16 +113,10 @@ export const translations: Record<Language, Translations> = {
       badge: 'Mini-sites for creators · English + Arabic',
       headline: 'Your mini-site',
       headlineHighlight: 'in your bio.',
-      subheadline: `Bring your links, work, supported media, bookings, and newsletter together in one customizable page. Publish at ${brand.domain}/@yourname, with English and Arabic support including RTL layouts.`,
+      subheadline: 'One page for the links, media and bookings a bio line cannot hold.',
       claimPlaceholder: 'yourname',
-      claimButton: 'Build your page',
       exploreTemplates: 'Explore templates',
       previewSubtitle: 'Interactive template preview',
-      noCreditCard: 'Start with a free account',
-      customDomainIncluded: 'Custom domains on paid plans',
-      zeroCommission: 'No RALOA fee on external sales or bookings',
-      microProof1: 'Preview your page as you build',
-      microProof2: 'Templates for creators, studios, and brands',
       themeLabel: 'Theme:',
       customizeCta: (name) => `Customize ${name}'s Page in Studio`
     },
@@ -287,16 +275,10 @@ export const translations: Record<Language, Translations> = {
       badge: 'مواقع مصغّرة للمبدعين · عربي وإنجليزي',
       headline: 'موقعك المصغّر',
       headlineHighlight: 'في نبذتك.',
-      subheadline: `اجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك ونشرتك البريدية في صفحة واحدة قابلة للتخصيص. انشرها على ${brand.domain}/@اسمك، مع دعم العربية واتجاه RTL.`,
+      subheadline: 'صفحة واحدة تجمع الروابط والمحتوى والحجوزات التي لا تستوعبها نبذتك.',
       claimPlaceholder: 'اسمك',
-      claimButton: 'أنشئ صفحتك مجاناً',
       exploreTemplates: 'استكشف القوالب',
       previewSubtitle: 'معاينة تفاعلية لقالب',
-      noCreditCard: 'ابدأ بحساب مجاني',
-      customDomainIncluded: 'النطاقات المخصصة في الخطط المدفوعة',
-      zeroCommission: 'لا تفرض RALOA رسوماً على المبيعات أو الحجوزات التي يدير مزود خارجي مدفوعاتها',
-      microProof1: 'عاين صفحتك أثناء بنائها',
-      microProof2: 'قوالب للمبدعين والاستوديوهات والعلامات التجارية',
       themeLabel: 'السمة:',
       customizeCta: (name) => `تخصيص صفحة ${name} في الاستوديو`
     },

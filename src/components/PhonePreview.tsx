@@ -19,7 +19,6 @@ interface PhonePreviewProps {
   scale?: 'normal' | 'compact' | 'responsive' | 'editor';
   compact?: boolean;
   deviceMode?: 'mobile' | 'tablet' | 'desktop';
-  highlightedFeatureId?: string | null;
 }
 
 export const PhonePreview: React.FC<PhonePreviewProps> = ({
@@ -30,7 +29,6 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   scale = 'normal',
   compact = false,
   deviceMode = 'mobile',
-  highlightedFeatureId = null,
 }) => {
   const { tr: ui } = useUiLanguage();
   const theme = resolveTheme(profile.themeId, customTheme);
@@ -131,7 +129,6 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
         <PhoneProfileHeader
           profile={profile}
           theme={theme}
-          highlightedFeatureId={highlightedFeatureId}
         />
 
         {/* Social Icons Row */}
@@ -146,7 +143,6 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           theme={theme}
           interactive={interactive}
           onLinkClick={onLinkClick}
-          highlightedFeatureId={highlightedFeatureId}
           profileId={profile.id}
           onSubscribeNotice={(msg) => {
             setPreviewNotice(msg);

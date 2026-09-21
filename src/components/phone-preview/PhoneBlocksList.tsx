@@ -23,23 +23,11 @@ import {
 import { getAccessibleTextColor } from '../../utils/colorContrast';
 import { useLanguage as useUiLanguage } from '../../context/LanguageContext';
 
-/** Which preview block, if any, the feature tour is pointing at. */
-const highlightClassFor = (blockType: string, highlightedFeatureId?: string | null) => {
-  const isHighlighted =
-    (blockType === 'booking' && highlightedFeatureId === 'booking') ||
-    (blockType === 'audio' && highlightedFeatureId === 'audio') ||
-    (blockType === 'folder' && highlightedFeatureId === 'folders');
-  return isHighlighted
-    ? 'ring-2 ring-amber-500 shadow-lg shadow-amber-500/20 scale-[1.02] transition-all duration-300'
-    : 'transition-all duration-300';
-};
-
 interface PhoneBlocksListProps {
   blocks?: ProfileBlock[];
   theme: ThemeConfig;
   interactive?: boolean;
   onLinkClick?: (block: ProfileBlock) => void;
-  highlightedFeatureId?: string | null;
   onSubscribeNotice?: (message: string) => void;
   /** Only forms need it, and only when the preview is live enough to accept a submission. */
   profileId?: string;
@@ -50,7 +38,6 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
   theme,
   interactive = true,
   onLinkClick,
-  highlightedFeatureId,
   onSubscribeNotice,
   profileId = ''
 }) => {
@@ -85,11 +72,9 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
   return (
     <div className="space-y-3 mb-8">
       {blocks.map((block, index) => {
-        const highlightClass = highlightClassFor(block.type, highlightedFeatureId);
-
         if (block.type === 'booking') {
           return (
-            <div key={block.id} data-feature="booking" className={highlightClass}>
+            <div key={block.id} data-feature="booking" className="transition-all duration-300">
               <BookingCard block={block} theme={theme} previewOnly={!interactive} />
             </div>
           );
@@ -162,7 +147,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
               <div
                 key={block.id}
                 data-feature="audio"
-                className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
+                className={`overflow-hidden transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} transition-all duration-300`}
                 style={{ backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText }}
               >
                 <iframe
@@ -224,7 +209,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
             <div
               key={block.id}
               data-feature="audio"
-              className={`p-3.5 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
+              className={`p-3.5 transition-shadow shadow-xs ${getRadiusClass(theme.cardRadius, true)} transition-all duration-300`}
               style={{ backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText }}
             >
               <div className="flex items-center gap-3">
@@ -311,7 +296,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
             <div
               key={block.id}
               data-feature="folders"
-              className={`overflow-hidden transition-shadow duration-200 border shadow-xs ${getRadiusClass(theme.cardRadius, true)} ${highlightClass}`}
+              className={`overflow-hidden transition-shadow duration-200 border shadow-xs ${getRadiusClass(theme.cardRadius, true)} transition-all duration-300`}
               style={{ backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText }}
             >
               <button

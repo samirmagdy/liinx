@@ -9,13 +9,11 @@ import { useLanguage as useUiLanguage } from '../../context/LanguageContext';
 interface PhoneProfileHeaderProps {
   profile: CreatorProfile;
   theme: ThemeConfig;
-  highlightedFeatureId?: string | null;
 }
 
 export const PhoneProfileHeader: React.FC<PhoneProfileHeaderProps> = ({
   profile,
   theme,
-  highlightedFeatureId,
 }) => {
   const { tr: ui } = useUiLanguage();
 
@@ -60,12 +58,8 @@ export const PhoneProfileHeader: React.FC<PhoneProfileHeaderProps> = ({
       {profile.username && (
         <p
           data-feature="domain"
-          className={`text-[11px] font-mono mb-2.5 px-2.5 py-1 rounded-full transition-all duration-300 ${
-            highlightedFeatureId === 'domain'
-              ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-2 ring-amber-500 font-bold scale-105 shadow-sm'
-              : ''
-          }`}
-          style={{ color: highlightedFeatureId === 'domain' ? undefined : theme.subtextColor }}
+          className="text-[11px] font-mono mb-2.5 px-2.5 py-1 rounded-full transition-all duration-300"
+          style={{ color: theme.subtextColor }}
           dir="ltr"
         >
           {brand.domain}/@{profile.username}

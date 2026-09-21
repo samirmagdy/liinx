@@ -6,14 +6,9 @@ import { DEMO_PROFILES } from '../demo/demoProfiles';
 import { ARABIC_DEMO_PROFILES } from '../demo/arabicDemoProfiles';
 import { type CreatorProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { 
-  ArrowRight, 
-  Palette, 
-  Check
-} from 'lucide-react';
+import { ArrowRight, Palette } from 'lucide-react';
 
 import { useHeroMotion } from '../animations/useHeroMotion';
-import { HeroFeatureShowcase } from './HeroFeatureShowcase';
 import { HeroPreviewControls } from './HeroPreviewControls';
 import { HeroClaimForm } from './HeroClaimForm';
 
@@ -27,9 +22,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
   const { t, isRtl } = useLanguage();
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(DEMO_PROFILES[0].themeId);
-  const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>('audio');
   const heroRef = useRef<HTMLElement>(null);
-  const phoneScrollRef = useRef<HTMLDivElement>(null);
   useHeroMotion(heroRef, isRtl ? 'ar' : 'en', `${selectedProfileIndex}:${selectedThemeId}`);
 
   const currentProfiles = isRtl ? ARABIC_DEMO_PROFILES : DEMO_PROFILES;
@@ -41,34 +34,9 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
 
   const theme = activeTheme;
 
-  const scrollToFeature = (featureId: string) => {
-    const scrollContainer = phoneScrollRef.current;
-    if (!scrollContainer) return;
-
-    const targetEl = scrollContainer.querySelector(`[data-feature="${featureId}"]`) as HTMLElement | null;
-    if (targetEl) {
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   const handleProfileSelect = (index: number) => {
     setSelectedProfileIndex(index);
     setSelectedThemeId(currentProfiles[index]?.themeId || DEMO_PROFILES[index].themeId);
-    setSelectedFeatureId(null);
-  };
-
-  const handleFeatureSelect = (featureId: string, profileIndex: number) => {
-    setSelectedFeatureId(featureId);
-    if (selectedProfileIndex !== profileIndex) {
-      setSelectedProfileIndex(profileIndex);
-      setSelectedThemeId(currentProfiles[profileIndex]?.themeId || DEMO_PROFILES[profileIndex].themeId);
-      // Wait for re-render with the new profile blocks before scrolling
-      setTimeout(() => {
-        scrollToFeature(featureId);
-      }, 120);
-    } else {
-      scrollToFeature(featureId);
-    }
   };
 
   return (
@@ -109,61 +77,52 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 onFallbackRedirect={() => setLocation('/register')}
               />
 
-              {/* Secondary CTAs & Concise Guarantees */}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs px-2">
-                <div className="flex flex-wrap items-center gap-x-4">
-                  <Link
-                    href="/@elenarostova"
-                    className="inline-flex min-h-11 items-center gap-1.5 font-bold text-neutral-900 hover:text-indigo-600 transition-colors cursor-pointer"
-                  >
-                    <span>{isRtl ? 'شاهد العرض التجريبي ↗' : 'View live demo ↗'}</span>
-                  </Link>
-                  <Link
-                    href="/templates"
-                    className="inline-flex min-h-11 items-center gap-1 font-semibold text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer"
-                  >
-                    <span>{t.hero.exploreTemplates}</span>
-                    <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
-                  </Link>
-                </div>
-
-                <div className="flex items-center gap-3 text-neutral-500">
-                  <span className="flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                    <span>{t.hero.noCreditCard}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                    <span>{t.hero.zeroCommission}</span>
-                  </span>
-                </div>
+              {/* Secondary CTAs */}
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-xs px-2">
+                <Link
+                  href="/@elenarostova"
+                  className="inline-flex min-h-11 items-center gap-1.5 font-bold text-neutral-900 hover:text-indigo-600 transition-colors cursor-pointer"
+                >
+                  <span>{isRtl ? 'شاهد العرض التجريبي ↗' : 'View live demo ↗'}</span>
+                </Link>
+                <Link
+                  href="/templates"
+                  className="inline-flex min-h-11 items-center gap-1 font-semibold text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                  <span>{t.hero.exploreTemplates}</span>
+                  <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
+                </Link>
+                <Link
+                  href="/studio"
+                  onClick={event => { event.preventDefault(); onOpenStudio(activeProfile); }}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-neutral-300 bg-neutral-100 px-4 text-xs font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
+                >
+                  <Palette className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>{t.hero.customizeCta(activeProfile.displayName.split(' ')[0])}</span>
+                </Link>
               </div>
-
-              {/* Native Building Blocks Showcase - Balances Left Column Whitespace */}
-              <HeroFeatureShowcase
-                isRtl={isRtl}
-                selectedFeatureId={selectedFeatureId}
-                onSelectFeature={handleFeatureSelect}
-              />
             </div>
 
           </div>
 
           {/* Right Column: Interactive Device & Controls */}
           <div className="lg:col-span-5 flex flex-col items-center">
-            
-            {/* Interactive Selector Bar */}
-            <HeroPreviewControls
-              currentProfiles={currentProfiles}
-              selectedProfileIndex={selectedProfileIndex}
-              onSelectProfile={handleProfileSelect}
-              selectedThemeId={selectedThemeId}
-              onSelectTheme={setSelectedThemeId}
-              activeTheme={activeTheme}
-            />
+
+            {/* On a phone the device itself is the answer to "can I see one?", so it leads and
+                its controls follow; on desktop the selector bar stays above the shell. */}
+            <div className="order-2 flex w-full justify-center lg:order-1">
+              <HeroPreviewControls
+                currentProfiles={currentProfiles}
+                selectedProfileIndex={selectedProfileIndex}
+                onSelectProfile={handleProfileSelect}
+                selectedThemeId={selectedThemeId}
+                onSelectTheme={setSelectedThemeId}
+                activeTheme={activeTheme}
+              />
+            </div>
 
             {/* Live Interactive Device Preview with Apple-style motion */}
-            <div data-hero="visual" className="w-full max-w-[380px]">
+            <div data-hero="visual" className="order-1 mt-2 w-full max-w-[380px] lg:order-2 lg:mt-0">
               <div className="flex items-center justify-between px-2 mb-2">
                 <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-neutral-600">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
@@ -176,8 +135,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
               <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
-                <div 
-                  ref={phoneScrollRef}
+                <div
                   id="hero-phone-scroll-container"
                   dir={isProfileRtl ? 'rtl' : 'ltr'}
                   className="relative w-full h-[590px] rounded-[36px] overflow-y-auto no-scrollbar pt-10 pb-6 px-4 sm:px-5 transition-colors duration-300 scroll-smooth"
@@ -191,25 +149,12 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                     customTheme={activeTheme}
                     compact
                     interactive={false}
-                    highlightedFeatureId={selectedFeatureId}
                   /></div>
                 </div>
 
                 {/* Subtle bottom scroll affordance vignette */}
                 <div className="pointer-events-none absolute bottom-5 left-5 right-5 h-12 bg-gradient-to-t from-black/25 to-transparent rounded-b-[30px] z-20" />
               </div>
-            </div>
-
-            {/* Action below Phone */}
-            <div className="mt-4 flex items-center gap-3">
-              <Link
-                href="/studio"
-                onClick={event => { event.preventDefault(); onOpenStudio(activeProfile); }}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-neutral-300 bg-neutral-100 px-4 text-xs font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
-              >
-                <Palette className="w-3.5 h-3.5 text-indigo-600" />
-                <span>{t.hero.customizeCta(activeProfile.displayName.split(' ')[0])}</span>
-              </Link>
             </div>
 
           </div>
