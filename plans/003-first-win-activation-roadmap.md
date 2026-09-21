@@ -1,6 +1,6 @@
 # From theme picker to first win: activation and trust roadmap
 
-**Status:** TODO (awaiting maintainer priority call)
+**Status:** Phases 1, 2, 3, 4, 5a, 6 and 7 are shipped. Phase 5b (draft → preview → publish) is its own XL plan and is not started. Phase 8 stays blocked on maintainer-owned Google/Apple credentials — a provider button that 404s is a fake implementation and is refused.
 **Written against:** `6fc47ac`
 **Source:** external UX review, overall score ~7/10, "Template UX 4.5/10", headline complaint: *"I get the full product before I get the first win."*
 **Supersedes nothing.** Plans 001 and 002 remain independent.
