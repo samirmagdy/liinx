@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { signupIntentSchema } from '../contracts/templates.js';
 
 export const registerSchema = z.object({
   email: z.string().email('Please provide a valid email address').max(255, 'Email cannot exceed 255 characters'),
@@ -11,7 +12,9 @@ export const registerSchema = z.object({
     .max(30, 'Username cannot exceed 30 characters')
     .regex(/^[a-z0-9_]+$/, 'Username may only contain lowercase letters, numbers, and underscores'),
   /** Catalog starter site applied in the same transaction that opens the account. */
-  templateId: z.string().trim().min(1).max(60).optional()
+  templateId: z.string().trim().min(1).max(60).optional(),
+  /** Discipline picked at signup; files the account when no starter site supplies a category. */
+  intent: signupIntentSchema.optional()
 });
 
 export const loginSchema = z.object({

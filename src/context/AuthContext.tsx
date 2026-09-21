@@ -7,7 +7,7 @@ interface AuthContextType {
   profile: CreatorProfile | null;
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<void>;
-  register: (email: string, pass: string, username: string) => Promise<void>;
+  register: (email: string, pass: string, username: string, starterSite?: { templateId?: string; intent?: string }) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -49,8 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await refreshProfile();
   };
 
-  const register = async (email: string, pass: string, username: string) => {
-    await api.auth.register(email, pass, username);
+  const register = async (email: string, pass: string, username: string, starterSite?: { templateId?: string; intent?: string }) => {
+    await api.auth.register(email, pass, username, starterSite);
     await refreshProfile();
   };
 

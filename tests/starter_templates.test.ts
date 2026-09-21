@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { randomBytes } from 'node:crypto';
 import { app } from '../server/server.js';
-import { SITE_TEMPLATES, findSiteTemplate } from '../shared/index.js';
+import { SITE_TEMPLATES, SIGNUP_INTENT_CATEGORIES, findSiteTemplate } from '../shared/index.js';
 
 function unique(prefix: string): string {
   return `${prefix}_${Date.now()}_${randomBytes(4).toString('hex')}`;
@@ -159,9 +159,11 @@ describe('starter sites', () => {
 });
 
 describe('starter sites chosen during signup', () => {
-  async function signUpWithStarterSite(username: string, templateId?: string) {
+  async function signUpWithStarterSite(username: string, templateId?: string, intent?: string) {
     const response = await request(app).post('/api/auth/register').send({
-      email: `${username}@raloa.test`, password: 'StarterSitePassword2026!', username, ...(templateId ? { templateId } : {})
+      email: `${username}@raloa.test`, password: 'StarterSitePassword2026!', username,
+      ...(templateId ? { templateId } : {}),
+      ...(intent ? { intent } : {})
     });
     return { username, token: response.body.token as string, status: response.status };
   }
@@ -205,5 +207,29 @@ describe('starter sites chosen during signup', () => {
     const retried = await signUpWithStarterSite(username);
     expect(retried.status).toBe(201);
     expect((await studio(retried.token)).username).toBe(username);
+  });
+
+  it('files an account that skips the starter site under the discipline it declared', async () => {
+    const { token } = await signUpWithStarterSite(handle('signupintent'), undefined, 'musician');
+    const profile = await studio(token);
+    expect(profile.category).toBe(SIGNUP_INTENT_CATEGORIES.musician);
+    expect(profile.themeId).toBe('editorial-stone');
+    expect(profile.blocks.map((block: any) => block.title)).toEqual(['My Website']);
+  });
+
+  it('lets the starter site decide the category when both it and a discipline are sent', async () => {
+    const template = findSiteTemplate('tmpl-brutalist')!;
+    expect(template.category).not.toBe(SIGNUP_INTENT_CATEGORIES[template.intent]);
+    const { token } = await signUpWithStarterSite(handle('signupboth'), 'tmpl-brutalist', template.intent);
+    const profile = await studio(token);
+    expect(profile.category).toBe(template.category);
+    expect(profile.themeId).toBe(template.themeId);
+  });
+
+  it('rejects a discipline the catalogue does not collect instead of filing the account somewhere', async () => {
+    const username = handle('signupbadintent');
+    const rejected = await signUpWithStarterSite(username, undefined, 'astronaut');
+    expect(rejected.status).toBe(400);
+    await request(app).get(`/api/profiles/${username}`).expect(404);
   });
 });

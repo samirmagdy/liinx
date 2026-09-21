@@ -15,6 +15,28 @@ export const TEMPLATE_ALLOWED_BLOCK_TYPES = [
 
 export const templateBlockTypeSchema = z.enum(TEMPLATE_ALLOWED_BLOCK_TYPES);
 
+/** The disciplines signup collects. A starter site recommends itself through this id. */
+export const SIGNUP_INTENTS = ['creator', 'photographer', 'musician', 'developer', 'coach', 'business'] as const;
+
+export const signupIntentSchema = z.enum(SIGNUP_INTENTS);
+
+export type SignupIntent = z.infer<typeof signupIntentSchema>;
+
+/** What an account is filed under when its owner picks a discipline but no starter site. */
+export const SIGNUP_INTENT_CATEGORIES: Record<SignupIntent, string> = {
+  creator: 'Creator',
+  photographer: 'Design & Art',
+  musician: 'Musicians',
+  developer: 'Tech & Design',
+  coach: 'Wellness',
+  business: 'Business'
+};
+
+export function intentStartingCategory(intent: unknown): string | undefined {
+  const parsed = signupIntentSchema.safeParse(intent);
+  return parsed.success ? SIGNUP_INTENT_CATEGORIES[parsed.data] : undefined;
+}
+
 export const templateBlockSchema = z.object({
   type: templateBlockTypeSchema,
   title: z.string().trim().min(1).max(150),
@@ -44,7 +66,7 @@ export const siteTemplateSchema = z.object({
   id: z.string().regex(/^tmpl-[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?$/, 'Template ids use tmpl- followed by lowercase letters, numbers, and hyphens.'),
   name: z.string().trim().min(1).max(60),
   /** Matches the intent categories collected during registration so a template can be recommended. */
-  intent: z.enum(['creator', 'photographer', 'musician', 'developer', 'coach', 'business']),
+  intent: signupIntentSchema,
   category: z.string().trim().min(1).max(50),
   description: z.string().trim().min(1).max(300),
   themeId: z.enum(presetThemeIds),

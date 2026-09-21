@@ -85,12 +85,12 @@ export const api = {
     checkUsername: async (username: string): Promise<{ available: boolean; reason?: string }> => {
       return request<{ available: boolean; reason?: string }>(`/api/auth/check-username/${encodeURIComponent(username)}`);
     },
-    register: async (email: string, password: string, username: string) => {
+    register: async (email: string, password: string, username: string, starterSite?: { templateId?: string; intent?: string }) => {
       const referral = typeof window !== 'undefined' ? window.localStorage.getItem('raloa-referral') || undefined : undefined;
       const agencyReferral = typeof window !== 'undefined' ? window.localStorage.getItem('raloa-agency-referral') || undefined : undefined;
       const data = await request<{ token?: string; user: any; profileId: string }>('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email, password, username, referral, agencyReferral })
+        body: JSON.stringify({ email, password, username, referral, agencyReferral, ...starterSite })
       });
       if (data.token) authStorage.setToken(data.token);
       if (typeof window !== 'undefined') window.localStorage.removeItem('raloa-referral');

@@ -6,9 +6,8 @@ import path from 'node:path';
 import { SITE_TEMPLATES, type CreatorProfile } from '../shared/index.js';
 import { runtimeTranslations } from '../src/config/runtimeTranslations';
 import { LanguageProvider } from '../src/context/LanguageContext';
-import { clearStarterSiteParam, readStarterSiteParam } from '../src/features/builder/hooks/useStarterSite';
 import { StarterSiteDialog } from '../src/features/builder/components/dialogs/StarterSiteDialog';
-import { starterSiteBlocks } from '../src/utils/starterSites';
+import { clearStarterSiteParam, readStarterSiteParam, starterSiteBlocks } from '../src/utils/starterSites';
 
 if (typeof window === 'undefined') {
   (global as any).window = {

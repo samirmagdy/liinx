@@ -1,4 +1,5 @@
 import {
+  SITE_TEMPLATES,
   templateBlockExtra,
   type CreatorPage,
   type CreatorProfile,
@@ -102,4 +103,22 @@ export function starterSitePreview(template: SiteTemplate, options: StarterSiteP
 export function starterSitePath(templateId: string, signedIn: boolean): string {
   const query = `template=${encodeURIComponent(templateId)}`;
   return signedIn ? `/studio?${query}` : `/register?${query}`;
+}
+
+/**
+ * Reads the `?template=` hand-off. The gallery sends a catalogue id, never a theme id, so a value
+ * that is not a real starter site is ignored instead of quietly becoming a colour change.
+ */
+export function readStarterSiteParam(): SiteTemplate | null {
+  const requested = new URLSearchParams(window.location.search).get('template');
+  if (!requested) return null;
+  return SITE_TEMPLATES.find(template => template.id === requested) || null;
+}
+
+export function clearStarterSiteParam() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('template')) return;
+  params.delete('template');
+  const query = params.toString();
+  window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
 }

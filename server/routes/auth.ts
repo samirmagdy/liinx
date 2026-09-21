@@ -13,6 +13,7 @@ import {
   changePasswordSchema,
   updateEmailSchema,
   findSiteTemplate,
+  intentStartingCategory,
   type SiteTemplate
 } from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
@@ -238,9 +239,9 @@ function registrationReferrerId(value: unknown): string | undefined {
 
 function createRegisteredAccount(input: {
   userId: string; profileId: string; username: string; email: string; passwordHash: string;
-  inviterId?: string; agencyInviterId?: string; now: number; template?: SiteTemplate;
+  inviterId?: string; agencyInviterId?: string; now: number; template?: SiteTemplate; intent?: string;
 }): void {
-  const { userId, profileId, username, email, passwordHash, inviterId, agencyInviterId, now, template } = input;
+  const { userId, profileId, username, email, passwordHash, inviterId, agencyInviterId, now, template, intent } = input;
   const displayName = username.charAt(0).toUpperCase() + username.slice(1);
   // A starter site is only allowed to promise what it can deliver, so a template account starts
   // with the one social that is genuinely known at signup and no photo of a stranger.
@@ -251,6 +252,8 @@ function createRegisteredAccount(input: {
       { platform: 'email', url: `mailto:${email}` }
     ]);
   const starterAvatar = template ? null : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop';
+  // A starter site carries its own category; an account that skips one is filed under the discipline its owner declared.
+  const category = template?.category || intentStartingCategory(intent) || 'Creator';
   db.transaction(() => {
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, email, passwordHash, now);
     if (inviterId) recordCreatorReferral(inviterId, userId, now);
@@ -260,7 +263,7 @@ function createRegisteredAccount(input: {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .run(profileId, userId, username, displayName, template ? '' : 'Welcome to my links! Tap below to explore my latest updates.',
         starterAvatar,
-        template?.category || 'Creator', 0, template?.themeId || 'editorial-stone', starterSocials, now, now);
+        category, 0, template?.themeId || 'editorial-stone', starterSocials, now, now);
     const homePageId = createHomePage(profileId, displayName, null, now);
     if (template) {
       applySiteTemplate(profileId, template, 'append');
@@ -318,7 +321,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     const userId = createId('usr');
     const profileId = createId('prf');
     const passwordHash = hashPassword(password);
-    createRegisteredAccount({ userId, profileId, username: cleanUsername, email: cleanEmail, passwordHash, inviterId, agencyInviterId, now, template });
+    createRegisteredAccount({ userId, profileId, username: cleanUsername, email: cleanEmail, passwordHash, inviterId, agencyInviterId, now, template, intent: parse.data.intent });
 
     const token = issueCurrentSession(userId, profileId, cleanUsername, cleanEmail);
     setSessionCookie(res, token);
