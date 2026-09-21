@@ -11,9 +11,12 @@ import {
   resetConfirmSchema,
   deletionSchema,
   changePasswordSchema,
-  updateEmailSchema
+  updateEmailSchema,
+  findSiteTemplate,
+  type SiteTemplate
 } from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
+import { applySiteTemplate, createHomePage, insertBlocks, newBlockId } from '../services/siteComposition.js';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { cancelStripeSubscription } from '../services/billingCancellation.js';
 import { createHash, randomBytes } from 'node:crypto';
@@ -235,15 +238,14 @@ function registrationReferrerId(value: unknown): string | undefined {
 
 function createRegisteredAccount(input: {
   userId: string; profileId: string; username: string; email: string; passwordHash: string;
-  inviterId?: string; agencyInviterId?: string; now: number;
+  inviterId?: string; agencyInviterId?: string; now: number; template?: SiteTemplate;
 }): void {
-  const { userId, profileId, username, email, passwordHash, inviterId, agencyInviterId, now } = input;
+  const { userId, profileId, username, email, passwordHash, inviterId, agencyInviterId, now, template } = input;
   const displayName = username.charAt(0).toUpperCase() + username.slice(1);
   const starterSocials = JSON.stringify([
     { platform: 'instagram', url: 'https://instagram.com' },
     { platform: 'email', url: `mailto:${email}` }
   ]);
-  const starterBlockId = createId('blk');
   db.transaction(() => {
     db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, email, passwordHash, now);
     if (inviterId) recordCreatorReferral(inviterId, userId, now);
@@ -251,17 +253,19 @@ function createRegisteredAccount(input: {
     db.prepare(`INSERT INTO profiles (
       id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(profileId, userId, username, displayName, 'Welcome to my links! Tap below to explore my latest updates.',
+      .run(profileId, userId, username, displayName, template ? '' : 'Welcome to my links! Tap below to explore my latest updates.',
         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
-        'Creator', 0, 'editorial-stone', starterSocials, now, now);
-    const homePageId = createId('page');
-    db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at)
-      VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`).run(homePageId, profileId, displayName, now, now);
-    db.prepare(`INSERT INTO blocks (
-      id, profile_id, type, title, url, subtitle, badge, highlighted, position, page_id, extra_json, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(starterBlockId, profileId, 'link', 'My Website', `https://${brand.domain}`,
-        'Check out my official website', 'NEW', 1, 0, homePageId, null, now, now);
+        template?.category || 'Creator', 0, template?.themeId || 'editorial-stone', starterSocials, now, now);
+    const homePageId = createHomePage(profileId, displayName, null, now);
+    if (template) {
+      applySiteTemplate(profileId, template, 'append');
+      return;
+    }
+    insertBlocks(profileId, [{
+      id: newBlockId(), type: 'link', title: 'My Website', url: `https://${brand.domain}`,
+      subtitle: 'Check out my official website', icon: null, badge: 'NEW', highlighted: true, visible: true,
+      position: 0, startAt: null, endAt: null, pageId: homePageId, extraJson: null
+    }], now);
   })();
 }
 
@@ -279,6 +283,10 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     }
 
     const { email, password, username } = parse.data;
+    const template = parse.data.templateId ? findSiteTemplate(parse.data.templateId) : undefined;
+    if (parse.data.templateId && !template) {
+      return res.status(400).json({ error: 'That starter site does not exist. Choose another or continue without one.' });
+    }
     const inviterId = registrationReferrerId(req.body?.referral);
     const agencyInviterId = registrationReferrerId(req.body?.agencyReferral);
     const cleanEmail = email.toLowerCase().trim();
@@ -305,7 +313,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
     const userId = createId('usr');
     const profileId = createId('prf');
     const passwordHash = hashPassword(password);
-    createRegisteredAccount({ userId, profileId, username: cleanUsername, email: cleanEmail, passwordHash, inviterId, agencyInviterId, now });
+    createRegisteredAccount({ userId, profileId, username: cleanUsername, email: cleanEmail, passwordHash, inviterId, agencyInviterId, now, template });
 
     const token = issueCurrentSession(userId, profileId, cleanUsername, cleanEmail);
     setSessionCookie(res, token);

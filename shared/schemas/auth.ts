@@ -9,7 +9,9 @@ export const registerSchema = z.object({
   username: z.string()
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username cannot exceed 30 characters')
-    .regex(/^[a-z0-9_]+$/, 'Username may only contain lowercase letters, numbers, and underscores')
+    .regex(/^[a-z0-9_]+$/, 'Username may only contain lowercase letters, numbers, and underscores'),
+  /** Catalog starter site applied in the same transaction that opens the account. */
+  templateId: z.string().trim().min(1).max(60).optional()
 });
 
 export const loginSchema = z.object({

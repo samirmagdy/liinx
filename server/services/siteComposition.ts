@@ -176,7 +176,7 @@ export const applyComposition = db.transaction((profileId: string, template: Sit
  * nowhere. Identity fields are only filled while they are still empty: an existing creator's bio
  * belongs to the creator, and a template does not get to replace it.
  */
-const applyTemplateToProfile = db.transaction((profileId: string, template: SiteTemplate, mode: CompositionMode): CompositionOutcome => {
+export const applySiteTemplate = db.transaction((profileId: string, template: SiteTemplate, mode: CompositionMode): CompositionOutcome => {
   const outcome = applyComposition(profileId, template, mode);
   const profile = db.prepare('SELECT category, bio, share_title as shareTitle, share_description as shareDescription FROM profiles WHERE id = ?')
     .get(profileId) as { category?: string | null; bio?: string | null; shareTitle?: string | null; shareDescription?: string | null } | undefined;
@@ -195,5 +195,5 @@ const applyTemplateToProfile = db.transaction((profileId: string, template: Site
 export function applySiteTemplateById(profileId: string, templateId: unknown, mode: CompositionMode): CompositionOutcome | null {
   const template = findSiteTemplate(templateId);
   if (!template) return null;
-  return applyTemplateToProfile(profileId, template, mode);
+  return applySiteTemplate(profileId, template, mode);
 }

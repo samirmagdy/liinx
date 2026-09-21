@@ -157,3 +157,53 @@ describe('starter sites', () => {
     expect(untouched.blocks.some((block: any) => block.title === 'Book a session')).toBe(false);
   });
 });
+
+describe('starter sites chosen during signup', () => {
+  async function signUpWithStarterSite(username: string, templateId?: string) {
+    const response = await request(app).post('/api/auth/register').send({
+      email: `${username}@raloa.test`, password: 'StarterSitePassword2026!', username, ...(templateId ? { templateId } : {})
+    });
+    return { username, token: response.body.token as string, status: response.status };
+  }
+
+  const handle = (prefix: string) => unique(prefix).replace(/[^a-z0-9_]/g, '').slice(0, 30);
+
+  it('opens the account with the starter site already published on it', async () => {
+    const { token } = await signUpWithStarterSite(handle('signup'), EDITORIAL);
+    const template = findSiteTemplate(EDITORIAL)!;
+    const profile = await studio(token);
+    expect(profile.themeId).toBe(template.themeId);
+    expect(profile.category).toBe(template.category);
+    expect(profile.bio).toBe(template.profile?.bio);
+    expect(profile.pages.map((page: any) => page.slug).sort())
+      .toEqual(['home', ...(template.pages || []).map(page => page.slug)].sort());
+    expect(profile.blocks).toHaveLength(template.blocks.length);
+    expect(profile.blocks.some((block: any) => block.title === 'My Website')).toBe(false);
+
+    const visitor = (await request(app).get(`/api/profiles/${(await studio(token)).username}`).expect(200)).body;
+    expect(visitor.blocks.map((block: any) => block.title))
+      .toEqual(template.blocks.filter(block => !block.page).map(block => block.title));
+    const secondPage = (await request(app).get(`/api/profiles/${visitor.username}?page=${template.pages![0].slug}`).expect(200)).body;
+    expect(secondPage.blocks.map((block: any) => block.title))
+      .toEqual(template.blocks.filter(block => block.page === template.pages![0].slug).map(block => block.title));
+  });
+
+  it('keeps the blank starting point for an account that chooses no starter site', async () => {
+    const { token } = await signUpWithStarterSite(handle('signupblank'));
+    const profile = await studio(token);
+    expect(profile.themeId).toBe('editorial-stone');
+    expect(profile.blocks.map((block: any) => block.title)).toEqual(['My Website']);
+    expect(profile.pages).toHaveLength(1);
+  });
+
+  it('refuses to open an account with a starter site that does not exist', async () => {
+    const username = unique('signupbad').replace(/[^a-z0-9_]/g, '').slice(0, 30);
+    const rejected = await signUpWithStarterSite(username, 'tmpl-not-real');
+    expect(rejected.status).toBe(400);
+
+    // Nothing was half-created: the same handle and email are still free to claim.
+    const retried = await signUpWithStarterSite(username);
+    expect(retried.status).toBe(201);
+    expect((await studio(retried.token)).username).toBe(username);
+  });
+});
