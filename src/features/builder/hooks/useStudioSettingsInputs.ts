@@ -13,10 +13,7 @@ export function useStudioSettingsInputs() {
   const [pixelsError, setPixelsError] = useState<string | null>(null);
 
   const [customDomainInput, setCustomDomainInput] = useState('');
-  const [isVerifyingDns, setIsVerifyingDns] = useState(false);
-  const [dnsVerificationResult, setDnsVerificationResult] = useState<{ verified: boolean; message: string } | null>(null);
   const [isSavingDomain, setIsSavingDomain] = useState(false);
-  const [copiedCname, setCopiedCname] = useState(false);
   const [domainFeedback, setDomainFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const [customCssInput, setCustomCssInput] = useState('');
@@ -62,10 +59,7 @@ export function useStudioSettingsInputs() {
     pixelsSavedFeedback, setPixelsSavedFeedback,
     pixelsError, setPixelsError,
     customDomainInput, setCustomDomainInput,
-    isVerifyingDns, setIsVerifyingDns,
-    dnsVerificationResult, setDnsVerificationResult,
     isSavingDomain, setIsSavingDomain,
-    copiedCname, setCopiedCname,
     domainFeedback, setDomainFeedback,
     customCssInput, setCustomCssInput,
     customFontUrlInput, setCustomFontUrlInput,

@@ -1,9 +1,6 @@
 {
   "missing": [
-    " record pointing to:",
-    ") after your hosting provider provisions HTTPS.",
     "/* Custom CSS overrides */\\n#public-bio-view .custom-card { border-width: 2px; }",
-    "3. Click 'Verify DNS' below once your record is created. Connect your custom domain with guided DNS verification.",
     "?utm_source=instagram&utm_campaign=spring",
     "Add an address to show directions.",
     "Add item",
@@ -79,7 +76,6 @@
     "Email message",
     "Email subject",
     "Enter a page title and URL slug.",
-    "Enter your subdomain above (e.g. links.yourdomain.com)",
     "Event description",
     "Event details",
     "Event link is disabled in preview.",
@@ -111,7 +107,6 @@
     "Height (px)",
     "Help text (optional)",
     "Home",
-    "How to connect your domain:",
     "I agree that this creator may receive and use my response.",
     "INSTAGRAM_CLIENT_ID",
     "INSTAGRAM_CLIENT_SECRET",
@@ -121,7 +116,6 @@
     "Image shape",
     "Image unavailable.",
     "Image unavailable. Please try again later.",
-    "In your DNS provider (Cloudflare, GoDaddy, etc.), add a ",
     "Include country code; spaces, parentheses, and hyphens are allowed.",
     "Informative images need alt text. Mark an image decorative when it adds no meaning. Uploading a replacement does not delete the previous asset.",
     "Insert link",
@@ -135,7 +129,6 @@
     "Left",
     "Lift on hover",
     "Link",
-    "Link a verified domain or subdomain (e.g.",
     "Link animation",
     "Link layout",
     "LinkedIn",
@@ -255,10 +248,9 @@
     "e.g. USD",
     "links found",
     "myotherbrand",
-    "stored responses",
-    "✓ Domain connected successfully. Secure HTTPS becomes active once your hosting provider completes TLS certificate provisioning."
+    "stored responses"
   ],
-  "count": 257,
+  "count": 249,
   "inlineBilingualTernaries": {
     "src/components/BookingCard.tsx": 9,
     "src/components/BookingEditor.tsx": 7,

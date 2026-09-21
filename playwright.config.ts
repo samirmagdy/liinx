@@ -1,10 +1,21 @@
 import { defineConfig, devices } from 'playwright/test';
 import os from 'node:os';
 import path from 'node:path';
+import { brand } from './shared/config/brand';
 
 const port = 3178;
 const baseURL = `http://127.0.0.1:${port}`;
 const databasePath = path.join(os.tmpdir(), `raloa-playwright-${process.pid}.db`);
+
+/**
+ * The documented DNS stub (see server/services/dnsRecords.ts and .env.example). It answers only
+ * these hosts; every other lookup still goes to real DNS, and it is never read in production.
+ */
+const dnsStub = {
+  'dns-missing.procreator.test': [],
+  'dns-wrong.procreator.test': ['old-host.example.com'],
+  'dns-live.procreator.test': [brand.cnameTarget]
+};
 
 export default defineConfig({
   testDir: './playwright/e2e',
@@ -37,7 +48,10 @@ export default defineConfig({
       CORS_ORIGIN: baseURL,
       MAINTENANCE_ENABLED: 'false',
       RESEND_API_KEY: '',
-      CONTACT_FROM_EMAIL: ''
+      CONTACT_FROM_EMAIL: '',
+      // Only this throwaway suite reads it, and only to open a paid tier without Stripe.
+      ADMIN_SECRET: 'playwright-plan-bridge',
+      RALOA_DNS_STUB: JSON.stringify(dnsStub)
     }
   }
 });

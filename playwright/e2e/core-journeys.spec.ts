@@ -1,4 +1,5 @@
 import { expect, test, type Page } from 'playwright/test';
+import { brand } from '../../shared/config/brand';
 
 function uniqueName(prefix = 'pw') {
   return `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`.slice(0, 25);
@@ -98,6 +99,63 @@ test.describe('the saved and live claim', () => {
   });
 });
 
+test.describe('guided custom domain', () => {
+  test('shows the record, names what is missing, and confirms what matches', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const username = uniqueName('dom');
+    let authHeader = '';
+    page.on('request', request => {
+      const header = request.headers()['authorization'];
+      if (header && !authHeader) authHeader = header;
+    });
+    await completeRegistration(page, { username, email: `${username}@example.test`, password: 'DomainFlow2026pass!' });
+
+    // The card is a paid capability, so the tier has to be real. This uses the test-only plan
+    // bridge the server already exposes; nothing about the domain flow is faked.
+    const upgrade = await page.request.put('/api/studio/plan', {
+      headers: { authorization: authHeader, 'x-admin-key': 'playwright-plan-bridge' },
+      data: { plan: 'pro' }
+    });
+    expect(upgrade.status()).toBe(200);
+
+    await page.goto('/studio');
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    await page.getByRole('button', { name: 'Domain & SEO' }).click();
+
+    const hostField = page.locator('#settings-custom-domain');
+    const outcome = page.locator('.domain-outcome');
+    const connect = async (host: string) => {
+      await hostField.fill(host);
+      await page.getByRole('button', { name: 'Continue to the DNS record' }).click();
+      await expect(page.locator('.domain-records')).toBeVisible();
+    };
+
+    await connect('dns-missing.procreator.test');
+    const rows = page.locator('.domain-records dd');
+    await expect(rows).toHaveText(['CNAME', 'dns-missing.procreator.test', brand.cnameTarget]);
+    await expect(page.locator('.domain-records button[aria-label^="Copy"]')).toHaveCount(3);
+    await expect(outcome).toContainText('No CNAME record was found for dns-missing.procreator.test');
+    await expect(outcome).not.toContainText('Connected');
+
+    await page.getByRole('button', { name: 'Edit address' }).click();
+    await connect('dns-wrong.procreator.test');
+    await expect(outcome).toContainText('This host currently points to old-host.example.com');
+    await expect(outcome, 'a wrong pointer is not reported as a missing record')
+      .not.toContainText('No CNAME record was found');
+
+    await page.getByRole('button', { name: 'Edit address' }).click();
+    await connect('dns-live.procreator.test');
+    await expect(outcome).toContainText('Connected. Visitors reach your site at dns-live.procreator.test');
+
+    // The copy control is the thing a creator actually uses to fill the DNS form.
+    await page.locator('.domain-records button[aria-label="Copy Points to"]').click();
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(brand.cnameTarget);
+
+    await page.locator('.domain-advanced summary').click();
+    await expect(page.locator('.domain-advanced')).toContainText('never holds the private key');
+  });
+});
+
 test.describe('mobile studio navigation', () => {
   for (const width of [360, 390, 414]) {
     test(`keeps the bottom tab bar usable at ${width}px`, async ({ page }) => {
@@ -109,13 +167,13 @@ test.describe('mobile studio navigation', () => {
       await expect(bar).toBeVisible();
       // The desktop strip must not double up with the bottom bar on a phone.
       await expect(page.locator('.studio-tabs')).toBeHidden();
-      const labels = await bar.locator('button > span').allTextContents();
+      const labels = await bar.locator('.studio-mobile-nav button > span').allTextContents();
       expect(labels).toEqual(['Content', 'Design', 'Stats', 'More']);
 
       const fit = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
       expect(fit.scroll, 'no horizontal scroll').toBeLessThanOrEqual(fit.viewport);
 
-      const taps = await bar.locator('button').evaluateAll(els => els.map(el => {
+      const taps = await bar.locator('.studio-mobile-nav button').evaluateAll(els => els.map(el => {
         const r = el.getBoundingClientRect();
         const size = parseFloat(getComputedStyle(el.querySelector('span') as Element).fontSize);
         return { h: r.height, w: r.width, size };
@@ -125,6 +183,11 @@ test.describe('mobile studio navigation', () => {
         expect(tap.w, 'tap target width').toBeGreaterThanOrEqual(44);
         expect(tap.size, 'label size stays readable').toBeGreaterThanOrEqual(13);
       });
+
+      // The preview switch has to live inside the reserved chrome. A pill floating over the
+      // page instead sits on top of whichever control happens to scroll beneath it.
+      await expect(bar.locator('.studio-mobile-switcher button')).toHaveCount(2);
+      await expect(bar.locator('.studio-mobile-switcher')).toBeVisible();
 
       // The bottom chrome is fixed, so scrolled to the end the page must have reserved its
       // band — otherwise the last footer row is trapped underneath it forever.

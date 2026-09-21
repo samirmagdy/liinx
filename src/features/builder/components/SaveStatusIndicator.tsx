@@ -24,7 +24,7 @@ export const SaveStatusIndicator: React.FC = () => {
         {failed ? ui('Save failed') : pending ? ui('Saving...') : activePage?.published ? ui('Saved · Live') : ui('Saved')}
       </span>
       {activePage && (
-        <span className="save-status-page text-neutral-500">
+        <span className="save-status-page hidden text-neutral-500 sm:inline">
           <bdi>{activePage.title}</bdi> {activePage.published ? ui('is live') : ui('is unpublished')}
         </span>
       )}

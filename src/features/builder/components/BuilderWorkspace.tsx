@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Sliders, Smartphone } from 'lucide-react';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { useBuilder } from '../context/BuilderContext';
 import { BuilderToolbar } from './BuilderToolbar';
@@ -63,30 +62,8 @@ export const BuilderWorkspace: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Switcher Floating Bar */}
-      <StudioMobileTabBar />
-
-      {/* Editor / Live Preview switch, lifted clear of the tab bar */}
-      <div className="studio-mobile-switcher lg:hidden fixed bottom-20 inset-x-0 z-40 flex justify-center pointer-events-none px-4">
-        <div className="pointer-events-auto bg-neutral-900/90 backdrop-blur-md p-1 rounded-full shadow-2xl border border-neutral-700/60 flex items-center gap-1 text-xs font-semibold text-white">
-          <button
-            type="button"
-            onClick={() => setMobileTab('editor')}
-            className={"flex items-center gap-1.5 px-4 py-2 rounded-full transition-colors cursor-pointer " + (mobileTab === 'editor' ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-300 hover:text-white')}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>{ui('Editor')}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMobileTab('preview')}
-            className={"flex items-center gap-1.5 px-4 py-2 rounded-full transition-colors cursor-pointer " + (mobileTab === 'preview' ? 'bg-white text-neutral-900 shadow-xs' : 'text-neutral-300 hover:text-white')}
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>{ui('Live Preview')}</span>
-          </button>
-        </div>
-      </div>
+      {/* Bottom chrome: the preview switch lives with the tabs so nothing floats over content */}
+      <StudioMobileTabBar mobileTab={mobileTab} onMobileTabChange={setMobileTab} />
     </>
   );
 };

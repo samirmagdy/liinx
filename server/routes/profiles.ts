@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import dns from 'dns';
 import { db } from '../db.js';
 import { issueCurrentSession } from '../services/session.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
@@ -501,58 +500,6 @@ profilesRouter.put('/studio/profile', requireAuth, (req: AuthenticatedRequest, r
     res.status(500).json({ error: 'Failed to update profile.' });
   }
 });
-
-// Authenticated: Verify DNS CNAME for a custom domain
-profilesRouter.post('/studio/custom-domain/verify', requireAuth, async (req: AuthenticatedRequest, res) => {
-  try {
-    const { domain } = req.body;
-    if (!domain || typeof domain !== 'string') {
-      return res.status(400).json({ error: 'Domain name is required.' });
-    }
-
-    const cleanDomain = normalizeCustomDomain(domain);
-    if (!cleanDomain) return res.status(400).json({ error: 'Invalid domain format. Use a hostname such as links.yourdomain.com.' });
-
-    const expectedTarget = brand.cnameTarget;
-    let isVerified = false;
-    let cnameRecords: string[] = [];
-
-    try {
-      cnameRecords = await dns.promises.resolveCname(cleanDomain);
-      isVerified = cnameRecords.some(r => r.replace(/\.$/, '').toLowerCase() === expectedTarget);
-    } catch (dnsErr) {
-      // DNS record may not yet be configured or propagating
-    }
-
-    // A failed DNS check must revoke the old flag; otherwise a changed DNS
-    // record would remain publicly routable based on stale database state.
-    const saved = db.prepare('SELECT custom_domain FROM profiles WHERE id = ?').get(req.user!.profileId) as { custom_domain?: string | null; plan?: string } | undefined;
-    if (!saved?.custom_domain || saved.custom_domain !== cleanDomain) {
-      return res.status(409).json({ error: 'Verify the exact custom domain saved on this profile.' });
-    }
-    if (!hasEntitlement(getEffectivePlan(req.user!.profileId), 'customDomain')) return res.status(403).json({ error: 'Custom domains require a Pro or Studio subscription plan.' });
-    db.prepare('UPDATE profiles SET custom_domain_verified = ?, updated_at = ? WHERE id = ? AND custom_domain = ?').run(
-      isVerified ? 1 : 0, Date.now(), req.user!.profileId, cleanDomain
-    );
-
-    res.json({
-      domain: cleanDomain,
-      verified: isVerified,
-      dnsVerified: isVerified,
-      tlsStatus: 'external_provider_required',
-      tlsProvider: 'fly.io',
-      expectedTarget,
-      cnameRecords,
-      message: isVerified
-        ? `DNS record verified! Your CNAME points to ${expectedTarget}. Secure HTTPS becomes active once your hosting provider completes TLS certificate provisioning.`
-        : `DNS verification pending. Point your CNAME record to ${expectedTarget} and verify again. DNS changes can take a few minutes to propagate.`
-    });
-  } catch (err: any) {
-    console.error('Custom domain verify error:', err);
-    res.status(500).json({ error: 'Failed to verify DNS record.' });
-  }
-});
-
 
 // Authenticated: Update subscription plan (restricted to automated test suite and admin sync)
 profilesRouter.put('/studio/plan', requireAuth, (req: AuthenticatedRequest, res) => {

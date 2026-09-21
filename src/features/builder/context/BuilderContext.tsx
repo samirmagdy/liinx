@@ -3,7 +3,6 @@ import { type CreatorProfile, type ThemeConfig, type ProfileBlock, type CreatorP
 import { type SiteTemplate } from '../../../../shared/index.js';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { api } from '../../../services/api';
-import { brand } from '../../../config/brand';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import confetti from 'canvas-confetti';
@@ -240,14 +239,9 @@ export interface BuilderContextType {
 
   customDomainInput: string;
   setCustomDomainInput: (val: string) => void;
-  isVerifyingDns: boolean;
-  dnsVerificationResult: { verified: boolean; message: string } | null;
   isSavingDomain: boolean;
-  copiedCname: boolean;
   domainFeedback: { type: 'success' | 'error'; message: string } | null;
-  handleVerifyDns: () => Promise<void>;
   handleSaveCustomDomain: () => Promise<void>;
-  handleCopyCname: () => void;
 
   customCssInput: string;
   setCustomCssInput: (val: string) => void;
@@ -323,9 +317,8 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
     gaInput, setGaInput, metaPixelInput, setMetaPixelInput,
     isSavingPixels, setIsSavingPixels, pixelsSavedFeedback, setPixelsSavedFeedback,
     pixelsError, setPixelsError,
-    customDomainInput, setCustomDomainInput, isVerifyingDns, setIsVerifyingDns,
-    dnsVerificationResult, setDnsVerificationResult, isSavingDomain, setIsSavingDomain,
-    copiedCname, setCopiedCname, domainFeedback, setDomainFeedback,
+    customDomainInput, setCustomDomainInput, isSavingDomain, setIsSavingDomain,
+    domainFeedback, setDomainFeedback,
     customCssInput, setCustomCssInput, customFontUrlInput, setCustomFontUrlInput,
     shareTitleInput, setShareTitleInput, shareDescriptionInput, setShareDescriptionInput,
     shareImageUrlInput, setShareImageUrlInput,
@@ -488,28 +481,6 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
     }
   };
 
-  const handleVerifyDns = async () => {
-    setIsVerifyingDns(true);
-    setDnsVerificationResult(null);
-    try {
-      const res = await api.studio.verifyCustomDomain(customDomainInput.trim());
-      setDnsVerificationResult({
-        verified: res.verified,
-        message: res.message
-      });
-    } catch (err: any) {
-      setDnsVerificationResult({
-        verified: false,
-        message: friendlyErrorMessage(
-          err,
-          'We could not verify the domain right now. Check your DNS records and try again.'
-        )
-      });
-    } finally {
-      setIsVerifyingDns(false);
-    }
-  };
-
   const handleSaveCustomDomain = async () => {
     setIsSavingDomain(true);
     setDomainFeedback(null);
@@ -535,12 +506,6 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
     } finally {
       setIsSavingDomain(false);
     }
-  };
-
-  const handleCopyCname = () => {
-    navigator.clipboard?.writeText(brand.cnameTarget);
-    setCopiedCname(true);
-    setTimeout(() => setCopiedCname(false), 2000);
   };
 
   const handleSaveCustomStyling = async () => {
@@ -637,14 +602,9 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
 
     customDomainInput,
     setCustomDomainInput,
-    isVerifyingDns,
-    dnsVerificationResult,
     isSavingDomain,
-    copiedCname,
     domainFeedback,
-    handleVerifyDns,
     handleSaveCustomDomain,
-    handleCopyCname,
 
     customCssInput,
     setCustomCssInput,

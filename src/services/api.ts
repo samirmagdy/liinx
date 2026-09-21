@@ -321,7 +321,10 @@ export const api = {
       return request<{
         domain: string;
         verified: boolean;
+        /** What the resolver actually answered, so the UI can name the missing record. */
+        state: 'verified' | 'pointing-elsewhere' | 'no-record' | 'lookup-unavailable';
         expectedTarget: string;
+        foundTargets: string[];
         cnameRecords: string[];
         message: string;
       }>('/api/studio/custom-domain/verify', {
