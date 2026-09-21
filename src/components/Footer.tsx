@@ -27,7 +27,7 @@ function FooterBrand() {
     </div>
     <div className="flex flex-wrap items-center gap-4 pt-1">
       <div className="flex items-center gap-2"><span aria-hidden="true" className="w-2 h-2 rounded-full bg-emerald-400" /><span className="text-xs text-neutral-400">{tr('Global availability monitoring')}</span></div>
-      <a href={languageHref} className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-xs text-neutral-300 transition-colors cursor-pointer"><Globe className="w-3 h-3 text-indigo-500" /><span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span></a>
+      <a href={languageHref} className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-xs text-neutral-300 transition-colors cursor-pointer"><Globe className="w-3 h-3 text-indigo-500" /><span>{lang === 'en' ? 'العربية (RTL)' : 'English (LTR)'}</span></a>
     </div>
   </div>;
 }
