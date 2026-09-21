@@ -40,7 +40,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
           {/* Logo Badge */}
           <div className="relative w-14 h-14 rounded-2xl bg-[#0F172A] shadow-xl shadow-neutral-900/10 border border-white/10 flex items-center justify-center transition-transform">
-            <img src="/brand/loader-mark-256.png" alt="" className="w-9 h-9" loading="eager" decoding="async" />
+            <img src="/brand/loader-mark-256.png" alt="" width={36} height={36} className="w-9 h-9" loading="eager" decoding="async" />
           </div>
         </div>
 
@@ -61,7 +61,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
         {/* Subdued Subtitle */}
         {submessage && (
-          <span className="text-[11px] font-mono uppercase tracking-widest text-neutral-400">
+          <span className="text-[11px] font-mono uppercase tracking-widest text-neutral-600">
             {submessage}
           </span>
         )}
@@ -150,7 +150,7 @@ export const BioSkeletonLoader: React.FC = () => {
 
         {/* Footer Brand Mark Skeleton */}
         <div className="mt-10 flex items-center gap-1.5 opacity-60">
-          <img src="/brand/loader-mark-256.png" alt="" className="w-4 h-4" loading="lazy" decoding="async" />
+          <img src="/brand/loader-mark-256.png" alt="" width={16} height={16} className="w-4 h-4" loading="lazy" decoding="async" />
           <span className="text-[11px] font-brand font-bold text-neutral-500 tracking-wider">RALOA</span>
         </div>
       </div>

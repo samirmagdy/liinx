@@ -31,7 +31,7 @@ const BuilderStudioContent: React.FC = () => {
             </p>
             <button
               onClick={() => { window.location.href = '/register'; }}
-              className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               {tr('Create Profile')}
             </button>
@@ -50,7 +50,7 @@ const BuilderStudioContent: React.FC = () => {
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               {tr('Retry')}
             </button>

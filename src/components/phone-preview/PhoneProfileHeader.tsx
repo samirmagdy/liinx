@@ -24,6 +24,10 @@ export const PhoneProfileHeader: React.FC<PhoneProfileHeaderProps> = ({
         <img
           src={profile.avatarUrl}
           alt={profile.displayName}
+          width={80}
+          height={80}
+          loading="lazy"
+          decoding="async"
           className="w-20 h-20 rounded-full object-cover shadow-sm ring-2 ring-white/20"
           referrerPolicy="no-referrer"
         />

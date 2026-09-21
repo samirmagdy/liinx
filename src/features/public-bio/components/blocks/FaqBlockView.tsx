@@ -26,7 +26,7 @@ export const FaqBlockView: React.FC<FaqBlockViewProps> = ({ block, theme }) => {
         faqItems.map((item, index) => (
           <details key={item.id || index} className={card} style={cardStyle}>
             <summary
-              className="cursor-pointer break-words font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              className="cursor-pointer break-words font-bold focus-visible:ring-2 focus-visible:ring-current"
               dir="auto"
             >
               {item.question}

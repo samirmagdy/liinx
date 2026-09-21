@@ -42,7 +42,7 @@ export const PageManager: React.FC = () => {
               type="button"
               aria-current={page.id === activePage?.id ? 'page' : undefined}
               onClick={() => setActivePageId(page.id)}
-              className={`rounded-xl border px-3 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30 ${
+              className={`rounded-xl border px-3 py-1.5 text-xs font-semibold focus-visible:ring-2 focus-visible:ring-neutral-900/30 ${
                 page.id === activePage?.id
                   ? 'border-neutral-900 bg-neutral-900 text-white'
                   : 'border-neutral-200 text-neutral-700 hover:border-neutral-500'

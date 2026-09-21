@@ -12,12 +12,12 @@ export function ProfileSettingsPanel(props: ProfileSettingsPanelProps) {
         </div>
         <form onSubmit={props.handleUpdateEmail} className="space-y-4 max-w-md">
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'البريد الإلكتروني' : 'Email Address'}</label>
-            <input type="email" required value={props.newEmail} onChange={event => props.setNewEmail(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20" />
+            <label htmlFor="account-email" className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'البريد الإلكتروني' : 'Email Address'}</label>
+            <input id="account-email" type="email" name="email" autoComplete="email" required value={props.newEmail} onChange={event => props.setNewEmail(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'كلمة المرور الحالية للتأكيد' : 'Current Password (to confirm)'}</label>
-            <input type="password" required value={props.emailPassword} onChange={event => props.setEmailPassword(event.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20" />
+            <label htmlFor="account-email-password" className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'كلمة المرور الحالية للتأكيد' : 'Current Password (to confirm)'}</label>
+            <input id="account-email-password" type="password" name="current_password" autoComplete="current-password" required value={props.emailPassword} onChange={event => props.setEmailPassword(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900" />
           </div>
           <PanelFeedback message={props.emailMessage} />
           <button type="submit" disabled={props.emailLoading} className="px-4 py-2 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer disabled:opacity-50">
@@ -33,16 +33,16 @@ export function ProfileSettingsPanel(props: ProfileSettingsPanelProps) {
         </div>
         <form onSubmit={props.handleChangePassword} className="space-y-4 max-w-md">
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'كلمة المرور الحالية' : 'Current Password'}</label>
-            <input type="password" required value={props.currentPassword} onChange={event => props.setCurrentPassword(event.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20" />
+            <label htmlFor="account-current-password" className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'كلمة المرور الحالية' : 'Current Password'}</label>
+            <input id="account-current-password" type="password" name="current_password" autoComplete="current-password" required value={props.currentPassword} onChange={event => props.setCurrentPassword(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'كلمة المرور الجديدة' : 'New Password'}</label>
-            <input type="password" required minLength={8} value={props.newPassword} onChange={event => props.setNewPassword(event.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20" />
+            <label htmlFor="account-new-password" className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'كلمة المرور الجديدة' : 'New Password'}</label>
+            <input id="account-new-password" type="password" name="new_password" autoComplete="new-password" required minLength={8} value={props.newPassword} onChange={event => props.setNewPassword(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'تأكيد كلمة المرور الجديدة' : 'Confirm New Password'}</label>
-            <input type="password" required minLength={8} value={props.confirmPassword} onChange={event => props.setConfirmPassword(event.target.value)} placeholder="••••••••" className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20" />
+            <label htmlFor="account-confirm-password" className="block text-xs font-semibold text-neutral-700 mb-1.5">{ar ? 'تأكيد كلمة المرور الجديدة' : 'Confirm New Password'}</label>
+            <input id="account-confirm-password" type="password" name="confirm_password" autoComplete="new-password" required minLength={8} value={props.confirmPassword} onChange={event => props.setConfirmPassword(event.target.value)} className="w-full px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium text-neutral-900" />
           </div>
           <PanelFeedback message={props.passwordMessage} />
           <button type="submit" disabled={props.passwordLoading} className="px-4 py-2 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer disabled:opacity-50">

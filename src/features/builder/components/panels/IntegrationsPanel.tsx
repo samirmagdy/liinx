@@ -47,18 +47,18 @@ export const IntegrationsPanel: React.FC = () => {
               <Terminal className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-neutral-900">{ui("Developer & REST API Access")}</h3>
+              <h2 className="font-bold text-sm text-neutral-900">{ui("Developer & REST API Access")}</h2>
               <p className="text-xs text-neutral-500 mt-0.5">
                 {ui("Read profile details and create or delete link blocks with REST API v1.")}
               </p>
             </div>
           </div>
           {profile.plan !== 'studio' ? (
-            <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("STUDIO TIER ONLY")}
             </span>
           ) : (
-            <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {ui("API ENABLED")}
             </span>
           )}
@@ -93,7 +93,7 @@ export const IntegrationsPanel: React.FC = () => {
             )}
 
             {apiKeyList.length === 0 ? (
-              <div className="py-6 text-center text-xs text-neutral-400 border border-dashed rounded-xl">
+              <div className="py-6 text-center text-xs text-neutral-600 border border-dashed rounded-xl">
                 {ui("No API keys generated yet. Click \"Generate Key\" to create your first API credential.")}
               </div>
             ) : (
@@ -102,9 +102,9 @@ export const IntegrationsPanel: React.FC = () => {
                   <div key={k.id} className="p-3 flex items-center justify-between gap-3">
                     <div className="flex flex-col">
                       <span className="font-bold text-neutral-900">{k.name}</span>
-                      <span className="font-mono text-[11px] text-neutral-400" dir="ltr">{k.prefix}</span>
+                      <span className="font-mono text-[11px] text-neutral-600" dir="ltr">{k.prefix}</span>
                       {k.expiresAt && (
-                        <span className="text-[10px] text-neutral-500" dir="auto">
+                        <span className="text-[11px] text-neutral-500" dir="auto">
                           {ui('Expires')} <span dir="ltr">{formatUiDate(k.expiresAt, lang)}</span>
                         </span>
                       )}
@@ -141,7 +141,7 @@ export const IntegrationsPanel: React.FC = () => {
             )}
 
             <div className="p-3 bg-neutral-900 text-neutral-200 rounded-xl space-y-1 text-xs font-mono">
-              <span className="text-neutral-400 text-[10px] uppercase font-bold tracking-wider block">{ui("Sample API Request")}</span>
+              <span className="text-neutral-600 text-[11px] uppercase font-bold tracking-caps block">{ui("Sample API Request")}</span>
               <p className="text-[11px] select-all overflow-x-auto whitespace-nowrap">
                 <span dir="ltr">curl https://raloa.app/api/v1/profile</span><br />
                 {'  -H "Authorization: Bearer raloa_live_your_key_here"'}
@@ -159,15 +159,15 @@ export const IntegrationsPanel: React.FC = () => {
               <Instagram className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
+              <h2 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
                 <span>{ui("Instagram Caption Link Sync")}</span>
-              </h3>
+              </h2>
               <p className="text-xs text-neutral-500 mt-0.5">
                 {ui("Sync links found in captions from your connected professional Instagram account. This does not provide an Instagram media grid.")}
               </p>
             </div>
           </div>
-          <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border ${
+          <span className={`px-2.5 py-1 text-[11px] font-mono font-bold rounded-lg border ${
             instagramStatus?.connected
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
               : 'bg-neutral-100 text-neutral-600 border-neutral-200'
@@ -199,7 +199,7 @@ export const IntegrationsPanel: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-neutral-900">@{instagramStatus.username}</span>
-                <span className="text-neutral-400">•</span>
+                <span className="text-neutral-500" aria-hidden="true">•</span>
                 <span className="font-mono text-neutral-500">
                   {instagramStatus.syncedLinksCount ?? 0} {ui("synced links active")}
                 </span>
@@ -216,14 +216,14 @@ export const IntegrationsPanel: React.FC = () => {
                 <button
                   onClick={handleSyncInstagramNow}
                   disabled={isSyncingInstagram}
-                  className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white font-semibold flex items-center gap-1.5 text-xs hover:bg-black transition-colors cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                  className="px-3 py-1.5 rounded-lg bg-neutral-900 text-white font-semibold flex items-center gap-1.5 text-xs hover:bg-black transition-colors cursor-pointer disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isSyncingInstagram ? 'animate-spin' : ''}`} />
                   <span>{isSyncingInstagram ? ui("Syncing...") : ui("Sync Now")}</span>
                 </button>
                 <button
                   onClick={handleDisconnectInstagram}
-                  className="px-3 py-1.5 rounded-lg border border-neutral-300 text-neutral-700 font-semibold text-xs hover:bg-neutral-100 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                  className="px-3 py-1.5 rounded-lg border border-neutral-300 text-neutral-700 font-semibold text-xs hover:bg-neutral-100 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
                   {ui("Disconnect")}
                 </button>
@@ -251,7 +251,7 @@ export const IntegrationsPanel: React.FC = () => {
               <span>{ui("Meta Instagram OAuth Setup Required")}</span>
             </div>
             <p className="text-amber-800 text-[11px] leading-relaxed">
-              {ui("To connect your live Instagram account, server administrators must configure")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">{ui("INSTAGRAM_CLIENT_ID")}</code> {ui("and")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px]">{ui("INSTAGRAM_CLIENT_SECRET")}</code> {ui("in the server environment.")}
+              {ui("To connect your live Instagram account, server administrators must configure")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[11px]">{ui("INSTAGRAM_CLIENT_ID")}</code> {ui("and")}<code className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[11px]">{ui("INSTAGRAM_CLIENT_SECRET")}</code> {ui("in the server environment.")}
             </p>
             <div className="pt-1 flex items-center justify-between text-[11px] text-amber-900 font-medium">
               <span>{ui("Live Caption Parser & Link Ingest is available below without OAuth.")}</span>
@@ -268,7 +268,7 @@ export const IntegrationsPanel: React.FC = () => {
               </div>
               <button
                 onClick={handleConnectInstagram}
-                className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <Instagram className="w-3.5 h-3.5" />
                 <span>{ui("Connect Account")}</span>
@@ -287,7 +287,7 @@ export const IntegrationsPanel: React.FC = () => {
             <button
               type="button"
               onClick={() => setInstagramCaptionInput('Tickets for Berlin studio show live now: https://eventbrite.com/e/berlin-live-2025! Also grab the vinyl bundle at https://shop.artist.studio/vinyl.')}
-              className="text-[10px] font-mono text-amber-700 hover:underline cursor-pointer"
+              className="text-[11px] font-mono text-amber-700 hover:underline cursor-pointer"
             >
               {ui("Fill sample caption")}
             </button>
@@ -307,7 +307,7 @@ export const IntegrationsPanel: React.FC = () => {
               type="button"
               onClick={() => handleTestCaptionExtract(false)}
               disabled={isTestingCaption || !instagramCaptionInput.trim()}
-              className="px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-700 transition-colors cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               {ui("Test Parser")}
             </button>
@@ -315,7 +315,7 @@ export const IntegrationsPanel: React.FC = () => {
               type="button"
               onClick={() => handleTestCaptionExtract(true)}
               disabled={isTestingCaption || !instagramCaptionInput.trim()}
-              className="px-3.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-black text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="px-3.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-black text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               <span>{ui("Extract & Add Link to Bio")}</span>
             </button>

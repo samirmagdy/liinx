@@ -24,6 +24,9 @@ export default defineConfig(({ mode }) => {
       maxWorkers: 1,
       minWorkers: 1,
       testTimeout: 15000,
+      // Playwright specs live under playwright/ and must run with `npm run test:e2e:browser`;
+      // vitest collecting them makes `npm test` fail on syntax it cannot understand.
+      exclude: ['**/node_modules/**', '**/dist/**', 'playwright/**'],
       coverage: {
         provider: 'v8',
         reporter: ['text', 'text-summary', 'lcov', 'json', 'html'],
@@ -103,7 +106,7 @@ export default defineConfig(({ mode }) => {
       hmr: true,
       proxy: {
         '/api': apiTarget,
-        '/r': apiTarget,
+        '^/r/': apiTarget,
         '/uploads': apiTarget,
       },
     },

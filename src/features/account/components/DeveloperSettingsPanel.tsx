@@ -20,7 +20,7 @@ export function DeveloperSettingsPanel(props: DeveloperSettingsPanelProps) {
       ) : (
         <div className="space-y-6">
           <form onSubmit={props.createApiKey} className="flex gap-2 max-w-md">
-            <input type="text" placeholder={ar ? 'اسم المفتاح (مثال: GitHub Action)' : 'Key name (e.g. Website Sync)'} value={props.newKeyName} onChange={event => props.setNewKeyName(event.target.value)} className="flex-1 px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-neutral-900/20" />
+            <input type="text" placeholder={ar ? 'اسم المفتاح (مثال: GitHub Action)' : 'Key name (e.g. Website Sync)'} value={props.newKeyName} onChange={event => props.setNewKeyName(event.target.value)} className="flex-1 px-3.5 py-2 rounded-xl border border-neutral-300 text-xs font-medium focus-visible:ring-2 focus-visible:ring-indigo-500" />
             <button type="submit" disabled={props.keyLoading || !props.newKeyName.trim()} className="px-4 py-2 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer disabled:opacity-50">
               {props.keyLoading ? '...' : (ar ? 'إنشاء مفتاح' : 'Create Key')}
             </button>
@@ -37,12 +37,12 @@ export function DeveloperSettingsPanel(props: DeveloperSettingsPanelProps) {
             </div>
           )}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold text-neutral-700 uppercase font-mono">{ar ? 'المفاتيح النشطة' : 'Active Keys'}</h3>
-            {props.apiKeys.length === 0 ? <p className="text-xs text-neutral-400">{ar ? 'لا توجد مفاتيح نشطة حالياً.' : 'No active API keys created yet.'}</p> : (
+            <h3 className="text-xs font-bold text-neutral-700 uppercase tracking-caps font-mono">{ar ? 'المفاتيح النشطة' : 'Active Keys'}</h3>
+            {props.apiKeys.length === 0 ? <p className="text-xs text-neutral-600">{ar ? 'لا توجد مفاتيح نشطة حالياً.' : 'No active API keys created yet.'}</p> : (
               <div className="divide-y divide-neutral-100">
                 {props.apiKeys.map(key => (
                   <div key={key.id} className="py-2.5 flex items-center justify-between gap-2">
-                    <div><p className="text-xs font-bold text-neutral-900">{key.name}</p><p className="text-[11px] font-mono text-neutral-400">{key.prefix}</p></div>
+                    <div><p className="text-xs font-bold text-neutral-900">{key.name}</p><p className="text-[11px] font-mono text-neutral-600">{key.prefix}</p></div>
                     <button onClick={() => props.revokeApiKey(key.id)} className="text-xs text-rose-600 hover:text-rose-800 font-semibold cursor-pointer">{ar ? 'إلغاء المفتاح' : 'Revoke'}</button>
                   </div>
                 ))}

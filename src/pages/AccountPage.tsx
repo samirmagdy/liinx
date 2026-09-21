@@ -44,7 +44,7 @@ export function AccountPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900">
       <Navbar activeView="builder" />
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="mb-8 text-start">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">{ar ? 'إعدادات الحساب' : 'Account Settings'}</h1>
           <p className="text-sm text-neutral-500 mt-1">{ar ? 'إدارة الهوية، والأمان، والاشتراكات، ومفاتيح API لبيئة عملك.' : 'Manage your master login, security, multi-profile limits, and developer credentials.'}</p>

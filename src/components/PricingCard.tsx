@@ -20,6 +20,7 @@ interface PricingCardProps {
   ar: boolean;
   currency: (cents: number) => string;
   pending: string | null;
+  titleTag: 'h2' | 'h3';
   onSelectPlan: (planId: string) => void;
 }
 
@@ -45,11 +46,11 @@ function PlanPrice({
       <span className={`text-4xl font-extrabold tracking-tight ${highlight ? 'text-white' : 'text-neutral-900'}`}>
         {currency(price)}
       </span>
-      <span className={`text-sm font-normal ${highlight ? 'text-neutral-400' : 'text-neutral-500'}`}>
+      <span className={`text-sm font-normal ${highlight ? 'text-neutral-400' : 'text-neutral-600'}`}>
         {' '}/ {periodLabel}
       </span>
       {interval === 'year' && price > 0 && (
-        <p className={`text-xs mt-2 ${highlight ? 'text-neutral-400' : 'text-neutral-500'}`}>
+        <p className={`text-xs mt-2 ${highlight ? 'text-neutral-300' : 'text-neutral-600'}`}>
           {ar ? `ما يعادل ${currency(price / 12)} شهرياً` : `Equivalent to ${currency(price / 12)}/month`}
         </p>
       )}
@@ -77,13 +78,13 @@ function PlanCtaButton({
       : (ar ? 'المتابعة إلى الدفع' : 'Continue to checkout');
 
   const btnClasses = highlight
-    ? 'bg-neutral-50 text-neutral-900 hover:bg-neutral-100 focus-visible:ring-neutral-900/20'
-    : 'bg-neutral-900 text-white hover:bg-black focus-visible:ring-neutral-900/20';
+    ? 'bg-neutral-50 text-neutral-900 hover:bg-neutral-100 focus-visible:ring-indigo-500'
+    : 'bg-neutral-900 text-white hover:bg-black focus-visible:ring-indigo-500';
 
   return (
     <button
       disabled={pending}
-      className={`w-full min-h-[44px] rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${btnClasses}`}
+      className={`w-full min-h-[44px] rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-offset-2 ${btnClasses}`}
       onClick={onClick}
     >
       <span>{label}</span>
@@ -98,6 +99,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   ar,
   currency,
   pending,
+  titleTag: Title,
   onSelectPlan
 }) => {
   return (
@@ -109,7 +111,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       }`}
     >
       {plan.highlight && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-indigo-400 text-neutral-950 text-xs font-mono font-bold uppercase tracking-wider shadow-xs">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-indigo-400 text-neutral-950 text-xs font-mono font-bold uppercase tracking-caps shadow-xs">
           {plan.recommendationLabel}
         </span>
       )}
@@ -124,9 +126,9 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           >
             {plan.icon}
           </div>
-          <h3 className={`text-xl font-bold ${plan.highlight ? 'text-white' : 'text-neutral-900'}`}>
+          <Title className={`text-xl font-bold ${plan.highlight ? 'text-white' : 'text-neutral-900'}`}>
             {plan.name}
-          </h3>
+          </Title>
         </div>
         <div className="space-y-1 -mt-3">
           <p className={`text-xs font-semibold ${plan.highlight ? 'text-indigo-400' : 'text-indigo-700'}`}>

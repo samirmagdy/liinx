@@ -79,7 +79,7 @@ export function ComparisonSection() {
               <div>
                 <div className="flex items-center justify-between pb-5 border-b border-neutral-200 mb-6">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-500 text-xs font-bold">
+                    <div aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-600">
                       ✕
                     </div>
                     <div>
@@ -115,7 +115,7 @@ export function ComparisonSection() {
                   </div>
 
                   <div className="text-center pt-2">
-                    <span className="text-[10px] text-neutral-400 font-mono">
+                    <span className="text-[11px] text-neutral-600 font-mono">
                       {ar ? 'تخصيص بصري أساسي وتحديثات يدوية' : 'Basic visual styling • Manual content updates'}
                     </span>
                   </div>
@@ -124,23 +124,23 @@ export function ComparisonSection() {
                 {/* Characteristics List */}
                 <ul className="space-y-2.5 text-xs text-neutral-600">
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <X className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
                     <span><strong>{ar ? 'أزرار توجيه مسطحة' : 'Flat destination buttons'}:</strong> {ar ? 'روابط نصية تنقل الزائر خارج الصفحة دون تفاعل' : 'Simple text buttons redirecting visitors elsewhere'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <X className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
                     <span><strong>{ar ? 'صفحة تمرير واحدة' : 'Single scrolling page'}:</strong> {ar ? 'تكدس طولي للروابط بدون صفحات فرعية أو مجلدات' : 'Single continuous scroll with no sub-pages or folder grouping'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <X className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
                     <span><strong>{ar ? 'رابط المنصة الافتراضي' : 'Platform URL'}:</strong> {ar ? 'الاعتماد على رابط فرعي تابع للمنصة' : 'Runs on standard shared platform link URLs'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <X className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
                     <span><strong>{ar ? 'تخصيص بصري أساسي' : 'Basic visual customization'}:</strong> {ar ? 'خيارات محدودة لتعديل الألوان والخطوط' : 'Basic preset styling and limited typography controls'}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <X className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <X className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
                     <span><strong>{ar ? 'تحديثات محتوى يدوية' : 'Manual content updates'}:</strong> {ar ? 'تعديل يدوي مستمر للروابط دون أتمتة عبر API' : 'Manual block maintenance with no API automation'}</span>
                   </li>
                 </ul>
@@ -153,7 +153,7 @@ export function ComparisonSection() {
                 activeTab === 'generic' ? 'hidden md:flex' : 'flex'
               }`}
             >
-              <div className="absolute -top-3.5 left-8 px-3.5 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-md">
+              <div className="absolute -top-3.5 left-8 px-3.5 py-1 rounded-full bg-neutral-900 text-white text-[11px] font-bold tracking-caps uppercase flex items-center gap-1.5 shadow-md">
                 <Sparkles className="w-3 h-3 text-indigo-400" />
                 <span>{ar ? 'تجربة ليينكس الفائقة' : 'RALOA Mini-Website'}</span>
               </div>
@@ -187,15 +187,19 @@ export function ComparisonSection() {
                         <img 
                           src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" 
                           alt="Elena"
+                          width={200}
+                          height={200}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div>
                         <p className="text-xs font-bold leading-none">Elena Rostova</p>
-                        <p className="text-[10px] text-neutral-400 font-mono mt-0.5">links.elena.design</p>
+                        <p className="text-[11px] text-neutral-400 font-mono mt-0.5">links.elena.design</p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold">
                       DNS Verified
                     </span>
                   </div>
@@ -207,7 +211,7 @@ export function ComparisonSection() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-bold truncate">Architecture & Space Vol. 2</p>
-                      <p className="text-[9px] text-neutral-400">Playable directly in page</p>
+                      <p className="text-[11px] text-neutral-400">Playable directly in page</p>
                     </div>
                   </div>
 
@@ -217,7 +221,7 @@ export function ComparisonSection() {
                       <Folder className="w-3.5 h-3.5 text-indigo-400" />
                       <span className="text-[11px] font-bold">2025 Architectural Portfolio</span>
                     </div>
-                    <span className="text-[9px] font-mono text-neutral-400 bg-neutral-800 px-1.5 py-0.5 rounded">
+                    <span className="text-[11px] font-mono text-neutral-400 bg-neutral-800 px-1.5 py-0.5 rounded">
                       4 links
                     </span>
                   </div>

@@ -21,7 +21,7 @@ export function GuidesPage() {
 
   return <div className="min-h-screen bg-white text-neutral-900">
     <Navbar activeView="home" onClaimClick={() => setLocation('/register')} />
-    <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-16">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-16">
       {activeGuide
         ? <GuideArticle guide={activeGuide} ar={ar} />
         : <GuideIndex guides={guides} ar={ar} />}

@@ -75,7 +75,7 @@ export const VideoBlockView: React.FC<VideoBlockViewProps> = ({
                 window.open(videoSource, '_blank', 'noopener,noreferrer');
               }
             }}
-            className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-80"
+            className="block relative w-full h-full text-left focus-visible:ring-2 focus-visible:ring-white cursor-pointer disabled:cursor-not-allowed disabled:opacity-80"
             aria-label={
               ytEmbed || vimeoEmbed || directVideo
                 ? `Play ${block.title}`
@@ -117,7 +117,7 @@ export const VideoBlockView: React.FC<VideoBlockViewProps> = ({
             href={videoSource}
             target="_blank"
             rel="noreferrer"
-            className="shrink-0 text-xs font-semibold underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            className="shrink-0 text-xs font-semibold underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-current"
           >
             {ui('Open video')}
           </a>

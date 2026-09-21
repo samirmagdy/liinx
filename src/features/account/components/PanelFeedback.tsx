@@ -13,5 +13,5 @@ export function PanelFeedback({ message }: { message: AccountMessage }) {
 }
 
 export function PanelLoading({ children }: { children: ReactNode }) {
-  return <div className="py-6 text-center text-xs text-neutral-400 font-mono">{children}</div>;
+  return <div className="py-6 text-center text-xs text-neutral-600 font-mono">{children}</div>;
 }

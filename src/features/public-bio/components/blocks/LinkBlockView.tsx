@@ -29,7 +29,7 @@ export const LinkBlockView: React.FC<LinkBlockViewProps> = ({ block, theme, prev
           </span>
           {block.badge && (
             <span
-              className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold tracking-wider uppercase shadow-xs shrink-0"
+              className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold tracking-caps uppercase shadow-xs shrink-0"
               style={{
                 backgroundColor: theme.accentColor,
                 color: getAccessibleTextColor(theme.accentColor)
@@ -55,7 +55,7 @@ export const LinkBlockView: React.FC<LinkBlockViewProps> = ({ block, theme, prev
     isPill ? 'px-6 py-4' : 'p-4'
   } transition-shadow duration-200 flex items-center justify-between gap-4 shadow-sm ${
     hasDestination
-      ? 'hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-current'
+      ? 'hover:shadow-md focus-visible:ring-2 focus-visible:ring-current'
       : 'opacity-75'
   } ${linkLayout === 'featured' ? 'min-h-28' : ''} ${linkLayout === 'grid' ? 'min-h-24' : ''} ${
     linkAnimation === 'fade' ? 'raloa-link-animation-fade' : ''

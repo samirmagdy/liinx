@@ -36,14 +36,15 @@ export const PhoneSocialsRow: React.FC<PhoneSocialsRowProps> = ({ socials, theme
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
+    <div className="mb-2 flex flex-wrap items-center justify-center gap-2">
       {socials.map((social, idx) => (
         <a
           key={idx}
           href={social.url}
           target="_blank"
           rel="noreferrer"
-          className="p-2 rounded-full transition-transform hover:scale-110 active:scale-95 border focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          aria-label={social.platform}
+          className="grid h-11 w-11 place-items-center rounded-full border transition-transform hover:scale-110 active:scale-95"
           style={{
             backgroundColor: theme.cardBg,
             borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.06)'),

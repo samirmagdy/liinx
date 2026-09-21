@@ -31,7 +31,7 @@ export const BlockCatalogGrid: React.FC<BlockCatalogGridProps> = ({
             key={item.id}
             type="button"
             onClick={() => onSelect(item)}
-            className="p-2.5 rounded-xl border border-neutral-200 bg-white hover:border-neutral-900 hover:shadow-xs flex items-start gap-2.5 text-left transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 group"
+            className="p-2.5 rounded-xl border border-neutral-200 bg-white hover:border-neutral-900 hover:shadow-xs flex items-start gap-2.5 text-left transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 group"
           >
             <div className={`p-2 rounded-lg shrink-0 transition-transform group-hover:scale-105 ${item.colorClass}`}>
               <IconComponent className="w-4 h-4" />
@@ -40,7 +40,7 @@ export const BlockCatalogGrid: React.FC<BlockCatalogGridProps> = ({
               <div className="text-xs font-bold text-neutral-900 truncate">
                 {ui(item.titleKey)}
               </div>
-              <div className="text-[10px] text-neutral-500 line-clamp-1 leading-tight mt-0.5">
+              <div className="text-[11px] text-neutral-500 line-clamp-1 leading-tight mt-0.5">
                 {ui(item.descKey)}
               </div>
             </div>

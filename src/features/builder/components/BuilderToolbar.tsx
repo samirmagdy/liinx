@@ -47,7 +47,7 @@ export const BuilderToolbar: React.FC = () => {
                 setProfileSwitchError(null);
                 setProfileDropdownOpen(!profileDropdownOpen);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-l-xl cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-l-xl cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               <span className="font-mono">@{profile.username}</span>
               <ChevronDown className={`w-3.5 h-3.5 text-neutral-500 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
@@ -57,7 +57,7 @@ export const BuilderToolbar: React.FC = () => {
               onClick={() => setActiveTab('settings')}
               title={ui("Manage subscription plan")}
               aria-label={ui("Manage subscription plan")}
-              className="mr-2 ml-1 text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition-colors cursor-pointer"
+              className="mr-2 ml-1 text-[11px] font-mono font-bold uppercase tracking-caps px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition-colors cursor-pointer"
             >
               {profile.plan || 'free'}
             </button>
@@ -70,7 +70,7 @@ export const BuilderToolbar: React.FC = () => {
                   {profileSwitchError}
                 </div>
               )}
-              <div className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400">
+              <div className="px-3 py-1.5 text-[11px] font-mono font-bold uppercase tracking-caps text-neutral-600">
                 {ui("Switch Profile (")}{profileList.length})
               </div>
               <div className="max-h-56 overflow-y-auto divide-y divide-neutral-50">
@@ -83,7 +83,7 @@ export const BuilderToolbar: React.FC = () => {
                   >
                     <button type="button" onClick={() => handleSelectProfile(p.id)} className="flex min-w-0 flex-1 flex-col truncate text-start">
                       <span className="truncate">{p.displayName || p.username}</span>
-                      <span className="text-[10px] font-mono text-neutral-400">@{p.username}</span>
+                      <span className="text-[11px] font-mono text-neutral-600">@{p.username}</span>
                     </button>
                     {p.id === profile.id ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -119,19 +119,19 @@ export const BuilderToolbar: React.FC = () => {
           )}
         </div>
 
-        <div className="save-status flex items-center gap-1.5 text-xs text-neutral-500">
+        <div className="save-status flex items-center gap-1.5 text-xs text-neutral-600">
           <span className={`w-2 h-2 rounded-full ${
             saveStatus === 'saving' ? 'bg-amber-500 animate-ping' : 
             saveStatus === 'error' ? 'bg-rose-500' : 'bg-emerald-500'
           }`} />
-          <span className="font-mono text-[11px]">
+          <span className="font-mono text-xs">
             {ui(saveErrorBanner ? 'Save failed' : queueRef.current?.dirty || saveStatus === 'saving' ? 'Saving...' : saveStatus === 'error' ? 'Save failed' : 'Saved')}
           </span>
           {queueRef.current?.dirty && saveStatus === 'error' && (
             <button
               type="button"
               onClick={handleRetryFailedSaves}
-              className="ml-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-[10px] font-bold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
+              className="ml-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
             >
               {ui("Retry")}
             </button>
@@ -144,7 +144,7 @@ export const BuilderToolbar: React.FC = () => {
         <button
           onClick={() => setQrModalOpen(true)}
           aria-label={ui('QR Code')}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+          className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <QrCode className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">{ui("QR Code")}</span>
@@ -153,7 +153,7 @@ export const BuilderToolbar: React.FC = () => {
         <button
           onClick={handleCopyPublicLink}
           aria-label={ui('Copy Link')}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+          className="px-3 py-1.5 rounded-xl border border-neutral-200 hover:border-neutral-900 bg-neutral-50 text-xs font-semibold text-neutral-900 flex items-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           {copiedLink ? (
             <>
@@ -175,7 +175,7 @@ export const BuilderToolbar: React.FC = () => {
               onViewFullscreen(profile, customTheme);
             }
           }}
-          className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition-colors active:scale-95 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+          className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition-colors active:scale-95 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
         >
           <Maximize2 className="w-3.5 h-3.5 text-amber-300" />
           <span>{ui("View Live Page")}</span>

@@ -110,7 +110,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                   </span>
                   {linkBlock.badge && (
                     <span
-                      className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase shrink-0"
+                      className="px-1.5 py-0.5 rounded text-[11px] font-mono font-bold tracking-caps uppercase shrink-0"
                       style={{
                         backgroundColor: theme.accentColor,
                         color: getAccessibleTextColor(theme.accentColor)
@@ -242,7 +242,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                           }
                         }
                       }}
-                      className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus-visible:ring-2 focus-visible:ring-white"
                       aria-label={isPlayingAudio ? ui('Pause track') : ui('Play track')}
                     >
                       {isPlayingAudio ? (
@@ -256,7 +256,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                       href={audioBlock.audioUrl || `/r/${block.id}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus-visible:ring-2 focus-visible:ring-white"
                       aria-label={ui('Listen track')}
                     >
                       <Play className="w-4 h-4 fill-white text-white ml-0.5" />
@@ -265,9 +265,9 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                 </div>
 
                 <div className="flex-1 min-w-0" dir="auto">
-                  <div className="flex items-center gap-1.5 text-[10px] mb-0.5" style={{ color: theme.subtextColor }}>
+                  <div className="flex items-center gap-1.5 text-[11px] mb-0.5" style={{ color: theme.subtextColor }}>
                     <Music2 className="w-3 h-3 text-emerald-500 shrink-0" />
-                    <span className="uppercase font-mono tracking-wider font-semibold">{ui('Audio Track')}</span>
+                    <span className="uppercase font-mono tracking-caps font-semibold">{ui('Audio Track')}</span>
                   </div>
                   <p className="text-xs font-bold truncate" dir="auto">{block.title}</p>
                   <p className="text-[11px] truncate" style={{ color: theme.subtextColor }} dir="auto">{audioBlock.artist}</p>
@@ -309,20 +309,20 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
             >
               <button
                 onClick={() => toggleFolder(block.id)}
-                className="w-full p-3.5 flex items-center justify-between text-left transition-opacity hover:opacity-90 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 gap-2"
+                className="w-full p-3.5 flex items-center justify-between text-left transition-opacity hover:opacity-90 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 gap-2"
               >
                 <div className="min-w-0 flex-1" dir="auto">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-xs truncate" dir="auto">{block.title}</span>
                     <span
-                      className="text-[9px] px-1.5 py-0.5 rounded-full font-mono shrink-0"
+                      className="text-[11px] px-1.5 py-0.5 rounded-full font-mono shrink-0"
                       style={{ backgroundColor: theme.isDark ? 'rgba(255,255,255,0.12)' : '#F5F5F5', color: theme.cardText }}
                     >
                       {folderBlock.items.length} {ui('items')}
                     </span>
                   </div>
                   {folderBlock.subtitle && (
-                    <p className="text-[10px] truncate mt-0.5 text-pretty" style={{ color: theme.subtextColor }} dir="auto">{folderBlock.subtitle}</p>
+                    <p className="text-[11px] truncate mt-0.5 text-pretty" style={{ color: theme.subtextColor }} dir="auto">{folderBlock.subtitle}</p>
                   )}
                 </div>
                 <div className="p-1 rounded-full opacity-60 shrink-0">
@@ -338,14 +338,14 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                       href={item.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-2.5 rounded-xl block transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                      className="p-2.5 rounded-xl block transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900/5 group focus-visible:ring-2 focus-visible:ring-indigo-500"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[11px] font-medium group-hover:underline truncate" dir="auto">{item.title}</span>
                         <ExternalLink className="w-3 h-3 opacity-40 group-hover:opacity-100 shrink-0" />
                       </div>
                       {item.subtitle && (
-                        <p className="text-[10px] truncate mt-0.5" style={{ color: theme.subtextColor }} dir="auto">{item.subtitle}</p>
+                        <p className="text-[11px] truncate mt-0.5" style={{ color: theme.subtextColor }} dir="auto">{item.subtitle}</p>
                       )}
                     </a>
                   ))}
@@ -397,7 +397,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                         window.open(videoBlock.videoUrl || `/r/${block.id}`, '_blank', 'noreferrer');
                       }
                     }}
-                    className="block relative w-full h-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
+                    className="block relative w-full h-full text-left focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
                     aria-label={`${ui('Play track')} ${block.title}`}
                   >
                     <img
@@ -431,7 +431,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
             >
               <div className="flex items-center justify-between mb-2" dir="auto">
                 <span className="text-xs font-semibold" dir="auto">{block.title}</span>
-                <span className="text-[10px] font-mono opacity-60 shrink-0">{igBlock.handle}</span>
+                <span className="text-[11px] font-mono opacity-60 shrink-0">{igBlock.handle}</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {igBlock.posts.map(post => (
@@ -442,7 +442,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-mono">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-mono">
                       ♥ {post.likes}
                     </div>
                   </div>
@@ -478,7 +478,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="your@email.com…"
-                  className="w-full px-3 py-2 text-xs rounded-xl border outline-none transition-colors focus:ring-1 focus:ring-neutral-900/10"
+                  className="w-full px-3 py-2 text-xs rounded-xl border outline-none transition-colors focus-visible:ring-1 focus-visible:ring-indigo-500"
                   style={{ backgroundColor: theme.cardBg, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)'), color: theme.cardText }}
                   required
                   spellCheck={false}
@@ -486,7 +486,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
                 />
                 <button
                   type="submit"
-                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
                   style={{ backgroundColor: theme.accentColor, color: getAccessibleTextColor(theme.accentColor) }}
                 >
                   <span dir="auto">{nlBlock.buttonText}</span>
@@ -502,7 +502,7 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
           return (
             <div key={block.id} className={`p-3.5 shadow-xs ${getRadiusClass(theme.cardRadius, true)}`} style={{ backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText }}>
               <p className="text-xs font-bold" dir="auto">{block.title}</p>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.subtextColor }}>{ui('Protected text preview')}</p>
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-caps" style={{ color: theme.subtextColor }}>{ui('Protected text preview')}</p>
               {gate.locked ? <p className="mt-2 whitespace-pre-wrap break-words text-xs" dir="auto">{gate.body || ui('Protected text is empty.')}</p> : <p className="mt-2 text-xs" style={{ color: theme.subtextColor }}>{ui('This gate is not configured yet.')}</p>}
             </div>
           );

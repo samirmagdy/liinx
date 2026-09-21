@@ -80,7 +80,7 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
               target="_blank"
               rel="noreferrer"
               aria-label={logoLabel}
-              className="inline-flex rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              className="inline-flex rounded-full focus-visible:ring-2 focus-visible:ring-current"
             >
               {logo}
             </a>
@@ -91,7 +91,7 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
       ) : (
         <button
           onClick={onBackToStudio ? onBackToStudio : () => setLocation('/')}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider transition-opacity hover:opacity-100 bg-neutral-100/5 dark:bg-neutral-900/5 border border-neutral-200 dark:border-neutral-800 shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/5 px-4 text-xs font-mono tracking-wider text-current shadow-xs transition-opacity hover:opacity-100 dark:border-neutral-800 dark:bg-neutral-900/5 cursor-pointer"
           style={{
             backgroundColor: theme.cardBg,
             color: theme.cardText,

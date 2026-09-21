@@ -66,6 +66,7 @@ export const BuilderShell: React.FC = () => {
 
   return (
     <div className="studio-shell min-h-[calc(100vh-72px)] bg-neutral-50 border-t border-neutral-200 flex flex-col">
+      <h1 className="sr-only">{ui('Bio Studio')} · @{profile.username}</h1>
       {/* Hidden File Input for Avatar Upload */}
       <input
         id="builder-avatar-file-input"
@@ -239,7 +240,7 @@ export const BuilderShell: React.FC = () => {
             <div className="space-y-1">
               <label htmlFor="create-profile-username" className="text-xs font-semibold text-neutral-800">{ui("Handle (Username)")}</label>
               <div className="flex items-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 focus-within:bg-neutral-50 focus-within:border-neutral-900">
-                <span className="text-xs font-mono text-neutral-400">@</span>
+                <span className="text-xs font-mono text-neutral-600">@</span>
                 <input
                   id="create-profile-username"
                   name="username"
@@ -318,7 +319,7 @@ export const BuilderShell: React.FC = () => {
                 setCreatedApiKey(null);
                 setNewKeyName('');
               }}
-              className="text-neutral-400 hover:text-neutral-600 p-1 rounded-lg cursor-pointer"
+              className="text-neutral-600 hover:text-neutral-600 p-1 rounded-lg cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -391,7 +392,7 @@ export const BuilderShell: React.FC = () => {
                   placeholder={ui("e.g., Zapier Sync, Mobile App Integration")}
                   className="w-full text-xs p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none"
                 />
-                <p className="text-[11px] text-neutral-400">
+                <p className="text-[11px] text-neutral-600">
                   {ui("Give your API key a recognizable name so you can track where it is being used.")}
                 </p>
               </div>

@@ -4,7 +4,6 @@ import { api } from '../../../services/api';
 import { isAllowedFontStylesheetUrl } from '../../../utils/fontValidation';
 import { safePublicHref } from '../utils/publicBio.utils';
 import { findSystemDemoProfile } from '../../../../shared/index.js';
-import { DEMO_PROFILES } from '../../../demo/demoProfiles';
 
 interface UsePublicProfileProps {
   initialProfile?: CreatorProfile;
@@ -117,7 +116,7 @@ export function usePublicProfile({
     fetchPromise
       .then(fetchedProfile => {
         if (!fetchedProfile || !fetchedProfile.id) {
-          const demo = cleanUsername ? (findSystemDemoProfile(cleanUsername) || DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername)) : undefined;
+          const demo = cleanUsername ? findSystemDemoProfile(cleanUsername) : undefined;
           if (demo) {
             setProfile(demo);
             if (typeof document !== 'undefined') {
@@ -134,7 +133,7 @@ export function usePublicProfile({
         }
       })
       .catch((err: any) => {
-        const demo = cleanUsername ? (findSystemDemoProfile(cleanUsername) || DEMO_PROFILES.find(p => p.username.toLowerCase() === cleanUsername)) : undefined;
+        const demo = cleanUsername ? findSystemDemoProfile(cleanUsername) : undefined;
         if (demo) {
           setProfile(demo);
           if (typeof document !== 'undefined') {

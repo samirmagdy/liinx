@@ -25,7 +25,7 @@ export const TipsBlockView: React.FC<TipsBlockViewProps> = ({
   return (
     <article className={`${card} space-y-3`} style={cardStyle}>
       <h3 className="break-words font-bold">{block.title}</h3>
-      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: theme.subtextColor }}>
+      <p className="text-xs font-semibold uppercase tracking-caps" style={{ color: theme.subtextColor }}>
         {ui('External support link')}
       </p>
       {(extra.description || block.subtitle) && (
@@ -39,7 +39,7 @@ export const TipsBlockView: React.FC<TipsBlockViewProps> = ({
             href={actionHref}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            className="inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-current"
           >
             {ui('Open support link')}
           </a>

@@ -21,7 +21,7 @@ function InformationPage({ title, icon, badge, sections }: InformationPageProps)
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar />
-      <main className="flex-1 w-full max-w-3xl mx-auto px-5 py-10 sm:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-3xl mx-auto px-5 py-10 sm:py-12">
 
         {/* Page Header */}
         <div className="text-center mb-12">
@@ -152,7 +152,7 @@ export function ContactPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="contact" />
-      <main className="flex-1 max-w-3xl mx-auto px-6 py-10 sm:py-12">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-3xl mx-auto px-6 py-10 sm:py-12">
         <div className="text-center space-y-4 mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-semibold text-neutral-700">
             <Mail className="w-3.5 h-3.5 text-indigo-600" />
@@ -198,7 +198,7 @@ export function ContactPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={ui("Elena Rostova")}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 transition-shadow"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-300 text-sm focus:ring-2 focus:ring-neutral-900 transition-shadow"
                 />
               </div>
               <div>
@@ -210,7 +210,7 @@ export function ContactPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="elena@studio.design"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 transition-shadow"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-300 text-sm focus:ring-2 focus:ring-neutral-900 transition-shadow"
                 />
               </div>
             </div>
@@ -224,14 +224,14 @@ export function ContactPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={ui("Tell us about your project or inquiry...")}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 transition-shadow resize-none"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-300 text-sm focus:ring-2 focus:ring-neutral-900 transition-shadow resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={sending}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-neutral-900 text-white text-sm font-bold hover:bg-black transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-neutral-900 text-white text-sm font-bold hover:bg-black transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             >
               <span>{sending ? ui("Sending…") : ui("Send Message")}</span>
               <Send className="w-3.5 h-3.5" />

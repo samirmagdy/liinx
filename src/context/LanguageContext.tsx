@@ -13,6 +13,10 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Cairo is only needed once the document flips to RTL, so it is never fetched
+// for the Latin interface.
+const ARABIC_FONT_STYLESHEET = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800&display=swap';
+
 export const LanguageProvider: React.FC<{ children: ReactNode; initialLanguage?: Language }> = ({ children, initialLanguage }) => {
   const [lang, setLang] = useState<Language>(() => {
     if (initialLanguage) return initialLanguage;
@@ -24,6 +28,12 @@ export const LanguageProvider: React.FC<{ children: ReactNode; initialLanguage?:
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+    if (!isRtl || !document.getElementById('raloa-arabic-fonts')) return;
+    const link = document.createElement('link');
+    link.id = 'raloa-arabic-fonts';
+    link.rel = 'stylesheet';
+    link.href = ARABIC_FONT_STYLESHEET;
+    document.head.appendChild(link);
   }, [lang, isRtl]);
 
   const setLanguage = (newLang: Language) => {

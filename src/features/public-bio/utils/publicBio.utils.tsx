@@ -93,7 +93,7 @@ export function renderRichTextInline(value: string): React.ReactNode[] {
     const link = part.match(/^\[([^\]]+)\]\(([^\s)]+)\)$/);
     if (link) {
       const href = safePublicHref(link[2]);
-      if (href) return <a key={index} href={href} target={/^(https?:)/i.test(href) ? '_blank' : undefined} rel={/^(https?:)/i.test(href) ? 'noreferrer' : undefined} className="underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{link[1]}</a>;
+      if (href) return <a key={index} href={href} target={/^(https?:)/i.test(href) ? '_blank' : undefined} rel={/^(https?:)/i.test(href) ? 'noreferrer' : undefined} className="underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-current">{link[1]}</a>;
     }
     return <React.Fragment key={index}>{part}</React.Fragment>;
   });

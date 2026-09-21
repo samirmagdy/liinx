@@ -45,7 +45,7 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
       href={audioSource}
       target="_blank"
       rel="noreferrer"
-      className="block px-3 pb-3 text-xs font-semibold underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+      className="block px-3 pb-3 text-xs font-semibold underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-current"
     >
       {ui('Open audio provider')}
     </a>
@@ -59,7 +59,7 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
     <button
       type="button"
       onClick={() => setActiveEmbeddedAudioId(block.id)}
-      className="flex h-28 w-full items-center justify-center gap-2 bg-neutral-100 px-4 text-xs font-semibold text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+      className="flex h-28 w-full items-center justify-center gap-2 bg-neutral-100 px-4 text-xs font-semibold text-neutral-700 focus-visible:ring-2 focus-visible:ring-current"
       aria-label={ui('Load audio player')}
     >
       <Play className="h-4 w-4" />
@@ -216,7 +216,7 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
                   }
                 }
               }}
-              className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus-visible:ring-2 focus-visible:ring-white"
               aria-label={ui('Play track')}
             >
               {isPlayingAudio ? (
@@ -230,7 +230,7 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
               href={audioSource}
               target="_blank"
               rel="noreferrer"
-              className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="absolute inset-0 bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors focus-visible:ring-2 focus-visible:ring-white"
               aria-label={ui('Listen track')}
             >
               <Play className="w-5 h-5 fill-white text-white ml-0.5" />
@@ -248,7 +248,7 @@ export const AudioBlockView: React.FC<AudioBlockViewProps> = ({
         <div className="flex-1 min-w-0" dir="auto">
           <div className="flex items-center gap-1.5 text-[11px] mb-0.5" style={{ color: theme.subtextColor }}>
             <Music2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="uppercase font-mono tracking-wider font-semibold">{ui('Audio Track')}</span>
+            <span className="uppercase font-mono tracking-caps font-semibold">{ui('Audio Track')}</span>
           </div>
           <p className="text-sm font-bold truncate" dir="auto">{block.title}</p>
           <p className="text-xs truncate" style={{ color: theme.subtextColor }} dir="auto">{block.artist}</p>

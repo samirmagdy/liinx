@@ -13,7 +13,7 @@ interface HeroClaimFormProps {
 
 function ClaimStatusBadge({ status, reason, isRtl }: { status: string; reason: string | null; isRtl: boolean }) {
   if (status === 'checking') {
-    return <Loader2 className="w-4 h-4 text-neutral-400 animate-spin shrink-0" />;
+    return <Loader2 className="w-4 h-4 text-neutral-500 animate-spin shrink-0" />;
   }
   if (status === 'available') {
     return (
@@ -67,21 +67,26 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
           <input
             id="hero-claim-input"
             type="text"
+            name="username"
+            autoComplete="username"
             value={handle}
             onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
             placeholder={placeholder}
-            className="hero-claim-input w-full min-w-0 pl-1.5 pr-2 outline-none font-mono text-sm sm:text-base font-bold text-neutral-900 placeholder-neutral-400 bg-transparent"
+            className="hero-claim-input w-full min-w-0 pl-1.5 pr-2 font-mono text-sm sm:text-base font-bold text-neutral-900 placeholder:text-neutral-500 bg-transparent"
             spellCheck={false}
             aria-label={`Claim your ${brand.productShortName} handle`}
+            aria-describedby="hero-claim-status"
           />
 
-          <ClaimStatusBadge status={status} reason={reason} isRtl={isRtl} />
+          <span id="hero-claim-status" className="contents" aria-live="polite">
+            <ClaimStatusBadge status={status} reason={reason} isRtl={isRtl} />
+          </span>
         </div>
 
         <button
           id="hero-claim-btn"
           type="submit"
-          className="min-h-[44px] px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-full bg-neutral-900 hover:bg-black text-white text-sm font-bold tracking-tight transition-colors active:scale-[0.985] flex items-center justify-center gap-2 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+          className="min-h-[44px] px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-full bg-neutral-900 hover:bg-black text-white text-sm font-bold tracking-tight transition-colors active:scale-[0.985] flex items-center justify-center gap-2 cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <span>{createLabel}</span>
           <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />

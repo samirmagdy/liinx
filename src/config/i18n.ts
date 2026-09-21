@@ -268,7 +268,7 @@ export const translations: Record<Language, Translations> = {
           features: [
             'Everything in Free',
             'Up to {maxProfiles} profiles / mini-sites under 1 account',
-            'Custom domain support; hosting must configure DNS and TLS',
+            'Custom domain support, with a step-by-step DNS and TLS setup guide',
             'Remove all RALOA branding',
             'Custom CSS styling & web font injection',
             'Link scheduling & UTM campaign tracking',
@@ -457,7 +457,7 @@ export const translations: Record<Language, Translations> = {
           features: [
             'كل ما تتضمنه الخطة المجانية',
             'حتى {maxProfiles} ملفات شخصية ومواقع مصغرة ضمن حساب واحد',
-            'دعم النطاق المخصص؛ يجب على الاستضافة إعداد DNS وTLS',
+            'دعم النطاقات المخصصة، مع دليل خطوة بخطوة لإعداد DNS وإصدار شهادة TLS',
             'إزالة جميع شعارات RALOA',
             'تخصيص CSS وإضافة خطوط ويب',
             'جدولة الروابط وتتبع حملات UTM',

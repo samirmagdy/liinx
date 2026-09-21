@@ -263,7 +263,7 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                   maxLength={5000}
                   className="min-h-24 rounded-lg border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
                 />
-                <p className="text-[10px] text-neutral-500 sm:col-span-2">
+                <p className="text-[11px] text-neutral-500 sm:col-span-2">
                   {ui('Answers are plain text. Line breaks are preserved; links are not supported in FAQs.')}
                 </p>
               </>
@@ -299,7 +299,7 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
               onClick={() => move(index, -1)}
               disabled={index === 0}
               aria-label={ui('Move item up')}
-              className="rounded p-1 text-neutral-500 disabled:opacity-30"
+              className="grid min-h-11 min-w-11 place-items-center rounded-lg text-neutral-600 disabled:opacity-30"
             >
               ↑
             </button>
@@ -308,7 +308,7 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
               onClick={() => move(index, 1)}
               disabled={index === items.length - 1}
               aria-label={ui('Move item down')}
-              className="rounded p-1 text-neutral-500 disabled:opacity-30"
+              className="grid min-h-11 min-w-11 place-items-center rounded-lg text-neutral-600 disabled:opacity-30"
             >
               ↓
             </button>
@@ -335,7 +335,7 @@ export const StructuredItemsEditor: React.FC<StructuredItemsEditorProps> = ({
                 }}
                 disabled={items.length >= 20}
                 aria-label={ui('Duplicate field')}
-                className="rounded p-1 text-neutral-500 disabled:opacity-30"
+                className="grid min-h-11 min-w-11 place-items-center rounded-lg text-neutral-600 disabled:opacity-30"
               >
                 +
               </button>

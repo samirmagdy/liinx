@@ -149,6 +149,8 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
 
       {/* Main Centered Bio Column */}
       <main
+        id="main-content"
+        tabIndex={-1}
         dir={isProfileRtl ? 'rtl' : 'ltr'}
         className="relative z-10 max-w-xl mx-auto px-4 py-12 sm:py-16"
         onClickCapture={

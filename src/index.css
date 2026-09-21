@@ -5,6 +5,11 @@
   --font-sans: var(--raloa-font-ui);
   --font-display: var(--raloa-font-display);
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Readability floor: the smallest body size in the product is 13px, and
+     11px is reserved for badges and metadata only. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
 }
 
 @layer base {
@@ -42,7 +47,7 @@
     text-wrap: balance;
   }
 
-  p, li, span, div {
+  p, li, figcaption, blockquote, dd {
     text-wrap: pretty;
   }
 
@@ -58,15 +63,24 @@
     min-height: 2.75rem;
   }
 
-  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
-    outline-offset: 3px;
-  }
-
   /* Tabular numbers for stats, prices, counters */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Focus ring lives outside every cascade layer so component-level
+   `focus:outline-none` utilities can never silence it. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* === Design Tokens === */
@@ -228,16 +242,10 @@
 .marketing-shell footer {
   font-size: 0.8125rem;
 }
-.marketing-shell .font-mono {
+/* Two-class selector outranks plain `.tracking-caps`, so opt-in caps tracking
+   has to be excluded here or every uppercase mono label loses its spacing. */
+.marketing-shell .font-mono:not(.tracking-caps) {
   letter-spacing: 0.02em;
-}
-.marketing-shell > main .text-neutral-400 {
-  color: var(--color-neutral-600) !important;
-}
-
-/* Studio surfaces are light, so subdued helper text must remain readable. */
-.studio-shell .text-neutral-400 {
-  color: var(--color-neutral-600) !important;
 }
 
 @media (max-width: 767px) {
@@ -284,8 +292,6 @@
    the component breakpoints and protect long editor controls from creating overflow. */
 html, body, #root { max-width: 100%; min-width: 0; }
 button, a, input, select, textarea { touch-action: manipulation; }
-.hero-claim-input:focus-visible { outline: none; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 input, textarea, select { max-width: 100%; min-width: 0; }
 [dir="ltr"]:is(input, textarea) { text-align: left; unicode-bidi: plaintext; }
 
@@ -376,11 +382,11 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 
 /* RTL and Arabic Typography Support */
 [dir="rtl"] body {
-  font-family: 'Cairo', 'Tajawal', var(--font-sans);
+  font-family: 'Cairo', var(--font-sans);
 }
 
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] .font-brand {
-  font-family: 'Cairo', 'Tajawal', var(--font-display);
+  font-family: 'Cairo', var(--font-display);
 }
 
 [dir="rtl"] .text-left { text-align: right; }

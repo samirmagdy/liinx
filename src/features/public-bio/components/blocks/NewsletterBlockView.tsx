@@ -90,7 +90,7 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
               if (newsletterError) setNewsletterError(null);
             }}
             placeholder={ui('Enter your email address')}
-            className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl border outline-none focus:ring-2 focus:ring-neutral-900/20"
+            className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl border outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.12)'),
@@ -117,13 +117,13 @@ export const NewsletterBlockView: React.FC<NewsletterBlockViewProps> = ({
             />
             <span>{ui('I agree to receive email updates from this creator and can unsubscribe at any time.')}</span>
           </label>
-          <p className="text-[10px] leading-relaxed opacity-75" style={{ color: theme.subtextColor }} dir="auto">
+          <p className="text-[11px] leading-relaxed opacity-75" style={{ color: theme.subtextColor }} dir="auto">
             {ui('You will be added after you confirm the email we send.')}
           </p>
           <button
             type="submit"
             disabled={newsletterLoading}
-            className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold text-white transition-opacity hover:opacity-95 active:scale-[0.99] flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-white"
             style={{
               backgroundColor: theme.accentColor,
               color: getAccessibleTextColor(theme.accentColor)

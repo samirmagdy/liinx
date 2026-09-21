@@ -92,7 +92,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLocation('/')}
-            className="px-5 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            className="px-5 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             {ui('Go to Homepage')}
           </button>
@@ -100,7 +100,7 @@ export const PublicBioView: React.FC<PublicBioViewProps> = ({
             onClick={() =>
               setLocation(`/register?username=${routeUsername?.replace(/^@/, '') || ''}`)
             }
-            className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
+            className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
           >
             {ui('Claim this handle')}
           </button>

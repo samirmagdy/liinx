@@ -17,8 +17,8 @@ export const SubscribersPanel: React.FC = () => {
     <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-bold text-sm text-neutral-900">{ui("Newsletter Email Subscribers")}</h3>
-          <p className="text-xs text-[#71717A] mt-0.5">
+          <h2 className="font-bold text-sm text-neutral-900">{ui("Newsletter Email Subscribers")}</h2>
+          <p className="text-xs text-neutral-600 mt-0.5">
             {ui("Real subscribers collected directly from your page's newsletter blocks.")}
           </p>
         </div>
@@ -29,7 +29,7 @@ export const SubscribersPanel: React.FC = () => {
           <button
             onClick={handleExportCsv}
             disabled={subscribers.length === 0}
-            className="px-3 py-1 rounded-xl border border-neutral-300 hover:border-black text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            className="px-3 py-1 rounded-xl border border-neutral-300 hover:border-black text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500"
             title={ui("Download CSV")}
           >
             <Download className="w-3.5 h-3.5" />
@@ -39,7 +39,7 @@ export const SubscribersPanel: React.FC = () => {
       </div>
 
       {subscribersLoading ? (
-        <div className="py-8 text-center text-xs text-neutral-400" role="status">
+        <div className="py-8 text-center text-xs text-neutral-600" role="status">
           {ui('Loading subscribers...')}
         </div>
       ) : subscribersError ? (
@@ -47,7 +47,7 @@ export const SubscribersPanel: React.FC = () => {
           {subscribersError}
         </div>
       ) : subscribers.length === 0 ? (
-        <div className="py-8 text-center text-xs text-neutral-400 border border-dashed rounded-xl">
+        <div className="py-8 text-center text-xs text-neutral-600 border border-dashed rounded-xl">
           {ui("No subscribers collected yet. Add a Newsletter block to your page to start capturing leads!")}
         </div>
       ) : (
@@ -56,13 +56,13 @@ export const SubscribersPanel: React.FC = () => {
             <div key={sub.id} className="p-3 flex items-center justify-between gap-3 text-xs hover:bg-neutral-50">
               <span className="font-semibold text-neutral-800 break-all">{sub.email}</span>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="font-mono text-neutral-400 text-[11px]">{sub.subscribedAt}</span>
+                <span className="font-mono text-neutral-600 text-[11px]">{sub.subscribedAt}</span>
                 <button
                   type="button"
                   onClick={() => handleDeleteSubscriber(sub.id)}
                   aria-label={ui('Remove subscriber')}
                   title={ui('Remove subscriber')}
-                  className="p-1.5 min-h-0 rounded-lg text-neutral-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500"
+                  className="p-1.5 min-h-0 rounded-lg text-neutral-600 hover:text-rose-600 hover:bg-rose-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

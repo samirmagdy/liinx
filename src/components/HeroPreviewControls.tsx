@@ -46,10 +46,10 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
               key={prof.id}
               aria-pressed={selectedProfileIndex === idx}
               onClick={() => onSelectProfile(idx)}
-              className={`relative z-10 flex-1 py-1.5 px-2 rounded-full text-[11px] font-semibold transition-colors duration-200 truncate cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`relative z-10 flex-1 py-1.5 px-2 rounded-full text-[11px] font-semibold transition-colors duration-200 truncate cursor-pointer active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 selectedProfileIndex === idx
                   ? 'text-white'
-                  : 'text-neutral-500 hover:text-neutral-900'
+                  : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >
               {prof.displayName.split(' ')[0]}
@@ -59,13 +59,13 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
 
         {/* Theme switcher dots */}
         <div className="flex flex-wrap gap-2 items-center justify-between px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs">
-          <span className="text-[11px] font-medium text-neutral-500 flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-600">
             <Palette className="w-3.5 h-3.5" />
             <span>{t.hero.themeLabel}</span>
             <strong className="text-neutral-900">{ui(activeTheme.name)}</strong>
           </span>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5">
             {THEMES.slice(0, 6).map((theme) => (
               <button
                 key={theme.id}
@@ -73,16 +73,21 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
                 onClick={() => onSelectTheme(theme.id)}
                 title={theme.name}
                 aria-label={`Select ${theme.name} theme`}
-                className={`w-5 h-5 rounded-full border transition-[transform,opacity,box-shadow] duration-200 cursor-pointer active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/40 focus-visible:ring-offset-1 ${
-                  selectedThemeId === theme.id
-                    ? 'ring-2 ring-neutral-900 ring-offset-1 scale-110'
-                    : 'opacity-70 hover:opacity-100'
+                className={`grid h-11 w-11 cursor-pointer place-items-center rounded-full transition-transform duration-200 active:scale-95 ${
+                  selectedThemeId === theme.id ? 'scale-100' : 'opacity-70 hover:opacity-100'
                 }`}
-                style={{
-                  backgroundColor: theme.bgColor,
-                  borderColor: theme.isDark ? '#555' : '#ccc'
-                }}
-              />
+              >
+                <span
+                  aria-hidden="true"
+                  className={`h-5 w-5 rounded-full border transition-shadow duration-200 ${
+                    selectedThemeId === theme.id ? 'ring-2 ring-neutral-900 ring-offset-1' : ''
+                  }`}
+                  style={{
+                    backgroundColor: theme.bgColor,
+                    borderColor: theme.isDark ? '#555' : '#ccc'
+                  }}
+                />
+              </button>
             ))}
           </div>
         </div>

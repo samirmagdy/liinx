@@ -141,7 +141,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
           <button 
             onClick={handleCancel}
             aria-label={ui('Close modal')}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/10 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -250,10 +250,13 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                   <img
                     src={previewData.avatarUrl}
                     alt={previewData.displayName || "Avatar"}
+                    width={40}
+                    height={40}
+                    loading="lazy"
                     className="w-10 h-10 rounded-full object-cover border border-neutral-200 dark:border-neutral-700"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 font-bold text-sm">
                     {previewData.displayName?.[0] || 'U'}
                   </div>
                 )}
@@ -266,7 +269,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                       {previewData.bio}
                     </p>
                   )}
-                  <span className="inline-block mt-1 text-[10px] text-neutral-600 dark:text-neutral-300 font-medium">
+                  <span className="inline-block mt-1 text-[11px] text-neutral-600 dark:text-neutral-300 font-medium">
                     {previewData.links.length} {ui("links found")}
                   </span>
                 </div>
@@ -297,7 +300,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                 >
                   {availablePages.map(page => <option key={page.id} value={page.id}>{page.isHome ? ui('Home') : `${page.title}${page.published ? '' : ' (draft)'}`}</option>)}
                 </select>
-                <span className="mt-1 block text-[10px] font-normal text-neutral-500">{ui("Imported links are appended to this page; existing content is not overwritten.")}</span>
+                <span className="mt-1 block text-[11px] font-normal text-neutral-500">{ui("Imported links are appended to this page; existing content is not overwritten.")}</span>
               </label>
 
               {previewData.warnings?.length > 0 && (
@@ -339,7 +342,7 @@ export const LinktreeImporterModal: React.FC<LinktreeImporterModalProps> = ({
                     >
                       <div className="min-w-0 pr-2">
                         <p className="font-semibold text-neutral-900 dark:text-white truncate">{link.title}</p>
-                        <p className="text-[10px] text-neutral-600 truncate">{link.url}</p>
+                        <p className="text-[11px] text-neutral-600 truncate">{link.url}</p>
                       </div>
                       <div className={`w-4 h-4 rounded flex items-center justify-center border ${
                         selectedIndices.has(idx)

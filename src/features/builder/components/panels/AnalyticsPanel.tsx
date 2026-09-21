@@ -37,7 +37,7 @@ export const AnalyticsPanel: React.FC = () => {
           <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
             {analyticsData ? analyticsData.totalViews.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US') : '...'}
           </p>
-          <span className="text-[10px] text-neutral-500 font-mono tabular-nums">
+          <span className="text-[11px] text-neutral-500 font-mono tabular-nums">
             {analyticsData ? `${analyticsData.uniqueVisitors} unique` : ui("loading")}
           </span>
         </div>
@@ -47,7 +47,7 @@ export const AnalyticsPanel: React.FC = () => {
           <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">
             {analyticsData ? analyticsData.ctr : '...'}
           </p>
-          <span className="text-[10px] text-emerald-700 font-semibold font-mono">{ui("Clicks per view")}</span>
+          <span className="text-[11px] text-emerald-700 font-semibold font-mono">{ui("Clicks per view")}</span>
         </div>
 
         <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs">
@@ -55,7 +55,7 @@ export const AnalyticsPanel: React.FC = () => {
           <p className="text-2xl font-extrabold text-neutral-900 mt-1 tabular-nums">
             {analyticsData ? analyticsData.totalClicks.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US') : '...'}
           </p>
-          <span className="text-[10px] text-neutral-500 font-mono">{ui("Live logged")}</span>
+          <span className="text-[11px] text-neutral-500 font-mono">{ui("Live logged")}</span>
         </div>
       </div>
 
@@ -63,11 +63,11 @@ export const AnalyticsPanel: React.FC = () => {
       {analyticsData && analyticsData.dailyTimeline && (
         <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+            <h2 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
               <TrendingUp className="w-4 h-4 text-emerald-500" />
               <span>{ui("7-Day Engagement Timeline")}</span>
-            </h3>
-            <div className="flex items-center gap-3 text-[10px] font-mono">
+            </h2>
+            <div className="flex items-center gap-3 text-[11px] font-mono">
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-neutral-200 rounded" /> {ui("Views")}</span>
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded" /> {ui("Clicks")}</span>
             </div>
@@ -93,7 +93,7 @@ export const AnalyticsPanel: React.FC = () => {
                       title={`${day.clicks} clicks`}
                     />
                   </div>
-                  <span className="text-[10px] font-mono text-neutral-500 truncate w-full text-center">
+                  <span className="text-[11px] font-mono text-neutral-500 truncate w-full text-center">
                     {day.date.split(',')[0]}
                   </span>
                 </div>
@@ -106,9 +106,9 @@ export const AnalyticsPanel: React.FC = () => {
       {/* Top Performing Links */}
       {analyticsData && analyticsData.topLinks && (
         <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
-          <h3 className="text-xs font-bold text-neutral-900">{ui("Top Performing Links")}</h3>
+          <h2 className="text-xs font-bold text-neutral-900">{ui("Top Performing Links")}</h2>
           {analyticsData.topLinks.length === 0 ? (
-            <p className="text-xs text-neutral-400 py-2">{ui("No clicks recorded yet. Share your link to start tracking!")}</p>
+            <p className="text-xs text-neutral-600 py-2">{ui("No clicks recorded yet. Share your link to start tracking!")}</p>
           ) : (
             <div className="space-y-2.5 text-xs">
               {analyticsData.topLinks.map((link) => (
@@ -134,12 +134,12 @@ export const AnalyticsPanel: React.FC = () => {
       {analyticsData && (
         <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-neutral-900">{ui("UTM Campaign & Traffic Attribution")}</h3>
-            <span className="text-[10px] font-mono text-neutral-500">{ui("Source / Medium / Campaign")}</span>
+            <h2 className="text-xs font-bold text-neutral-900">{ui("UTM Campaign & Traffic Attribution")}</h2>
+            <span className="text-[11px] font-mono text-neutral-500">{ui("Source / Medium / Campaign")}</span>
           </div>
           {!analyticsData.topUtmCampaigns || analyticsData.topUtmCampaigns.length === 0 ? (
-            <p className="text-xs text-neutral-400 py-2">
-              {ui("No UTM parameters recorded yet. Append")}<code className="bg-neutral-100 px-1 py-0.5 rounded text-neutral-700 font-mono text-[10px]">{ui("?utm_source=instagram&utm_campaign=spring")}</code> {ui("to your bio URL to start tracking!")}
+            <p className="text-xs text-neutral-600 py-2">
+              {ui("No UTM parameters recorded yet. Append")}<code className="bg-neutral-100 px-1 py-0.5 rounded text-neutral-700 font-mono text-[11px]">{ui("?utm_source=instagram&utm_campaign=spring")}</code> {ui("to your bio URL to start tracking!")}
             </p>
           ) : (
             <div className="divide-y divide-neutral-100 text-xs">

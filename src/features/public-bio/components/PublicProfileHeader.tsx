@@ -23,6 +23,9 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
         <img
           src={profile.avatarUrl}
           alt={profile.displayName}
+          width={96}
+          height={96}
+          decoding="async"
           onError={event => {
             event.currentTarget.onerror = null;
             event.currentTarget.src = '/icons/favicon-32x32.png';
@@ -67,7 +70,7 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
               rel={/^(https?:)/i.test(social.url) ? 'noreferrer' : undefined}
               aria-label={`${social.platform} link`}
               dir="ltr"
-              className="p-2.5 rounded-full transition-transform duration-200 hover:scale-110 active:scale-95 border shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              className="p-2.5 rounded-full transition-transform duration-200 hover:scale-110 active:scale-95 border shadow-xs focus-visible:ring-2 focus-visible:ring-current"
               style={{
                 backgroundColor: theme.cardBg,
                 borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.1)'),

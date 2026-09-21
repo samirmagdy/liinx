@@ -42,8 +42,8 @@ export const ContentPanel: React.FC = () => {
       {/* Profile Bio & Avatar Card */}
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm text-[#18181B]">{ui("Creator Identity")}</h3>
-          <span className="text-[10px] font-mono uppercase bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-md">
+          <h2 className="font-bold text-sm text-neutral-900">{ui("Creator Identity")}</h2>
+          <span className="text-[11px] font-mono uppercase tracking-caps bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-md">
             {ui("Published autosave")}
           </span>
         </div>
@@ -53,6 +53,9 @@ export const ContentPanel: React.FC = () => {
             <img
               src={profile.avatarUrl}
               alt={profile.displayName}
+              width={64}
+              height={64}
+              decoding="async"
               onError={event => {
                 event.currentTarget.onerror = null;
                 event.currentTarget.src = '/icons/favicon-32x32.png';
@@ -117,7 +120,7 @@ export const ContentPanel: React.FC = () => {
                   void handleUsernameBlur();
                 }
               }}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-neutral-900 focus-visible:ring-1 focus-visible:ring-indigo-500"
             />
             <p className="mt-1 text-[11px] text-neutral-500">
               {usernameCheck.loading ? ui('Checking handle…') : usernameCheck.error || ui('3–30 lowercase letters, numbers, or underscores.')}
@@ -135,7 +138,7 @@ export const ContentPanel: React.FC = () => {
               maxLength={100}
               value={profile.displayName}
               onChange={(e) => handleProfileChange('displayName', e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-semibold text-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-semibold text-neutral-900 focus-visible:ring-1 focus-visible:ring-indigo-500"
             />
           </div>
 
@@ -149,7 +152,7 @@ export const ContentPanel: React.FC = () => {
               maxLength={50}
               value={profile.category}
               onChange={(e) => handleProfileChange('category', e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900 focus-visible:ring-1 focus-visible:ring-indigo-500"
             />
           </div>
         </div>
@@ -164,7 +167,7 @@ export const ContentPanel: React.FC = () => {
             maxLength={500}
             value={profile.bio}
             onChange={(e) => handleProfileChange('bio', e.target.value)}
-            className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900 resize-none focus:ring-1 focus:ring-neutral-900/10"
+            className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 text-neutral-900 resize-none focus-visible:ring-1 focus-visible:ring-indigo-500"
           />
         </div>
 

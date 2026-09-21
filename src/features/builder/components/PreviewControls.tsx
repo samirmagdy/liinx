@@ -22,7 +22,7 @@ export const PreviewControls: React.FC = () => {
         <button
           onClick={() => setPreviewDevice('mobile')}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
-            previewDevice === 'mobile' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+            previewDevice === 'mobile' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-600 hover:text-neutral-900'
           }`}
         >
           <Smartphone className="w-3.5 h-3.5" />
@@ -31,7 +31,7 @@ export const PreviewControls: React.FC = () => {
         <button
           onClick={() => setPreviewDevice('tablet')}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
-            previewDevice === 'tablet' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+            previewDevice === 'tablet' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-600 hover:text-neutral-900'
           }`}
         >
           <Tablet className="w-3.5 h-3.5" />
@@ -40,7 +40,7 @@ export const PreviewControls: React.FC = () => {
         <button
           onClick={() => setPreviewDevice('desktop')}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all cursor-pointer ${
-            previewDevice === 'desktop' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'
+            previewDevice === 'desktop' ? 'bg-neutral-50 shadow-xs text-neutral-900' : 'text-neutral-600 hover:text-neutral-900'
           }`}
         >
           <Monitor className="w-3.5 h-3.5" />

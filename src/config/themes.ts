@@ -161,7 +161,7 @@ export const THEMES: ThemeConfig[] = [
     cardBorder: '1px solid #334155',
     cardHover: '#273548',
     cardRadius: 'xl',
-    accentColor: '#0284C7',
+    accentColor: '#0369A1',
     fontFamily: 'sans',
     isDark: true,
   },

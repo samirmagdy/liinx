@@ -143,10 +143,10 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center justify-center mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
-          <img src="/brand/raloa-logo-horizontal-primary.png" alt={brand.productShortName} className="h-11 w-auto" loading="eager" decoding="async" />
+        <Link href="/" className="inline-flex items-center justify-center mb-4 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg">
+          <img src="/brand/raloa-logo-horizontal-primary.png" alt={brand.productShortName} width={99} height={44} className="h-11 w-auto" loading="eager" decoding="async" />
         </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">
           {step === 1 ? ui("Build your micro-site") : ui("Choose your aesthetic")}
@@ -179,7 +179,7 @@ export const RegisterPage: React.FC = () => {
                 <label htmlFor="register-username" className="block text-xs font-bold text-neutral-700 mb-1.5">
                   {ui("Choose your handle")}</label>
                 <div className="relative">
-                  <AtSign className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                  <AtSign className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3.5" />
                   <input
                     id="register-username"
                     name="username"
@@ -190,7 +190,7 @@ export const RegisterPage: React.FC = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                     placeholder={ui("yourname")}
-                    className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus-visible:ring-2 focus-visible:ring-indigo-500 focus:border-neutral-900 transition-colors"
                   />
                   {availability.checked && (
                     <div className="absolute right-3.5 top-3">
@@ -211,7 +211,7 @@ export const RegisterPage: React.FC = () => {
                 <label htmlFor="register-email" className="block text-xs font-bold text-neutral-700 mb-1.5">
                   {ui("Email address")}</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                  <Mail className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3.5" />
                   <input
                     id="register-email"
                     type="email"
@@ -220,7 +220,7 @@ export const RegisterPage: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@domain.com"
-                    className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus-visible:ring-2 focus-visible:ring-indigo-500 focus:border-neutral-900 transition-colors"
                   />
                 </div>
               </div>
@@ -229,7 +229,7 @@ export const RegisterPage: React.FC = () => {
                 <label htmlFor="register-password" className="block text-xs font-bold text-neutral-700 mb-1.5">
                   {ui("Choose password")}</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                  <Lock className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3.5" />
                   <input
                     id="register-password"
                     type="password"
@@ -238,7 +238,7 @@ export const RegisterPage: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={ui("At least 8 characters")}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-900 transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-300 text-sm focus-visible:ring-2 focus-visible:ring-indigo-500 focus:border-neutral-900 transition-colors"
                   />
                 </div>
               </div>
@@ -272,7 +272,7 @@ export const RegisterPage: React.FC = () => {
                             : 'bg-white/60 border-neutral-200 text-neutral-600 hover:border-neutral-300'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-indigo-600' : 'text-neutral-400'}`} />
+                        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-indigo-600' : 'text-neutral-600'}`} />
                         <span className="text-[11px] font-semibold leading-tight">{ui(item.label)}</span>
                       </button>
                     );
@@ -301,7 +301,7 @@ export const RegisterPage: React.FC = () => {
                           className="w-5 h-5 rounded-full border shadow-xs"
                           style={{ backgroundColor: theme.bgColor, borderColor: theme.isDark ? '#444' : '#ccc' }}
                         />
-                        <span className="text-[10px] font-semibold truncate w-full">{theme.name}</span>
+                        <span className="text-[11px] font-semibold truncate w-full">{theme.name}</span>
                       </button>
                     );
                   })}
@@ -351,6 +351,6 @@ export const RegisterPage: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 };

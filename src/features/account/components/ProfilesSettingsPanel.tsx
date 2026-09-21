@@ -20,7 +20,7 @@ export function ProfilesSettingsPanel({ ar, profilesList, profilesLoading, setLo
             <div key={profile.id} className="py-3.5 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center font-bold text-xs text-neutral-700 overflow-hidden">
-                  {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" className="w-full h-full object-cover" /> : profile.username.slice(0, 2).toUpperCase()}
+                  {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" width={36} height={36} loading="lazy" decoding="async" className="w-full h-full object-cover" /> : profile.username.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <p className="text-xs font-bold text-neutral-900">@{profile.username}</p>

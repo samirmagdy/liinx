@@ -74,7 +74,7 @@ export const ImageBlockView: React.FC<ImageBlockViewProps> = ({
           href={analyticsHref(`/r/${block.id}`)}
           target="_blank"
           rel="noreferrer"
-          className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          className="block focus-visible:ring-2 focus-visible:ring-current"
         >
           {content}
         </a>

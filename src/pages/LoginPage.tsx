@@ -32,16 +32,16 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center justify-center mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-lg">
-          <img src="/brand/raloa-logo-horizontal-primary.png" alt={brand.productShortName} className="h-11 w-auto" loading="eager" decoding="async" />
+        <Link href="/" className="inline-flex items-center justify-center mb-4 focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg">
+          <img src="/brand/raloa-logo-horizontal-primary.png" alt={brand.productShortName} width={99} height={44} className="h-11 w-auto" loading="eager" decoding="async" />
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 text-balance">
           {ui("Welcome back to your Studio")}</h1>
         <p className="mt-2 text-sm text-neutral-600">
           {ui("Or")}{' '}
-          <Link href="/register" className="font-semibold text-neutral-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded">
+          <Link href="/register" className="font-semibold text-neutral-900 hover:underline focus-visible:ring-2 focus-visible:ring-indigo-500 rounded">
             {ui("claim a new handle and create your page")}</Link>
         </p>
       </div>
@@ -57,33 +57,33 @@ export const LoginPage: React.FC = () => {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="login-email" className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-email" className="block text-xs font-semibold text-neutral-700 uppercase tracking-caps mb-1.5">
                 {ui("Email address")}</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                <Mail className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3.5" />
                 <input
                   type="email" id="login-email" name="email" autoComplete="email" dir="ltr"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@domain.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:ring-2 focus-visible:ring-indigo-500 focus:border-neutral-900 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="login-password" className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-password" className="block text-xs font-semibold text-neutral-700 uppercase tracking-caps mb-1.5">
                 {ui("Password")}</label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3.5" />
+                <Lock className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3.5" />
                 <input
                   type="password" id="login-password" name="password" autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-sm focus:ring-2 focus-visible:ring-indigo-500 focus:border-neutral-900 transition-colors"
                 />
               </div>
             </div>
@@ -91,7 +91,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-sm font-semibold shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             >
               {isSubmitting ? (
                 <>
@@ -110,6 +110,6 @@ export const LoginPage: React.FC = () => {
 
         </div>
       </div>
-    </div>
+    </main>
   );
 };

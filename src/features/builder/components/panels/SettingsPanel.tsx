@@ -91,12 +91,12 @@ export const SettingsPanel: React.FC = () => {
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
+            <h2 className="font-bold text-sm text-neutral-900 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>{ui("Membership & Subscription Plan")}</span>
-            </h3>
+            </h2>
             <p className="text-xs text-neutral-500 mt-0.5">
-              {ui("Current tier:")}<strong className="uppercase font-mono text-neutral-900">{profile.plan || 'free'}</strong>
+              {ui("Current tier:")}<strong className="uppercase tracking-caps font-mono text-neutral-900">{profile.plan || 'free'}</strong>
             </p>
           </div>
           <span className="px-3 py-1 bg-neutral-100 text-neutral-800 text-xs font-mono font-bold rounded-xl border border-neutral-200">
@@ -121,7 +121,7 @@ export const SettingsPanel: React.FC = () => {
             <button
               onClick={() => handleUpgradePlan('free')}
               disabled={(profile.plan || 'free') === 'free'}
-              className="mt-3 py-1.5 px-3 rounded-lg border border-neutral-300 text-center font-semibold disabled:opacity-50 cursor-pointer hover:border-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 transition-colors"
+              className="mt-3 py-1.5 px-3 rounded-lg border border-neutral-300 text-center font-semibold disabled:opacity-50 cursor-pointer hover:border-neutral-900 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors"
             >
               {(profile.plan || 'free') === 'free' ? ui("Current Plan") : ui("Downgrade")}
             </button>
@@ -133,14 +133,14 @@ export const SettingsPanel: React.FC = () => {
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-neutral-900">{ui("Pro")}</span>
-                <span className="text-[10px] bg-amber-100 text-amber-800 font-mono font-bold px-1.5 py-0.5 rounded">{ui("POPULAR")}</span>
+                <span className="text-[11px] bg-amber-100 text-amber-800 font-mono font-bold px-1.5 py-0.5 rounded">{ui("POPULAR")}</span>
               </div>
               <div className="text-neutral-500 text-[11px] mt-0.5">{ui("Custom domain and branding controls")}</div>
             </div>
             <button
               onClick={() => handleUpgradePlan('pro')}
               disabled={profile.plan === 'pro'}
-              className="mt-3 py-1.5 px-3 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-center font-semibold disabled:opacity-50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 transition-colors"
+              className="mt-3 py-1.5 px-3 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-center font-semibold disabled:opacity-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors"
             >
               {profile.plan === 'pro' ? ui("Current Plan") : ui("Select Pro")}
             </button>
@@ -156,7 +156,7 @@ export const SettingsPanel: React.FC = () => {
             <button
               onClick={() => handleUpgradePlan('studio')}
               disabled={profile.plan === 'studio'}
-              className="mt-3 py-1.5 px-3 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-center font-semibold disabled:opacity-50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 transition-colors"
+              className="mt-3 py-1.5 px-3 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-center font-semibold disabled:opacity-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors"
             >
               {profile.plan === 'studio' ? ui("Current Plan") : ui("Select Studio")}
             </button>
@@ -168,13 +168,13 @@ export const SettingsPanel: React.FC = () => {
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-sm text-neutral-900">{ui("White-Label Branding")}</h3>
+            <h2 className="font-bold text-sm text-neutral-900">{ui("White-Label Branding")}</h2>
             <p className="text-xs text-neutral-500 mt-0.5">
               {ui("Remove the \"Made with RALOA\" badge from your bio page and footer.")}
             </p>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO FEATURE")}
             </span>
           ) : (
@@ -189,7 +189,7 @@ export const SettingsPanel: React.FC = () => {
                   console.error('Failed to update white label setting', err);
                 }
               }}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 profile.hideBranding ? 'bg-emerald-600' : 'bg-neutral-200'
               }`}
               role="switch"
@@ -204,7 +204,7 @@ export const SettingsPanel: React.FC = () => {
           )}
         </div>
         {profile.plan === 'free' && (
-          <p className="text-[11px] text-neutral-400">
+          <p className="text-[11px] text-neutral-600">
             {ui("Upgrade to Pro or Studio to completely remove all RALOA branding badges.")}
           </p>
         )}
@@ -214,17 +214,17 @@ export const SettingsPanel: React.FC = () => {
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-sm text-neutral-900">{ui("Analytics & Retargeting Pixels")}</h3>
+            <h2 className="font-bold text-sm text-neutral-900">{ui("Analytics & Retargeting Pixels")}</h2>
             <p className="text-xs text-neutral-500 mt-0.5">
               {ui("Connect your Google Analytics 4 Measurement ID and Meta Pixel to track visitors and run retargeting ads.")}
             </p>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO FEATURE")}
             </span>
           ) : (
-            <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {ui("ACTIVE")}
             </span>
           )}
@@ -244,7 +244,7 @@ export const SettingsPanel: React.FC = () => {
               placeholder={ui("G-XXXXXXXXXX")}
               className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
             />
-            <p className="text-[10px] text-neutral-400">{ui("Found in GA4 Admin > Data Streams > Measurement ID")}</p>
+            <p className="text-[11px] text-neutral-600">{ui("Found in GA4 Admin > Data Streams > Measurement ID")}</p>
           </div>
 
           <div className="space-y-1.5">
@@ -260,7 +260,7 @@ export const SettingsPanel: React.FC = () => {
               placeholder={ui("e.g. 123456789012345")}
               className="w-full text-xs font-mono p-2.5 rounded-xl border border-neutral-200 bg-neutral-50 focus:bg-neutral-50 focus:border-neutral-900 outline-none transition-colors disabled:opacity-50"
             />
-            <p className="text-[10px] text-neutral-400">{ui("Found in Meta Events Manager > Data Sources")}</p>
+            <p className="text-[11px] text-neutral-600">{ui("Found in Meta Events Manager > Data Sources")}</p>
           </div>
         </div>
 
@@ -274,7 +274,7 @@ export const SettingsPanel: React.FC = () => {
               type="button"
               disabled={isSavingPixels}
               onClick={handleSavePixels}
-              className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               {isSavingPixels ? ui("Saving...") : ui("Save Tracking IDs")}
             </button>
@@ -290,18 +290,18 @@ export const SettingsPanel: React.FC = () => {
               <Globe2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-neutral-900">{ui("Custom Domain")}</h3>
+              <h2 className="font-bold text-sm text-neutral-900">{ui("Custom Domain")}</h2>
               <p className="text-xs text-neutral-500 mt-0.5">
                 {ui("Link a verified domain or subdomain (e.g.")}<span className="font-mono">links.yourbrand.com</span>{ui(") after your hosting provider provisions HTTPS.")}
               </p>
             </div>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO / STUDIO")}
             </span>
           ) : (
-            <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {profile.customDomainVerified ? ui("DNS VERIFIED") : ui("SETUP REQUIRED")}
             </span>
           )}
@@ -407,18 +407,18 @@ export const SettingsPanel: React.FC = () => {
               <Code className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-neutral-900">{ui("Custom CSS & Custom Webfonts")}</h3>
+              <h2 className="font-bold text-sm text-neutral-900">{ui("Custom CSS & Custom Webfonts")}</h2>
               <p className="text-xs text-neutral-500 mt-0.5">
                 {ui("Custom styles are limited to the public page; font stylesheets must use Google Fonts.")}
               </p>
             </div>
           </div>
           {profile.plan === 'free' ? (
-            <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-md">
               {ui("PRO / STUDIO")}
             </span>
           ) : (
-            <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
+            <span className="text-[11px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-md">
               {ui("ACTIVE")}
             </span>
           )}
@@ -446,7 +446,7 @@ export const SettingsPanel: React.FC = () => {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label htmlFor="settings-custom-css" className="text-xs font-semibold text-neutral-800">{ui("Custom CSS Overrides")}</label>
-              <span className="text-[10px] font-mono text-neutral-400">{ui("Scoped to #public-bio-view")}</span>
+              <span className="text-[11px] font-mono text-neutral-600">{ui("Scoped to #public-bio-view")}</span>
             </div>
             <textarea
               id="settings-custom-css"
@@ -483,7 +483,7 @@ export const SettingsPanel: React.FC = () => {
       {/* Public Page Controls */}
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
         <div>
-          <h3 className="font-bold text-sm text-neutral-900">{ui('Public Page Controls')}</h3>
+          <h2 className="font-bold text-sm text-neutral-900">{ui('Public Page Controls')}</h2>
           <p className="text-xs text-neutral-500 mt-0.5">{ui('Control how your page appears when shared and what visitors see in the background.')}</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -633,7 +633,7 @@ export const SettingsPanel: React.FC = () => {
               onChange={e => setPageRedirectUntilInput(e.target.value)}
               className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 p-2.5 text-xs font-normal text-neutral-900"
             />
-            <span className="mt-1 block text-[10px] font-normal text-neutral-500">
+            <span className="mt-1 block text-[11px] font-normal text-neutral-500">
               {ui('Times use this browser timezone and are saved as UTC instants. The redirect expires at the selected time.')}
             </span>
           </label>
@@ -657,7 +657,7 @@ export const SettingsPanel: React.FC = () => {
       {/* Duplicate Profile and Form Submissions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
-          <h3 className="font-bold text-sm text-neutral-900">{ui('Duplicate this profile')}</h3>
+          <h2 className="font-bold text-sm text-neutral-900">{ui('Duplicate this profile')}</h2>
           <p className="text-xs text-neutral-500">{ui('Create another profile with the same content and design, then choose a new handle.')}</p>
           <button
             type="button"
@@ -685,7 +685,7 @@ export const SettingsPanel: React.FC = () => {
         <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="font-bold text-sm text-neutral-900">{ui('Form submissions')}</h3>
+              <h2 className="font-bold text-sm text-neutral-900">{ui('Form submissions')}</h2>
               <p className="text-xs text-neutral-500">
                 {formSubmissionTotal ? `${formSubmissionTotal} ${ui('stored responses')}` : ui('No form responses yet.')}
               </p>
@@ -739,7 +739,7 @@ export const SettingsPanel: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-semibold text-neutral-900">{item.formTitle}</p>
-                      <time className="font-mono text-neutral-400" dateTime={new Date(item.createdAt).toISOString()}>
+                      <time className="font-mono text-neutral-600" dateTime={new Date(item.createdAt).toISOString()}>
                         {new Date(item.createdAt).toLocaleString()}
                       </time>
                     </div>

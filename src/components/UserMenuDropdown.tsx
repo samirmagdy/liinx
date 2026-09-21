@@ -36,7 +36,7 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
   >
     {/* User Info Header */}
     <div className="px-3.5 py-2.5 border-b border-neutral-100">
-      <div className="text-[11px] text-neutral-400 font-medium">
+      <div className="text-[11px] text-neutral-600 font-medium">
         {ui('Logged in')}
       </div>
       <div className="text-xs font-bold text-neutral-900 truncate font-mono">
@@ -57,7 +57,7 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
         role="menuitem"
         className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-neutral-700 hover:bg-neutral-50 hover:text-neutral-950 transition-colors"
       >
-        <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
+        <ExternalLink className="w-3.5 h-3.5 text-neutral-500" />
         <span>{ui('View Live Bio')}</span>
       </Link>
 
@@ -77,7 +77,7 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
         role="menuitem"
         className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-neutral-700 hover:bg-neutral-50 hover:text-neutral-950 transition-colors"
       >
-        <Settings className="w-3.5 h-3.5 text-neutral-400" />
+        <Settings className="w-3.5 h-3.5 text-neutral-500" />
         <span>{ui('Account Settings')}</span>
       </Link>
     </div>
@@ -136,7 +136,7 @@ export const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label={`${ui('Logged in')}: @${user.username}`}
-        className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-neutral-200/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+        className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-neutral-200/80 focus-visible:ring-2 focus-visible:ring-indigo-500 ${
           isOpen
             ? 'bg-neutral-900 text-white shadow-xs border-neutral-900'
             : 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-900'

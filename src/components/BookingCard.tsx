@@ -32,6 +32,6 @@ export function BookingCard({ block, theme, previewOnly = false }: { block: Book
     {open && failed && <p role="alert" className="text-sm">{ar ? 'تعذّر تحميل أداة الحجز هنا. افتح Calendly في نافذة جديدة.' : 'Calendly could not load here. Open it in a new tab instead.'}</p>}
     {open && !failed && <iframe key={url} src={url} onLoad={() => { setLoaded(true); setFailed(false); }} onError={() => { setLoaded(false); setFailed(true); }} title={ar ? 'حجز موعد عبر Calendly' : 'Book with Calendly'} aria-busy={!loaded} className="w-full max-w-full border-0 rounded-xl" style={{ backgroundColor: theme.cardBg, height: 'min(700px, 85svh)', minHeight: 420 }} />}
     {open && !failed && <p className="text-xs">{ar ? 'لا يكتمل الحجز إلا بعد تأكيد Calendly. يمكنك استخدام النافذة الجديدة إذا تعذّر التمرير هنا.' : 'Your appointment is booked only after Calendly confirms it. Use a new tab if scrolling here is difficult.'}</p>}
-    <a href={url} target="_blank" rel="noopener noreferrer" className="block underline text-sm py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-current">{ar ? 'افتح Calendly في نافذة جديدة' : 'Open Calendly in a new tab'}</a>
+    <a href={url} target="_blank" rel="noopener noreferrer" className="block underline text-sm py-2 focus-visible:ring-2 focus-visible:ring-current">{ar ? 'افتح Calendly في نافذة جديدة' : 'Open Calendly in a new tab'}</a>
   </section>;
 }

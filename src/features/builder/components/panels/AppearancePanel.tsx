@@ -5,6 +5,15 @@ import { type ThemeConfig } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useBuilder } from '../../context/BuilderContext';
 
+const ACCENT_COLORS = [
+  { hex: '#B45309', name: 'Amber' },
+  { hex: '#3B82F6', name: 'Blue' },
+  { hex: '#EC4899', name: 'Pink' },
+  { hex: '#10B981', name: 'Emerald' },
+  { hex: '#0F172A', name: 'Navy ink' },
+  { hex: '#8B5CF6', name: 'Violet' },
+];
+
 export const AppearancePanel: React.FC = () => {
   const { tr: ui } = useUiLanguage();
   const {
@@ -33,7 +42,7 @@ export const AppearancePanel: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm text-neutral-900">{ui("Curated Visual Presets")}</h3>
+          <h2 className="font-bold text-sm text-neutral-900">{ui("Curated Visual Presets")}</h2>
           {previousCustomTheme && (
             <button
               type="button"
@@ -55,7 +64,7 @@ export const AppearancePanel: React.FC = () => {
             <button
               key={th.id}
               onClick={() => onSelectPreset(th)}
-              className={`p-3.5 rounded-xl border text-start flex items-center justify-between transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`p-3.5 rounded-xl border text-start flex items-center justify-between transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 customTheme.id === th.id 
                   ? 'border-neutral-900 ring-2 ring-neutral-900/10 shadow-sm bg-neutral-50' 
                   : 'border-neutral-200 hover:border-neutral-400'
@@ -68,10 +77,10 @@ export const AppearancePanel: React.FC = () => {
                 />
                 <div>
                   <p className="font-bold text-xs text-neutral-900">{th.name}</p>
-                  <p className="text-[10px] text-neutral-500 font-mono capitalize">{th.fontFamily} {ui("font")}</p>
+                  <p className="text-[11px] text-neutral-500 font-mono capitalize">{th.fontFamily} {ui("font")}</p>
                 </div>
               </div>
-              <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${th.isDark ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-900'}`}>
+              <span className={`text-[11px] font-mono px-2 py-0.5 rounded ${th.isDark ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-900'}`}>
                 {th.isDark ? ui("Dark") : ui("Light")}
               </span>
             </button>
@@ -81,7 +90,7 @@ export const AppearancePanel: React.FC = () => {
 
       {/* Geometry & Radius Control */}
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
-        <h3 className="font-bold text-sm text-neutral-900">{ui("Card Geometry & Accent Tint")}</h3>
+        <h2 className="font-bold text-sm text-neutral-900">{ui("Card Geometry & Accent Tint")}</h2>
         
         <div className="grid grid-cols-4 gap-2">
           {(['none', 'md', 'xl', 'full'] as const).map((rad) => (
@@ -90,7 +99,7 @@ export const AppearancePanel: React.FC = () => {
               onClick={() => {
                 updateThemeOverride({ cardRadius: rad });
               }}
-              className={`py-2 px-3 border rounded-xl text-xs font-semibold capitalize transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`py-2 px-3 border rounded-xl text-xs font-semibold capitalize transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 customTheme.cardRadius === rad 
                   ? 'border-neutral-900 bg-neutral-900 text-white' 
                   : 'border-neutral-200 bg-neutral-50 text-neutral-900 hover:bg-neutral-100'
@@ -102,19 +111,30 @@ export const AppearancePanel: React.FC = () => {
         </div>
 
         <div className="pt-2">
-          <span className="block text-xs font-semibold text-[#71717A] mb-2">{ui("Brand Accent Color")}</span>
-          <div className="flex items-center gap-2.5">
-            {['#B45309', '#3B82F6', '#EC4899', '#10B981', '#18181B', '#8B5CF6'].map((col) => (
+          <span className="block text-xs font-semibold text-neutral-600 mb-2">{ui("Brand Accent Color")}</span>
+          <div className="flex items-center gap-0.5">
+            {ACCENT_COLORS.map(({ hex, name }) => (
               <button
-                key={col}
+                key={hex}
+                type="button"
+                aria-pressed={customTheme.accentColor === hex}
+                title={name}
+                aria-label={name}
                 onClick={() => {
-                  updateThemeOverride({ accentColor: col });
+                  updateThemeOverride({ accentColor: hex });
                 }}
-                className={`w-8 h-8 rounded-full border transition-transform cursor-pointer ${
-                  customTheme.accentColor === col ? 'ring-2 ring-black scale-110' : 'opacity-80 hover:opacity-100'
+                className={`grid h-11 w-11 cursor-pointer place-items-center rounded-full transition-transform ${
+                  customTheme.accentColor === hex ? 'scale-100' : 'opacity-80 hover:opacity-100'
                 }`}
-                style={{ backgroundColor: col }}
-              />
+              >
+                <span
+                  aria-hidden="true"
+                  className={`h-8 w-8 rounded-full border border-neutral-300 ${
+                    customTheme.accentColor === hex ? 'ring-2 ring-neutral-900 ring-offset-1' : ''
+                  }`}
+                  style={{ backgroundColor: hex }}
+                />
+              </button>
             ))}
           </div>
         </div>

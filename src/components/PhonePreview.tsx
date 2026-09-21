@@ -106,7 +106,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
             <button 
               onClick={handleShare}
               aria-label={ui("Share bio link")}
-              className="p-1.5 rounded-full hover:bg-neutral-900/10 dark:hover:bg-neutral-100/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              className="grid min-h-11 min-w-11 place-items-center rounded-full hover:bg-neutral-900/10 dark:hover:bg-neutral-100/10 transition-colors"
               title={ui("Copy bio link")}
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -188,7 +188,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           <div className="pt-2 pb-6 text-center">
             <a 
               href="#builder" 
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-wider hover:opacity-100 transition-opacity bg-neutral-100 dark:bg-neutral-50/5 border border-neutral-200 dark:border-white/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-100 px-3 font-mono text-xs tracking-wider transition-opacity hover:opacity-100 dark:border-white/10 dark:bg-neutral-50/5 cursor-pointer"
               style={{ backgroundColor: theme.cardBg, color: theme.cardText, borderColor: getBorderColor(theme.cardBorder, 'rgba(0,0,0,0.15)') }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

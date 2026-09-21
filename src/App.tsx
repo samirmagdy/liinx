@@ -24,6 +24,7 @@ import { type CreatorProfile, type ThemeConfig } from './types';
 import { api } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
+import { SkipLink } from './components/SkipLink';
 import { ProductFeedbackProvider } from './components/ProductFeedback';
 import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
@@ -57,7 +58,7 @@ function HomePage() {
   return (
     <div className="marketing-home min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="home" onClaimClick={handleClaimUsername} />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <Hero
           onClaimUsername={handleClaimUsername}
           onOpenStudio={handleOpenStudio}
@@ -117,7 +118,7 @@ function StudioPage() {
     return (
       <div className="min-h-screen flex flex-col bg-white text-neutral-900">
         <Navbar activeView="builder" />
-        <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 text-center animate-fade-in">
+        <main id="main-content" tabIndex={-1} className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 text-center animate-fade-in">
           <div className="w-16 h-16 rounded-3xl bg-neutral-100 border border-neutral-200/80 flex items-center justify-center mb-6 shadow-xs text-neutral-900">
             <Lock className="w-7 h-7 text-neutral-800" />
           </div>
@@ -130,14 +131,14 @@ function StudioPage() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => setLocation('/login')}
-              className="px-6 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors shadow-xs cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 flex items-center gap-2"
             >
               <span>{tr('Sign In')}</span>
               <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </button>
             <button
               onClick={() => setLocation('/register')}
-              className="px-6 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="px-6 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold hover:bg-neutral-100 text-neutral-900 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               {tr('Create an account')}
             </button>
@@ -151,7 +152,7 @@ function StudioPage() {
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="builder" />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <Suspense fallback={<LoadingScreen message={tr('Loading your profile…')} submessage="Preparing your creative studio" fullscreen={false} />}>
           <BuilderStudio
             onViewFullscreen={(profile, theme) => {
@@ -178,7 +179,7 @@ function TemplatesPage() {
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="templates" />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <TemplatesSection headingLevel={1} onSelectTemplate={handleSelectTemplate} />
         <ComparisonSection />
       </main>
@@ -205,7 +206,7 @@ function PricingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="pricing" />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <PricingSection headingLevel={1} onSelectPlan={handleSelectPlan} />
         <ComparisonSection />
         <FaqSection />
@@ -232,7 +233,7 @@ interface ErrorBoundaryState {
 function CrashFallback() {
   const { tr } = useLanguage();
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-white text-neutral-900">
+    <main id="main-content" tabIndex={-1} className="min-h-screen flex flex-col items-center justify-center p-6 bg-white text-neutral-900">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="w-16 h-16 rounded-3xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto">
           <AlertTriangle className="w-7 h-7 text-red-600" />
@@ -243,7 +244,7 @@ function CrashFallback() {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
-            className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 focus-visible:ring-offset-2"
+            className="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-black transition-colors flex items-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             onClick={() => window.location.reload()}
           >
             <RotateCw className="w-4 h-4" />
@@ -325,6 +326,7 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
       <LanguageProvider initialLanguage={language}>
         <CapabilitiesProvider>
           <AuthProvider>
+          <SkipLink />
           <ProductFeedbackProvider>
           <div className="relative min-h-screen">
             <div className="relative z-10">

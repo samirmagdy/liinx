@@ -31,7 +31,7 @@ export const AddBlockHeader: React.FC<AddBlockHeaderProps> = ({
         <label htmlFor="add-block-search-input" className="sr-only">
           {ui("Search blocks")}
         </label>
-        <Search className="w-4 h-4 text-neutral-400 absolute start-3 pointer-events-none" />
+        <Search className="w-4 h-4 text-neutral-500 absolute start-3 pointer-events-none" />
         <input
           id="add-block-search-input"
           name="addBlockSearch"
@@ -40,14 +40,14 @@ export const AddBlockHeader: React.FC<AddBlockHeaderProps> = ({
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           placeholder={ui("Search block types (e.g. video, form, event)...")}
-          className="w-full ps-9 pe-8 py-2 text-xs rounded-xl bg-white border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900/10"
+          className="w-full ps-9 pe-8 py-2 text-xs rounded-xl bg-white border border-neutral-200 text-neutral-900 placeholder:text-neutral-500 focus:border-neutral-900 focus-visible:ring-1 focus-visible:ring-indigo-500"
         />
         {searchQuery && (
           <button
             type="button"
             aria-label={ui("Clear search")}
             onClick={() => onSearchChange('')}
-            className="absolute end-2.5 p-0.5 rounded-full text-neutral-400 hover:text-neutral-700 cursor-pointer"
+            className="absolute end-2.5 p-0.5 rounded-full text-neutral-600 hover:text-neutral-700 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>

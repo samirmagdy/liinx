@@ -88,7 +88,7 @@ export const HeroFeatureShowcase: React.FC<HeroFeatureShowcaseProps> = ({
               data-hero-feature
               type="button"
               onClick={() => onSelectFeature(badge.id, badge.profileIndex)}
-              className={`group text-start py-3 border-b border-neutral-200 transition-colors cursor-pointer flex items-start gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              className={`group text-start py-3 border-b border-neutral-200 transition-colors cursor-pointer flex items-start gap-3 focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 isActive
                   ? 'text-neutral-950'
                   : 'text-neutral-700 hover:text-neutral-950'

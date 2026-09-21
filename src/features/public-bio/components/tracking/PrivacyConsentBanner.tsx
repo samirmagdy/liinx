@@ -34,14 +34,14 @@ export const PrivacyConsentBanner: React.FC<PrivacyConsentBannerProps> = ({
         <button
           type="button"
           onClick={() => onConsentChange('denied')}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-semibold hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+          className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-semibold hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-neutral-900/30"
         >
           {ui('Reject optional analytics')}
         </button>
         <button
           type="button"
           onClick={() => onConsentChange('granted')}
-          className="rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+          className="rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white hover:bg-black focus-visible:ring-2 focus-visible:ring-neutral-900/30"
         >
           {ui('Allow optional analytics')}
         </button>

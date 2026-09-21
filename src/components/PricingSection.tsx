@@ -49,9 +49,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               {ar ? 'ابدأ مجاناً. طوّر عند الحاجة.' : 'Start free. Upgrade when ready.'}
             </Heading>
             <p className="text-base text-neutral-600 leading-relaxed text-pretty">
-              {ar
-                ? 'قارن الميزات المتاحة في كل خطة قبل الترقية.'
-                : 'Compare the features included in each plan before upgrading.'}
+              {t.pricingSection.subtitle}
             </p>
           </div>
         </Reveal>
@@ -64,7 +62,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                 key={value}
                 aria-pressed={interval === value}
                 onClick={() => setInterval(value)}
-                className={`px-5 py-2 min-h-[40px] rounded-full text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+                className={`px-5 py-2 min-h-[40px] rounded-full text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                   interval === value
                     ? 'bg-neutral-900 text-white shadow-xs'
                     : 'text-neutral-600 hover:text-neutral-900'
@@ -72,7 +70,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               >
                 <span>{value === 'month' ? (ar ? 'شهري' : 'Monthly') : (ar ? 'سنوي' : 'Annual')}</span>
                 {value === 'year' && (
-                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+                  <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
                     interval === 'year'
                       ? 'bg-indigo-400 text-neutral-950'
                       : 'bg-indigo-100 text-indigo-800'
@@ -101,6 +99,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               ar={ar}
               currency={currency}
               pending={pending}
+              titleTag={headingLevel === 1 ? 'h2' : 'h3'}
               onSelectPlan={async (planId) => {
                 setPending(planId);
                 setError(false);

@@ -6,6 +6,14 @@ import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageCo
 import type { CreatorPage } from '../types';
 import { buildQrTargetUrl } from '../utils/qr';
 
+const QR_TINTS = [
+  { hex: '#0F172A', name: 'Navy ink' },
+  { hex: '#B45309', name: 'Amber' },
+  { hex: '#2563EB', name: 'Blue' },
+  { hex: '#7C3AED', name: 'Violet' },
+  { hex: '#047857', name: 'Emerald' },
+];
+
 interface QrCodeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,7 +35,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
 }) => {
   const { tr: ui } = useUiLanguage();
   const [copied, setCopied] = useState(false);
-  const [qrColor, setQrColor] = useState('#111315');
+  const [qrColor, setQrColor] = useState('#0F172A');
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState('');
   const [imageFailed, setImageFailed] = useState(false);
@@ -101,7 +109,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
           aria-label={ui("Close modal")}
         >
           <X className="w-5 h-5" />
@@ -116,7 +124,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
             {ui("Profile QR code")}</h3>
           <p className="text-xs text-neutral-500 mt-0.5">
             {lang === 'ar' ? `شارك صفحة ${displayName} عبر رمز QR` : `Share ${displayName}'s page with a QR code`}</p>
-          <p className="text-[10px] leading-relaxed text-neutral-500 mt-2">
+          <p className="text-[11px] leading-relaxed text-neutral-500 mt-2">
             {ui("This is a profile QR code. Only the selected public URL is sent to the QR image provider.")}
           </p>
         </div>
@@ -129,7 +137,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
               name="targetPage"
               value={targetPage ? (targetPage.isHome ? 'home' : targetPage.slug) : 'home'}
               onChange={event => setSelectedPageSlug(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-normal text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+              className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-normal text-neutral-900 focus-visible:ring-2 focus-visible:ring-neutral-900/30"
               aria-label={ui("QR target")}
             >
               {publishedPages.map(page => <option key={page.id} value={page.isHome ? 'home' : page.slug}>{page.isHome ? ui('Home') : page.title}</option>)}
@@ -147,6 +155,8 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
             <img
               src={qrApiUrl}
               alt={`QR code for ${profileUrl}`}
+              width={192}
+              height={192}
               onError={() => { setImageFailed(true); setError(ui("The QR image provider is unavailable. Please retry later.")); }}
               className="w-48 h-48 object-contain rounded-lg"
             />
@@ -158,20 +168,28 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
 
         {/* Color Palette Tint Picker */}
         <div className="flex items-center justify-between px-2 mb-6">
-          <span className="text-xs font-medium text-neutral-500">{ui("QR Tint:")}</span>
-          <div className="flex items-center gap-2">
-            {['#111315', '#B45309', '#2563EB', '#7C3AED', '#047857'].map((c) => (
+          <span className="text-xs font-medium text-neutral-600">{ui("QR Tint:")}</span>
+          <div className="flex items-center gap-0.5">
+            {QR_TINTS.map(({ hex, name }) => (
               <button
                 type="button"
-                key={c}
-                onClick={() => setQrColor(c)}
-                className={`w-8 h-8 rounded-full border transition-transform cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
-                  qrColor === c ? 'ring-2 ring-neutral-900 ring-offset-1 scale-110' : 'opacity-70 hover:opacity-100'
+                key={hex}
+                onClick={() => setQrColor(hex)}
+                aria-pressed={qrColor === hex}
+                title={name}
+                aria-label={name}
+                className={`grid h-11 w-11 cursor-pointer place-items-center rounded-full transition-transform ${
+                  qrColor === hex ? 'scale-100' : 'opacity-70 hover:opacity-100'
                 }`}
-                style={{ backgroundColor: c }}
-                title={`Tint ${c}`}
-                aria-label={`Tint ${c}`}
-              />
+              >
+                <span
+                  aria-hidden="true"
+                  className={`h-8 w-8 rounded-full border border-neutral-300 ${
+                    qrColor === hex ? 'ring-2 ring-neutral-900 ring-offset-1' : ''
+                  }`}
+                  style={{ backgroundColor: hex }}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -180,7 +198,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
         <div className="grid grid-cols-2 gap-2.5">
 <button
               onClick={handleCopyLink}
-              className="py-2.5 px-3 rounded-xl bg-neutral-50 border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="py-2.5 px-3 rounded-xl bg-neutral-50 border border-neutral-300 hover:border-neutral-900 text-xs font-semibold text-neutral-900 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
             {copied ? (
               <>
@@ -198,7 +216,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
 <button
               onClick={handleDownload}
               disabled={downloading}
-              className="py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+              className="py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
             <Download className="w-4 h-4" />
             <span>{downloading ? ui("Downloading...") : ui("Download PNG")}</span>

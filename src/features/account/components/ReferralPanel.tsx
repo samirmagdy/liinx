@@ -21,7 +21,7 @@ export function ReferralPanel({ ar }: { ar: boolean }) {
   return (
     <section className="space-y-5" aria-labelledby="referrals-title">
       <div>
-        <div className="flex items-center gap-2 text-amber-700"><Gift className="h-4 w-4" /><span className="text-xs font-semibold uppercase tracking-wide">{ar ? 'دعوة المبدعين' : 'Creator referrals'}</span></div>
+        <div className="flex items-center gap-2 text-amber-700"><Gift className="h-4 w-4" /><span className="text-xs font-semibold uppercase tracking-caps">{ar ? 'دعوة المبدعين' : 'Creator referrals'}</span></div>
         <h2 id="referrals-title" className="mt-2 text-xl font-bold text-neutral-900">{ar ? 'شارك RALOA واحصل على Pro لمدة 90 يوماً' : 'Share RALOA. Earn 90 days of Pro.'}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600">
           {ar
@@ -35,7 +35,7 @@ export function ReferralPanel({ ar }: { ar: boolean }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-neutral-200 p-4">
           <div className="flex items-center gap-2 text-neutral-500"><Users className="h-4 w-4" /><span className="text-xs">{ar ? 'دعوات تم التحقق منها' : 'Verified referrals'}</span></div>
-          <p className="mt-2 text-2xl font-bold text-neutral-900">{progress}<span className="text-base font-medium text-neutral-400"> / {data.required}</span></p>
+          <p className="mt-2 text-2xl font-bold text-neutral-900">{progress}<span className="text-base font-medium text-neutral-600"> / {data.required}</span></p>
           <p className="mt-1 text-xs text-neutral-500">{ar ? `إجمالي التسجيلات عبر رابطك: ${data.total}` : `Total signups through your link: ${data.total}`}</p>
         </div>
         <ReferralRewardCard data={data} progress={progress} rewardDate={rewardDate} ar={ar} />

@@ -107,7 +107,7 @@ export const TrustProofSection: React.FC = () => {
                     href={`/@${showcase.username}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="justify-self-start sm:justify-self-end py-2 text-sm font-semibold text-neutral-800 hover:text-indigo-700 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="inline-flex min-h-11 items-center justify-self-start gap-1.5 text-sm font-semibold text-neutral-800 hover:text-indigo-700 transition-colors cursor-pointer sm:justify-self-end"
                   >
                     <span>{ar ? 'فتح النموذج' : 'Open sample'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />

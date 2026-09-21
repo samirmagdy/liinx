@@ -48,7 +48,7 @@ export const EventBlockView: React.FC<EventBlockViewProps> = ({
           href={actionHref}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          className="inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-current"
         >
           {ui('Event details')}
         </a>

@@ -481,7 +481,6 @@ app.use('/api', billingRouter);
 app.use('/api', contactRouter);
 app.use('/api/referrals', referralsRouter);
 app.use('/api/agency-referrals', agencyReferralsRouter);
-app.use('/api/agency-referrals', agencyReferralsRouter);
 
 // CSP Violation Reporting Endpoint
 app.post('/api/csp-report', sharedRateLimit({ name: 'csp-report', limit: 60, windowMs: 60000 }), (req, res) => {

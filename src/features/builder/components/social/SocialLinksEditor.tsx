@@ -51,7 +51,7 @@ const SocialLinkItem: React.FC<SocialLinkItemProps> = ({
         value={draftValue ?? soc.url}
         onChange={event => onDraftChange(event.target.value)}
         onBlur={event => onBlur(event.target.value)}
-        className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-neutral-600 truncate font-mono text-[11px] focus:border-neutral-900 focus:outline-none"
+        className="min-w-0 flex-1 rounded-lg border border-neutral-200 bg-white px-2 py-1 text-neutral-600 truncate font-mono text-[11px] focus:border-neutral-900"
       />
     </div>
     <button
@@ -59,7 +59,7 @@ const SocialLinkItem: React.FC<SocialLinkItemProps> = ({
       onClick={() => onMove(-1)}
       disabled={index === 0}
       aria-label={ui('Move social link up')}
-      className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+      className="grid min-h-11 min-w-11 place-items-center rounded-lg text-neutral-600 disabled:opacity-30"
     >
       ↑
     </button>
@@ -68,7 +68,7 @@ const SocialLinkItem: React.FC<SocialLinkItemProps> = ({
       onClick={() => onMove(1)}
       disabled={index === total - 1}
       aria-label={ui('Move social link down')}
-      className="rounded p-1 text-neutral-500 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+      className="grid min-h-11 min-w-11 place-items-center rounded-lg text-neutral-600 disabled:opacity-30"
     >
       ↓
     </button>
@@ -76,7 +76,7 @@ const SocialLinkItem: React.FC<SocialLinkItemProps> = ({
       type="button"
       onClick={onRemove}
       aria-label={`${ui('Remove social link')} ${soc.platform}`}
-      className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/30 rounded"
+      className="grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-lg text-rose-600 hover:text-rose-700"
       title={ui("Remove social link")}
     >
       <Trash2 className="w-3.5 h-3.5" />
@@ -125,7 +125,7 @@ export const SocialLinksEditor: React.FC = () => {
             />
           ))
         ) : (
-          <p className="text-[11px] text-neutral-400">{ui("No social links added yet.")}</p>
+          <p className="text-[11px] text-neutral-600">{ui("No social links added yet.")}</p>
         )}
       </div>
 
@@ -165,7 +165,7 @@ export const SocialLinksEditor: React.FC = () => {
         <button
           type="button"
           onClick={handleAddSocial}
-          className="px-3 py-1.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+          className="px-3 py-1.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           {ui("Add")}
         </button>

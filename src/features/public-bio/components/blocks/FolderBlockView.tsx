@@ -33,13 +33,13 @@ export const FolderBlockView: React.FC<FolderBlockViewProps> = ({
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={`folder-items-${block.id}`}
-        className="w-full p-4 flex items-center justify-between text-left hover:opacity-95 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current gap-2"
+        className="w-full p-4 flex items-center justify-between text-left hover:opacity-95 transition-opacity cursor-pointer focus-visible:ring-2 focus-visible:ring-current gap-2"
       >
         <div className="min-w-0 flex-1" dir="auto">
           <div className="flex items-center gap-2">
             <span className="font-bold text-sm sm:text-base truncate" dir="auto">{block.title}</span>
             <span
-              className="text-[10px] px-2 py-0.5 rounded-full font-mono shrink-0"
+              className="text-[11px] px-2 py-0.5 rounded-full font-mono shrink-0"
               style={{
                 backgroundColor: theme.isDark ? 'rgba(255,255,255,0.12)' : '#F5F5F5',
                 color: theme.cardText
@@ -97,7 +97,7 @@ export const FolderBlockView: React.FC<FolderBlockViewProps> = ({
                 href={trackingHref}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-xl block transition-colors hover:bg-neutral-100/5 dark:hover:bg-neutral-900/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+                className="p-3 rounded-xl block transition-colors hover:bg-neutral-100/5 dark:hover:bg-neutral-900/5 group focus-visible:ring-2 focus-visible:ring-current"
               >
                 {content}
               </a>

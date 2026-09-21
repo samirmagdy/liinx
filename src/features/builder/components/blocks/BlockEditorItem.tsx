@@ -63,28 +63,28 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
   const [richTextLinkUrl, setRichTextLinkUrl] = useState('');
 
   return (
-    <div id={"builder-block-" + block.id} tabIndex={-1} className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs space-y-3 hover:border-neutral-400 transition-all scroll-mt-24 focus:outline-none focus:ring-2 focus:ring-neutral-900">
+    <div id={"builder-block-" + block.id} tabIndex={-1} className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 shadow-xs space-y-3 hover:border-neutral-400 transition-all scroll-mt-24 focus:ring-2 focus:ring-neutral-900">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           {onToggleExpand && (
-            <button type="button" onClick={onToggleExpand} aria-label={isExpanded ? ui("Collapse block") : ui("Expand block")} className="p-0.5 rounded text-neutral-400 hover:text-black cursor-pointer">
+            <button type="button" onClick={onToggleExpand} aria-label={isExpanded ? ui("Collapse block") : ui("Expand block")} className="p-0.5 rounded text-neutral-600 hover:text-black cursor-pointer">
               {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
             </button>
           )}
-          <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-caps px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">
             {block.type}
           </span>
-          <span className="text-xs font-bold text-[#18181B] truncate">
+          <span className="text-xs font-bold text-neutral-900 truncate">
             {block.title || 'Untitled Block'}
           </span>
           {(block as LinkBlock).clicks !== undefined && (
-            <span className="text-[10px] font-mono text-emerald-600 font-semibold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-xs font-semibold text-emerald-800">
               <MousePointerClick className="w-3 h-3" />
               <span>{(block as LinkBlock).clicks} {ui("clicks")}</span>
             </span>
           )}
           {getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt, ui, lang) && (
-            <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+            <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
               getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt, ui, lang)?.color
             }`}>
               {getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt, ui, lang)?.label}
@@ -98,7 +98,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
             onClick={() => handleUpdateBlockField(block.id, 'visible', block.visible === false)}
             aria-label={ui(block.visible === false ? 'Show block' : 'Hide block')}
             title={ui(block.visible === false ? 'Show block' : 'Hide block')}
-            className={"p-1 rounded-lg transition-colors cursor-pointer " + (block.visible === false ? "text-amber-600 hover:text-amber-800" : "text-neutral-400 hover:text-black")}
+            className={"p-1 rounded-lg transition-colors cursor-pointer " + (block.visible === false ? "text-amber-600 hover:text-amber-800" : "text-neutral-600 hover:text-black")}
           >
             {block.visible === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           </button>
@@ -107,7 +107,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
             onClick={() => handleMoveBlock(index, 'up')}
             disabled={index === 0}
             aria-label={ui('Move block up')}
-            className="p-1 rounded-lg text-neutral-400 hover:text-black disabled:opacity-20 cursor-pointer"
+            className="p-1 rounded-lg text-neutral-600 hover:text-black disabled:opacity-20 cursor-pointer"
             title={ui("Move up")}
           >
             <ArrowUp className="w-3.5 h-3.5" />
@@ -117,7 +117,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
             onClick={() => handleMoveBlock(index, 'down')}
             disabled={index === visibleBlocks.length - 1}
             aria-label={ui('Move block down')}
-            className="p-1 rounded-lg text-neutral-400 hover:text-black disabled:opacity-20 cursor-pointer"
+            className="p-1 rounded-lg text-neutral-600 hover:text-black disabled:opacity-20 cursor-pointer"
             title={ui("Move down")}
           >
             <ArrowDown className="w-3.5 h-3.5" />
@@ -128,7 +128,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
             aria-label={ui('Move block to page')}
             value={(block as any).pageId || activePage?.id || ''}
             onChange={event => void handleMoveBlockToPage(block.id, event.target.value)}
-            className="max-w-28 rounded-lg border border-neutral-200 bg-white px-1 py-1 text-[10px] text-neutral-700"
+            className="max-w-28 rounded-lg border border-neutral-200 bg-white px-1 py-1 text-[11px] text-neutral-700"
           >
             {pages.map(page => <option key={page.id} value={page.id}>{page.title}</option>)}
           </select>
@@ -137,7 +137,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
             onClick={() => void handleDuplicateBlock(block.id)}
             aria-label={ui('Duplicate block')}
             title={ui('Duplicate block')}
-            className="rounded-lg p-1 text-neutral-400 hover:text-black"
+            className="rounded-lg p-1 text-neutral-600 hover:text-black"
           >
             <Copy className="h-3.5 w-3.5" />
           </button>
@@ -148,13 +148,13 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   handleDeleteBlock(block.id);
                   setConfirmDeleteBlockId(null);
                 }}
-                className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-700 text-white hover:bg-rose-800 transition-colors cursor-pointer"
+                className="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-700 text-white hover:bg-rose-800 transition-colors cursor-pointer"
               >
                 {ui("Confirm")}
               </button>
               <button
                 onClick={() => setConfirmDeleteBlockId(null)}
-                className="px-2 py-0.5 rounded text-[10px] font-semibold text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer"
+                className="px-2 py-0.5 rounded text-[11px] font-semibold text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer"
               >
                 {ui("Cancel")}
               </button>
@@ -233,7 +233,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
               placeholder="https://youtube.com/watch?v=..."
               className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-[11px] text-neutral-900"
             />
-            <p className="mt-1 text-[10px] font-normal text-neutral-500">
+            <p className="mt-1 text-[11px] font-normal text-neutral-500">
               {ui('Supported: YouTube watch, youtu.be, or Shorts URLs; Vimeo links; or direct HTTPS MP4, WebM, OGV, or MOV files. Other HTTPS URLs remain external fallback links. Playback is never started automatically.')}
             </p>
           </div>
@@ -341,12 +341,12 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                 <span>{ui("Link Scheduling & Time-Release")}</span>
               </span>
               {profile.plan === 'free' ? (
-                <span className="text-[9px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
+                <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
                   {ui("PRO FEATURE")}
                 </span>
               ) : (
                 getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt, ui, lang) && (
-                  <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                  <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded ${
                     getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt, ui, lang)?.color
                   }`}>
                     {getScheduleStatus((block as LinkBlock).startAt, (block as LinkBlock).endAt, ui, lang)?.label}
@@ -359,34 +359,34 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <span className="text-neutral-400 block mb-1">{ui("Publish (Start Date/Time):")}</span>
+                    <span className="text-neutral-600 block mb-1">{ui("Publish (Start Date/Time):")}</span>
                     <input
                       id={`block-start-date-${block.id}`}
                       name="blockStartDate"
                       type="datetime-local"
                       value={toDateTimeLocal((block as LinkBlock).startAt)}
                       onChange={(e) => handleUpdateBlockField(block.id, 'startAt', fromDateTimeLocal(e.target.value))}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-800 focus:outline-none focus:border-neutral-900 font-mono text-[11px]"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-800 focus:border-neutral-900 font-mono text-[11px]"
                     />
                   </div>
                   <div>
-                    <span className="text-neutral-400 block mb-1">{ui("Unpublish (End Date/Time):")}</span>
+                    <span className="text-neutral-600 block mb-1">{ui("Unpublish (End Date/Time):")}</span>
                     <input
                       id={`block-end-date-${block.id}`}
                       name="blockEndDate"
                       type="datetime-local"
                       value={toDateTimeLocal((block as LinkBlock).endAt)}
                       onChange={(e) => handleUpdateBlockField(block.id, 'endAt', fromDateTimeLocal(e.target.value))}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-800 focus:outline-none focus:border-neutral-900 font-mono text-[11px]"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-800 focus:border-neutral-900 font-mono text-[11px]"
                     />
                   </div>
                 </div>
-                <p className="text-[10px] leading-relaxed text-neutral-400 sm:col-span-2">
+                <p className="text-[11px] leading-relaxed text-neutral-600 sm:col-span-2">
                   {ui("Schedule times use this browser timezone and are saved as UTC instants. The block is available from its start until (but not including) its end time.")}
                 </p>
               </>
             ) : (
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-[11px] text-neutral-600">
                 {ui("Upgrade to Pro to automatically schedule links to go live and expire at specific dates and times.")}
               </p>
             )}
@@ -424,7 +424,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
               />
             </div>
           </div>
-          <p className="mt-1 text-[10px] text-neutral-500">
+          <p className="mt-1 text-[11px] text-neutral-500">
             {ui('Supported: Spotify track, album, playlist, artist, or episode URLs; Apple Music pages; SoundCloud tracks; or direct HTTPS MP3, WAV, OGG, M4A, or AAC files. Playback never starts automatically.')}
           </p>
         </>
@@ -443,7 +443,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
             placeholder="https://..."
             className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 outline-none focus:border-neutral-900 font-mono text-[11px] text-neutral-900"
           />
-          <p className="mt-1 text-[10px] font-normal text-neutral-500">
+          <p className="mt-1 text-[11px] font-normal text-neutral-500">
             {ui('Optional thumbnail. If it is unavailable, visitors see a neutral fallback. Remote video is hosted by the selected provider or media host; RALOA does not host these URLs.')}
           </p>
         </div>
@@ -497,11 +497,11 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                 {block.type === 'rich_text' && (
                   <>
                     <div className="mb-1 flex flex-wrap items-center gap-1">
-                      <button type="button" aria-label={ui('Bold selected text')} onClick={() => formatRichText('**')} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">B</button>
-                      <button type="button" aria-label={ui('Italic selected text')} onClick={() => formatRichText('*')} className="rounded border border-neutral-200 px-2 py-1 text-[10px] italic">I</button>
-                      <button type="button" aria-label={ui('Heading line')} onClick={() => formatRichText('## ')} className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-bold">H</button>
-                      <button type="button" aria-label={ui('Bulleted list line')} onClick={() => formatRichText('- ')} className="rounded border border-neutral-200 px-2 py-1 text-[10px]">•</button>
-                      <button type="button" aria-label={ui('Numbered list line')} onClick={() => formatRichText('1. ')} className="rounded border border-neutral-200 px-2 py-1 text-[10px]">1.</button>
+                      <button type="button" aria-label={ui('Bold selected text')} onClick={() => formatRichText('**')} className="rounded border border-neutral-200 px-2 py-1 text-[11px] font-bold">B</button>
+                      <button type="button" aria-label={ui('Italic selected text')} onClick={() => formatRichText('*')} className="rounded border border-neutral-200 px-2 py-1 text-[11px] italic">I</button>
+                      <button type="button" aria-label={ui('Heading line')} onClick={() => formatRichText('## ')} className="rounded border border-neutral-200 px-2 py-1 text-[11px] font-bold">H</button>
+                      <button type="button" aria-label={ui('Bulleted list line')} onClick={() => formatRichText('- ')} className="rounded border border-neutral-200 px-2 py-1 text-[11px]">•</button>
+                      <button type="button" aria-label={ui('Numbered list line')} onClick={() => formatRichText('1. ')} className="rounded border border-neutral-200 px-2 py-1 text-[11px]">1.</button>
                     </div>
                     <div className="mb-1 flex gap-1">
                       <input
@@ -511,7 +511,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                         value={richTextLinkUrl}
                         onChange={e => setRichTextLinkUrl(e.target.value)}
                         placeholder="https://..."
-                        className="min-w-0 flex-1 rounded border border-neutral-200 px-2 py-1 text-[10px] text-neutral-900"
+                        className="min-w-0 flex-1 rounded border border-neutral-200 px-2 py-1 text-[11px] text-neutral-900"
                       />
                       <button
                         type="button"
@@ -538,12 +538,12 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                             return;
                           }
                         }}
-                        className="rounded border border-neutral-200 px-2 py-1 text-[10px] font-semibold disabled:opacity-40"
+                        className="rounded border border-neutral-200 px-2 py-1 text-[11px] font-semibold disabled:opacity-40"
                       >
                         {ui('Link')}
                       </button>
                     </div>
-                    <p className="mb-1 text-[10px] text-neutral-500">
+                    <p className="mb-1 text-[11px] text-neutral-500">
                       {ui('Safe format: paragraphs, # headings, - or 1. lists, **bold**, *italic*, and [label](https://url). HTML is shown as text.')}
                     </p>
                   </>
@@ -676,7 +676,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     </select>
                   </label>
                 </div>
-                <p className="text-[10px] text-neutral-500">
+                <p className="text-[11px] text-neutral-500">
                   {ui('Informative images need alt text. Mark an image decorative when it adds no meaning. Uploading a replacement does not delete the previous asset.')}
                 </p>
               </div>
@@ -782,7 +782,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                   />
                 </label>
-                <p className="text-[10px] font-normal text-neutral-500 sm:col-span-2">
+                <p className="text-[11px] font-normal text-neutral-500 sm:col-span-2">
                   {ui('Date and time are displayed exactly as entered. Include the event timezone; RALOA does not convert times for visitors.')}
                 </p>
               </div>
@@ -801,7 +801,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     className="mt-1 min-h-16 w-full rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                   />
                 </label>
-                <p className="mt-1 text-[10px] font-normal text-neutral-500">
+                <p className="mt-1 text-[11px] font-normal text-neutral-500">
                   {ui('External release link only. RALOA does not complete a music-service pre-save or request authorization.')}
                 </p>
               </div>
@@ -853,10 +853,10 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     onChange={e => updateAdvanced('currency', e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3))}
                     maxLength={3}
                     placeholder={ui('e.g. USD')}
-                    className="mt-1 w-full uppercase rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
+                    className="mt-1 w-full uppercase tracking-caps rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                   />
                 </label>
-                <p className="text-[10px] font-normal text-neutral-500 sm:col-span-2">
+                <p className="text-[11px] font-normal text-neutral-500 sm:col-span-2">
                   {ui('Display-only price. RALOA does not process checkout, inventory, taxes, or payments.')}
                 </p>
               </div>
@@ -875,7 +875,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     className="mt-1 min-h-16 w-full rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                   />
                 </label>
-                <p className="mt-1 text-[10px] font-normal text-neutral-500">
+                <p className="mt-1 text-[11px] font-normal text-neutral-500">
                   {ui('External support link only. RALOA does not process tips or show earnings.')}
                 </p>
               </div>
@@ -895,7 +895,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     className="mt-1 w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                   />
                 </label>
-                <p className="text-[10px] font-normal text-neutral-500">
+                <p className="text-[11px] font-normal text-neutral-500">
                   {ui('Directions link only. No embedded map or device location request is used.')}
                 </p>
               </div>
@@ -945,7 +945,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                       placeholder="+966 50 123 4567"
                       className="mt-1 w-full rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                     />
-                    <span className="mt-1 block text-[10px] font-normal text-neutral-500">
+                    <span className="mt-1 block text-[11px] font-normal text-neutral-500">
                       {ui('Include country code; spaces, parentheses, and hyphens are allowed.')}
                     </span>
                   </label>
@@ -999,7 +999,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     </label>
                   </>
                 )}
-                <p className="text-[10px] font-normal text-neutral-500 sm:col-span-2">
+                <p className="text-[11px] font-normal text-neutral-500 sm:col-span-2">
                   {ui('This is a creator-published contact action, not a form. Visitors are not asked to submit data to RALOA.')}
                 </p>
               </div>
@@ -1068,7 +1068,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                     aria-describedby={`spacer-help-${block.id}`}
                     className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                   />
-                  <p id={`spacer-help-${block.id}`} className="mt-1 text-[10px] font-normal text-neutral-500">
+                  <p id={`spacer-help-${block.id}`} className="mt-1 text-[11px] font-normal text-neutral-500">
                     {ui(`Adds ${spacerHeight}px of intentional space. Normal block gaps are not added around this spacer.`)}
                   </p>
                 </div>
@@ -1091,7 +1091,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                   maxLength={128}
                   className="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900"
                 />
-                <p className="mt-1 text-[10px] font-normal text-neutral-500">
+                <p className="mt-1 text-[11px] font-normal text-neutral-500">
                   {ui('Content gates protect inline text only. They do not provide membership or identity verification.')}
                 </p>
               </div>
@@ -1114,7 +1114,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
               className="mt-1 w-full rounded border border-neutral-200 px-2 py-1.5 text-[11px] text-neutral-900"
             />
           </label>
-          <p className="text-[10px] text-neutral-500">
+          <p className="text-[11px] text-neutral-500">
             {ui('Folders are collapsible one-level link groups, not subpages. Nested folders are not supported.')}
           </p>
           <div className="flex items-center justify-between">
@@ -1157,7 +1157,7 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                 onClick={() => handleMoveFolderItem(block.id, item.id, -1)}
                 disabled={itemIndex === 0}
                 aria-label={ui('Move item up')}
-                className="rounded p-1 text-neutral-500 disabled:opacity-30"
+                className="grid min-h-11 min-w-11 place-items-center rounded-lg text-neutral-600 disabled:opacity-30"
               >
                 ↑
               </button>
@@ -1166,14 +1166,14 @@ export const BlockEditorItem: React.FC<BlockEditorItemProps> = ({ block, index, 
                 onClick={() => handleMoveFolderItem(block.id, item.id, 1)}
                 disabled={itemIndex === (block as FolderBlock).items.length - 1}
                 aria-label={ui('Move item down')}
-                className="rounded p-1 text-neutral-500 disabled:opacity-30"
+                className="grid min-h-11 min-w-11 place-items-center rounded-lg text-neutral-600 disabled:opacity-30"
               >
                 ↓
               </button>
               <button
                 type="button"
                 onClick={() => handleRemoveFolderItem(block.id, item.id)}
-                className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer"
+                className="grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-lg text-rose-600 hover:text-rose-700"
               >
                 <Trash2 className="w-3 h-3" />
               </button>

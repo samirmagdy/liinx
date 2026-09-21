@@ -35,7 +35,7 @@ export const MapBlockView: React.FC<MapBlockViewProps> = ({ block, theme }) => {
             target="_blank"
             rel="noreferrer"
             dir="ltr"
-            className="mt-3 inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            className="mt-3 inline-flex rounded-lg border px-3 py-2 text-sm font-semibold underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-current"
             aria-label={`${ui('Get directions to')} ${location}`}
           >
             {ui('Get directions')}

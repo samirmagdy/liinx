@@ -107,7 +107,7 @@ export function FeaturesPage() {
   return (
     <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="features" />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         {/* Hero Header */}
         <section className="max-w-6xl mx-auto px-6 pt-12 pb-8 space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{isRtl ? 'ميزات المنصة' : 'Platform features'}</p>
