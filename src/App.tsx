@@ -20,7 +20,6 @@ import { RegisterPage } from './pages/RegisterPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { AccountPage } from './pages/AccountPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
-import { type ThemeConfig } from './types';
 import { api } from './services/api';
 import { RESERVED_USERNAMES } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
@@ -30,6 +29,12 @@ import { LoadingScreen, BioSkeletonLoader } from './components/LoadingScreen';
 import { Lock, ArrowRight, AlertTriangle, RotateCw } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 import { languageForPath } from './utils/languagePaths';
+import {
+  clearFullscreenPreviewMark,
+  isFullscreenPreviewMarked,
+  readFullscreenPreviewTheme,
+  setFullscreenPreviewTheme
+} from './utils/previewSession';
 import { starterSitePath } from './utils/starterSites';
 import type { Language } from './config/i18n';
 
@@ -81,21 +86,24 @@ function HomePage() {
 }
 
 function PublicProfilePage({ username, pageSlug }: { username: string; pageSlug?: string }) {
-  const previewKey = `raloa-fullscreen-preview:${username.toLowerCase()}`;
-  const fullscreenPreview = window.sessionStorage.getItem(previewKey) === '1';
-  if (fullscreenPreview) window.sessionStorage.removeItem(previewKey);
-  const previewTheme = (() => {
-    try {
-      const raw = window.sessionStorage.getItem(`raloa-preview-theme:${username}`);
-      if (!raw) return undefined;
-      const parsed = JSON.parse(raw) as { theme?: ThemeConfig; createdAt?: number };
-      if (!parsed.createdAt || Date.now() - parsed.createdAt > 60_000 || !parsed.theme) return undefined;
-      return parsed.theme;
-    } catch {
-      return undefined;
-    }
-  })();
-  return <Suspense fallback={<BioSkeletonLoader />}><PublicBioView username={username} pageSlug={pageSlug} customTheme={previewTheme} previewOnly={fullscreenPreview} onBackToStudio={() => window.location.href = '/studio'} /></Suspense>;
+  // Latched for the lifetime of this mount and cleared once it has committed. Re-reading the
+  // tab-scoped flag on every render would hand a later render `previewOnly: false`, which is how the
+  // creator's own preview came to be counted as a visitor.
+  const [fullscreenPreview] = React.useState(() => isFullscreenPreviewMarked(username));
+  React.useEffect(() => {
+    if (fullscreenPreview) clearFullscreenPreviewMark(username);
+  }, [fullscreenPreview, username]);
+  return (
+    <Suspense fallback={<BioSkeletonLoader />}>
+      <PublicBioView
+        username={username}
+        pageSlug={pageSlug}
+        customTheme={readFullscreenPreviewTheme(username)}
+        previewOnly={fullscreenPreview}
+        onBackToStudio={() => window.location.href = '/studio'}
+      />
+    </Suspense>
+  );
 }
 
 function StudioPage() {
@@ -156,7 +164,11 @@ function StudioPage() {
         <Suspense fallback={<LoadingScreen message={tr('Loading your profile…')} submessage="Preparing your creative studio" fullscreen={false} />}>
           <BuilderStudio
             onViewFullscreen={(profile, theme) => {
-              window.sessionStorage.setItem(`raloa-preview-theme:${profile.username}`, JSON.stringify({ theme, createdAt: Date.now() }));
+              setFullscreenPreviewTheme(profile.username, theme);
+              // A preview step that only existed in this tab would vanish on another device, so the
+              // visit is recorded on the account. If the write fails the step stays unticked, which is
+              // the honest direction: nothing here claims a step the server did not store.
+              void api.studio.previewed().catch(() => {});
               setLocation(`/@${profile.username}`);
             }}
           />

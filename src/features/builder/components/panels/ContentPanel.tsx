@@ -8,6 +8,8 @@ import { BlockList } from '../blocks/BlockList';
 import { BookingEditor } from '../../../../components/BookingEditor';
 import { AvatarUploader } from './AvatarUploader';
 import { IdentityFields } from './IdentityFields';
+import { SetupChecklist } from './SetupChecklist';
+import { SetupMilestoneCard } from './SetupMilestoneCard';
 import { UsernameChangeDialog } from './UsernameChangeDialog';
 
 const USERNAME_PATTERN = /^[a-z0-9_]{3,30}$/;
@@ -49,6 +51,9 @@ export const ContentPanel: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <SetupMilestoneCard />
+      <SetupChecklist />
+
       {/* Profile Bio & Avatar Card */}
       <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">

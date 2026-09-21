@@ -1,73 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Plus, Download } from 'lucide-react';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useCapabilities } from '../../../../context/CapabilitiesContext';
 import { useBuilder } from '../../context/BuilderContext';
-import { BLOCK_CATALOG, type BlockCategory, type BlockCatalogItem } from './addBlockCatalog';
-import { BlockCatalogGrid } from './BlockCatalogGrid';
-import { AddBlockHeader } from './AddBlockHeader';
-
-function filterCatalog(catalog: BlockCatalogItem[], category: BlockCategory, query: string, ui: (k: string) => string): BlockCatalogItem[] {
-  const clean = query.trim().toLowerCase();
-  return catalog.filter(item => {
-    if (category !== 'all' && item.category !== category) return false;
-    if (!clean) return true;
-    return (
-      ui(item.titleKey).toLowerCase().includes(clean) ||
-      item.titleKey.toLowerCase().includes(clean) ||
-      ui(item.descKey).toLowerCase().includes(clean) ||
-      item.descKey.toLowerCase().includes(clean) ||
-      item.type.toLowerCase().includes(clean)
-    );
-  });
-}
+import { AddBlockPopover } from './AddBlockPopover';
 
 export const AddBlockMenu: React.FC = () => {
   const { tr: ui } = useUiLanguage();
   const { hasAnyImporter } = useCapabilities();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<BlockCategory>('all');
-
-  const {
-    showAddMenu,
-    setShowAddMenu,
-    handleAddLink,
-    handleAddHeader,
-    handleAddAudio,
-    handleAddVideo,
-    handleAddFolder,
-    handleAddNewsletter,
-    handleAddAdvancedBlock,
-    setShowImporterModal
-  } = useBuilder();
-
-  const handleSelectBlock = (item: BlockCatalogItem) => {
-    const actions: Record<string, () => void> = {
-      link: handleAddLink,
-      header: handleAddHeader,
-      audio: handleAddAudio,
-      video: handleAddVideo,
-      folder: handleAddFolder,
-      newsletter: handleAddNewsletter
-    };
-    if (actions[item.handlerKey]) {
-      actions[item.handlerKey]();
-    } else {
-      handleAddAdvancedBlock(item.type);
-    }
-    setShowAddMenu(false);
-    setSearchQuery('');
-  };
-
-  const filteredCatalog = useMemo(
-    () => filterCatalog(BLOCK_CATALOG, selectedCategory, searchQuery, ui),
-    [selectedCategory, searchQuery, ui]
-  );
+  const { showAddMenu, setShowAddMenu, setShowImporterModal } = useBuilder();
 
   return (
     <div className="flex flex-col sm:flex-row gap-3">
       <div className="flex-1 relative">
         <button
+          id="builder-add-block"
           onClick={() => setShowAddMenu(!showAddMenu)}
           className="w-full py-3.5 px-4 rounded-2xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
         >
@@ -75,24 +22,7 @@ export const AddBlockMenu: React.FC = () => {
           <span>{ui("Add New Link or Block to Profile")}</span>
         </button>
 
-        {showAddMenu && (
-          <div className="absolute top-full left-0 right-0 mt-2 p-3.5 bg-neutral-50 rounded-2xl border border-neutral-200 shadow-2xl z-20 flex flex-col gap-3 animate-fade-in max-h-[480px] overflow-hidden">
-            <AddBlockHeader
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              selectedCategory={selectedCategory}
-              onCategorySelect={setSelectedCategory}
-              ui={ui}
-            />
-
-            <BlockCatalogGrid
-              items={filteredCatalog}
-              searchQuery={searchQuery}
-              ui={ui}
-              onSelect={handleSelectBlock}
-            />
-          </div>
-        )}
+        {showAddMenu && <AddBlockPopover />}
       </div>
 
       <button

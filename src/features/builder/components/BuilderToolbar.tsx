@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import { useBuilder } from '../context/BuilderContext';
+import { useLivePreview } from '../hooks/useLivePreview';
 
 export const BuilderToolbar: React.FC = () => {
   const { tr: ui } = useUiLanguage();
@@ -29,10 +30,9 @@ export const BuilderToolbar: React.FC = () => {
     setQrModalOpen,
     copiedLink,
     handleCopyPublicLink,
-    customTheme,
-    onViewFullscreen,
     setActiveTab
   } = useBuilder();
+  const openLivePreview = useLivePreview();
 
   return (
     <div className="studio-toolbar bg-neutral-100 border-b border-neutral-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-18 z-30 shadow-2xs">
@@ -169,12 +169,7 @@ export const BuilderToolbar: React.FC = () => {
         </button>
 
         <button
-          onClick={async () => {
-            if (!queueRef.current?.dirty || (await queueRef.current.flush())) {
-              window.sessionStorage.setItem(`raloa-fullscreen-preview:${profile.username.toLowerCase()}`, '1');
-              onViewFullscreen(profile, customTheme);
-            }
-          }}
+          onClick={() => void openLivePreview()}
           className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition-colors active:scale-95 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
         >
           <Maximize2 className="w-3.5 h-3.5 text-amber-300" />

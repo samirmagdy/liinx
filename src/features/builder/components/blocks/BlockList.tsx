@@ -3,12 +3,12 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { useBuilder } from '../../context/BuilderContext';
 import { BlockEditorItem } from './BlockEditorItem';
+import { BlockListEmptyState } from './BlockListEmptyState';
 
 export const BlockList: React.FC = () => {
   const { tr: ui } = useUiLanguage();
   const { visibleBlocks } = useBuilder();
   const [collapsedBlocks, setCollapsedBlocks] = useState<Record<string, boolean>>({});
-
   const allCollapsed = visibleBlocks.length > 0 && visibleBlocks.every(b => collapsedBlocks[b.id] === true);
 
   const handleToggleExpandAll = () => {
@@ -53,6 +53,7 @@ export const BlockList: React.FC = () => {
           </button>
         </div>
       )}
+      {visibleBlocks.length === 0 && <BlockListEmptyState />}
       {visibleBlocks.map((block, index) => (
         <BlockEditorItem
           key={block.id}

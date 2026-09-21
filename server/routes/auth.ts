@@ -4,7 +4,6 @@ import { hashPassword, comparePassword } from '../auth.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import {
   RESERVED_USERNAMES,
-  brand,
   registerSchema,
   loginSchema,
   resetRequestSchema,
@@ -14,6 +13,7 @@ import {
   updateEmailSchema,
   findSiteTemplate,
   intentStartingCategory,
+  SEED_AVATAR_URL, SEED_BIO, SEED_BLOCK_TITLE, SEED_BLOCK_URL, SEED_INSTAGRAM_HOME_URL,
   type SiteTemplate
 } from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
@@ -248,10 +248,10 @@ function createRegisteredAccount(input: {
   const starterSocials = JSON.stringify(template
     ? [{ platform: 'email', url: `mailto:${email}` }]
     : [
-      { platform: 'instagram', url: 'https://instagram.com' },
+      { platform: 'instagram', url: SEED_INSTAGRAM_HOME_URL },
       { platform: 'email', url: `mailto:${email}` }
     ]);
-  const starterAvatar = template ? null : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop';
+  const starterAvatar = template ? null : SEED_AVATAR_URL;
   // A starter site carries its own category; an account that skips one is filed under the discipline its owner declared.
   const category = template?.category || intentStartingCategory(intent) || 'Creator';
   db.transaction(() => {
@@ -259,18 +259,18 @@ function createRegisteredAccount(input: {
     if (inviterId) recordCreatorReferral(inviterId, userId, now);
     if (agencyInviterId) recordAgencyReferral(agencyInviterId, userId, now);
     db.prepare(`INSERT INTO profiles (
-      id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(profileId, userId, username, displayName, template ? '' : 'Welcome to my links! Tap below to explore my latest updates.',
+      id, user_id, username, display_name, bio, avatar_url, category, verified, theme_id, socials_json, signup_intent, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(profileId, userId, username, displayName, template ? '' : SEED_BIO,
         starterAvatar,
-        category, 0, template?.themeId || 'editorial-stone', starterSocials, now, now);
+        category, 0, template?.themeId || 'editorial-stone', starterSocials, template?.intent || intent || null, now, now);
     const homePageId = createHomePage(profileId, displayName, null, now);
     if (template) {
       applySiteTemplate(profileId, template, 'append');
       return;
     }
     insertBlocks(profileId, [{
-      id: newBlockId(), type: 'link', title: 'My Website', url: `https://${brand.domain}`,
+      id: newBlockId(), type: 'link', title: SEED_BLOCK_TITLE, url: SEED_BLOCK_URL,
       subtitle: 'Check out my official website', icon: null, badge: 'NEW', highlighted: true, visible: true,
       position: 0, startAt: null, endAt: null, pageId: homePageId, extraJson: null
     }], now);

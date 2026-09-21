@@ -1,4 +1,5 @@
 import type { ContractBlockType, FormFieldContract } from '../contracts/blocks.js';
+import type { SetupProgress } from '../contracts/setup.js';
 import type { SystemCapabilities } from '../schemas/capabilities.js';
 import type { BrandConfig } from '../config/brand.js';
 import type { SubscriptionPlan, BillingInterval } from '../config/plans.js';
@@ -167,6 +168,8 @@ export interface CreatorProfile {
   bio: string;
   avatarUrl: string;
   category: string;
+  /** The discipline chosen at signup, when the account came from the signup form. Drives suggestions. */
+  signupIntent?: string | null;
   verified: boolean;
   socials: SocialLink[];
   themeId: string;
@@ -192,6 +195,8 @@ export interface CreatorProfile {
   customTheme?: ThemeConfig;
   blocks: ProfileBlock[];
   pages?: CreatorPage[];
+  /** Studio-only: derived from stored rows, so it is never sent back on a write. */
+  setup?: SetupProgress;
   page?: CreatorPage;
   stats?: {
     viewsThisMonth: string;

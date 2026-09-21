@@ -8,8 +8,7 @@ import {
   RESERVED_USERNAMES,
   brand,
   findSystemDemoProfile,
-  isHttpUrl,
-  isSafeCreatorCss,
+  isHttpUrl, isSafeCreatorCss, DUPLICATED_SEED_BLOCK_URL, SEED_BLOCK_TITLE,
   normalizeBlockExtra,
   normalizeEditorBlockExtra,
   normalizePublicSocials,
@@ -18,6 +17,7 @@ import {
 import { createId } from '../utils/ids.js';
 import { createHomePage, insertBlocks, insertPages, newBlockId, newPageId } from '../services/siteComposition.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
+import { buildSetupProgress } from '../services/setupProgress.js';
 import { getEffectivePlan, syncAccountPlanToProfiles } from '../accountEntitlements.js';
 import { normalizeCustomDomain } from '../utils/customDomain.js';
 import { testOnlySessionToken } from './sessionResponse.js';
@@ -211,7 +211,7 @@ export function studioProfilePayload(profile: any, pages: any[], blocks: any[]) 
   return {
     id: profile.id, revision: profile.updated_at, username: profile.username,
     displayName: profile.display_name, bio: profile.bio || '', avatarUrl: profile.avatar_url || '',
-    category: profile.category || 'Creator', verified: Boolean(profile.verified),
+    category: profile.category || 'Creator', signupIntent: profile.signup_intent || null, verified: Boolean(profile.verified),
     themeId: profile.theme_id || 'editorial-stone', plan,
     hideBranding: Boolean(allowedValue(canCustomize, profile.hide_branding)),
     gaMeasurementId: allowedValue(canCustomize, profile.ga_measurement_id),
@@ -233,7 +233,8 @@ export function studioProfilePayload(profile: any, pages: any[], blocks: any[]) 
     customTheme: safeJsonParse(profile.custom_theme_json, null),
     socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
     pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
-    blocks
+    blocks,
+    setup: buildSetupProgress({ profile, socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])), pages, blocks })
   };
 }
 
@@ -720,7 +721,7 @@ function insertProfileRecord(
     sortOrder: 0, isHome: true, published: true
   }], now);
   insertBlocks(profileId, [{
-    id: newBlockId(), type: 'link', title: 'My Website', url: 'https://example.com', subtitle: null, icon: null,
+    id: newBlockId(), type: 'link', title: SEED_BLOCK_TITLE, url: DUPLICATED_SEED_BLOCK_URL, subtitle: null, icon: null,
     badge: null, highlighted: false, visible: true, position: 0, startAt: null, endAt: null, pageId: homePageId, extraJson: null
   }], now);
   if (duplicateSource) duplicatePagesAndBlocks(profileId, homePageId, now, sourcePages, sourceBlocks);

@@ -32,7 +32,7 @@ const SitePreviewFrame: React.FC<{ template: SiteTemplate }> = ({ template }) =>
   const { tr: ui } = useUiLanguage();
   return (
     <div className="relative h-[212px] overflow-hidden bg-neutral-100" aria-hidden="true" inert>
-      <div className="pointer-events-none absolute inset-x-0 top-0 w-[300px] origin-top-left scale-[0.55]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 w-[316px] origin-top-left scale-[0.55]">
         <PhonePreview
           profile={starterSitePreview(template, { displayName: ui(STARTER_SITE_NAME_PLACEHOLDER) })}
           compact

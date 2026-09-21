@@ -3,6 +3,24 @@ import { type CreatorProfile, type CreatorPage } from '../../../types';
 import { api } from '../../../services/api';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
+import { notifyPagePublished } from '../utils/publishEvents';
+
+interface PageEdit {
+  title: string;
+  slug: string;
+  description: string;
+  published: boolean;
+}
+
+/** The stored shape of a page edit. The home page is always reachable, so it never sends false. */
+function pageEditPayload(activePage: CreatorPage, edit: PageEdit) {
+  return {
+    title: edit.title,
+    slug: edit.slug,
+    description: edit.description.trim() || null,
+    published: activePage.isHome ? true : edit.published
+  };
+}
 
 interface UsePagesProps {
   profile: CreatorProfile;
@@ -83,34 +101,24 @@ export function usePages({
 
   const handleSavePage = async () => {
     if (!activePage || isSavingPage) return;
-    const title = pageEditTitle.trim();
-    const slug = pageEditSlug.trim().toLowerCase();
-    if (!title || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    const payload = pageEditPayload(activePage, {
+      title: pageEditTitle.trim(),
+      slug: pageEditSlug.trim().toLowerCase(),
+      description: pageEditDescription,
+      published: pageEditPublished
+    });
+    if (!payload.title || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(payload.slug)) {
       setPageManagerError(ui('Use a title and a lowercase URL slug with hyphens only.'));
       return;
     }
     setIsSavingPage(true);
     try {
-      const result = await api.studio.updatePage(activePage.id, {
-        title,
-        slug,
-        description: pageEditDescription.trim() || null,
-        published: activePage.isHome ? true : pageEditPublished,
-        revision: activePage.revision
-      });
-      const updated: CreatorPage = {
-        ...activePage,
-        title,
-        slug,
-        description: pageEditDescription.trim() || null,
-        published: activePage.isHome ? true : pageEditPublished,
-        revision: result.revision ?? activePage.revision
-      };
-      setProfile(previous => ({
-        ...previous,
-        pages: (previous.pages || []).map(page => (page.id === activePage.id ? updated : page))
-      }));
+      const result = await api.studio.updatePage(activePage.id, { ...payload, revision: activePage.revision });
+      const updated: CreatorPage = { ...activePage, ...payload, revision: result.revision ?? activePage.revision };
+      setProfile(previous => ({ ...previous, pages: (previous.pages || []).map(page => (page.id === activePage.id ? updated : page)) }));
       setPageManagerError(null);
+      // The share moment belongs to the moment a page actually becomes reachable.
+      if (payload.published && !activePage.published) notifyPagePublished(activePage.id);
     } catch (error: any) {
       setPageManagerError(friendlyErrorMessage(error, ui('Could not save page settings.')));
     } finally {

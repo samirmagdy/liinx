@@ -15,6 +15,7 @@ import { uploadRouter, detectDocument, detectImageMagicBytes } from './routes/up
 import { formsRouter } from './routes/forms.js';
 import { pagesRouter } from './routes/pages.js';
 import { templatesRouter } from './routes/templates.js';
+import { setupRouter } from './routes/setup.js';
 import { instagramRouter } from './routes/instagram.js';
 import { importerRouter } from './routes/importer.js';
 import { capabilitiesRouter } from './routes/capabilities.js';
@@ -472,6 +473,7 @@ app.use('/api/auth', authRouter);
 app.use('/api', profilesRouter);
 app.use('/api', pagesRouter);
 app.use('/api', templatesRouter);
+app.use('/api', setupRouter);
 app.use('/api', blocksRouter);
 app.use(newsletterRouter);
 app.use(uploadRouter);

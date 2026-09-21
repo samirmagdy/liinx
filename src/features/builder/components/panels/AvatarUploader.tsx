@@ -36,6 +36,7 @@ export const AvatarUploader: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             type="button"
+            id="builder-profile-avatar"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingImage}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-black transition-colors cursor-pointer flex items-center gap-1.5"

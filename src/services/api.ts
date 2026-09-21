@@ -13,6 +13,12 @@ export interface ApplyTemplateResult {
   profile: CreatorProfile;
 }
 
+/** A studio bookkeeping write returns the full profile so the client re-renders from server truth. */
+export interface StudioProfileResult {
+  success: boolean;
+  profile: CreatorProfile;
+}
+
 let sessionToken: string | null = null;
 
 export const authStorage = {
@@ -207,6 +213,10 @@ export const api = {
         body: JSON.stringify({ mode })
       });
     },
+    /** Records that the creator actually opened their own page, so setup progress is a stored fact. */
+    previewed: async (): Promise<StudioProfileResult> => request<StudioProfileResult>('/api/studio/previewed', { method: 'POST' }),
+    dismissSetup: async (): Promise<StudioProfileResult> => request<StudioProfileResult>('/api/studio/setup/dismiss', { method: 'POST' }),
+    ackMilestone: async (milestone: string): Promise<StudioProfileResult> => request<StudioProfileResult>(`/api/studio/setup/milestone/${encodeURIComponent(milestone)}/ack`, { method: 'POST' }),
     getAnalytics: async () => {
       return request<{
         totalViews: number;

@@ -198,6 +198,14 @@ export function initDatabase() {
 
     CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_unique ON newsletter_subscribers(profile_id, email);
 
+    CREATE TABLE IF NOT EXISTS setup_milestone_ack (
+      profile_id TEXT NOT NULL,
+      milestone TEXT NOT NULL,
+      event_id TEXT NOT NULL,
+      acknowledged_at INTEGER NOT NULL,
+      PRIMARY KEY (profile_id, milestone)
+    );
+
     CREATE TABLE IF NOT EXISTS newsletter_pending_subscriptions (
       id TEXT PRIMARY KEY,
       profile_id TEXT NOT NULL,
@@ -378,7 +386,8 @@ export function initDatabase() {
   for (const column of [
     'share_title TEXT', 'share_description TEXT', 'share_image_url TEXT',
     'footer_logo_url TEXT', 'footer_logo_link TEXT', 'footer_logo_alt TEXT', 'background_media_url TEXT', 'background_media_type TEXT',
-    'page_redirect_url TEXT', 'page_redirect_until INTEGER'
+    'page_redirect_url TEXT', 'page_redirect_until INTEGER',
+    'last_previewed_at INTEGER', 'setup_dismissed_at INTEGER', 'signup_intent TEXT'
   ]) {
     try { db.exec(`ALTER TABLE profiles ADD COLUMN ${column}`); } catch (e) {}
   }

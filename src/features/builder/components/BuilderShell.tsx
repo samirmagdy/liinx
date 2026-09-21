@@ -8,6 +8,8 @@ import { ConfirmDeleteDialog } from './dialogs/ConfirmDeleteDialog';
 import { NewProfileDialog } from './dialogs/NewProfileDialog';
 import { ApiKeyDialog } from './dialogs/ApiKeyDialog';
 import { StarterSiteDialogHost } from './dialogs/StarterSiteDialogHost';
+import { PublishSharePrompt } from './share/PublishSharePrompt';
+import { SetupStateSync } from './SetupStateSync';
 import { api } from '../../../services/api';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { initialPageId } from '../utils/builder.utils';
@@ -52,6 +54,9 @@ export const BuilderShell: React.FC = () => {
       <h1 className="sr-only">{ui('Bio Studio')} · @{profile.username}</h1>
 
       <BuilderWorkspace />
+
+      <SetupStateSync />
+      <PublishSharePrompt />
 
       {/* QR Code Modal */}
       <QrCodeModal

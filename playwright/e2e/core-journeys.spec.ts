@@ -90,6 +90,26 @@ test.describe('account acquisition and session lifecycle', () => {
   });
 });
 
+test.describe('creator preview and first-win analytics', () => {
+  const stats = async (page: Page) => (await page.request.get('/api/analytics/stats')).json();
+
+  test('the creator\'s own full-screen preview records no visit while a visitor load does', async ({ page }) => {
+    const username = uniqueName('pv');
+    await completeRegistration(page, { username, email: `${username}@example.test`, password: 'SecureBrowserPass2026!' });
+
+    await page.getByRole('button', { name: 'View Live Page' }).click();
+    await expect(page).toHaveURL(new RegExp(`/@${username}$`));
+    await expect(page.locator('#public-bio-view')).toBeVisible();
+    // The setup milestones tell a creator that somebody visited, so the creator's own preview
+    // must not be the row behind that sentence.
+    await expect.poll(async () => (await stats(page)).totalViews).toBe(0);
+
+    await page.goto(`/@${username}`);
+    await expect(page.locator('#public-bio-view')).toBeVisible();
+    await expect.poll(async () => (await stats(page)).totalViews).toBe(1);
+  });
+});
+
 test.describe('creator publishing and account operations', () => {
   test('creates a real public link, exercises newsletter consent and delivery failure, and opens referral settings', async ({ page }) => {
     const username = uniqueName('creator');
@@ -97,7 +117,7 @@ test.describe('creator publishing and account operations', () => {
     await completeRegistration(page, { username, email, password: 'SecureBrowserPass2026!' });
 
     await page.getByRole('button', { name: 'Add New Link or Block to Profile' }).click();
-    await page.getByRole('button', { name: /^Link/ }).click();
+    await page.getByRole('button', { name: /^Custom Link/ }).click();
     const title = page.getByRole('textbox', { name: 'Title' }).last();
     const destination = page.getByRole('textbox', { name: 'Destination URL' }).last();
     await title.fill('Portfolio');
