@@ -51,7 +51,7 @@ const publicProfileCachePurge = setInterval(() => {
 }, 60_000);
 publicProfileCachePurge.unref();
 
-function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
+export function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   if (!val) return fallback;
   try {
     return JSON.parse(val) as T;
@@ -87,7 +87,8 @@ function publicDemoPayload(systemDemo: any) {
   };
 }
 
-function publishedPagesForProfile(profile: any): any[] {
+/** Only published pages reach a reader, so the gallery reuses the same rule the public page does. */
+export function publishedPagesForProfile(profile: any): any[] {
   let pages = db.prepare(publishedPagesSql).all(profile.id) as any[];
   if (pages.length) return pages;
   createHomePage(profile.id, profile.display_name || 'Home');
@@ -95,7 +96,7 @@ function publishedPagesForProfile(profile: any): any[] {
   return pages;
 }
 
-function publicBlocksForPage(profile: any, page: any, now: number): any[] {
+export function publicBlocksForPage(profile: any, page: any, now: number): any[] {
   const rows = db.prepare(`
     SELECT * FROM blocks
     WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1)) AND COALESCE(visible, 1) = 1
@@ -231,6 +232,7 @@ export function studioProfilePayload(profile: any, pages: any[], blocks: any[]) 
     pageRedirectUntil: profile.page_redirect_until || null,
     customTheme: safeJsonParse(profile.custom_theme_json, null),
     socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])),
+    showcaseOptIn: Boolean(profile.showcase_opt_in),
     pages: pages.map(page => ({ ...page, isHome: Boolean(page.isHome), published: Boolean(page.published) })),
     blocks,
     setup: buildSetupProgress({ profile, socials: normalizePublicSocials(safeJsonParse(profile.socials_json, [])), pages, blocks })

@@ -401,3 +401,46 @@ test.describe('arabic studio reading order', () => {
     expect(typed.direction, `display name "${typed.value}"`).toBe('ltr');
   });
 });
+
+test.describe('made-with-RALOA gallery', () => {
+  test('lists a page only while its owner keeps the offer standing', async ({ page }) => {
+    const username = uniqueName('gal');
+    await completeRegistration(page, { username, email: `${username}@example.test`, password: 'GalleryConsent2026!' });
+
+    const listed = async () => {
+      const response = await page.request.get('/api/showcase');
+      expect(response.status()).toBe(200);
+      const body = await response.json() as { profiles: { username: string }[] };
+      return body.profiles.some(entry => entry.username === username);
+    };
+
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    await page.getByRole('button', { name: 'Site', exact: true }).click();
+    const consent = page.getByRole('switch', { name: 'Show my page in the gallery' });
+    await expect(consent).toHaveAttribute('aria-checked', 'false');
+    expect(await listed(), 'nobody is listed before they agree').toBe(false);
+
+    await consent.click();
+    await expect(consent).toHaveAttribute('aria-checked', 'true');
+    await expect.poll(listed, 'the offer reaches the server listing').toBe(true);
+
+    // The switch must read the stored answer, not whatever the click set.
+    await page.reload();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    await page.getByRole('button', { name: 'Site', exact: true }).click();
+    await expect(consent).toHaveAttribute('aria-checked', 'true');
+
+    await page.goto('/');
+    // The signed-in navbar also links to the same page, so the assertion stays inside the gallery.
+    const card = page.locator('#showcase').locator(`a[href="/@${username}"]`);
+    await expect(card, 'the gallery card links to the real page').toBeVisible();
+    await expect(card.locator('h3')).toHaveText('Galmubvhqoucugo'.replace('Galmubvhqoucugo', username.charAt(0).toUpperCase() + username.slice(1)));
+
+    await page.goto('/studio');
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    await page.getByRole('button', { name: 'Site', exact: true }).click();
+    await consent.click();
+    await expect(consent).toHaveAttribute('aria-checked', 'false');
+    await expect.poll(listed, 'withdrawing takes the page out again').toBe(false);
+  });
+});

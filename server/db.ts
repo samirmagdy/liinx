@@ -562,6 +562,10 @@ export function initDatabase() {
 
   try { db.exec('ALTER TABLE blocks ADD COLUMN visible INTEGER NOT NULL DEFAULT 1'); } catch {}
 
+  // Gallery consent lives on the row, so a browser cannot list a page its owner never offered.
+  try { db.exec('ALTER TABLE profiles ADD COLUMN showcase_opt_in INTEGER NOT NULL DEFAULT 0'); } catch {}
+  db.exec('CREATE INDEX IF NOT EXISTS idx_profiles_showcase_opt_in ON profiles(showcase_opt_in) WHERE showcase_opt_in = 1');
+
   // Every profile has a stable home page. Existing blocks remain visible by
   // assigning them to that page during migration; this is idempotent.
   const ensureHomePages = db.transaction(() => {

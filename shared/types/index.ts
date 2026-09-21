@@ -193,6 +193,8 @@ export interface CreatorProfile {
   pageRedirectUrl?: string | null;
   pageRedirectUntil?: number | null;
   customTheme?: ThemeConfig;
+  /** Studio-only: whether this page sits in the public made-with-RALOA gallery. Server-owned. */
+  showcaseOptIn?: boolean;
   blocks: ProfileBlock[];
   pages?: CreatorPage[];
   /** Studio-only: derived from stored rows, so it is never sent back on a write. */
@@ -203,6 +205,11 @@ export interface CreatorProfile {
     ctr: string;
     totalClicks: string;
   };
+}
+
+/** One opted-in page in the public gallery: what the public bio already exposes, plus where to find it. */
+export interface ShowcaseProfile extends CreatorProfile {
+  url: string;
 }
 
 export interface PricingPlan {

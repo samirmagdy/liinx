@@ -447,6 +447,19 @@ export const runtimeTranslations: Record<string, string> = {
   'Make your site useful': 'اجعل موقعك مفيداً',
   'Check your links and details before sharing. External services can change their interface over time.': 'راجع روابطك ومعلوماتك قبل مشاركة صفحتك. قد تغيّر الخدمات الخارجية واجهاتها مع الوقت.',
   'Straightforward advice for building a useful page and sharing it in English or Arabic.': 'إرشادات واضحة لبناء صفحة مفيدة ومشاركتها بالعربية أو الإنجليزية.',
+  'Made-with-RALOA gallery': 'معرض «صُنع باستخدام RALOA»',
+  'Offer your published page to a public gallery of sites people made here.': 'اعرض صفحتك المنشورة في معرض عام للمواقع التي أنشأها الناس هنا.',
+  'Your published page is eligible. Unpublishing it removes it from the gallery too.': 'صفحتك المنشورة مؤهلة للظهور. إيقاف نشرها يزيلها من المعرض أيضاً.',
+  'Nothing is listed unless you turn this on, and only published pages qualify.': 'لا يُدرج شيء إلا إذا فعّلت هذا الخيار، والصفحات المنشورة فقط هي المؤهلة للظهور.',
+  'Show my page in the gallery': 'اعرض صفحتي في المعرض',
+  'No creators have opted in yet.': 'لم يوافق أي مبدع على الظهور بعد.',
+  'This wall is built only from pages their owners offered. It stays empty until someone says yes.': 'هذا الجدار مبني من صفحات عرضها أصحابها فقط، ويبقى فارغاً حتى يوافق أحدهم.',
+  'Made with RALOA': 'صُنع باستخدام RALOA',
+  'Pages people actually published here': 'صفحات نشرها الناس هنا فعلاً',
+  'Every card below is a live page its owner let us show. Open one and it is the same site, with the same links.': 'كل بطاقة أدناه صفحة منشورة سمح صاحبها بعرضها. افتحها لتجد الموقع نفسه بالروابط نفسها.',
+  'The gallery could not load.': 'تعذّر تحميل المعرض.',
+  'Reload the page and it will try again.': 'أعد تحميل الصفحة وسيُعاد المحاولة.',
+  'Browse starter sites instead': 'تصفّح مواقع البداية بدلاً من ذلك',
 };
 
 export function translateRuntime(value: string, lang: Language): string {

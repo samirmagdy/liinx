@@ -2,6 +2,7 @@ import React from 'react';
 import { SettingsWhiteLabelCard } from './SettingsWhiteLabelCard';
 import { SettingsFooterCard } from './SettingsFooterCard';
 import { SettingsDuplicateCard } from './SettingsDuplicateCard';
+import { SettingsShowcaseCard } from './SettingsShowcaseCard';
 
 /** How the site presents itself: its own branding, not the platform's. */
 export const SettingsSiteSection: React.FC = () => (
@@ -9,5 +10,6 @@ export const SettingsSiteSection: React.FC = () => (
     <SettingsWhiteLabelCard />
     <SettingsFooterCard />
     <SettingsDuplicateCard />
+    <SettingsShowcaseCard />
   </div>
 );

@@ -3,7 +3,8 @@ import {
   type CreatorPage,
   type ProfileBlock,
   type ContactInput,
-  type ContactResponse
+  type ContactResponse,
+  type ShowcaseProfile
 } from '../../shared/index.js';
 import { friendlyErrorMessage } from '../utils/errors';
 
@@ -158,7 +159,9 @@ export const api = {
     getByCustomDomain: async (domain: string, pageSlug?: string): Promise<CreatorProfile> => {
       const query = pageSlug ? `?page=${encodeURIComponent(pageSlug)}` : '';
       return request<CreatorProfile>(`/api/profiles/by-domain/${encodeURIComponent(domain)}${query}`);
-    }
+    },
+    /** Only pages their owner offered server-side appear here; nothing is scraped or composed client-side. */
+    getShowcase: async (): Promise<{ profiles: ShowcaseProfile[] }> => request<{ profiles: ShowcaseProfile[] }>('/api/showcase')
   },
 
   studio: {
@@ -176,6 +179,11 @@ export const api = {
         body: JSON.stringify(data)
       });
     },
+    setShowcaseOptIn: async (optedIn: boolean): Promise<{ success: boolean; showcaseOptIn: boolean }> =>
+      request<{ success: boolean; showcaseOptIn: boolean }>('/api/studio/profile/showcase', {
+        method: 'PUT',
+        body: JSON.stringify({ optedIn })
+      }),
     updatePlan: async (plan: 'free' | 'pro' | 'studio'): Promise<{ success: boolean; plan: string; message: string }> => {
       return request<{ success: boolean; plan: string; message: string }>('/api/studio/plan', {
         method: 'PUT',
