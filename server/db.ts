@@ -118,6 +118,7 @@ export function initDatabase() {
       icon TEXT,
       badge TEXT,
       highlighted INTEGER DEFAULT 0,
+      visible INTEGER NOT NULL DEFAULT 1,
       position INTEGER NOT NULL,
       start_at INTEGER,
       end_at INTEGER,
@@ -549,6 +550,8 @@ export function initDatabase() {
   // mismatched and will be rejected on confirmation – they expire naturally anyway.
   try { db.exec('ALTER TABLE account_tokens ADD COLUMN subject_value_hash TEXT'); } catch {}
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_form_submissions_idempotency ON form_submissions(block_id, submission_key) WHERE submission_key IS NOT NULL');
+
+  try { db.exec('ALTER TABLE blocks ADD COLUMN visible INTEGER NOT NULL DEFAULT 1'); } catch {}
 
   // Every profile has a stable home page. Existing blocks remain visible by
   // assigning them to that page during migration; this is idempotent.

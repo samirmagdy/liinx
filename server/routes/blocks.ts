@@ -21,6 +21,7 @@ interface BlockRequestData {
   badge?: string | null;
   icon?: string | null;
   highlighted?: boolean;
+  visible?: boolean;
   startAt?: number | null;
   endAt?: number | null;
   pageId?: string;
@@ -76,6 +77,41 @@ function nextBlockPosition(profileId: string, pageId: string): number {
   return row.maxPos === null ? 0 : row.maxPos + 1;
 }
 
+type NewBlockData = BlockRequestData & { type: ContractBlockType; title: string };
+
+/** Column order for the blocks INSERT shared by the route and its response shape. */
+function blockInsertValues(id: string, profileId: string, position: number, pageId: string, now: number, data: NewBlockData): Array<string | number | null> {
+  const { type, title, url, subtitle, badge, icon, highlighted, visible, startAt, endAt, extra } = data;
+  return [
+    id, profileId, type, title, url || null, subtitle || null, icon || null, badge || null,
+    highlighted ? 1 : 0, visible === false ? 0 : 1, position, startAt || null, endAt || null, pageId,
+    prepareBlockExtra(type, extra), now, now
+  ];
+}
+
+function createdBlockResponse(id: string, position: number, pageId: string, now: number, data: NewBlockData) {
+  const { type, title, url, subtitle, badge, icon, highlighted, visible, startAt, endAt, extra } = data;
+  const gateConfigured = type === 'content_gate' && typeof extra?.password === 'string' && extra.password.length > 0;
+  return {
+    id,
+    revision: now,
+    type,
+    title,
+    url: url || null,
+    subtitle: subtitle || null,
+    icon: icon || null,
+    badge: badge || null,
+    highlighted: Boolean(highlighted),
+    visible: visible !== false,
+    startAt: startAt || null,
+    endAt: endAt || null,
+    position,
+    pageId,
+    clicks: 0,
+    ...(type === 'content_gate' ? { locked: gateConfigured } : (extra || {}))
+  };
+}
+
 // Public content-gate verification. Protected content is deliberately returned
 // only after the password is checked server-side; it is never included in the
 // public profile response.
@@ -90,6 +126,7 @@ blocksRouter.post('/content-gates/verify', sharedRateLimit({ name: 'content-gate
     FROM blocks b
     INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id
     WHERE b.id = ? AND b.profile_id = ? AND b.type = 'content_gate' AND p.published = 1
+      AND COALESCE(b.visible, 1) = 1
       AND (b.start_at IS NULL OR b.start_at <= ?) AND (b.end_at IS NULL OR b.end_at > ?)
   `).get(blockId, profileId, Date.now(), Date.now()) as { extra_json?: string | null } | undefined;
   if (!row?.extra_json) return res.status(404).json({ error: 'This gated content is unavailable.' });
@@ -112,8 +149,9 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       return res.status(400).json({ error: parse.error.issues[0].message });
     }
 
-    const { type, title, url, subtitle, badge, icon, highlighted, startAt, endAt, pageId, extra } = parse.data as BlockRequestData & { type: ContractBlockType; title: string };
-    const validationError = validateNewBlock(parse.data as BlockRequestData, req.user!.userId);
+    const data = parse.data as NewBlockData;
+    const { startAt, endAt, pageId } = data;
+    const validationError = validateNewBlock(data, req.user!.userId);
     if (validationError) return res.status(validationError.status).json({ error: validationError.error });
     const profileId = req.user!.profileId;
     const resolvedPage = resolveBlockPage(profileId, pageId);
@@ -129,45 +167,12 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
 
     db.prepare(`
       INSERT INTO blocks (
-        id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id,
-      profileId,
-      type,
-      title,
-      url || null,
-      subtitle || null,
-      icon || null,
-      badge || null,
-      highlighted ? 1 : 0,
-      nextPos,
-      startAt || null,
-      endAt || null,
-      resolvedPage.id,
-      prepareBlockExtra(type, extra),
-      now,
-      now
-    );
+        id, profile_id, type, title, url, subtitle, icon, badge, highlighted, visible, position, start_at, end_at, page_id, extra_json, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(...blockInsertValues(id, profileId, nextPos, resolvedPage.id, now, data));
     invalidatePublicProfileCache(profileId);
 
-    res.status(201).json({
-      id,
-      revision: now,
-      type,
-      title,
-      url: url || null,
-      subtitle: subtitle || null,
-      icon: icon || null,
-      badge: badge || null,
-      highlighted: Boolean(highlighted),
-      startAt: startAt || null,
-      endAt: endAt || null,
-      position: nextPos,
-      pageId: resolvedPage.id,
-      clicks: 0,
-      ...(type === 'content_gate' ? { locked: typeof extra?.password === 'string' && extra.password.length > 0 } : (extra || {}))
-    });
+    res.status(201).json(createdBlockResponse(id, nextPos, resolvedPage.id, now, data));
   } catch (err: any) {
     console.error('Create block error:', err);
     res.status(500).json({ error: 'Failed to create block.' });
@@ -259,9 +264,9 @@ blocksRouter.post('/studio/blocks/:id/duplicate', requireAuth, (req: Authenticat
     const max = db.prepare('SELECT COALESCE(MAX(position), -1) as value FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, page.id) as { value: number };
     const now = Date.now();
     const id = createId('blk');
-    db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, profileId, source.type, source.title, source.url, source.subtitle, source.icon, source.badge, source.highlighted, max.value + 1, source.start_at, source.end_at, page.id, source.extra_json, now, now);
+    db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, visible, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, profileId, source.type, source.title, source.url, source.subtitle, source.icon, source.badge, source.highlighted, source.visible === 0 ? 0 : 1, max.value + 1, source.start_at, source.end_at, page.id, source.extra_json, now, now);
     invalidatePublicProfileCache(profileId);
-    res.status(201).json({ success: true, block: { id, revision: now, type: source.type, title: source.title, url: source.url, subtitle: source.subtitle, icon: source.icon, badge: source.badge, highlighted: Boolean(source.highlighted), position: max.value + 1, pageId: page.id } });
+    res.status(201).json({ success: true, block: { id, revision: now, type: source.type, title: source.title, url: source.url, subtitle: source.subtitle, icon: source.icon, badge: source.badge, highlighted: Boolean(source.highlighted), visible: source.visible !== 0, position: max.value + 1, pageId: page.id } });
   } catch (err: any) {
     console.error('Duplicate block error:', err);
     res.status(500).json({ error: 'Failed to duplicate block.' });
@@ -319,6 +324,7 @@ function persistBlockUpdate(
         badge = ?,
         icon = ?,
         highlighted = ?,
+        visible = ?,
         start_at = ?,
         end_at = ?,
         extra_json = ?,
@@ -331,6 +337,7 @@ function persistBlockUpdate(
     data.badge !== undefined ? data.badge : existing.badge,
     data.icon !== undefined ? data.icon : existing.icon,
     data.highlighted !== undefined ? (data.highlighted ? 1 : 0) : existing.highlighted,
+    data.visible !== undefined ? (data.visible ? 1 : 0) : existing.visible,
     data.startAt !== undefined ? data.startAt : existing.start_at,
     data.endAt !== undefined ? data.endAt : existing.end_at,
     data.extra !== undefined ? prepareBlockExtra(existing.type, mergedExtra) : existing.extra_json,

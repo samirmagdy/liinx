@@ -101,7 +101,7 @@ function publishedPagesForProfile(profile: any): any[] {
 function publicBlocksForPage(profile: any, page: any, now: number): any[] {
   const rows = db.prepare(`
     SELECT * FROM blocks
-    WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1))
+    WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1)) AND COALESCE(visible, 1) = 1
       AND (start_at IS NULL OR start_at <= ?) AND (end_at IS NULL OR end_at > ?)
     ORDER BY position ASC
   `).all(profile.id, page.id, page.isHome ? 1 : 0, now, now) as any[];
@@ -200,7 +200,7 @@ function studioBlocksForProfile(profile: any, pages: any[]): any[] {
     const formatted: any = {
       id: block.id, revision: block.updated_at, pageId: block.page_id || homePageId,
       type: block.type, title: block.title, url: block.url, subtitle: block.subtitle,
-      icon: block.icon, badge: block.badge, highlighted: Boolean(block.highlighted),
+      icon: block.icon, badge: block.badge, highlighted: Boolean(block.highlighted), visible: block.visible !== 0,
       startAt: canSchedule ? (block.start_at || null) : null,
       endAt: canSchedule ? (block.end_at || null) : null,
       clicks: clicks.get(block.id) || 0
@@ -679,13 +679,13 @@ function duplicatePagesAndBlocks(profileId: string, homePageId: string, now: num
     if (page.is_home) continue;
     insertPage.run(pageMap.get(page.id), profileId, page.slug, page.title, page.description, page.sort_order, 0, page.published, now, now);
   }
-  const insertBlock = db.prepare('INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+  const insertBlock = db.prepare('INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, visible, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
   for (const block of sourceBlocks) {
     const sanitizedExtra = duplicatedBlockExtra(block.type, block.extra_json);
     const remappedExtra = sanitizedExtra ? JSON.stringify(remapDuplicatedValue(JSON.parse(sanitizedExtra), pageMap, blockMap)) : null;
     const remappedUrl = typeof block.url === 'string' ? remapDuplicatedValue(block.url, pageMap, blockMap) : block.url;
     insertBlock.run(blockMap.get(block.id), profileId, block.type, block.title, remappedUrl, block.subtitle,
-      block.icon, block.badge, block.highlighted, block.position, block.start_at, block.end_at,
+      block.icon, block.badge, block.highlighted, block.visible === 0 ? 0 : 1, block.position, block.start_at, block.end_at,
       pageMap.get(block.page_id) || homePageId, remappedExtra, now, now);
   }
 }

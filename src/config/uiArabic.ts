@@ -112,6 +112,7 @@ export const uiArabic: Record<string, string> = {
   'Collapse block': 'طي الكتلة',
   'Show block': 'إظهار الكتلة',
   'Hide block': 'إخفاء الكتلة',
+  'Hidden': 'مخفية',
   'Editor': 'المحرر',
   'Live Preview': 'معاينة حية',
   'Manage subscription plan': 'إدارة خطة الاشتراك',

@@ -178,7 +178,7 @@ analyticsRouter.get('/r/:blockId', sharedRateLimit({ name: 'analytics-click-ip',
     const block = db.prepare(`
       SELECT b.* FROM blocks b
       INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id AND p.published = 1
-      WHERE b.id = ?
+      WHERE b.id = ? AND COALESCE(b.visible, 1) = 1
     `).get(blockId) as any;
 
     if (!block) {

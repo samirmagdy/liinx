@@ -47,6 +47,11 @@ export const BlockEditorIdentity: React.FC<BlockEditorIdentityProps> = ({
           {scheduleStatus.label}
         </span>
       )}
+      {block.visible === false && (
+        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-mono font-bold uppercase tracking-caps text-amber-800">
+          {ui('Hidden')}
+        </span>
+      )}
     </div>
   );
 };

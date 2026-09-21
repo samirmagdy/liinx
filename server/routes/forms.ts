@@ -33,7 +33,7 @@ formsRouter.post('/api/forms/submit', sharedRateLimit({ name: 'form-submit', lim
     const parsed = submissionSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: 'Please complete the form with valid values.' });
     const now = Date.now();
-    const block = db.prepare(`SELECT b.id, b.extra_json FROM blocks b JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id WHERE b.id = ? AND b.profile_id = ? AND b.type = 'form' AND p.published = 1 AND (b.start_at IS NULL OR b.start_at <= ?) AND (b.end_at IS NULL OR b.end_at > ?)`).get(parsed.data.blockId, parsed.data.profileId, now, now) as { id: string; extra_json?: string | null } | undefined;
+    const block = db.prepare(`SELECT b.id, b.extra_json FROM blocks b JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id WHERE b.id = ? AND b.profile_id = ? AND b.type = 'form' AND p.published = 1 AND COALESCE(b.visible, 1) = 1 AND (b.start_at IS NULL OR b.start_at <= ?) AND (b.end_at IS NULL OR b.end_at > ?)`).get(parsed.data.blockId, parsed.data.profileId, now, now) as { id: string; extra_json?: string | null } | undefined;
     if (!block) return res.status(404).json({ error: 'This form is no longer available.' });
     let rawExtra: Record<string, unknown> = {};
     try { rawExtra = JSON.parse(block.extra_json || '{}') as Record<string, unknown>; } catch { return res.status(500).json({ error: 'This form configuration is invalid.' }); }

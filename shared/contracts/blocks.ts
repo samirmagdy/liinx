@@ -9,6 +9,7 @@ export const MAX_EXTRA_BYTES = 64 * 1024;
 export const RESERVED_KEYS = new Set([
   'id', 'type', 'profileid', 'profile_id', 'pageid', 'page_id',
   'owneruserid', 'owner_user_id', 'profileownership', 'pageownership',
+  'visible',
   'position', 'createdat', 'updatedat', 'created_at', 'updated_at'
 ]);
 
@@ -209,6 +210,7 @@ export const blockCreateEnvelope = z.object({
   badge: z.string().max(30).optional().nullable(),
   icon: z.string().max(50).optional().nullable(),
   highlighted: z.boolean().optional(),
+  visible: z.boolean().optional(),
   startAt: z.number().finite().int().min(0).nullable().optional(),
   endAt: z.number().finite().int().min(0).nullable().optional(),
   pageId: z.string().min(1).max(100).optional(),

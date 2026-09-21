@@ -56,6 +56,7 @@ newsletterRouter.post('/api/newsletter/subscribe', sharedRateLimit({ name: 'news
         FROM blocks b
         INNER JOIN pages p ON p.id = b.page_id AND p.profile_id = b.profile_id
         WHERE b.id = ? AND b.profile_id = ? AND b.type = 'newsletter' AND p.published = 1
+          AND COALESCE(b.visible, 1) = 1
           AND (b.start_at IS NULL OR b.start_at <= ?) AND (b.end_at IS NULL OR b.end_at > ?)
       `).get(blockId, profileId, now, now);
       if (!block) return res.status(404).json({ error: 'This newsletter form is unavailable.' });

@@ -329,6 +329,7 @@ function loadVisibleProfileBlocks(profileId: string, pageId: string, isHome: boo
   const now = Date.now();
   return db.prepare(`SELECT type, title, url, subtitle, extra_json as extraJson FROM blocks
     WHERE profile_id = ? AND (page_id = ? OR (page_id IS NULL AND ? = 1))
+      AND COALESCE(visible, 1) = 1
       AND (start_at IS NULL OR start_at <= ?) AND (end_at IS NULL OR end_at > ?)
     ORDER BY position ASC`).all(profileId, pageId, isHome ? 1 : 0, now, now) as PublicProfileBlockRow[];
 }
