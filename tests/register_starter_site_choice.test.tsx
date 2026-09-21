@@ -57,7 +57,7 @@ const CHOICE_LABELS = [
   'Default theme, nothing filled in',
   'No starter blocks. You add every link yourself.',
   'Step 2 of 2: Choose your focus discipline and the starter site to build on.',
-  'Launch My Page'
+  'Create my site'
 ];
 
 describe('signup starter site choice', () => {

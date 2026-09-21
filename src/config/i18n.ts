@@ -1,3 +1,5 @@
+import { brand } from './brand';
+
 export type Language = 'en' | 'ar';
 
 export interface TemplateTranslation {
@@ -126,7 +128,7 @@ export const translations: Record<Language, Translations> = {
       pricing: 'Pricing',
       about: 'About',
       contact: 'Contact',
-      studio: 'Studio Builder',
+      studio: 'Studio',
       login: 'Sign in',
       register: 'Get Started',
       claimCta: 'Build your page'
@@ -135,7 +137,7 @@ export const translations: Record<Language, Translations> = {
       badge: 'Mini-sites for creators · English + Arabic',
       headline: 'Your mini-site',
       headlineHighlight: 'in your bio.',
-      subheadline: 'Bring your links, work, supported media, bookings, and newsletter together in one customizable page. Publish at raloa.app/@yourname, with English and Arabic support including RTL layouts.',
+      subheadline: `Bring your links, work, supported media, bookings, and newsletter together in one customizable page. Publish at ${brand.domain}/@yourname, with English and Arabic support including RTL layouts.`,
       claimPlaceholder: 'yourname',
       claimButton: 'Build your page',
       exploreTemplates: 'Explore templates',
@@ -164,7 +166,7 @@ export const translations: Record<Language, Translations> = {
       feature5Desc: 'See visits, link clicks, referring sources, and campaign tags in one calm view.',
       ctaBarTitle: 'Make your next click feel intentional.',
       ctaBarDesc: 'Start with a free account. Paid plans are available through Stripe Checkout.',
-      cta: 'Open the Studio Builder'
+      cta: 'Open the Studio'
     },
     templatesSection: {
       badge: 'Template gallery',
@@ -254,7 +256,7 @@ export const translations: Record<Language, Translations> = {
           audience: 'For creators just getting started',
           tagline: 'A simple place to publish your work and links.',
           features: [
-            '1 published profile (raloa.app/@username)',
+            `1 published site (${brand.domain}/@username)`,
             'Links, social icons and rich media blocks',
             'Theme and aesthetic customization',
             'Built-in newsletter capture form',
@@ -315,7 +317,7 @@ export const translations: Record<Language, Translations> = {
       pricing: 'الأسعار',
       about: 'عن المنصة',
       contact: 'اتصل بنا',
-      studio: 'استوديو التصميم',
+      studio: 'الاستوديو',
       login: 'تسجيل الدخول',
       register: 'ابدأ مجاناً',
       claimCta: 'أنشئ صفحتك'
@@ -324,7 +326,7 @@ export const translations: Record<Language, Translations> = {
       badge: 'مواقع مصغّرة للمبدعين · عربي وإنجليزي',
       headline: 'موقعك المصغّر',
       headlineHighlight: 'في نبذتك.',
-      subheadline: 'اجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك ونشرتك البريدية في صفحة واحدة قابلة للتخصيص. انشرها على raloa.app/@اسمك، مع دعم العربية واتجاه RTL.',
+      subheadline: `اجمع روابطك وأعمالك ووسائطك المدعومة وحجوزاتك ونشرتك البريدية في صفحة واحدة قابلة للتخصيص. انشرها على ${brand.domain}/@اسمك، مع دعم العربية واتجاه RTL.`,
       claimPlaceholder: 'اسمك',
       claimButton: 'أنشئ صفحتك مجاناً',
       exploreTemplates: 'استكشف القوالب',
@@ -353,7 +355,7 @@ export const translations: Record<Language, Translations> = {
       feature5Desc: 'تتبّع الزيارات ونقرات الروابط والمصادر المحيلة ووسوم الحملات.',
       ctaBarTitle: 'هل أنت مستعد للارتقاء بحضورك الرقمي؟',
       ctaBarDesc: 'ابدأ بحساب مجاني. اشترك في خطة مدفوعة عبر Stripe عند الحاجة.',
-      cta: 'افتح استوديو التصميم'
+      cta: 'افتح الاستوديو'
     },
     templatesSection: {
       badge: 'معرض القوالب',
@@ -443,7 +445,7 @@ export const translations: Record<Language, Translations> = {
           audience: 'للمبدعين في بداية طريقهم',
           tagline: 'مساحة بسيطة لنشر أعمالك وروابطك.',
           features: [
-            'ملف شخصي واحد منشور (raloa.app/@username)',
+            `موقع واحد منشور (${brand.domain}/@username)`,
             'روابط وأيقونات تواصل وكتل وسائط غنية',
             'تخصيص المظهر والقوالب',
             'نموذج اشتراك في النشرة البريدية',

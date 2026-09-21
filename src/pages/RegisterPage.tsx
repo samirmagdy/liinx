@@ -19,7 +19,7 @@ export const RegisterPage: React.FC = () => {
           <img src="/brand/raloa-logo-horizontal-primary.png" alt={brand.productShortName} width={99} height={44} className="h-11 w-auto" loading="eager" decoding="async" />
         </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">
-          {step === 1 ? ui("Build your micro-site") : ui("Choose your aesthetic")}
+          {step === 1 ? ui("Build your site") : ui("Choose your aesthetic")}
         </h1>
         <p className="mt-2 text-xs sm:text-sm text-neutral-600">
           {step === 1 ? (

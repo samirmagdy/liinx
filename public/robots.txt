@@ -3,4 +3,6 @@ Allow: /
 Disallow: /api/
 Disallow: /uploads/
 
-Sitemap: https://raloa.app/sitemap.xml
+# The Sitemap line is emitted by the /robots.txt route in server/server.ts so it
+# always names the origin that served the request. This file is only the static
+# fallback shipped inside dist/, which has no host to write down.

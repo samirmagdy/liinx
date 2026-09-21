@@ -18,7 +18,7 @@ export const BuilderSidebar: React.FC = () => {
         }`}
       >
         <Layers className="w-3.5 h-3.5" />
-        <span>{ui("Blocks & Content")}</span>
+        <span>{ui("Content")}</span>
       </button>
 
       <button

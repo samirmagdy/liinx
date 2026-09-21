@@ -120,10 +120,11 @@ describe('Builder Decomposition & Architectural Integrity', () => {
       expect(html).toContain('studio');
       
       // Sidebar tab navigation
-      expect(html).toContain('Blocks &amp; Content');
-      expect(html).toContain('Themes &amp; Styles');
-      expect(html).toContain('Analytics');
-      expect(html).toContain('Settings &amp; Plan');
+      expect(html).toContain('>Content</span>');
+      expect(html).toContain('>Themes &amp; Styles</span>');
+      // The glossary is Account → Site → Pages → Blocks, so each tab is one short noun.
+      expect(html).toContain('>Analytics</span>');
+      expect(html).toContain('>Settings &amp; Plan</span>');
 
       // Default active ContentPanel
       expect(html).toContain('Creator Identity');
@@ -148,7 +149,7 @@ describe('Builder Decomposition & Architectural Integrity', () => {
 
       expect(html).toContain('testcreator');
       expect(html).toContain('studio');
-      expect(html).toContain('Blocks &amp; Content');
+      expect(html).toContain('>Content</span>');
     });
   });
 
@@ -169,10 +170,11 @@ describe('Builder Decomposition & Architectural Integrity', () => {
     it('renders all four domain navigation tabs with proper accessibility attributes', () => {
       const html = renderWithProviders(<BuilderSidebar />);
 
-      expect(html).toContain('Blocks &amp; Content');
-      expect(html).toContain('Themes &amp; Styles');
-      expect(html).toContain('Analytics');
-      expect(html).toContain('Settings &amp; Plan');
+      expect(html).toContain('>Content</span>');
+      expect(html).toContain('>Themes &amp; Styles</span>');
+      // The glossary is Account → Site → Pages → Blocks, so each tab is one short noun.
+      expect(html).toContain('>Analytics</span>');
+      expect(html).toContain('>Settings &amp; Plan</span>');
     });
   });
 

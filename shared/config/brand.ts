@@ -59,3 +59,24 @@ export const brand: BrandConfig = {
   },
   reservedUsernames: RESERVED_USERNAMES
 };
+
+/**
+ * The one place a host string is written. Everything else imports from here.
+ *
+ * Origin rule:
+ * - Copy-link, QR targets and share buttons use `window.location.origin`, so a page
+ *   served from a creator's connected domain shares that address.
+ * - Marketing copy, canonical/OG fallbacks and "back to Studio" links use
+ *   `canonicalOrigin`, because they have to name the product rather than whatever
+ *   host happens to be serving the request.
+ */
+export const canonicalOrigin = `https://${brand.domain}`;
+
+/** Hosts that serve RALOA itself. Anything else is a creator's connected domain. */
+export const firstPartyHosts: readonly string[] = ['localhost', '127.0.0.1', '0.0.0.0', 'raloa.vercel.app', brand.domain];
+
+export function isFirstPartyHost(host: string): boolean {
+  const normalized = (host || '').split(':')[0].toLowerCase().trim();
+  if (!normalized) return true;
+  return firstPartyHosts.includes(normalized) || normalized.endsWith(`.${brand.domain}`);
+}

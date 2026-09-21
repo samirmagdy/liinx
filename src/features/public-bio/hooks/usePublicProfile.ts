@@ -4,6 +4,7 @@ import { api } from '../../../services/api';
 import { isAllowedFontStylesheetUrl } from '../../../utils/fontValidation';
 import { safePublicHref } from '../utils/publicBio.utils';
 import { findSystemDemoProfile } from '../../../../shared/index.js';
+import { canonicalOrigin } from '../../../config/brand';
 
 interface UsePublicProfileProps {
   initialProfile?: CreatorProfile;
@@ -32,8 +33,8 @@ function updatePublicProfileMetadata(profile: CreatorProfile, customDomain?: str
   const isDemo = Boolean(findSystemDemoProfile(profile.username));
   const canonical = customDomain
     ? `https://${customDomain}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`
-    : `https://raloa.app/@${profile.username}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`;
-  const image = profile.shareImageUrl || profile.avatarUrl || 'https://raloa.app/social/og-image-1200x630.jpg';
+    : `${canonicalOrigin}/@${profile.username}${profile.page && !profile.page.isHome ? `/${profile.page.slug}` : ''}`;
+  const image = profile.shareImageUrl || profile.avatarUrl || `${canonicalOrigin}/social/og-image-1200x630.jpg`;
 
   document.title = title;
   setMetaContent('meta[name="description"]', description);

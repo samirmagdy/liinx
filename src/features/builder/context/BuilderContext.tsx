@@ -3,6 +3,7 @@ import { type CreatorProfile, type ThemeConfig, type ProfileBlock, type CreatorP
 import { type SiteTemplate } from '../../../../shared/index.js';
 import { resolveTheme } from '../../../utils/colorContrast';
 import { api } from '../../../services/api';
+import { brand } from '../../../config/brand';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 import confetti from 'canvas-confetti';
@@ -556,7 +557,7 @@ export const BuilderProvider: React.FC<BuilderProviderProps> = ({
   };
 
   const handleCopyCname = () => {
-    navigator.clipboard?.writeText('raloa-app.fly.dev');
+    navigator.clipboard?.writeText(brand.cnameTarget);
     setCopiedCname(true);
     setTimeout(() => setCopiedCname(false), 2000);
   };

@@ -24,7 +24,7 @@ import { billingRouter } from './routes/billing.js';
 import { contactRouter } from './routes/contact.js';
 import { referralsRouter } from './routes/referrals.js';
 import { agencyReferralsRouter } from './routes/agencyReferrals.js';
-import { pageTitles, brand, findSystemDemoProfile } from '../shared/index.js';
+import { pageTitles, brand, isFirstPartyHost, findSystemDemoProfile } from '../shared/index.js';
 import * as Sentry from '@sentry/node';
 import { log, logError } from './logger.js';
 import { sharedRateLimit } from './middleware/rateLimit.js';
@@ -373,7 +373,7 @@ function sendHtmlFileWithNonce(res: express.Response, filePath: string) {
 // Custom Domain Host-Header Routing Engine
 function customDomainMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
   const host = (req.headers.host || '').split(':')[0].toLowerCase().trim();
-  if (isDefaultHost(host) || host.endsWith('.raloa.app')) return next();
+  if (isFirstPartyHost(host)) return next();
   const profile = db.prepare('SELECT id, username FROM profiles WHERE lower(custom_domain) = ? AND custom_domain_verified = 1').get(host) as { id: string; username: string } | undefined;
   if (!profile) return next();
   if (!hasEntitlement(getEffectivePlan(profile.id), 'customDomain')) return res.status(404).send('This custom domain is not available.');
@@ -382,9 +382,6 @@ function customDomainMiddleware(req: express.Request, res: express.Response, nex
   if (routeCustomDomainRequest(req, res, host, profile)) next();
 }
 
-function isDefaultHost(host: string) {
-  return !host || ['localhost', '127.0.0.1', '0.0.0.0', 'raloa.vercel.app', 'raloa.app'].includes(host);
-}
 
 function routeCustomDomainRequest(
   req: express.Request,

@@ -110,38 +110,29 @@ export function FeaturesPage() {
       <main id="main-content" tabIndex={-1} className="flex-1">
         {/* Hero Header */}
         <section className="max-w-6xl mx-auto px-6 pt-12 pb-8 space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{isRtl ? 'ميزات المنصة' : 'Platform features'}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{ui('Platform features')}</p>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-neutral-900 max-w-3xl leading-tight">
-            {isRtl ? (
-              <>
-                أنشئ صفحة لأعمالك. <br className="hidden sm:inline" />
-                <span className="text-neutral-500">روابطك ووسائطك في مكان واحد.</span>
-              </>
-            ) : (
-              <>
-                {ui("Create one page for your work.")}<br className="hidden sm:inline" />
-                <span className="block text-neutral-500">{ui("Links, media, and bookings.")}</span>
-              </>
-            )}
+            <>
+              {ui('Create one page for your work.')}<br className="hidden sm:inline" />
+              <span className="block text-neutral-500">{ui('Links, media, and bookings.')}</span>
+            </>
           </h1>
           <p className="text-base text-neutral-600 max-w-2xl leading-relaxed">
-            {isRtl 
-              ? 'أنشئ صفحة قابلة للتخصيص لروابطك ووسائطك وحجوزاتك وقائمتك البريدية.' 
-              : 'Build a customizable page for your links, media, bookings, and newsletter.'}
+            {ui('Build a customizable page for your links, media, bookings, and newsletter.')}
           </p>
           <div className="pt-2 flex flex-col sm:flex-row gap-3 items-start">
             <button
               onClick={() => setLocation('/register')}
               className="w-full sm:w-auto px-5 py-3 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-black transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>{isRtl ? 'أنشئ موقعك المصغر' : 'Build your micro-site'}</span>
+              <span>{ui('Build your site')}</span>
               <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
             </button>
             <button
               onClick={() => setLocation('/templates')}
               className="w-full sm:w-auto px-5 py-3 rounded-lg border border-neutral-300 text-neutral-800 font-semibold text-sm hover:bg-neutral-50 transition-colors cursor-pointer"
             >
-              {isRtl ? 'استكشف القوالب' : 'Explore Templates'}
+              {ui('Explore templates')}
             </button>
           </div>
         </section>

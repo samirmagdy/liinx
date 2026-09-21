@@ -51,7 +51,7 @@ export const BuilderShell: React.FC = () => {
 
   return (
     <div className="studio-shell min-h-[calc(100vh-72px)] bg-neutral-50 border-t border-neutral-200 flex flex-col">
-      <h1 className="sr-only">{ui('Bio Studio')} · @{profile.username}</h1>
+      <h1 className="sr-only">{ui('Studio')} · @{profile.username}</h1>
 
       <BuilderWorkspace />
 

@@ -2,7 +2,7 @@ import { Link, useLocation } from 'wouter';
 import { ArrowRight, Check } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { Reveal } from '../components/motion/Reveal';
 import { getGuides, type Guide } from './guides.data';
 
@@ -31,8 +31,9 @@ export function GuidesPage() {
 }
 
 function GuideArticle({ guide, ar }: { guide: Guide; ar: boolean }) {
+  const { tr: ui } = useUiLanguage();
   return <article>
-    <Link href="/guides" className="text-sm font-semibold text-indigo-800 hover:underline">{ar ? 'كل الأدلة' : 'All guides'}</Link>
+    <Link href="/guides" className="text-sm font-semibold text-indigo-800 hover:underline">{ui('All guides')}</Link>
     <Reveal distance="md" className="mt-8 max-w-3xl">
       <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-balance">{guide.title}</h1>
       <p className="mt-4 text-lg leading-relaxed text-neutral-600">{guide.summary}</p>
@@ -45,20 +46,21 @@ function GuideArticle({ guide, ar }: { guide: Guide; ar: boolean }) {
     </div>
     <div className="mt-8 flex items-start gap-3 rounded-2xl bg-neutral-50 p-5">
       <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
-      <p className="text-sm leading-relaxed text-neutral-700">{ar ? 'راجع الروابط والمعلومات بنفسك قبل مشاركة صفحتك. قد تتغير واجهات الخدمات الخارجية.' : 'Check your links and details before sharing. External services can change their interface over time.'}</p>
+      <p className="text-sm leading-relaxed text-neutral-700">{ui('Check your links and details before sharing. External services can change their interface over time.')}</p>
     </div>
     <Link href="/register" className="mt-8 inline-flex items-center gap-2 rounded-full bg-neutral-900 px-5 py-3 text-sm font-semibold text-white hover:bg-neutral-800">
-      {ar ? 'أنشئ موقعك المصغّر' : 'Build your mini-site'}<ArrowRight className={`h-4 w-4 ${ar ? 'rotate-180' : ''}`} />
+      {ui('Build your site')}<ArrowRight className={`h-4 w-4 ${ar ? 'rotate-180' : ''}`} />
     </Link>
   </article>;
 }
 
 function GuideIndex({ guides, ar }: { guides: Guide[]; ar: boolean }) {
+  const { tr: ui } = useUiLanguage();
   return <>
     <Reveal distance="md" className="max-w-3xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-800">{ar ? 'أدلة عملية' : 'Practical guides'}</p>
-      <h1 className="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl text-balance">{ar ? 'أفكار عملية لموقعك المصغّر' : 'Make your mini-site useful'}</h1>
-      <p className="mt-4 text-base leading-relaxed text-neutral-600">{ar ? 'إرشادات واضحة لبناء صفحة تعريف ومشاركة روابطك بالعربية والإنجليزية.' : 'Straightforward advice for building a useful profile page and sharing it in English or Arabic.'}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-800">{ui('Practical guides')}</p>
+      <h1 className="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl text-balance">{ui('Make your site useful')}</h1>
+      <p className="mt-4 text-base leading-relaxed text-neutral-600">{ui('Straightforward advice for building a useful page and sharing it in English or Arabic.')}</p>
     </Reveal>
     <div className="mt-10 divide-y divide-neutral-200 border-y border-neutral-200">
       {guides.map(guide => <Link key={guide.path} href={guide.path} className="group block py-6">

@@ -68,7 +68,7 @@ const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
         className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-neutral-700 hover:bg-neutral-50 hover:text-neutral-950 transition-colors"
       >
         <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
-        <span>{ui('Studio Builder')}</span>
+        <span>{ui('Studio')}</span>
       </Link>
 
       <Link

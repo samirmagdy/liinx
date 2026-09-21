@@ -112,7 +112,7 @@ export const BuilderToolbar: React.FC = () => {
                   className="w-full py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>{ui("New Bio Profile")}</span>
+                  <span>{ui("New site")}</span>
                 </button>
               </div>
             </div>

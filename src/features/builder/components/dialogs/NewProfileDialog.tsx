@@ -18,11 +18,11 @@ export const NewProfileDialog: React.FC = () => {
   } = useBuilder();
 
   return (
-    <Modal open={showNewProfileModal} onClose={() => setShowNewProfileModal(false)} label={ui('Create New Bio Profile')}>
+    <Modal open={showNewProfileModal} onClose={() => setShowNewProfileModal(false)} label={ui('Create a new site')}>
       <div className="bg-neutral-50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-scale-in border border-neutral-200">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-base text-neutral-900">{ui("Create New Bio Profile")}</h3>
+            <h3 className="font-bold text-base text-neutral-900">{ui("Create a new site")}</h3>
             <p className="text-xs text-neutral-500 mt-0.5">
               {ui("Add another project, brand, or persona under your account.")}
             </p>
@@ -90,7 +90,7 @@ export const NewProfileDialog: React.FC = () => {
               disabled={isCreatingProfile || !newUsername.trim() || !newDisplayName.trim()}
               className="px-5 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
             >
-              {isCreatingProfile ? ui("Creating...") : ui("Create Profile")}
+              {isCreatingProfile ? ui("Creating...") : ui("Create site")}
             </button>
           </div>
         </form>

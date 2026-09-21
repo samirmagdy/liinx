@@ -91,7 +91,7 @@ export const SignupStarterSiteStep: React.FC<{ flow: SignupFlow }> = ({ flow }) 
               </>
             ) : (
               <>
-                <span>{ui("Launch My Page")}</span>
+                <span>{ui("Create my site")}</span>
                 <Sparkles className="w-4 h-4 text-indigo-400" />
               </>
             )}

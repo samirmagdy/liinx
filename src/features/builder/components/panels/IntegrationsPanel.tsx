@@ -1,4 +1,5 @@
 import React from 'react';
+import { canonicalOrigin } from '../../../../config/brand';
 import {
   Terminal,
   Plus,
@@ -143,7 +144,7 @@ export const IntegrationsPanel: React.FC = () => {
             <div className="p-3 bg-neutral-900 text-neutral-200 rounded-xl space-y-1 text-xs font-mono">
               <span className="text-neutral-600 text-[11px] uppercase font-bold tracking-caps block">{ui("Sample API Request")}</span>
               <p className="text-xs select-all overflow-x-auto whitespace-nowrap">
-                <span dir="ltr">curl https://raloa.app/api/v1/profile</span><br />
+                <span dir="ltr">{`curl ${canonicalOrigin}/api/v1/profile`}</span><br />
                 {'  -H "Authorization: Bearer raloa_live_your_key_here"'}
               </p>
             </div>

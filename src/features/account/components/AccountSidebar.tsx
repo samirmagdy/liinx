@@ -1,12 +1,14 @@
 import { Building2, Gift, Key, Layers, Lock, ShieldCheck, User } from 'lucide-react';
+import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
 
 export type SettingsTab = 'profile' | 'billing' | 'profiles' | 'referrals' | 'agency-referrals' | 'developers' | 'security';
 
 export function AccountSidebar({ ar, activeTab, setActiveTab }: { ar: boolean; activeTab: SettingsTab; setActiveTab: (tab: SettingsTab) => void }) {
+  const { tr: ui } = useUiLanguage();
   const tabs = [
     { id: 'profile' as const, label: ar ? 'الملف الشخصي والحساب' : 'Profile & Login', icon: User },
     { id: 'billing' as const, label: ar ? 'الخطة والاشتراك' : 'Plans & Billing', icon: ShieldCheck },
-    { id: 'profiles' as const, label: ar ? 'الملفات والمواقع المصغرة' : 'Profiles & Sites', icon: Layers },
+    { id: 'profiles' as const, label: ui('Sites'), icon: Layers },
     { id: 'referrals' as const, label: ar ? 'دعوة المبدعين' : 'Refer creators', icon: Gift },
     { id: 'agency-referrals' as const, label: ar ? 'إحالات الوكالات' : 'Agency referrals', icon: Building2 },
     { id: 'developers' as const, label: ar ? 'المطورون ومفاتيح API' : 'API & Developer', icon: Key },

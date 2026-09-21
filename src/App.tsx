@@ -21,7 +21,7 @@ import { FeaturesPage } from './pages/FeaturesPage';
 import { AccountPage } from './pages/AccountPage';
 import { PrivacyPage, TermsPage, ContactPage, AboutPage } from './pages/LegalPages';
 import { api } from './services/api';
-import { RESERVED_USERNAMES } from './config/brand';
+import { RESERVED_USERNAMES, canonicalOrigin, isFirstPartyHost } from './config/brand';
 import { PageMetadata } from './components/PageMetadata';
 import { SkipLink } from './components/SkipLink';
 import { ProductFeedbackProvider } from './components/ProductFeedback';
@@ -313,7 +313,7 @@ function CustomDomainApp({ currentHost, language, routerBase, routerSsrPath }: R
                 <Suspense fallback={<BioSkeletonLoader />}><PublicBioView
                   customDomain={currentHost}
                   pageSlug={customPageSlug}
-                  onBackToStudio={() => window.location.href = 'https://raloa.app/studio'}
+                  onBackToStudio={() => window.location.href = `${canonicalOrigin}/studio`}
                 /></Suspense>
               </div>
             </div>
@@ -410,8 +410,7 @@ export default function App({ initialLanguage, initialPath }: AppProps = {}) {
   const language = initialLanguage || languageForPath(currentPath);
   const routerBase = language === 'ar' ? '/ar' : undefined;
   const routerSsrPath = initialPath ? { ssrPath: initialPath } : {};
-  const defaultHosts = ['localhost', '127.0.0.1', '0.0.0.0', 'raloa.vercel.app', 'raloa.app'];
-  const isCustomDomain = currentHost && !defaultHosts.includes(currentHost) && !currentHost.endsWith('.raloa.app');
+  const isCustomDomain = currentHost && !isFirstPartyHost(currentHost);
 
   return isCustomDomain
     ? <CustomDomainApp currentHost={currentHost} language={language} routerBase={routerBase} routerSsrPath={routerSsrPath} />

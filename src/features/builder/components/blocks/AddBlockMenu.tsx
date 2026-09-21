@@ -19,7 +19,7 @@ export const AddBlockMenu: React.FC = () => {
           className="w-full py-3.5 px-4 rounded-2xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
         >
           <Plus className="w-4 h-4" />
-          <span>{ui("Add New Link or Block to Profile")}</span>
+          <span>{ui("Add new link or block")}</span>
         </button>
 
         {showAddMenu && <AddBlockPopover />}

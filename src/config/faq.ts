@@ -1,4 +1,5 @@
 import type { Language } from './i18n';
+import { brand } from './brand';
 
 export function getFaqs(lang: Language, hasAnyImporter: boolean) {
   return lang === 'ar' ? [
@@ -13,7 +14,7 @@ export function getFaqs(lang: Language, hasAnyImporter: boolean) {
         : 'الاستيراد التلقائي من المنصات الأخرى متوقف حالياً لحين اكتمال التكامل الرسمي عبر واجهات API. يمكنك إضافة روابطك وترتيبها بسهولة ومباشرة عبر الاستوديو.'
     },
     { question: 'هل يمكن تصدير المحتوى أو إلغاء الخطة؟', answer: 'يمكنك تصدير مشتركي النشرة بصيغة CSV. تُدار الاشتراكات المدفوعة وإلغاؤها عبر Stripe؛ تواصل مع الدعم قبل تغيير الخطة إذا كنت تحتاج مساعدة في المحتوى.' },
-    { question: 'هل توجد خطة مجانية؟', answer: 'توجد خطة مجانية لنشر صفحة raloa.app. الخطط المدفوعة لا تتضمن فترة تجريبية مجانية وتُحصّل حسب الفترة المختارة في Stripe.' }
+    { question: 'هل توجد خطة مجانية؟', answer: `توجد خطة مجانية لنشر صفحة ${brand.domain}. الخطط المدفوعة لا تتضمن فترة تجريبية مجانية وتُحصّل حسب الفترة المختارة في Stripe.` }
   ] : [
     { question: 'How is RALOA different from a basic link page?', answer: 'RALOA combines links, supported media, newsletter capture, and a Calendly embed in a customizable designed page instead of only a list of buttons.' },
     { question: 'How do I start?', answer: 'Create a free account, add your links, choose a theme and open your published page to check it.' },
@@ -26,6 +27,6 @@ export function getFaqs(lang: Language, hasAnyImporter: boolean) {
         : 'Automated competitor imports are currently paused pending official provider API integrations. You can quickly add and organize your links directly in the Studio.'
     },
     { question: 'Can I export my content or cancel?', answer: 'Newsletter subscribers can be exported as CSV. Paid subscriptions and cancellations are handled through Stripe; contact support before changing plans if you need help with your content.' },
-    { question: 'Is there a free plan?', answer: 'There is a free plan for publishing a raloa.app page. Paid plans have no free trial and are charged for the selected interval through Stripe.' }
+    { question: 'Is there a free plan?', answer: `There is a free plan for publishing a ${brand.domain} page. Paid plans have no free trial and are charged for the selected interval through Stripe.` }
   ];
 }

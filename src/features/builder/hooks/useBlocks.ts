@@ -1,6 +1,7 @@
 import { useState, type Dispatch, type SetStateAction, type MutableRefObject } from 'react';
 import { type CreatorProfile, type CreatorPage, type ProfileBlock, type FolderBlock } from '../../../types';
 import { api } from '../../../services/api';
+import { canonicalOrigin } from '../../../config/brand';
 
 interface UseBlocksProps {
   profile: CreatorProfile;
@@ -124,7 +125,7 @@ export function useBlocks({
           subtitle: 'Expandable collection of destinations',
           items: [
             { id: 'f_1', title: 'Main Project', url: 'https://github.com' },
-            { id: 'f_2', title: 'Documentation', url: 'https://raloa.app/features' }
+            { id: 'f_2', title: 'Documentation', url: `${canonicalOrigin}/features` }
           ]
         }
       });

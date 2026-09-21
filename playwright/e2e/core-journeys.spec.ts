@@ -13,14 +13,14 @@ async function completeRegistration(page: Page, values: { username: string; emai
   await page.getByRole('button', { name: 'Continue to Step 2' }).click();
   await expect(page.getByText('What are you building?')).toBeVisible();
   await page.getByRole('button', { name: /Photographer \/ Visual Artist/ }).click();
-  await page.getByRole('button', { name: 'Launch My Page' }).click();
+  await page.getByRole('button', { name: 'Create my site' }).click();
   await expect(page).toHaveURL(/\/studio(?:\?|$)/);
 }
 
 test.describe('public discovery and localization', () => {
   test('public guide and privacy content render in English and Arabic RTL', async ({ page }) => {
     await page.goto('/guides');
-    await expect(page.getByRole('heading', { name: 'Make your mini-site useful' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Make your site useful' })).toBeVisible();
     await expect(page.getByRole('link', { name: /How to build an Arabic mini-site/ })).toBeVisible();
 
     await page.goto('/ar/privacy');
@@ -35,7 +35,7 @@ test.describe('public discovery and localization', () => {
     await expect(page.getByRole('link', { name: /RALOA/ }).first()).toBeVisible();
     await page.getByRole('link', { name: /Practical guides/ }).click();
     await expect(page).toHaveURL(/\/guides$/);
-    await expect(page.getByRole('heading', { name: 'Make your mini-site useful' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Make your site useful' })).toBeVisible();
     const dimensions = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
     expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.viewport);
   });
@@ -65,7 +65,7 @@ test.describe('account acquisition and session lifecycle', () => {
     await page.getByLabel('Choose password').fill(password);
     await page.getByRole('button', { name: 'Continue to Step 2' }).click();
     await expect(page.getByText('What are you building?')).toBeVisible();
-    await page.getByRole('button', { name: 'Launch My Page' }).click();
+    await page.getByRole('button', { name: 'Create my site' }).click();
     await expect(page).toHaveURL(/\/studio(?:\?|$)/);
 
     await page.goto('/');
@@ -74,7 +74,7 @@ test.describe('account acquisition and session lifecycle', () => {
     await page.getByLabel('Email address').fill(email);
     await page.getByLabel('Choose password').fill(password);
     await page.getByRole('button', { name: 'Continue to Step 2' }).click();
-    await page.getByRole('button', { name: 'Launch My Page' }).click();
+    await page.getByRole('button', { name: 'Create my site' }).click();
     await expect(page.getByText('An account with this email already exists.')).toBeVisible();
 
     await page.getByRole('link', { name: /sign in here/i }).click();
@@ -116,7 +116,7 @@ test.describe('creator publishing and account operations', () => {
     const email = `${username}@example.test`;
     await completeRegistration(page, { username, email, password: 'SecureBrowserPass2026!' });
 
-    await page.getByRole('button', { name: 'Add New Link or Block to Profile' }).click();
+    await page.getByRole('button', { name: 'Add new link or block' }).click();
     await page.getByRole('button', { name: /^Custom Link/ }).click();
     const title = page.getByRole('textbox', { name: 'Title' }).last();
     const destination = page.getByRole('textbox', { name: 'Destination URL' }).last();
@@ -127,7 +127,7 @@ test.describe('creator publishing and account operations', () => {
       blocks: expect.arrayContaining([expect.objectContaining({ subtitle: 'Portfolio', url: 'https://example.org/portfolio' })])
     });
 
-    await page.getByRole('button', { name: 'Add New Link or Block to Profile' }).click();
+    await page.getByRole('button', { name: 'Add new link or block' }).click();
     await page.getByRole('button', { name: /^Newsletter/ }).click();
     await expect.poll(async () => {
       const response = await page.request.get(`/api/profiles/${username}`);
@@ -200,7 +200,7 @@ test.describe('arabic studio reading order', () => {
     expect(handle!.at).toBeLessThan(handle!.name);
 
     const typed = await page.evaluate(() => {
-      const el = document.getElementById('builder-profile-displayName');
+      const el = document.getElementById('builder-profile-displayName') as HTMLInputElement | null;
       const cs = getComputedStyle(el);
       return { direction: cs.direction, value: el.value };
     });
