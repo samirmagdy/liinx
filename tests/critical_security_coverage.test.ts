@@ -11,7 +11,6 @@ import { isLoginRateLimited, isRegisterRateLimited, resetAuthRateLimits } from '
 import { isAllowedFontStylesheetUrl } from '../src/utils/fontValidation.js';
 import { friendlyErrorMessage } from '../src/utils/errors.js';
 import { SITE_TEMPLATES } from '../shared/index.js';
-import { COMPARISON_FEATURES } from '../src/config/marketing.js';
 import { getFaqs } from '../src/config/faq.js';
 import { paidPlans, PLAN_ENTITLEMENTS } from '../shared/config/plans.js';
 import { translations } from '../src/config/i18n.js';
@@ -966,7 +965,6 @@ describe('Critical Security & Coverage Modules', () => {
 
     it('verifies marketing plans, templates, and translation functions', () => {
       expect(SITE_TEMPLATES.length).toBeGreaterThan(0);
-      expect(COMPARISON_FEATURES.length).toBeGreaterThan(0);
       expect(getFaqs('en', false).length).toBeGreaterThan(0);
       expect(getFaqs('ar', false).length).toBeGreaterThan(0);
       expect(paidPlans.pro.month).toBe(1200);

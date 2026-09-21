@@ -1,50 +1,34 @@
-import React, { useState } from 'react';
-import { Sparkles } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import React from 'react';
+import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
-import { ComparisonToggle, type ComparisonTab } from './comparison/ComparisonToggle';
-import { LinkListPanel, RaloaPanel } from './comparison/ComparisonPanels';
+import { ComparisonFitList } from './comparison/ComparisonFitList';
+import { ComparisonHonestClose } from './comparison/ComparisonHonestClose';
 import { MigrationBanner } from './comparison/MigrationBanner';
 
+/** Who this is for, stated as fit rather than as a scorecard against a rival. */
 export function ComparisonSection() {
-  const { lang } = useLanguage();
-  const ar = lang === 'ar';
-  const [activeTab, setActiveTab] = useState<ComparisonTab>('both');
+  const { tr: ui } = useUiLanguage();
 
   return (
     <section id="comparison" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200 bg-neutral-50/50">
       <div className="max-w-7xl mx-auto">
-        
-        {/* Section Header */}
-        <Reveal distance="md" className="text-center max-w-3xl mx-auto mb-8">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-xs font-mono font-bold text-neutral-800 mb-3 tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              <span>{ar ? 'مقارنة بصرية واضحة' : 'The Visual Difference'}</span>
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
-              {ar ? 'موقع مصغر متكامل أم مجرد قائمة روابط؟' : 'A design-first mini website vs. A list of links'}
-            </h2>
-            <p className="text-base sm:text-lg text-neutral-600 leading-relaxed text-pretty">
-              {ar
-                ? 'شاهد الفرق بين قائمة روابط بسيطة وموقع مصغر مصمم بعناية يعكس هويتك الإبداعية.'
-                : 'See the difference between a link list and a design-first mini-site.'}
-            </p>
-          </div>
+        <Reveal distance="md" className="mb-8 max-w-3xl">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-4 text-balance">
+            {ui('Choose RALOA if any of these is true')}
+          </h2>
+          <p className="text-base sm:text-lg text-neutral-600 leading-relaxed text-pretty">
+            {ui('Six things the product does today. If none of them is yours, the section below says so plainly.')}
+          </p>
         </Reveal>
 
-        <ComparisonToggle ar={ar} active={activeTab} onSelect={setActiveTab} />
-
-        {/* Side-by-Side Visual Comparison Grid */}
         <Reveal stagger>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start mb-8">
-            <LinkListPanel ar={ar} hidden={activeTab === 'raloa'} />
-            <RaloaPanel ar={ar} hidden={activeTab === 'generic'} />
-          </div>
+          <ComparisonFitList />
+          <ComparisonHonestClose />
         </Reveal>
 
-        <MigrationBanner ar={ar} />
-
+        <Reveal className="mt-6">
+          <MigrationBanner />
+        </Reveal>
       </div>
     </section>
   );

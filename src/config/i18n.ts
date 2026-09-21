@@ -15,13 +15,6 @@ export interface PricingPlanTranslation {
   features: string[];
 }
 
-export interface ComparisonRow {
-  feature: string;
-  raloa: boolean | string;
-  linktree: boolean | string;
-  beacons: boolean | string;
-}
-
 export interface Translations {
   nav: {
     features: string;
@@ -78,17 +71,6 @@ export interface Translations {
     previewMobile: string;
     categories: string[];
     templates: Record<string, TemplateTranslation>;
-  };
-  comparisonSection: {
-    badge: string;
-    title: string;
-    subtitle: string;
-    featuresCol: string;
-    raloaCol: string;
-    linktreeCol: string;
-    beaconsCol: string;
-    included: string;
-    rows: ComparisonRow[];
   };
   pricingSection: {
     badge: string;
@@ -218,27 +200,6 @@ export const translations: Record<Language, Translations> = {
           description: 'Warm desert tones, elegant serif accents, and earthy hues for travel bloggers and lifestyle creators.'
         }
       }
-    },
-    comparisonSection: {
-      badge: 'THE HONEST COMPARISON',
-      title: 'Compare RALOA capabilities',
-      subtitle: 'See exactly what RALOA currently supports, what is handled by another provider, and what requires a paid plan.',
-      featuresCol: 'Features & Standards',
-      raloaCol: 'RALOA',
-      linktreeCol: 'Linktree',
-      beaconsCol: 'Beacons',
-      included: 'Included',
-      rows: [
-        { feature: 'Clean, Ad-Free Design', raloa: true, linktree: false, beacons: false },
-        { feature: 'Custom Domain (e.g. bio.yoursite.com)', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Supported Spotify & YouTube embeds', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Accordion folders for clean profiles', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Instagram caption link extraction when authorized', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'External checkout and support links', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Public page performance depends on content and hosting', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Curated design themes', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' },
-        { feature: 'Multiple profiles on eligible plans', raloa: true, linktree: 'Not assessed', beacons: 'Not assessed' }
-      ]
     },
     pricingSection: {
       badge: 'Transparent Pricing',
@@ -407,27 +368,6 @@ export const translations: Record<Language, Translations> = {
           description: 'درجات صحراوية دافئة، تفاصيل سيريف راقية، وألوان ترابية لمدوني السفر وصناع محتوى أسلوب الحياة.'
         }
       }
-    },
-    comparisonSection: {
-      badge: 'المقارنة الشفافة',
-      title: 'قارن إمكانات RALOA',
-      subtitle: 'راجع ما تدعمه RALOA حالياً، وما يتطلب مزوّداً خارجياً أو خطة مدفوعة.',
-      featuresCol: 'المعايير والمميزات',
-      raloaCol: 'RALOA',
-      linktreeCol: 'Linktree',
-      beaconsCol: 'Beacons',
-      included: 'مشمول',
-      rows: [
-        { feature: 'تصميم نظيف وخالٍ تماماً من الإعلانات', raloa: true, linktree: false, beacons: false },
-        { feature: 'دومين مخصص (مثل bio.yoursite.com)', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'تضمينات Spotify وYouTube المدعومة', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'مجلدات قابلة للطي لتقليل التمرير', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'استخراج روابط Instagram عند التفويض', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'روابط دفع ودعم خارجية', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'أداء الصفحة يعتمد على المحتوى والاستضافة', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'سمات تصميم مختارة بعناية', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' },
-        { feature: 'إدارة ملفات متعددة في الخطط المؤهلة', raloa: true, linktree: 'غير مُقيّم', beacons: 'غير مُقيّم' }
-      ]
     },
     pricingSection: {
       badge: 'أسعار واضحة',
