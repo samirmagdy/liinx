@@ -1,5 +1,6 @@
 import React from 'react';
 import { type ThemeConfig } from '../../../types';
+import { getThemeBackground } from '../../../utils/colorContrast';
 
 export function safePublicHref(value: unknown): string | null {
   if (typeof value !== 'string') return null;
@@ -83,6 +84,30 @@ export function getRadiusClass(radius: ThemeConfig['cardRadius'], isComplex: boo
 
 export function isArabicText(text?: string): boolean {
   return /[\u0600-\u06FF]/.test(text || '');
+}
+
+export function buildShellStyle(
+  theme: ThemeConfig,
+  options: { hasBackgroundMedia: boolean; backgroundMediaType?: string; backgroundMediaHref: string | null }
+): React.CSSProperties {
+  const themeBackground = getThemeBackground(theme);
+  const imageBackdrop = options.hasBackgroundMedia && options.backgroundMediaType === 'image';
+
+  return {
+    ...themeBackground,
+    backgroundImage: imageBackdrop ? `url(${options.backgroundMediaHref})` : themeBackground.backgroundImage,
+    backgroundSize: imageBackdrop ? 'cover' : undefined,
+    backgroundPosition: imageBackdrop ? 'center center' : undefined,
+    backgroundAttachment: imageBackdrop ? 'scroll' : undefined,
+    color: theme.textColor,
+    fontFamily: themeFontVar(theme.fontFamily)
+  };
+}
+
+export function themeFontVar(fontFamily: ThemeConfig['fontFamily']): string {
+  if (fontFamily === 'display') return 'var(--font-display)';
+  if (fontFamily === 'mono') return 'var(--font-mono)';
+  return 'var(--font-sans)';
 }
 
 export function renderRichTextInline(value: string): React.ReactNode[] {

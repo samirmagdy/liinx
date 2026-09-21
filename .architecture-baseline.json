@@ -56,15 +56,8 @@
       "functions": []
     },
     "src/components/ComparisonSection.tsx": {
-      "lines": 298,
-      "functions": [
-        {
-          "name": "ComparisonSection",
-          "lines": 280,
-          "complexity": 49,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 52,
+      "functions": []
     },
     "src/components/FaqSection.tsx": {
       "lines": 70,
@@ -102,15 +95,8 @@
       "functions": []
     },
     "src/components/LinktreeImporterModal.tsx": {
-      "lines": 400,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 373,
-          "complexity": 38,
-          "maxDepth": 4
-        }
-      ]
+      "lines": 94,
+      "functions": []
     },
     "src/components/LoadingLogo.tsx": {
       "lines": 49,
@@ -125,15 +111,8 @@
       "functions": []
     },
     "src/components/Navbar.tsx": {
-      "lines": 298,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 169,
-          "complexity": 18,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 50,
+      "functions": []
     },
     "src/components/PageMetadata.tsx": {
       "lines": 55,
@@ -180,15 +159,8 @@
       ]
     },
     "src/components/QrCodeModal.tsx": {
-      "lines": 231,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 204,
-          "complexity": 23,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 115,
+      "functions": []
     },
     "src/components/RaloaLogo.tsx": {
       "lines": 65,
@@ -229,12 +201,84 @@
       "lines": 36,
       "functions": []
     },
+    "src/components/comparison/ComparisonFeatureList.tsx": {
+      "lines": 28,
+      "functions": []
+    },
+    "src/components/comparison/ComparisonPanels.tsx": {
+      "lines": 105,
+      "functions": []
+    },
+    "src/components/comparison/ComparisonToggle.tsx": {
+      "lines": 30,
+      "functions": []
+    },
+    "src/components/comparison/MigrationBanner.tsx": {
+      "lines": 37,
+      "functions": []
+    },
+    "src/components/comparison/RaloaMockup.tsx": {
+      "lines": 62,
+      "functions": []
+    },
+    "src/components/comparison/comparisonContent.ts": {
+      "lines": 51,
+      "functions": []
+    },
+    "src/components/importer/ImportLinkSelector.tsx": {
+      "lines": 61,
+      "functions": []
+    },
+    "src/components/importer/ImportedProfileCard.tsx": {
+      "lines": 40,
+      "functions": []
+    },
+    "src/components/importer/ImporterError.tsx": {
+      "lines": 10,
+      "functions": []
+    },
+    "src/components/importer/ImporterReview.tsx": {
+      "lines": 120,
+      "functions": []
+    },
+    "src/components/importer/ImporterUnavailable.tsx": {
+      "lines": 57,
+      "functions": []
+    },
+    "src/components/importer/ImporterUrlForm.tsx": {
+      "lines": 63,
+      "functions": []
+    },
+    "src/components/importer/useImportPreview.ts": {
+      "lines": 101,
+      "functions": []
+    },
+    "src/components/importer/useLinkImport.ts": {
+      "lines": 96,
+      "functions": []
+    },
     "src/components/motion/AccordionPanel.tsx": {
       "lines": 26,
       "functions": []
     },
     "src/components/motion/Reveal.tsx": {
       "lines": 27,
+      "functions": []
+    },
+    "src/components/navbar/NavbarBrandLinks.tsx": {
+      "lines": 58,
+      "functions": []
+    },
+    "src/components/navbar/NavbarDesktopActions.tsx": {
+      "lines": 73,
+      "functions": []
+    },
+    "src/components/navbar/NavbarMobileActions.tsx": {
+      "lines": 60,
+      "functions": []
+    },
+    "src/components/navbar/NavbarMobileMenu.tsx": {
+      "lines": 107,
       "functions": []
     },
     "src/components/phone-preview/PhoneBlocksList.tsx": {
@@ -260,6 +304,34 @@
     },
     "src/components/phone-preview/PhoneSocialsRow.tsx": {
       "lines": 61,
+      "functions": []
+    },
+    "src/components/qr/QrModalHeader.tsx": {
+      "lines": 24,
+      "functions": []
+    },
+    "src/components/qr/QrPreview.tsx": {
+      "lines": 38,
+      "functions": []
+    },
+    "src/components/qr/QrShareActions.tsx": {
+      "lines": 52,
+      "functions": []
+    },
+    "src/components/qr/QrTargetSelect.tsx": {
+      "lines": 27,
+      "functions": []
+    },
+    "src/components/qr/QrTintPicker.tsx": {
+      "lines": 45,
+      "functions": []
+    },
+    "src/components/qr/useQrShare.ts": {
+      "lines": 79,
+      "functions": []
+    },
+    "src/components/qr/useQrTarget.ts": {
+      "lines": 38,
       "functions": []
     },
     "src/context/AuthContext.tsx": {
@@ -343,15 +415,8 @@
       "functions": []
     },
     "src/features/builder/components/BuilderShell.tsx": {
-      "lines": 423,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 404,
-          "complexity": 28,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 102,
+      "functions": []
     },
     "src/features/builder/components/BuilderSidebar.tsx": {
       "lines": 62,
@@ -367,6 +432,10 @@
           "maxDepth": 3
         }
       ]
+    },
+    "src/features/builder/components/BuilderWorkspace.tsx": {
+      "lines": 87,
+      "functions": []
     },
     "src/features/builder/components/PreviewControls.tsx": {
       "lines": 64,
@@ -426,6 +495,26 @@
       "lines": 269,
       "functions": []
     },
+    "src/features/builder/components/dialogs/ApiKeyDialog.tsx": {
+      "lines": 93,
+      "functions": []
+    },
+    "src/features/builder/components/dialogs/ApiKeyForm.tsx": {
+      "lines": 72,
+      "functions": []
+    },
+    "src/features/builder/components/dialogs/ApiKeyResult.tsx": {
+      "lines": 62,
+      "functions": []
+    },
+    "src/features/builder/components/dialogs/ConfirmDeleteDialog.tsx": {
+      "lines": 50,
+      "functions": []
+    },
+    "src/features/builder/components/dialogs/NewProfileDialog.tsx": {
+      "lines": 101,
+      "functions": []
+    },
     "src/features/builder/components/pages/PageManager.tsx": {
       "lines": 185,
       "functions": [
@@ -449,26 +538,24 @@
       ]
     },
     "src/features/builder/components/panels/AppearancePanel.tsx": {
-      "lines": 175,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 158,
-          "complexity": 14,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 11,
+      "functions": []
+    },
+    "src/features/builder/components/panels/AppearancePresetsCard.tsx": {
+      "lines": 78,
+      "functions": []
+    },
+    "src/features/builder/components/panels/AvatarUploader.tsx": {
+      "lines": 59,
+      "functions": []
     },
     "src/features/builder/components/panels/ContentPanel.tsx": {
-      "lines": 225,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 213,
-          "complexity": 13,
-          "maxDepth": 1
-        }
-      ]
+      "lines": 93,
+      "functions": []
+    },
+    "src/features/builder/components/panels/IdentityFields.tsx": {
+      "lines": 83,
+      "functions": []
     },
     "src/features/builder/components/panels/IntegrationsPanel.tsx": {
       "lines": 328,
@@ -494,6 +581,14 @@
     },
     "src/features/builder/components/panels/SubscribersPanel.tsx": {
       "lines": 77,
+      "functions": []
+    },
+    "src/features/builder/components/panels/ThemeGeometryCard.tsx": {
+      "lines": 103,
+      "functions": []
+    },
+    "src/features/builder/components/panels/UsernameChangeDialog.tsx": {
+      "lines": 58,
       "functions": []
     },
     "src/features/builder/components/social/SocialLinksEditor.tsx": {
@@ -620,20 +715,25 @@
       "lines": 36,
       "functions": []
     },
+    "src/features/public-bio/components/PublicBioBackdrop.tsx": {
+      "lines": 23,
+      "functions": []
+    },
     "src/features/public-bio/components/PublicBioHeader.tsx": {
       "lines": 107,
       "functions": []
     },
+    "src/features/public-bio/components/PublicBioMain.tsx": {
+      "lines": 77,
+      "functions": []
+    },
     "src/features/public-bio/components/PublicBioShell.tsx": {
-      "lines": 269,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 237,
-          "complexity": 35,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 118,
+      "functions": []
+    },
+    "src/features/public-bio/components/PublicBioTracking.tsx": {
+      "lines": 45,
+      "functions": []
     },
     "src/features/public-bio/components/PublicBlockRenderer.tsx": {
       "lines": 164,
@@ -645,6 +745,10 @@
           "maxDepth": 1
         }
       ]
+    },
+    "src/features/public-bio/components/PublicBlocksList.tsx": {
+      "lines": 73,
+      "functions": []
     },
     "src/features/public-bio/components/PublicPageNavigation.tsx": {
       "lines": 52,
@@ -815,6 +919,18 @@
         }
       ]
     },
+    "src/features/public-bio/hooks/useBackgroundMedia.ts": {
+      "lines": 16,
+      "functions": []
+    },
+    "src/features/public-bio/hooks/useBlockPlayback.ts": {
+      "lines": 45,
+      "functions": []
+    },
+    "src/features/public-bio/hooks/usePublicBioState.ts": {
+      "lines": 72,
+      "functions": []
+    },
     "src/features/public-bio/hooks/usePublicProfile.ts": {
       "lines": 173,
       "functions": [
@@ -831,7 +947,7 @@
       "functions": []
     },
     "src/features/public-bio/utils/publicBio.utils.tsx": {
-      "lines": 137,
+      "lines": 162,
       "functions": []
     },
     "src/features/public-bio/utils/shareUtils.ts": {
