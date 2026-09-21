@@ -4,7 +4,7 @@ import { bookingUrl } from '../../shared/index.js';
 import { blockExtraSchemas, normalizeFormFields, parseBlockContract, type ContractBlockType } from '../contracts.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { invalidatePublicProfileCache } from './profiles.js';
-import { createId } from '../utils/ids.js';
+import { createHomePage, insertBlocks, newBlockId, nextBlockPosition, type CompositionBlock } from '../services/siteComposition.js';
 import bcrypt from 'bcryptjs';
 import { sharedRateLimit } from '../middleware/rateLimit.js';
 import { hasEntitlement } from '../entitlements.js';
@@ -64,29 +64,18 @@ function resolveBlockPage(profileId: string, pageId?: string): { id: string } | 
     : db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profileId) as { id: string } | undefined;
 
   if (selectedPage || pageId || !profile) return selectedPage;
-
-  const homeId = createId('page');
-  const now = Date.now();
-  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-    .run(homeId, profileId, profile.displayName || 'Home', now, now);
-  return { id: homeId };
-}
-
-function nextBlockPosition(profileId: string, pageId: string): number {
-  const row = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, pageId) as { maxPos: number | null };
-  return row.maxPos === null ? 0 : row.maxPos + 1;
+  return { id: createHomePage(profileId, profile.displayName || 'Home') };
 }
 
 type NewBlockData = BlockRequestData & { type: ContractBlockType; title: string };
 
-/** Column order for the blocks INSERT shared by the route and its response shape. */
-function blockInsertValues(id: string, profileId: string, position: number, pageId: string, now: number, data: NewBlockData): Array<string | number | null> {
+function newBlockRow(id: string, position: number, pageId: string, data: NewBlockData): CompositionBlock {
   const { type, title, url, subtitle, badge, icon, highlighted, visible, startAt, endAt, extra } = data;
-  return [
-    id, profileId, type, title, url || null, subtitle || null, icon || null, badge || null,
-    highlighted ? 1 : 0, visible === false ? 0 : 1, position, startAt || null, endAt || null, pageId,
-    prepareBlockExtra(type, extra), now, now
-  ];
+  return {
+    id, type, title, url: url || null, subtitle: subtitle || null, icon: icon || null, badge: badge || null,
+    highlighted: Boolean(highlighted), visible: visible !== false, position, startAt: startAt || null,
+    endAt: endAt || null, pageId, extraJson: prepareBlockExtra(type, extra)
+  };
 }
 
 function createdBlockResponse(id: string, position: number, pageId: string, now: number, data: NewBlockData) {
@@ -160,16 +149,12 @@ blocksRouter.post('/studio/blocks', requireAuth, (req: AuthenticatedRequest, res
       return res.status(403).json({ error: 'Scheduled links require a Pro or Studio subscription plan.' });
     }
     const now = Date.now();
-    const id = createId('blk');
+    const id = newBlockId();
 
     // Get current max position
     const nextPos = nextBlockPosition(profileId, resolvedPage.id);
 
-    db.prepare(`
-      INSERT INTO blocks (
-        id, profile_id, type, title, url, subtitle, icon, badge, highlighted, visible, position, start_at, end_at, page_id, extra_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(...blockInsertValues(id, profileId, nextPos, resolvedPage.id, now, data));
+    insertBlocks(profileId, [newBlockRow(id, nextPos, resolvedPage.id, data)], now);
     invalidatePublicProfileCache(profileId);
 
     res.status(201).json(createdBlockResponse(id, nextPos, resolvedPage.id, now, data));
@@ -242,10 +227,10 @@ blocksRouter.put('/studio/blocks/:id/move', requireAuth, (req: AuthenticatedRequ
     const page = db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(targetPageId, profileId) as { id: string } | undefined;
     if (!block || !page) return res.status(400).json({ error: 'The block and destination page must belong to this profile.' });
     if (block.pageId === page.id) return res.json({ success: true, block: { id: block.id, pageId: page.id } });
-    const max = db.prepare('SELECT COALESCE(MAX(position), -1) as value FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, page.id) as { value: number };
-    db.prepare('UPDATE blocks SET page_id = ?, position = ?, updated_at = ? WHERE id = ? AND profile_id = ?').run(page.id, max.value + 1, Date.now(), blockId, profileId);
+    const position = nextBlockPosition(profileId, page.id);
+    db.prepare('UPDATE blocks SET page_id = ?, position = ?, updated_at = ? WHERE id = ? AND profile_id = ?').run(page.id, position, Date.now(), blockId, profileId);
     invalidatePublicProfileCache(profileId);
-    res.json({ success: true, block: { id: block.id, pageId: page.id, position: max.value + 1 } });
+    res.json({ success: true, block: { id: block.id, pageId: page.id, position } });
   } catch (err: any) {
     console.error('Move block error:', err);
     res.status(500).json({ error: 'Failed to move block.' });
@@ -261,12 +246,16 @@ blocksRouter.post('/studio/blocks/:id/duplicate', requireAuth, (req: Authenticat
     const targetPageId = typeof req.body?.pageId === 'string' ? req.body.pageId : source.page_id;
     const page = db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(targetPageId, profileId) as { id: string } | undefined;
     if (!page) return res.status(400).json({ error: 'The destination page does not belong to this profile.' });
-    const max = db.prepare('SELECT COALESCE(MAX(position), -1) as value FROM blocks WHERE profile_id = ? AND page_id = ?').get(profileId, page.id) as { value: number };
+    const position = nextBlockPosition(profileId, page.id);
     const now = Date.now();
-    const id = createId('blk');
-    db.prepare(`INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, visible, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, profileId, source.type, source.title, source.url, source.subtitle, source.icon, source.badge, source.highlighted, source.visible === 0 ? 0 : 1, max.value + 1, source.start_at, source.end_at, page.id, source.extra_json, now, now);
+    const id = newBlockId();
+    insertBlocks(profileId, [{
+      id, type: source.type, title: source.title, url: source.url, subtitle: source.subtitle,
+      icon: source.icon, badge: source.badge, highlighted: Boolean(source.highlighted), visible: source.visible !== 0,
+      position, startAt: source.start_at, endAt: source.end_at, pageId: page.id, extraJson: source.extra_json
+    }], now);
     invalidatePublicProfileCache(profileId);
-    res.status(201).json({ success: true, block: { id, revision: now, type: source.type, title: source.title, url: source.url, subtitle: source.subtitle, icon: source.icon, badge: source.badge, highlighted: Boolean(source.highlighted), visible: source.visible !== 0, position: max.value + 1, pageId: page.id } });
+    res.status(201).json({ success: true, block: { id, revision: now, type: source.type, title: source.title, url: source.url, subtitle: source.subtitle, icon: source.icon, badge: source.badge, highlighted: Boolean(source.highlighted), visible: source.visible !== 0, position, pageId: page.id } });
   } catch (err: any) {
     console.error('Duplicate block error:', err);
     res.status(500).json({ error: 'Failed to duplicate block.' });

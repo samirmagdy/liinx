@@ -16,6 +16,7 @@ import {
   profileUpdateContract
 } from '../../shared/index.js';
 import { createId } from '../utils/ids.js';
+import { createHomePage, insertBlocks, insertPages, newBlockId, newPageId } from '../services/siteComposition.js';
 import { entitlementsFor, hasEntitlement, normalizePlan } from '../entitlements.js';
 import { getEffectivePlan, syncAccountPlanToProfiles } from '../accountEntitlements.js';
 import { normalizeCustomDomain } from '../utils/customDomain.js';
@@ -69,6 +70,7 @@ export function isAllowedFontStylesheetUrl(value: string | null | undefined): bo
 }
 
 const publishedPagesSql = 'SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published FROM pages WHERE profile_id = ? AND published = 1 ORDER BY sort_order ASC, created_at ASC';
+const studioPagesSql = 'SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC';
 
 function publicDemoPayload(systemDemo: any) {
   const homePage = { id: `page_${systemDemo.id}_home`, slug: 'home', title: 'Home', sortOrder: 0, isHome: true, published: true };
@@ -89,11 +91,7 @@ function publicDemoPayload(systemDemo: any) {
 function publishedPagesForProfile(profile: any): any[] {
   let pages = db.prepare(publishedPagesSql).all(profile.id) as any[];
   if (pages.length) return pages;
-  const homeId = createId('page');
-  const now = Date.now();
-  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-    .run(homeId, profile.id, profile.display_name || 'Home', now, now);
-  db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
+  createHomePage(profile.id, profile.display_name || 'Home');
   pages = db.prepare(publishedPagesSql).all(profile.id) as any[];
   return pages;
 }
@@ -175,21 +173,15 @@ function cachePublicProfile(key: string, payload: Record<string, unknown>): void
   publicProfileCache.set(key, { expiresAt: Date.now() + PUBLIC_PROFILE_CACHE_TTL_MS, payload });
 }
 
-function studioPagesForProfile(profile: any): any[] {
-  let pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC')
-    .all(profile.id) as any[];
+export function studioPagesForProfile(profile: any): any[] {
+  let pages = db.prepare(studioPagesSql).all(profile.id) as any[];
   if (pages.length) return pages;
-  const homeId = createId('page');
-  const now = Date.now();
-  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`)
-    .run(homeId, profile.id, profile.display_name || 'Home', now, now);
-  db.prepare('UPDATE blocks SET page_id = ? WHERE profile_id = ? AND page_id IS NULL').run(homeId, profile.id);
-  pages = db.prepare('SELECT id, slug, title, description, sort_order as sortOrder, is_home as isHome, published, updated_at as revision FROM pages WHERE profile_id = ? ORDER BY sort_order ASC, created_at ASC')
-    .all(profile.id) as any[];
+  createHomePage(profile.id, profile.display_name || 'Home');
+  pages = db.prepare(studioPagesSql).all(profile.id) as any[];
   return pages;
 }
 
-function studioBlocksForProfile(profile: any, pages: any[]): any[] {
+export function studioBlocksForProfile(profile: any, pages: any[]): any[] {
   const blocks = db.prepare('SELECT * FROM blocks WHERE profile_id = ? ORDER BY position ASC').all(profile.id) as any[];
   const clickRows = db.prepare('SELECT block_id, COUNT(*) as clicks FROM link_clicks WHERE profile_id = ? GROUP BY block_id')
     .all(profile.id) as { block_id: string; clicks: number }[];
@@ -211,7 +203,7 @@ function studioBlocksForProfile(profile: any, pages: any[]): any[] {
   });
 }
 
-function studioProfilePayload(profile: any, pages: any[], blocks: any[]) {
+export function studioProfilePayload(profile: any, pages: any[], blocks: any[]) {
   const plan = getEffectivePlan(profile.id);
   const canCustomize = hasEntitlement(plan, 'paidCustomization');
   const canUseDomain = hasEntitlement(plan, 'customDomain');
@@ -672,22 +664,23 @@ function duplicatePagesAndBlocks(profileId: string, homePageId: string, now: num
   db.prepare('DELETE FROM pages WHERE profile_id = ? AND id != ?').run(profileId, homePageId);
   const pageMap = new Map<string, string>();
   const blockMap = new Map<string, string>();
-  for (const page of sourcePages) pageMap.set(page.id, page.is_home ? homePageId : createId('page'));
-  for (const block of sourceBlocks) blockMap.set(block.id, createId('blk'));
-  const insertPage = db.prepare('INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-  for (const page of sourcePages) {
-    if (page.is_home) continue;
-    insertPage.run(pageMap.get(page.id), profileId, page.slug, page.title, page.description, page.sort_order, 0, page.published, now, now);
-  }
-  const insertBlock = db.prepare('INSERT INTO blocks (id, profile_id, type, title, url, subtitle, icon, badge, highlighted, visible, position, start_at, end_at, page_id, extra_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-  for (const block of sourceBlocks) {
+  for (const page of sourcePages) pageMap.set(page.id, page.is_home ? homePageId : newPageId());
+  for (const block of sourceBlocks) blockMap.set(block.id, newBlockId());
+  insertPages(profileId, sourcePages.filter(page => !page.is_home).map(page => ({
+    id: pageMap.get(page.id), slug: page.slug, title: page.title, description: page.description,
+    sortOrder: page.sort_order, isHome: false, published: Boolean(page.published)
+  })), now);
+  insertBlocks(profileId, sourceBlocks.map(block => {
     const sanitizedExtra = duplicatedBlockExtra(block.type, block.extra_json);
     const remappedExtra = sanitizedExtra ? JSON.stringify(remapDuplicatedValue(JSON.parse(sanitizedExtra), pageMap, blockMap)) : null;
     const remappedUrl = typeof block.url === 'string' ? remapDuplicatedValue(block.url, pageMap, blockMap) : block.url;
-    insertBlock.run(blockMap.get(block.id), profileId, block.type, block.title, remappedUrl, block.subtitle,
-      block.icon, block.badge, block.highlighted, block.visible === 0 ? 0 : 1, block.position, block.start_at, block.end_at,
-      pageMap.get(block.page_id) || homePageId, remappedExtra, now, now);
-  }
+    return {
+      id: blockMap.get(block.id), type: block.type, title: block.title, url: remappedUrl, subtitle: block.subtitle,
+      icon: block.icon, badge: block.badge, highlighted: Boolean(block.highlighted), visible: block.visible !== 0,
+      position: block.position, startAt: block.start_at, endAt: block.end_at,
+      pageId: pageMap.get(block.page_id) || homePageId, extraJson: remappedExtra
+    };
+  }), now);
 }
 
 function insertProfileRecord(
@@ -721,11 +714,15 @@ function insertProfileRecord(
     source.footer_logo_alt || null, source.background_media_url || null,
     source.background_media_type || null, now, now);
 
-  const homePageId = createId('page');
-  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, ?, 0, 1, 1, ?, ?)`)
-    .run(homePageId, profileId, sourceHome.title || displayName, sourceHome.description || null, now, now);
-  db.prepare('INSERT INTO blocks (id, profile_id, type, title, url, position, page_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-    .run(createId('blk'), profileId, 'link', 'My Website', 'https://example.com', 0, homePageId, now, now);
+  const homePageId = newPageId();
+  insertPages(profileId, [{
+    id: homePageId, slug: 'home', title: sourceHome.title || displayName, description: sourceHome.description || null,
+    sortOrder: 0, isHome: true, published: true
+  }], now);
+  insertBlocks(profileId, [{
+    id: newBlockId(), type: 'link', title: 'My Website', url: 'https://example.com', subtitle: null, icon: null,
+    badge: null, highlighted: false, visible: true, position: 0, startAt: null, endAt: null, pageId: homePageId, extraJson: null
+  }], now);
   if (duplicateSource) duplicatePagesAndBlocks(profileId, homePageId, now, sourcePages, sourceBlocks);
   db.exec('COMMIT');
 }

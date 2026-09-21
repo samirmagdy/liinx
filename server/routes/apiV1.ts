@@ -5,6 +5,7 @@ import { db } from '../db.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { parseBlockContract } from '../contracts.js';
 import { createId } from '../utils/ids.js';
+import { createHomePage, homePageId, insertBlocks, newBlockId, nextBlockPosition } from '../services/siteComposition.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 import { hasEntitlement } from '../entitlements.js';
 import { getEffectivePlan } from '../accountEntitlements.js';
@@ -207,25 +208,24 @@ apiV1Router.post('/v1/blocks', requireApiKey, (req: ApiKeyRequest, res: Response
       if (existingKey) return res.status(200).json({ ...JSON.parse(existingKey.response_json), idempotentReplay: true });
     }
     const now = Date.now();
-    const id = createId('blk');
+    const id = newBlockId();
+    const existingHome = homePageId(profile.id);
     const createBlock = db.transaction(() => {
       let targetPage = pageId
         ? db.prepare('SELECT id FROM pages WHERE id = ? AND profile_id = ?').get(pageId, profile.id) as { id: string } | undefined
-        : db.prepare('SELECT id FROM pages WHERE profile_id = ? AND is_home = 1').get(profile.id) as { id: string } | undefined;
+        : (existingHome ? { id: existingHome } : undefined);
       if (!targetPage) {
         if (pageId) throw new Error('PAGE_NOT_FOUND');
-        const homeId = createId('page');
-        db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, 'home', ?, NULL, 0, 1, 1, ?, ?)`).run(homeId, profile.id, profile.display_name || 'Home', now, now);
-        targetPage = { id: homeId };
+        targetPage = { id: createHomePage(profile.id, profile.display_name || 'Home', null, now) };
       }
 
-      const maxPosRow = db.prepare('SELECT MAX(position) as maxPos FROM blocks WHERE profile_id = ? AND page_id = ?').get(profile.id, targetPage.id) as { maxPos: number | null };
-    const nextPos = (maxPosRow && maxPosRow.maxPos !== null) ? maxPosRow.maxPos + 1 : 0;
+      const nextPos = nextBlockPosition(profile.id, targetPage.id);
 
-    db.prepare(`
-      INSERT INTO blocks (id, profile_id, type, title, url, subtitle, badge, highlighted, position, page_id, created_at, updated_at)
-      VALUES (?, ?, 'link', ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(id, profile.id, title, url, subtitle || null, badge || null, highlighted ? 1 : 0, nextPos, targetPage.id, now, now);
+      insertBlocks(profile.id, [{
+        id, type: 'link', title, url, subtitle: subtitle || null, icon: null, badge: badge || null,
+        highlighted: Boolean(highlighted), visible: true, position: nextPos, startAt: null, endAt: null,
+        pageId: targetPage.id, extraJson: null
+      }], now);
       const response = { success: true, block: { id, type: 'link', title, url, subtitle: subtitle || null, badge: badge || null, highlighted: Boolean(highlighted), position: nextPos, pageId: targetPage.id, createdAt: now } };
       if (idempotencyKey) db.prepare('INSERT INTO api_idempotency_keys (request_key, profile_id, response_json, created_at) VALUES (?, ?, ?, ?)').run(idempotencyKey, profile.id, JSON.stringify(response), now);
       return response;

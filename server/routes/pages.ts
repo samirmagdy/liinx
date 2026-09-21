@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { db } from '../db.js';
 import { pageContract, pageUpdateContract, RESERVED_USERNAMES } from '../../shared/index.js';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
-import { createId } from '../utils/ids.js';
+import { insertPages, newPageId, nextPageSortOrder } from '../services/siteComposition.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 
 export const pagesRouter = Router();
@@ -35,10 +35,10 @@ pagesRouter.post('/studio/pages', requireAuth, (req: AuthenticatedRequest, res) 
   if (RESERVED_PAGE_SLUGS.has(parsed.data.slug)) return res.status(400).json({ error: 'This page slug is reserved. Choose another URL slug.' });
   const existing = db.prepare('SELECT id FROM pages WHERE profile_id = ? AND slug = ?').get(profileId, parsed.data.slug);
   if (existing) return res.status(409).json({ error: 'A page with this slug already exists.' });
-  const max = db.prepare('SELECT COALESCE(MAX(sort_order), -1) as value FROM pages WHERE profile_id = ?').get(profileId) as { value: number };
+  const max = nextPageSortOrder(profileId);
   const now = Date.now();
-  const page = { id: createId('page'), profileId, slug: parsed.data.slug, title: parsed.data.title, description: parsed.data.description || null, sortOrder: max.value + 1, isHome: false, published: parsed.data.published !== false, createdAt: now, updatedAt: now, revision: now };
-  db.prepare(`INSERT INTO pages (id, profile_id, slug, title, description, sort_order, is_home, published, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`).run(page.id, profileId, page.slug, page.title, page.description, page.sortOrder, page.published ? 1 : 0, now, now);
+  const page = { id: newPageId(), profileId, slug: parsed.data.slug, title: parsed.data.title, description: parsed.data.description || null, sortOrder: max, isHome: false, published: parsed.data.published !== false, createdAt: now, updatedAt: now, revision: now };
+  insertPages(profileId, [page], now);
   invalidateProfile(profileId);
   res.status(201).json({ page });
 });
