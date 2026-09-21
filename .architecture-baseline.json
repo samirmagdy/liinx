@@ -17,7 +17,7 @@
   ],
   "files": {
     "src/App.tsx": {
-      "lines": 369,
+      "lines": 409,
       "functions": []
     },
     "src/animations/gsap.ts": {
@@ -25,7 +25,7 @@
       "functions": []
     },
     "src/animations/useHeroMotion.ts": {
-      "lines": 64,
+      "lines": 78,
       "functions": []
     },
     "src/animations/usePanelMotion.ts": {
@@ -56,81 +56,57 @@
       "functions": []
     },
     "src/components/ComparisonSection.tsx": {
-      "lines": 294,
+      "lines": 298,
       "functions": [
         {
           "name": "ComparisonSection",
-          "lines": 276,
-          "complexity": 50,
+          "lines": 280,
+          "complexity": 49,
           "maxDepth": 2
         }
       ]
     },
     "src/components/FaqSection.tsx": {
-      "lines": 94,
+      "lines": 70,
       "functions": []
     },
     "src/components/FeaturesSection.tsx": {
-      "lines": 328,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 309,
-          "complexity": 54,
-          "maxDepth": 1
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 139,
-          "complexity": 13,
-          "maxDepth": 1
-        }
-      ]
+      "lines": 105,
+      "functions": []
     },
     "src/components/Footer.tsx": {
-      "lines": 223,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 210,
-          "complexity": 4,
-          "maxDepth": 1
-        }
-      ]
+      "lines": 101,
+      "functions": []
     },
     "src/components/Hero.tsx": {
-      "lines": 230,
+      "lines": 222,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 203,
-          "complexity": 24,
+          "lines": 197,
+          "complexity": 22,
           "maxDepth": 2
         }
       ]
     },
     "src/components/HeroClaimForm.tsx": {
-      "lines": 93,
+      "lines": 98,
       "functions": []
     },
     "src/components/HeroFeatureShowcase.tsx": {
-      "lines": 125,
+      "lines": 119,
       "functions": []
     },
     "src/components/HeroPreviewControls.tsx": {
-      "lines": 82,
-      "functions": []
-    },
-    "src/components/RaloaLogo.tsx": {
-      "lines": 100,
+      "lines": 98,
       "functions": []
     },
     "src/components/LinktreeImporterModal.tsx": {
-      "lines": 397,
+      "lines": 400,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 370,
+          "lines": 373,
           "complexity": 38,
           "maxDepth": 4
         }
@@ -141,7 +117,7 @@
       "functions": []
     },
     "src/components/LoadingScreen.tsx": {
-      "lines": 167,
+      "lines": 160,
       "functions": []
     },
     "src/components/Modal.tsx": {
@@ -149,18 +125,18 @@
       "functions": []
     },
     "src/components/Navbar.tsx": {
-      "lines": 286,
+      "lines": 298,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 157,
-          "complexity": 14,
+          "lines": 169,
+          "complexity": 18,
           "maxDepth": 2
         }
       ]
     },
     "src/components/PageMetadata.tsx": {
-      "lines": 23,
+      "lines": 55,
       "functions": []
     },
     "src/components/PhonePreview.tsx": {
@@ -181,19 +157,16 @@
       ]
     },
     "src/components/PricingCard.tsx": {
-      "lines": 172,
+      "lines": 175,
       "functions": []
     },
     "src/components/PricingSection.tsx": {
-      "lines": 188,
-      "functions": [
-        {
-          "name": "PricingSection",
-          "lines": 180,
-          "complexity": 28,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 126,
+      "functions": []
+    },
+    "src/components/ProductFeedback.tsx": {
+      "lines": 74,
+      "functions": []
     },
     "src/components/PublicBioView.tsx": {
       "lines": 128,
@@ -207,18 +180,26 @@
       ]
     },
     "src/components/QrCodeModal.tsx": {
-      "lines": 213,
+      "lines": 231,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 194,
-          "complexity": 22,
+          "lines": 204,
+          "complexity": 23,
           "maxDepth": 2
         }
       ]
     },
+    "src/components/RaloaLogo.tsx": {
+      "lines": 65,
+      "functions": []
+    },
     "src/components/ResourceModal.tsx": {
       "lines": 40,
+      "functions": []
+    },
+    "src/components/SkipLink.tsx": {
+      "lines": 15,
       "functions": []
     },
     "src/components/TemplateCard.tsx": {
@@ -230,12 +211,12 @@
       "functions": []
     },
     "src/components/TrustProofSection.tsx": {
-      "lines": 192,
+      "lines": 137,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 181,
-          "complexity": 22,
+          "lines": 126,
+          "complexity": 16,
           "maxDepth": 1
         }
       ]
@@ -247,17 +228,6 @@
     "src/components/ViewportPreview.tsx": {
       "lines": 36,
       "functions": []
-    },
-    "src/components/WhyRaloaSection.tsx": {
-      "lines": 135,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 120,
-          "complexity": 21,
-          "maxDepth": 1
-        }
-      ]
     },
     "src/components/motion/AccordionPanel.tsx": {
       "lines": 26,
@@ -285,11 +255,11 @@
       ]
     },
     "src/components/phone-preview/PhoneProfileHeader.tsx": {
-      "lines": 68,
+      "lines": 72,
       "functions": []
     },
     "src/components/phone-preview/PhoneSocialsRow.tsx": {
-      "lines": 60,
+      "lines": 61,
       "functions": []
     },
     "src/context/AuthContext.tsx": {
@@ -301,15 +271,83 @@
       "functions": []
     },
     "src/context/LanguageContext.tsx": {
+      "lines": 69,
+      "functions": []
+    },
+    "src/features/account/components/AccountSidebar.tsx": {
+      "lines": 31,
+      "functions": []
+    },
+    "src/features/account/components/AgencyReferralPanel.tsx": {
+      "lines": 77,
+      "functions": []
+    },
+    "src/features/account/components/BillingSettingsPanel.tsx": {
+      "lines": 47,
+      "functions": []
+    },
+    "src/features/account/components/DeveloperSettingsPanel.tsx": {
       "lines": 57,
       "functions": []
     },
+    "src/features/account/components/PanelFeedback.tsx": {
+      "lines": 18,
+      "functions": []
+    },
+    "src/features/account/components/ProfileSettingsPanel.tsx": {
+      "lines": 56,
+      "functions": []
+    },
+    "src/features/account/components/ProfilesSettingsPanel.tsx": {
+      "lines": 45,
+      "functions": []
+    },
+    "src/features/account/components/ReferralLinkCard.tsx": {
+      "lines": 31,
+      "functions": []
+    },
+    "src/features/account/components/ReferralPanel.tsx": {
+      "lines": 60,
+      "functions": []
+    },
+    "src/features/account/components/SecuritySettingsPanel.tsx": {
+      "lines": 38,
+      "functions": []
+    },
+    "src/features/account/components/accountPanelTypes.ts": {
+      "lines": 71,
+      "functions": []
+    },
+    "src/features/account/hooks/useAccountCredentials.ts": {
+      "lines": 62,
+      "functions": []
+    },
+    "src/features/account/hooks/useAccountDataControls.ts": {
+      "lines": 50,
+      "functions": []
+    },
+    "src/features/account/hooks/useAccountProfiles.ts": {
+      "lines": 32,
+      "functions": []
+    },
+    "src/features/account/hooks/useAccountSecurity.ts": {
+      "lines": 22,
+      "functions": []
+    },
+    "src/features/account/hooks/useApiKeys.ts": {
+      "lines": 64,
+      "functions": []
+    },
+    "src/features/account/hooks/useBillingStatus.ts": {
+      "lines": 26,
+      "functions": []
+    },
     "src/features/builder/components/BuilderShell.tsx": {
-      "lines": 422,
+      "lines": 423,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 403,
+          "lines": 404,
           "complexity": 28,
           "maxDepth": 2
         }
@@ -411,22 +449,22 @@
       ]
     },
     "src/features/builder/components/panels/AppearancePanel.tsx": {
-      "lines": 155,
+      "lines": 175,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 147,
-          "complexity": 13,
+          "lines": 158,
+          "complexity": 14,
           "maxDepth": 2
         }
       ]
     },
     "src/features/builder/components/panels/ContentPanel.tsx": {
-      "lines": 222,
+      "lines": 225,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 210,
+          "lines": 213,
           "complexity": 13,
           "maxDepth": 1
         }
@@ -504,7 +542,7 @@
       ]
     },
     "src/features/builder/hooks/useFormSubmissions.ts": {
-      "lines": 108,
+      "lines": 123,
       "functions": []
     },
     "src/features/builder/hooks/useInstagramIntegration.ts": {
@@ -552,7 +590,7 @@
       ]
     },
     "src/features/builder/hooks/useSubscribers.ts": {
-      "lines": 81,
+      "lines": 92,
       "functions": []
     },
     "src/features/builder/hooks/useUploads.ts": {
@@ -574,6 +612,10 @@
       "lines": 58,
       "functions": []
     },
+    "src/features/public-bio/components/DemoProfileNotice.tsx": {
+      "lines": 15,
+      "functions": []
+    },
     "src/features/public-bio/components/PublicBackgroundMedia.tsx": {
       "lines": 36,
       "functions": []
@@ -583,11 +625,11 @@
       "functions": []
     },
     "src/features/public-bio/components/PublicBioShell.tsx": {
-      "lines": 267,
+      "lines": 269,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 235,
+          "lines": 237,
           "complexity": 35,
           "maxDepth": 2
         }
@@ -609,11 +651,11 @@
       "functions": []
     },
     "src/features/public-bio/components/PublicProfileFooter.tsx": {
-      "lines": 111,
+      "lines": 119,
       "functions": []
     },
     "src/features/public-bio/components/PublicProfileHeader.tsx": {
-      "lines": 84,
+      "lines": 89,
       "functions": []
     },
     "src/features/public-bio/components/PublicSearchInput.tsx": {
@@ -705,12 +747,12 @@
       "functions": []
     },
     "src/features/public-bio/components/blocks/NewsletterBlockView.tsx": {
-      "lines": 156,
+      "lines": 149,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 140,
-          "complexity": 13,
+          "lines": 133,
+          "complexity": 11,
           "maxDepth": 2
         }
       ]
@@ -774,12 +816,12 @@
       ]
     },
     "src/features/public-bio/hooks/usePublicProfile.ts": {
-      "lines": 159,
+      "lines": 173,
       "functions": [
         {
           "name": "usePublicProfile",
-          "lines": 142,
-          "complexity": 43,
+          "lines": 116,
+          "complexity": 28,
           "maxDepth": 3
         }
       ]
@@ -805,33 +847,23 @@
       "functions": []
     },
     "src/main.tsx": {
-      "lines": 32,
+      "lines": 36,
       "functions": []
     },
     "src/pages/AccountPage.tsx": {
-      "lines": 660,
-      "functions": [
-        {
-          "name": "AccountPage",
-          "lines": 633,
-          "complexity": 134,
-          "maxDepth": 4
-        }
-      ]
+      "lines": 76,
+      "functions": []
     },
     "src/pages/FeaturesPage.tsx": {
-      "lines": 177,
-      "functions": [
-        {
-          "name": "FeaturesPage",
-          "lines": 160,
-          "complexity": 12,
-          "maxDepth": 4
-        }
-      ]
+      "lines": 187,
+      "functions": []
+    },
+    "src/pages/GuidesPage.tsx": {
+      "lines": 71,
+      "functions": []
     },
     "src/pages/LegalPages.tsx": {
-      "lines": 263,
+      "lines": 273,
       "functions": [
         {
           "name": "ContactPage",
@@ -842,33 +874,37 @@
       ]
     },
     "src/pages/LoginPage.tsx": {
-      "lines": 120,
+      "lines": 116,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 110,
+          "lines": 107,
           "complexity": 5,
           "maxDepth": 1
         }
       ]
     },
     "src/pages/RegisterPage.tsx": {
-      "lines": 361,
+      "lines": 357,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 324,
+          "lines": 321,
           "complexity": 33,
           "maxDepth": 3
         }
       ]
     },
+    "src/pages/guides.data.ts": {
+      "lines": 74,
+      "functions": []
+    },
     "src/services/api.ts": {
-      "lines": 464,
+      "lines": 487,
       "functions": []
     },
     "src/types.ts": {
-      "lines": 30,
+      "lines": 19,
       "functions": []
     },
     "src/utils/booking.ts": {
@@ -898,6 +934,10 @@
       "lines": 10,
       "functions": []
     },
+    "src/utils/languagePaths.ts": {
+      "lines": 17,
+      "functions": []
+    },
     "src/utils/localization.ts": {
       "lines": 14,
       "functions": []
@@ -922,6 +962,10 @@
       "lines": 66,
       "functions": []
     },
+    "server/accountEntitlements.ts": {
+      "lines": 18,
+      "functions": []
+    },
     "server/auth.ts": {
       "lines": 43,
       "functions": []
@@ -931,7 +975,7 @@
       "functions": []
     },
     "server/entitlements.ts": {
-      "lines": 20,
+      "lines": 2,
       "functions": []
     },
     "server/infrastructure/inProcessScheduler.ts": {
@@ -991,7 +1035,7 @@
       "functions": []
     },
     "server/maintenance.ts": {
-      "lines": 60,
+      "lines": 70,
       "functions": []
     },
     "server/middleware/auth.ts": {
@@ -1002,25 +1046,20 @@
       "lines": 60,
       "functions": []
     },
+    "server/profileHtml.ts": {
+      "lines": 133,
+      "functions": []
+    },
+    "server/routes/agencyReferrals.ts": {
+      "lines": 60,
+      "functions": []
+    },
     "server/routes/analytics.ts": {
-      "lines": 414,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 114,
-          "complexity": 50,
-          "maxDepth": 3
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 124,
-          "complexity": 14,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 381,
+      "functions": []
     },
     "server/routes/apiV1.ts": {
-      "lines": 263,
+      "lines": 264,
       "functions": [
         {
           "name": "<anonymous>",
@@ -1031,43 +1070,16 @@
       ]
     },
     "server/routes/auth.ts": {
-      "lines": 577,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 119,
-          "complexity": 9,
-          "maxDepth": 1
-        }
-      ]
+      "lines": 585,
+      "functions": []
     },
     "server/routes/billing.ts": {
-      "lines": 283,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 133,
-          "complexity": 37,
-          "maxDepth": 3
-        }
-      ]
+      "lines": 309,
+      "functions": []
     },
     "server/routes/blocks.ts": {
-      "lines": 363,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 82,
-          "complexity": 37,
-          "maxDepth": 1
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 82,
-          "complexity": 40,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 408,
+      "functions": []
     },
     "server/routes/capabilities.ts": {
       "lines": 34,
@@ -1078,33 +1090,26 @@
       "functions": []
     },
     "server/routes/forms.ts": {
-      "lines": 124,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 36,
-          "complexity": 28,
-          "maxDepth": 2
-        }
-      ]
+      "lines": 130,
+      "functions": []
     },
     "server/routes/importer.ts": {
       "lines": 60,
       "functions": []
     },
     "server/routes/instagram.ts": {
-      "lines": 443,
+      "lines": 450,
       "functions": [
         {
           "name": "<anonymous>",
-          "lines": 129,
-          "complexity": 23,
+          "lines": 118,
+          "complexity": 19,
           "maxDepth": 2
         }
       ]
     },
     "server/routes/newsletter.ts": {
-      "lines": 173,
+      "lines": 284,
       "functions": []
     },
     "server/routes/pages.ts": {
@@ -1112,33 +1117,12 @@
       "functions": []
     },
     "server/routes/profiles.ts": {
-      "lines": 889,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 160,
-          "complexity": 60,
-          "maxDepth": 3
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 95,
-          "complexity": 50,
-          "maxDepth": 2
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 188,
-          "complexity": 77,
-          "maxDepth": 3
-        },
-        {
-          "name": "<anonymous>",
-          "lines": 153,
-          "complexity": 46,
-          "maxDepth": 3
-        }
-      ]
+      "lines": 826,
+      "functions": []
+    },
+    "server/routes/referrals.ts": {
+      "lines": 30,
+      "functions": []
     },
     "server/routes/sessionResponse.ts": {
       "lines": 9,
@@ -1160,21 +1144,12 @@
       "functions": []
     },
     "server/server.ts": {
-      "lines": 673,
-      "functions": [
-        {
-          "name": "<anonymous>",
-          "lines": 37,
-          "complexity": 25,
-          "maxDepth": 6
-        },
-        {
-          "name": "startServer",
-          "lines": 97,
-          "complexity": 29,
-          "maxDepth": 4
-        }
-      ]
+      "lines": 746,
+      "functions": []
+    },
+    "server/services/agencyReferrals.ts": {
+      "lines": 76,
+      "functions": []
     },
     "server/services/backup/backupService.ts": {
       "lines": 329,
@@ -1294,6 +1269,18 @@
     },
     "server/services/instagramSync.ts": {
       "lines": 281,
+      "functions": []
+    },
+    "server/services/passwordReset.ts": {
+      "lines": 21,
+      "functions": []
+    },
+    "server/services/referrals.ts": {
+      "lines": 40,
+      "functions": []
+    },
+    "server/services/session.ts": {
+      "lines": 17,
       "functions": []
     },
     "server/services/uploadLifecycle.ts": {
