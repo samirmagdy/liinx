@@ -68,6 +68,7 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
             id="hero-claim-input"
             type="text"
             name="username"
+            dir="ltr"
             autoComplete="username"
             value={handle}
             onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
