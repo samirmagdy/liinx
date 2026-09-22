@@ -72,7 +72,6 @@ export interface Translations {
     subtitle: string;
     monthly: string;
     yearly: string;
-    yearlySave: string;
     startTrial: string;
     perMonth: string;
     recommended: string;
@@ -195,7 +194,6 @@ export const translations: Record<Language, Translations> = {
       subtitle: 'Start free. Upgrade when you need custom domains, deeper analytics, and multi-profile studio rosters.',
       monthly: 'Monthly billing',
       yearly: 'Annual billing',
-      yearlySave: 'Save 20%',
       startTrial: 'Start free',
       perMonth: '/ month',
       recommended: 'Recommended',
@@ -357,7 +355,6 @@ export const translations: Record<Language, Translations> = {
       subtitle: 'ابدأ مجاناً، ورَقِّ حسابك عندما تحتاج لربط دومين مخصص، إدارة حسابات متعددة، وتحليلات أعمق.',
       monthly: 'اشتراك شهري',
       yearly: 'اشتراك سنوي',
-      yearlySave: 'وفّر ٢٠٪',
       startTrial: 'ابدأ مجاناً',
       perMonth: '/ شهرياً',
       recommended: 'موصى بها',

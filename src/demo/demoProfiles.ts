@@ -69,7 +69,7 @@ export const DEMO_PROFILES: CreatorProfile[] = [
         id: 'b6',
         type: 'newsletter',
         title: 'The Sunday Dispatches',
-        description: 'A weekly photo essay on design, light, and urban solitude. Read by 14,000+ creators.',
+        description: 'A weekly photo essay on design, light, and urban solitude.',
         buttonText: 'Subscribe Free'
       }
     ]
@@ -279,7 +279,7 @@ export const DEMO_PROFILES: CreatorProfile[] = [
         id: 'km1',
         type: 'link',
         title: '8-Week Body Recomposition Program',
-        subtitle: 'Home & gym variations included — 12,000+ members enrolled',
+        subtitle: 'Home & gym variations included',
         url: 'https://example.com/program',
         badge: 'BESTSELLER',
         highlighted: true,
@@ -322,7 +322,7 @@ export const DEMO_PROFILES: CreatorProfile[] = [
         id: 'km6',
         type: 'newsletter',
         title: 'The Grounded Newsletter',
-        description: 'Weekly evidence-based wellness tips, workout ideas, and mindset strategies. Join 22,000+ readers.',
+        description: 'Weekly evidence-based wellness tips, workout ideas, and mindset strategies.',
         buttonText: 'Subscribe Free'
       }
     ]
@@ -398,7 +398,7 @@ export const DEMO_PROFILES: CreatorProfile[] = [
         id: 'ma6',
         type: 'newsletter',
         title: 'The Long View Letters',
-        description: 'Curated show notes, guest recommendations, and original essays every Friday. Read by 65,000+ subscribers.',
+        description: 'Curated show notes, guest recommendations, and original essays every Friday.',
         buttonText: 'Read the Archive'
       }
     ]
@@ -547,7 +547,7 @@ export const DEMO_PROFILES: CreatorProfile[] = [
         id: 'ao6',
         type: 'newsletter',
         title: 'The Slow Dispatch',
-        description: 'A bi-weekly letter on intentional travel, cultural immersion, and living with less. 35,000+ readers.',
+        description: 'A bi-weekly letter on intentional travel, cultural immersion, and living with less.',
         buttonText: 'Join the Journey'
       }
     ]
