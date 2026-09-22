@@ -43,6 +43,12 @@ export const NavbarBrandLinks: React.FC<NavbarBrandLinksProps> = ({ activeView }
 
       {/* Desktop Nav Links */}
       <nav className="hidden xl:flex items-center gap-1">
+        <Link href="/templates" className={navLinkClass(activeView === 'templates')}>
+          {t.nav.templates}
+        </Link>
+        <Link href="/features" className={navLinkClass(activeView === 'features')}>
+          {t.nav.features}
+        </Link>
         <Link
           href="/#how-it-works"
           onClick={(event) => scrollWithinPage(event, HOW_IT_WORKS_ANCHOR)}
@@ -50,14 +56,11 @@ export const NavbarBrandLinks: React.FC<NavbarBrandLinksProps> = ({ activeView }
         >
           {ui('How it works')}
         </Link>
-        <Link href="/features" className={navLinkClass(activeView === 'features')}>
-          {t.nav.features}
-        </Link>
-        <Link href="/templates" className={navLinkClass(activeView === 'templates')}>
-          {t.nav.templates}
-        </Link>
         <Link href="/pricing" className={navLinkClass(activeView === 'pricing')}>
           {t.nav.pricing}
+        </Link>
+        <Link href="/guides" className={navLinkClass(false)}>
+          {ui('Resources')}
         </Link>
       </nav>
     </div>

@@ -115,9 +115,9 @@ export const translations: Record<Language, Translations> = {
     },
     hero: {
       badge: 'Mini-sites for creators · English + Arabic',
-      headline: 'Your mini-site',
-      headlineHighlight: 'in your bio.',
-      subheadline: 'One page for the links, media and bookings a bio line cannot hold.',
+      headline: 'Your story.',
+      headlineHighlight: 'One beautiful link.',
+      subheadline: 'Turn your links, content and bookings into a stunning mini-site in minutes. No coding. No limits.',
       claimPlaceholder: 'yourname',
       exploreTemplates: 'Explore templates',
       previewSubtitle: 'Interactive template preview',

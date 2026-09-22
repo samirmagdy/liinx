@@ -7,15 +7,14 @@ const Navbar = lazy(() => import('./components/Navbar').then(module => ({ defaul
 const Hero = lazy(() => import('./components/Hero').then(module => ({ default: module.Hero })));
 const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(module => ({ default: module.FeaturesSection })));
 const ComparisonSection = lazy(() => import('./components/ComparisonSection').then(module => ({ default: module.ComparisonSection })));
-const TrustProofSection = lazy(() => import('./components/TrustProofSection').then(module => ({ default: module.TrustProofSection })));
 const HowItWorksSection = lazy(() => import('./components/HowItWorksSection').then(module => ({ default: module.HowItWorksSection })));
-const MadeWithRaloaSection = lazy(() => import('./components/MadeWithRaloaSection').then(module => ({ default: module.MadeWithRaloaSection })));
 const StickyMobileCta = lazy(() => import('./components/StickyMobileCta').then(module => ({ default: module.StickyMobileCta })));
 const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
 const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(module => ({ default: module.GuidesPage })));
 const FaqSection = lazy(() => import('./components/FaqSection').then(module => ({ default: module.FaqSection })));
 const Footer = lazy(() => import('./components/Footer').then(module => ({ default: module.Footer })));
+import { HandoffBenefits, HandoffFinalCta } from './components/HandoffBenefits';
 const BuilderStudio = lazy(() => import('./components/BuilderStudio').then(module => ({ default: module.BuilderStudio })));
 const PublicBioView = lazy(() => import('./components/PublicBioView').then(module => ({ default: module.PublicBioView })));
 import { LoginPage } from './pages/LoginPage';
@@ -72,14 +71,13 @@ function HomePage() {
           onClaimUsername={handleClaimUsername}
           onOpenStudio={handleOpenStudio}
         />
-        <ComparisonSection />
+        <HandoffBenefits />
+        <TemplatesSection maxVisible={8} onSelectTemplate={handleSelectTemplate} />
         <HowItWorksSection />
-        <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
-        <TrustProofSection />
-        <MadeWithRaloaSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
+        <HandoffFinalCta onClaimUsername={handleClaimUsername} />
       </main>
       <Footer onSelectView={(v) => {
         if (v === 'home') setLocation('/');

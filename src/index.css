@@ -295,6 +295,126 @@ button, a, input, select, textarea { touch-action: manipulation; }
 input, textarea, select { max-width: 100%; min-width: 0; }
 [dir="ltr"]:is(input, textarea) { text-align: left; unicode-bidi: plaintext; }
 
+/* === RALOA handoff homepage direction === */
+.marketing-home {
+  --handoff-ink: #0f172a;
+  --handoff-muted: #64748b;
+  --handoff-border: #e2e8f0;
+  --handoff-indigo: #5b5cf6;
+  --handoff-violet: #7c3aed;
+}
+.raloa-container { width: min(1200px, calc(100% - 64px)); margin-inline: auto; }
+.raloa-navbar { min-height: 72px; background: rgba(255,255,255,.92) !important; border-bottom-color: rgba(226,232,240,.85) !important; }
+.raloa-navbar > div { height: 72px; }
+.marketing-home .hero-section {
+  min-height: 680px;
+  padding-block: 84px 72px;
+  background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 45%, #f5f3ff 100%);
+  border-bottom: 0;
+}
+.marketing-home .hero-section > .raloa-hero-bg { opacity: .28; mix-blend-mode: multiply; }
+.marketing-home .hero-section h1 { max-width: 700px; font-size: clamp(3.2rem, 6vw, 5.25rem); letter-spacing: -.065em; color: var(--handoff-ink); }
+.marketing-home .hero-section h1 span { color: var(--handoff-violet); font-weight: 800; }
+.marketing-home .hero-section [data-hero="eyebrow"] { color: var(--handoff-violet); font-size: .7rem; letter-spacing: .14em; }
+.marketing-home .hero-section [data-hero="copy"] p { color: #475569; font-size: 1.125rem; max-width: 570px; }
+.marketing-home .raloa-claim-form { background: rgba(255,255,255,.9); border-color: rgba(203,213,225,.9); box-shadow: 0 14px 36px rgba(15,23,42,.1); }
+.marketing-home .raloa-primary-button { background: linear-gradient(90deg, #0f172a 0%, #172554 100%); }
+.raloa-hero-proof { display: flex; flex-wrap: wrap; gap: 14px 18px; margin: 14px 8px 0; color: #475569; font-size: .72rem; }
+.raloa-hero-proof span { display: inline-flex; align-items: center; gap: 5px; }
+.raloa-hero-proof svg { width: 13px; height: 13px; color: #16a34a; stroke-width: 3; }
+.marketing-home .hero-section .phone-shell { box-shadow: 0 28px 70px rgba(15,23,42,.18); }
+.marketing-home .hero-section [data-hero="visual"] { transform: translateY(-22px); }
+.raloa-trust-strip { padding: 22px 0 20px; background: #fff; border-bottom: 1px solid var(--handoff-border); }
+.raloa-trust-strip p { margin: 0 0 16px; color: #94a3b8; font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; text-align: center; }
+.raloa-trust-marks { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 28px; color: #64748b; font-size: .9rem; font-weight: 800; filter: grayscale(1); opacity: .72; }
+.raloa-trust-marks span:last-child { color: #94a3b8; font-weight: 600; }
+.raloa-benefits { padding: 26px 0 34px; background: #fff; }
+.raloa-benefit-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+.raloa-benefit-card { display: flex; gap: 12px; align-items: flex-start; padding: 18px 16px; border-radius: 18px; background: #fff; }
+.raloa-benefit-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 auto; border-radius: 13px; color: #5b5cf6; background: #eef2ff; }
+.raloa-benefit-card:nth-child(2) .raloa-benefit-icon { color: #7c3aed; background: #f3e8ff; }
+.raloa-benefit-card:nth-child(3) .raloa-benefit-icon { color: #059669; background: #d1fae5; }
+.raloa-benefit-card:nth-child(4) .raloa-benefit-icon { color: #2563eb; background: #dbeafe; }
+.raloa-benefit-icon svg { width: 19px; height: 19px; }
+.raloa-benefit-card h3 { margin: 0 0 4px; color: var(--handoff-ink); font-size: .9rem; font-weight: 800; }
+.raloa-benefit-card p { margin: 0; color: var(--handoff-muted); font-size: .76rem; line-height: 1.45; }
+.marketing-home .marketing-section { padding-block: 96px; border-bottom-color: var(--handoff-border); }
+.marketing-home .marketing-section:nth-of-type(even) { background: linear-gradient(135deg, #f8faff 0%, #f8f5ff 100%); }
+.marketing-home .marketing-section h2 { color: var(--handoff-ink); font-size: clamp(2.1rem, 4vw, 3rem); letter-spacing: -.05em; }
+.marketing-home .marketing-section .inline-flex.items-center.gap-2.px-3.py-1 { color: var(--handoff-violet); background: #f5f3ff; border-color: #ddd6fe; }
+.marketing-home #templates .grid { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
+.marketing-home #templates .grid { display: flex; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x proximity; }
+.marketing-home #templates .grid > * { flex: 0 0 170px; scroll-snap-align: start; }
+.marketing-home #templates .grid > * .relative { height: 210px; }
+.marketing-home #templates .grid > * .p-6 { padding: 14px; }
+.marketing-home #templates .grid > * p { display: none; }
+.marketing-home #templates .grid > * button:first-child { display: none; }
+.marketing-home #templates .grid > * button:last-child { width: 100%; }
+.raloa-step-marker { display: flex; align-items: center; gap: 14px; }
+.raloa-step-marker > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; color: #fff; background: linear-gradient(135deg, #7c3aed, #2563eb); font-size: .78rem; font-weight: 800; }
+.raloa-step-marker > svg { width: 22px; height: 22px; padding: 5px; box-sizing: content-box; border-radius: 10px; color: #5b5cf6; background: #eef2ff; }
+.raloa-feature-card { transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+.raloa-feature-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15,23,42,.08); border-color: #e0e7ff; }
+.raloa-feature-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: #5b5cf6; background: #eef2ff; }
+.raloa-feature-icon svg { width: 18px; height: 18px; }
+.raloa-feature-card:nth-child(2n) .raloa-feature-icon { color: #ec4899; background: #fce7f3; }
+.raloa-feature-card:nth-child(3n) .raloa-feature-icon { color: #10b981; background: #d1fae5; }
+.marketing-home #pricing article { border-radius: 18px; box-shadow: 0 6px 18px rgba(15,23,42,.06); }
+.marketing-home #pricing article[class*="bg-neutral-900"] { color: var(--handoff-ink); background: #fff; border: 2px solid #a5b4fc; box-shadow: 0 16px 40px rgba(91,92,246,.13); }
+.marketing-home #pricing article[class*="bg-neutral-900"] h2,
+.marketing-home #pricing article[class*="bg-neutral-900"] h3,
+.marketing-home #pricing article[class*="bg-neutral-900"] [class*="text-white"],
+.marketing-home #pricing article[class*="bg-neutral-900"] [class*="text-neutral-200"],
+.marketing-home #pricing article[class*="bg-neutral-900"] [class*="text-neutral-300"] { color: var(--handoff-ink) !important; }
+.marketing-home #pricing article[class*="bg-neutral-900"] [class*="bg-neutral-50"] { color: #fff !important; background: var(--handoff-ink) !important; }
+.marketing-home #pricing article[class*="bg-neutral-900"] [class*="text-emerald"] { color: #059669 !important; }
+.marketing-home #pricing article[class*="bg-neutral-900"] [class*="bg-indigo-400"] { color: #fff; background: linear-gradient(90deg,#7c3aed,#2563eb); }
+.marketing-home #faq > div { max-width: 1200px; }
+.marketing-home #faq > div > div:first-child { text-align: start; max-width: 32rem; margin-inline: 0; }
+.marketing-home #faq > div > div:last-child { max-width: 700px; margin-inline-start: auto; }
+.marketing-home footer { color: #64748b; background: #fff !important; border-top: 1px solid #e2e8f0; }
+.marketing-home footer .raloa-hero-bg { display: none; }
+.marketing-home footer [class*="text-white"] { color: #0f172a !important; }
+.marketing-home footer [class*="text-neutral-400"] { color: #64748b !important; }
+.marketing-home footer [class*="bg-neutral-900"] { background: #f8fafc; border-color: #e2e8f0; }
+.marketing-home footer [class*="border-neutral-800"] { border-color: #e2e8f0; }
+.marketing-home footer a:hover, .marketing-home footer button:hover { color: #4f46e5 !important; }
+.marketing-home #features .grid { gap: 0 20px; }
+.marketing-home #features article { padding: 28px 0; border-top-color: #cbd5e1; }
+.marketing-home #pricing { background: linear-gradient(135deg, #f8faff 0%, #f5f3ff 100%); }
+.raloa-final-cta { padding: 0 0 72px; background: #fff; }
+.raloa-final-cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 38px 44px; color: #fff; border-radius: 24px; background: linear-gradient(90deg, #5b5cf6 0%, #8b5cf6 100%); box-shadow: 0 20px 44px rgba(91,92,246,.22); }
+.raloa-eyebrow { margin: 0 0 8px; font-size: .68rem; font-weight: 800; letter-spacing: .14em; opacity: .8; }
+.raloa-final-cta h2 { margin: 0 0 5px; font-size: clamp(1.9rem, 4vw, 2.75rem); letter-spacing: -.05em; }
+.raloa-final-cta p:not(.raloa-eyebrow) { margin: 0; color: rgba(255,255,255,.82); }
+.raloa-final-form { display: flex; align-items: center; min-height: 52px; padding: 5px; flex: 0 1 440px; border-radius: 999px; background: #fff; color: #94a3b8; font-size: .85rem; }
+.raloa-final-form span { padding-inline: 14px 0; white-space: nowrap; }
+.raloa-final-form input { min-width: 0; flex: 1; padding: 0 8px; border: 0; outline: 0; color: #0f172a; background: transparent; }
+.raloa-final-form button { min-height: 42px; padding: 0 18px; border: 0; border-radius: 999px; color: #fff; background: #0f172a; font-size: .78rem; font-weight: 800; white-space: nowrap; cursor: pointer; }
+@media (max-width: 1023px) {
+  .raloa-container { width: min(100% - 48px, 1200px); }
+  .marketing-home .hero-section { min-height: 0; padding-block: 64px; }
+  .marketing-home .hero-section [data-hero="visual"] { transform: none; }
+  .raloa-benefit-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .raloa-final-cta-inner { align-items: flex-start; flex-direction: column; }
+  .raloa-final-form { width: 100%; max-width: 520px; }
+}
+@media (max-width: 767px) {
+  .raloa-container { width: calc(100% - 40px); }
+  .marketing-home .hero-section { padding-block: 46px 54px; }
+  .marketing-home .hero-section h1 { font-size: 2.85rem; }
+  .marketing-home .hero-section [data-hero="copy"] p { font-size: 1rem; }
+  .raloa-trust-marks { gap: 14px 20px; font-size: .78rem; }
+  .raloa-benefit-grid { grid-template-columns: 1fr; }
+  .marketing-home .marketing-section { padding-block: 72px; }
+  .raloa-final-cta { padding-bottom: 52px; }
+  .raloa-final-cta-inner { padding: 28px 22px; border-radius: 20px; }
+  .raloa-final-form { display: grid; grid-template-columns: auto 1fr; gap: 4px; padding: 8px; border-radius: 18px; }
+  .raloa-final-form span { padding-inline: 6px 0; }
+  .raloa-final-form input { min-height: 42px; }
+  .raloa-final-form button { grid-column: 1 / -1; width: 100%; }
+}
+
 @media (max-width: 767px) {
   .hero-accent { white-space: normal; }
   .hero-section { padding-top: 3rem; padding-bottom: 3.5rem; }

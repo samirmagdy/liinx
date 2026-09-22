@@ -1,105 +1,44 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BarChart3, CalendarDays, Globe2, Image, Palette, Search, Share2, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
 
-interface FeaturesSectionProps {
-  onOpenStudio: () => void;
-}
-
-/**
- * Grouped by what the person is trying to do, not by which Studio panel holds the control.
- * Every line describes behaviour the server actually has, limits included.
- */
-const GROUPS = [
-  {
-    goal: 'Build',
-    title: 'Build a page, not a list of buttons',
-    detail: 'Pages and folders keep a launch, a shop and an archive from competing in one long scroll.',
-    items: [
-      'Pages and folders you can publish one at a time',
-      'Audio and video that play on the page',
-      'A booking link that opens your calendar',
-      'Forms and newsletter signups, with consent recorded'
-    ]
-  },
-  {
-    goal: 'Grow',
-    title: 'Give every visitor somewhere to go next',
-    detail: 'The page keeps working after the visit: people leave something behind you can use.',
-    items: [
-      'Newsletter subscribers you can export as CSV',
-      'Form answers collected in the Studio',
-      'Your own domain, after DNS verification (paid plans)',
-      'Arabic and English layouts, built right-to-left first'
-    ]
-  },
-  {
-    goal: 'Understand',
-    title: 'See what people actually clicked',
-    detail: 'Traffic is counted on the page a visitor reached, and nothing is estimated.',
-    items: [
-      'Page views and clicks per link',
-      'Where the visit came from, including UTM campaigns',
-      'Which day brought the visits',
-      'Milestones only from real traffic'
-    ]
-  },
-  {
-    goal: 'Own',
-    title: 'It stays yours, with us or without',
-    detail: 'The point of an address you own is that you can move it.',
-    items: [
-      'Export your profile, pages, blocks and records as JSON',
-      'Uploaded media and raw analytics history are not part of that export',
-      'No RALOA fee on sales or bookings settled elsewhere',
-      'Cancel from Stripe; your pages stay until you delete them'
-    ]
-  }
+const FEATURES = [
+  { icon: Globe2, title: 'Custom domain', body: 'Use your own domain or raloa.app/@name.' },
+  { icon: CalendarDays, title: 'Bookings & scheduling', body: 'Get appointments directly on your page.' },
+  { icon: ShoppingBag, title: 'Sell products', body: 'Offer digital or physical products with ease.' },
+  { icon: BarChart3, title: 'Analytics', body: 'Track views, clicks and grow faster.' },
+  { icon: Image, title: 'Media galleries', body: 'Showcase your work with beautiful galleries.' },
+  { icon: Share2, title: 'Social integrations', body: 'Connect all your social platforms.' },
+  { icon: Search, title: 'SEO optimized', body: 'Get discovered by the people looking for you.' },
+  { icon: Palette, title: 'Fully customizable', body: 'Colors, fonts, sections — make it yours.' },
 ];
 
-export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onOpenStudio }) => {
+export const FeaturesSection: React.FC<{ onOpenStudio: () => void }> = ({ onOpenStudio }) => {
   const { tr: ui, isRtl } = useLanguage();
-
   return (
     <section id="features" className="marketing-section border-y border-neutral-200 bg-neutral-50 py-12 md:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Reveal distance="md" className="mb-8 max-w-3xl">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{ui('What it does')}</p>
-          <h2 className="mb-3 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl text-balance">
-            {ui('Four things a page should do for you')}
-          </h2>
-          <p className="max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base text-pretty">
-            {ui('Build the page, give visitors somewhere to go next, see what worked, and keep all of it yours.')}
-          </p>
+        <Reveal distance="md" className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{ui('MORE THAN JUST LINKS')}</p>
+            <h2 className="mb-3 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl text-balance">{ui('Everything you need to grow')}</h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base text-pretty">{ui('Powerful features designed for creators, freelancers and businesses.')}</p>
+          </div>
+          <button type="button" onClick={onOpenStudio} className="raloa-section-link inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-neutral-200 bg-white px-4 text-xs font-semibold text-neutral-800 shadow-sm sm:self-auto">
+            {ui('See all features')} <ArrowRight className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
+          </button>
         </Reveal>
-
         <Reveal stagger>
-          <div className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
-            {GROUPS.map((group, index) => (
-              <article key={group.goal} className="motion-card border-t border-neutral-300 py-5 text-start">
-                <div className="mb-2 flex items-baseline gap-3">
-                  <span className="font-mono text-xs text-indigo-700">{`0${index + 1} · ${ui(group.goal)}`}</span>
-                  <h3 className="text-base font-semibold text-neutral-900 text-balance">{ui(group.title)}</h3>
-                </div>
-                <p className="mb-3 text-sm leading-relaxed text-neutral-600 text-pretty">{ui(group.detail)}</p>
-                <ul className="space-y-1.5 text-sm text-neutral-700">
-                  {group.items.map(item => <li key={item} dir="auto">{ui(item)}</li>)}
-                </ul>
+          <div className="raloa-feature-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map(({ icon: Icon, title, body }) => (
+              <article key={title} className="raloa-feature-card motion-card rounded-2xl border border-white bg-white p-5 text-start shadow-sm">
+                <div className="raloa-feature-icon mb-3"><Icon aria-hidden="true" /></div>
+                <h3 className="text-sm font-bold text-neutral-900">{ui(title)}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-neutral-600">{ui(body)}</p>
               </article>
             ))}
           </div>
-        </Reveal>
-
-        <Reveal distance="sm" delay={80} className="mt-6 flex flex-col items-start justify-between gap-4 border-t border-neutral-300 pt-5 sm:flex-row sm:items-center">
-          <p className="text-sm text-neutral-600">{ui('Start with a free account and create your page in the Studio.')}</p>
-          <button
-            onClick={onOpenStudio}
-            className="inline-flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
-          >
-            <span>{ui('Open Studio')}</span>
-            <ArrowRight className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
-          </button>
         </Reveal>
       </div>
     </section>

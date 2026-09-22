@@ -6,7 +6,7 @@ import { DEMO_PROFILES } from '../demo/demoProfiles';
 import { ARABIC_DEMO_PROFILES } from '../demo/arabicDemoProfiles';
 import { type CreatorProfile } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { ArrowRight, Palette } from 'lucide-react';
+import { ArrowRight, Check, Palette } from 'lucide-react';
 
 import { useHeroMotion } from '../animations/useHeroMotion';
 import { HeroPreviewControls } from './HeroPreviewControls';
@@ -76,6 +76,12 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 onClaimUsername={onClaimUsername}
                 onFallbackRedirect={() => setLocation('/register')}
               />
+
+              <div className="hero-proof raloa-hero-proof" aria-label={isRtl ? 'مزايا البدء' : 'Getting started benefits'}>
+                {[isRtl ? 'مجاني إلى الأبد' : 'Free forever', isRtl ? 'لا تحتاج بطاقة ائتمانية' : 'No credit card required', isRtl ? 'جاهز خلال 60 ثانية' : 'Live in 60 seconds'].map(item => (
+                  <span key={item}><Check aria-hidden="true" />{item}</span>
+                ))}
+              </div>
 
               {/* Secondary CTAs: deliberately unstyled text, so nothing competes with the claim button. */}
               <div data-hero="secondary" className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-xs px-2">

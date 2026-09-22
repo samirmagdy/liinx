@@ -60,7 +60,7 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
     <div className="w-full">
       <form
         onSubmit={handleSubmit}
-        className="p-1.5 sm:p-2 bg-neutral-50 rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(24,24,23,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
+        className="raloa-claim-form p-1.5 sm:p-2 bg-neutral-50 rounded-2xl sm:rounded-full border border-neutral-300 shadow-[0_10px_30px_rgba(24,24,23,0.04)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 focus-within:border-neutral-900 transition-colors"
       >
         <div className="flex items-center min-w-0 px-3 sm:px-4 py-2 sm:py-1 flex-1" dir="ltr">
           <span className="text-neutral-500 font-mono text-sm sm:text-base font-semibold select-none shrink-0">
@@ -89,7 +89,7 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
         <button
           id="hero-claim-btn"
           type="submit"
-          className="min-h-[44px] px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-full bg-neutral-900 hover:bg-black text-white text-sm font-bold tracking-tight transition-colors active:scale-[0.985] flex items-center justify-center gap-2 cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="raloa-primary-button min-h-[44px] px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-full bg-neutral-900 hover:bg-black text-white text-sm font-bold tracking-tight transition-colors active:scale-[0.985] flex items-center justify-center gap-2 cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <span>{createLabel}</span>
           <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
