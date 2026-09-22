@@ -77,8 +77,8 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 onFallbackRedirect={() => setLocation('/register')}
               />
 
-              {/* Secondary CTAs */}
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-xs px-2">
+              {/* Secondary CTAs: deliberately unstyled text, so nothing competes with the claim button. */}
+              <div data-hero="secondary" className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-xs px-2">
                 <Link
                   href="/@elenarostova"
                   className="inline-flex min-h-11 items-center gap-1.5 font-bold text-neutral-900 hover:text-indigo-600 transition-colors cursor-pointer"
@@ -91,14 +91,6 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 >
                   <span>{t.hero.exploreTemplates}</span>
                   <ArrowRight className={`w-3 h-3 ${isRtl ? 'rotate-180' : ''}`} />
-                </Link>
-                <Link
-                  href="/studio"
-                  onClick={event => { event.preventDefault(); onOpenStudio(activeProfile); }}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-neutral-300 bg-neutral-100 px-4 text-xs font-semibold text-neutral-900 transition-colors hover:bg-neutral-200"
-                >
-                  <Palette className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>{t.hero.customizeCta(activeProfile.displayName.split(' ')[0])}</span>
                 </Link>
               </div>
             </div>
@@ -154,6 +146,17 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
 
                 {/* Subtle bottom scroll affordance vignette */}
                 <div className="pointer-events-none absolute bottom-5 left-5 right-5 h-12 bg-gradient-to-t from-black/25 to-transparent rounded-b-[30px] z-20" />
+              </div>
+
+              <div className="mt-3 px-2">
+                <Link
+                  href="/studio"
+                  onClick={event => { event.preventDefault(); onOpenStudio(activeProfile); }}
+                  className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-neutral-600 transition-colors hover:text-neutral-900"
+                >
+                  <Palette className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>{t.hero.customizeCta(activeProfile.displayName.split(' ')[0])}</span>
+                </Link>
               </div>
             </div>
 

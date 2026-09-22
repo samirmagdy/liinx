@@ -1,15 +1,11 @@
-import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 import React, { useState } from 'react';
 import { type CreatorProfile, type ThemeConfig, type ProfileBlock } from '../types';
-import { 
-  CheckCircle2, 
-  Share2
-} from 'lucide-react';
 import { getThemeBackground, resolveTheme } from '../utils/colorContrast';
 import { PhoneProfileHeader } from './phone-preview/PhoneProfileHeader';
 import { PhoneSocialsRow } from './phone-preview/PhoneSocialsRow';
 import { PhoneBlocksList } from './phone-preview/PhoneBlocksList';
 import { PhoneFooterBranding } from './phone-preview/PhoneFooterBranding';
+import { PhoneStatusBar } from './phone-preview/PhoneStatusBar';
 
 interface PhonePreviewProps {
   profile: CreatorProfile;
@@ -30,18 +26,9 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   compact = false,
   deviceMode = 'mobile',
 }) => {
-  const { tr: ui } = useUiLanguage();
   const theme = resolveTheme(profile.themeId, customTheme);
   const themeBackground = getThemeBackground(theme);
-  const [copiedNotification, setCopiedNotification] = useState(false);
   const [previewNotice, setPreviewNotice] = useState<string | null>(null);
-
-  const handleShare = async () => {
-    try { await navigator.clipboard.writeText(window.location.origin + '/@' + profile.username); }
-    catch { return; }
-    setCopiedNotification(true);
-    setTimeout(() => setCopiedNotification(false), 2000);
-  };
 
   const isArabicText = (text?: string) => /[\u0600-\u06FF]/.test(text || '');
   const isProfileRtl = isArabicText(profile.displayName) || isArabicText(profile.bio);
@@ -96,27 +83,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
     return (
       <>
         {/* Top Bar inside Screen */}
-        <div className="flex items-center justify-between text-xs px-2 mb-6 opacity-70">
-          <span className="font-mono text-[11px] font-semibold tracking-tight">9:41</span>
-          <div className="flex items-center gap-1">
-            <button 
-              onClick={handleShare}
-              aria-label={ui("Share bio link")}
-              className="grid min-h-11 min-w-11 place-items-center rounded-full hover:bg-neutral-900/10 dark:hover:bg-neutral-100/10 transition-colors"
-              title={ui("Copy bio link")}
-            >
-              <Share2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Copy Toast inside screen */}
-        {copiedNotification && (
-          <div role="status" aria-live="polite" className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-neutral-900 text-white text-[11px] px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-fade-in">
-            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-            <span>{ui("Link copied to clipboard")}</span>
-          </div>
-        )}
+        <PhoneStatusBar interactive={interactive} username={profile.username} />
 
         {/* Preview Notice Toast */}
         {previewNotice && (

@@ -460,6 +460,10 @@ export const runtimeTranslations: Record<string, string> = {
   'The gallery could not load.': 'تعذّر تحميل المعرض.',
   'Reload the page and it will try again.': 'أعد تحميل الصفحة وسيُعاد المحاولة.',
   'Browse starter sites instead': 'تصفّح مواقع البداية بدلاً من ذلك',
+  'Preview': 'معاينة',
+  'Close preview': 'إغلاق المعاينة',
+  'Full-screen preview': 'معاينة بملء الشاشة',
+  'Nothing is created yet — this opens the sign-up with this page already chosen.': 'لم يُنشأ شيء بعد — يفتح هذا التسجيل مبدئياً مع هذه الصفحة مختارة مسبقاً.',
 };
 
 export function translateRuntime(value: string, lang: Language): string {

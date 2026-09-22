@@ -444,3 +444,61 @@ test.describe('made-with-RALOA gallery', () => {
     await expect.poll(listed, 'withdrawing takes the page out again').toBe(false);
   });
 });
+
+test.describe('mobile conversion', () => {
+  test('keeps a way to start within reach without covering the page', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    const bar = page.locator('.sticky-mobile-cta');
+    await expect(bar).toHaveAttribute('aria-hidden', 'true');
+
+    await page.locator('#templates').scrollIntoViewIfNeeded();
+    await expect(bar).toHaveAttribute('aria-hidden', 'false', { timeout: 3000 });
+    const cta = bar.locator('a[href="/register"]');
+    // The bar slides up over 300ms, so require the whole control inside the viewport before measuring.
+    await expect(cta).toBeInViewport({ ratio: 1 });
+    const box = await cta.boundingBox();
+    expect(box, 'the bar has no size').not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(845);
+
+    await cta.click();
+    await expect(page).toHaveURL(/\/register/);
+
+    // The footer owns the end of the page; the bar must step aside for it.
+    await page.goto('/');
+    await page.locator('footer').scrollIntoViewIfNeeded();
+    await expect(bar).toHaveAttribute('aria-hidden', 'true', { timeout: 3000 });
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.locator('#templates').scrollIntoViewIfNeeded();
+    await expect(bar).toBeHidden();
+  });
+});
+
+test.describe('template preview without an account', () => {
+  test('opens a full-screen composition, moves between its pages, and closes', async ({ page }) => {
+    await page.goto('/templates');
+    const firstCard = page.locator('article, .motion-card').first();
+    await expect(firstCard.getByRole('button', { name: 'Preview' })).toBeVisible();
+    await expect(firstCard.getByRole('button', { name: /Use this template/ })).toBeVisible();
+
+    await firstCard.getByRole('button', { name: 'Preview' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    // The home tab carries the placeholder the creator's own name replaces once the site is made.
+    await expect(dialog.locator('button[aria-pressed="true"]')).toHaveText('Add your name');
+
+    const homeText = await dialog.locator('div.max-h-\\[46vh\\]').innerText();
+    const subPage = dialog.getByRole('button', { name: 'Portfolio' });
+    await expect(subPage).toBeVisible();
+    await subPage.click();
+    const subText = await dialog.locator('div.max-h-\\[46vh\\]').innerText();
+    expect(subText).not.toBe(homeText);
+    expect(subText).toContain('Full portfolio');
+
+    // The preview is a look, not a conversion: nothing has been created and no account is asked for.
+    expect(page.url()).toContain('/templates');
+    await dialog.getByRole('button', { name: 'Use this template' }).click();
+    await expect(page).toHaveURL(/\/register\?template=tmpl-/);
+  });
+});

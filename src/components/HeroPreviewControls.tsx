@@ -33,7 +33,7 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
         <div className="relative isolate flex items-center justify-between gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-neutral-900"
+            className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-white shadow-sm ring-1 ring-neutral-900/15"
             style={{
               insetInlineStart: '4px',
               width: `calc((100% - 8px) / ${visibleProfileCount})`,
@@ -48,7 +48,7 @@ export const HeroPreviewControls: React.FC<HeroPreviewControlsProps> = ({
               onClick={() => onSelectProfile(idx)}
               className={`relative z-10 flex-1 py-1.5 px-2 rounded-full text-[11px] font-semibold transition-colors duration-200 truncate cursor-pointer active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 selectedProfileIndex === idx
-                  ? 'text-white'
+                  ? 'font-bold text-neutral-900'
                   : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >

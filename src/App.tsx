@@ -9,6 +9,7 @@ const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(m
 const ComparisonSection = lazy(() => import('./components/ComparisonSection').then(module => ({ default: module.ComparisonSection })));
 const TrustProofSection = lazy(() => import('./components/TrustProofSection').then(module => ({ default: module.TrustProofSection })));
 const MadeWithRaloaSection = lazy(() => import('./components/MadeWithRaloaSection').then(module => ({ default: module.MadeWithRaloaSection })));
+const StickyMobileCta = lazy(() => import('./components/StickyMobileCta').then(module => ({ default: module.StickyMobileCta })));
 const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
 const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(module => ({ default: module.GuidesPage })));
@@ -83,6 +84,7 @@ function HomePage() {
         else if (v === 'templates') setLocation('/templates');
         else if (v === 'pricing') setLocation('/pricing');
       }} />
+      <StickyMobileCta />
     </div>
   );
 }
@@ -204,6 +206,7 @@ function TemplatesPage() {
         else if (v === 'templates') setLocation('/templates');
         else if (v === 'pricing') setLocation('/pricing');
       }} />
+      <StickyMobileCta />
     </div>
   );
 }
@@ -232,6 +235,7 @@ function PricingPage() {
         else if (v === 'templates') setLocation('/templates');
         else if (v === 'pricing') setLocation('/pricing');
       }} />
+      <StickyMobileCta />
     </div>
   );
 }

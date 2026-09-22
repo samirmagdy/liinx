@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { THEMES } from '../config/themes';
 import { type SiteTemplate } from '../../shared/index.js';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Maximize2 } from 'lucide-react';
 import { PhonePreview } from './PhonePreview';
+import { TemplatePreviewDialog } from './TemplatePreviewDialog';
 import { starterSitePreview } from '../utils/starterSites';
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 
@@ -24,6 +25,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
   onSelectTemplate
 }) => {
   const { tr: ui } = useUiLanguage();
+  const [previewing, setPreviewing] = useState(false);
   const theme = THEMES.find(item => item.id === template.themeId);
   const pageCount = 1 + (template.pages || []).length;
 
@@ -64,14 +66,35 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={() => onSelectTemplate(template.id)}
-          className="w-full py-2.5 px-4 rounded-full bg-neutral-950 border border-neutral-600 hover:border-neutral-500 text-xs font-bold text-neutral-100 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
-        >
-          <span>{useTemplateLabel}</span>
-          <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPreviewing(true)}
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-neutral-300 px-3.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-neutral-900 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{ui('Preview')}</span>
+          </button>
+          <button
+            onClick={() => onSelectTemplate(template.id)}
+            className="flex-1 py-2.5 px-4 rounded-full bg-neutral-950 border border-neutral-600 hover:border-neutral-500 text-xs font-bold text-neutral-100 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <span>{useTemplateLabel}</span>
+            <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
       </div>
+
+      {previewing && (
+        <TemplatePreviewDialog
+          template={template}
+          loc={loc}
+          useLabel={useTemplateLabel}
+          isRtl={isRtl}
+          onClose={() => setPreviewing(false)}
+          onUse={() => { setPreviewing(false); onSelectTemplate(template.id); }}
+        />
+      )}
     </div>
   );
 };
