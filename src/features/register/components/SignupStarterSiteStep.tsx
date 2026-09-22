@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Briefcase, Camera, Code, Heart, Loader2, Music, Sparkles } from 'lucide-react';
 import { type SignupIntent } from '../../../../shared/index.js';
 import { useLanguage as useUiLanguage } from '../../../context/LanguageContext';
+import { ReassuranceNote } from '../../../components/ReassuranceNote';
 import { StarterSiteChoices } from './StarterSiteChoices';
 import { type SignupFlow } from '../hooks/useSignupFlow';
 
@@ -97,6 +98,8 @@ export const SignupStarterSiteStep: React.FC<{ flow: SignupFlow }> = ({ flow }) 
             )}
           </button>
         </div>
+
+        <ReassuranceNote className="justify-center" />
       </div>
     </form>
   );

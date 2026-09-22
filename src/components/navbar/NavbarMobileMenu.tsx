@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { ExternalLink, LogOut, Settings, Smartphone } from 'lucide-react';
+import { HOW_IT_WORKS_ANCHOR, scrollWithinPage } from '../../hooks/useHashScroll';
 
 interface NavbarMobileMenuProps {
   user: any;
@@ -13,7 +14,17 @@ interface NavbarMobileMenuProps {
 
 export const NavbarMobileMenu: React.FC<NavbarMobileMenuProps> = ({ user, lang, t, ui, onClose, onLogout }) => (
   <div id="mobile-navigation" className="xl:hidden border-t border-neutral-200/60 bg-neutral-50 px-4 pt-3 pb-6 space-y-3">
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2">
+      <Link
+        href="/#how-it-works"
+        onClick={(event) => {
+          scrollWithinPage(event, HOW_IT_WORKS_ANCHOR);
+          onClose();
+        }}
+        className="p-3 rounded-xl bg-white border border-neutral-200 text-center text-xs font-semibold block hover:border-neutral-300"
+      >
+        {ui('How it works')}
+      </Link>
       <Link
         href="/features"
         onClick={onClose}

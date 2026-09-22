@@ -4,6 +4,7 @@ import { paidPlans, entitlementsFor, type BillingInterval } from '../config/plan
 import { Sparkles, Zap, Crown } from 'lucide-react';
 import { Reveal } from './motion/Reveal';
 import { PricingCard, type PricingPlanItem } from './PricingCard';
+import { ReassuranceNote } from './ReassuranceNote';
 import type { PricingPlanTranslation } from '../config/i18n';
 
 function buildPricingPlans(content: Record<'starter' | 'pro' | 'studio', PricingPlanTranslation>, interval: BillingInterval, recommendationLabel: string): PricingPlanItem[] {
@@ -43,10 +44,10 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
         <Reveal distance="md" className="text-center max-w-2xl mx-auto mb-8">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
-              <span>{ar ? 'أسعار شفافة وبسيطة' : 'Transparent, Simple Pricing'}</span>
+              <span>{t.pricingSection.badge}</span>
             </div>
             <Heading className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 mb-3 text-balance">
-              {ar ? 'ابدأ مجاناً. طوّر عند الحاجة.' : 'Start free. Upgrade when ready.'}
+              {t.pricingSection.title}
             </Heading>
             <p className="text-base text-neutral-600 leading-relaxed text-pretty">
               {t.pricingSection.subtitle}
@@ -68,14 +69,14 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
                     : 'text-neutral-600 hover:text-neutral-900'
                 }`}
               >
-                <span>{value === 'month' ? (ar ? 'شهري' : 'Monthly') : (ar ? 'سنوي' : 'Annual')}</span>
+                <span>{value === 'month' ? t.pricingSection.monthlyShort : t.pricingSection.annualShort}</span>
                 {value === 'year' && (
                   <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
                     interval === 'year'
                       ? 'bg-indigo-400 text-neutral-950'
                       : 'bg-indigo-100 text-indigo-800'
                   }`}>
-                    {ar ? 'شهران مجاناً' : '2 months free'}
+                    {t.pricingSection.annualBonus}
                   </span>
                 )}
               </button>
@@ -85,7 +86,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
 
         {error && (
           <p role="alert" className="text-sm text-red-700 text-center mb-6 p-3 rounded-xl bg-red-50 border border-red-200 max-w-md mx-auto">
-            {ar ? 'خدمة الدفع غير متاحة مؤقتاً. يُرجى تسجيل الدخول والمحاولة لاحقاً أو التواصل مع الدعم.' : 'Checkout is temporarily unavailable. Please try again or contact support.'}
+            {t.pricingSection.checkoutUnavailable}
           </p>
         )}
 
@@ -117,8 +118,12 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
 
         {/* Disclaimer */}
         <p className="mt-6 text-xs text-center text-neutral-600 max-w-lg mx-auto">
-          {ar ? 'تُحصّل الخطط السنوية دفعة واحدة. لا توجد تجربة مدفوعة مجانية. تُدار الاشتراكات والإلغاءات عبر Stripe.' : 'Annual plans are charged once. Paid plans have no free trial. Subscriptions and cancellations are handled through Stripe.'}
+          {t.pricingSection.disclaimer}
         </p>
+
+        <Reveal distance="sm" delay={60}>
+          <ReassuranceNote className="mt-3 justify-center" />
+        </Reveal>
       </div>
     </section>
   );

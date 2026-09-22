@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'wouter';
 import { useLanguage, useLanguage as useUiLanguage } from '../../context/LanguageContext';
 import { brand } from '../../config/brand';
+import { HOW_IT_WORKS_ANCHOR, scrollWithinPage } from '../../hooks/useHashScroll';
 
 interface NavbarBrandLinksProps {
   activeView: string;
@@ -42,6 +43,13 @@ export const NavbarBrandLinks: React.FC<NavbarBrandLinksProps> = ({ activeView }
 
       {/* Desktop Nav Links */}
       <nav className="hidden xl:flex items-center gap-1">
+        <Link
+          href="/#how-it-works"
+          onClick={(event) => scrollWithinPage(event, HOW_IT_WORKS_ANCHOR)}
+          className={navLinkClass(false)}
+        >
+          {ui('How it works')}
+        </Link>
         <Link href="/features" className={navLinkClass(activeView === 'features')}>
           {t.nav.features}
         </Link>

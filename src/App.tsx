@@ -8,6 +8,7 @@ const Hero = lazy(() => import('./components/Hero').then(module => ({ default: m
 const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(module => ({ default: module.FeaturesSection })));
 const ComparisonSection = lazy(() => import('./components/ComparisonSection').then(module => ({ default: module.ComparisonSection })));
 const TrustProofSection = lazy(() => import('./components/TrustProofSection').then(module => ({ default: module.TrustProofSection })));
+const HowItWorksSection = lazy(() => import('./components/HowItWorksSection').then(module => ({ default: module.HowItWorksSection })));
 const MadeWithRaloaSection = lazy(() => import('./components/MadeWithRaloaSection').then(module => ({ default: module.MadeWithRaloaSection })));
 const StickyMobileCta = lazy(() => import('./components/StickyMobileCta').then(module => ({ default: module.StickyMobileCta })));
 const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
@@ -71,6 +72,7 @@ function HomePage() {
           onOpenStudio={handleOpenStudio}
         />
         <ComparisonSection />
+        <HowItWorksSection />
         <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
         <TrustProofSection />

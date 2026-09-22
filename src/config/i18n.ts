@@ -72,6 +72,11 @@ export interface Translations {
     subtitle: string;
     monthly: string;
     yearly: string;
+    monthlyShort: string;
+    annualShort: string;
+    annualBonus: string;
+    checkoutUnavailable: string;
+    disclaimer: string;
     startTrial: string;
     perMonth: string;
     recommended: string;
@@ -189,11 +194,16 @@ export const translations: Record<Language, Translations> = {
       }
     },
     pricingSection: {
-      badge: 'Transparent Pricing',
-      title: 'Simple plans for ambitious creators.',
-      subtitle: 'Start free. Upgrade when you need custom domains, deeper analytics, and multi-profile studio rosters.',
+      badge: 'Transparent, Simple Pricing',
+      title: 'Start free. Upgrade when ready.',
+      subtitle: 'Start free. Upgrade when you need a custom domain, custom CSS and web fonts, more sites under one account, or API access.',
       monthly: 'Monthly billing',
       yearly: 'Annual billing',
+      monthlyShort: 'Monthly',
+      annualShort: 'Annual',
+      annualBonus: '2 months free',
+      checkoutUnavailable: 'Checkout is temporarily unavailable. Please try again or contact support.',
+      disclaimer: 'Annual plans are charged once. Paid plans have no free trial. Subscriptions and cancellations are handled through Stripe.',
       startTrial: 'Start free',
       perMonth: '/ month',
       recommended: 'Recommended',
@@ -350,11 +360,16 @@ export const translations: Record<Language, Translations> = {
       }
     },
     pricingSection: {
-      badge: 'أسعار واضحة',
-      title: 'خطط بسيطة تمنحك الحرية الكاملة.',
-      subtitle: 'ابدأ مجاناً، ورَقِّ حسابك عندما تحتاج لربط دومين مخصص، إدارة حسابات متعددة، وتحليلات أعمق.',
+      badge: 'أسعار شفافة وبسيطة',
+      title: 'ابدأ مجاناً. طوّر عند الحاجة.',
+      subtitle: 'ابدأ مجاناً، وطوّر حسابك عند الحاجة إلى نطاق مخصص، أو CSS وخطوط مخصصة، أو مواقع أكثر في حساب واحد، أو الوصول إلى الواجهة البرمجية.',
       monthly: 'اشتراك شهري',
       yearly: 'اشتراك سنوي',
+      monthlyShort: 'شهري',
+      annualShort: 'سنوي',
+      annualBonus: 'شهران مجاناً',
+      checkoutUnavailable: 'خدمة الدفع غير متاحة مؤقتاً. يُرجى تسجيل الدخول والمحاولة لاحقاً أو التواصل مع الدعم.',
+      disclaimer: 'تُحصّل الخطط السنوية دفعة واحدة. لا توجد تجربة مدفوعة مجانية. تُدار الاشتراكات والإلغاءات عبر Stripe.',
       startTrial: 'ابدأ مجاناً',
       perMonth: '/ شهرياً',
       recommended: 'موصى بها',
