@@ -17,11 +17,12 @@ export const FaqSection: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="marketing-section py-12 md:py-16 border-b border-neutral-200">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="faq" className="marketing-section raloa-faq-section py-12 md:py-16 border-b border-neutral-200">
+      <div className="raloa-container">
         
         {/* Header */}
-        <Reveal distance="md" className="text-center mb-8">
+        <div className="raloa-faq-layout">
+        <Reveal distance="md" className="raloa-faq-intro">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
             <span>{t.faqSection.badge}</span>
           </div>
@@ -34,7 +35,7 @@ export const FaqSection: React.FC = () => {
         </Reveal>
 
         {/* FAQ Accordion */}
-        <Reveal stagger className="space-y-3">
+        <Reveal stagger className="raloa-faq-list space-y-3">
           {faqList.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
@@ -62,6 +63,7 @@ export const FaqSection: React.FC = () => {
             );
           })}
         </Reveal>
+        </div>
 
       </div>
     </section>

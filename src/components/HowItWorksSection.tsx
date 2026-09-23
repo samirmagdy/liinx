@@ -49,7 +49,7 @@ export function HowItWorksSection() {
         </Reveal>
 
         <Reveal stagger>
-          <ol className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <ol className="raloa-steps-grid grid grid-cols-1 gap-6 md:grid-cols-3">
             {STEPS.map((step, index) => (
               <li key={step.title} className="motion-card flex h-full flex-col border-t-2 border-neutral-900 pt-4 text-start">
                 <div className="raloa-step-marker"><span>{index + 1}</span><step.icon aria-hidden="true" /></div>

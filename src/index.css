@@ -256,6 +256,137 @@ summary:focus-visible,
   }
 }
 
+/* Homepage composition lock: one grid, readable type, and intentional section rhythm. */
+.marketing-home {
+  --raloa-content-width: 1200px;
+  --raloa-gutter: 32px;
+}
+
+.marketing-home .raloa-container,
+.marketing-home .marketing-section > div,
+.marketing-home .marketing-hero > div,
+.marketing-home footer > div {
+  width: min(var(--raloa-content-width), calc(100% - (var(--raloa-gutter) * 2)));
+  max-width: var(--raloa-content-width);
+  margin-inline: auto;
+}
+
+.marketing-home .marketing-section {
+  padding-block: 88px;
+}
+
+.marketing-home .hero-section {
+  min-height: 0;
+  padding-block: 60px 54px;
+}
+
+.marketing-home .hero-section > .raloa-hero-bg { opacity: .22; }
+.marketing-home .hero-section .hero-device-meta { font-size: .75rem; }
+
+.marketing-home .raloa-trust-strip { padding-block: 28px 24px; }
+.marketing-home .raloa-trust-strip p { color: #64748b; font-size: .72rem; }
+.marketing-home .raloa-trust-marks { gap: 36px; color: #475569; font-size: 1rem; opacity: 1; }
+.marketing-home .raloa-trust-marks span { white-space: nowrap; }
+
+.marketing-home .raloa-benefits { padding-block: 26px 48px; }
+.marketing-home .raloa-benefit-grid { gap: 24px; }
+.marketing-home .raloa-benefit-card { padding: 20px 16px; }
+.marketing-home .raloa-benefit-icon { width: 44px; height: 44px; }
+.marketing-home .raloa-benefit-card h3 { font-size: 1rem; }
+.marketing-home .raloa-benefit-card p { max-width: 220px; font-size: .875rem; line-height: 1.5; }
+
+.marketing-home .marketing-section h2 { font-size: clamp(2.25rem, 4vw, 3.25rem); }
+.marketing-home .marketing-section > div > .mb-6,
+.marketing-home .marketing-section > div > .mb-8 { margin-bottom: 40px; }
+
+.marketing-home #templates .raloa-template-grid { gap: 14px; }
+.marketing-home #templates .template-card-body h3 { font-size: .95rem; }
+.marketing-home #templates .template-card-body { padding: 14px; }
+
+.marketing-home .raloa-steps-grid { position: relative; gap: 32px; }
+.marketing-home .raloa-steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 8.333%;
+  right: 8.333%;
+  border-top: 1px solid #cbd5e1;
+  z-index: 0;
+}
+.marketing-home .raloa-steps-grid > li { position: relative; z-index: 1; background: transparent; }
+.marketing-home .raloa-step-marker > span { box-shadow: 0 0 0 8px #fff; }
+.marketing-home .raloa-step-marker > svg { box-shadow: 0 0 0 8px #fff; }
+.marketing-home .raloa-steps-grid h3 { font-size: 1.05rem; }
+.marketing-home .raloa-steps-grid p { font-size: .95rem; max-width: 280px; }
+
+.marketing-home #features .raloa-feature-grid { gap: 16px; }
+.marketing-home #features article { min-height: 172px; padding: 24px; }
+.marketing-home #features article h3 { font-size: 1rem; }
+.marketing-home #features article p { font-size: .875rem; line-height: 1.5; }
+.marketing-home #features .raloa-feature-icon { width: 40px; height: 40px; }
+
+.marketing-home #proof { padding-block: 88px; }
+.marketing-home #proof .max-w-7xl { max-width: none; }
+.marketing-home #proof article { padding-block: 22px; }
+.marketing-home #proof article h3 { font-size: 1rem; }
+.marketing-home #proof article p { font-size: .9rem; }
+
+.marketing-home #pricing { padding-block: 88px; }
+.marketing-home #pricing .max-w-7xl { max-width: none; }
+.marketing-home #pricing .grid { gap: 20px; }
+.marketing-home #pricing article { min-height: 470px; }
+.marketing-home #pricing .text-xs { font-size: .8rem; }
+
+.marketing-home .raloa-faq-section { padding-block: 88px; }
+.marketing-home .raloa-faq-layout { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.35fr); gap: clamp(48px, 9vw, 140px); align-items: start; }
+.marketing-home .raloa-faq-intro { position: sticky; top: 104px; margin: 0; text-align: start; }
+.marketing-home .raloa-faq-intro h2 { max-width: 380px; }
+.marketing-home .raloa-faq-intro p { max-width: 360px; font-size: 1rem; }
+.marketing-home .raloa-faq-list { min-width: 0; }
+.marketing-home .raloa-faq-list .motion-card { border-radius: 14px; }
+.marketing-home .raloa-faq-list button { padding: 18px 20px; min-height: 64px; }
+.marketing-home .raloa-faq-list button > span { font-size: .95rem; }
+
+.marketing-home .raloa-final-cta { padding-block: 0 88px; }
+.marketing-home .raloa-final-cta-inner { min-height: 194px; padding: 42px 48px; }
+.marketing-home .raloa-final-cta h2 { font-size: clamp(2.25rem, 4vw, 3.15rem); }
+
+.marketing-home footer { padding-block: 64px 36px; }
+.marketing-home footer .grid { gap: 40px 48px; }
+.marketing-home footer .raloa-hero-bg { display: none; }
+.marketing-home footer p,
+.marketing-home footer li,
+.marketing-home footer a,
+.marketing-home footer button { font-size: .8rem; }
+.footer-logo-marketing { display: none; }
+.marketing-home .footer-logo-default { display: none; }
+.marketing-home .footer-logo-marketing { display: block; }
+
+@media (max-width: 1023px) {
+  .marketing-home { --raloa-gutter: 24px; }
+  .marketing-home .raloa-steps-grid::before { display: none; }
+  .marketing-home .raloa-faq-layout { gap: 40px; }
+  .marketing-home .raloa-faq-intro { position: static; }
+  .marketing-home #pricing article { min-height: 0; }
+}
+
+@media (max-width: 767px) {
+  .marketing-home { --raloa-gutter: 20px; }
+  .marketing-home .marketing-section,
+  .marketing-home #proof,
+  .marketing-home #pricing,
+  .marketing-home .raloa-faq-section { padding-block: 64px; }
+  .marketing-home .raloa-trust-marks { gap: 16px 22px; font-size: .875rem; }
+  .marketing-home .raloa-benefit-grid { gap: 8px; }
+  .marketing-home .raloa-benefit-card { padding: 16px 12px; }
+  .marketing-home .raloa-benefit-card p { max-width: none; }
+  .marketing-home .raloa-faq-layout { display: block; }
+  .marketing-home .raloa-faq-intro { margin-bottom: 28px; }
+  .marketing-home .raloa-final-cta { padding-bottom: 64px; }
+  .marketing-home .raloa-final-cta-inner { min-height: 0; padding: 30px 22px; }
+  .marketing-home footer { padding-block: 48px 28px; }
+}
+
 /* Reference-locked landing composition. */
 .marketing-home [data-hero="controls"],
 .marketing-home .hero-device-meta,
@@ -1087,4 +1218,100 @@ input, textarea, select { max-width: 100%; min-width: 0; }
   .marketing-home .raloa-template-grid > * {
     flex: 0 0 158px;
   }
+}
+
+/* Final homepage QA pass: these are the authoritative marketing rules. */
+.marketing-home {
+  --raloa-content-width: 1200px;
+  --raloa-gutter: 32px;
+}
+.marketing-home .raloa-container,
+.marketing-home .marketing-section > div,
+.marketing-home .marketing-hero > div,
+.marketing-home footer > div {
+  width: min(var(--raloa-content-width), calc(100% - (var(--raloa-gutter) * 2)));
+  max-width: var(--raloa-content-width);
+  margin-inline: auto;
+}
+.marketing-home .marketing-section { padding-block: 88px; }
+.marketing-home .hero-section { min-height: 0; padding-block: 60px 54px; }
+.marketing-home .hero-section > .raloa-hero-bg { opacity: .22; }
+.marketing-home .raloa-trust-strip { padding-block: 28px 24px; }
+.marketing-home .raloa-trust-strip p { color: #64748b; font-size: .72rem; }
+.marketing-home .raloa-trust-marks { gap: 36px; color: #475569; font-size: 1rem; opacity: 1; }
+.marketing-home .raloa-trust-marks span { white-space: nowrap; }
+.marketing-home .raloa-benefits { padding-block: 26px 48px; }
+.marketing-home .raloa-benefit-grid { gap: 24px; }
+.marketing-home .raloa-benefit-card { padding: 20px 16px; }
+.marketing-home .raloa-benefit-icon { width: 44px; height: 44px; }
+.marketing-home .raloa-benefit-card h3 { font-size: 1rem; }
+.marketing-home .raloa-benefit-card p { max-width: 220px; font-size: .875rem; line-height: 1.5; }
+.marketing-home .marketing-section h2 { font-size: clamp(2.25rem, 4vw, 3.25rem); }
+.marketing-home .marketing-section > div > .mb-6,
+.marketing-home .marketing-section > div > .mb-8 { margin-bottom: 40px; }
+.marketing-home #templates .raloa-template-grid { gap: 14px; }
+.marketing-home #templates .template-card-body h3 { font-size: .95rem; }
+.marketing-home #templates .template-card-body { padding: 14px; }
+.marketing-home .raloa-steps-grid { position: relative; gap: 32px; }
+.marketing-home .raloa-steps-grid::before { content: ''; position: absolute; top: 14px; left: 8.333%; right: 8.333%; border-top: 1px solid #cbd5e1; z-index: 0; }
+.marketing-home .raloa-steps-grid > li { position: relative; z-index: 1; background: transparent; }
+.marketing-home .raloa-step-marker > span,
+.marketing-home .raloa-step-marker > svg { box-shadow: 0 0 0 8px #fff; }
+.marketing-home .raloa-steps-grid h3 { font-size: 1.05rem; }
+.marketing-home .raloa-steps-grid p { font-size: .95rem; max-width: 280px; }
+.marketing-home #features .raloa-feature-grid { gap: 16px; }
+.marketing-home #features article { min-height: 172px; padding: 24px; }
+.marketing-home #features article h3 { font-size: 1rem; }
+.marketing-home #features article p { font-size: .875rem; line-height: 1.5; }
+.marketing-home #features .raloa-feature-icon { width: 40px; height: 40px; }
+.marketing-home #proof { padding-block: 88px; }
+.marketing-home #proof .max-w-7xl { max-width: none; }
+.marketing-home #proof article { padding-block: 22px; }
+.marketing-home #proof article h3 { font-size: 1rem; }
+.marketing-home #proof article p { font-size: .9rem; }
+.marketing-home #pricing { padding-block: 88px; }
+.marketing-home #pricing .max-w-7xl { max-width: none; }
+.marketing-home #pricing .grid { gap: 20px; }
+.marketing-home #pricing article { min-height: 470px; }
+.marketing-home #pricing .text-xs { font-size: .8rem; }
+.marketing-home .raloa-faq-section { padding-block: 88px; }
+.marketing-home .raloa-faq-layout { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.35fr); gap: clamp(48px, 9vw, 140px); align-items: start; }
+.marketing-home .raloa-faq-intro { position: sticky; top: 104px; margin: 0; text-align: start; }
+.marketing-home .raloa-faq-intro h2 { max-width: 380px; }
+.marketing-home .raloa-faq-intro p { max-width: 360px; font-size: 1rem; }
+.marketing-home .raloa-faq-list { min-width: 0; }
+.marketing-home .raloa-faq-list .motion-card { border-radius: 14px; }
+.marketing-home .raloa-faq-list button { padding: 18px 20px; min-height: 64px; }
+.marketing-home .raloa-faq-list button > span { font-size: .95rem; }
+.marketing-home .raloa-final-cta { padding-block: 0 88px; }
+.marketing-home .raloa-final-cta-inner { min-height: 194px; padding: 42px 48px; }
+.marketing-home .raloa-final-cta h2 { font-size: clamp(2.25rem, 4vw, 3.15rem); }
+.marketing-home footer { padding-block: 64px 36px; }
+.marketing-home footer .grid { gap: 40px 48px; }
+.marketing-home footer p,
+.marketing-home footer li,
+.marketing-home footer a,
+.marketing-home footer button { font-size: .8rem; }
+@media (max-width: 1023px) {
+  .marketing-home { --raloa-gutter: 24px; }
+  .marketing-home .raloa-steps-grid::before { display: none; }
+  .marketing-home .raloa-faq-layout { gap: 40px; }
+  .marketing-home .raloa-faq-intro { position: static; }
+  .marketing-home #pricing article { min-height: 0; }
+}
+@media (max-width: 767px) {
+  .marketing-home { --raloa-gutter: 20px; }
+  .marketing-home .marketing-section,
+  .marketing-home #proof,
+  .marketing-home #pricing,
+  .marketing-home .raloa-faq-section { padding-block: 64px; }
+  .marketing-home .raloa-trust-marks { gap: 16px 22px; font-size: .875rem; }
+  .marketing-home .raloa-benefit-grid { gap: 8px; }
+  .marketing-home .raloa-benefit-card { padding: 16px 12px; }
+  .marketing-home .raloa-benefit-card p { max-width: none; }
+  .marketing-home .raloa-faq-layout { display: block; }
+  .marketing-home .raloa-faq-intro { margin-bottom: 28px; }
+  .marketing-home .raloa-final-cta { padding-bottom: 64px; }
+  .marketing-home .raloa-final-cta-inner { min-height: 0; padding: 30px 22px; }
+  .marketing-home footer { padding-block: 48px 28px; }
 }

@@ -19,7 +19,10 @@ function FooterBrand() {
   const [location] = useLocation();
   const languageHref = localizedPath(location, lang === 'en' ? 'ar' : 'en');
   return <div className="md:col-span-2 space-y-4">
-    <div className="flex items-center"><img src="/brand/footer-logo-white.png" alt={brand.productShortName} width={144} height={36} className="h-9 w-auto" loading="lazy" decoding="async" /></div>
+    <div className="flex items-center">
+      <img src="/brand/footer-logo-white.png" alt={brand.productShortName} width={144} height={36} className="footer-logo-default h-9 w-auto" loading="lazy" decoding="async" />
+      <img src="/brand/raloa-logo-horizontal-primary.png" alt="" width={144} height={36} className="footer-logo-marketing h-9 w-auto" loading="lazy" decoding="async" />
+    </div>
     <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">{t.footer.tagline}</p>
     <div className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 max-w-sm">
       <div className="flex items-center gap-2 text-neutral-300 font-mono text-xs font-semibold mb-1"><ShieldCheck className="w-3.5 h-3.5 text-indigo-500" /><span>{tr('Creator tools')}</span></div>

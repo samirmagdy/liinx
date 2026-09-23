@@ -144,7 +144,7 @@ export const translations: Record<Language, Translations> = {
     },
     templatesSection: {
       badge: 'Template gallery',
-      title: 'Start with a page shaped around your work.',
+      title: 'Templates for every creator',
       subtitle: 'Choose a considered starting point for your links, media, and audience.',
       allCategory: 'All Templates',
       useTemplate: 'Use this template',
@@ -195,7 +195,7 @@ export const translations: Record<Language, Translations> = {
     },
     pricingSection: {
       badge: 'Transparent, Simple Pricing',
-      title: 'Start free. Upgrade when ready.',
+      title: 'Pricing for every creator',
       subtitle: 'Start free. Upgrade when you need a custom domain, custom CSS and web fonts, more sites under one account, or API access.',
       monthly: 'Monthly billing',
       yearly: 'Annual billing',
@@ -252,7 +252,7 @@ export const translations: Record<Language, Translations> = {
     },
     faqSection: {
       badge: 'Questions & Answers',
-      title: 'Everything you need to know.',
+      title: 'Frequently asked questions',
       subtitle: 'Clear answers about the features RALOA currently supports.',
       openAnswer: 'Open answer'
     },

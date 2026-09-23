@@ -13,6 +13,7 @@ const TemplatesSection = lazy(() => import('./components/TemplatesSection').then
 const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(module => ({ default: module.GuidesPage })));
 const FaqSection = lazy(() => import('./components/FaqSection').then(module => ({ default: module.FaqSection })));
+const TrustProofSection = lazy(() => import('./components/TrustProofSection').then(module => ({ default: module.TrustProofSection })));
 const Footer = lazy(() => import('./components/Footer').then(module => ({ default: module.Footer })));
 import { HandoffBenefits, HandoffFinalCta } from './components/HandoffBenefits';
 const BuilderStudio = lazy(() => import('./components/BuilderStudio').then(module => ({ default: module.BuilderStudio })));
@@ -75,6 +76,7 @@ function HomePage() {
         <TemplatesSection maxVisible={8} onSelectTemplate={handleSelectTemplate} />
         <HowItWorksSection />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
+        <TrustProofSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
         <HandoffFinalCta onClaimUsername={handleClaimUsername} />
