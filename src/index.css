@@ -256,6 +256,177 @@ summary:focus-visible,
   }
 }
 
+/* Reference-locked landing composition. */
+.marketing-home [data-hero="controls"],
+.marketing-home .hero-device-meta,
+.marketing-home .hero-device-customize {
+  display: none;
+}
+
+.marketing-home .hero-section {
+  min-height: 522px;
+  padding-block: 58px 0;
+}
+
+.marketing-home .hero-section > .relative {
+  z-index: 2;
+}
+
+.marketing-home .hero-section h1 {
+  max-width: 640px;
+  font-size: clamp(3.7rem, 5.2vw, 5.25rem);
+  letter-spacing: -.07em;
+}
+
+.marketing-home .hero-headline-main,
+.marketing-home .hero-headline-highlight {
+  display: block;
+}
+
+.marketing-home .hero-headline-main {
+  color: #0f172a !important;
+}
+
+.marketing-home .hero-headline-highlight {
+  background: linear-gradient(90deg, #7c3aed 0%, #2563eb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+.marketing-home [data-hero="copy"] p {
+  max-width: 590px;
+  font-size: 1.15rem;
+}
+
+.marketing-home [data-hero="visual"] {
+  position: relative;
+  max-width: 520px;
+  margin-top: -48px;
+}
+
+.marketing-home .hero-device-stage {
+  position: relative;
+  min-height: 590px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.marketing-home .hero-device-stage .phone-shell {
+  width: 350px;
+  z-index: 2;
+}
+
+.marketing-home .hero-device-stage .phone-shell > div[dir] {
+  height: 590px;
+}
+
+.marketing-home .hero-float {
+  position: absolute;
+  z-index: 3;
+  color: #0f172a;
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 13px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .1);
+  font-size: .74rem;
+  font-weight: 800;
+  line-height: 1.25;
+  padding: 12px 14px;
+  white-space: nowrap;
+}
+
+.marketing-home .hero-float i {
+  display: block;
+  color: #4f46e5;
+  font-size: 1.7rem;
+  font-style: normal;
+  line-height: .7;
+  margin-top: 7px;
+}
+
+.marketing-home .hero-float-links { left: 1%; top: 92px; transform: rotate(-5deg); }
+.marketing-home .hero-float-device { right: 0; top: 156px; transform: rotate(3deg); }
+.marketing-home .hero-float-templates { left: 2%; top: 382px; transform: rotate(-5deg); }
+.marketing-home .hero-float-growth {
+  right: -4%;
+  top: 286px;
+  display: grid;
+  min-width: 108px;
+  text-align: center;
+  color: #0f172a;
+}
+.marketing-home .hero-float-growth strong { color: #10b981; font-size: 2rem; line-height: .8; }
+.marketing-home .hero-float-growth b { font-size: 1.3rem; margin-top: 9px; }
+.marketing-home .hero-float-growth small { color: #64748b; font-size: .7rem; margin-top: 3px; }
+
+.marketing-home .raloa-trust-strip p { margin-bottom: 14px; }
+.marketing-home .raloa-benefits { padding-block: 28px 38px; }
+
+.marketing-home #templates .grid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 12px;
+  overflow: visible;
+}
+
+.marketing-home #templates .grid > * {
+  min-width: 0;
+  flex: none;
+}
+
+.marketing-home #templates .grid > * .relative {
+  height: 180px;
+}
+
+.marketing-home #templates .grid > * .p-6 {
+  padding: 12px;
+}
+
+.marketing-home #templates .grid > * p,
+.marketing-home #templates .grid > * button:first-child {
+  display: none;
+}
+
+.marketing-home .raloa-more-template-card {
+  min-height: 268px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .78);
+  color: #64748b;
+  text-align: center;
+  transition: border-color 160ms var(--motion-ease-out), box-shadow 160ms var(--motion-ease-out), transform 160ms var(--motion-ease-out);
+}
+
+.marketing-home .raloa-more-template-card span { font-size: 2rem; line-height: 1; color: #334155; }
+.marketing-home .raloa-more-template-card strong { font-size: .8rem; }
+.marketing-home .raloa-more-template-card:hover { border-color: #a5b4fc; box-shadow: 0 10px 24px rgba(15, 23, 42, .08); transform: translateY(-2px); }
+
+@media (max-width: 1100px) {
+  .marketing-home #templates .grid { grid-template-columns: repeat(5, minmax(150px, 1fr)); overflow-x: auto; }
+  .marketing-home #templates .grid > * { min-width: 150px; }
+}
+
+@media (max-width: 767px) {
+  .marketing-home .hero-section { min-height: 0; padding-block: 46px 36px; }
+  .marketing-home .hero-section h1 { font-size: clamp(3rem, 13vw, 4.2rem); }
+  .marketing-home [data-hero="visual"] { margin-top: 12px; max-width: 390px; }
+  .marketing-home .hero-device-stage { min-height: 540px; }
+  .marketing-home .hero-device-stage .phone-shell { width: 300px; }
+  .marketing-home .hero-device-stage .phone-shell > div[dir] { height: 520px; }
+  .marketing-home .hero-float-links { left: -1%; top: 72px; }
+  .marketing-home .hero-float-device { right: -3%; top: 120px; }
+  .marketing-home .hero-float-templates { left: -1%; top: 348px; }
+  .marketing-home .hero-float-growth { right: -2%; top: 258px; }
+  .marketing-home #templates .grid { display: flex; overflow-x: auto; padding-bottom: 8px; }
+}
+
 /* Decorative motion background: never create a stacking or layout dependency. */
 .raloa-motion-background { isolation: isolate; opacity: 0.9; will-change: opacity; }
 .raloa-motion-glow {
@@ -452,6 +623,136 @@ input, textarea, select { max-width: 100%; min-width: 0; }
   .hero-section form { border-radius: 1rem; }
   .hero-section form button { width: 100%; }
   .hero-section .hero-proof { display: grid; grid-template-columns: 1fr; }
+}
+
+/* === RALOA reference refinement ===
+   The marketing homepage uses one compact visual system: bright surfaces,
+   navy type, indigo-violet accents, and soft product-like boundaries. */
+.marketing-home {
+  --raloa-ink: #0f172a;
+  --raloa-slate-700: #334155;
+  --raloa-slate-500: #64748b;
+  --raloa-slate-300: #cbd5e1;
+  --raloa-surface: #ffffff;
+  --raloa-surface-alt: #f8fafc;
+  --raloa-border: #e2e8f0;
+  --raloa-indigo: #5b5cf6;
+  --raloa-blue: #2563eb;
+  --raloa-violet: #7c3aed;
+  --raloa-pink: #ec4899;
+  --raloa-green: #10b981;
+}
+
+.marketing-home .hero-section {
+  background:
+    radial-gradient(circle at 76% 38%, rgba(129, 140, 248, .18), transparent 27%),
+    linear-gradient(135deg, #eef2ff 0%, #f8fafc 46%, #f5f3ff 100%);
+}
+
+.marketing-home .hero-section h1 {
+  font-weight: 800;
+  line-height: .98;
+}
+
+.marketing-home .hero-section h1 span {
+  background: linear-gradient(90deg, var(--raloa-violet), var(--raloa-blue));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.marketing-home .hero-section .phone-shell {
+  border: 5px solid #0f172a;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, .18), 0 0 0 2px rgba(91, 92, 246, .9);
+}
+
+.marketing-home .raloa-trust-strip {
+  border-bottom: 0;
+}
+
+.marketing-home .raloa-benefits {
+  padding-top: 18px;
+  padding-bottom: 42px;
+}
+
+.marketing-home .raloa-benefit-card {
+  border: 1px solid transparent;
+  transition: border-color 160ms var(--motion-ease-out), box-shadow 160ms var(--motion-ease-out), transform 160ms var(--motion-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .marketing-home .raloa-benefit-card:hover {
+    border-color: var(--raloa-border);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+    transform: translateY(-2px);
+  }
+}
+
+.marketing-home .marketing-section {
+  border-bottom: 1px solid var(--raloa-border);
+}
+
+.marketing-home #templates,
+.marketing-home #features,
+.marketing-home #pricing {
+  background: linear-gradient(135deg, #f8fafc 0%, #f8f5ff 100%);
+}
+
+.marketing-home #how-it-works,
+.marketing-home #faq {
+  background: var(--raloa-surface);
+}
+
+.marketing-home #templates .grid > * {
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, .06);
+}
+
+.marketing-home #features article {
+  border: 1px solid rgba(226, 232, 240, .8);
+  border-top-color: rgba(226, 232, 240, .8);
+  border-radius: 18px;
+  padding: 20px;
+  background: rgba(255, 255, 255, .86);
+}
+
+.marketing-home #pricing article {
+  min-height: 100%;
+}
+
+.marketing-home #faq .motion-card {
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, .04);
+}
+
+@media (min-width: 1024px) {
+  .marketing-home .hero-section {
+    padding-block: 64px 48px;
+  }
+
+  .marketing-home .marketing-section {
+    padding-block: 80px;
+  }
+}
+
+@media (max-width: 767px) {
+  .marketing-home .hero-section {
+    background:
+      radial-gradient(circle at 80% 20%, rgba(129, 140, 248, .14), transparent 32%),
+      linear-gradient(160deg, #eef2ff 0%, #f8fafc 58%, #f5f3ff 100%);
+  }
+
+  .marketing-home .hero-section h1 {
+    font-size: clamp(2.75rem, 13vw, 4rem);
+  }
+
+  .marketing-home .raloa-benefit-card {
+    padding: 14px 10px;
+  }
+
+  .marketing-home .marketing-section {
+    padding-block: 64px;
+  }
 }
 
 /* === Typography utilities === */

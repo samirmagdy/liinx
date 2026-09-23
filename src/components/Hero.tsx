@@ -56,7 +56,8 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
             {/* Main Headline */}
             <div>
               <h1 key={isRtl ? 'ar' : 'en'} className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-[-0.045em] text-neutral-900 leading-[1.02] mb-4 text-balance">
-                {t.hero.headline} <span className="text-neutral-500 font-medium">{t.hero.headlineHighlight}</span>
+                <span className="hero-headline-main">{t.hero.headline}</span>
+                <span className="hero-headline-highlight">{t.hero.headlineHighlight}</span>
               </h1>
             </div>
 
@@ -121,7 +122,7 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
 
             {/* Live Interactive Device Preview with Apple-style motion */}
             <div data-hero="visual" className="order-1 mt-2 w-full max-w-[380px] lg:order-2 lg:mt-0">
-              <div className="flex items-center justify-between px-2 mb-2">
+              <div className="hero-device-meta flex items-center justify-between px-2 mb-2">
                 <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-neutral-600">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                   {isRtl ? 'نموذج توضيحي' : 'Demo Profile'}
@@ -130,6 +131,11 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                   {isRtl ? 'بيانات تجريبية' : 'Sample Data'}
                 </span>
               </div>
+              <div className="hero-device-stage relative">
+                <span className="hero-float hero-float-links">All your links<br />in one place <i aria-hidden="true">↘</i></span>
+                <span className="hero-float hero-float-device">Looks amazing<br />on any device <i aria-hidden="true">↙</i></span>
+                <span className="hero-float hero-float-templates">Templates<br />that convert <i aria-hidden="true">↘</i></span>
+                <span className="hero-float hero-float-growth"><strong>↗</strong><b>+300%</b><small>More clicks</small></span>
               <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
@@ -153,8 +159,9 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 {/* Subtle bottom scroll affordance vignette */}
                 <div className="pointer-events-none absolute bottom-5 left-5 right-5 h-12 bg-gradient-to-t from-black/25 to-transparent rounded-b-[30px] z-20" />
               </div>
+              </div>
 
-              <div className="mt-3 px-2">
+              <div className="hero-device-customize mt-3 px-2">
                 <Link
                   href="/studio"
                   onClick={event => { event.preventDefault(); onOpenStudio(activeProfile); }}

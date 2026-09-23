@@ -92,6 +92,12 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
               />
             );
           })}
+          {maxVisible && SITE_TEMPLATES.length > maxVisible && (
+            <a href="/templates" className="raloa-more-template-card" aria-label={isRtl ? 'عرض المزيد من القوالب' : 'Browse more templates'}>
+              <span aria-hidden="true">＋</span>
+              <strong>{isRtl ? 'قوالب أكثر' : 'More templates'}</strong>
+            </a>
+          )}
         </div></Reveal>
 
         {maxVisible && SITE_TEMPLATES.length > maxVisible && (
