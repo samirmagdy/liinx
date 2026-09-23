@@ -19,42 +19,39 @@ export const DEMO_PROFILES: CreatorProfile[] = [
       { platform: 'instagram', url: 'https://instagram.com' },
       { platform: 'twitter', url: 'https://x.com' },
       { platform: 'youtube', url: 'https://youtube.com' },
+      { platform: 'linkedin', url: 'https://linkedin.com' },
       { platform: 'email', url: 'mailto:studio@elena.design' }
     ],
     blocks: [
       {
         id: 'b1',
         type: 'link',
-        title: 'New Monograph: "Shadow & Stone"',
-        subtitle: 'Limited hardcover edition (Only 200 copies left)',
+        title: 'Portfolio',
+        subtitle: 'Selected works',
         url: 'https://example.com/book',
-        badge: 'PRE-ORDER',
         highlighted: true,
         clicks: 3410
       },
       {
         id: 'b2',
-        type: 'audio',
-        title: 'Architectural Echoes (Studio Mix)',
-        artist: 'Elena Rostova & Kiasmos',
-        coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=300&auto=format&fit=crop',
-        platform: 'spotify'
+        type: 'link',
+        title: 'Book a Session',
+        subtitle: 'Available for projects',
+        url: 'https://example.com/book-session'
       },
       {
         id: 'b3',
-        type: 'folder',
-        title: 'Lightroom Presets & Film LUTs',
-        subtitle: '3 curated packs for architectural & editorial tones',
-        items: [
-          { id: 'f1', title: 'Berlin Brutalism 35mm (.xmp)', url: 'https://example.com/lut1', subtitle: 'High contrast architectural monochrome' },
-          { id: 'f2', title: 'Kyoto Golden Hour Film Pack', url: 'https://example.com/lut2', subtitle: 'Warm amber tones and delicate grain' },
-          { id: 'f3', title: 'Minimalist Clean Neutral 2025', url: 'https://example.com/lut3', subtitle: 'Subtle desaturation for studio work' }
-        ]
+        type: 'link',
+        title: 'Shop Prints',
+        subtitle: 'Limited edition',
+        url: 'https://example.com/prints'
       },
       {
         id: 'b4',
-        type: 'header',
-        title: 'Recent Exhibition & Talks'
+        type: 'link',
+        title: 'My Gear',
+        subtitle: 'Tools I use',
+        url: 'https://example.com/gear'
       },
       {
         id: 'b5',

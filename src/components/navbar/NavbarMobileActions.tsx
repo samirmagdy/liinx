@@ -32,18 +32,18 @@ export const NavbarMobileActions: React.FC<NavbarMobileActionsProps> = ({ open, 
         !onStudio && (
           <Link
             href="/studio"
-            className="hidden sm:inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white"
+            className="mobile-create-cta inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white"
           >
-            {t.nav.studio}
+            <span>{t.nav.studio}</span>
           </Link>
         )
       ) : (
         /* Below sm this CTA duplicates the one inside the mobile menu panel. */
         <Link
           href="/register"
-          className="hidden sm:inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white"
+          className="mobile-create-cta inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-neutral-900 px-3.5 text-xs font-semibold text-white"
         >
-          {lang === 'ar' ? 'أنشئ صفحتك' : 'Create your page'}
+          <span>{lang === 'ar' ? 'أنشئ صفحتك' : 'Create your page'}</span>
         </Link>
       )}
       <button

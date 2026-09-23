@@ -7,6 +7,18 @@ import { TemplatePreviewDialog } from './TemplatePreviewDialog';
 import { starterSitePreview } from '../utils/starterSites';
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 
+const TEMPLATE_IMAGES: Record<string, string> = {
+  'Design & Art': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=500&auto=format&fit=crop',
+  Musicians: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=500&auto=format&fit=crop',
+  Brands: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=500&auto=format&fit=crop',
+  Creators: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=500&auto=format&fit=crop',
+  Wellness: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=500&auto=format&fit=crop',
+  Podcasts: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=500&auto=format&fit=crop',
+  Travel: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?q=80&w=500&auto=format&fit=crop',
+  Food: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=500&auto=format&fit=crop',
+  Personal: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=500&auto=format&fit=crop'
+};
+
 interface TemplateCardProps {
   template: SiteTemplate;
   loc: { name: string; category: string; description: string };
@@ -33,12 +45,20 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
     <div
       className="motion-card rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
     >
-      <div className="relative h-[300px] overflow-hidden border-b" aria-label={ui('Starter site preview')}>
-        <span className="absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[11px] font-semibold text-neutral-800 shadow-sm">
+      <div className="template-card-preview relative h-[300px] overflow-hidden border-b" aria-label={ui('Starter site preview')}>
+        <span className="template-preview-badge absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[11px] font-semibold text-neutral-800 shadow-sm">
           {ui('Starter site preview')}
         </span>
+        <img
+          className="template-card-image absolute inset-0 h-full w-full object-cover"
+          src={TEMPLATE_IMAGES[template.category] || TEMPLATE_IMAGES.Creators}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="template-card-image-wash absolute inset-0" aria-hidden="true" />
         {isHydrated ? (
-          <div className="absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none" aria-hidden="true" inert>
+          <div className="template-preview-render absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none" aria-hidden="true" inert>
             <PhonePreview profile={starterSitePreview(template)} compact interactive={false} />
           </div>
         ) : (
@@ -53,7 +73,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
       </div>
 
       {/* Template Body */}
-      <div className="p-6 flex flex-col flex-1 justify-between text-start">
+      <div className="template-card-body p-6 flex flex-col flex-1 justify-between text-start">
         <div>
           <h3 className="font-brand font-bold text-base text-neutral-900 mb-1 text-balance">
             {loc.name}
@@ -66,7 +86,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="template-card-actions flex items-center gap-2">
           <button
             type="button"
             onClick={() => setPreviewing(true)}

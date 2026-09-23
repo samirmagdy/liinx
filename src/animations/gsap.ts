@@ -16,10 +16,10 @@ export const conditions = {
 
 /** One trigger per group; focus completes pending reveals immediately. */
 export function revealGroup(root: HTMLElement, targets: HTMLElement[], distance: number, delay = 0) {
-  const animation = gsap.from(targets, {
-    opacity: 0, y: distance, duration: timing.section, ease: easing.out,
+  const animation = gsap.fromTo(targets, { opacity: 0, y: distance }, {
+    opacity: 1, y: 0, duration: timing.section, ease: easing.out,
     stagger: { amount: Math.min(0.24, targets.length * 0.06) }, delay,
-    clearProps: 'opacity,transform',
+    clearProps: 'opacity,transform', immediateRender: false,
     scrollTrigger: { trigger: root, start: 'top 92%', once: true },
   });
   const show = () => animation.progress(1);

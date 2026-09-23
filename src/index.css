@@ -364,28 +364,28 @@ summary:focus-visible,
 .marketing-home .raloa-trust-strip p { margin-bottom: 14px; }
 .marketing-home .raloa-benefits { padding-block: 28px 38px; }
 
-.marketing-home #templates .grid {
+.marketing-home .raloa-template-grid {
   display: grid;
   grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 12px;
   overflow: visible;
 }
 
-.marketing-home #templates .grid > * {
+.marketing-home .raloa-template-grid > * {
   min-width: 0;
   flex: none;
 }
 
-.marketing-home #templates .grid > * .relative {
+.marketing-home .raloa-template-grid > * .relative {
   height: 180px;
 }
 
-.marketing-home #templates .grid > * .p-6 {
+.marketing-home .raloa-template-grid > * .p-6 {
   padding: 12px;
 }
 
-.marketing-home #templates .grid > * p,
-.marketing-home #templates .grid > * button:first-child {
+.marketing-home .raloa-template-grid > * p,
+.marketing-home .raloa-template-grid > * button:first-child {
   display: none;
 }
 
@@ -409,8 +409,8 @@ summary:focus-visible,
 .marketing-home .raloa-more-template-card:hover { border-color: #a5b4fc; box-shadow: 0 10px 24px rgba(15, 23, 42, .08); transform: translateY(-2px); }
 
 @media (max-width: 1100px) {
-  .marketing-home #templates .grid { grid-template-columns: repeat(5, minmax(150px, 1fr)); overflow-x: auto; }
-  .marketing-home #templates .grid > * { min-width: 150px; }
+  .marketing-home .raloa-template-grid { grid-template-columns: repeat(5, minmax(150px, 1fr)); overflow-x: auto; }
+  .marketing-home .raloa-template-grid > * { min-width: 150px; }
 }
 
 @media (max-width: 767px) {
@@ -424,7 +424,7 @@ summary:focus-visible,
   .marketing-home .hero-float-device { right: -3%; top: 120px; }
   .marketing-home .hero-float-templates { left: -1%; top: 348px; }
   .marketing-home .hero-float-growth { right: -2%; top: 258px; }
-  .marketing-home #templates .grid { display: flex; overflow-x: auto; padding-bottom: 8px; }
+  .marketing-home .raloa-template-grid { display: flex; overflow-x: auto; padding-bottom: 8px; }
 }
 
 /* Decorative motion background: never create a stacking or layout dependency. */
@@ -513,14 +513,13 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 .marketing-home .marketing-section:nth-of-type(even) { background: linear-gradient(135deg, #f8faff 0%, #f8f5ff 100%); }
 .marketing-home .marketing-section h2 { color: var(--handoff-ink); font-size: clamp(2.1rem, 4vw, 3rem); letter-spacing: -.05em; }
 .marketing-home .marketing-section .inline-flex.items-center.gap-2.px-3.py-1 { color: var(--handoff-violet); background: #f5f3ff; border-color: #ddd6fe; }
-.marketing-home #templates .grid { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
-.marketing-home #templates .grid { display: flex; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x proximity; }
-.marketing-home #templates .grid > * { flex: 0 0 170px; scroll-snap-align: start; }
-.marketing-home #templates .grid > * .relative { height: 210px; }
-.marketing-home #templates .grid > * .p-6 { padding: 14px; }
-.marketing-home #templates .grid > * p { display: none; }
-.marketing-home #templates .grid > * button:first-child { display: none; }
-.marketing-home #templates .grid > * button:last-child { width: 100%; }
+.marketing-home .raloa-template-grid { display: flex; overflow-x: auto; gap: 14px; padding: 4px 2px 12px; scroll-snap-type: x proximity; }
+.marketing-home .raloa-template-grid > * { flex: 0 0 170px; scroll-snap-align: start; }
+.marketing-home .raloa-template-grid > * .relative { height: 210px; }
+.marketing-home .raloa-template-grid > * .p-6 { padding: 14px; }
+.marketing-home .raloa-template-grid > * p { display: none; }
+.marketing-home .raloa-template-grid > * button:first-child { display: none; }
+.marketing-home .raloa-template-grid > * button:last-child { width: 100%; }
 .raloa-step-marker { display: flex; align-items: center; gap: 14px; }
 .raloa-step-marker > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; color: #fff; background: linear-gradient(135deg, #7c3aed, #2563eb); font-size: .78rem; font-weight: 800; }
 .raloa-step-marker > svg { width: 22px; height: 22px; padding: 5px; box-sizing: content-box; border-radius: 10px; color: #5b5cf6; background: #eef2ff; }
@@ -703,7 +702,7 @@ input, textarea, select { max-width: 100%; min-width: 0; }
   background: var(--raloa-surface);
 }
 
-.marketing-home #templates .grid > * {
+.marketing-home .raloa-template-grid > * {
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(15, 23, 42, .06);
 }
@@ -917,4 +916,175 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 @media (max-width: 767px) {
   [dir="rtl"] .hero-section .hero-proof svg { order: 0; }
   [dir="rtl"] .public-header-actions { flex-direction: row-reverse; }
+}
+
+@media (max-width: 390px) {
+  .raloa-navbar .mobile-create-cta {
+    width: 44px;
+    min-width: 44px;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .raloa-navbar .mobile-create-cta span {
+    display: none;
+  }
+
+  .raloa-navbar .mobile-create-cta::after {
+    content: '→';
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+}
+
+/* Final landing-page overrides: keep the marketing composition stable after the
+   legacy marketing styles above, while leaving product pages untouched. */
+.marketing-home .hero-section [data-hero="visual"] {
+  transform: none;
+  margin-top: 0;
+}
+
+.marketing-home .hero-device-stage {
+  overflow: visible;
+}
+
+.marketing-home .raloa-template-grid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 12px;
+  overflow: visible;
+}
+
+.marketing-home .raloa-template-grid > * {
+  min-width: 0;
+  flex: none;
+}
+
+.marketing-home .raloa-template-grid .template-preview-render,
+.marketing-home .raloa-template-grid .template-preview-badge,
+.marketing-home .raloa-template-grid .template-card-actions,
+.marketing-home .raloa-template-grid .template-card-body > p {
+  display: none;
+}
+
+.marketing-home .raloa-template-grid .template-card-preview {
+  height: 184px;
+  border-bottom: 0;
+}
+
+.marketing-home .raloa-template-grid .template-card-image {
+  display: block;
+  transition: transform 220ms var(--motion-ease-out);
+}
+
+.marketing-home .raloa-template-grid .template-card-image-wash {
+  background: linear-gradient(180deg, rgba(15, 23, 42, .04), rgba(15, 23, 42, .2));
+}
+
+.marketing-home .raloa-template-grid > *:hover .template-card-image {
+  transform: scale(1.04);
+}
+
+.marketing-home .raloa-template-grid > *:not(.raloa-more-template-card) {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.marketing-home .template-card-body {
+  min-height: 58px;
+  padding: 12px;
+}
+
+.marketing-home .template-card-body h3 {
+  margin: 0;
+  font-size: .82rem;
+  line-height: 1.2;
+}
+
+.marketing-home footer input,
+.marketing-home footer button {
+  min-height: 44px;
+}
+
+[dir="rtl"] .marketing-home .hero-float-links { left: auto; right: 1%; }
+[dir="rtl"] .marketing-home .hero-float-device { right: auto; left: 0; }
+[dir="rtl"] .marketing-home .hero-float-templates { left: auto; right: 2%; }
+[dir="rtl"] .marketing-home .hero-float-growth { right: auto; left: -4%; }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .marketing-home .hero-section {
+    min-height: 720px;
+    padding-block: 58px 28px;
+  }
+
+  .marketing-home .hero-section > .relative > .grid {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, .9fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .marketing-home .hero-section > .relative > .grid > * {
+    grid-column: auto;
+  }
+
+  .marketing-home [data-hero="visual"] {
+    max-width: 390px;
+    margin-top: -48px;
+  }
+
+  .marketing-home .hero-device-stage .phone-shell {
+    width: 320px;
+  }
+
+  .marketing-home .hero-device-stage .phone-shell > div[dir] {
+    height: 540px;
+  }
+
+  .marketing-home .hero-float {
+    font-size: .65rem;
+    padding: 9px 10px;
+  }
+
+  .marketing-home .hero-float-growth { right: -1%; }
+}
+
+@media (min-width: 1024px) {
+  .marketing-home .hero-section {
+    min-height: 650px;
+    padding-block: 58px 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .marketing-home .hero-section [data-hero="visual"] {
+    margin-top: 12px;
+  }
+
+  .marketing-home .hero-device-stage {
+    min-height: 460px;
+  }
+
+  .marketing-home .hero-device-stage .phone-shell {
+    width: 260px;
+  }
+
+  .marketing-home .hero-device-stage .phone-shell > div[dir] {
+    height: 430px;
+  }
+
+  .marketing-home .hero-float-links { left: -2%; top: 54px; }
+  .marketing-home .hero-float-device { right: -2%; top: 96px; }
+  .marketing-home .hero-float-templates { left: -2%; top: 292px; }
+  .marketing-home .hero-float-growth { right: -2%; top: 216px; }
+
+  .marketing-home .raloa-template-grid {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .marketing-home .raloa-template-grid > * {
+    flex: 0 0 158px;
+  }
 }

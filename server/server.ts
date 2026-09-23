@@ -169,10 +169,10 @@ app.use((_req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
   const isDevelopment = process.env.NODE_ENV === 'development';
   const scriptPolicy = isDevelopment
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net"
-    : `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://connect.facebook.net`;
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://va.vercel-scripts.com"
+    : `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://connect.facebook.net https://va.vercel-scripts.com`;
   const devSockets = isDevelopment ? ' ws: wss:' : '';
-  res.setHeader('Content-Security-Policy', `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ${scriptPolicy}; connect-src 'self' https://api.qrserver.com https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com${devSockets}; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com https://embed.music.apple.com; report-uri /api/csp-report;`);
+  res.setHeader('Content-Security-Policy', `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ${scriptPolicy}; connect-src 'self' https://api.qrserver.com https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com https://va.vercel-scripts.com https://vitals.vercel-insights.com${devSockets}; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com https://embed.music.apple.com; report-uri /api/csp-report;`);
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }

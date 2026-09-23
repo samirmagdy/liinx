@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { SITE_TEMPLATES } from '../../shared/index.js';
-import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
 import { TemplateCard } from './TemplateCard';
@@ -72,7 +71,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
         </div>
 
         {/* Templates Grid */}
-        <Reveal stagger><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Reveal stagger><div className="raloa-template-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredTemplates.map((template) => {
             const loc = t.templatesSection.templates[template.id] || {
               name: template.name,
@@ -92,22 +91,13 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
               />
             );
           })}
-          {maxVisible && SITE_TEMPLATES.length > maxVisible && (
+          {maxVisible && (
             <a href="/templates" className="raloa-more-template-card" aria-label={isRtl ? 'عرض المزيد من القوالب' : 'Browse more templates'}>
               <span aria-hidden="true">＋</span>
               <strong>{isRtl ? 'قوالب أكثر' : 'More templates'}</strong>
             </a>
           )}
         </div></Reveal>
-
-        {maxVisible && SITE_TEMPLATES.length > maxVisible && (
-          <div className="mt-8 text-center">
-            <a href="/templates" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-300 text-sm font-semibold text-neutral-800 hover:bg-neutral-100 transition-colors">
-              {isRtl ? 'عرض جميع القوالب' : 'View all templates'}
-              <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
-            </a>
-          </div>
-        )}
 
       </div>
     </section>

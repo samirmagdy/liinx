@@ -132,10 +132,10 @@ export const Hero: React.FC<HeroProps> = ({ onClaimUsername, onOpenStudio }) => 
                 </span>
               </div>
               <div className="hero-device-stage relative">
-                <span className="hero-float hero-float-links">All your links<br />in one place <i aria-hidden="true">↘</i></span>
-                <span className="hero-float hero-float-device">Looks amazing<br />on any device <i aria-hidden="true">↙</i></span>
-                <span className="hero-float hero-float-templates">Templates<br />that convert <i aria-hidden="true">↘</i></span>
-                <span className="hero-float hero-float-growth"><strong>↗</strong><b>+300%</b><small>More clicks</small></span>
+                <span className="hero-float hero-float-links">{isRtl ? <>كل روابطك<br />في مكان واحد</> : <>All your links<br />in one place</>} <i aria-hidden="true">↘</i></span>
+                <span className="hero-float hero-float-device">{isRtl ? <>يبدو رائعاً<br />على أي جهاز</> : <>Looks amazing<br />on any device</>} <i aria-hidden="true">↙</i></span>
+                <span className="hero-float hero-float-templates">{isRtl ? <>قوالب<br />تحوّل</> : <>Templates<br />that convert</>} <i aria-hidden="true">↘</i></span>
+                <span className="hero-float hero-float-growth"><strong>↗</strong><b>+300%</b><small>{isRtl ? 'نقرات أكثر' : 'More clicks'}</small></span>
               <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
