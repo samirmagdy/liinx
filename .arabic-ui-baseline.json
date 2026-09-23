@@ -254,13 +254,10 @@
   "inlineBilingualTernaries": {
     "src/components/BookingCard.tsx": 9,
     "src/components/BookingEditor.tsx": 7,
-    "src/components/Hero.tsx": 4,
     "src/components/HeroClaimForm.tsx": 1,
     "src/components/PricingCard.tsx": 6,
-    "src/components/PricingSection.tsx": 7,
     "src/components/ResourceModal.tsx": 21,
     "src/components/TemplateCard.tsx": 1,
-    "src/components/TemplatesSection.tsx": 1,
     "src/components/TrustProofSection.tsx": 15,
     "src/features/account/components/AccountSidebar.tsx": 6,
     "src/features/account/components/AgencyReferralPanel.tsx": 16,

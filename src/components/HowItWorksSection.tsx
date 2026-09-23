@@ -25,7 +25,7 @@ const STEPS = [
   },
   {
     title: 'Go live and share',
-    detail: 'Publish your unique raloa.app/@name link and start growing.',
+    detail: 'Your page is published the moment the account is made. Share its address wherever people look for you.',
     icon: Send,
     action: { href: '/@elenarostova', label: 'Look at a live page' }
   }
@@ -39,7 +39,7 @@ export function HowItWorksSection() {
     <section id={HOW_IT_WORKS_ANCHOR} className="marketing-section border-b border-neutral-200 bg-white py-12 md:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal distance="md" className="mb-8 max-w-2xl">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{ui('GET STARTED TODAY')}</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{ui('Get started today')}</p>
           <h2 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl text-balance">
             {ui('How RALOA works')}
           </h2>

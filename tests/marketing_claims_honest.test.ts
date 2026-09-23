@@ -37,4 +37,20 @@ describe('marketing copy stays free of invented proof', () => {
     expect(i18n).not.toMatch(/yearlySave/);
     expect(i18n).not.toMatch(/Save 20%|وفّر ٢٠٪/);
   });
+
+  it('keeps invented performance numbers off the page', () => {
+    // Nothing here is measured, so a percentage attached to an outcome is a made-up figure.
+    const PERCENT = /\d{2,}\s*%/;
+    const OUTCOME = /\b(more|lift|increase|higher)\b|\bclicks\b|\bconversions?\b|\bsales\b|نقرات|مبيعات|تحويل/i;
+    const hits: string[] = [];
+    for (const file of scanned) {
+      if (!fs.existsSync(file)) continue;
+      fs.readFileSync(file, 'utf8').split('\n').forEach((line, index) => {
+        const text = line.trim();
+        if (/gradient|rgba|#[0-9a-f]{3}|duration-|width|height|opacity|scale/i.test(text)) return;
+        if (PERCENT.test(text) && OUTCOME.test(text)) hits.push(`${relativeToRoot(file)}:${index + 1}: ${text.slice(0, 110)}`);
+      });
+    }
+    expect(hits, `invented performance numbers:\n${hits.join('\n')}`).toEqual([]);
+  });
 });

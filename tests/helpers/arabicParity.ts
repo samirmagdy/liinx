@@ -59,9 +59,26 @@ export function countInlineBilingualTernaries(files: string[]): Record<string, n
 }
 
 
+/**
+ * Copy parked in a module-level array and rendered as `ui(item.title)` or `ui(line)`. The static
+ * `ui('…')` scan above cannot see those, which is how a feature grid could ship with no Arabic.
+ */
+export function usedArrayCopyKeys(files: string[]): string[] {
+  const keys = new Set<string>();
+  const property = /\b(?:title|body|detail|label|question|answer|placeholder|description):\s*'([^'\\\n]{4,})'/g;
+  for (const file of files) {
+    const source = fs.readFileSync(file, 'utf8');
+    if (!/\bui\(/.test(source)) continue;
+    for (const match of source.matchAll(property)) {
+      if (!match[1].includes('${')) keys.add(match[1]);
+    }
+  }
+  return [...keys].sort();
+}
+
 export function readArabicParity(dir = repoRoot) {
   const files = collectSourceFiles(path.join(dir, 'src'));
-  const keys = usedUiKeys(files);
+  const keys = [...new Set([...usedUiKeys(files), ...usedArrayCopyKeys(files)])].sort();
   return {
     keys,
     missing: keys.filter(key => !(key in runtimeTranslations)),

@@ -13,7 +13,7 @@ interface TemplatesSectionProps {
 export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemplate, headingLevel = 2, maxVisible }) => {
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   const [isHydrated, setIsHydrated] = useState(false);
-  const { t, isRtl } = useLanguage();
+  const { t, tr: ui, isRtl } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   /** Each category is labelled by its own translated template entry, never by the raw catalog string. */
@@ -92,9 +92,9 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
             );
           })}
           {maxVisible && (
-            <a href="/templates" className="raloa-more-template-card" aria-label={isRtl ? 'عرض المزيد من القوالب' : 'Browse more templates'}>
+            <a href="/templates" className="raloa-more-template-card" aria-label={ui('Browse more templates')}>
               <span aria-hidden="true">＋</span>
-              <strong>{isRtl ? 'قوالب أكثر' : 'More templates'}</strong>
+              <strong>{ui('More templates')}</strong>
             </a>
           )}
         </div></Reveal>

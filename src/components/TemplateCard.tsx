@@ -3,21 +3,11 @@ import { THEMES } from '../config/themes';
 import { type SiteTemplate } from '../../shared/index.js';
 import { ArrowRight, Maximize2 } from 'lucide-react';
 import { PhonePreview } from './PhonePreview';
+import { getThemeBackground } from '../utils/colorContrast';
 import { TemplatePreviewDialog } from './TemplatePreviewDialog';
 import { starterSitePreview } from '../utils/starterSites';
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
 
-const TEMPLATE_IMAGES: Record<string, string> = {
-  'Design & Art': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=500&auto=format&fit=crop',
-  Musicians: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=500&auto=format&fit=crop',
-  Brands: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=500&auto=format&fit=crop',
-  Creators: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=500&auto=format&fit=crop',
-  Wellness: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=500&auto=format&fit=crop',
-  Podcasts: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=500&auto=format&fit=crop',
-  Travel: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?q=80&w=500&auto=format&fit=crop',
-  Food: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=500&auto=format&fit=crop',
-  Personal: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=500&auto=format&fit=crop'
-};
 
 interface TemplateCardProps {
   template: SiteTemplate;
@@ -49,12 +39,12 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         <span className="template-preview-badge absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[11px] font-semibold text-neutral-800 shadow-sm">
           {ui('Starter site preview')}
         </span>
-        <img
-          className="template-card-image absolute inset-0 h-full w-full object-cover"
-          src={TEMPLATE_IMAGES[template.category] || TEMPLATE_IMAGES.Creators}
-          alt=""
-          loading="lazy"
-          decoding="async"
+        {/* The card wears the template's own palette. Borrowed stock photography would be
+            somebody else's work standing in for the visitor's, and it costs a network request. */}
+        <div
+          className="template-card-image absolute inset-0"
+          aria-hidden="true"
+          style={{ background: getThemeBackground(theme ?? THEMES[0]) }}
         />
         <div className="template-card-image-wash absolute inset-0" aria-hidden="true" />
         {isHydrated ? (

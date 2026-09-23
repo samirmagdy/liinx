@@ -99,6 +99,12 @@ describe('the made-with-RALOA gallery', () => {
     expect(html).toMatch(/no creators have opted in|not yet|no pages yet/i);
   });
 
+  it('is mounted on the page a visitor actually reads', () => {
+    // The section was dropped from the home layout once already, and every unit test stayed green.
+    const app = fs.readFileSync(path.join(repoRoot, 'src', 'App.tsx'), 'utf8');
+    expect(app).toMatch(/<MadeWithRaloaSection \/>/);
+  });
+
   it('never hardcodes a handle or a name', () => {
     const source = fs.readFileSync(path.join(repoRoot, 'src', 'components', 'MadeWithRaloaSection.tsx'), 'utf8');
     const handles = [...source.matchAll(/\/@[A-Za-z0-9_]+/g)].map(match => match[0]);

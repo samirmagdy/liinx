@@ -7,6 +7,7 @@ const Navbar = lazy(() => import('./components/Navbar').then(module => ({ defaul
 const Hero = lazy(() => import('./components/Hero').then(module => ({ default: module.Hero })));
 const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(module => ({ default: module.FeaturesSection })));
 const ComparisonSection = lazy(() => import('./components/ComparisonSection').then(module => ({ default: module.ComparisonSection })));
+const MadeWithRaloaSection = lazy(() => import('./components/MadeWithRaloaSection').then(module => ({ default: module.MadeWithRaloaSection })));
 const HowItWorksSection = lazy(() => import('./components/HowItWorksSection').then(module => ({ default: module.HowItWorksSection })));
 const StickyMobileCta = lazy(() => import('./components/StickyMobileCta').then(module => ({ default: module.StickyMobileCta })));
 const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
@@ -77,6 +78,7 @@ function HomePage() {
         <HowItWorksSection />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
         <TrustProofSection />
+        <MadeWithRaloaSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
         <HandoffFinalCta onClaimUsername={handleClaimUsername} />

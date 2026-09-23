@@ -1,40 +1,41 @@
 import React from 'react';
 import { BarChart3, Monitor, Palette, Rocket } from 'lucide-react';
+import { brand } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 
 const benefits = [
-  { icon: Rocket, title: 'Launch in minutes', body: 'Choose a template, add your content, and go live instantly.' },
-  { icon: Palette, title: 'Stunning templates', body: 'Professionally designed and fully customizable.' },
-  { icon: BarChart3, title: 'More opportunities', body: 'Grow your audience, get clients, and make sales.' },
+  { icon: Rocket, title: 'Launch in minutes', body: 'Pick a starter site, replace the placeholders, and the page is live.' },
+  { icon: Palette, title: 'Eight starter sites', body: 'Each one arrives with its own pages and blocks, ready to edit.' },
+  { icon: BarChart3, title: 'One address for everything', body: 'Links, media, bookings and newsletter signups on the same page.' },
   { icon: Monitor, title: 'Works everywhere', body: 'Looks polished on mobile, tablet and desktop.' },
 ];
 
-const trustMarks = ['YouTube', 'Instagram', 'TikTok', 'LinkedIn', 'Adobe', 'Spotify', 'Notion'];
+/** Only platforms the social block actually accepts — see the platform enum in shared/contracts/blocks.ts. */
+export const supportedPlatforms = ['Instagram', 'TikTok', 'YouTube', 'Spotify', 'X', 'GitHub', 'LinkedIn'];
 
 export function HandoffBenefits() {
-  const { isRtl } = useLanguage();
+  const { tr: ui } = useLanguage();
   return (
     <>
-      <section aria-label={isRtl ? 'تكاملات' : 'Integrations'} className="raloa-trust-strip">
+      <section aria-label={ui('Places you can link to')} className="raloa-trust-strip">
         <div className="raloa-container">
-          <p>{isRtl ? 'مصمم للمبدعين والمستقلين والشركات حول العالم' : 'Trusted by creators, freelancers and businesses worldwide'}</p>
-          <div className="raloa-trust-marks" aria-label="Supported platforms">
-            {trustMarks.map(mark => <span key={mark}>{mark}</span>)}
-            <span>and more…</span>
+          <p>{ui('Add the places people already look for you')}</p>
+          <div className="raloa-trust-marks" dir="ltr" aria-label={ui('Supported platforms')}>
+            {supportedPlatforms.map(mark => <span key={mark}>{mark}</span>)}
           </div>
         </div>
       </section>
 
       <section className="raloa-benefits" aria-labelledby="benefits-heading">
         <div className="raloa-container">
-          <h2 id="benefits-heading" className="sr-only">{isRtl ? 'لماذا RALOA' : 'Why RALOA'}</h2>
+          <h2 id="benefits-heading" className="sr-only">{ui('Why RALOA')}</h2>
           <div className="raloa-benefit-grid">
             {benefits.map(({ icon: Icon, title, body }) => (
               <article key={title} className="raloa-benefit-card">
                 <div className="raloa-benefit-icon"><Icon aria-hidden="true" /></div>
                 <div>
-                  <h3>{title}</h3>
-                  <p>{body}</p>
+                  <h3>{ui(title)}</h3>
+                  <p>{ui(body)}</p>
                 </div>
               </article>
             ))}
@@ -46,7 +47,7 @@ export function HandoffBenefits() {
 }
 
 export function HandoffFinalCta({ onClaimUsername }: { onClaimUsername: (handle: string) => void }) {
-  const { isRtl } = useLanguage();
+  const { tr: ui } = useLanguage();
   const [handle, setHandle] = React.useState('');
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -57,15 +58,15 @@ export function HandoffFinalCta({ onClaimUsername }: { onClaimUsername: (handle:
       <div className="raloa-container">
         <div className="raloa-final-cta-inner">
           <div>
-            <p className="raloa-eyebrow">{isRtl ? 'جاهز لبناء صفحتك؟' : 'READY TO BUILD YOURS?'}</p>
-            <h2 id="final-cta-heading">{isRtl ? 'أنشئ موقعك المصغر اليوم' : 'Create your mini-site today'}</h2>
-            <p>{isRtl ? 'انضم إلى المبدعين والمستقلين والشركات التي تستخدم RALOA.' : 'Join creators, freelancers and businesses using RALOA.'}</p>
+            <p className="raloa-eyebrow">{ui('Ready to build yours?')}</p>
+            <h2 id="final-cta-heading">{ui('Create your mini-site today')}</h2>
+            <p>{ui('One address for your links, media, bookings and signups.')}</p>
           </div>
           <form className="raloa-final-form" onSubmit={submit} dir="ltr">
-            <label className="sr-only" htmlFor="final-cta-handle">Username</label>
-            <span>raloa.app/@</span>
-            <input id="final-cta-handle" value={handle} onChange={event => setHandle(event.target.value)} placeholder="yourname" />
-            <button type="submit">{isRtl ? 'أنشئ صفحتك' : 'Create your page'} <span aria-hidden="true">→</span></button>
+            <label className="sr-only" htmlFor="final-cta-handle">{ui('Choose your handle')}</label>
+            <span>{`${brand.domain}/@`}</span>
+            <input id="final-cta-handle" value={handle} onChange={event => setHandle(event.target.value)} placeholder={ui('yourname')} />
+            <button type="submit">{ui('Create your page')} <span aria-hidden="true">→</span></button>
           </form>
         </div>
       </div>

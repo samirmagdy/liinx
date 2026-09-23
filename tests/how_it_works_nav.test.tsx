@@ -60,9 +60,9 @@ describe('the how-it-works section and the nav that reaches it', () => {
 
   it('says what happens at each step instead of naming a feature', () => {
     const html = render(<HowItWorksSection />);
-    expect(html).toContain('Three steps, and the page is live');
-    expect(html).toContain('Swap the placeholders for your own');
-    expect(html).toContain('Put the address where people look');
+    expect(html).toContain('Choose a template');
+    expect(html).toContain('Add your content');
+    expect(html).toContain('Go live and share');
   });
 
   it('offers the section from the desktop nav and the mobile menu', () => {
@@ -74,6 +74,6 @@ describe('the how-it-works section and the nav that reaches it', () => {
     const arabicNav = render(<NavbarBrandLinks activeView="home" />, 'ar');
     expect(reachesSection(arabicNav)).toBe(true);
     expect(arabicNav).toContain('كيف يعمل');
-    expect(render(<HowItWorksSection />, 'ar')).toContain('ثلاث خطوات وتصبح الصفحة منشورة');
+    expect(render(<HowItWorksSection />, 'ar')).toContain('اختر قالباً');
   });
 });

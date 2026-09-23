@@ -5,6 +5,7 @@ import { Sparkles, Zap, Crown } from 'lucide-react';
 import { Reveal } from './motion/Reveal';
 import { PricingCard, type PricingPlanItem } from './PricingCard';
 import { ReassuranceNote } from './ReassuranceNote';
+import { PricingIntervalToggle } from './PricingIntervalToggle';
 import type { PricingPlanTranslation } from '../config/i18n';
 
 function buildPricingPlans(content: Record<'starter' | 'pro' | 'studio', PricingPlanTranslation>, interval: BillingInterval, recommendationLabel: string): PricingPlanItem[] {
@@ -55,34 +56,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
           </div>
         </Reveal>
 
-        {/* Interval Toggle */}
-        <Reveal delay={80} distance="sm"><div className="flex justify-center mb-6">
-          <div className="inline-flex items-center gap-1 p-1 bg-neutral-100 border border-neutral-200 rounded-full">
-            {(['month', 'year'] as const).map(value => (
-              <button
-                key={value}
-                aria-pressed={interval === value}
-                onClick={() => setInterval(value)}
-                className={`px-5 py-2 min-h-[40px] rounded-full text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                  interval === value
-                    ? 'bg-neutral-900 text-white shadow-xs'
-                    : 'text-neutral-600 hover:text-neutral-900'
-                }`}
-              >
-                <span>{value === 'month' ? t.pricingSection.monthlyShort : t.pricingSection.annualShort}</span>
-                {value === 'year' && (
-                  <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
-                    interval === 'year'
-                      ? 'bg-indigo-400 text-neutral-950'
-                      : 'bg-indigo-100 text-indigo-800'
-                  }`}>
-                    {t.pricingSection.annualBonus}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div></Reveal>
+        <Reveal delay={80} distance="sm"><PricingIntervalToggle interval={interval} onChange={setInterval} /></Reveal>
 
         {error && (
           <p role="alert" className="text-sm text-red-700 text-center mb-6 p-3 rounded-xl bg-red-50 border border-red-200 max-w-md mx-auto">

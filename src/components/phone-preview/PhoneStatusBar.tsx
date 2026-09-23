@@ -22,7 +22,8 @@ export const PhoneStatusBar: React.FC<{ interactive: boolean; username: string }
 
   return (
     <>
-      <div className="flex items-center justify-between text-xs px-2 mb-6 opacity-70">
+      {/* Phone chrome, not page content: the clock stays on the left in either direction. */}
+      <div dir="ltr" className="flex items-center justify-between text-xs px-2 mb-6 opacity-70">
         <span className="font-mono text-[11px] font-semibold tracking-tight">9:41</span>
         <div className="flex items-center gap-1">
           {interactive ? (

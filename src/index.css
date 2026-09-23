@@ -480,18 +480,6 @@ summary:focus-visible,
 .marketing-home .hero-float-links { left: 1%; top: 92px; transform: rotate(-5deg); }
 .marketing-home .hero-float-device { right: 0; top: 156px; transform: rotate(3deg); }
 .marketing-home .hero-float-templates { left: 2%; top: 382px; transform: rotate(-5deg); }
-.marketing-home .hero-float-growth {
-  right: -4%;
-  top: 286px;
-  display: grid;
-  min-width: 108px;
-  text-align: center;
-  color: #0f172a;
-}
-.marketing-home .hero-float-growth strong { color: #10b981; font-size: 2rem; line-height: .8; }
-.marketing-home .hero-float-growth b { font-size: 1.3rem; margin-top: 9px; }
-.marketing-home .hero-float-growth small { color: #64748b; font-size: .7rem; margin-top: 3px; }
-
 .marketing-home .raloa-trust-strip p { margin-bottom: 14px; }
 .marketing-home .raloa-benefits { padding-block: 28px 38px; }
 
@@ -554,7 +542,6 @@ summary:focus-visible,
   .marketing-home .hero-float-links { left: -1%; top: 72px; }
   .marketing-home .hero-float-device { right: -3%; top: 120px; }
   .marketing-home .hero-float-templates { left: -1%; top: 348px; }
-  .marketing-home .hero-float-growth { right: -2%; top: 258px; }
   .marketing-home .raloa-template-grid { display: flex; overflow-x: auto; padding-bottom: 8px; }
 }
 
@@ -685,7 +672,7 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 .marketing-home #pricing { background: linear-gradient(135deg, #f8faff 0%, #f5f3ff 100%); }
 .raloa-final-cta { padding: 0 0 72px; background: #fff; }
 .raloa-final-cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 38px 44px; color: #fff; border-radius: 24px; background: linear-gradient(90deg, #5b5cf6 0%, #8b5cf6 100%); box-shadow: 0 20px 44px rgba(91,92,246,.22); }
-.raloa-eyebrow { margin: 0 0 8px; font-size: .68rem; font-weight: 800; letter-spacing: .14em; opacity: .8; }
+.raloa-eyebrow { margin: 0 0 8px; font-size: .68rem; font-weight: 800; letter-spacing: .14em; opacity: .8;  text-transform: uppercase; }
 .raloa-final-cta h2 { margin: 0 0 5px; font-size: clamp(1.9rem, 4vw, 2.75rem); letter-spacing: -.05em; }
 .raloa-final-cta p:not(.raloa-eyebrow) { margin: 0; color: rgba(255,255,255,.82); }
 .raloa-final-form { display: flex; align-items: center; min-height: 52px; padding: 5px; flex: 0 1 440px; border-radius: 999px; background: #fff; color: #94a3b8; font-size: .85rem; }
@@ -937,6 +924,11 @@ input, textarea, select { max-width: 100%; min-width: 0; }
   font-family: 'Cairo', var(--font-display);
 }
 
+/* Tracking and tight leading are display tricks for Latin: negative letter-spacing pulls Arabic
+   letters apart mid-word, and a 1.02 line-height clips the marks above and below them. */
+[dir="rtl"] .marketing-home :is(h1, h2, h3) { letter-spacing: 0; line-height: 1.35; }
+[dir="rtl"] .marketing-home :is(.raloa-eyebrow, .uppercase) { letter-spacing: 0; }
+
 [dir="rtl"] .text-left { text-align: right; }
 [dir="rtl"] .text-right { text-align: left; }
 [dir="rtl"] input:not([dir="ltr"]):not([dir="auto"]), [dir="rtl"] textarea:not([dir="ltr"]):not([dir="auto"]) { text-align: right; }
@@ -1141,7 +1133,6 @@ input, textarea, select { max-width: 100%; min-width: 0; }
 [dir="rtl"] .marketing-home .hero-float-links { left: auto; right: 1%; }
 [dir="rtl"] .marketing-home .hero-float-device { right: auto; left: 0; }
 [dir="rtl"] .marketing-home .hero-float-templates { left: auto; right: 2%; }
-[dir="rtl"] .marketing-home .hero-float-growth { right: auto; left: -4%; }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .marketing-home .hero-section {
@@ -1176,8 +1167,6 @@ input, textarea, select { max-width: 100%; min-width: 0; }
     font-size: .65rem;
     padding: 9px 10px;
   }
-
-  .marketing-home .hero-float-growth { right: -1%; }
 }
 
 @media (min-width: 1024px) {
@@ -1207,8 +1196,7 @@ input, textarea, select { max-width: 100%; min-width: 0; }
   .marketing-home .hero-float-links { left: -2%; top: 54px; }
   .marketing-home .hero-float-device { right: -2%; top: 96px; }
   .marketing-home .hero-float-templates { left: -2%; top: 292px; }
-  .marketing-home .hero-float-growth { right: -2%; top: 216px; }
-
+  
   .marketing-home .raloa-template-grid {
     display: flex;
     overflow-x: auto;

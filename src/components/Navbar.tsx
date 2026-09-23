@@ -18,7 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { tr: ui } = useUiLanguage();
   const { user, logout } = useAuth();
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   usePanelMotion(headerRef, mobileMenuOpen, '#mobile-navigation a, #mobile-navigation button');
@@ -37,7 +37,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <NavbarMobileMenu
           user={user}
-          lang={lang}
           t={t}
           ui={ui}
           onClose={() => setMobileMenuOpen(false)}
