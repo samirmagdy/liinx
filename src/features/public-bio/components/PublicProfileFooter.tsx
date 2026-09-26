@@ -11,8 +11,8 @@ interface PublicProfileFooterProps {
   theme: ThemeConfig;
   footerLogoFailed: boolean;
   setFooterLogoFailed: (failed: boolean) => void;
-  footerLogoLoading: boolean;
-  setFooterLogoLoading: (loading: boolean) => void;
+  footerLogoLoading?: boolean;
+  setFooterLogoLoading?: (loading: boolean) => void;
   onBackToStudio?: () => void;
 }
 
@@ -21,8 +21,8 @@ export const PublicProfileFooter: React.FC<PublicProfileFooterProps> = ({
   theme,
   footerLogoFailed,
   setFooterLogoFailed,
-  footerLogoLoading,
-  setFooterLogoLoading,
+  footerLogoLoading = false,
+  setFooterLogoLoading = () => {},
   onBackToStudio
 }) => {
   const { tr: ui } = useUiLanguage();

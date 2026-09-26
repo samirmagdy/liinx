@@ -47,7 +47,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         <div
           className="template-card-image absolute inset-0"
           aria-hidden="true"
-          style={{ background: getThemeBackground(theme ?? THEMES[0]) }}
+          style={getThemeBackground(theme ?? THEMES[0])}
         />
         <div className="template-card-image-wash absolute inset-0" aria-hidden="true" />
         {isHydrated ? (

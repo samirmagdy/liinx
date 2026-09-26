@@ -107,8 +107,20 @@ export type ProfileBlock = {
   pageId?: string;
   visible?: boolean;
   sortOrder?: number;
+  startAt?: number;
+  endAt?: number;
   createdAt?: number;
   updatedAt?: number;
+  url?: string | null;
+  subtitle?: string;
+  description?: string;
+  buttonText?: string;
+  items?: FolderItem[];
+  icon?: string;
+  badge?: string;
+  highlighted?: boolean;
+  extra?: Record<string, unknown>;
+  extraData?: Record<string, unknown>;
 } & (
   | BookingBlock
   | LinkBlock

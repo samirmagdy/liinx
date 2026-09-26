@@ -1,0 +1,7 @@
+{
+  "name": "RALOA",
+  "description": "Create a customizable link-in-bio page for your links, media, bookings, and newsletter. Start free with RALOA.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -370,19 +370,19 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
 
             {/* Reserved System Demo Routes */}
             <Route path="/demo/:identifier">
-              {(params) => params ? <PublicProfilePage username={params.identifier} /> : <HomePage />}
+              {(params: any) => params ? <PublicProfilePage username={params.identifier} /> : <HomePage />}
             </Route>
 
             {/* Dynamic Public Bio Pages */}
             <Route path="/@:username/:pageSlug">
-              {(params) => params ? <PublicProfilePage username={params.username} pageSlug={params.pageSlug} /> : <HomePage />}
+              {(params: any) => params ? <PublicProfilePage username={params.username} pageSlug={params.pageSlug} /> : <HomePage />}
             </Route>
             <Route path="/@:username">
-              {(params) => params ? <PublicProfilePage username={params.username} /> : <HomePage />}
+              {(params: any) => params ? <PublicProfilePage username={params.username} /> : <HomePage />}
             </Route>
 
             <Route path="/:username/:pageSlug">
-              {(params) => {
+              {(params: any) => {
                 if (!params) return <HomePage />;
                 const clean = params.username.toLowerCase();
                 if (RESERVED_USERNAMES.includes(clean as any)) return <HomePage />;
@@ -391,7 +391,7 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
             </Route>
 
             <Route path="/:username">
-              {(params) => {
+              {(params: any) => {
                 if (!params) return <HomePage />;
                 // Guard against system routes and reserved words
                 const clean = params.username.toLowerCase();

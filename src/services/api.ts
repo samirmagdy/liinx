@@ -5,7 +5,8 @@ import {
   type ContactInput,
   type ContactResponse,
   type ShowcaseProfile,
-  type MarketingEventPayload
+  type MarketingEventPayload,
+  type SystemCapabilities
 } from '../../shared/index.js';
 import { friendlyErrorMessage } from '../utils/errors';
 
@@ -512,15 +513,7 @@ export const api = {
 
   capabilities: {
     get: async () => {
-      return request<{
-        importers: {
-          linktree: boolean;
-          beacons: boolean;
-          biofm: boolean;
-        };
-        instagram: boolean;
-        billing: boolean;
-      }>('/api/capabilities');
+      return request<SystemCapabilities>('/api/capabilities');
     }
   }
 };

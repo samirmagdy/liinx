@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Play, Pause, Music2 } from 'lucide-react';
-import { type BlockItem, type ThemeConfig } from '../../../../types';
+import { type ThemeConfig, type AudioBlock } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import {
   getSpotifyEmbedUrl,
@@ -11,7 +11,7 @@ import {
 import { safePublicHref, getRadiusClass } from '../../utils/publicBio.utils';
 
 interface AudioBlockViewProps {
-  block: BlockItem;
+  block: AudioBlock;
   theme: ThemeConfig;
   playingAudioId: string | null;
   setPlayingAudioId: (id: string | null) => void;

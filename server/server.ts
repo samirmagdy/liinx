@@ -53,7 +53,7 @@ if (process.env.SENTRY_DSN) {
     tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE || 0.05)
   });
 }
-const PORT = Number(process.env.PORT) || 3050;
+const PORT = Number(process.env.PORT) || 3000;
 
 function validateProductionConfig() {
   if (process.env.NODE_ENV !== 'production') return;
@@ -103,7 +103,7 @@ validateProductionConfig();
 // Initialize SQLite database & seed demo data
 initDatabase();
 
-const configuredOrigins = (process.env.CORS_ORIGIN || process.env.APP_ORIGIN || 'http://localhost:3050')
+const configuredOrigins = (process.env.CORS_ORIGIN || process.env.APP_ORIGIN || 'http://localhost:3000')
   .split(',').map(origin => origin.trim()).filter(Boolean);
 if (process.env.NODE_ENV === 'production' && configuredOrigins.includes('*')) {
   throw new Error('Production CORS_ORIGIN must list explicit trusted origins; wildcard CORS is not allowed.');
@@ -161,19 +161,22 @@ app.use((_req, res, next) => {
   const nonce = crypto.randomBytes(16).toString('base64');
   res.locals.cspNonce = nonce;
 
+  const isDevelopment = process.env.NODE_ENV !== 'production';
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  if (!isDevelopment) {
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  }
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('X-DNS-Prefetch-Control', 'off');
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const frameAncestors = isDevelopment ? "frame-ancestors *" : "frame-ancestors 'self'";
   const scriptPolicy = isDevelopment
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://va.vercel-scripts.com"
     : `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://connect.facebook.net https://va.vercel-scripts.com`;
   const devSockets = isDevelopment ? ' ws: wss:' : '';
-  res.setHeader('Content-Security-Policy', `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ${scriptPolicy}; connect-src 'self' https://api.qrserver.com https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com https://va.vercel-scripts.com https://vitals.vercel-insights.com${devSockets}; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com https://embed.music.apple.com; report-uri /api/csp-report;`);
+  res.setHeader('Content-Security-Policy', `default-src 'self'; base-uri 'self'; object-src 'none'; ${frameAncestors}; img-src 'self' data: https:; media-src 'self' https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ${scriptPolicy}; connect-src 'self' https://api.qrserver.com https://www.google-analytics.com https://graph.instagram.com https://api.instagram.com https://va.vercel-scripts.com https://vitals.vercel-insights.com${devSockets}; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://player.vimeo.com https://w.soundcloud.com https://calendly.com https://embed.music.apple.com; report-uri /api/csp-report;`);
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
@@ -681,7 +684,7 @@ function handleStaticProductionRoute(req: express.Request, res: express.Response
 async function configureDevelopmentServer() {
   const { createServer: createViteServer } = await import('vite');
   const vite = await createViteServer({
-    server: { middlewareMode: true, hmr: { port: Number(process.env.VITE_HMR_PORT) || 24679 } },
+    server: { middlewareMode: true, hmr: false },
     appType: 'spa'
   });
   app.use(vite.middlewares);

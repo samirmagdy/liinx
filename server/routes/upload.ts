@@ -116,7 +116,7 @@ uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', 
   if (uploadRateLimited((req as any).user?.userId || req.ip)) {
     return res.status(429).json({ error: 'Too many uploads. Please try again later.' });
   }
-  uploadFields(req, res, async (err: any) => {
+  (uploadFields as any)(req, res, async (err: any) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ error: 'Image file size exceeds the 5MB limit.' });
@@ -182,7 +182,7 @@ uploadRouter.post('/api/upload', requireAuth, sharedRateLimit({ name: 'upload', 
 });
 
 uploadRouter.post('/api/upload/file', requireAuth, sharedRateLimit({ name: 'file-upload', limit: 20, windowMs: 60 * 60 * 1000 }), (req, res, next) => {
-  documentUpload.single('file')(req, res, (err: any) => {
+  (documentUpload.single('file') as any)(req, res, (err: any) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'File size exceeds the 25MB limit.' });
       return res.status(400).json({ error: err.message });

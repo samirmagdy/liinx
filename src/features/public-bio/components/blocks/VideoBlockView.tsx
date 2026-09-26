@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Play } from 'lucide-react';
-import { type BlockItem, type ThemeConfig } from '../../../../types';
+import { type ThemeConfig, type VideoBlock } from '../../../../types';
 import { useLanguage as useUiLanguage } from '../../../../context/LanguageContext';
 import { getYouTubeEmbedUrl, getVimeoEmbedUrl, isDirectVideoFile } from '../../../../utils/mediaEmbeds';
 import { safePublicHref, getRadiusClass } from '../../utils/publicBio.utils';
 
 interface VideoBlockViewProps {
-  block: BlockItem;
+  block: VideoBlock;
   theme: ThemeConfig;
   activeVideoId: string | null;
   setActiveVideoId: (id: string | null) => void;

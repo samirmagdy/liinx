@@ -19,7 +19,7 @@ export const TipsBlockView: React.FC<TipsBlockViewProps> = ({
   const card = `p-5 shadow-sm ${advancedRadius(theme.cardRadius)}`;
   const cardStyle = { backgroundColor: theme.cardBg, border: theme.cardBorder, color: theme.cardText };
 
-  const href = safePublicHref(extra.url || block.url);
+  const href = safePublicHref(extra.url || (block as any).url);
   const actionHref = href && !previewOnly ? analyticsHref(`/r/${block.id}`) : null;
 
   return (
@@ -28,9 +28,9 @@ export const TipsBlockView: React.FC<TipsBlockViewProps> = ({
       <p className="text-xs font-semibold uppercase tracking-caps" style={{ color: theme.subtextColor }}>
         {ui('External support link')}
       </p>
-      {(extra.description || block.subtitle) && (
+      {(extra.description || (block as any).subtitle) && (
         <p className="whitespace-pre-wrap break-words text-sm leading-6" style={{ color: theme.subtextColor }}>
-          {extra.description || block.subtitle}
+          {extra.description || (block as any).subtitle}
         </p>
       )}
       {actionHref ? (

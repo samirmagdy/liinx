@@ -22,5 +22,17 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "src",
+    "server",
+    "shared",
+    "server.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-server",
+    "playwright"
+  ]
 }
