@@ -42,6 +42,7 @@ import {
 import { starterSitePath } from './utils/starterSites';
 import type { Language } from './config/i18n';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { AudiencePathsSection } from './components/AudiencePathsSection';
 
 
 
@@ -74,7 +75,8 @@ function HomePage() {
           onOpenStudio={handleOpenStudio}
         />
         <HandoffBenefits />
-        <TemplatesSection maxVisible={8} onSelectTemplate={handleSelectTemplate} />
+        <AudiencePathsSection />
+        <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
         <HowItWorksSection />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
         <TrustProofSection />
@@ -199,7 +201,7 @@ function TemplatesPage() {
   };
 
   return (
-    <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-shell marketing-templates-page min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="templates" />
       <main id="main-content" tabIndex={-1} className="flex-1">
         <TemplatesSection headingLevel={1} onSelectTemplate={handleSelectTemplate} />
@@ -227,7 +229,7 @@ function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-shell marketing-pricing-page min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="pricing" />
       <main id="main-content" tabIndex={-1} className="flex-1">
         <PricingSection headingLevel={1} onSelectPlan={handleSelectPlan} />
@@ -375,21 +377,20 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
 
             {/* Reserved System Demo Routes */}
             <Route path="/demo/:identifier">
-              {(params) => <PublicProfilePage username={params.identifier} />}
+              {(params) => params ? <PublicProfilePage username={params.identifier} /> : <HomePage />}
             </Route>
 
             {/* Dynamic Public Bio Pages */}
             <Route path="/@:username/:pageSlug">
-              {(params) => <PublicProfilePage username={params.username} pageSlug={params.pageSlug} />}
+              {(params) => params ? <PublicProfilePage username={params.username} pageSlug={params.pageSlug} /> : <HomePage />}
             </Route>
             <Route path="/@:username">
-              {(params) => (
-                <PublicProfilePage username={params.username} />
-              )}
+              {(params) => params ? <PublicProfilePage username={params.username} /> : <HomePage />}
             </Route>
 
             <Route path="/:username/:pageSlug">
               {(params) => {
+                if (!params) return <HomePage />;
                 const clean = params.username.toLowerCase();
                 if (RESERVED_USERNAMES.includes(clean as any)) return <HomePage />;
                 return <PublicProfilePage username={params.username} pageSlug={params.pageSlug} />;
@@ -398,6 +399,7 @@ function MainApplication({ language, routerBase, routerSsrPath }: RoutedAppProps
 
             <Route path="/:username">
               {(params) => {
+                if (!params) return <HomePage />;
                 // Guard against system routes and reserved words
                 const clean = params.username.toLowerCase();
                 if (RESERVED_USERNAMES.includes(clean as any)) {

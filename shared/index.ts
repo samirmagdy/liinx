@@ -22,6 +22,7 @@ export * from './schemas/auth.js';
 export * from './schemas/contact.js';
 export * from './schemas/importer.js';
 export * from './schemas/forms.js';
+export * from './schemas/marketingEvents.js';
 export * from './schemas/capabilities.js';
 
 // Domain Types

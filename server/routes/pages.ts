@@ -4,6 +4,7 @@ import { pageContract, pageUpdateContract, RESERVED_USERNAMES } from '../../shar
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth.js';
 import { insertPages, newPageId, nextPageSortOrder } from '../services/siteComposition.js';
 import { invalidatePublicProfileCache } from './profiles.js';
+import { serverMarketingEvent } from '../services/marketingEvents.js';
 
 export const pagesRouter = Router();
 
@@ -76,6 +77,7 @@ pagesRouter.put('/studio/pages/:id', requireAuth, (req: AuthenticatedRequest, re
   const result = db.prepare('UPDATE pages SET slug = ?, title = ?, description = ?, published = ?, sort_order = ?, updated_at = ? WHERE id = ? AND profile_id = ? AND (? IS NULL OR updated_at = ?)').run(next.slug, next.title, next.description || null, next.published ? 1 : 0, next.sortOrder, now, page.id, page.profile_id, revision ?? null, revision ?? null);
   if (result.changes === 0) return res.status(409).json({ error: 'This page changed in another tab. Reload it before retrying your changes.' });
   invalidateProfile(page.profile_id);
+  if (!page.published && next.published) serverMarketingEvent('page_published', '/studio', 'en', req.user!.userId, { pageId: page.id });
   res.json({ success: true, revision: now });
 });
 

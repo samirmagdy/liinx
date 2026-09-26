@@ -6,6 +6,7 @@ import { log, logError } from './logger.js';
 import { getUploadBackupRetentionCount } from './services/backup/retention.js';
 import { stripeClient } from './routes/billing.js';
 import { grantDueAgencyReferralCredits } from './services/agencyReferrals.js';
+import { purgeMarketingEvents } from './routes/marketingEvents.js';
 
 const dayMs = 24 * 60 * 60 * 1000;
 
@@ -21,7 +22,8 @@ export function runRetentionCleanup() {
     const clicks = db.prepare('DELETE FROM link_clicks WHERE created_at < ?').run(analyticsCutoff).changes;
     const webhooks = db.prepare('DELETE FROM processed_webhook_events WHERE processed_at < ?').run(webhookCutoff).changes;
     const pendingNewsletter = db.prepare('DELETE FROM newsletter_pending_subscriptions WHERE expires_at <= ?').run(now).changes;
-    return { views, clicks, webhooks, pendingNewsletter };
+    const marketingEvents = purgeMarketingEvents(analyticsCutoff);
+    return { views, clicks, webhooks, pendingNewsletter, marketingEvents };
   })();
   log('info', 'Retention cleanup completed', { ...result, analyticsRetentionDays: analyticsDays, webhookRetentionDays: webhookDays });
   return result;

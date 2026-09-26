@@ -29,6 +29,7 @@ import { consumePasswordResetToken } from '../services/passwordReset.js';
 import { qualifyCreatorReferral, recordCreatorReferral } from '../services/referrals.js';
 import { recordAgencyReferral } from '../services/agencyReferrals.js';
 import { getEffectivePlan } from '../accountEntitlements.js';
+import { serverMarketingEvent } from '../services/marketingEvents.js';
 
 export const authRouter = Router();
 
@@ -325,6 +326,7 @@ authRouter.post('/register', sharedRateLimit({ name: 'register', limit: 15, wind
 
     const token = issueCurrentSession(userId, profileId, cleanUsername, cleanEmail);
     setSessionCookie(res, token);
+    serverMarketingEvent('signup_completed', '/register', 'en', userId, { hasTemplate: Boolean(template) });
 
     res.status(201).json({
       ...testOnlySessionToken(token),

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import { type Language, translations, type Translations } from '../config/i18n';
 import { translateRuntime } from '../config/runtimeTranslations';
 import { languageForPath, localizedPath } from '../utils/languagePaths';
+import { trackMarketingEvent } from '../services/marketingEvents';
 
 interface LanguageContextType {
   lang: Language;
@@ -37,6 +38,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode; initialLanguage?:
   }, [lang, isRtl]);
 
   const setLanguage = (newLang: Language) => {
+    if (newLang !== lang) void trackMarketingEvent({ event: 'language_changed', language: newLang, metadata: { from: lang } });
     if (typeof window !== 'undefined') {
       const currentLanguage = languageForPath(window.location.pathname);
       if (currentLanguage !== newLang) {

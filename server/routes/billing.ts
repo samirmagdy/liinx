@@ -9,6 +9,7 @@ import { hasEntitlement, normalizePlan } from '../entitlements.js';
 import { syncAccountPlanToProfiles } from '../accountEntitlements.js';
 import { invalidatePublicProfileCache } from './profiles.js';
 import { recordAgencyReferralPayment } from '../services/agencyReferrals.js';
+import { serverMarketingEvent } from '../services/marketingEvents.js';
 
 export const billingRouter = Router();
 
@@ -116,6 +117,7 @@ billingRouter.post('/billing/create-checkout-session', requireAuth, async (req: 
     }
 
     const session = await stripeClient.checkout.sessions.create(sessionParams);
+    serverMarketingEvent('checkout_started', '/pricing', 'en', req.user!.userId, { plan, interval });
 
     res.json({
       url: session.url,

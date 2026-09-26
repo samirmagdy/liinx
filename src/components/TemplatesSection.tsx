@@ -3,6 +3,7 @@ import { SITE_TEMPLATES } from '../../shared/index.js';
 import { useLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
 import { TemplateCard } from './TemplateCard';
+import { trackMarketingEvent } from '../services/marketingEvents';
 
 interface TemplatesSectionProps {
   headingLevel?: 1 | 2;
@@ -31,6 +32,11 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
     const list = selectedCategory === 'all' ? SITE_TEMPLATES : SITE_TEMPLATES.filter(template => template.category === selectedCategory);
     return maxVisible ? list.slice(0, maxVisible) : list;
   }, [selectedCategory, maxVisible]);
+
+  const handleTemplateSelect = (templateId: string) => {
+    void trackMarketingEvent({ event: 'template_selected', language: isRtl ? 'ar' : 'en', templateId });
+    onSelectTemplate(templateId);
+  };
 
   useEffect(() => setIsHydrated(true), []);
 
@@ -87,7 +93,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 isHydrated={isHydrated}
                 isRtl={isRtl}
                 useTemplateLabel={t.templatesSection.useTemplate}
-                onSelectTemplate={onSelectTemplate}
+                onSelectTemplate={handleTemplateSelect}
               />
             );
           })}

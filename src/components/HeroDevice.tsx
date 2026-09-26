@@ -1,16 +1,11 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Link } from 'wouter';
 import { Palette } from 'lucide-react';
 import { PhonePreview } from './PhonePreview';
 import { type CreatorProfile, type ThemeConfig } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { HeroPreviewControls } from './HeroPreviewControls';
-
-const FLOATS = [
-  { className: 'hero-float-links', title: 'All your links', body: 'in one place', mark: '↘' },
-  { className: 'hero-float-device', title: 'Looks amazing', body: 'on any device', mark: '↙' },
-  { className: 'hero-float-templates', title: 'Eight starter sites', body: 'to begin with', mark: '↘' }
-];
+const CreatorAssemblyScene = lazy(() => import('./CreatorAssemblyScene').then(module => ({ default: module.CreatorAssemblyScene })));
 
 interface HeroDeviceProps {
   currentProfiles: CreatorProfile[];
@@ -58,11 +53,7 @@ export const HeroDevice: React.FC<HeroDeviceProps> = ({
           </span>
         </div>
         <div className="hero-device-stage relative">
-          {FLOATS.map(float => (
-            <span key={float.className} className={`hero-float ${float.className}`}>
-              {ui(float.title)}<br />{ui(float.body)} <i aria-hidden="true">{float.mark}</i>
-            </span>
-          ))}
+          <Suspense fallback={<div className="creator-assembly-loading" aria-hidden="true" />}><CreatorAssemblyScene /></Suspense>
           <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 

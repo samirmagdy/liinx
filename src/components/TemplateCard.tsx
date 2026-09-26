@@ -7,6 +7,7 @@ import { getThemeBackground } from '../utils/colorContrast';
 import { TemplatePreviewDialog } from './TemplatePreviewDialog';
 import { starterSitePreview } from '../utils/starterSites';
 import { useLanguage as useUiLanguage } from '../context/LanguageContext';
+import { trackMarketingEvent } from '../services/marketingEvents';
 
 
 interface TemplateCardProps {
@@ -79,7 +80,10 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         <div className="template-card-actions flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setPreviewing(true)}
+            onClick={() => {
+              void trackMarketingEvent({ event: 'template_previewed', language: isRtl ? 'ar' : 'en', templateId: template.id });
+              setPreviewing(true);
+            }}
             className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-neutral-300 px-3.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-neutral-900 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />

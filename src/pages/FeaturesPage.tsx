@@ -18,7 +18,7 @@ function getFeaturePillars(isRtl: boolean) {
   return isRtl ? [
     {
       icon: <Layers className="w-6 h-6 text-indigo-600" />,
-      title: "محتوى وروابط",
+      title: "انشر",
       description: "أضف روابط ووسائط مدعومة ومجلدات ونماذج اشتراك إلى صفحتك.",
       bullets: [
         "مشغلات صوتية مع معاينة سبوتيفاي",
@@ -29,7 +29,7 @@ function getFeaturePillars(isRtl: boolean) {
     },
     {
       icon: <Palette className="w-6 h-6 text-indigo-600" />,
-      title: "تنسيق الصفحة",
+      title: "قدّم عملك",
       description: "اختر سمة وعدّل مظهر صفحتك، مع CSS وخطوط ويب مخصصة في الخطط المؤهلة.",
       bullets: [
         "سمات جاهزة",
@@ -39,7 +39,7 @@ function getFeaturePillars(isRtl: boolean) {
     },
     {
       icon: <Globe2 className="w-6 h-6 text-indigo-600" />,
-      title: "نطاقات مخصصة",
+      title: "امتلك وجهتك",
       description: "اربط نطاقاً فرعياً بعد التحقق من DNS وإعداد الاستضافة وTLS.",
       bullets: [
         "التحقق من DNS",
@@ -49,7 +49,7 @@ function getFeaturePillars(isRtl: boolean) {
     },
     {
       icon: <BarChart3 className="w-6 h-6 text-indigo-600" />,
-      title: "تحليلات الصفحة",
+      title: "قس ما يهم",
       description: "راجع زيارات الصفحة ونقرات الروابط ومصادر الإحالة وبيانات حملات UTM.",
       bullets: [
         "مشاهدات الصفحة ونقرات الروابط اليومية",
@@ -59,38 +59,38 @@ function getFeaturePillars(isRtl: boolean) {
     },
     {
       icon: <Download className="w-6 h-6 text-indigo-600" />,
-      title: "تصدير بيانات الحساب",
+      title: "احفظ جمهورك",
       description: "نزّل ملف JSON يتضمن بيانات الحساب والملفات الشخصية والصفحات والعناصر ومشتركي النشرة وردود النماذج. لا يتضمن ملفات الوسائط نفسها أو سجل التحليلات الخام.",
       bullets: ["بيانات الحساب والملفات والصفحات والعناصر", "سجلات المشتركين وردود النماذج", "ملفات الوسائط وسجل التحليلات الخام غير مضمنين"]
     }
   ] : [
     {
       icon: <Layers className="w-6 h-6 text-indigo-600" />,
-      title: "Links and content blocks",
+      title: "Publish",
       description: "Add links, supported media embeds, folders, and newsletter signup forms to your page.",
       bullets: ["Audio players with supported provider embeds", "YouTube and Vimeo embeds", "Collapsible multi-item folders", "Newsletter subscription forms"]
     },
     {
       icon: <Palette className="w-6 h-6 text-indigo-600" />,
-      title: "Page styling",
+      title: "Present your work",
       description: "Choose a theme and adjust the typography and appearance of your public page.",
       bullets: ["Theme presets", "Custom CSS on eligible plans", "Custom web font links"]
     },
     {
       icon: <Globe2 className="w-6 h-6 text-indigo-600" />,
-      title: "Custom domains",
+      title: "Own the destination",
       description: "Connect a subdomain after DNS verification and hosting and TLS configuration.",
       bullets: ["DNS verification", "Remove RALOA branding on eligible plans", "Custom domain support per eligible profile"]
     },
     {
       icon: <BarChart3 className="w-6 h-6 text-indigo-600" />,
-      title: "Page analytics",
+      title: "Measure what matters",
       description: "Review page visits, link clicks, referral sources, and UTM campaign data.",
       bullets: ["Daily page views and link clicks", "Referrer and UTM reporting", "Seven-day activity charts"]
     },
     {
       icon: <Download className="w-6 h-6 text-indigo-600" />,
-      title: "Export your account data",
+      title: "Keep your audience",
       description: "Download a JSON file with account metadata, profiles, pages, blocks, newsletter subscribers, and form submissions. Uploaded file binaries and raw analytics history are not included.",
       bullets: ["Account metadata, profiles, pages, and blocks", "Newsletter subscribers and form submissions", "Uploaded files and raw analytics history are not included"]
     }
@@ -105,13 +105,13 @@ export function FeaturesPage() {
   const featurePillars = getFeaturePillars(isRtl);
 
   return (
-    <div className="marketing-shell min-h-screen flex flex-col bg-white text-neutral-900">
+    <div className="marketing-shell marketing-features-page min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar activeView="features" />
       <main id="main-content" tabIndex={-1} className="flex-1">
         {/* Hero Header */}
-        <section className="max-w-6xl mx-auto px-6 pt-12 pb-8 space-y-4">
+        <section className="raloa-editorial-hero max-w-6xl mx-auto px-6 pt-16 pb-12 space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{ui('Platform features')}</p>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-neutral-900 max-w-3xl leading-tight">
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-neutral-900 max-w-3xl leading-[1.02]">
             <>
               {ui('Create one page for your work.')}<br className="hidden sm:inline" />
               <span className="block text-neutral-500">{ui('Links, media, and bookings.')}</span>
@@ -138,7 +138,7 @@ export function FeaturesPage() {
         </section>
 
         {/* Feature Grid */}
-        <section className="max-w-6xl mx-auto px-6 py-8">
+        <section className="raloa-feature-journeys max-w-6xl mx-auto px-6 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
             {featurePillars.map((feature, idx) => (
               <div

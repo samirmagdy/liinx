@@ -67,6 +67,10 @@ export function MadeWithRaloaSection() {
     return () => { alive = false; };
   }, []);
 
+  // Empty community proof is not proof. Keep the homepage focused on live product demos
+  // until opted-in creator pages are available, instead of reserving a large blank band.
+  if (state === 'ready' && !profiles.length) return null;
+
   return (
     <section id="showcase" className="marketing-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto">

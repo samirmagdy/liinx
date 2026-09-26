@@ -5,6 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { friendlyErrorMessage } from '../../../utils/errors';
 import { useStarterSiteChoice } from './useStarterSiteChoice';
 import { useUsernameAvailability } from './useUsernameAvailability';
+import { trackMarketingEvent } from '../../../services/marketingEvents';
 
 /**
  * Everything the two signup steps share: the credentials, the starter-site choice, and the single
@@ -54,6 +55,7 @@ export function useSignupFlow() {
       return;
     }
 
+    void trackMarketingEvent({ event: 'signup_started', language: window.location.pathname.startsWith('/ar') ? 'ar' : 'en', metadata: { step: 1 } });
     setStep(2);
   };
 

@@ -536,6 +536,25 @@ export function initDatabase() {
     );
     CREATE INDEX IF NOT EXISTS idx_rate_limit_bucket_time ON rate_limit_events(bucket_key, occurred_at);
 
+    CREATE TABLE IF NOT EXISTS marketing_events (
+      id TEXT PRIMARY KEY,
+      event_name TEXT NOT NULL,
+      anonymous_id TEXT,
+      session_id TEXT,
+      user_id TEXT,
+      route TEXT NOT NULL,
+      language TEXT NOT NULL,
+      segment TEXT,
+      template_id TEXT,
+      plan_id TEXT,
+      metadata_json TEXT NOT NULL DEFAULT '{}',
+      dedupe_key TEXT UNIQUE,
+      created_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_marketing_events_name_time ON marketing_events(event_name, created_at);
+    CREATE INDEX IF NOT EXISTS idx_marketing_events_anon_time ON marketing_events(anonymous_id, created_at);
+
     CREATE TABLE IF NOT EXISTS form_submissions (
       id TEXT PRIMARY KEY,
       profile_id TEXT NOT NULL,
@@ -553,6 +572,8 @@ export function initDatabase() {
   try { db.exec('ALTER TABLE api_keys ADD COLUMN expires_at INTEGER'); } catch {}
   db.prepare('UPDATE api_keys SET expires_at = created_at + ? WHERE expires_at IS NULL').run(90 * 24 * 60 * 60 * 1000);
   try { db.exec('ALTER TABLE form_submissions ADD COLUMN submission_key TEXT'); } catch {}
+  try { db.exec('ALTER TABLE marketing_events ADD COLUMN dedupe_key TEXT'); } catch {}
+  try { db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_marketing_events_dedupe ON marketing_events(dedupe_key) WHERE dedupe_key IS NOT NULL'); } catch {}
 
   // Bind verification tokens to the specific email/credential they were issued
   // for. Tokens without this hash (issued before this migration) are treated as

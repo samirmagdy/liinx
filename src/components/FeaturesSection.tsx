@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, BarChart3, CalendarDays, Globe2, Image, Link2, Palette, Share2, ShoppingBag } from 'lucide-react';
+import { ArrowRight, BarChart3, Globe2, Image, Link2, Share2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Reveal } from './motion/Reveal';
 
@@ -8,14 +8,11 @@ import { Reveal } from './motion/Reveal';
  * an outcome, and nothing is a paid-only feature unless the card says so.
  */
 const FEATURES = [
-  { icon: Link2, title: 'Links and social profiles', body: 'Add the platforms you are already on, in the order you want them.' },
-  { icon: Image, title: 'Media and galleries', body: 'Images, galleries, carousels, and supported audio and video embeds.' },
-  { icon: CalendarDays, title: 'Bookings', body: 'Add a Calendly event link and visitors pick a time from your page.' },
-  { icon: ShoppingBag, title: 'Product showcase', body: 'Show a product with its price and a link to where it sells.' },
-  { icon: Share2, title: 'Newsletter and forms', body: 'Collect signups and answers, then export them as CSV.' },
-  { icon: BarChart3, title: 'Page activity', body: 'See page views, link clicks and where the visits came from.' },
-  { icon: Palette, title: 'Themes and type', body: 'Choose a theme and adjust colors and fonts. Custom CSS on paid plans.' },
-  { icon: Globe2, title: 'Your own address', body: 'Every page is published under your name. Custom domains on paid plans.' }
+  { icon: Link2, title: 'Publish', body: 'Put links, socials, media, products and bookings in one page people can scan.' },
+  { icon: Image, title: 'Present', body: 'Use a starter site, your type, your colors and the same live preview your visitors see.' },
+  { icon: Share2, title: 'Capture', body: 'Collect newsletter signups and form answers without sending your audience elsewhere.' },
+  { icon: BarChart3, title: 'Measure', body: 'See visits, link clicks, referring sources and campaign tags in one calm view.' },
+  { icon: Globe2, title: 'Own the destination', body: 'Share a page under your name, with custom domains available on paid plans.' }
 ];
 
 export const FeaturesSection: React.FC<{ onOpenStudio: () => void }> = ({ onOpenStudio }) => {

@@ -4,7 +4,8 @@ import {
   type ProfileBlock,
   type ContactInput,
   type ContactResponse,
-  type ShowcaseProfile
+  type ShowcaseProfile,
+  type MarketingEventPayload
 } from '../../shared/index.js';
 import { friendlyErrorMessage } from '../utils/errors';
 
@@ -68,6 +69,12 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  marketingEvents: {
+    track: (event: MarketingEventPayload) => request<{ success: boolean; id: string }>('/api/marketing/events', {
+      method: 'POST',
+      body: JSON.stringify(event)
+    })
+  },
   referrals: {
     get: () => request<{ referralUrl: string; total: number; qualified: number; required: number; rewardUntil: number | null; rewardEligible: boolean }>('/api/referrals')
   },

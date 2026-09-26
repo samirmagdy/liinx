@@ -19,7 +19,7 @@ export function GuidesPage() {
   const guides = getGuides(ar);
   const activeGuide = guides.find(guide => guide.path === path);
 
-  return <div className="min-h-screen bg-white text-neutral-900">
+  return <div className="marketing-shell marketing-guides-page min-h-screen bg-white text-neutral-900">
     <Navbar activeView="home" onClaimClick={() => setLocation('/register')} />
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-16">
       {activeGuide

@@ -26,6 +26,7 @@ import { billingRouter } from './routes/billing.js';
 import { contactRouter } from './routes/contact.js';
 import { referralsRouter } from './routes/referrals.js';
 import { agencyReferralsRouter } from './routes/agencyReferrals.js';
+import { marketingEventsRouter } from './routes/marketingEvents.js';
 import { pageTitles, brand, isFirstPartyHost, findSystemDemoProfile } from '../shared/index.js';
 import * as Sentry from '@sentry/node';
 import { log, logError } from './logger.js';
@@ -487,6 +488,7 @@ app.use('/api', billingRouter);
 app.use('/api', contactRouter);
 app.use('/api/referrals', referralsRouter);
 app.use('/api/agency-referrals', agencyReferralsRouter);
+app.use('/api', marketingEventsRouter);
 
 // CSP Violation Reporting Endpoint
 app.post('/api/csp-report', sharedRateLimit({ name: 'csp-report', limit: 60, windowMs: 60000 }), (req, res) => {

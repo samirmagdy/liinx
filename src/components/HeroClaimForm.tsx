@@ -3,6 +3,7 @@ import { brand } from '../config/brand';
 import { useUsernameAvailability } from '../hooks/useUsernameAvailability';
 import { useLanguage } from '../context/LanguageContext';
 import { ArrowRight, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { trackMarketingEvent } from '../services/marketingEvents';
 
 interface HeroClaimFormProps {
   isRtl: boolean;
@@ -50,6 +51,7 @@ export const HeroClaimForm: React.FC<HeroClaimFormProps> = ({
     e.preventDefault();
     const clean = handle.trim().toLowerCase();
     if (clean) {
+      void trackMarketingEvent({ event: 'marketing_cta_clicked', language: isRtl ? 'ar' : 'en', metadata: { source: 'hero_claim' } });
       onClaimUsername(clean);
     } else {
       onFallbackRedirect();

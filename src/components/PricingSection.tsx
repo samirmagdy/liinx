@@ -7,6 +7,7 @@ import { PricingCard, type PricingPlanItem } from './PricingCard';
 import { ReassuranceNote } from './ReassuranceNote';
 import { PricingIntervalToggle } from './PricingIntervalToggle';
 import type { PricingPlanTranslation } from '../config/i18n';
+import { trackMarketingEvent } from '../services/marketingEvents';
 
 function buildPricingPlans(content: Record<'starter' | 'pro' | 'studio', PricingPlanTranslation>, interval: BillingInterval, recommendationLabel: string): PricingPlanItem[] {
   const icons = {
@@ -76,6 +77,7 @@ export function PricingSection({ onSelectPlan, headingLevel = 2 }: { onSelectPla
               pending={pending}
               titleTag={headingLevel === 1 ? 'h2' : 'h3'}
               onSelectPlan={async (planId) => {
+                void trackMarketingEvent({ event: 'pricing_plan_selected', language: lang, planId: planId as 'free' | 'pro' | 'studio', metadata: { interval } });
                 setPending(planId);
                 setError(false);
                 try {

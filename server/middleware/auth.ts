@@ -42,3 +42,15 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
   req.user = payload;
   next();
 }
+
+export function optionalAuth(req: AuthenticatedRequest, _res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!bearer) return next();
+  const payload = verifyJwt(bearer);
+  if (!payload) return next();
+  const user = db.prepare('SELECT id, session_version FROM users WHERE id = ?').get(payload.userId) as { id: string; session_version: number } | undefined;
+  const profile = db.prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?').get(payload.profileId, payload.userId);
+  if (user && profile && (payload.sessionVersion === undefined || Number(payload.sessionVersion) === Number(user.session_version || 1))) req.user = payload;
+  next();
+}

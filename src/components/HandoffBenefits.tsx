@@ -16,33 +16,25 @@ export const supportedPlatforms = ['Instagram', 'TikTok', 'YouTube', 'Spotify', 
 export function HandoffBenefits() {
   const { tr: ui } = useLanguage();
   return (
-    <>
-      <section aria-label={ui('Places you can link to')} className="raloa-trust-strip">
-        <div className="raloa-container">
-          <p>{ui('Add the places people already look for you')}</p>
-          <div className="raloa-trust-marks" dir="ltr" aria-label={ui('Supported platforms')}>
-            {supportedPlatforms.map(mark => <span key={mark}>{mark}</span>)}
-          </div>
+    <section className="raloa-benefits" aria-labelledby="benefits-heading">
+      <div className="raloa-container">
+        <div className="raloa-benefits-intro">
+          <p className="raloa-eyebrow">{ui('One home for your audience')}</p>
+          <h2 id="benefits-heading">{ui('Everything your next click needs.')}</h2>
         </div>
-      </section>
-
-      <section className="raloa-benefits" aria-labelledby="benefits-heading">
-        <div className="raloa-container">
-          <h2 id="benefits-heading" className="sr-only">{ui('Why RALOA')}</h2>
-          <div className="raloa-benefit-grid">
-            {benefits.map(({ icon: Icon, title, body }) => (
-              <article key={title} className="raloa-benefit-card">
-                <div className="raloa-benefit-icon"><Icon aria-hidden="true" /></div>
-                <div>
-                  <h3>{ui(title)}</h3>
-                  <p>{ui(body)}</p>
-                </div>
-              </article>
-            ))}
-          </div>
+        <div className="raloa-benefit-grid">
+          {benefits.map(({ icon: Icon, title, body }) => (
+            <article key={title} className="raloa-benefit-card">
+              <div className="raloa-benefit-icon"><Icon aria-hidden="true" /></div>
+              <div>
+                <h3>{ui(title)}</h3>
+                <p>{ui(body)}</p>
+              </div>
+            </article>
+          ))}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
 

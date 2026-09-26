@@ -71,12 +71,12 @@ export const TrustProofSection: React.FC = () => {
         <Reveal distance="md" className="max-w-3xl mb-8">
           <div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-900 mb-3 text-balance">
-              {ar ? 'نماذج توضيحية تفاعلية يمكنك استكشافها' : 'Explore interactive sample pages'}
+              {ar ? 'شاهد المنتج وهو يعمل' : 'See the product in action'}
             </h2>
             <p className="text-sm sm:text-base text-neutral-600 leading-relaxed text-pretty">
               {ar
                 ? 'هذه ملفات تعريف خيالية توضح بعض أنواع الصفحات التي يمكن إنشاؤها باستخدام RALOA؛ وليست حسابات عملاء.'
-                : 'These fictional profiles demonstrate examples of pages you can build with RALOA. They are not customer accounts.'}
+                : 'Open a working page to see how links, media, bookings, music and signup forms come together.'}
             </p>
           </div>
         </Reveal>
