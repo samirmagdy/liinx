@@ -25,7 +25,6 @@ export const runtimeTranslations: Record<string, string> = {
   'Bring every post, project, booking, and signup into one page your audience can remember—and measure.': 'اجمع كل منشور ومشروع وحجز واشتراك في صفحة واحدة يتذكرها جمهورك ويمكنك قياسها.',
   'Give every post, project, and booking a home.': 'امنح كل منشور ومشروع وحجز وجهة واحدة.',
   'Create your page and share one address for everything your audience needs.': 'أنشئ صفحتك وشارك عنواناً واحداً لكل ما يحتاجه جمهورك.',
-  'Creator product preview': 'معاينة منتج المبدع',
   'Something went wrong': 'حدث خطأ ما',
   'Back to Home': 'العودة للرئيسية',
   'Reload Page': 'إعادة تحميل الصفحة',

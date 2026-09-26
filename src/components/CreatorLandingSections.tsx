@@ -35,7 +35,7 @@ export function TouchpointConvergenceSection() {
           <p className="creator-landing-kicker">{ar ? 'المشكلة' : 'The problem'}</p>
           <h2 id="convergence-title">{ar ? 'جمهورك موزّع. وجهتك لا يجب أن تكون كذلك.' : 'Your audience is scattered. Your destination should not be.'}</h2>
           <p>{ar ? 'يبدأ الناس من منشور أو إصدار أو رسالة أو رابط حجز. اجمع كل نقطة تواصل في صفحة واحدة تتحدث بصوتك.' : 'People start from a post, a release, a message, or a booking link. Bring every touchpoint into one page that sounds like you.'}</p>
-          <a href="#creator-proof" className="creator-landing-text-link">{ar ? 'شاهد المنتج' : 'See the product'} <ArrowUpRight aria-hidden="true" /></a>
+          <a href="#creator-jobs" className="creator-landing-text-link">{ar ? 'شاهد كيف تعمل' : 'See how it works'} <ArrowUpRight aria-hidden="true" /></a>
         </div>
 
         <figure className="creator-landing-convergence-visual" aria-labelledby="convergence-visual-caption">
@@ -65,6 +65,7 @@ export function CreatorJobsSection() {
   const ar = lang === 'ar';
   return (
     <section className="creator-landing-jobs" id="creator-jobs" aria-labelledby="creator-jobs-title">
+      <span id="how-it-works" className="creator-landing-anchor-alias" aria-hidden="true" />
       <div className="creator-landing-container creator-landing-jobs-grid">
         <div className="creator-landing-jobs-intro">
           <p className="creator-landing-kicker">{ar ? 'ما الذي تبنيه' : 'What you build'}</p>

@@ -39,7 +39,6 @@ import { starterSitePath } from './utils/starterSites';
 import type { Language } from './config/i18n';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { TouchpointConvergenceSection, CreatorJobsSection, CreatorSegmentsSection } from './components/CreatorLandingSections';
-import { CreatorProofSection } from './components/CreatorProofSection';
 
 
 
@@ -74,7 +73,6 @@ function HomePage() {
         <TouchpointConvergenceSection />
         <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
         <CreatorJobsSection />
-        <CreatorProofSection />
         <CreatorSegmentsSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />

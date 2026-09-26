@@ -33,6 +33,8 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
     return maxVisible ? list.slice(0, maxVisible) : list;
   }, [selectedCategory, maxVisible]);
 
+  const carouselTemplates = React.useMemo(() => [...filteredTemplates, ...filteredTemplates], [filteredTemplates]);
+
   const handleTemplateSelect = (templateId: string) => {
     void trackMarketingEvent({ event: 'template_selected', language: isRtl ? 'ar' : 'en', templateId });
     onSelectTemplate(templateId);
@@ -77,8 +79,11 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
         </div>
 
         {/* Templates Grid */}
-        <Reveal stagger><div className="raloa-template-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredTemplates.map((template) => {
+        <Reveal stagger>
+          <div className="raloa-template-carousel" aria-label={ui('Template carousel')}>
+            <div className="raloa-template-grid template-carousel-track">
+              <div className="template-carousel-group">
+          {carouselTemplates.slice(0, filteredTemplates.length).map((template) => {
             const loc = t.templatesSection.templates[template.id] || {
               name: template.name,
               category: template.category,
@@ -97,13 +102,37 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
               />
             );
           })}
+              </div>
+              <div className="template-carousel-group" aria-hidden="true" inert>
+          {carouselTemplates.slice(filteredTemplates.length).map((template) => {
+            const loc = t.templatesSection.templates[template.id] || {
+              name: template.name,
+              category: template.category,
+              description: template.description
+            };
+
+            return (
+              <TemplateCard
+                key={`clone-${template.id}`}
+                template={template}
+                loc={loc}
+                isHydrated={isHydrated}
+                isRtl={isRtl}
+                useTemplateLabel={t.templatesSection.useTemplate}
+                onSelectTemplate={handleTemplateSelect}
+              />
+            );
+          })}
+              </div>
+            </div>
+          </div>
           {maxVisible && (
             <a href="/templates" className="raloa-more-template-card" aria-label={ui('Browse more templates')}>
               <span aria-hidden="true">＋</span>
               <strong>{ui('More templates')}</strong>
             </a>
           )}
-        </div></Reveal>
+        </Reveal>
 
       </div>
     </section>

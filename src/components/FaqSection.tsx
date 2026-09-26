@@ -17,41 +17,43 @@ export const FaqSection: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="marketing-section raloa-faq-section py-12 md:py-16 border-b border-neutral-200">
+    <section id="faq" className="marketing-section raloa-faq-section creator-faq-section py-12 md:py-16 border-b border-neutral-200">
       <div className="raloa-container">
         
         {/* Header */}
         <div className="raloa-faq-layout">
-        <Reveal distance="md" className="raloa-faq-intro">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
-            <span>{t.faqSection.badge}</span>
+        <Reveal distance="md" className="raloa-faq-intro creator-faq-intro">
+          <div className="creator-faq-heading">
+            <div className="creator-faq-kicker inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-800 text-xs font-mono font-bold mb-3 tracking-wider">
+              <span>{t.faqSection.badge}</span>
+            </div>
+            <h2 className="creator-faq-title text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 mb-3 text-balance">
+              {t.faqSection.title}
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 mb-3 text-balance">
-            {t.faqSection.title}
-          </h2>
-          <p className="text-base text-neutral-600 text-pretty">
+          <p className="creator-faq-subtitle text-base text-neutral-600 text-pretty">
             {t.faqSection.subtitle}
           </p>
         </Reveal>
 
         {/* FAQ Accordion */}
-        <Reveal stagger className="raloa-faq-list space-y-3">
+        <Reveal stagger className="raloa-faq-list creator-faq-list space-y-3">
           {faqList.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div
                 key={idx}
-                className="motion-card rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden shadow-xs"
+                className="motion-card creator-faq-item rounded-2xl border border-neutral-200 bg-neutral-50 overflow-hidden shadow-xs"
               >
                 <button
                   id={`faq-question-${idx}`} aria-expanded={isOpen} aria-controls={`faq-answer-${idx}`}
                   onClick={() => toggleFaq(idx)}
-                  className="w-full p-5 text-start flex items-center justify-between gap-4 hover:bg-neutral-50 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="creator-faq-question w-full p-5 text-start flex items-center justify-between gap-4 hover:bg-neutral-50 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
                   <span className="font-bold text-sm sm:text-base text-neutral-900 text-start">
                     {faq.question}
                   </span>
-                  <div className="p-1 rounded-full bg-neutral-100 shrink-0 text-neutral-600">
+                  <div className="creator-faq-toggle p-1 rounded-full bg-neutral-100 shrink-0 text-neutral-600">
                     {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </div>
                 </button>

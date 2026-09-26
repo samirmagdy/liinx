@@ -50,7 +50,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         <div className="template-card-image-wash absolute inset-0" aria-hidden="true" />
         {isHydrated ? (
           <div className="template-preview-render absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none" aria-hidden="true" inert>
-            <PhonePreview profile={starterSitePreview(template)} compact interactive={false} />
+            <PhonePreview profile={starterSitePreview(template)} interactive={false} />
           </div>
         ) : (
           <div className="h-full flex items-center justify-center p-6 text-center" style={{ backgroundColor: theme?.bgColor }}>
