@@ -7,6 +7,9 @@ import { useLanguage } from '../context/LanguageContext';
 import { HeroPreviewControls } from './HeroPreviewControls';
 const CreatorAssemblyScene = lazy(() => import('./CreatorAssemblyScene').then(module => ({ default: module.CreatorAssemblyScene })));
 
+const HERO_ACCENT_START = '#7C3AED';
+const HERO_ACCENT_END = '#2563EB';
+
 interface HeroDeviceProps {
   currentProfiles: CreatorProfile[];
   selectedProfileIndex: number;
@@ -25,7 +28,12 @@ export const HeroDevice: React.FC<HeroDeviceProps> = ({
   activeTheme, activeProfile, isProfileRtl, onOpenStudio
 }) => {
   const { t, tr: ui } = useLanguage();
-  const theme = activeTheme;
+  // The hero is one composed brand moment: the selected demo controls its surface and type,
+  // while its interactive accent stays aligned with the purple/blue hero headline.
+  const theme = {
+    ...activeTheme,
+    accentColor: HERO_ACCENT_START,
+  };
 
   return (
     <div className="lg:col-span-5 flex flex-col items-center">
@@ -53,8 +61,8 @@ export const HeroDevice: React.FC<HeroDeviceProps> = ({
           </span>
         </div>
         <div className="hero-device-stage relative">
-          <Suspense fallback={<div className="creator-assembly-loading" aria-hidden="true" />}><CreatorAssemblyScene /></Suspense>
-          <div className="phone-shell relative rounded-[44px] p-3 shadow-lg ring-2 ring-black/10 bg-neutral-900 border border-neutral-800">
+          <Suspense fallback={<div className="creator-assembly-loading" style={{ '--assembly-accent': HERO_ACCENT_START, '--assembly-accent-secondary': HERO_ACCENT_END } as React.CSSProperties} aria-hidden="true" />}><CreatorAssemblyScene accentColor={HERO_ACCENT_START} secondaryAccentColor={HERO_ACCENT_END} /></Suspense>
+          <div className="phone-shell relative rounded-[44px] p-3 shadow-lg bg-neutral-900 border border-neutral-800">
             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-neutral-800 rounded-full z-30" />
 
             <div
@@ -68,14 +76,12 @@ export const HeroDevice: React.FC<HeroDeviceProps> = ({
               }}>
               <div data-hero-preview><PhonePreview
                 profile={activeProfile}
-                customTheme={activeTheme}
+                customTheme={theme}
                 compact
+                bare
                 interactive={false}
               /></div>
             </div>
-
-            {/* Subtle bottom scroll affordance vignette */}
-            <div className="pointer-events-none absolute bottom-5 left-5 right-5 h-12 bg-gradient-to-t from-black/25 to-transparent rounded-b-[30px] z-20" />
           </div>
         </div>
 

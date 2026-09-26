@@ -14,9 +14,8 @@ const TemplatesSection = lazy(() => import('./components/TemplatesSection').then
 const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(module => ({ default: module.GuidesPage })));
 const FaqSection = lazy(() => import('./components/FaqSection').then(module => ({ default: module.FaqSection })));
-const TrustProofSection = lazy(() => import('./components/TrustProofSection').then(module => ({ default: module.TrustProofSection })));
 const Footer = lazy(() => import('./components/Footer').then(module => ({ default: module.Footer })));
-import { HandoffBenefits, HandoffFinalCta } from './components/HandoffBenefits';
+import { HandoffFinalCta } from './components/HandoffBenefits';
 const BuilderStudio = lazy(() => import('./components/BuilderStudio').then(module => ({ default: module.BuilderStudio })));
 const PublicBioView = lazy(() => import('./components/PublicBioView').then(module => ({ default: module.PublicBioView })));
 import { LoginPage } from './pages/LoginPage';
@@ -42,7 +41,7 @@ import {
 import { starterSitePath } from './utils/starterSites';
 import type { Language } from './config/i18n';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import { AudiencePathsSection } from './components/AudiencePathsSection';
+import { TouchpointConvergenceSection, CreatorJobsSection, CreatorSegmentsSection } from './components/CreatorLandingSections';
 
 
 
@@ -74,12 +73,12 @@ function HomePage() {
           onClaimUsername={handleClaimUsername}
           onOpenStudio={handleOpenStudio}
         />
-        <HandoffBenefits />
-        <AudiencePathsSection />
-        <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
+        <TouchpointConvergenceSection />
         <HowItWorksSection />
+        <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
+        <CreatorJobsSection />
         <FeaturesSection onOpenStudio={handleOpenStudio} />
-        <TrustProofSection />
+        <CreatorSegmentsSection />
         <MadeWithRaloaSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />

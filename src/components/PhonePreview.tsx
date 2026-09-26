@@ -14,6 +14,8 @@ interface PhonePreviewProps {
   onLinkClick?: (block: ProfileBlock) => void;
   scale?: 'normal' | 'compact' | 'responsive' | 'editor';
   compact?: boolean;
+  /** Render only the profile content when another device shell already owns the screen surface. */
+  bare?: boolean;
   deviceMode?: 'mobile' | 'tablet' | 'desktop';
 }
 
@@ -24,6 +26,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   onLinkClick,
   scale = 'normal',
   compact = false,
+  bare = false,
   deviceMode = 'mobile',
 }) => {
   const theme = resolveTheme(profile.themeId, customTheme);
@@ -45,12 +48,12 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
       {compact ? (
         <div
           dir={isProfileRtl ? 'rtl' : 'ltr'}
-          className="rounded-[28px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300 shadow-lg"
+          className={bare ? 'w-full' : 'rounded-[28px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300 shadow-lg'}
           style={{
-            ...themeBackground,
+            ...(bare ? {} : themeBackground),
             color: theme.textColor,
             fontFamily: theme.fontFamily === 'display' ? 'var(--font-display)' : theme.fontFamily === 'mono' ? 'var(--font-mono)' : 'var(--font-sans)',
-            aspectRatio: '9 / 16',
+            ...(bare ? {} : { aspectRatio: '9 / 16' }),
           }}
         >
           {renderProfileContent()}

@@ -23,8 +23,8 @@ export const FeaturesSection: React.FC<{ onOpenStudio: () => void }> = ({ onOpen
         <Reveal distance="md" className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">{ui('What goes on the page')}</p>
-            <h2 className="mb-3 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl text-balance">{ui('Everything one page can hold')}</h2>
-            <p className="max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base text-pretty">{ui('Blocks you can add today, in the plan they are actually available on.')}</p>
+            <h2 className="mb-3 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl text-balance">{ui('From publish to measure')}</h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base text-pretty">{ui('The page, audience capture, and signals you need to keep building.')}</p>
           </div>
           <button type="button" onClick={onOpenStudio} className="raloa-section-link inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-neutral-200 bg-white px-4 text-xs font-semibold text-neutral-800 shadow-sm sm:self-auto">
             {ui('See all features')} <ArrowRight className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />

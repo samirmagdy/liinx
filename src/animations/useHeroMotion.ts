@@ -12,14 +12,15 @@ export function useHeroMotion(ref: RefObject<HTMLElement | null>, language: stri
       if (!heading) return;
       // Word splitting preserves natural line wrapping. Keep Arabic shaping intact.
       const split = language !== 'ar' ? SplitText.create(heading, { type: 'words', aria: 'auto' }) : null;
-      const tl = gsap.timeline({ defaults: { ease: easing.out, clearProps: 'opacity,transform' } });
-      const distance = context.conditions?.desktop ? 24 : 8;
-      tl.from('[data-hero="eyebrow"]', { opacity: 0, y: 8, duration: timing.component }, 0)
-        .from(split?.words || heading, { opacity: 0, y: distance, stagger: split ? { amount: 0.16 } : 0, duration: timing.section }, 0.1)
-        .from('[data-hero="copy"]', { opacity: 0, y: 8, duration: timing.component, stagger: 0.06 }, 0.3)
-        .from('[data-hero="action"]', { opacity: 0, y: 8, duration: timing.component }, 0.42)
-        .from('[data-hero="visual"]', { opacity: 0, y: distance, duration: timing.hero, ease: easing.hero }, 0.38)
-        .from('[data-hero="controls"]', { opacity: 0, duration: timing.component }, 0.6);
+      // Critical hero copy must remain readable if the animation is delayed, interrupted,
+      // captured by a crawler, or unavailable. Motion only shifts already-visible content.
+      const tl = gsap.timeline({ defaults: { ease: easing.out, clearProps: 'transform' } });
+      const distance = context.conditions?.desktop ? 18 : 6;
+      tl.from('[data-hero="eyebrow"]', { y: 8, duration: timing.component }, 0)
+        .from(split?.words || heading, { y: distance, stagger: split ? { amount: 0.16 } : 0, duration: timing.section }, 0.1)
+        .from('[data-hero="copy"]', { y: 8, duration: timing.component, stagger: 0.06 }, 0.3)
+        .from('[data-hero="action"]', { y: 8, duration: timing.component }, 0.42)
+        .from('[data-hero="visual"]', { y: distance, duration: timing.hero, ease: easing.hero }, 0.38);
       const finish = () => tl.progress(1);
       root.addEventListener('focusin', finish);
       if (context.conditions?.desktop && context.conditions?.fine) {
