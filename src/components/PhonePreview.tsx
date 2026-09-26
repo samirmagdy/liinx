@@ -67,7 +67,9 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
 
           <div 
             dir={isProfileRtl ? 'rtl' : 'ltr'}
-            className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
+          data-theme-shape={theme.shapeStyle || 'soft'}
+          data-theme-shadow={theme.shadow || 'sm'}
+          className="relative w-full h-[660px] rounded-[36px] overflow-y-auto no-scrollbar pt-12 pb-8 px-5 transition-colors duration-300"
             style={{
               ...themeBackground,
               color: theme.textColor,

@@ -331,6 +331,22 @@ summary:focus-visible,
   }
 }
 
+/* Creator-authored theme language: shapes and depth stay scoped to the live page. */
+[data-theme-shape="organic"] .theme-card-shape {
+  border-radius: 28px 12px 28px 12px !important;
+}
+[data-theme-shape="pill"] .theme-card-shape {
+  border-radius: 999px !important;
+}
+[data-theme-shape="cutout"] .theme-card-shape {
+  border-radius: 0 !important;
+}
+[data-theme-shadow="none"] .theme-card-shape { box-shadow: none !important; }
+[data-theme-shadow="md"] .theme-card-shape { box-shadow: 0 14px 32px rgba(15, 23, 42, .12) !important; }
+[data-theme-shadow="lg"] .theme-card-shape { box-shadow: 0 24px 54px rgba(15, 23, 42, .18) !important; }
+[data-theme-shape="organic"] #main-content,
+[data-theme-shape="organic"] .phone-shell { --theme-organic-accent: 28px; }
+
 /* Creator-first marketing direction: sharp editorial structure around the real product previews. */
 .marketing-home .marketing-section,
 .marketing-shell .marketing-section {
@@ -687,6 +703,16 @@ summary:focus-visible,
 }
 .marketing-home #templates .template-carousel-group .phone-shell > div[dir] { height: 660px !important; }
 .marketing-home #templates .template-card-image { display: none; }
+.marketing-home #templates .template-carousel-card .template-card-body {
+  min-height: 76px;
+  padding: 12px;
+}
+.marketing-home #templates .template-carousel-card .template-card-actions { width: 100%; }
+.marketing-home #templates .template-carousel-card .template-card-actions button,
+.marketing-home #templates .template-carousel-card .template-card-actions button:first-child {
+  display: flex !important;
+  width: 100%;
+}
 .marketing-home #templates .template-card-preview {
   height: 560px !important;
   background: linear-gradient(180deg, #f7f8ff 0%, #ffffff 100%);

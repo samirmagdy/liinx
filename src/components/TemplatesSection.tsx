@@ -99,6 +99,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 isRtl={isRtl}
                 useTemplateLabel={t.templatesSection.useTemplate}
                 onSelectTemplate={handleTemplateSelect}
+                carouselMode
               />
             );
           })}
@@ -120,6 +121,7 @@ export const TemplatesSection: React.FC<TemplatesSectionProps> = ({ onSelectTemp
                 isRtl={isRtl}
                 useTemplateLabel={t.templatesSection.useTemplate}
                 onSelectTemplate={handleTemplateSelect}
+                carouselMode
               />
             );
           })}

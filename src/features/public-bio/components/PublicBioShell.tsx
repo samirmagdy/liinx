@@ -53,6 +53,8 @@ export const PublicBioShell: React.FC<PublicBioShellProps> = ({
   return (
     <div
       id="public-bio-view"
+      data-theme-shape={theme.shapeStyle || 'soft'}
+      data-theme-shadow={theme.shadow || 'sm'}
       className="min-h-screen w-full transition-colors duration-300 relative selection:bg-black selection:text-white"
       style={buildShellStyle(theme, {
         hasBackgroundMedia: backgroundMedia.hasMedia,

@@ -76,15 +76,16 @@ export function getBorderColor(border: unknown, fallback: string): string {
 
 /** Builds a usable background declaration for solid, gradient, and mesh themes. */
 export function getThemeBackground(theme: ThemeConfig): { backgroundColor: string; backgroundImage?: string } {
-  if (theme.bgType === 'gradient' && theme.bgGradient) return { backgroundColor: theme.bgColor, backgroundImage: theme.bgGradient };
+  const imageLayer = theme.backgroundImageUrl ? `url("${theme.backgroundImageUrl.replace(/"/g, '')}")` : undefined;
+  if (theme.bgType === 'gradient' && theme.bgGradient) return { backgroundColor: theme.bgColor, backgroundImage: [theme.bgGradient, imageLayer].filter(Boolean).join(', ') || undefined };
   if (theme.bgType === 'mesh') {
     const color = theme.bgColor;
     return {
       backgroundColor: color,
-      backgroundImage: theme.bgGradient || `radial-gradient(circle at 20% 20%, ${color}, transparent 55%), radial-gradient(circle at 80% 80%, ${color}, transparent 55%)`
+      backgroundImage: [theme.bgGradient || `radial-gradient(circle at 20% 20%, ${color}, transparent 55%), radial-gradient(circle at 80% 80%, ${color}, transparent 55%)`, imageLayer].filter(Boolean).join(', ')
     };
   }
-  return { backgroundColor: theme.bgColor };
+  return { backgroundColor: theme.bgColor, backgroundImage: imageLayer };
 }
 
 export function contrastRatio(foreground: unknown, background: unknown): number | null {
@@ -118,6 +119,7 @@ export function ensureThemeContrast(theme: Partial<ThemeConfig> | null | undefin
     bgType: theme?.bgType === 'gradient' || theme?.bgType === 'mesh' ? theme.bgType : 'solid',
     bgColor: colorOr(theme?.bgColor, '#FAF9F6'),
     bgGradient: gradientOr(theme?.bgGradient),
+    backgroundImageUrl: typeof theme?.backgroundImageUrl === 'string' && theme.backgroundImageUrl.trim() ? theme.backgroundImageUrl.trim() : null,
     textColor: colorOr(theme?.textColor, DARK_TEXT),
     subtextColor: colorOr(theme?.subtextColor, '#525252'),
     cardBg: colorOr(theme?.cardBg, fallbackCardBackground),
@@ -125,6 +127,10 @@ export function ensureThemeContrast(theme: Partial<ThemeConfig> | null | undefin
     cardBorder: borderOr(theme?.cardBorder, isDark ? '1px solid #334155' : '1px solid #E5E5E0'),
     cardHover: colorOr(theme?.cardHover, isDark ? '#273548' : '#F9FAFA'),
     cardRadius: theme?.cardRadius === 'none' || theme?.cardRadius === 'md' || theme?.cardRadius === 'full' ? theme.cardRadius : 'xl',
+    shapeStyle: theme?.shapeStyle === 'organic' || theme?.shapeStyle === 'pill' || theme?.shapeStyle === 'cutout' ? theme.shapeStyle : 'soft',
+    profileShape: theme?.profileShape === 'rounded' || theme?.profileShape === 'square' || theme?.profileShape === 'blob' ? theme.profileShape : 'circle',
+    buttonStyle: theme?.buttonStyle === 'outline' || theme?.buttonStyle === 'ghost' ? theme.buttonStyle : 'fill',
+    shadow: theme?.shadow === 'none' || theme?.shadow === 'md' || theme?.shadow === 'lg' ? theme.shadow : 'sm',
     accentColor: colorOr(theme?.accentColor, isDark ? '#38BDF8' : '#92400E'),
     fontFamily: theme?.fontFamily === 'display' || theme?.fontFamily === 'mono' ? theme.fontFamily : 'sans',
     isDark

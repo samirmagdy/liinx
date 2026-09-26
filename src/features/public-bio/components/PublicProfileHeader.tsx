@@ -32,13 +32,13 @@ export const PublicProfileHeader: React.FC<PublicProfileHeaderProps> = ({ profil
               event.currentTarget.onerror = null;
               event.currentTarget.src = '/icons/favicon-32x32.png';
             }}
-            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-md ring-4 ring-white/20"
+            className={`w-24 h-24 sm:w-28 sm:h-28 object-cover shadow-md ring-4 ring-white/20 ${theme.profileShape === 'square' ? 'rounded-none' : theme.profileShape === 'rounded' ? 'rounded-3xl' : theme.profileShape === 'blob' ? 'rounded-[44%_56%_62%_38%/38%_42%_58%_62%]' : 'rounded-full'}`}
             referrerPolicy="no-referrer"
           />
         ) : (
           <div
             aria-hidden="true"
-            className="grid h-24 w-24 place-items-center rounded-full text-3xl font-bold shadow-md ring-4 ring-white/20 sm:h-28 sm:w-28"
+            className={`grid h-24 w-24 place-items-center text-3xl font-bold shadow-md ring-4 ring-white/20 sm:h-28 sm:w-28 ${theme.profileShape === 'square' ? 'rounded-none' : theme.profileShape === 'rounded' ? 'rounded-3xl' : theme.profileShape === 'blob' ? 'rounded-[44%_56%_62%_38%/38%_42%_58%_62%]' : 'rounded-full'}`}
             style={{ backgroundColor: theme.cardBg, color: theme.cardText }}
           >
             {avatarInitials(profile.displayName)}

@@ -28,13 +28,13 @@ export const PhoneProfileHeader: React.FC<PhoneProfileHeaderProps> = ({
             height={80}
             loading="lazy"
             decoding="async"
-            className="w-20 h-20 rounded-full object-cover shadow-sm ring-2 ring-white/20"
+            className={`w-20 h-20 object-cover shadow-sm ring-2 ring-white/20 ${theme.profileShape === 'square' ? 'rounded-none' : theme.profileShape === 'rounded' ? 'rounded-2xl' : theme.profileShape === 'blob' ? 'rounded-[44%_56%_62%_38%/38%_42%_58%_62%]' : 'rounded-full'}`}
             referrerPolicy="no-referrer"
           />
         ) : (
           <div
             aria-hidden="true"
-            className="grid h-20 w-20 place-items-center rounded-full text-2xl font-bold shadow-sm ring-2 ring-white/20"
+            className={`grid h-20 w-20 place-items-center text-2xl font-bold shadow-sm ring-2 ring-white/20 ${theme.profileShape === 'square' ? 'rounded-none' : theme.profileShape === 'rounded' ? 'rounded-2xl' : theme.profileShape === 'blob' ? 'rounded-[44%_56%_62%_38%/38%_42%_58%_62%]' : 'rounded-full'}`}
             style={{ backgroundColor: theme.cardBg, color: theme.cardText }}
           >
             {avatarInitials(profile.displayName)}

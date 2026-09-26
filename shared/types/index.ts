@@ -135,6 +135,7 @@ export interface ThemeConfig {
   bgType: 'solid' | 'gradient' | 'mesh';
   bgColor: string;
   bgGradient?: string;
+  backgroundImageUrl?: string | null;
   textColor: string;
   subtextColor: string;
   cardBg: string;
@@ -142,6 +143,10 @@ export interface ThemeConfig {
   cardBorder: string;
   cardHover: string;
   cardRadius: 'none' | 'md' | 'xl' | 'full';
+  shapeStyle?: 'soft' | 'organic' | 'pill' | 'cutout';
+  profileShape?: 'circle' | 'rounded' | 'square' | 'blob';
+  buttonStyle?: 'fill' | 'outline' | 'ghost';
+  shadow?: 'none' | 'sm' | 'md' | 'lg';
   accentColor: string;
   fontFamily: 'sans' | 'display' | 'mono';
   isDark: boolean;

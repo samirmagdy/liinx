@@ -17,6 +17,7 @@ interface TemplateCardProps {
   isRtl: boolean;
   useTemplateLabel: string;
   onSelectTemplate: (templateId: string) => void;
+  carouselMode?: boolean;
 }
 
 export const TemplateCard: React.FC<TemplateCardProps> = ({
@@ -25,7 +26,8 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
   isHydrated,
   isRtl,
   useTemplateLabel,
-  onSelectTemplate
+  onSelectTemplate,
+  carouselMode = false
 }) => {
   const { tr: ui } = useUiLanguage();
   const [previewing, setPreviewing] = useState(false);
@@ -34,7 +36,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
 
   return (
     <div
-      className="motion-card rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10"
+      className={`motion-card ${carouselMode ? 'template-carousel-card' : ''} rounded-3xl border border-neutral-200 bg-neutral-50 overflow-hidden flex flex-col justify-between hover:border-neutral-400 focus-within:border-neutral-400 focus-within:ring-2 focus-within:ring-neutral-900/10`}
     >
       <div className="template-card-preview relative h-[300px] overflow-hidden border-b" aria-label={ui('Starter site preview')}>
         <span className="template-preview-badge absolute top-3 start-3 z-10 rounded-full border border-white/70 bg-white/90 backdrop-blur-xs px-2.5 py-1 text-[11px] font-semibold text-neutral-800 shadow-sm">
@@ -65,7 +67,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
 
       {/* Template Body */}
       <div className="template-card-body p-6 flex flex-col flex-1 justify-between text-start">
-        <div>
+        <div className={carouselMode ? 'sr-only' : undefined}>
           <h3 className="font-brand font-bold text-base text-neutral-900 mb-1 text-balance">
             {loc.name}
           </h3>
@@ -78,7 +80,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
         </div>
 
         <div className="template-card-actions flex items-center gap-2">
-          <button
+          {!carouselMode && <button
             type="button"
             onClick={() => {
               void trackMarketingEvent({ event: 'template_previewed', language: isRtl ? 'ar' : 'en', templateId: template.id });
@@ -88,7 +90,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           >
             <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />
             <span>{ui('Preview')}</span>
-          </button>
+          </button>}
           <button
             onClick={() => onSelectTemplate(template.id)}
             className="flex-1 py-2.5 px-4 rounded-full bg-neutral-950 border border-neutral-600 hover:border-neutral-500 text-xs font-bold text-neutral-100 flex items-center justify-center gap-1.5 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"

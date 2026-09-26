@@ -7,7 +7,7 @@ export async function cleanupUploadedFileIfUnreferenced(fileUrl: unknown, ownerU
   const row = db.prepare('SELECT path, owner_user_id as ownerUserId FROM uploaded_files WHERE path = ?').get(fileUrl) as { path: string; ownerUserId: string } | undefined;
   if (!row || (ownerUserId && row.ownerUserId !== ownerUserId)) return false;
   const referencedByBlock = db.prepare("SELECT 1 FROM blocks WHERE url = ? OR instr(coalesce(extra_json, ''), ?) > 0 LIMIT 1").get(fileUrl, fileUrl);
-  const referencedByProfile = db.prepare(`SELECT 1 FROM profiles WHERE avatar_url = ? OR footer_logo_url = ? OR background_media_url = ? OR share_image_url = ? LIMIT 1`).get(fileUrl, fileUrl, fileUrl, fileUrl);
+  const referencedByProfile = db.prepare(`SELECT 1 FROM profiles WHERE avatar_url = ? OR footer_logo_url = ? OR background_media_url = ? OR share_image_url = ? OR instr(coalesce(custom_theme_json, ''), ?) > 0 LIMIT 1`).get(fileUrl, fileUrl, fileUrl, fileUrl, fileUrl);
   if (referencedByBlock || referencedByProfile) return false;
 
   const key = storageKeyFromUrl(fileUrl);

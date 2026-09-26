@@ -61,11 +61,11 @@ export const LinkBlockView: React.FC<LinkBlockViewProps> = ({ block, theme, prev
     linkAnimation === 'fade' ? 'raloa-link-animation-fade' : ''
   } ${linkAnimation === 'pulse' ? 'raloa-link-animation-pulse' : ''} ${
     linkAnimation === 'lift' && hasDestination ? 'raloa-link-animation-lift' : ''
-  } ${getRadiusClass(theme.cardRadius, isComplexLink)}`;
+  } ${getRadiusClass(theme.cardRadius, isComplexLink)} theme-card-shape`;
 
   const style = {
-    backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
-    border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
+    backgroundColor: block.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.buttonStyle === 'ghost' ? 'transparent' : theme.buttonStyle === 'outline' ? 'transparent' : theme.cardBg,
+    border: block.highlighted ? `2px solid ${theme.accentColor}` : theme.buttonStyle === 'ghost' ? '1px solid transparent' : theme.buttonStyle === 'outline' ? `1px solid ${theme.accentColor}` : theme.cardBorder,
     color: theme.cardText
   };
 

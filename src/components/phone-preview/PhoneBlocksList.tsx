@@ -88,10 +88,10 @@ export const PhoneBlocksList: React.FC<PhoneBlocksListProps> = ({
             <div
               key={block.id}
               onClick={() => onLinkClick?.(block)}
-              className={`group relative ${isPill ? 'px-5 py-3.5' : 'p-3.5'} transition-shadow duration-200 cursor-pointer flex items-center justify-between gap-3 shadow-xs hover:shadow-md hover:-translate-y-0.5 ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
+              className={`group relative theme-card-shape ${isPill ? 'px-5 py-3.5' : 'p-3.5'} transition-shadow duration-200 cursor-pointer flex items-center justify-between gap-3 shadow-xs hover:shadow-md hover:-translate-y-0.5 ${getRadiusClass(theme.cardRadius, isComplexLink)}`}
               style={{
-                backgroundColor: linkBlock.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.cardBg,
-                border: linkBlock.highlighted ? `2px solid ${theme.accentColor}` : theme.cardBorder,
+                backgroundColor: linkBlock.highlighted ? (theme.isDark ? '#23242A' : '#FFFFFF') : theme.buttonStyle === 'ghost' ? 'transparent' : theme.buttonStyle === 'outline' ? 'transparent' : theme.cardBg,
+                border: linkBlock.highlighted ? `2px solid ${theme.accentColor}` : theme.buttonStyle === 'ghost' ? '1px solid transparent' : theme.buttonStyle === 'outline' ? `1px solid ${theme.accentColor}` : theme.cardBorder,
                 color: theme.cardText
               }}
             >

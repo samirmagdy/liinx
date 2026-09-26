@@ -96,9 +96,9 @@ export function buildShellStyle(
   return {
     ...themeBackground,
     backgroundImage: imageBackdrop ? `url(${options.backgroundMediaHref})` : themeBackground.backgroundImage,
-    backgroundSize: imageBackdrop ? 'cover' : undefined,
-    backgroundPosition: imageBackdrop ? 'center center' : undefined,
-    backgroundAttachment: imageBackdrop ? 'scroll' : undefined,
+    backgroundSize: imageBackdrop || theme.backgroundImageUrl ? 'cover' : undefined,
+    backgroundPosition: imageBackdrop || theme.backgroundImageUrl ? 'center center' : undefined,
+    backgroundAttachment: imageBackdrop || theme.backgroundImageUrl ? 'scroll' : undefined,
     color: theme.textColor,
     fontFamily: themeFontVar(theme.fontFamily)
   };
