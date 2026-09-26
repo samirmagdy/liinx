@@ -16,6 +16,8 @@ interface PhonePreviewProps {
   compact?: boolean;
   /** Render only the profile content when another device shell already owns the screen surface. */
   bare?: boolean;
+  /** Hide the footer badge when the preview is rendered inside another link or card. */
+  showBranding?: boolean;
   deviceMode?: 'mobile' | 'tablet' | 'desktop';
 }
 
@@ -27,6 +29,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
   scale = 'normal',
   compact = false,
   bare = false,
+  showBranding = true,
   deviceMode = 'mobile',
 }) => {
   const theme = resolveTheme(profile.themeId, customTheme);
@@ -120,7 +123,7 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({
           }}
         />
 
-        <PhoneFooterBranding profile={profile} theme={theme} />
+        {showBranding && <PhoneFooterBranding profile={profile} theme={theme} />}
       </>
     );
   }

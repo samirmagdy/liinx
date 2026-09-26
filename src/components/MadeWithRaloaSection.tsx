@@ -35,7 +35,7 @@ export const ShowcaseGrid: React.FC<{ profiles: ShowcaseProfile[] }> = ({ profil
         >
           <div className="relative h-[280px] overflow-hidden border-b border-neutral-200" aria-hidden="true" inert>
             <div className="absolute top-4 left-1/2 w-[360px] -translate-x-1/2 origin-top scale-75 pointer-events-none">
-              <PhonePreview profile={profile} compact interactive={false} />
+              <PhonePreview profile={profile} compact interactive={false} showBranding={false} />
             </div>
           </div>
           <div className="p-5 flex items-start justify-between gap-3 text-start">

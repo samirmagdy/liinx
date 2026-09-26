@@ -50,7 +50,7 @@ export const NavbarBrandLinks: React.FC<NavbarBrandLinksProps> = ({ activeView }
           {t.nav.features}
         </Link>
         <Link
-          href="/#how-it-works"
+          href={`/#${HOW_IT_WORKS_ANCHOR}`}
           onClick={(event) => scrollWithinPage(event, HOW_IT_WORKS_ANCHOR)}
           className={navLinkClass(false)}
         >

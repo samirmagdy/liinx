@@ -46,12 +46,6 @@ export const HeroCopy: React.FC<{ onClaimUsername: (handle: string) => void }> =
         {/* Secondary CTAs: deliberately unstyled text, so nothing competes with the claim button. */}
         <div data-hero="secondary" className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 text-xs px-2">
           <Link
-            href="/@elenarostova"
-            className="inline-flex min-h-11 items-center gap-1.5 font-bold text-neutral-900 hover:text-indigo-600 transition-colors cursor-pointer"
-          >
-            <span>{ui('View live demo ↗')}</span>
-          </Link>
-          <Link
             href="/templates"
             className="inline-flex min-h-11 items-center gap-1 font-semibold text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer"
           >

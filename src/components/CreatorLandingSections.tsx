@@ -35,10 +35,11 @@ export function TouchpointConvergenceSection() {
           <p className="creator-landing-kicker">{ar ? 'المشكلة' : 'The problem'}</p>
           <h2 id="convergence-title">{ar ? 'جمهورك موزّع. وجهتك لا يجب أن تكون كذلك.' : 'Your audience is scattered. Your destination should not be.'}</h2>
           <p>{ar ? 'يبدأ الناس من منشور أو إصدار أو رسالة أو رابط حجز. اجمع كل نقطة تواصل في صفحة واحدة تتحدث بصوتك.' : 'People start from a post, a release, a message, or a booking link. Bring every touchpoint into one page that sounds like you.'}</p>
-          <a href="#how-it-works" className="creator-landing-text-link">{ar ? 'شاهد كيف تعمل' : 'See how it works'} <ArrowUpRight aria-hidden="true" /></a>
+          <a href="#creator-proof" className="creator-landing-text-link">{ar ? 'شاهد المنتج' : 'See the product'} <ArrowUpRight aria-hidden="true" /></a>
         </div>
 
-        <div className="creator-landing-convergence-visual" aria-label={ar ? 'نقاط التواصل تتحول إلى صفحة RALOA واحدة' : 'Touchpoints converging into one RALOA page'}>
+        <figure className="creator-landing-convergence-visual" aria-labelledby="convergence-visual-caption">
+          <figcaption id="convergence-visual-caption" className="sr-only">{ar ? 'نقاط التواصل تتحول إلى صفحة RALOA واحدة' : 'Touchpoints converging into one RALOA page'}</figcaption>
           <div className="creator-landing-touchpoints">
             {TOUCHPOINTS.map(({ icon: Icon, en, ar: arLabel, detailEn, detailAr }) => (
               <div key={en} className="creator-landing-touchpoint">
@@ -53,7 +54,7 @@ export function TouchpointConvergenceSection() {
             <div><strong>raloa.app/@{ar ? 'اسمك' : 'yourname'}</strong><small>{ar ? 'صفحتك الحية' : 'your live page'}</small></div>
             <Link2 aria-hidden="true" />
           </div>
-        </div>
+        </figure>
       </div>
     </section>
   );

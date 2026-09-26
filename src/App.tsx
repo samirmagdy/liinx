@@ -5,10 +5,7 @@ import { useLanguage, LanguageProvider } from './context/LanguageContext';
 import { CapabilitiesProvider } from './context/CapabilitiesContext';
 const Navbar = lazy(() => import('./components/Navbar').then(module => ({ default: module.Navbar })));
 const Hero = lazy(() => import('./components/Hero').then(module => ({ default: module.Hero })));
-const FeaturesSection = lazy(() => import('./components/FeaturesSection').then(module => ({ default: module.FeaturesSection })));
 const ComparisonSection = lazy(() => import('./components/ComparisonSection').then(module => ({ default: module.ComparisonSection })));
-const MadeWithRaloaSection = lazy(() => import('./components/MadeWithRaloaSection').then(module => ({ default: module.MadeWithRaloaSection })));
-const HowItWorksSection = lazy(() => import('./components/HowItWorksSection').then(module => ({ default: module.HowItWorksSection })));
 const StickyMobileCta = lazy(() => import('./components/StickyMobileCta').then(module => ({ default: module.StickyMobileCta })));
 const TemplatesSection = lazy(() => import('./components/TemplatesSection').then(module => ({ default: module.TemplatesSection })));
 const PricingSection = lazy(() => import('./components/PricingSection').then(module => ({ default: module.PricingSection })));
@@ -42,6 +39,7 @@ import { starterSitePath } from './utils/starterSites';
 import type { Language } from './config/i18n';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { TouchpointConvergenceSection, CreatorJobsSection, CreatorSegmentsSection } from './components/CreatorLandingSections';
+import { CreatorProofSection } from './components/CreatorProofSection';
 
 
 
@@ -74,12 +72,10 @@ function HomePage() {
           onOpenStudio={handleOpenStudio}
         />
         <TouchpointConvergenceSection />
-        <HowItWorksSection />
         <TemplatesSection maxVisible={4} onSelectTemplate={handleSelectTemplate} />
         <CreatorJobsSection />
-        <FeaturesSection onOpenStudio={handleOpenStudio} />
+        <CreatorProofSection />
         <CreatorSegmentsSection />
-        <MadeWithRaloaSection />
         <PricingSection onSelectPlan={handleSelectPlan} />
         <FaqSection />
         <HandoffFinalCta onClaimUsername={handleClaimUsername} />

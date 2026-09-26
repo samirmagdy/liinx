@@ -81,7 +81,7 @@ export function CreatorAssemblyScene({ accentColor = '#7C3AED', secondaryAccentC
         >
           <ambientLight intensity={1.3} />
           <directionalLight position={[2, 2, 4]} intensity={2.2} color="#FFFFFF" />
-          <pointLight position={[-2, 0, 2]} intensity={3} color="#06B6D4" distance={5} />
+          <pointLight position={[-2, 0, 2]} intensity={3} color={accentColor} distance={5} />
           <Suspense fallback={null}><AssemblyBlocks reducedMotion={reducedMotion} accentColor={accentColor} secondaryAccentColor={secondaryAccentColor} /></Suspense>
         </Canvas>
       ) : (

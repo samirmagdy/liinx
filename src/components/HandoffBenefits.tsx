@@ -51,8 +51,8 @@ export function HandoffFinalCta({ onClaimUsername }: { onClaimUsername: (handle:
         <div className="raloa-final-cta-inner">
           <div>
             <p className="raloa-eyebrow">{ui('Ready to build yours?')}</p>
-            <h2 id="final-cta-heading">{ui('Create your mini-site today')}</h2>
-            <p>{ui('One address for your links, media, bookings and signups.')}</p>
+            <h2 id="final-cta-heading">{ui('Give every post, project, and booking a home.')}</h2>
+            <p>{ui('Create your page and share one address for everything your audience needs.')}</p>
           </div>
           <form className="raloa-final-form" onSubmit={submit} dir="ltr">
             <label className="sr-only" htmlFor="final-cta-handle">{ui('Choose your handle')}</label>
